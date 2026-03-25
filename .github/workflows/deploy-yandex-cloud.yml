@@ -49,7 +49,7 @@ jobs:
         run: |
           yc iam create-token | docker login --username iam --password-stdin cr.yandex
 
-            - name: Build and push image
+      - name: Build and push image
         shell: bash
         run: |
           REGISTRY_ID_CLEAN="$(printf '%s' "$YC_REGISTRY_ID" | tr -d '\r\n\t ')"
