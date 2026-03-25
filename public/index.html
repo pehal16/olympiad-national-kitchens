@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Национальные кухни мира</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+
+    <main class="shell">
+      <section class="card hero">
+        <div class="hero-brand">
+          <div class="brand-figure" aria-label="Профессионалитет. Туризм и сфера услуг">
+            <svg viewBox="0 -24 520 344" role="img" aria-hidden="true">
+              <defs>
+                <path id="brand-arc" d="M 92 132 A 176 176 0 0 1 428 132" />
+              </defs>
+              <text
+                font-family="Bahnschrift, Segoe UI, sans-serif"
+                font-size="38"
+                font-weight="800"
+                letter-spacing="2.4"
+                fill="#262626"
+              >
+                <textPath href="#brand-arc" startOffset="50%" text-anchor="middle">
+                  ПРОФЕССИОНАЛИТЕТ
+                </textPath>
+              </text>
+              <line x1="74" y1="276" x2="118" y2="232" stroke="#262626" stroke-width="2" />
+              <line x1="246" y1="98" x2="230" y2="66" stroke="#1f8e73" stroke-width="7" stroke-linecap="round" />
+              <line x1="246" y1="98" x2="262" y2="66" stroke="#1f8e73" stroke-width="7" stroke-linecap="round" />
+              <path d="M246 92 L178 214 H314 Z" fill="#1f8e73" />
+              <rect x="170" y="214" width="152" height="12" rx="6" fill="#1f8e73" />
+              <text
+                x="260"
+                y="296"
+                text-anchor="middle"
+                font-family="Bahnschrift, Segoe UI, sans-serif"
+                font-size="34"
+                font-weight="400"
+                fill="#262626"
+              >
+                туризм и сфера услуг
+              </text>
+            </svg>
+          </div>
+          <div class="game-badge">Маршрут шефа • 5 туров</div>
+        </div>
+        <div class="eyebrow">Автоматизированная олимпиада</div>
+        <h1 id="hero-title">Национальные кухни мира</h1>
+        <p id="hero-subtitle" class="lead"></p>
+        <div class="meta-row" id="tour-meta"></div>
+      </section>
+
+      <section class="grid-two" id="prestart-section">
+        <section class="card">
+          <h2>Регистрация участника</h2>
+          <form id="registration-form" class="form-stack">
+            <label class="field">
+              <span>ФИО участника</span>
+              <input id="full-name" type="text" required />
+            </label>
+            <label class="field">
+              <span>Учебное заведение</span>
+              <input id="institution" type="text" required />
+            </label>
+            <label class="field">
+              <span>Группа</span>
+              <input id="group-name" type="text" required />
+            </label>
+            <label class="field">
+              <span>Наставник</span>
+              <input id="mentor-name" type="text" />
+            </label>
+            <button class="button primary" type="submit">Сохранить данные</button>
+          </form>
+          <div id="registration-message" class="message hidden"></div>
+        </section>
+
+        <section class="card">
+          <h2>Правила прохождения</h2>
+          <ul id="rules-list" class="flat-list"></ul>
+          <div class="actions">
+            <button id="start-attempt" class="button primary" disabled>Начать олимпиаду</button>
+            <a class="button secondary" href="/admin.html">Панель организатора</a>
+          </div>
+          <div id="prestart-message" class="message hidden"></div>
+        </section>
+      </section>
+
+      <section id="attempt-section" class="hidden">
+        <section class="card dashboard-head">
+          <div>
+            <div class="eyebrow">Участник</div>
+            <h2 id="participant-name">-</h2>
+            <p id="participant-meta" class="muted"></p>
+          </div>
+          <div class="timer-stack">
+            <div class="timer-box">
+              <span>Общий лимит</span>
+              <strong id="timer-total">--:--</strong>
+            </div>
+            <div class="timer-box secondary-timer">
+              <span>Лимит текущего тура</span>
+              <strong id="timer-tour">--:--</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="progress-meta">
+            <div id="progress-global" class="stage-chip">Вопрос 0 из 0</div>
+            <div id="progress-tour" class="stage-chip">Тур 0 • вопрос 0 из 0</div>
+          </div>
+          <div class="progress-bars">
+            <div class="progress-line">
+              <span id="progress-global-fill"></span>
+            </div>
+            <div class="progress-line secondary">
+              <span id="progress-tour-fill"></span>
+            </div>
+          </div>
+
+          <div class="tour-head">
+            <div>
+              <div class="eyebrow" id="tour-code">T0</div>
+              <h2 id="tour-title">Тур не начат</h2>
+              <p id="tour-description" class="muted"></p>
+            </div>
+            <div class="pill" id="tour-limit">0 минут</div>
+          </div>
+
+          <article id="question-card" class="question-card question-single">
+            <div id="question-case" class="message hidden"></div>
+            <div class="question-meta">
+              <span id="question-points">0 баллов</span>
+              <span class="auto-check-badge">автопроверка</span>
+            </div>
+            <h3 id="question-prompt">Вопрос не загружен</h3>
+            <p id="question-note" class="muted hidden"></p>
+            <div id="question-body"></div>
+          </article>
+
+          <div class="actions">
+            <button id="submit-answer" class="button primary">Ответить и далее</button>
+            <button id="finish-attempt" class="button secondary">Завершить досрочно</button>
+          </div>
+          <div id="attempt-message" class="message hidden"></div>
+        </section>
+      </section>
+
+      <section id="result-section" class="hidden">
+        <section class="card hero compact">
+          <div class="eyebrow">Попытка завершена</div>
+          <h2 id="result-title">Результат зафиксирован</h2>
+          <p id="result-subtitle" class="lead"></p>
+          <div id="result-tours" class="result-grid"></div>
+        </section>
+      </section>
+
+      <footer class="footer-note">
+        <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
+        <small>Разработчик: Постовит Дмитрий Александрович</small>
+      </footer>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

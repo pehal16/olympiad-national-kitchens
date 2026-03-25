@@ -1,0 +1,11 @@
+{
+  "adminPassword": "chef2026",
+  "showParticipantScore": false,
+  "institutionName": "ГБПОУ \"Горловский колледж технологий и сервиса\"",
+  "developerName": "Постовит Дмитрий Александрович",
+  "yandexDiskIntegration": {
+    "enabled": false,
+    "oauthToken": "",
+    "folder": "/Олимпиада_Национальные_кухни"
+  }
+}

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Панель организатора</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+
+    <main class="shell">
+      <section class="card hero compact">
+        <div class="eyebrow">Организатор</div>
+        <h1>Панель управления олимпиадой</h1>
+        <p class="lead">
+          Рейтинг участников, туровые баллы, служебный лог вопросов, ответы и выгрузка протоколов.
+        </p>
+      </section>
+
+      <section id="admin-login-card" class="card">
+        <h2>Вход администратора</h2>
+        <form id="admin-login-form" class="form-stack">
+          <label class="field">
+            <span>Пароль</span>
+            <input id="admin-password" type="password" required />
+          </label>
+          <button class="button primary" type="submit">Войти</button>
+        </form>
+        <div id="admin-login-message" class="message hidden"></div>
+      </section>
+
+      <section id="admin-panel" class="hidden">
+        <section class="grid-three">
+          <article class="card stat-card">
+            <span class="stat-label">Участники</span>
+            <strong id="stat-participants">0</strong>
+          </article>
+          <article class="card stat-card">
+            <span class="stat-label">Попытки</span>
+            <strong id="stat-attempts">0</strong>
+          </article>
+          <article class="card stat-card">
+            <span class="stat-label">Завершено</span>
+            <strong id="stat-completed">0</strong>
+          </article>
+        </section>
+
+        <section class="grid-two">
+          <section class="card">
+            <div class="section-row">
+              <h2>Рейтинг участников</h2>
+              <div class="actions inline">
+                <button id="export-csv" class="button secondary">Экспорт CSV</button>
+                <button id="export-json" class="button secondary">Резерв JSON</button>
+                <button id="upload-disk" class="button primary">Выгрузить на Яндекс Диск</button>
+              </div>
+            </div>
+            <div id="export-message" class="message hidden"></div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Место</th>
+                    <th>Участник</th>
+                    <th>Группа</th>
+                    <th>Статус</th>
+                    <th>Балл</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="attempts-table-body"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Карточка попытки</h2>
+            <div id="attempt-detail" class="muted">Выберите участника из таблицы слева.</div>
+          </section>
+        </section>
+      </section>
+
+      <footer class="footer-note">
+        <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
+        <small>разработчик: Постовит Дмитрий Александрович</small>
+      </footer>
+    </main>
+
+    <script src="/admin.js"></script>
+  </body>
+</html>

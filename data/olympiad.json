@@ -1,0 +1,4 @@
+{
+  "activeConfig": "data/olympiad.js",
+  "note": "Рабочая конфигурация олимпиады, туров и банка заданий перенесена в JS-модули data/olympiad.js и data/banks/*.js"
+}

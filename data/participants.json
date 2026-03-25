@@ -1,0 +1,37 @@
+[
+  {
+    "code": "PKD24-001",
+    "fullName": "Иванова Мария Сергеевна",
+    "institution": "Технологический колледж гастрономии",
+    "groupName": "ПКД-24",
+    "attemptsAllowed": 1
+  },
+  {
+    "code": "PKD24-002",
+    "fullName": "Петров Артём Олегович",
+    "institution": "Технологический колледж гастрономии",
+    "groupName": "ПКД-24",
+    "attemptsAllowed": 1
+  },
+  {
+    "code": "PKD24-003",
+    "fullName": "Соколова Елена Игоревна",
+    "institution": "Колледж сервиса и индустрии питания",
+    "groupName": "ПКД-24",
+    "attemptsAllowed": 1
+  },
+  {
+    "code": "PKD24-004",
+    "fullName": "Крылов Максим Дмитриевич",
+    "institution": "Колледж сервиса и индустрии питания",
+    "groupName": "ПКД-24",
+    "attemptsAllowed": 1
+  },
+  {
+    "code": "PKD24-005",
+    "fullName": "Николаева Софья Андреевна",
+    "institution": "Технологический колледж гастрономии",
+    "groupName": "ПКД-24",
+    "attemptsAllowed": 1
+  }
+]
