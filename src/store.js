@@ -24,7 +24,10 @@ const SETTINGS_FILE = path.join(CONFIG_DIR, "settings.json");
 const ATTEMPTS_FILE = path.join(STORAGE_DIR, "attempts.json");
 const SESSIONS_FILE = path.join(STORAGE_DIR, "admin-sessions.json");
 
-const STORAGE_BACKEND = String(process.env.STORAGE_BACKEND || "file")
+const STORAGE_BACKEND = String(
+  process.env.STORAGE_BACKEND ||
+    (process.env.YDB_CONNECTION_STRING ? "ydb" : "file")
+)
   .trim()
   .toLowerCase();
 

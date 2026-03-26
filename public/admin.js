@@ -1,6 +1,11 @@
 const adminState = {
-  token: localStorage.getItem("olympiad_admin_token") || ""
+  token: localStorage.getItem("olympiad_admin_token") || "",
+  selectedAttemptId: "",
+  refreshTimer: null,
+  refreshInFlight: false
 };
+
+const PANEL_REFRESH_MS = 15000;
 
 const elements = {
   loginCard: document.getElementById("admin-login-card"),
@@ -48,6 +53,34 @@ function hideMessage(element) {
 function showPanel() {
   elements.loginCard.classList.add("hidden");
   elements.panel.classList.remove("hidden");
+}
+
+function stopAutoRefresh() {
+  if (adminState.refreshTimer) {
+    clearInterval(adminState.refreshTimer);
+    adminState.refreshTimer = null;
+  }
+}
+
+function resetAdminSession(message = "") {
+  stopAutoRefresh();
+  localStorage.removeItem("olympiad_admin_token");
+  adminState.token = "";
+  adminState.selectedAttemptId = "";
+  elements.panel.classList.add("hidden");
+  elements.loginCard.classList.remove("hidden");
+  if (message) {
+    showMessage(elements.loginMessage, message, "error");
+  } else {
+    hideMessage(elements.loginMessage);
+  }
+}
+
+function startAutoRefresh() {
+  stopAutoRefresh();
+  adminState.refreshTimer = setInterval(() => {
+    refreshPanel({ silent: true });
+  }, PANEL_REFRESH_MS);
 }
 
 function mapById(items = []) {
@@ -118,6 +151,9 @@ async function loadAttempts() {
       <td>${attempt.totalFinalScore ?? "скрыто"}</td>
       <td><button class="button secondary" data-attempt="${attempt.id}">Открыть</button></td>
     `;
+    if (attempt.id === adminState.selectedAttemptId) {
+      row.classList.add("is-selected");
+    }
     elements.attemptsBody.appendChild(row);
   });
 
@@ -126,7 +162,10 @@ async function loadAttempts() {
   });
 }
 
-async function loadAttemptDetail(attemptId) {
+async function loadAttemptDetail(attemptId, options = {}) {
+  if (!options.preserveSelection) {
+    adminState.selectedAttemptId = attemptId;
+  }
   const data = await adminApi(`/api/admin/attempts/${attemptId}`);
   const summary = data.summary;
 
@@ -175,6 +214,34 @@ async function loadAttemptDetail(attemptId) {
   elements.attemptDetail.appendChild(detail);
 }
 
+async function refreshPanel(options = {}) {
+  const { silent = false } = options;
+
+  if (!adminState.token || adminState.refreshInFlight) {
+    return;
+  }
+
+  adminState.refreshInFlight = true;
+  const selectedAttemptId = adminState.selectedAttemptId;
+
+  try {
+    await loadSummary();
+    await loadAttempts();
+
+    if (selectedAttemptId) {
+      await loadAttemptDetail(selectedAttemptId, { preserveSelection: true });
+    }
+  } catch (error) {
+    if (silent) {
+      resetAdminSession("Сеанс администратора завершен. Войдите повторно.");
+      return;
+    }
+    throw error;
+  } finally {
+    adminState.refreshInFlight = false;
+  }
+}
+
 async function handleLogin(event) {
   event.preventDefault();
   hideMessage(elements.loginMessage);
@@ -193,8 +260,8 @@ async function handleLogin(event) {
     adminState.token = data.data.token;
     localStorage.setItem("olympiad_admin_token", adminState.token);
     showPanel();
-    await loadSummary();
-    await loadAttempts();
+    await refreshPanel();
+    startAutoRefresh();
   } catch (error) {
     showMessage(elements.loginMessage, error.message, "error");
   }
@@ -237,13 +304,10 @@ async function init() {
   if (adminState.token) {
     try {
       showPanel();
-      await loadSummary();
-      await loadAttempts();
+      await refreshPanel();
+      startAutoRefresh();
     } catch (error) {
-      localStorage.removeItem("olympiad_admin_token");
-      adminState.token = "";
-      elements.panel.classList.add("hidden");
-      elements.loginCard.classList.remove("hidden");
+      resetAdminSession();
     }
   }
 }
