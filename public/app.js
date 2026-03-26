@@ -58,6 +58,41 @@ const elements = {
   resultTours: document.getElementById("result-tours")
 };
 
+function setButtonAvailability(button, enabled, hint = "") {
+  if (!button) {
+    return;
+  }
+
+  button.disabled = !enabled;
+  if (!enabled && hint) {
+    button.title = hint;
+  } else {
+    button.removeAttribute("title");
+  }
+}
+
+function refreshNavigationState() {
+  const attemptActive = Boolean(state.attempt && state.attempt.status === "in_progress");
+  const resultVisible =
+    Boolean(state.attempt) && !elements.resultSection.classList.contains("hidden");
+
+  setButtonAvailability(
+    elements.navRegister,
+    !attemptActive && !resultVisible,
+    "Регистрация доступна до начала попытки."
+  );
+  setButtonAvailability(
+    elements.navAttempt,
+    attemptActive,
+    "Текущий тур появится после запуска попытки."
+  );
+  setButtonAvailability(
+    elements.navResult,
+    Boolean(state.attempt && state.attempt.status !== "in_progress"),
+    "Результат станет доступен после завершения попытки."
+  );
+}
+
 function scrollToSection(section) {
   if (!section || section.classList.contains("hidden")) {
     return;
@@ -66,6 +101,11 @@ function scrollToSection(section) {
 }
 
 function goBackOrHome() {
+  if (state.attempt) {
+    scrollToSection(elements.heroSection);
+    return;
+  }
+
   if (window.history.length > 1) {
     window.history.back();
     return;
@@ -638,6 +678,7 @@ function renderAttempt() {
   elements.prestartSection.classList.add("hidden");
   elements.resultSection.classList.add("hidden");
   elements.attemptSection.classList.remove("hidden");
+  refreshNavigationState();
 
   elements.progressGlobal.textContent = `Вопрос ${attempt.progress.currentQuestionIndex} из ${attempt.progress.totalQuestions}`;
   elements.progressGlobalFill.style.width = `${
@@ -672,6 +713,7 @@ function renderResult() {
   const summary = state.attempt.summary;
   elements.attemptSection.classList.add("hidden");
   elements.resultSection.classList.remove("hidden");
+  refreshNavigationState();
   elements.resultTours.innerHTML = "";
 
   if (summary.totalFinalScore === null) {
@@ -810,8 +852,13 @@ async function handleRegistration(event) {
     state.participant = data.participant;
     renderParticipant();
     elements.startAttempt.disabled = data.alreadyCompleted;
+    elements.startAttempt.textContent = data.activeAttemptId
+      ? "Продолжить олимпиаду"
+      : "Начать олимпиаду";
 
     if (data.alreadyCompleted) {
+      elements.startAttempt.textContent = "Попытка завершена";
+      refreshNavigationState();
       showMessage(
         elements.prestartMessage,
         "Для этого участника попытка уже завершена. Повторный старт недоступен.",
@@ -827,6 +874,7 @@ async function handleRegistration(event) {
         : "Данные участника сохранены. Можно начинать олимпиаду.",
       "success"
     );
+    refreshNavigationState();
   } catch (error) {
     showMessage(elements.registrationMessage, error.message, "error");
   }
@@ -842,6 +890,7 @@ async function startAttempt() {
       body: JSON.stringify({ participant: state.participant })
     });
     state.participant = attempt.participant;
+    elements.startAttempt.textContent = "Продолжить олимпиаду";
     applyAttemptState(attempt);
     startTimers();
     showMessage(
@@ -904,15 +953,30 @@ async function init() {
   state.olympiad = await api("/api/public/olympiad");
   renderHero();
   renderRules();
+  refreshNavigationState();
 
   elements.navBack.addEventListener("click", goBackOrHome);
   elements.navHome.addEventListener("click", () => scrollToSection(elements.heroSection));
-  elements.navRegister.addEventListener("click", () => scrollToSection(elements.prestartSection));
+  elements.navRegister.addEventListener("click", () => {
+    if (elements.prestartSection.classList.contains("hidden")) {
+      scrollToSection(elements.heroSection);
+      return;
+    }
+    scrollToSection(elements.prestartSection);
+  });
   elements.navAttempt.addEventListener("click", () => {
-    scrollToSection(state.attempt ? elements.attemptSection : elements.prestartSection);
+    scrollToSection(
+      state.attempt && state.attempt.status === "in_progress"
+        ? elements.attemptSection
+        : elements.heroSection
+    );
   });
   elements.navResult.addEventListener("click", () => {
-    scrollToSection(elements.resultSection.classList.contains("hidden") ? elements.prestartSection : elements.resultSection);
+    scrollToSection(
+      elements.resultSection.classList.contains("hidden")
+        ? elements.heroSection
+        : elements.resultSection
+    );
   });
   elements.registrationForm.addEventListener("submit", handleRegistration);
   elements.startAttempt.addEventListener("click", startAttempt);

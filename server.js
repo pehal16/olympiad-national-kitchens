@@ -835,6 +835,14 @@ async function handleApi(req, res, url) {
             ).size,
             attempts: ranked.length,
             completed: ranked.filter((item) => item.status !== "in_progress").length
+          },
+          capabilities: {
+            storageBackend: settings.storageBackend,
+            yandexDiskEnabled: Boolean(
+              settings.yandexDiskIntegration &&
+                settings.yandexDiskIntegration.enabled &&
+                settings.yandexDiskIntegration.oauthToken
+            )
           }
         }
       });

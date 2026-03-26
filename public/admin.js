@@ -42,7 +42,9 @@ async function adminApi(path, options = {}) {
 
   const data = await response.json();
   if (!response.ok || data.ok === false) {
-    throw new Error(data.message || "Ошибка запроса");
+    const error = new Error(data.message || "Ошибка запроса");
+    error.status = response.status;
+    throw error;
   }
   return data.data;
 }
@@ -60,6 +62,11 @@ function hideMessage(element) {
 function showPanel() {
   elements.loginCard.classList.add("hidden");
   elements.panel.classList.remove("hidden");
+}
+
+function focusLoginCard() {
+  elements.loginCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  elements.passwordInput.focus();
 }
 
 function scrollToBlock(block) {
@@ -109,6 +116,12 @@ function mapById(items = []) {
   return new Map(items.map((item) => [item.id, item]));
 }
 
+function highlightSelectedAttemptRow() {
+  elements.attemptsBody.querySelectorAll("tr[data-attempt]").forEach((row) => {
+    row.classList.toggle("is-selected", row.dataset.attempt === adminState.selectedAttemptId);
+  });
+}
+
 function formatAnswer(question, answer) {
   if (!answer || !answer.answerPayload) {
     return "Ответ не сохранён";
@@ -152,6 +165,11 @@ function renderSummary(summary) {
   elements.statParticipants.textContent = summary.counts.participants;
   elements.statAttempts.textContent = summary.counts.attempts;
   elements.statCompleted.textContent = summary.counts.completed;
+  const diskEnabled = Boolean(summary.capabilities && summary.capabilities.yandexDiskEnabled);
+  elements.uploadDisk.disabled = !diskEnabled;
+  elements.uploadDisk.title = diskEnabled
+    ? ""
+    : "Выгрузка на Яндекс Диск недоступна: интеграция еще не настроена.";
 }
 
 async function loadSummary() {
@@ -165,6 +183,8 @@ async function loadAttempts() {
 
   attempts.forEach((attempt) => {
     const row = document.createElement("tr");
+    row.dataset.attempt = attempt.id;
+    row.tabIndex = 0;
     row.innerHTML = `
       <td>${attempt.rank}</td>
       <td>${attempt.fullName}<br /><span class="muted">${attempt.institution}</span></td>
@@ -177,6 +197,23 @@ async function loadAttempts() {
       row.classList.add("is-selected");
     }
     elements.attemptsBody.appendChild(row);
+  });
+
+  highlightSelectedAttemptRow();
+
+  elements.attemptsBody.querySelectorAll("tr[data-attempt]").forEach((row) => {
+    row.addEventListener("click", (event) => {
+      if (event.target.closest("button[data-attempt]")) {
+        return;
+      }
+      loadAttemptDetail(row.dataset.attempt);
+    });
+    row.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        loadAttemptDetail(row.dataset.attempt);
+      }
+    });
   });
 
   elements.attemptsBody.querySelectorAll("button[data-attempt]").forEach((button) => {
@@ -234,6 +271,10 @@ async function loadAttemptDetail(attemptId, options = {}) {
 
   elements.attemptDetail.innerHTML = "";
   elements.attemptDetail.appendChild(detail);
+  highlightSelectedAttemptRow();
+  if (!options.preserveSelection) {
+    scrollToBlock(elements.detailSection);
+  }
 }
 
 async function refreshPanel(options = {}) {
@@ -255,7 +296,9 @@ async function refreshPanel(options = {}) {
     }
   } catch (error) {
     if (silent) {
-      resetAdminSession("Сеанс администратора завершен. Войдите повторно.");
+      if (error.status === 401) {
+        resetAdminSession("Сеанс администратора завершен. Войдите повторно.");
+      }
       return;
     }
     throw error;
@@ -320,9 +363,27 @@ async function uploadToDisk() {
 async function init() {
   elements.navBack.addEventListener("click", goBackOrHome);
   elements.navTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-  elements.navRating.addEventListener("click", () => scrollToBlock(elements.ratingSection));
-  elements.navDetail.addEventListener("click", () => scrollToBlock(elements.detailSection));
-  elements.navRefresh.addEventListener("click", () => refreshPanel());
+  elements.navRating.addEventListener("click", () => {
+    if (elements.panel.classList.contains("hidden")) {
+      focusLoginCard();
+      return;
+    }
+    scrollToBlock(elements.ratingSection);
+  });
+  elements.navDetail.addEventListener("click", () => {
+    if (elements.panel.classList.contains("hidden")) {
+      focusLoginCard();
+      return;
+    }
+    scrollToBlock(elements.detailSection);
+  });
+  elements.navRefresh.addEventListener("click", () => {
+    if (elements.panel.classList.contains("hidden")) {
+      focusLoginCard();
+      return;
+    }
+    refreshPanel();
+  });
   elements.loginForm.addEventListener("submit", handleLogin);
   elements.exportCsv.addEventListener("click", () => exportFile("csv"));
   elements.exportJson.addEventListener("click", () => exportFile("json"));
