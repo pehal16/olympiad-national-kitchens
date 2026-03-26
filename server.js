@@ -261,6 +261,22 @@ function normalizeAttemptState(olympiad, attempt) {
   return attempt;
 }
 
+async function normalizeAndPersistIfChanged(olympiad, attempt) {
+  if (!attempt) {
+    return attempt;
+  }
+
+  const before = JSON.stringify(attempt);
+  const normalized = normalizeAttemptState(olympiad, attempt);
+  const after = JSON.stringify(normalized);
+
+  if (before !== after) {
+    await upsertAttempt(normalized);
+  }
+
+  return normalized;
+}
+
 function questionCount(attempt) {
   return attempt.variant && Array.isArray(attempt.variant.questions)
     ? attempt.variant.questions.length
@@ -664,8 +680,7 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    const normalized = normalizeAttemptState(olympiad, attempt);
-    await upsertAttempt(normalized);
+    const normalized = await normalizeAndPersistIfChanged(olympiad, attempt);
     sendJson(res, 200, {
       ok: true,
       data: buildAttemptView(olympiad, normalized, settings)
@@ -681,8 +696,7 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    const normalized = normalizeAttemptState(olympiad, attempt);
-    await upsertAttempt(normalized);
+    const normalized = await normalizeAndPersistIfChanged(olympiad, attempt);
     sendJson(res, 200, {
       ok: true,
       data: buildAttemptView(olympiad, normalized, settings)
