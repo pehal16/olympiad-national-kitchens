@@ -35,7 +35,7 @@ async function adminApi(path, options = {}) {
   const response = await fetch(path, {
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${adminState.token}`
+      "X-Admin-Token": adminState.token
     },
     ...options
   });

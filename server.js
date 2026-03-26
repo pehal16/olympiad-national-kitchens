@@ -396,7 +396,8 @@ function formatCorrectAnswer(question) {
 
 async function requireAdmin(req) {
   const authHeader = req.headers.authorization || "";
-  const token = authHeader.replace("Bearer ", "").trim();
+  const headerToken = req.headers["x-admin-token"] || "";
+  const token = String(headerToken || authHeader.replace("Bearer ", "")).trim();
   if (!token) {
     return null;
   }
