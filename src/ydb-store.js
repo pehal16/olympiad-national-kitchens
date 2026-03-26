@@ -72,6 +72,17 @@ async function selectRows(tableName, keyColumn) {
   return rows;
 }
 
+async function selectRowByKey(tableName, keyColumn, keyValue) {
+  await ensureSchema();
+  const sql = await getSql();
+  const [rows = []] = await sql`
+    SELECT ${identifier(keyColumn)}, payload_json
+    FROM ${identifier(tableName)}
+    WHERE ${identifier(keyColumn)} = ${String(keyValue)}
+  `;
+  return rows[0] || null;
+}
+
 function parsePayloadRows(rows) {
   return rows
     .map((row) => {
@@ -125,9 +136,41 @@ async function upsertAttempt(attempt) {
   await upsertRow(ATTEMPTS_TABLE, "id", attempt.id, attempt);
 }
 
+async function loadAttemptById(attemptId) {
+  if (!attemptId) {
+    return null;
+  }
+  const row = await selectRowByKey(ATTEMPTS_TABLE, "id", attemptId);
+  if (!row) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(row.payload_json);
+  } catch (error) {
+    return null;
+  }
+}
+
 async function loadAdminSessions() {
   const rows = await selectRows(ADMIN_SESSIONS_TABLE, "token");
   return parsePayloadRows(rows);
+}
+
+async function loadAdminSessionByToken(token) {
+  if (!token) {
+    return null;
+  }
+  const row = await selectRowByKey(ADMIN_SESSIONS_TABLE, "token", token);
+  if (!row) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(row.payload_json);
+  } catch (error) {
+    return null;
+  }
 }
 
 async function saveAdminSessions(sessions) {
@@ -144,6 +187,8 @@ module.exports = {
   loadAttempts,
   saveAttempts,
   upsertAttempt,
+  loadAttemptById,
   loadAdminSessions,
-  saveAdminSessions
+  saveAdminSessions,
+  loadAdminSessionByToken
 };

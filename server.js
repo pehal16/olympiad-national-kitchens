@@ -10,6 +10,8 @@ const {
   saveAttempts,
   upsertAttempt,
   loadAdminSessions,
+  loadAttemptById,
+  loadAdminSessionByToken,
   saveAdminSessions,
   ROOT_DIR
 } = require("./src/store");
@@ -377,9 +379,18 @@ function formatCorrectAnswer(question) {
 }
 
 async function requireAdmin(req) {
-  const sessions = await loadAdminSessions();
   const authHeader = req.headers.authorization || "";
   const token = authHeader.replace("Bearer ", "").trim();
+  if (!token) {
+    return null;
+  }
+
+  const directSession = await loadAdminSessionByToken(token);
+  if (directSession) {
+    return directSession.expiresAt > Date.now() ? directSession : null;
+  }
+
+  const sessions = await loadAdminSessions();
   return sessions.find(
     (session) => session.token === token && session.expiresAt > Date.now()
   );
@@ -647,15 +658,14 @@ async function handleApi(req, res, url) {
 
   if (method === "GET" && pathname.match(/^\/api\/public\/attempts\/[^/]+$/)) {
     const attemptId = pathname.split("/")[4];
-    const allAttempts = await loadAttempts();
-    const attempt = findAttemptById(allAttempts, attemptId);
+    const attempt = await loadAttemptById(attemptId);
     if (!attempt || attempt.olympiadId !== olympiad.id) {
       sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
       return;
     }
 
     const normalized = normalizeAttemptState(olympiad, attempt);
-    await saveAttempt(allAttempts, normalized);
+    await upsertAttempt(normalized);
     sendJson(res, 200, {
       ok: true,
       data: buildAttemptView(olympiad, normalized, settings)
@@ -665,15 +675,14 @@ async function handleApi(req, res, url) {
 
   if (method === "GET" && pathname.match(/^\/api\/public\/attempts\/[^/]+\/current$/)) {
     const attemptId = pathname.split("/")[4];
-    const allAttempts = await loadAttempts();
-    const attempt = findAttemptById(allAttempts, attemptId);
+    const attempt = await loadAttemptById(attemptId);
     if (!attempt || attempt.olympiadId !== olympiad.id) {
       sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
       return;
     }
 
     const normalized = normalizeAttemptState(olympiad, attempt);
-    await saveAttempt(allAttempts, normalized);
+    await upsertAttempt(normalized);
     sendJson(res, 200, {
       ok: true,
       data: buildAttemptView(olympiad, normalized, settings)
@@ -684,8 +693,7 @@ async function handleApi(req, res, url) {
   if (method === "POST" && pathname.match(/^\/api\/public\/attempts\/[^/]+\/answer$/)) {
     const attemptId = pathname.split("/")[4];
     const body = await parseBody(req);
-    const allAttempts = await loadAttempts();
-    let attempt = findAttemptById(allAttempts, attemptId);
+    let attempt = await loadAttemptById(attemptId);
 
     if (!attempt || attempt.olympiadId !== olympiad.id) {
       sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
@@ -694,7 +702,7 @@ async function handleApi(req, res, url) {
 
     attempt = normalizeAttemptState(olympiad, attempt);
     if (attempt.status !== "in_progress") {
-      await saveAttempt(allAttempts, attempt);
+      await upsertAttempt(attempt);
       sendJson(res, 409, {
         ok: false,
         message: "Попытка уже завершена."
@@ -705,7 +713,7 @@ async function handleApi(req, res, url) {
     const currentQuestion = getCurrentQuestion(attempt);
     if (!currentQuestion) {
       const finalized = finalizeAttempt(olympiad, attempt, "finished");
-      await saveAttempt(allAttempts, finalized);
+      await upsertAttempt(finalized);
       sendJson(res, 200, {
         ok: true,
         data: buildAttemptView(olympiad, finalized, settings)
@@ -738,7 +746,7 @@ async function handleApi(req, res, url) {
     attempt.currentStepIndex += 1;
     if (attempt.currentStepIndex >= questionCount(attempt)) {
       attempt = finalizeAttempt(olympiad, attempt, "finished");
-      await saveAttempt(allAttempts, attempt);
+      await upsertAttempt(attempt);
       sendJson(res, 200, {
         ok: true,
         data: buildAttemptView(olympiad, attempt, settings)
@@ -761,7 +769,7 @@ async function handleApi(req, res, url) {
 
     markQuestionPresented(attempt);
     attempt = normalizeAttemptState(olympiad, attempt);
-    await saveAttempt(allAttempts, attempt);
+    await upsertAttempt(attempt);
 
     sendJson(res, 200, {
       ok: true,
@@ -772,8 +780,7 @@ async function handleApi(req, res, url) {
 
   if (method === "POST" && pathname.match(/^\/api\/public\/attempts\/[^/]+\/finish$/)) {
     const attemptId = pathname.split("/")[4];
-    const allAttempts = await loadAttempts();
-    let attempt = findAttemptById(allAttempts, attemptId);
+    let attempt = await loadAttemptById(attemptId);
 
     if (!attempt || attempt.olympiadId !== olympiad.id) {
       sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
@@ -781,7 +788,7 @@ async function handleApi(req, res, url) {
     }
 
     attempt = finalizeAttempt(olympiad, attempt, "finished");
-    await saveAttempt(allAttempts, attempt);
+    await upsertAttempt(attempt);
     sendJson(res, 200, {
       ok: true,
       data: buildAttemptView(olympiad, attempt, settings)

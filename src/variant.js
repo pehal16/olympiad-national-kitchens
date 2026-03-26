@@ -49,6 +49,70 @@ function addQuestionRuntimeMeta(question, tour, sequenceInTour, globalIndex) {
   return prepared;
 }
 
+function validateQuestionStructure(question) {
+  if (!question || !question.id || !question.prompt || !question.type) {
+    throw new Error("Некорректная структура вопроса в банке олимпиады.");
+  }
+
+  if (question.type === "single_choice") {
+    const options = Array.isArray(question.options) ? question.options : [];
+    const correctCount = options.filter((option) => option.isCorrect).length;
+    if (options.length < 2 || correctCount !== 1) {
+      throw new Error(`Вопрос ${question.sourceId || question.id} имеет некорректные варианты ответа.`);
+    }
+    return;
+  }
+
+  if (question.type === "sequence_drag") {
+    const items = Array.isArray(question.items) ? question.items : [];
+    const slots = Array.isArray(question.slots) ? question.slots : [];
+    const correctSequence = Array.isArray(question.correctSequence)
+      ? question.correctSequence
+      : [];
+
+    if (!items.length || !slots.length || !correctSequence.length || slots.length !== correctSequence.length) {
+      throw new Error(`Вопрос ${question.sourceId || question.id} имеет некорректную последовательность.`);
+    }
+    return;
+  }
+
+  if (question.type === "bucket_sort") {
+    const items = Array.isArray(question.items) ? question.items : [];
+    const buckets = Array.isArray(question.buckets) ? question.buckets : [];
+    const correctBuckets = question.correctBuckets || {};
+    const bucketIds = new Set(buckets.map((bucket) => bucket.id));
+
+    if (!items.length || !buckets.length) {
+      throw new Error(`Вопрос ${question.sourceId || question.id} имеет пустые зоны сортировки.`);
+    }
+
+    const hasMappingForEveryItem = items.every(
+      (item) => correctBuckets[item.id] && bucketIds.has(correctBuckets[item.id])
+    );
+    if (!hasMappingForEveryItem) {
+      throw new Error(`Вопрос ${question.sourceId || question.id} имеет неполную карту распределения.`);
+    }
+    return;
+  }
+
+  if (question.type === "ingredient_matrix") {
+    const items = Array.isArray(question.items) ? question.items : [];
+    const buckets = Array.isArray(question.buckets) ? question.buckets : [];
+    const correctIngredientIds = Array.isArray(question.correctIngredientIds)
+      ? question.correctIngredientIds
+      : [];
+
+    if (
+      !items.length ||
+      !buckets.length ||
+      !correctIngredientIds.length ||
+      !buckets.some((bucket) => bucket.id === "selected")
+    ) {
+      throw new Error(`Вопрос ${question.sourceId || question.id} имеет некорректную матрицу ингредиентов.`);
+    }
+  }
+}
+
 function pickOne(items) {
   const list = shuffleArray(items);
   return list[0] || null;
@@ -312,6 +376,8 @@ function buildVariant(olympiad) {
         stepEnd: globalIndex - 1
       };
     });
+
+    flatQuestions.forEach(validateQuestionStructure);
 
     if (!cuisineSpreadWithinLimit(flatQuestions)) {
       continue;

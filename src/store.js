@@ -148,11 +148,29 @@ async function upsertAttempt(attempt) {
   writeJson(ATTEMPTS_FILE, attempts);
 }
 
+async function loadAttemptById(attemptId) {
+  if (STORAGE_BACKEND === "ydb") {
+    return getYdbStore().loadAttemptById(attemptId);
+  }
+
+  const attempts = readJson(ATTEMPTS_FILE, []);
+  return attempts.find((item) => item.id === attemptId) || null;
+}
+
 async function loadAdminSessions() {
   if (STORAGE_BACKEND === "ydb") {
     return getYdbStore().loadAdminSessions();
   }
   return readJson(SESSIONS_FILE, []);
+}
+
+async function loadAdminSessionByToken(token) {
+  if (STORAGE_BACKEND === "ydb") {
+    return getYdbStore().loadAdminSessionByToken(token);
+  }
+
+  const sessions = readJson(SESSIONS_FILE, []);
+  return sessions.find((item) => item.token === token) || null;
 }
 
 async function saveAdminSessions(sessions) {
@@ -177,6 +195,8 @@ module.exports = {
   loadAttempts,
   saveAttempts,
   upsertAttempt,
+  loadAttemptById,
   loadAdminSessions,
-  saveAdminSessions
+  saveAdminSessions,
+  loadAdminSessionByToken
 };
