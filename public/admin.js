@@ -42,7 +42,7 @@ async function adminApi(path, options = {}) {
 
   const data = await response.json();
   if (!response.ok || data.ok === false) {
-    const error = new Error(data.message || "Ошибка запроса");
+    const error = new Error(data.message || data.errorMessage || "Ошибка запроса");
     error.status = response.status;
     throw error;
   }

@@ -149,7 +149,7 @@ async function api(path, options = {}) {
 
   const data = await response.json();
   if (!response.ok || data.ok === false) {
-    throw new Error(data.message || "Ошибка запроса");
+    throw new Error(data.message || data.errorMessage || "Ошибка запроса");
   }
   return data.data;
 }

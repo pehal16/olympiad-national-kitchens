@@ -4,6 +4,8 @@ const { EnvironCredentialsProvider } = require("@ydbjs/auth/environ");
 
 const YDB_CONNECTION_STRING = process.env.YDB_CONNECTION_STRING || "";
 const ATTEMPTS_TABLE = process.env.YDB_ATTEMPTS_TABLE || "olympiad_attempts";
+const ATTEMPT_VARIANTS_TABLE =
+  process.env.YDB_ATTEMPT_VARIANTS_TABLE || "olympiad_attempt_variants";
 const ADMIN_SESSIONS_TABLE = process.env.YDB_ADMIN_SESSIONS_TABLE || "admin_sessions";
 
 let sqlPromise = null;
@@ -42,6 +44,14 @@ async function ensureSchema() {
       const sql = await getSql();
       await sql`
         CREATE TABLE IF NOT EXISTS ${identifier(ATTEMPTS_TABLE)} (
+          id Utf8,
+          payload_json Utf8,
+          updated_at Utf8,
+          PRIMARY KEY (id)
+        )
+      `;
+      await sql`
+        CREATE TABLE IF NOT EXISTS ${identifier(ATTEMPT_VARIANTS_TABLE)} (
           id Utf8,
           payload_json Utf8,
           updated_at Utf8,
@@ -95,6 +105,77 @@ function parsePayloadRows(rows) {
     .filter(Boolean);
 }
 
+function cloneWithoutVariant(attempt) {
+  if (!attempt) {
+    return attempt;
+  }
+
+  const state = { ...attempt };
+  if (state.variant) {
+    delete state.variant;
+    state._variantStored = true;
+  } else if (state._variantStored === undefined) {
+    state._variantStored = false;
+  }
+  return state;
+}
+
+function mergeVariantIntoAttempt(statePayload, variantPayload) {
+  if (!statePayload) {
+    return null;
+  }
+
+  if (statePayload.variant) {
+    return statePayload;
+  }
+
+  if (variantPayload) {
+    return {
+      ...statePayload,
+      variant: variantPayload
+    };
+  }
+
+  return statePayload;
+}
+
+async function loadVariantRows() {
+  const rows = await selectRows(ATTEMPT_VARIANTS_TABLE, "id");
+  return rows
+    .map((row) => {
+      try {
+        return {
+          id: row.id,
+          variant: JSON.parse(row.payload_json)
+        };
+      } catch (error) {
+        return null;
+      }
+    })
+    .filter(Boolean);
+}
+
+async function loadVariantByAttemptId(attemptId) {
+  const row = await selectRowByKey(ATTEMPT_VARIANTS_TABLE, "id", attemptId);
+  if (!row) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(row.payload_json);
+  } catch (error) {
+    return null;
+  }
+}
+
+async function upsertVariant(attemptId, variantPayload) {
+  if (!attemptId || !variantPayload) {
+    return;
+  }
+
+  await upsertRow(ATTEMPT_VARIANTS_TABLE, "id", attemptId, variantPayload);
+}
+
 async function upsertRow(tableName, keyColumn, keyValue, payload) {
   await ensureSchema();
   const sql = await getSql();
@@ -120,20 +201,45 @@ async function initYdbStorage() {
 
 async function loadAttempts() {
   const rows = await selectRows(ATTEMPTS_TABLE, "id");
-  return parsePayloadRows(rows).sort((left, right) =>
-    String(left.startedAt || left.id).localeCompare(String(right.startedAt || right.id))
-  );
+  const attempts = parsePayloadRows(rows);
+  const variantMap = new Map((await loadVariantRows()).map((item) => [item.id, item.variant]));
+
+  return attempts
+    .map((attempt) => {
+      if (!attempt || attempt.variant || !attempt._variantStored) {
+        return attempt;
+      }
+      return mergeVariantIntoAttempt(attempt, variantMap.get(attempt.id) || null);
+    })
+    .sort((left, right) =>
+      String(left.startedAt || left.id).localeCompare(String(right.startedAt || right.id))
+    );
 }
 
 async function saveAttempts(attempts) {
-  await bulkUpsert(ATTEMPTS_TABLE, "id", attempts || [], (item) => item.id);
+  const items = attempts || [];
+  for (const attempt of items) {
+    if (!attempt || !attempt.id) {
+      continue;
+    }
+    if (attempt.variant) {
+      await upsertVariant(attempt.id, attempt.variant);
+    }
+    await upsertRow(ATTEMPTS_TABLE, "id", attempt.id, cloneWithoutVariant(attempt));
+  }
 }
 
 async function upsertAttempt(attempt) {
   if (!attempt || !attempt.id) {
     return;
   }
-  await upsertRow(ATTEMPTS_TABLE, "id", attempt.id, attempt);
+
+  if (attempt.variant && !attempt._variantStored) {
+    await upsertVariant(attempt.id, attempt.variant);
+    attempt._variantStored = true;
+  }
+
+  await upsertRow(ATTEMPTS_TABLE, "id", attempt.id, cloneWithoutVariant(attempt));
 }
 
 async function loadAttemptById(attemptId) {
@@ -146,7 +252,17 @@ async function loadAttemptById(attemptId) {
   }
 
   try {
-    return JSON.parse(row.payload_json);
+    const statePayload = JSON.parse(row.payload_json);
+    if (statePayload.variant) {
+      return statePayload;
+    }
+
+    if (!statePayload._variantStored) {
+      return statePayload;
+    }
+
+    const variantPayload = await loadVariantByAttemptId(attemptId);
+    return mergeVariantIntoAttempt(statePayload, variantPayload);
   } catch (error) {
     return null;
   }
