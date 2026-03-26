@@ -6,6 +6,8 @@ const YDB_CONNECTION_STRING = process.env.YDB_CONNECTION_STRING || "";
 const ATTEMPTS_TABLE = process.env.YDB_ATTEMPTS_TABLE || "olympiad_attempts";
 const ATTEMPT_VARIANTS_TABLE =
   process.env.YDB_ATTEMPT_VARIANTS_TABLE || "olympiad_attempt_variants";
+const ATTEMPT_ANSWERS_TABLE =
+  process.env.YDB_ATTEMPT_ANSWERS_TABLE || "olympiad_attempt_answers";
 const ADMIN_SESSIONS_TABLE = process.env.YDB_ADMIN_SESSIONS_TABLE || "admin_sessions";
 
 let sqlPromise = null;
@@ -59,6 +61,15 @@ async function ensureSchema() {
         )
       `;
       await sql`
+        CREATE TABLE IF NOT EXISTS ${identifier(ATTEMPT_ANSWERS_TABLE)} (
+          attempt_id Utf8,
+          question_id Utf8,
+          payload_json Utf8,
+          updated_at Utf8,
+          PRIMARY KEY (attempt_id, question_id)
+        )
+      `;
+      await sql`
         CREATE TABLE IF NOT EXISTS ${identifier(ADMIN_SESSIONS_TABLE)} (
           token Utf8,
           payload_json Utf8,
@@ -105,7 +116,7 @@ function parsePayloadRows(rows) {
     .filter(Boolean);
 }
 
-function cloneWithoutVariant(attempt) {
+function cloneAttemptState(attempt) {
   if (!attempt) {
     return attempt;
   }
@@ -117,26 +128,46 @@ function cloneWithoutVariant(attempt) {
   } else if (state._variantStored === undefined) {
     state._variantStored = false;
   }
+  if (state.answers) {
+    delete state.answers;
+    state._answersStored = true;
+  } else if (state._answersStored === undefined) {
+    state._answersStored = false;
+  }
+  if (state.questionLog) {
+    delete state.questionLog;
+  }
+  delete state._lastChangedQuestionId;
   return state;
 }
 
-function mergeVariantIntoAttempt(statePayload, variantPayload) {
+function mergeStoredPartsIntoAttempt(statePayload, variantPayload, answerRows) {
   if (!statePayload) {
     return null;
   }
 
-  if (statePayload.variant) {
-    return statePayload;
+  const attempt = { ...statePayload };
+  if (!attempt.variant && variantPayload) {
+    attempt.variant = variantPayload;
   }
-
-  if (variantPayload) {
-    return {
-      ...statePayload,
-      variant: variantPayload
-    };
+  if (!attempt.answers) {
+    attempt.answers = {};
   }
-
-  return statePayload;
+  if (!attempt.questionLog) {
+    attempt.questionLog = {};
+  }
+  for (const row of answerRows || []) {
+    if (!row || !row.questionId) {
+      continue;
+    }
+    if (row.answer) {
+      attempt.answers[row.questionId] = row.answer;
+    }
+    if (row.log) {
+      attempt.questionLog[row.questionId] = row.log;
+    }
+  }
+  return attempt;
 }
 
 async function loadVariantRows() {
@@ -176,6 +207,91 @@ async function upsertVariant(attemptId, variantPayload) {
   await upsertRow(ATTEMPT_VARIANTS_TABLE, "id", attemptId, variantPayload);
 }
 
+async function loadAnswerRows() {
+  await ensureSchema();
+  const sql = await getSql();
+  const [rows = []] = await sql`
+    SELECT attempt_id, question_id, payload_json
+    FROM ${identifier(ATTEMPT_ANSWERS_TABLE)}
+  `;
+
+  return rows
+    .map((row) => {
+      try {
+        const payload = JSON.parse(row.payload_json);
+        return {
+          attemptId: row.attempt_id,
+          questionId: row.question_id,
+          answer: payload.answer || null,
+          log: payload.log || null
+        };
+      } catch (error) {
+        return null;
+      }
+    })
+    .filter(Boolean);
+}
+
+async function loadAnswerRowsByAttemptId(attemptId) {
+  await ensureSchema();
+  const sql = await getSql();
+  const [rows = []] = await sql`
+    SELECT attempt_id, question_id, payload_json
+    FROM ${identifier(ATTEMPT_ANSWERS_TABLE)}
+    WHERE attempt_id = ${String(attemptId)}
+  `;
+
+  return rows
+    .map((row) => {
+      try {
+        const payload = JSON.parse(row.payload_json);
+        return {
+          attemptId: row.attempt_id,
+          questionId: row.question_id,
+          answer: payload.answer || null,
+          log: payload.log || null
+        };
+      } catch (error) {
+        return null;
+      }
+    })
+    .filter(Boolean);
+}
+
+async function upsertAnswerRow(attemptId, questionId, payload) {
+  await ensureSchema();
+  const sql = await getSql();
+  await sql`
+    UPSERT INTO ${identifier(ATTEMPT_ANSWERS_TABLE)} (attempt_id, question_id, payload_json, updated_at)
+    VALUES (${String(attemptId)}, ${String(questionId)}, ${JSON.stringify(payload)}, ${new Date().toISOString()})
+  `;
+}
+
+async function upsertAttemptAnswers(attempt) {
+  if (!attempt || !attempt.id) {
+    return;
+  }
+
+  const answers = attempt.answers || {};
+  const questionLog = attempt.questionLog || {};
+  const changedQuestionId = attempt._lastChangedQuestionId;
+
+  if (changedQuestionId && answers[changedQuestionId]) {
+    await upsertAnswerRow(attempt.id, changedQuestionId, {
+      answer: answers[changedQuestionId],
+      log: questionLog[changedQuestionId] || null
+    });
+    return;
+  }
+
+  for (const [questionId, answer] of Object.entries(answers)) {
+    await upsertAnswerRow(attempt.id, questionId, {
+      answer,
+      log: questionLog[questionId] || null
+    });
+  }
+}
+
 async function upsertRow(tableName, keyColumn, keyValue, payload) {
   await ensureSchema();
   const sql = await getSql();
@@ -203,13 +319,28 @@ async function loadAttempts() {
   const rows = await selectRows(ATTEMPTS_TABLE, "id");
   const attempts = parsePayloadRows(rows);
   const variantMap = new Map((await loadVariantRows()).map((item) => [item.id, item.variant]));
+  const answerRows = await loadAnswerRows();
+  const answerMap = new Map();
+  for (const row of answerRows) {
+    if (!answerMap.has(row.attemptId)) {
+      answerMap.set(row.attemptId, []);
+    }
+    answerMap.get(row.attemptId).push(row);
+  }
 
   return attempts
     .map((attempt) => {
-      if (!attempt || attempt.variant || !attempt._variantStored) {
+      if (!attempt) {
         return attempt;
       }
-      return mergeVariantIntoAttempt(attempt, variantMap.get(attempt.id) || null);
+      if (attempt.variant && attempt.answers) {
+        return attempt;
+      }
+      return mergeStoredPartsIntoAttempt(
+        attempt,
+        attempt._variantStored ? variantMap.get(attempt.id) || null : null,
+        attempt._answersStored ? answerMap.get(attempt.id) || [] : []
+      );
     })
     .sort((left, right) =>
       String(left.startedAt || left.id).localeCompare(String(right.startedAt || right.id))
@@ -225,7 +356,8 @@ async function saveAttempts(attempts) {
     if (attempt.variant) {
       await upsertVariant(attempt.id, attempt.variant);
     }
-    await upsertRow(ATTEMPTS_TABLE, "id", attempt.id, cloneWithoutVariant(attempt));
+    await upsertAttemptAnswers(attempt);
+    await upsertRow(ATTEMPTS_TABLE, "id", attempt.id, cloneAttemptState(attempt));
   }
 }
 
@@ -239,7 +371,12 @@ async function upsertAttempt(attempt) {
     attempt._variantStored = true;
   }
 
-  await upsertRow(ATTEMPTS_TABLE, "id", attempt.id, cloneWithoutVariant(attempt));
+  if ((attempt.answers && Object.keys(attempt.answers).length) || attempt._lastChangedQuestionId) {
+    await upsertAttemptAnswers(attempt);
+    attempt._answersStored = true;
+  }
+
+  await upsertRow(ATTEMPTS_TABLE, "id", attempt.id, cloneAttemptState(attempt));
 }
 
 async function loadAttemptById(attemptId) {
@@ -253,16 +390,17 @@ async function loadAttemptById(attemptId) {
 
   try {
     const statePayload = JSON.parse(row.payload_json);
-    if (statePayload.variant) {
+    if (statePayload.variant && statePayload.answers) {
       return statePayload;
     }
 
-    if (!statePayload._variantStored) {
-      return statePayload;
-    }
-
-    const variantPayload = await loadVariantByAttemptId(attemptId);
-    return mergeVariantIntoAttempt(statePayload, variantPayload);
+    const variantPayload = statePayload._variantStored
+      ? await loadVariantByAttemptId(attemptId)
+      : null;
+    const answerRows = statePayload._answersStored
+      ? await loadAnswerRowsByAttemptId(attemptId)
+      : [];
+    return mergeStoredPartsIntoAttempt(statePayload, variantPayload, answerRows);
   } catch (error) {
     return null;
   }

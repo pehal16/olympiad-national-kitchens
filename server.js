@@ -768,6 +768,7 @@ async function handleApi(req, res, url) {
 
     logEntry.answeredAt = savedAt;
     logEntry.timeSpentMs = timeSpentMs;
+    attempt._lastChangedQuestionId = currentQuestion.id;
 
     attempt.currentStepIndex += 1;
     if (attempt.currentStepIndex >= questionCount(attempt)) {
