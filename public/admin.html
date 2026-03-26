@@ -24,7 +24,7 @@
         <div class="eyebrow">Организатор</div>
         <h1>Панель управления олимпиадой</h1>
         <p class="lead">
-          Рейтинг участников, туровые баллы, служебный лог вопросов, ответы и выгрузка протоколов.
+          Рейтинг участников, туровые баллы, служебный лог вопросов, ответы, диагностика и выгрузка протоколов.
         </p>
       </section>
 
@@ -56,6 +56,36 @@
           </article>
         </section>
 
+        <section class="grid-three">
+          <article class="card diag-card">
+            <div class="section-row">
+              <h3>Система</h3>
+              <span id="system-backend-badge" class="stage-chip">--</span>
+            </div>
+            <div class="diag-list">
+              <div><span class="muted">Версия</span><strong id="diag-version">--</strong></div>
+              <div><span class="muted">Яндекс Диск</span><strong id="diag-disk">--</strong></div>
+              <div><span class="muted">Последняя активность</span><strong id="diag-last-activity">--</strong></div>
+            </div>
+          </article>
+          <article class="card diag-card">
+            <h3>Контингент</h3>
+            <div class="diag-list">
+              <div><span class="muted">В процессе</span><strong id="diag-in-progress">0</strong></div>
+              <div><span class="muted">Учреждений</span><strong id="diag-institutions">0</strong></div>
+              <div><span class="muted">Групп</span><strong id="diag-groups">0</strong></div>
+            </div>
+          </article>
+          <article class="card diag-card">
+            <h3>Синхронизация</h3>
+            <div class="diag-list">
+              <div><span class="muted">Обновлено</span><strong id="diag-refreshed-at">--</strong></div>
+              <div><span class="muted">Время сервера</span><strong id="diag-server-time">--</strong></div>
+              <div><span class="muted">Токен</span><strong id="diag-token-state">активен</strong></div>
+            </div>
+          </article>
+        </section>
+
         <section class="grid-two">
           <section id="admin-rating-section" class="card">
             <div class="section-row">
@@ -66,6 +96,33 @@
                 <button id="upload-disk" class="button primary">Выгрузить на Яндекс Диск</button>
               </div>
             </div>
+            <div class="filter-bar">
+              <label class="field compact-field">
+                <span>Поиск</span>
+                <input id="filter-search" type="text" placeholder="ФИО, колледж, группа" />
+              </label>
+              <label class="field compact-field">
+                <span>Статус</span>
+                <select id="filter-status">
+                  <option value="">Все статусы</option>
+                </select>
+              </label>
+              <label class="field compact-field">
+                <span>Учреждение</span>
+                <select id="filter-institution">
+                  <option value="">Все учреждения</option>
+                </select>
+              </label>
+              <label class="field compact-field">
+                <span>Группа</span>
+                <select id="filter-group">
+                  <option value="">Все группы</option>
+                </select>
+              </label>
+              <button id="filter-reset" class="button ghost" type="button">Сбросить фильтры</button>
+            </div>
+            <div id="attempts-meta" class="muted table-meta">Показано 0 из 0 попыток.</div>
+            <div id="tour-analytics" class="tour-analytics"></div>
             <div id="export-message" class="message hidden"></div>
             <div class="table-wrap">
               <table class="data-table">
@@ -97,6 +154,6 @@
       </footer>
     </main>
 
-    <script src="/admin.js?v=20260326d"></script>
+    <script src="/admin.js?v=20260326e"></script>
   </body>
 </html>

@@ -55,6 +55,8 @@ const elements = {
   questionBody: document.getElementById("question-body"),
   submitAnswer: document.getElementById("submit-answer"),
   finishAttempt: document.getElementById("finish-attempt"),
+  attemptSaveStatus: document.getElementById("attempt-save-status"),
+  attemptSyncMeta: document.getElementById("attempt-sync-meta"),
   attemptMessage: document.getElementById("attempt-message"),
   resultTitle: document.getElementById("result-title"),
   resultSubtitle: document.getElementById("result-subtitle"),
@@ -137,6 +139,112 @@ function goBackOrHome() {
     return;
   }
   window.location.href = "/";
+}
+
+function formatDateTime(value) {
+  if (!value) {
+    return "—";
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+
+  return date.toLocaleString("ru-RU", {
+    hour12: false,
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+}
+
+function setAttemptSaveStatus(message, type = "idle") {
+  if (!elements.attemptSaveStatus) {
+    return;
+  }
+
+  elements.attemptSaveStatus.textContent = message;
+  elements.attemptSaveStatus.className = `sync-badge ${type}`;
+}
+
+function setAttemptSyncMeta(message) {
+  if (!elements.attemptSyncMeta) {
+    return;
+  }
+
+  elements.attemptSyncMeta.textContent = message;
+}
+
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function formatApiError(error, fallback = "Ошибка запроса") {
+  if (!error) {
+    return fallback;
+  }
+
+  if (typeof error.message === "string" && error.message.trim()) {
+    return error.message.trim();
+  }
+
+  return fallback;
+}
+
+function isRetriableError(error) {
+  if (!error) {
+    return false;
+  }
+
+  if (error.status === 0 || error.status === 408 || error.status === 429) {
+    return true;
+  }
+
+  if (typeof error.status === "number" && error.status >= 500) {
+    return true;
+  }
+
+  const message = formatApiError(error, "").toLowerCase();
+  return (
+    message.includes("network") ||
+    message.includes("timeout") ||
+    message.includes("timed out") ||
+    message.includes("сервером") ||
+    message.includes("временно") ||
+    message.includes("подождите")
+  );
+}
+
+async function requestWithRetry(task, options = {}) {
+  const attempts = Math.max(1, Number(options.attempts) || 1);
+  const pauseMs = Math.max(0, Number(options.pauseMs) || 1200);
+  let lastError = null;
+
+  for (let attemptIndex = 1; attemptIndex <= attempts; attemptIndex += 1) {
+    try {
+      return await task();
+    } catch (error) {
+      lastError = error;
+      const shouldRetry = attemptIndex < attempts && isRetriableError(error);
+      if (!shouldRetry) {
+        break;
+      }
+
+      if (typeof options.onRetry === "function") {
+        options.onRetry(error, attemptIndex + 1, attempts);
+      }
+
+      await delay(pauseMs);
+    }
+  }
+
+  throw lastError || new Error("Не удалось выполнить запрос.");
 }
 
 async function api(path, options = {}) {
@@ -1028,6 +1136,323 @@ async function init() {
   elements.finishAttempt.addEventListener("click", finishAttempt);
 }
 
+async function api(path, options = {}) {
+  let response;
+  try {
+    response = await fetch(path, {
+      headers: {
+        "Content-Type": "application/json"
+      },
+      ...options
+    });
+  } catch (error) {
+    const wrapped = new Error("Не удалось связаться с сервером.");
+    wrapped.status = 0;
+    throw wrapped;
+  }
+
+  let data = {};
+  try {
+    data = await response.json();
+  } catch (error) {
+    data = {};
+  }
+
+  if (!response.ok || data.ok === false) {
+    const wrapped = new Error(
+      data.message || data.errorMessage || `Ошибка запроса (${response.status})`
+    );
+    wrapped.status = response.status;
+    throw wrapped;
+  }
+
+  return data.data;
+}
+
+function refreshAttemptControls() {
+  const attemptInProgress = Boolean(state.attempt && state.attempt.status === "in_progress");
+  const hasActiveQuestion = Boolean(
+    attemptInProgress && state.attempt.currentQuestion && state.questionController
+  );
+  const isBusy = state.isSubmittingAnswer || state.isFinishingAttempt;
+
+  elements.submitAnswer.disabled = !hasActiveQuestion || isBusy;
+  elements.finishAttempt.disabled = !attemptInProgress || isBusy;
+
+  if (state.isSubmittingAnswer) {
+    elements.submitAnswer.textContent = "Сохранение ответа...";
+    elements.finishAttempt.textContent = "Завершить досрочно";
+    return;
+  }
+
+  if (state.isFinishingAttempt) {
+    elements.finishAttempt.textContent = "Завершаем попытку...";
+    elements.submitAnswer.textContent = "Ответить и далее";
+    return;
+  }
+
+  elements.finishAttempt.textContent = "Завершить досрочно";
+
+  if (!attemptInProgress) {
+    elements.submitAnswer.textContent = "Ответить и далее";
+    return;
+  }
+
+  elements.submitAnswer.textContent =
+    state.attempt.progress.currentQuestionIndex >= state.attempt.progress.totalQuestions
+      ? "Ответить и завершить"
+      : "Ответить и далее";
+}
+
+function renderResult() {
+  const summary = state.attempt.summary;
+  elements.attemptSection.classList.add("hidden");
+  elements.resultSection.classList.remove("hidden");
+  refreshNavigationState();
+  elements.resultTours.innerHTML = "";
+
+  if (summary.totalFinalScore === null) {
+    elements.resultTitle.textContent = "Попытка завершена";
+    elements.resultSubtitle.textContent =
+      "Результат зафиксирован. Баллы доступны организатору в панели управления.";
+  } else {
+    elements.resultTitle.textContent = `Итоговый результат: ${summary.totalFinalScore} из ${summary.totalMaxScore}`;
+    elements.resultSubtitle.textContent =
+      "Правильные ответы участнику не показываются. Организатор видит служебный лог и полную раскладку в админ-панели.";
+  }
+
+  (summary.tourScores || []).forEach((tour) => {
+    const card = document.createElement("div");
+    card.className = "result-card";
+    card.innerHTML = `
+      <strong>${tour.code}</strong>
+      <span>${tour.title}</span>
+      <b>${tour.finalScore === null ? "скрыто" : `${tour.finalScore} / ${tour.maxScore}`}</b>
+    `;
+    elements.resultTours.appendChild(card);
+  });
+
+  refreshAttemptControls();
+  setAttemptSaveStatus("Попытка завершена и сохранена", "success");
+  setAttemptSyncMeta(
+    `Последняя синхронизация: ${formatDateTime(state.attempt.finishedAt || new Date())}`
+  );
+}
+
+async function syncAttempt(silent = false) {
+  if (!state.attempt || state.isSubmittingAnswer || state.isFinishingAttempt || state.syncInFlight) {
+    return;
+  }
+
+  state.syncInFlight = true;
+  try {
+    captureCurrentDraft();
+    const data = await api(`/api/public/attempts/${state.attempt.id}/current`);
+    applyAttemptState(data, { preserveQuestionRender: true });
+    if (data.status === "in_progress") {
+      updateTimers();
+    }
+    setAttemptSyncMeta(`Последняя синхронизация: ${formatDateTime(new Date())}`);
+    if (!silent && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
+      setAttemptSaveStatus("Данные синхронизированы", "success");
+    }
+  } catch (error) {
+    const message = formatApiError(error);
+    setAttemptSyncMeta(`Синхронизация: ${message}`);
+    setAttemptSaveStatus(
+      silent ? "Связь нестабильна, повторим синхронизацию" : "Проблема синхронизации",
+      silent ? "warning" : "error"
+    );
+    if (!silent) {
+      showMessage(elements.attemptMessage, message, "error");
+    }
+  } finally {
+    state.syncInFlight = false;
+  }
+}
+
+async function startAttempt() {
+  hideMessage(elements.prestartMessage);
+  hideMessage(elements.attemptMessage);
+  setAttemptSaveStatus("Запускаем попытку...", "pending");
+  setAttemptSyncMeta("Подготовка варианта и подключение к облаку...");
+
+  try {
+    const attempt = await requestWithRetry(
+      () =>
+        api("/api/public/attempts/start", {
+          method: "POST",
+          body: JSON.stringify({ participant: state.participant })
+        }),
+      {
+        attempts: 2,
+        pauseMs: 1000,
+        onRetry() {
+          setAttemptSaveStatus("Временный сбой, повторяем запуск...", "warning");
+        }
+      }
+    );
+
+    state.participant = attempt.participant;
+    elements.startAttempt.textContent = "Продолжить олимпиаду";
+    applyAttemptState(attempt);
+    startTimers();
+    refreshAttemptControls();
+    setAttemptSaveStatus("Попытка запущена", "success");
+    setAttemptSyncMeta(`Последняя синхронизация: ${formatDateTime(new Date())}`);
+    showMessage(
+      elements.attemptMessage,
+      "Попытка запущена. Ответы будут автоматически фиксироваться в облаке.",
+      "success"
+    );
+  } catch (error) {
+    const message = formatApiError(error);
+    setAttemptSaveStatus("Не удалось запустить попытку", "error");
+    setAttemptSyncMeta(`Запуск: ${message}`);
+    showMessage(elements.prestartMessage, message, "error");
+  }
+}
+
+async function submitAnswer() {
+  if (!state.attempt || !state.questionController || state.isSubmittingAnswer || state.isFinishingAttempt) {
+    return;
+  }
+
+  hideMessage(elements.attemptMessage);
+  const previousQuestionId = state.attempt.currentQuestion && state.attempt.currentQuestion.id;
+  const answerPayload = state.questionController.getAnswer();
+  rememberDraft(previousQuestionId, answerPayload);
+  state.isSubmittingAnswer = true;
+  setAttemptSaveStatus("Сохраняем ответ в облаке...", "pending");
+  setAttemptSyncMeta("Идёт отправка ответа...");
+  refreshAttemptControls();
+
+  try {
+    const data = await requestWithRetry(
+      () =>
+        api(`/api/public/attempts/${state.attempt.id}/answer`, {
+          method: "POST",
+          body: JSON.stringify({
+            questionId: previousQuestionId,
+            answerPayload
+          })
+        }),
+      {
+        attempts: 3,
+        pauseMs: 1200,
+        onRetry(error, nextAttempt, maxAttempts) {
+          setAttemptSaveStatus(
+            `Временный сбой. Повтор ${nextAttempt} из ${maxAttempts}...`,
+            "warning"
+          );
+          setAttemptSyncMeta(`Повторная отправка: ${formatApiError(error)}`);
+        }
+      }
+    );
+
+    clearDraft(previousQuestionId);
+    applyAttemptState(data);
+    if (data.status === "in_progress") {
+      startTimers();
+      setAttemptSaveStatus("Ответ сохранён", "success");
+    } else {
+      setAttemptSaveStatus("Последний ответ сохранён, попытка завершена", "success");
+      showMessage(elements.attemptMessage, "Попытка завершена.", "success");
+    }
+    setAttemptSyncMeta(`Последняя синхронизация: ${formatDateTime(new Date())}`);
+  } catch (error) {
+    const message = formatApiError(error);
+    setAttemptSaveStatus("Не удалось сохранить ответ", "error");
+    setAttemptSyncMeta(`Ошибка отправки: ${message}`);
+    showMessage(elements.attemptMessage, message, "error");
+  } finally {
+    state.isSubmittingAnswer = false;
+    refreshAttemptControls();
+  }
+}
+
+async function finishAttempt() {
+  if (!state.attempt || state.isSubmittingAnswer || state.isFinishingAttempt) {
+    return;
+  }
+
+  state.isFinishingAttempt = true;
+  hideMessage(elements.attemptMessage);
+  setAttemptSaveStatus("Завершаем попытку...", "pending");
+  setAttemptSyncMeta("Фиксируем итоговый результат...");
+  refreshAttemptControls();
+
+  try {
+    captureCurrentDraft();
+    const data = await requestWithRetry(
+      () =>
+        api(`/api/public/attempts/${state.attempt.id}/finish`, {
+          method: "POST"
+        }),
+      {
+        attempts: 2,
+        pauseMs: 1000,
+        onRetry(error) {
+          setAttemptSaveStatus("Повторяем завершение после временного сбоя...", "warning");
+          setAttemptSyncMeta(`Завершение: ${formatApiError(error)}`);
+        }
+      }
+    );
+
+    state.localDrafts = {};
+    applyAttemptState(data);
+    setAttemptSaveStatus("Попытка завершена и зафиксирована", "success");
+    setAttemptSyncMeta(`Последняя синхронизация: ${formatDateTime(new Date())}`);
+  } catch (error) {
+    const message = formatApiError(error);
+    setAttemptSaveStatus("Не удалось завершить попытку", "error");
+    setAttemptSyncMeta(`Завершение: ${message}`);
+    showMessage(elements.attemptMessage, message, "error");
+  } finally {
+    state.isFinishingAttempt = false;
+    refreshAttemptControls();
+  }
+}
+
+async function init() {
+  state.olympiad = await api("/api/public/olympiad");
+  renderHero();
+  renderRules();
+  refreshNavigationState();
+  setAttemptSaveStatus("Ожидание действия", "idle");
+  setAttemptSyncMeta("Последняя синхронизация: —");
+
+  elements.navBack.addEventListener("click", goBackOrHome);
+  elements.navHome.addEventListener("click", () => scrollToSection(elements.heroSection));
+  elements.navRegister.addEventListener("click", () => {
+    if (elements.prestartSection.classList.contains("hidden")) {
+      scrollToSection(elements.heroSection);
+      return;
+    }
+    scrollToSection(elements.prestartSection);
+  });
+  elements.navAttempt.addEventListener("click", () => {
+    scrollToSection(
+      state.attempt && state.attempt.status === "in_progress"
+        ? elements.attemptSection
+        : elements.heroSection
+    );
+  });
+  elements.navResult.addEventListener("click", () => {
+    scrollToSection(
+      elements.resultSection.classList.contains("hidden")
+        ? elements.heroSection
+        : elements.resultSection
+    );
+  });
+  elements.registrationForm.addEventListener("submit", handleRegistration);
+  elements.startAttempt.addEventListener("click", startAttempt);
+  elements.submitAnswer.addEventListener("click", submitAnswer);
+  elements.finishAttempt.addEventListener("click", finishAttempt);
+}
+
 init().catch((error) => {
-  showMessage(elements.registrationMessage, error.message, "error");
+  showMessage(elements.registrationMessage, formatApiError(error), "error");
+  setAttemptSaveStatus("Не удалось загрузить олимпиаду", "error");
+  setAttemptSyncMeta(`Инициализация: ${formatApiError(error)}`);
 });

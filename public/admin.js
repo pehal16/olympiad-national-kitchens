@@ -2,7 +2,16 @@ const adminState = {
   token: localStorage.getItem("olympiad_admin_token") || "",
   selectedAttemptId: "",
   refreshTimer: null,
-  refreshInFlight: false
+  refreshInFlight: false,
+  summary: null,
+  attempts: [],
+  lastRefreshedAt: null,
+  filters: {
+    search: "",
+    status: "",
+    institution: "",
+    group: ""
+  }
 };
 
 const PANEL_REFRESH_MS = 15000;
@@ -25,26 +34,79 @@ const elements = {
   statAttempts: document.getElementById("stat-attempts"),
   statCompleted: document.getElementById("stat-completed"),
   attemptsBody: document.getElementById("attempts-table-body"),
+  attemptsMeta: document.getElementById("attempts-meta"),
   attemptDetail: document.getElementById("attempt-detail"),
   exportCsv: document.getElementById("export-csv"),
   exportJson: document.getElementById("export-json"),
-  uploadDisk: document.getElementById("upload-disk")
+  uploadDisk: document.getElementById("upload-disk"),
+  filterSearch: document.getElementById("filter-search"),
+  filterStatus: document.getElementById("filter-status"),
+  filterInstitution: document.getElementById("filter-institution"),
+  filterGroup: document.getElementById("filter-group"),
+  filterReset: document.getElementById("filter-reset"),
+  systemBackendBadge: document.getElementById("system-backend-badge"),
+  diagVersion: document.getElementById("diag-version"),
+  diagDisk: document.getElementById("diag-disk"),
+  diagLastActivity: document.getElementById("diag-last-activity"),
+  diagInProgress: document.getElementById("diag-in-progress"),
+  diagInstitutions: document.getElementById("diag-institutions"),
+  diagGroups: document.getElementById("diag-groups"),
+  diagRefreshedAt: document.getElementById("diag-refreshed-at"),
+  diagServerTime: document.getElementById("diag-server-time"),
+  diagTokenState: document.getElementById("diag-token-state"),
+  tourAnalytics: document.getElementById("tour-analytics")
 };
 
-async function adminApi(path, options = {}) {
-  const response = await fetch(path, {
-    headers: {
-      "Content-Type": "application/json",
-      "X-Admin-Token": adminState.token
-    },
-    ...options
-  });
+function formatDateTime(value) {
+  if (!value) {
+    return "—";
+  }
 
-  const data = await response.json();
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+
+  return date.toLocaleString("ru-RU", {
+    hour12: false,
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+}
+
+async function adminApi(path, options = {}) {
+  let response;
+  try {
+    response = await fetch(path, {
+      headers: {
+        "Content-Type": "application/json",
+        "X-Admin-Token": adminState.token
+      },
+      ...options
+    });
+  } catch (error) {
+    const wrapped = new Error("Не удалось связаться с сервером.");
+    wrapped.status = 0;
+    throw wrapped;
+  }
+
+  let data = {};
+  try {
+    data = await response.json();
+  } catch (error) {
+    data = {};
+  }
+
   if (!response.ok || data.ok === false) {
-    const error = new Error(data.message || data.errorMessage || "Ошибка запроса");
-    error.status = response.status;
-    throw error;
+    const wrapped = new Error(
+      data.message || data.errorMessage || `Ошибка запроса (${response.status})`
+    );
+    wrapped.status = response.status;
+    throw wrapped;
   }
   return data.data;
 }
@@ -62,6 +124,7 @@ function hideMessage(element) {
 function showPanel() {
   elements.loginCard.classList.add("hidden");
   elements.panel.classList.remove("hidden");
+  elements.diagTokenState.textContent = "активен";
 }
 
 function focusLoginCard() {
@@ -96,8 +159,12 @@ function resetAdminSession(message = "") {
   localStorage.removeItem("olympiad_admin_token");
   adminState.token = "";
   adminState.selectedAttemptId = "";
+  adminState.summary = null;
+  adminState.attempts = [];
+  adminState.lastRefreshedAt = null;
   elements.panel.classList.add("hidden");
   elements.loginCard.classList.remove("hidden");
+  elements.diagTokenState.textContent = "требуется вход";
   if (message) {
     showMessage(elements.loginMessage, message, "error");
   } else {
@@ -119,6 +186,86 @@ function mapById(items = []) {
 function highlightSelectedAttemptRow() {
   elements.attemptsBody.querySelectorAll("tr[data-attempt]").forEach((row) => {
     row.classList.toggle("is-selected", row.dataset.attempt === adminState.selectedAttemptId);
+  });
+}
+
+function populateSelect(select, values, placeholder) {
+  const currentValue = select.value;
+  select.innerHTML = "";
+
+  const emptyOption = document.createElement("option");
+  emptyOption.value = "";
+  emptyOption.textContent = placeholder;
+  select.appendChild(emptyOption);
+
+  values.forEach((value) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    select.appendChild(option);
+  });
+
+  if (values.includes(currentValue)) {
+    select.value = currentValue;
+  } else {
+    select.value = "";
+  }
+}
+
+function updateFilterOptions() {
+  const institutions = [...new Set(adminState.attempts.map((attempt) => attempt.institution).filter(Boolean))].sort();
+  const groups = [...new Set(adminState.attempts.map((attempt) => attempt.groupName).filter(Boolean))].sort();
+  const statuses = [...new Set(adminState.attempts.map((attempt) => attempt.status).filter(Boolean))].sort();
+
+  populateSelect(elements.filterInstitution, institutions, "Все учреждения");
+  populateSelect(elements.filterGroup, groups, "Все группы");
+  populateSelect(elements.filterStatus, statuses, "Все статусы");
+}
+
+function syncFiltersFromControls() {
+  adminState.filters.search = elements.filterSearch.value.trim().toLowerCase();
+  adminState.filters.status = elements.filterStatus.value;
+  adminState.filters.institution = elements.filterInstitution.value;
+  adminState.filters.group = elements.filterGroup.value;
+}
+
+function resetFilters() {
+  elements.filterSearch.value = "";
+  elements.filterStatus.value = "";
+  elements.filterInstitution.value = "";
+  elements.filterGroup.value = "";
+  syncFiltersFromControls();
+  renderAttempts();
+}
+
+function getFilteredAttempts() {
+  syncFiltersFromControls();
+  const { search, status, institution, group } = adminState.filters;
+
+  return adminState.attempts.filter((attempt) => {
+    if (status && attempt.status !== status) {
+      return false;
+    }
+    if (institution && attempt.institution !== institution) {
+      return false;
+    }
+    if (group && attempt.groupName !== group) {
+      return false;
+    }
+    if (search) {
+      const haystack = [
+        attempt.fullName,
+        attempt.institution,
+        attempt.groupName,
+        attempt.mentorName
+      ]
+        .join(" ")
+        .toLowerCase();
+      if (!haystack.includes(search)) {
+        return false;
+      }
+    }
+    return true;
   });
 }
 
@@ -161,15 +308,46 @@ function formatAnswer(question, answer) {
   return JSON.stringify(answer.answerPayload, null, 2);
 }
 
+function renderTourAnalytics(summary) {
+  elements.tourAnalytics.innerHTML = "";
+  (summary.tourAnalytics || []).forEach((tour) => {
+    const card = document.createElement("div");
+    card.className = "tour-pill";
+    card.innerHTML = `
+      <strong>${tour.code} • ${tour.avgScore} / ${tour.maxScore}</strong>
+      <span>${tour.completedAttempts} завершено • штраф ${tour.avgPenalty}</span>
+    `;
+    elements.tourAnalytics.appendChild(card);
+  });
+}
+
 function renderSummary(summary) {
+  adminState.summary = summary;
+  adminState.lastRefreshedAt = new Date();
+
   elements.statParticipants.textContent = summary.counts.participants;
   elements.statAttempts.textContent = summary.counts.attempts;
   elements.statCompleted.textContent = summary.counts.completed;
+
   const diskEnabled = Boolean(summary.capabilities && summary.capabilities.yandexDiskEnabled);
   elements.uploadDisk.disabled = !diskEnabled;
   elements.uploadDisk.title = diskEnabled
     ? ""
-    : "Выгрузка на Яндекс Диск недоступна: интеграция еще не настроена.";
+    : "Выгрузка на Яндекс Диск недоступна: интеграция ещё не настроена.";
+
+  const diagnostics = summary.diagnostics || {};
+  elements.systemBackendBadge.textContent = String(diagnostics.storageBackend || "—").toUpperCase();
+  elements.diagVersion.textContent = diagnostics.appVersion || "—";
+  elements.diagDisk.textContent = diagnostics.yandexDiskEnabled ? "включён" : "выключен";
+  elements.diagLastActivity.textContent = formatDateTime(diagnostics.lastActivityAt);
+  elements.diagInProgress.textContent = summary.counts.inProgress;
+  elements.diagInstitutions.textContent = summary.counts.institutions;
+  elements.diagGroups.textContent = summary.counts.groups;
+  elements.diagRefreshedAt.textContent = formatDateTime(adminState.lastRefreshedAt);
+  elements.diagServerTime.textContent = formatDateTime(diagnostics.serverTime);
+  elements.diagTokenState.textContent = adminState.token ? "активен" : "требуется вход";
+
+  renderTourAnalytics(summary);
 }
 
 async function loadSummary() {
@@ -177,9 +355,11 @@ async function loadSummary() {
   renderSummary(summary);
 }
 
-async function loadAttempts() {
-  const attempts = await adminApi("/api/admin/attempts");
+function renderAttempts() {
+  const attempts = getFilteredAttempts();
   elements.attemptsBody.innerHTML = "";
+
+  elements.attemptsMeta.textContent = `Показано ${attempts.length} из ${adminState.attempts.length} попыток.`;
 
   attempts.forEach((attempt) => {
     const row = document.createElement("tr");
@@ -221,6 +401,12 @@ async function loadAttempts() {
   });
 }
 
+async function loadAttempts() {
+  adminState.attempts = await adminApi("/api/admin/attempts");
+  updateFilterOptions();
+  renderAttempts();
+}
+
 async function loadAttemptDetail(attemptId, options = {}) {
   if (!options.preserveSelection) {
     adminState.selectedAttemptId = attemptId;
@@ -239,7 +425,7 @@ async function loadAttemptDetail(attemptId, options = {}) {
     <span class="muted">${data.attempt.participant.mentorName || "Наставник не указан"}</span><br />
     <span class="muted">Статус: ${data.attempt.status}</span><br />
     <span class="muted">Итог: ${summary.totalFinalScore} / ${summary.totalMaxScore}</span><br />
-    <span class="muted">Выданы задания: ${data.attempt.variantMeta.issuedQuestionIds.join(", ")}</span>
+    <span class="muted">Выданные задания: ${data.attempt.variantMeta.issuedQuestionIds.join(", ")}</span>
   `;
   detail.appendChild(top);
 
@@ -297,7 +483,7 @@ async function refreshPanel(options = {}) {
   } catch (error) {
     if (silent) {
       if (error.status === 401) {
-        resetAdminSession("Сеанс администратора завершен. Войдите повторно.");
+        resetAdminSession("Сеанс администратора завершён. Войдите повторно.");
       }
       return;
     }
@@ -360,6 +546,15 @@ async function uploadToDisk() {
   }
 }
 
+function bindFilters() {
+  const rerender = () => renderAttempts();
+  elements.filterSearch.addEventListener("input", rerender);
+  elements.filterStatus.addEventListener("change", rerender);
+  elements.filterInstitution.addEventListener("change", rerender);
+  elements.filterGroup.addEventListener("change", rerender);
+  elements.filterReset.addEventListener("click", resetFilters);
+}
+
 async function init() {
   elements.navBack.addEventListener("click", goBackOrHome);
   elements.navTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
@@ -388,6 +583,7 @@ async function init() {
   elements.exportCsv.addEventListener("click", () => exportFile("csv"));
   elements.exportJson.addEventListener("click", () => exportFile("json"));
   elements.uploadDisk.addEventListener("click", uploadToDisk);
+  bindFilters();
 
   if (adminState.token) {
     try {

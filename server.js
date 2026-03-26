@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const http = require("http");
 const { URL } = require("url");
+const packageInfo = require("./package.json");
 const {
   initStorage,
   loadOlympiad,
@@ -413,8 +414,11 @@ async function requireAdmin(req) {
   );
 }
 
-async function buildRankedAttempts(olympiad, settings) {
-  const attempts = currentOlympiadAttempts(await loadAttempts(), olympiad.id)
+async function buildRankedAttempts(olympiad, settings, options = {}) {
+  const exposeScores = options.forceScores || settings.showParticipantScore;
+  const baseAttempts = options.attempts || currentOlympiadAttempts(await loadAttempts(), olympiad.id);
+
+  const attempts = baseAttempts
     .map((attempt) => {
       const normalized = normalizeAttemptState(olympiad, attempt);
       return {
@@ -431,13 +435,120 @@ async function buildRankedAttempts(olympiad, settings) {
       status: attempt.status,
       startedAt: attempt.startedAt,
       finishedAt: attempt.finishedAt,
-      summary: settings.showParticipantScore
+      summary: exposeScores
         ? attempt.summary
         : { ...attempt.summary, totalFinalScore: null },
       diploma: attempt.diploma
     }));
 
   return attempts;
+}
+
+function safeDateMs(value) {
+  if (!value) {
+    return 0;
+  }
+  const parsed = new Date(value).getTime();
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function buildAdminAnalytics(olympiad, rankedAttempts, settings) {
+  const participants = new Set();
+  const institutions = new Set();
+  const groups = new Set();
+  const mentors = new Set();
+
+  const statusBuckets = {
+    inProgress: 0,
+    reviewed: 0,
+    expired: 0
+  };
+
+  let lastActivityMs = 0;
+
+  rankedAttempts.forEach((attempt) => {
+    const participant = attempt.participant || {};
+    participants.add(
+      `${participant.fullName || ""}|${participant.institution || ""}|${participant.groupName || ""}`
+    );
+
+    if (participant.institution) {
+      institutions.add(participant.institution);
+    }
+    if (participant.groupName) {
+      groups.add(participant.groupName);
+    }
+    if (participant.mentorName) {
+      mentors.add(participant.mentorName);
+    }
+
+    if (attempt.status === "in_progress") {
+      statusBuckets.inProgress += 1;
+    } else if (attempt.status === "expired") {
+      statusBuckets.expired += 1;
+    } else {
+      statusBuckets.reviewed += 1;
+    }
+
+    lastActivityMs = Math.max(
+      lastActivityMs,
+      safeDateMs(attempt.finishedAt),
+      safeDateMs(attempt.startedAt)
+    );
+  });
+
+  const completedAttempts = rankedAttempts.filter((attempt) => attempt.status !== "in_progress");
+  const tourAnalytics = (olympiad.tours || []).map((tour) => {
+    const values = completedAttempts
+      .map((attempt) =>
+        (attempt.summary.tourScores || []).find((item) => item.tourId === tour.id) || null
+      )
+      .filter(Boolean);
+
+    const totalScore = values.reduce((sum, item) => sum + Number(item.finalScore || 0), 0);
+    const totalPenalty = values.reduce((sum, item) => sum + Number(item.penalty || 0), 0);
+
+    return {
+      tourId: tour.id,
+      code: tour.code,
+      title: tour.title,
+      completedAttempts: values.length,
+      avgScore: values.length ? Math.round((totalScore / values.length) * 100) / 100 : 0,
+      avgPenalty: values.length ? Math.round((totalPenalty / values.length) * 100) / 100 : 0,
+      maxScore: tour.maxScore
+    };
+  });
+
+  return {
+    counts: {
+      participants: participants.size,
+      attempts: rankedAttempts.length,
+      completed: completedAttempts.length,
+      inProgress: statusBuckets.inProgress,
+      reviewed: statusBuckets.reviewed,
+      expired: statusBuckets.expired,
+      institutions: institutions.size,
+      groups: groups.size,
+      mentors: mentors.size
+    },
+    diagnostics: {
+      appVersion: packageInfo.version,
+      serverTime: nowIso(),
+      storageBackend: settings.storageBackend || "file",
+      yandexDiskEnabled: Boolean(
+        settings.yandexDiskIntegration &&
+          settings.yandexDiskIntegration.enabled &&
+          settings.yandexDiskIntegration.oauthToken
+      ),
+      yandexDiskFolder:
+        settings.yandexDiskIntegration && settings.yandexDiskIntegration.folder
+          ? settings.yandexDiskIntegration.folder
+          : "",
+      participantScoreVisible: Boolean(settings.showParticipantScore),
+      lastActivityAt: lastActivityMs ? new Date(lastActivityMs).toISOString() : null
+    },
+    tourAnalytics
+  };
 }
 
 async function buildExportRows(olympiad) {
@@ -554,6 +665,7 @@ async function handleApi(req, res, url) {
     sendJson(res, 200, {
       ok: true,
       app: "national-kitchens-olympiad",
+      appVersion: packageInfo.version,
       now: nowIso(),
       olympiadId: olympiad.id,
       schemaVersion: olympiad.schemaVersion,
@@ -858,18 +970,17 @@ async function handleApi(req, res, url) {
     }
 
     if (method === "GET" && pathname === "/api/admin/summary") {
-      const ranked = await buildRankedAttempts(olympiad, settings);
+      const attempts = currentOlympiadAttempts(await loadAttempts(), olympiad.id);
+      const ranked = await buildRankedAttempts(olympiad, settings, {
+        attempts,
+        forceScores: true
+      });
+      const analytics = buildAdminAnalytics(olympiad, ranked, settings);
       sendJson(res, 200, {
         ok: true,
         data: {
           olympiad: getOlympiadPublicData(olympiad),
-          counts: {
-            participants: new Set(
-              ranked.map((item) => item.participant.fullName + item.participant.groupName)
-            ).size,
-            attempts: ranked.length,
-            completed: ranked.filter((item) => item.status !== "in_progress").length
-          },
+          counts: analytics.counts,
           capabilities: {
             storageBackend: settings.storageBackend,
             yandexDiskEnabled: Boolean(
@@ -877,14 +988,18 @@ async function handleApi(req, res, url) {
                 settings.yandexDiskIntegration.enabled &&
                 settings.yandexDiskIntegration.oauthToken
             )
-          }
+          },
+          diagnostics: analytics.diagnostics,
+          tourAnalytics: analytics.tourAnalytics
         }
       });
       return;
     }
 
     if (method === "GET" && pathname === "/api/admin/attempts") {
-      const attempts = (await buildRankedAttempts(olympiad, settings)).map((attempt) => ({
+      const attempts = (
+        await buildRankedAttempts(olympiad, settings, { forceScores: true })
+      ).map((attempt) => ({
         rank: attempt.rank,
         id: attempt.id,
         fullName: attempt.participant.fullName,
