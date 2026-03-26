@@ -15,13 +15,35 @@ async function yandexRequest(path, options = {}, oauthToken) {
   return response;
 }
 
+function normalizeDiskPath(inputPath) {
+  const raw = String(inputPath || "").trim();
+
+  if (!raw) {
+    return "app:/Олимпиада_Национальные_кухни";
+  }
+
+  if (raw.startsWith("app:/") || raw.startsWith("disk:/")) {
+    return raw;
+  }
+
+  if (raw.startsWith("/")) {
+    return `app:${raw}`;
+  }
+
+  return `app:/${raw.replace(/^\/+/, "")}`;
+}
+
 async function ensureFolder(folderPath, oauthToken) {
-  const parts = String(folderPath || "")
+  const normalizedPath = normalizeDiskPath(folderPath);
+  const match = normalizedPath.match(/^(app:|disk:)(\/.*)$/);
+  const prefix = match ? match[1] : "app:";
+  const relativePath = match ? match[2] : normalizedPath;
+  const parts = relativePath
     .split("/")
     .map((part) => part.trim())
     .filter(Boolean);
 
-  let current = "";
+  let current = prefix;
   for (const part of parts) {
     current += `/${part}`;
     const search = new URLSearchParams({ path: current });
@@ -39,7 +61,7 @@ async function getUploadLink(remotePath, oauthToken) {
 }
 
 async function uploadBuffer(remotePath, content, oauthToken) {
-  const upload = await getUploadLink(remotePath, oauthToken);
+  const upload = await getUploadLink(normalizeDiskPath(remotePath), oauthToken);
   const response = await fetch(upload.href, {
     method: "PUT",
     body: content
@@ -52,6 +74,7 @@ async function uploadBuffer(remotePath, content, oauthToken) {
 }
 
 module.exports = {
+  normalizeDiskPath,
   ensureFolder,
   uploadBuffer
 };

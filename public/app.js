@@ -7,7 +7,10 @@ const state = {
   timerInterval: null,
   syncInterval: null,
   timingSnapshot: null,
-  syncingAfterTimeout: false
+  syncingAfterTimeout: false,
+  syncInFlight: false,
+  isSubmittingAnswer: false,
+  isFinishingAttempt: false
 };
 
 const elements = {
@@ -91,6 +94,29 @@ function refreshNavigationState() {
     Boolean(state.attempt && state.attempt.status !== "in_progress"),
     "Результат станет доступен после завершения попытки."
   );
+}
+
+function refreshAttemptControls() {
+  const attemptInProgress = Boolean(state.attempt && state.attempt.status === "in_progress");
+  const hasActiveQuestion = Boolean(
+    attemptInProgress && state.attempt.currentQuestion && state.questionController
+  );
+  const isBusy = state.isSubmittingAnswer || state.isFinishingAttempt;
+
+  elements.submitAnswer.disabled = !hasActiveQuestion || isBusy;
+  elements.finishAttempt.disabled = !attemptInProgress || isBusy;
+
+  if (state.isSubmittingAnswer) {
+    elements.submitAnswer.textContent = "Сохранение ответа...";
+    return;
+  }
+
+  if (attemptInProgress) {
+    elements.submitAnswer.textContent =
+      state.attempt.progress.currentQuestionIndex >= state.attempt.progress.totalQuestions
+        ? "Ответить и завершить"
+        : "Ответить и далее";
+  }
 }
 
 function scrollToSection(section) {
@@ -703,6 +729,7 @@ function renderAttempt() {
   }
 
   renderQuestion(currentQuestion);
+  refreshAttemptControls();
   elements.submitAnswer.textContent =
     attempt.progress.currentQuestionIndex >= attempt.progress.totalQuestions
       ? "Ответить и завершить"
@@ -736,6 +763,8 @@ function renderResult() {
     `;
     elements.resultTours.appendChild(card);
   });
+
+  refreshAttemptControls();
 }
 
 function canSoftSyncAttempt(nextAttempt) {
@@ -816,14 +845,15 @@ function startTimers() {
   stopTimers();
   updateTimers();
   state.timerInterval = setInterval(updateTimers, 1000);
-  state.syncInterval = setInterval(() => syncAttempt(true), 5000);
+  state.syncInterval = setInterval(() => syncAttempt(true), 10000);
 }
 
 async function syncAttempt(silent = false) {
-  if (!state.attempt) {
+  if (!state.attempt || state.isSubmittingAnswer || state.isFinishingAttempt || state.syncInFlight) {
     return;
   }
 
+  state.syncInFlight = true;
   try {
     captureCurrentDraft();
     const data = await api(`/api/public/attempts/${state.attempt.id}/current`);
@@ -835,6 +865,8 @@ async function syncAttempt(silent = false) {
     if (!silent) {
       showMessage(elements.attemptMessage, error.message, "error");
     }
+  } finally {
+    state.syncInFlight = false;
   }
 }
 
@@ -893,6 +925,7 @@ async function startAttempt() {
     elements.startAttempt.textContent = "Продолжить олимпиаду";
     applyAttemptState(attempt);
     startTimers();
+    refreshAttemptControls();
     showMessage(
       elements.attemptMessage,
       "Попытка запущена. Все ответы фиксируются автоматически на сервере.",
@@ -904,18 +937,21 @@ async function startAttempt() {
 }
 
 async function submitAnswer() {
-  if (!state.attempt || !state.questionController) {
+  if (!state.attempt || !state.questionController || state.isSubmittingAnswer || state.isFinishingAttempt) {
     return;
   }
 
   hideMessage(elements.attemptMessage);
   captureCurrentDraft();
   const previousQuestionId = state.attempt.currentQuestion && state.attempt.currentQuestion.id;
+  state.isSubmittingAnswer = true;
+  refreshAttemptControls();
 
   try {
     const data = await api(`/api/public/attempts/${state.attempt.id}/answer`, {
       method: "POST",
       body: JSON.stringify({
+        questionId: previousQuestionId,
         answerPayload: state.questionController.getAnswer()
       })
     });
@@ -929,14 +965,19 @@ async function submitAnswer() {
     }
   } catch (error) {
     showMessage(elements.attemptMessage, error.message, "error");
+  } finally {
+    state.isSubmittingAnswer = false;
+    refreshAttemptControls();
   }
 }
 
 async function finishAttempt() {
-  if (!state.attempt) {
+  if (!state.attempt || state.isSubmittingAnswer || state.isFinishingAttempt) {
     return;
   }
 
+  state.isFinishingAttempt = true;
+  refreshAttemptControls();
   try {
     captureCurrentDraft();
     const data = await api(`/api/public/attempts/${state.attempt.id}/finish`, {
@@ -946,6 +987,9 @@ async function finishAttempt() {
     applyAttemptState(data);
   } catch (error) {
     showMessage(elements.attemptMessage, error.message, "error");
+  } finally {
+    state.isFinishingAttempt = false;
+    refreshAttemptControls();
   }
 }
 

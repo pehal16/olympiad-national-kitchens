@@ -735,6 +735,14 @@ async function handleApi(req, res, url) {
       return;
     }
 
+    if (body.questionId && body.questionId !== currentQuestion.id) {
+      sendJson(res, 200, {
+        ok: true,
+        data: buildAttemptView(olympiad, attempt, settings)
+      });
+      return;
+    }
+
     const result = scoreQuestion(currentQuestion, body.answerPayload);
     const logEntry = getQuestionLog(attempt, currentQuestion.id);
     const savedAt = nowIso();
