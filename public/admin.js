@@ -8,6 +8,13 @@ const adminState = {
 const PANEL_REFRESH_MS = 15000;
 
 const elements = {
+  navBack: document.getElementById("admin-nav-back"),
+  navTop: document.getElementById("admin-nav-top"),
+  navRating: document.getElementById("admin-nav-rating"),
+  navDetail: document.getElementById("admin-nav-detail"),
+  navRefresh: document.getElementById("admin-refresh"),
+  ratingSection: document.getElementById("admin-rating-section"),
+  detailSection: document.getElementById("admin-detail-section"),
   loginCard: document.getElementById("admin-login-card"),
   panel: document.getElementById("admin-panel"),
   loginForm: document.getElementById("admin-login-form"),
@@ -53,6 +60,21 @@ function hideMessage(element) {
 function showPanel() {
   elements.loginCard.classList.add("hidden");
   elements.panel.classList.remove("hidden");
+}
+
+function scrollToBlock(block) {
+  if (!block || block.classList.contains("hidden")) {
+    return;
+  }
+  block.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function goBackOrHome() {
+  if (window.history.length > 1) {
+    window.history.back();
+    return;
+  }
+  window.location.href = "/";
 }
 
 function stopAutoRefresh() {
@@ -296,6 +318,11 @@ async function uploadToDisk() {
 }
 
 async function init() {
+  elements.navBack.addEventListener("click", goBackOrHome);
+  elements.navTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  elements.navRating.addEventListener("click", () => scrollToBlock(elements.ratingSection));
+  elements.navDetail.addEventListener("click", () => scrollToBlock(elements.detailSection));
+  elements.navRefresh.addEventListener("click", () => refreshPanel());
   elements.loginForm.addEventListener("submit", handleLogin);
   elements.exportCsv.addEventListener("click", () => exportFile("csv"));
   elements.exportJson.addEventListener("click", () => exportFile("json"));

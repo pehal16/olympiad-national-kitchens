@@ -11,6 +11,12 @@ const state = {
 };
 
 const elements = {
+  navBack: document.getElementById("nav-back"),
+  navHome: document.getElementById("nav-home"),
+  navRegister: document.getElementById("nav-register"),
+  navAttempt: document.getElementById("nav-attempt"),
+  navResult: document.getElementById("nav-result"),
+  heroSection: document.getElementById("hero-section"),
   heroTitle: document.getElementById("hero-title"),
   heroSubtitle: document.getElementById("hero-subtitle"),
   tourMeta: document.getElementById("tour-meta"),
@@ -51,6 +57,21 @@ const elements = {
   resultSubtitle: document.getElementById("result-subtitle"),
   resultTours: document.getElementById("result-tours")
 };
+
+function scrollToSection(section) {
+  if (!section || section.classList.contains("hidden")) {
+    return;
+  }
+  section.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function goBackOrHome() {
+  if (window.history.length > 1) {
+    window.history.back();
+    return;
+  }
+  window.location.href = "/";
+}
 
 async function api(path, options = {}) {
   const response = await fetch(path, {
@@ -884,6 +905,15 @@ async function init() {
   renderHero();
   renderRules();
 
+  elements.navBack.addEventListener("click", goBackOrHome);
+  elements.navHome.addEventListener("click", () => scrollToSection(elements.heroSection));
+  elements.navRegister.addEventListener("click", () => scrollToSection(elements.prestartSection));
+  elements.navAttempt.addEventListener("click", () => {
+    scrollToSection(state.attempt ? elements.attemptSection : elements.prestartSection);
+  });
+  elements.navResult.addEventListener("click", () => {
+    scrollToSection(elements.resultSection.classList.contains("hidden") ? elements.prestartSection : elements.resultSection);
+  });
   elements.registrationForm.addEventListener("submit", handleRegistration);
   elements.startAttempt.addEventListener("click", startAttempt);
   elements.submitAnswer.addEventListener("click", submitAnswer);
