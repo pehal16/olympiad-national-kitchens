@@ -61,14 +61,16 @@ jobs:
       - name: Ensure serverless container exists
         shell: bash
         run: |
-          yc serverless container get --name "$YC_CONTAINER_NAME" >/dev/null 2>&1 || \
-          yc serverless container create --name "$YC_CONTAINER_NAME"
+          CONTAINER_NAME_CLEAN="$(printf '%s' "$YC_CONTAINER_NAME" | tr -d '\r\n\t ')"
+          yc serverless container get --name "$CONTAINER_NAME_CLEAN" >/dev/null 2>&1 || \
+          yc serverless container create --name "$CONTAINER_NAME_CLEAN"
+          echo "CONTAINER_NAME_CLEAN=$CONTAINER_NAME_CLEAN" >> "$GITHUB_ENV"
 
       - name: Deploy new revision
         shell: bash
         run: |
           yc serverless container revision deploy \
-            --container-name "$YC_CONTAINER_NAME" \
+            --container-name "$CONTAINER_NAME_CLEAN" \
             --image "$IMAGE" \
             --cores 1 \
             --memory 512MB \
@@ -81,4 +83,4 @@ jobs:
       - name: Allow public access
         shell: bash
         run: |
-          yc serverless container allow-unauthenticated-invoke --name "$YC_CONTAINER_NAME" || true
+          yc serverless container allow-unauthenticated-invoke --name "$CONTAINER_NAME_CLEAN" || true
