@@ -3,14 +3,18 @@ const adminState = {
   selectedAttemptId: "",
   refreshTimer: null,
   refreshInFlight: false,
+  lastRefreshedAt: null,
   summary: null,
   attempts: [],
-  lastRefreshedAt: null,
+  filteredAttempts: [],
   filters: {
     search: "",
-    status: "",
     institution: "",
-    group: ""
+    group: "",
+    mentor: "",
+    status: "",
+    dateFrom: "",
+    dateTo: ""
   }
 };
 
@@ -33,81 +37,77 @@ const elements = {
   statParticipants: document.getElementById("stat-participants"),
   statAttempts: document.getElementById("stat-attempts"),
   statCompleted: document.getElementById("stat-completed"),
+  backendBadge: document.getElementById("system-backend-badge"),
+  diskBadge: document.getElementById("system-disk-badge"),
+  diagVersion: document.getElementById("diag-version"),
+  diagRefreshedAt: document.getElementById("diag-refreshed-at"),
+  diagServerTime: document.getElementById("diag-server-time"),
+  diagLastActivity: document.getElementById("diag-last-activity"),
+  diagActiveAttempts: document.getElementById("diag-active-attempts"),
+  diagApiErrors: document.getElementById("diag-api-errors"),
+  diagLastApiError: document.getElementById("diag-last-api-error"),
+  diagDiskFolder: document.getElementById("diag-disk-folder"),
+  filterMeta: document.getElementById("attempts-filter-meta"),
+  filterSearch: document.getElementById("filter-search"),
+  filterInstitution: document.getElementById("filter-institution"),
+  filterGroup: document.getElementById("filter-group"),
+  filterMentor: document.getElementById("filter-mentor"),
+  filterStatus: document.getElementById("filter-status"),
+  filterDateFrom: document.getElementById("filter-date-from"),
+  filterDateTo: document.getElementById("filter-date-to"),
+  filterReset: document.getElementById("filter-reset"),
+  tourAnalyticsGrid: document.getElementById("tour-analytics-grid"),
+  institutionAnalyticsBody: document.getElementById("institution-analytics-body"),
+  suspiciousMeta: document.getElementById("suspicious-meta"),
+  suspiciousAttemptsBody: document.getElementById("suspicious-attempts-body"),
   attemptsBody: document.getElementById("attempts-table-body"),
-  attemptsMeta: document.getElementById("attempts-meta"),
   attemptDetail: document.getElementById("attempt-detail"),
   exportCsv: document.getElementById("export-csv"),
   exportJson: document.getElementById("export-json"),
-  uploadDisk: document.getElementById("upload-disk"),
-  filterSearch: document.getElementById("filter-search"),
-  filterStatus: document.getElementById("filter-status"),
-  filterInstitution: document.getElementById("filter-institution"),
-  filterGroup: document.getElementById("filter-group"),
-  filterReset: document.getElementById("filter-reset"),
-  systemBackendBadge: document.getElementById("system-backend-badge"),
-  diagVersion: document.getElementById("diag-version"),
-  diagDisk: document.getElementById("diag-disk"),
-  diagLastActivity: document.getElementById("diag-last-activity"),
-  diagInProgress: document.getElementById("diag-in-progress"),
-  diagInstitutions: document.getElementById("diag-institutions"),
-  diagGroups: document.getElementById("diag-groups"),
-  diagRefreshedAt: document.getElementById("diag-refreshed-at"),
-  diagServerTime: document.getElementById("diag-server-time"),
-  diagTokenState: document.getElementById("diag-token-state"),
-  tourAnalytics: document.getElementById("tour-analytics")
+  uploadDisk: document.getElementById("upload-disk")
 };
-
-function formatDateTime(value) {
-  if (!value) {
-    return "—";
-  }
-
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "—";
-  }
-
-  return date.toLocaleString("ru-RU", {
-    hour12: false,
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-  });
-}
 
 async function adminApi(path, options = {}) {
   let response;
+
   try {
     response = await fetch(path, {
       headers: {
         "Content-Type": "application/json",
-        "X-Admin-Token": adminState.token
+        Authorization: `Bearer ${adminState.token}`
       },
       ...options
     });
   } catch (error) {
-    const wrapped = new Error("Не удалось связаться с сервером.");
-    wrapped.status = 0;
-    throw wrapped;
+    const networkError = new Error("Не удалось связаться с сервером админки.");
+    networkError.status = 0;
+    networkError.cause = error;
+    throw networkError;
   }
 
+  const raw = await response.text();
   let data = {};
-  try {
-    data = await response.json();
-  } catch (error) {
-    data = {};
+
+  if (raw) {
+    try {
+      data = JSON.parse(raw);
+    } catch (error) {
+      const parseError = new Error(`Сервер вернул некорректный ответ (${response.status}).`);
+      parseError.status = response.status;
+      parseError.cause = error;
+      throw parseError;
+    }
   }
 
   if (!response.ok || data.ok === false) {
-    const wrapped = new Error(
-      data.message || data.errorMessage || `Ошибка запроса (${response.status})`
+    const requestError = new Error(
+      data.message || `Ошибка запроса (${response.status || "без кода"}).`
     );
-    wrapped.status = response.status;
-    throw wrapped;
+    requestError.status = response.status;
+    requestError.payload = data;
+    throw requestError;
   }
+
   return data.data;
 }
 
@@ -121,10 +121,80 @@ function hideMessage(element) {
   element.className = "message hidden";
 }
 
+function formatDateTime(value) {
+  if (!value) {
+    return "—";
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  }).format(date);
+}
+
+function formatDurationMs(value) {
+  if (!Number.isFinite(value) || value <= 0) {
+    return "—";
+  }
+
+  if (value < 1000) {
+    return `${value} мс`;
+  }
+
+  const totalSeconds = Math.round(value / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  if (!minutes) {
+    return `${seconds} с`;
+  }
+
+  return `${minutes} м ${seconds.toString().padStart(2, "0")} с`;
+}
+
+function formatAdminError(error) {
+  if (!error) {
+    return "Ошибка запроса.";
+  }
+
+  if (Number(error.status) === 0) {
+    return "Нет соединения с сервером админки.";
+  }
+
+  return error.message || "Ошибка запроса.";
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function uniqueSorted(values = []) {
+  return Array.from(new Set(values.filter(Boolean))).sort((left, right) =>
+    left.localeCompare(right, "ru-RU")
+  );
+}
+
+function mapById(items = []) {
+  return new Map(items.map((item) => [item.id, item]));
+}
+
 function showPanel() {
   elements.loginCard.classList.add("hidden");
   elements.panel.classList.remove("hidden");
-  elements.diagTokenState.textContent = "активен";
 }
 
 function focusLoginCard() {
@@ -161,10 +231,10 @@ function resetAdminSession(message = "") {
   adminState.selectedAttemptId = "";
   adminState.summary = null;
   adminState.attempts = [];
-  adminState.lastRefreshedAt = null;
+  adminState.filteredAttempts = [];
   elements.panel.classList.add("hidden");
   elements.loginCard.classList.remove("hidden");
-  elements.diagTokenState.textContent = "требуется вход";
+
   if (message) {
     showMessage(elements.loginMessage, message, "error");
   } else {
@@ -179,24 +249,37 @@ function startAutoRefresh() {
   }, PANEL_REFRESH_MS);
 }
 
-function mapById(items = []) {
-  return new Map(items.map((item) => [item.id, item]));
-}
-
 function highlightSelectedAttemptRow() {
   elements.attemptsBody.querySelectorAll("tr[data-attempt]").forEach((row) => {
     row.classList.toggle("is-selected", row.dataset.attempt === adminState.selectedAttemptId);
   });
 }
 
-function populateSelect(select, values, placeholder) {
-  const currentValue = select.value;
+function syncFiltersFromInputs() {
+  adminState.filters = {
+    search: elements.filterSearch ? elements.filterSearch.value.trim() : "",
+    institution: elements.filterInstitution ? elements.filterInstitution.value : "",
+    group: elements.filterGroup ? elements.filterGroup.value : "",
+    mentor: elements.filterMentor ? elements.filterMentor.value : "",
+    status: elements.filterStatus ? elements.filterStatus.value : "",
+    dateFrom: elements.filterDateFrom ? elements.filterDateFrom.value : "",
+    dateTo: elements.filterDateTo ? elements.filterDateTo.value : ""
+  };
+
+  return adminState.filters;
+}
+
+function fillSelectOptions(select, placeholder, values, selectedValue) {
+  if (!select) {
+    return;
+  }
+
   select.innerHTML = "";
 
-  const emptyOption = document.createElement("option");
-  emptyOption.value = "";
-  emptyOption.textContent = placeholder;
-  select.appendChild(emptyOption);
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = placeholder;
+  select.appendChild(defaultOption);
 
   values.forEach((value) => {
     const option = document.createElement("option");
@@ -205,67 +288,276 @@ function populateSelect(select, values, placeholder) {
     select.appendChild(option);
   });
 
-  if (values.includes(currentValue)) {
-    select.value = currentValue;
+  if (selectedValue && values.includes(selectedValue)) {
+    select.value = selectedValue;
   } else {
     select.value = "";
   }
 }
 
-function updateFilterOptions() {
-  const institutions = [...new Set(adminState.attempts.map((attempt) => attempt.institution).filter(Boolean))].sort();
-  const groups = [...new Set(adminState.attempts.map((attempt) => attempt.groupName).filter(Boolean))].sort();
-  const statuses = [...new Set(adminState.attempts.map((attempt) => attempt.status).filter(Boolean))].sort();
-
-  populateSelect(elements.filterInstitution, institutions, "Все учреждения");
-  populateSelect(elements.filterGroup, groups, "Все группы");
-  populateSelect(elements.filterStatus, statuses, "Все статусы");
+function updateFilterMeta(total, shown) {
+  if (!elements.filterMeta) {
+    return;
+  }
+  elements.filterMeta.textContent = `Показано ${shown} из ${total}`;
 }
 
-function syncFiltersFromControls() {
-  adminState.filters.search = elements.filterSearch.value.trim().toLowerCase();
-  adminState.filters.status = elements.filterStatus.value;
-  adminState.filters.institution = elements.filterInstitution.value;
-  adminState.filters.group = elements.filterGroup.value;
+function toDateOnly(value) {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return date.toISOString().slice(0, 10);
 }
 
-function resetFilters() {
-  elements.filterSearch.value = "";
-  elements.filterStatus.value = "";
-  elements.filterInstitution.value = "";
-  elements.filterGroup.value = "";
-  syncFiltersFromControls();
-  renderAttempts();
+function getAttemptSearchBlob(attempt) {
+  return [
+    attempt.fullName,
+    attempt.institution,
+    attempt.groupName,
+    attempt.mentorName,
+    attempt.status,
+    attempt.diploma
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
 }
 
-function getFilteredAttempts() {
-  syncFiltersFromControls();
-  const { search, status, institution, group } = adminState.filters;
+function populateFilterControls() {
+  const filters = syncFiltersFromInputs();
+  const attempts = adminState.attempts || [];
+  const catalogs = (adminState.summary && adminState.summary.catalogs) || {};
 
-  return adminState.attempts.filter((attempt) => {
-    if (status && attempt.status !== status) {
+  const institutions = catalogs.institutions?.length
+    ? catalogs.institutions
+    : uniqueSorted(attempts.map((attempt) => attempt.institution));
+
+  const attemptsByInstitution = filters.institution
+    ? attempts.filter((attempt) => attempt.institution === filters.institution)
+    : attempts;
+
+  const groups = uniqueSorted(attemptsByInstitution.map((attempt) => attempt.groupName));
+
+  const attemptsByInstitutionAndGroup = attempts.filter((attempt) => {
+    if (filters.institution && attempt.institution !== filters.institution) {
       return false;
     }
-    if (institution && attempt.institution !== institution) {
+    if (filters.group && attempt.groupName !== filters.group) {
       return false;
-    }
-    if (group && attempt.groupName !== group) {
-      return false;
-    }
-    if (search) {
-      const haystack = [
-        attempt.fullName,
-        attempt.institution,
-        attempt.groupName,
-        attempt.mentorName
-      ]
-        .join(" ")
-        .toLowerCase();
-      if (!haystack.includes(search)) {
-        return false;
-      }
     }
     return true;
+  });
+
+  const mentors = uniqueSorted(attemptsByInstitutionAndGroup.map((attempt) => attempt.mentorName));
+  const statuses = catalogs.statuses?.length
+    ? catalogs.statuses
+    : uniqueSorted(attempts.map((attempt) => attempt.status));
+
+  fillSelectOptions(elements.filterInstitution, "Все учреждения", institutions, filters.institution);
+  fillSelectOptions(elements.filterGroup, "Все группы", groups, filters.group);
+  fillSelectOptions(elements.filterMentor, "Все наставники", mentors, filters.mentor);
+  fillSelectOptions(elements.filterStatus, "Все статусы", statuses, filters.status);
+
+  if (elements.filterDateFrom) {
+    elements.filterDateFrom.min = catalogs.startedDateMin || "";
+    elements.filterDateFrom.max = catalogs.startedDateMax || "";
+  }
+  if (elements.filterDateTo) {
+    elements.filterDateTo.min = catalogs.startedDateMin || "";
+    elements.filterDateTo.max = catalogs.startedDateMax || "";
+  }
+
+  syncFiltersFromInputs();
+}
+
+function attemptMatchesFilters(attempt, filters) {
+  const startedDate = toDateOnly(attempt.startedAt);
+
+  if (filters.search && !getAttemptSearchBlob(attempt).includes(filters.search.toLowerCase())) {
+    return false;
+  }
+  if (filters.institution && attempt.institution !== filters.institution) {
+    return false;
+  }
+  if (filters.group && attempt.groupName !== filters.group) {
+    return false;
+  }
+  if (filters.mentor && attempt.mentorName !== filters.mentor) {
+    return false;
+  }
+  if (filters.status && attempt.status !== filters.status) {
+    return false;
+  }
+  if (filters.dateFrom && (!startedDate || startedDate < filters.dateFrom)) {
+    return false;
+  }
+  if (filters.dateTo && (!startedDate || startedDate > filters.dateTo)) {
+    return false;
+  }
+
+  return true;
+}
+
+function renderAttempts(attempts) {
+  elements.attemptsBody.innerHTML = "";
+
+  if (!attempts.length) {
+    const row = document.createElement("tr");
+    row.innerHTML = '<td colspan="6" class="muted">По текущим фильтрам попыток не найдено.</td>';
+    elements.attemptsBody.appendChild(row);
+    updateFilterMeta(adminState.attempts.length, 0);
+    return;
+  }
+
+  attempts.forEach((attempt) => {
+    const row = document.createElement("tr");
+    row.dataset.attempt = attempt.id;
+    row.tabIndex = 0;
+    row.innerHTML = `
+      <td>${attempt.rank}</td>
+      <td>${escapeHtml(attempt.fullName)}<br /><span class="muted">${escapeHtml(attempt.institution || "—")}</span></td>
+      <td>${escapeHtml(attempt.groupName || "—")}<br /><span class="muted">${escapeHtml(attempt.mentorName || "Наставник не указан")}</span></td>
+      <td>${escapeHtml(attempt.status)}</td>
+      <td>${attempt.totalFinalScore ?? "скрыто"}</td>
+      <td><button class="button secondary" data-attempt="${attempt.id}">Открыть</button></td>
+    `;
+    if (attempt.id === adminState.selectedAttemptId) {
+      row.classList.add("is-selected");
+    }
+    elements.attemptsBody.appendChild(row);
+  });
+
+  highlightSelectedAttemptRow();
+
+  elements.attemptsBody.querySelectorAll("tr[data-attempt]").forEach((row) => {
+    row.addEventListener("click", (event) => {
+      if (event.target.closest("button[data-attempt]")) {
+        return;
+      }
+      loadAttemptDetail(row.dataset.attempt);
+    });
+    row.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        loadAttemptDetail(row.dataset.attempt);
+      }
+    });
+  });
+
+  elements.attemptsBody.querySelectorAll("button[data-attempt]").forEach((button) => {
+    button.addEventListener("click", () => loadAttemptDetail(button.dataset.attempt));
+  });
+
+  updateFilterMeta(adminState.attempts.length, attempts.length);
+}
+
+function applyAttemptFilters() {
+  const filters = syncFiltersFromInputs();
+  adminState.filteredAttempts = adminState.attempts.filter((attempt) =>
+    attemptMatchesFilters(attempt, filters)
+  );
+  renderAttempts(adminState.filteredAttempts);
+}
+
+function renderTourAnalytics(items = []) {
+  if (!elements.tourAnalyticsGrid) {
+    return;
+  }
+
+  elements.tourAnalyticsGrid.innerHTML = "";
+
+  if (!items.length) {
+    elements.tourAnalyticsGrid.innerHTML = '<div class="muted">Данные по турам пока отсутствуют.</div>';
+    return;
+  }
+
+  items.forEach((tour) => {
+    const card = document.createElement("article");
+    card.className = "analytics-card";
+    card.innerHTML = `
+      <div class="section-row">
+        <strong>${escapeHtml(tour.code)}</strong>
+        <span class="pill">${tour.averageScore} / ${tour.maxScore}</span>
+      </div>
+      <div>${escapeHtml(tour.title)}</div>
+      <div class="analytics-meta">
+        <span>Завершённых попыток: ${tour.attempts}</span>
+        <span>Покрытие: ${tour.completionRate}%</span>
+      </div>
+    `;
+    elements.tourAnalyticsGrid.appendChild(card);
+  });
+}
+
+function renderInstitutionAnalytics(items = []) {
+  if (!elements.institutionAnalyticsBody) {
+    return;
+  }
+
+  elements.institutionAnalyticsBody.innerHTML = "";
+
+  if (!items.length) {
+    const row = document.createElement("tr");
+    row.innerHTML = '<td colspan="5" class="muted">Сводка по учреждениям пока недоступна.</td>';
+    elements.institutionAnalyticsBody.appendChild(row);
+    return;
+  }
+
+  items.forEach((entry) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(entry.institution)}</td>
+      <td>${entry.participants}</td>
+      <td>${entry.attempts}</td>
+      <td>${entry.completed}</td>
+      <td>${entry.averageScore}</td>
+    `;
+    elements.institutionAnalyticsBody.appendChild(row);
+  });
+}
+
+function renderSuspiciousAttempts(items = []) {
+  if (!elements.suspiciousAttemptsBody || !elements.suspiciousMeta) {
+    return;
+  }
+
+  elements.suspiciousMeta.textContent = `Сигналов: ${items.length}`;
+  elements.suspiciousAttemptsBody.innerHTML = "";
+
+  if (!items.length) {
+    elements.suspiciousAttemptsBody.innerHTML =
+      '<div class="muted">Подозрительных попыток пока не обнаружено.</div>';
+    return;
+  }
+
+  items.forEach((entry) => {
+    const card = document.createElement("article");
+    card.className = "suspicious-card";
+    const signals = (entry.signals || [])
+      .map((signal) => `<li>${escapeHtml(signal)}</li>`)
+      .join("");
+
+    card.innerHTML = `
+      <div class="section-row">
+        <strong>${escapeHtml(entry.participant?.fullName || "Без имени")}</strong>
+        <span class="pill">уровень ${entry.severity}</span>
+      </div>
+      <div class="muted">${escapeHtml(entry.participant?.institution || "Учреждение не указано")} • ${escapeHtml(entry.participant?.groupName || "Группа не указана")}</div>
+      <div class="analytics-meta">
+        <span>Статус: ${escapeHtml(entry.status)}</span>
+        <span>Ответов: ${entry.answeredCount} / ${entry.totalQuestions}</span>
+        <span>Среднее время: ${formatDurationMs(entry.averageTimeMs)}</span>
+        <span>Последняя активность: ${formatDateTime(entry.lastActivityAt)}</span>
+      </div>
+      <ul class="flat-list suspicious-signals">${signals}</ul>
+    `;
+    elements.suspiciousAttemptsBody.appendChild(card);
   });
 }
 
@@ -308,23 +600,8 @@ function formatAnswer(question, answer) {
   return JSON.stringify(answer.answerPayload, null, 2);
 }
 
-function renderTourAnalytics(summary) {
-  elements.tourAnalytics.innerHTML = "";
-  (summary.tourAnalytics || []).forEach((tour) => {
-    const card = document.createElement("div");
-    card.className = "tour-pill";
-    card.innerHTML = `
-      <strong>${tour.code} • ${tour.avgScore} / ${tour.maxScore}</strong>
-      <span>${tour.completedAttempts} завершено • штраф ${tour.avgPenalty}</span>
-    `;
-    elements.tourAnalytics.appendChild(card);
-  });
-}
-
 function renderSummary(summary) {
   adminState.summary = summary;
-  adminState.lastRefreshedAt = new Date();
-
   elements.statParticipants.textContent = summary.counts.participants;
   elements.statAttempts.textContent = summary.counts.attempts;
   elements.statCompleted.textContent = summary.counts.completed;
@@ -335,97 +612,79 @@ function renderSummary(summary) {
     ? ""
     : "Выгрузка на Яндекс Диск недоступна: интеграция ещё не настроена.";
 
+  adminState.lastRefreshedAt = new Date();
   const diagnostics = summary.diagnostics || {};
-  elements.systemBackendBadge.textContent = String(diagnostics.storageBackend || "—").toUpperCase();
-  elements.diagVersion.textContent = diagnostics.appVersion || "—";
-  elements.diagDisk.textContent = diagnostics.yandexDiskEnabled ? "включён" : "выключен";
-  elements.diagLastActivity.textContent = formatDateTime(diagnostics.lastActivityAt);
-  elements.diagInProgress.textContent = summary.counts.inProgress;
-  elements.diagInstitutions.textContent = summary.counts.institutions;
-  elements.diagGroups.textContent = summary.counts.groups;
-  elements.diagRefreshedAt.textContent = formatDateTime(adminState.lastRefreshedAt);
-  elements.diagServerTime.textContent = formatDateTime(diagnostics.serverTime);
-  elements.diagTokenState.textContent = adminState.token ? "активен" : "требуется вход";
+  const capabilities = summary.capabilities || {};
 
-  renderTourAnalytics(summary);
+  if (elements.backendBadge) {
+    elements.backendBadge.textContent = `backend: ${capabilities.storageBackend || diagnostics.storageBackend || "—"}`;
+  }
+  if (elements.diskBadge) {
+    elements.diskBadge.textContent = diskEnabled ? "Яндекс Диск: включён" : "Яндекс Диск: выключен";
+  }
+  if (elements.diagVersion) {
+    elements.diagVersion.textContent = diagnostics.appVersion || "—";
+  }
+  if (elements.diagRefreshedAt) {
+    elements.diagRefreshedAt.textContent = formatDateTime(adminState.lastRefreshedAt);
+  }
+  if (elements.diagServerTime) {
+    elements.diagServerTime.textContent = formatDateTime(diagnostics.serverTime);
+  }
+  if (elements.diagLastActivity) {
+    elements.diagLastActivity.textContent = formatDateTime(diagnostics.lastActivityAt);
+  }
+  if (elements.diagActiveAttempts) {
+    elements.diagActiveAttempts.textContent = String(summary.counts.activeAttempts ?? "—");
+  }
+  if (elements.diagApiErrors) {
+    elements.diagApiErrors.textContent = String(diagnostics.apiErrors ?? 0);
+  }
+  if (elements.diagLastApiError) {
+    elements.diagLastApiError.textContent = diagnostics.lastApiErrorMessage
+      ? `${diagnostics.lastApiErrorMessage}${diagnostics.lastApiErrorRoute ? ` (${diagnostics.lastApiErrorRoute})` : ""}`
+      : "Ошибок не зафиксировано";
+  }
+  if (elements.diagDiskFolder) {
+    elements.diagDiskFolder.textContent = capabilities.yandexDiskFolder || "—";
+  }
+
+  renderTourAnalytics(summary.tourAnalytics || []);
+  renderInstitutionAnalytics(summary.institutionAnalytics || []);
+  renderSuspiciousAttempts(summary.suspiciousAttempts || []);
 }
 
 async function loadSummary() {
   const summary = await adminApi("/api/admin/summary");
   renderSummary(summary);
-}
-
-function renderAttempts() {
-  const attempts = getFilteredAttempts();
-  elements.attemptsBody.innerHTML = "";
-
-  elements.attemptsMeta.textContent = `Показано ${attempts.length} из ${adminState.attempts.length} попыток.`;
-
-  attempts.forEach((attempt) => {
-    const row = document.createElement("tr");
-    row.dataset.attempt = attempt.id;
-    row.tabIndex = 0;
-    row.innerHTML = `
-      <td>${attempt.rank}</td>
-      <td>${attempt.fullName}<br /><span class="muted">${attempt.institution}</span></td>
-      <td>${attempt.groupName}<br /><span class="muted">${attempt.mentorName || "Наставник не указан"}</span></td>
-      <td>${attempt.status}</td>
-      <td>${attempt.totalFinalScore ?? "скрыто"}</td>
-      <td><button class="button secondary" data-attempt="${attempt.id}">Открыть</button></td>
-    `;
-    if (attempt.id === adminState.selectedAttemptId) {
-      row.classList.add("is-selected");
-    }
-    elements.attemptsBody.appendChild(row);
-  });
-
-  highlightSelectedAttemptRow();
-
-  elements.attemptsBody.querySelectorAll("tr[data-attempt]").forEach((row) => {
-    row.addEventListener("click", (event) => {
-      if (event.target.closest("button[data-attempt]")) {
-        return;
-      }
-      loadAttemptDetail(row.dataset.attempt);
-    });
-    row.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        loadAttemptDetail(row.dataset.attempt);
-      }
-    });
-  });
-
-  elements.attemptsBody.querySelectorAll("button[data-attempt]").forEach((button) => {
-    button.addEventListener("click", () => loadAttemptDetail(button.dataset.attempt));
-  });
+  populateFilterControls();
 }
 
 async function loadAttempts() {
   adminState.attempts = await adminApi("/api/admin/attempts");
-  updateFilterOptions();
-  renderAttempts();
+  populateFilterControls();
+  applyAttemptFilters();
 }
 
 async function loadAttemptDetail(attemptId, options = {}) {
   if (!options.preserveSelection) {
     adminState.selectedAttemptId = attemptId;
   }
+
   const data = await adminApi(`/api/admin/attempts/${attemptId}`);
   const summary = data.summary;
-
   const detail = document.createElement("div");
   detail.className = "detail-block";
 
   const top = document.createElement("div");
   top.className = "detail-card";
   top.innerHTML = `
-    <strong>${data.attempt.participant.fullName}</strong><br />
-    <span class="muted">${data.attempt.participant.institution} • ${data.attempt.participant.groupName}</span><br />
-    <span class="muted">${data.attempt.participant.mentorName || "Наставник не указан"}</span><br />
-    <span class="muted">Статус: ${data.attempt.status}</span><br />
+    <strong>${escapeHtml(data.attempt.participant.fullName)}</strong><br />
+    <span class="muted">${escapeHtml(data.attempt.participant.institution)} • ${escapeHtml(data.attempt.participant.groupName)}</span><br />
+    <span class="muted">${escapeHtml(data.attempt.participant.mentorName || "Наставник не указан")}</span><br />
+    <span class="muted">Статус: ${escapeHtml(data.attempt.status)}</span><br />
     <span class="muted">Итог: ${summary.totalFinalScore} / ${summary.totalMaxScore}</span><br />
-    <span class="muted">Выданные задания: ${data.attempt.variantMeta.issuedQuestionIds.join(", ")}</span>
+    <span class="muted">Выданные задания: ${escapeHtml((data.attempt.variantMeta.issuedQuestionIds || []).join(", "))}</span>
   `;
   detail.appendChild(top);
 
@@ -433,7 +692,7 @@ async function loadAttemptDetail(attemptId, options = {}) {
     const card = document.createElement("section");
     card.className = "detail-card";
     card.innerHTML = `
-      <h3>${tour.code} • ${tour.title}</h3>
+      <h3>${escapeHtml(tour.code)} • ${escapeHtml(tour.title)}</h3>
       <p class="muted">${tour.questionCount} вопросов • лимит ${tour.timeLimitMinutes} мин • результат ${tour.score ? `${tour.score.finalScore} / ${tour.score.maxScore}` : "0 / 0"}</p>
     `;
 
@@ -441,11 +700,11 @@ async function loadAttemptDetail(attemptId, options = {}) {
       const box = document.createElement("div");
       box.className = "review-box";
       box.innerHTML = `
-        <div><strong>${question.sourceId}</strong> • ${question.prompt}</div>
-        ${question.caseTitle ? `<div class="message">${question.caseTitle}</div>` : ""}
-        ${question.scenario ? `<div class="muted">${question.scenario}</div>` : ""}
-        <div class="muted">Ответ участника:<pre>${formatAnswer(question, question.answer)}</pre></div>
-        <div class="muted">Правильный ответ:<pre>${question.correctAnswer || "—"}</pre></div>
+        <div><strong>${escapeHtml(question.sourceId)}</strong> • ${escapeHtml(question.prompt)}</div>
+        ${question.caseTitle ? `<div class="message">${escapeHtml(question.caseTitle)}</div>` : ""}
+        ${question.scenario ? `<div class="muted">${escapeHtml(question.scenario)}</div>` : ""}
+        <div class="muted">Ответ участника:<pre>${escapeHtml(formatAnswer(question, question.answer))}</pre></div>
+        <div class="muted">Правильный ответ:<pre>${escapeHtml(question.correctAnswer || "—")}</pre></div>
         <div class="muted">Баллы: ${question.answer ? question.answer.finalScore : 0} / ${question.maxScore}</div>
         <div class="muted">Время на вопрос: ${question.log && question.log.timeSpentMs ? `${question.log.timeSpentMs} мс` : "нет данных"}</div>
       `;
@@ -458,6 +717,7 @@ async function loadAttemptDetail(attemptId, options = {}) {
   elements.attemptDetail.innerHTML = "";
   elements.attemptDetail.appendChild(detail);
   highlightSelectedAttemptRow();
+
   if (!options.preserveSelection) {
     scrollToBlock(elements.detailSection);
   }
@@ -484,6 +744,8 @@ async function refreshPanel(options = {}) {
     if (silent) {
       if (error.status === 401) {
         resetAdminSession("Сеанс администратора завершён. Войдите повторно.");
+      } else {
+        showMessage(elements.exportMessage, `Автообновление: ${formatAdminError(error)}`, "warning");
       }
       return;
     }
@@ -504,6 +766,7 @@ async function handleLogin(event) {
       body: JSON.stringify({ password: elements.passwordInput.value })
     });
     const data = await response.json();
+
     if (!response.ok || !data.ok) {
       throw new Error(data.message || "Ошибка входа");
     }
@@ -514,12 +777,13 @@ async function handleLogin(event) {
     await refreshPanel();
     startAutoRefresh();
   } catch (error) {
-    showMessage(elements.loginMessage, error.message, "error");
+    showMessage(elements.loginMessage, formatAdminError(error), "error");
   }
 }
 
 async function exportFile(kind) {
   hideMessage(elements.exportMessage);
+
   try {
     const data = await adminApi(`/api/admin/exports/${kind}`, { method: "POST" });
     showMessage(
@@ -528,12 +792,13 @@ async function exportFile(kind) {
       "success"
     );
   } catch (error) {
-    showMessage(elements.exportMessage, error.message, "error");
+    showMessage(elements.exportMessage, formatAdminError(error), "error");
   }
 }
 
 async function uploadToDisk() {
   hideMessage(elements.exportMessage);
+
   try {
     const data = await adminApi("/api/admin/disk/upload", { method: "POST" });
     showMessage(
@@ -542,17 +807,39 @@ async function uploadToDisk() {
       "success"
     );
   } catch (error) {
-    showMessage(elements.exportMessage, error.message, "error");
+    showMessage(elements.exportMessage, formatAdminError(error), "error");
   }
 }
 
-function bindFilters() {
-  const rerender = () => renderAttempts();
-  elements.filterSearch.addEventListener("input", rerender);
-  elements.filterStatus.addEventListener("change", rerender);
-  elements.filterInstitution.addEventListener("change", rerender);
-  elements.filterGroup.addEventListener("change", rerender);
-  elements.filterReset.addEventListener("click", resetFilters);
+function handleFiltersChanged() {
+  populateFilterControls();
+  applyAttemptFilters();
+}
+
+function resetFilters() {
+  if (elements.filterSearch) {
+    elements.filterSearch.value = "";
+  }
+  if (elements.filterInstitution) {
+    elements.filterInstitution.value = "";
+  }
+  if (elements.filterGroup) {
+    elements.filterGroup.value = "";
+  }
+  if (elements.filterMentor) {
+    elements.filterMentor.value = "";
+  }
+  if (elements.filterStatus) {
+    elements.filterStatus.value = "";
+  }
+  if (elements.filterDateFrom) {
+    elements.filterDateFrom.value = "";
+  }
+  if (elements.filterDateTo) {
+    elements.filterDateTo.value = "";
+  }
+
+  handleFiltersChanged();
 }
 
 async function init() {
@@ -579,11 +866,31 @@ async function init() {
     }
     refreshPanel();
   });
+
   elements.loginForm.addEventListener("submit", handleLogin);
   elements.exportCsv.addEventListener("click", () => exportFile("csv"));
   elements.exportJson.addEventListener("click", () => exportFile("json"));
   elements.uploadDisk.addEventListener("click", uploadToDisk);
-  bindFilters();
+
+  [
+    elements.filterInstitution,
+    elements.filterGroup,
+    elements.filterMentor,
+    elements.filterStatus,
+    elements.filterDateFrom,
+    elements.filterDateTo
+  ].forEach((element) => {
+    if (element) {
+      element.addEventListener("change", handleFiltersChanged);
+    }
+  });
+
+  if (elements.filterSearch) {
+    elements.filterSearch.addEventListener("input", handleFiltersChanged);
+  }
+  if (elements.filterReset) {
+    elements.filterReset.addEventListener("click", resetFilters);
+  }
 
   if (adminState.token) {
     try {

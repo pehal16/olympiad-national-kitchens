@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Панель организатора</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles.css?v=1.1.0" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -24,7 +24,7 @@
         <div class="eyebrow">Организатор</div>
         <h1>Панель управления олимпиадой</h1>
         <p class="lead">
-          Рейтинг участников, туровые баллы, служебный лог вопросов, ответы, диагностика и выгрузка протоколов.
+          Рейтинг участников, туровые баллы, служебный лог вопросов, ответы и выгрузка протоколов.
         </p>
       </section>
 
@@ -56,34 +56,144 @@
           </article>
         </section>
 
-        <section class="grid-three">
-          <article class="card diag-card">
+        <section class="grid-two diagnostics-grid">
+          <article class="card diagnostic-card">
             <div class="section-row">
-              <h3>Система</h3>
-              <span id="system-backend-badge" class="stage-chip">--</span>
+              <h2>Диагностика системы</h2>
+              <div id="system-backend-badge" class="pill">backend: —</div>
             </div>
-            <div class="diag-list">
-              <div><span class="muted">Версия</span><strong id="diag-version">--</strong></div>
-              <div><span class="muted">Яндекс Диск</span><strong id="diag-disk">--</strong></div>
-              <div><span class="muted">Последняя активность</span><strong id="diag-last-activity">--</strong></div>
-            </div>
-          </article>
-          <article class="card diag-card">
-            <h3>Контингент</h3>
-            <div class="diag-list">
-              <div><span class="muted">В процессе</span><strong id="diag-in-progress">0</strong></div>
-              <div><span class="muted">Учреждений</span><strong id="diag-institutions">0</strong></div>
-              <div><span class="muted">Групп</span><strong id="diag-groups">0</strong></div>
-            </div>
-          </article>
-          <article class="card diag-card">
-            <h3>Синхронизация</h3>
-            <div class="diag-list">
-              <div><span class="muted">Обновлено</span><strong id="diag-refreshed-at">--</strong></div>
-              <div><span class="muted">Время сервера</span><strong id="diag-server-time">--</strong></div>
-              <div><span class="muted">Токен</span><strong id="diag-token-state">активен</strong></div>
+            <div class="diagnostic-list">
+              <div class="diagnostic-row">
+                <span>Версия</span>
+                <strong id="diag-version">—</strong>
+              </div>
+              <div class="diagnostic-row">
+                <span>Последнее обновление панели</span>
+                <strong id="diag-refreshed-at">—</strong>
+              </div>
+              <div class="diagnostic-row">
+                <span>Время сервера</span>
+                <strong id="diag-server-time">—</strong>
+              </div>
+              <div class="diagnostic-row">
+                <span>Последняя активность участника</span>
+                <strong id="diag-last-activity">—</strong>
+              </div>
             </div>
           </article>
+          <article class="card diagnostic-card">
+            <div class="section-row">
+              <h2>Состояние интеграций</h2>
+              <div id="system-disk-badge" class="pill">Яндекс Диск: —</div>
+            </div>
+            <div class="diagnostic-list">
+              <div class="diagnostic-row">
+                <span>Активные попытки</span>
+                <strong id="diag-active-attempts">—</strong>
+              </div>
+              <div class="diagnostic-row">
+                <span>Ошибки API</span>
+                <strong id="diag-api-errors">—</strong>
+              </div>
+              <div class="diagnostic-row">
+                <span>Последняя ошибка API</span>
+                <strong id="diag-last-api-error">—</strong>
+              </div>
+              <div class="diagnostic-row">
+                <span>Папка выгрузки</span>
+                <strong id="diag-disk-folder">—</strong>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section class="card">
+          <div class="section-row">
+            <h2>Фильтры и поиск</h2>
+            <div id="attempts-filter-meta" class="pill">Показано 0 из 0</div>
+          </div>
+          <div class="filters-grid">
+            <label class="field">
+              <span>Поиск по участнику</span>
+              <input id="filter-search" type="search" placeholder="ФИО, учреждение, группа" />
+            </label>
+            <label class="field">
+              <span>Учреждение</span>
+              <select id="filter-institution">
+                <option value="">Все учреждения</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Группа</span>
+              <select id="filter-group">
+                <option value="">Все группы</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Наставник</span>
+              <select id="filter-mentor">
+                <option value="">Все наставники</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Статус</span>
+              <select id="filter-status">
+                <option value="">Все статусы</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Дата с</span>
+              <input id="filter-date-from" type="date" />
+            </label>
+            <label class="field">
+              <span>Дата по</span>
+              <input id="filter-date-to" type="date" />
+            </label>
+            <div class="filter-actions">
+              <button id="filter-reset" class="button secondary" type="button">Сбросить фильтры</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="grid-two analytics-grid">
+          <section class="card">
+            <h2>Аналитика по турам</h2>
+            <div id="tour-analytics-grid" class="analytics-cards">
+              <div class="muted">Данные пока не загружены.</div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Сводка по учреждениям</h2>
+            <div class="table-wrap compact-table">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Учреждение</th>
+                    <th>Участники</th>
+                    <th>Попытки</th>
+                    <th>Завершено</th>
+                    <th>Средний балл</th>
+                  </tr>
+                </thead>
+                <tbody id="institution-analytics-body">
+                  <tr>
+                    <td colspan="5" class="muted">Данные пока не загружены.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="card">
+          <div class="section-row">
+            <h2>Журнал подозрительных ситуаций</h2>
+            <div id="suspicious-meta" class="pill">Сигналов: 0</div>
+          </div>
+          <div id="suspicious-attempts-body" class="suspicious-list">
+            <div class="muted">Подозрительных попыток пока не обнаружено.</div>
+          </div>
         </section>
 
         <section class="grid-two">
@@ -96,33 +206,6 @@
                 <button id="upload-disk" class="button primary">Выгрузить на Яндекс Диск</button>
               </div>
             </div>
-            <div class="filter-bar">
-              <label class="field compact-field">
-                <span>Поиск</span>
-                <input id="filter-search" type="text" placeholder="ФИО, колледж, группа" />
-              </label>
-              <label class="field compact-field">
-                <span>Статус</span>
-                <select id="filter-status">
-                  <option value="">Все статусы</option>
-                </select>
-              </label>
-              <label class="field compact-field">
-                <span>Учреждение</span>
-                <select id="filter-institution">
-                  <option value="">Все учреждения</option>
-                </select>
-              </label>
-              <label class="field compact-field">
-                <span>Группа</span>
-                <select id="filter-group">
-                  <option value="">Все группы</option>
-                </select>
-              </label>
-              <button id="filter-reset" class="button ghost" type="button">Сбросить фильтры</button>
-            </div>
-            <div id="attempts-meta" class="muted table-meta">Показано 0 из 0 попыток.</div>
-            <div id="tour-analytics" class="tour-analytics"></div>
             <div id="export-message" class="message hidden"></div>
             <div class="table-wrap">
               <table class="data-table">
@@ -154,6 +237,6 @@
       </footer>
     </main>
 
-    <script src="/admin.js?v=20260326g"></script>
+    <script src="/admin.js?v=1.1.0"></script>
   </body>
 </html>

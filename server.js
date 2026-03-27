@@ -36,8 +36,25 @@ const { ensureFolder, uploadBuffer } = require("./src/yandex-disk");
 const PUBLIC_DIR = path.join(ROOT_DIR, "public");
 const PORT = Number(process.env.PORT) || 3100;
 const HOST = process.env.HOST || "0.0.0.0";
+const APP_VERSION = packageInfo.version || "0.0.0";
+
+const runtimeDiagnostics = {
+  apiErrors: 0,
+  lastApiErrorAt: null,
+  lastApiErrorMessage: "",
+  lastApiErrorRoute: ""
+};
 
 const storageReady = initStorage();
+
+function noteApiError(pathname, error) {
+  runtimeDiagnostics.apiErrors += 1;
+  runtimeDiagnostics.lastApiErrorAt = nowIso();
+  runtimeDiagnostics.lastApiErrorMessage = String(
+    (error && error.message) || "Неизвестная ошибка сервера."
+  );
+  runtimeDiagnostics.lastApiErrorRoute = pathname || "";
+}
 
 function isOlympiadAvailable(olympiad) {
   const now = new Date();
@@ -421,10 +438,11 @@ async function buildRankedAttempts(olympiad, settings, options = {}) {
   const attempts = baseAttempts
     .map((attempt) => {
       const normalized = normalizeAttemptState(olympiad, attempt);
+      const summary = summarizeAttempt(olympiad, normalized);
       return {
         ...normalized,
-        summary: summarizeAttempt(olympiad, normalized),
-        diploma: diplomaByScore(summarizeAttempt(olympiad, normalized).totalFinalScore)
+        summary,
+        diploma: diplomaByScore(summary.totalFinalScore)
       };
     })
     .sort(compareAttemptsByRank)
@@ -452,25 +470,137 @@ function safeDateMs(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function buildAdminAnalytics(olympiad, rankedAttempts, settings) {
-  const participants = new Set();
+function latestAttemptActivity(attempt) {
+  const timestamps = [attempt.startedAt, attempt.finishedAt];
+
+  Object.values(attempt.answers || {}).forEach((answer) => {
+    if (answer && answer.savedAt) {
+      timestamps.push(answer.savedAt);
+    }
+  });
+
+  Object.values(attempt.questionLog || {}).forEach((entry) => {
+    if (entry && entry.presentedAt) {
+      timestamps.push(entry.presentedAt);
+    }
+    if (entry && entry.answeredAt) {
+      timestamps.push(entry.answeredAt);
+    }
+  });
+
+  const validTimestamps = timestamps
+    .filter(Boolean)
+    .map((value) => new Date(value).getTime())
+    .filter((value) => !Number.isNaN(value));
+
+  if (!validTimestamps.length) {
+    return null;
+  }
+
+  return new Date(Math.max(...validTimestamps)).toISOString();
+}
+
+function sortCatalog(values) {
+  return Array.from(new Set(values.filter(Boolean))).sort((left, right) =>
+    left.localeCompare(right, "ru-RU")
+  );
+}
+
+function buildSuspiciousAttemptReport(olympiad, attempt, summary) {
+  const answers = Object.keys(attempt.answers || {}).length;
+  const totalQuestions = questionCount(attempt);
+  const timings = Object.values(attempt.questionLog || {})
+    .map((entry) => Number(entry.timeSpentMs))
+    .filter((value) => Number.isFinite(value) && value >= 0);
+
+  const veryFastAnswers = timings.filter((value) => value > 0 && value < 1500).length;
+  const instantAnswers = timings.filter((value) => value >= 0 && value < 400).length;
+  const averageTimeMs = timings.length
+    ? Math.round(timings.reduce((sum, value) => sum + value, 0) / timings.length)
+    : null;
+
+  const signals = [];
+  let severity = 0;
+
+  if (attempt.status !== "in_progress" && answers < totalQuestions) {
+    signals.push("Попытка завершена не по всем вопросам");
+    severity += 2;
+  }
+
+  if (veryFastAnswers >= 4 && veryFastAnswers / Math.max(1, timings.length) >= 0.35) {
+    signals.push(`Много очень быстрых ответов: ${veryFastAnswers}`);
+    severity += 2;
+  }
+
+  if (instantAnswers >= 2) {
+    signals.push(`Есть почти мгновенные ответы: ${instantAnswers}`);
+    severity += 1;
+  }
+
+  if (
+    summary.totalDurationMs &&
+    answers >= 12 &&
+    summary.totalDurationMs < Math.max(answers, 1) * 1500
+  ) {
+    signals.push("Общая скорость прохождения аномально высокая");
+    severity += 1;
+  }
+
+  const startedAtMs = safeDateMs(attempt.startedAt);
+  if (
+    attempt.status === "in_progress" &&
+    startedAtMs &&
+    Date.now() - startedAtMs > 30 * 60 * 1000
+  ) {
+    signals.push("Попытка зависла в статусе in_progress более 30 минут");
+    severity += 1;
+  }
+
+  if (!signals.length) {
+    return null;
+  }
+
+  return {
+    id: attempt.id,
+    participant: attempt.participant,
+    status: attempt.status,
+    totalFinalScore: summary.totalFinalScore,
+    answeredCount: answers,
+    totalQuestions,
+    averageTimeMs,
+    veryFastAnswers,
+    instantAnswers,
+    lastActivityAt: latestAttemptActivity(attempt),
+    severity,
+    signals
+  };
+}
+
+function buildAdminSummary(olympiad, rawAttempts, ranked, settings) {
+  const participantKeys = new Set();
   const institutions = new Set();
   const groups = new Set();
   const mentors = new Set();
+  const statuses = new Set();
+  const activeAttempts = rawAttempts.filter((attempt) => attempt.status === "in_progress");
+  const institutionMap = new Map();
+  const scoredAttempts = rawAttempts.map((attempt) => ({
+    attempt,
+    summary: summarizeAttempt(olympiad, attempt)
+  }));
 
-  const statusBuckets = {
-    inProgress: 0,
-    reviewed: 0,
-    expired: 0
-  };
-
-  let lastActivityMs = 0;
-
-  rankedAttempts.forEach((attempt) => {
+  rawAttempts.forEach((attempt) => {
     const participant = attempt.participant || {};
-    participants.add(
-      `${participant.fullName || ""}|${participant.institution || ""}|${participant.groupName || ""}`
-    );
+    const signature =
+      attempt.participantSignature ||
+      makeParticipantSignature({
+        fullName: participant.fullName || "",
+        institution: participant.institution || "",
+        groupName: participant.groupName || "",
+        mentorName: participant.mentorName || ""
+      });
+
+    participantKeys.add(signature);
 
     if (participant.institution) {
       institutions.add(participant.institution);
@@ -481,60 +611,140 @@ function buildAdminAnalytics(olympiad, rankedAttempts, settings) {
     if (participant.mentorName) {
       mentors.add(participant.mentorName);
     }
-
-    if (attempt.status === "in_progress") {
-      statusBuckets.inProgress += 1;
-    } else if (attempt.status === "expired") {
-      statusBuckets.expired += 1;
-    } else {
-      statusBuckets.reviewed += 1;
+    if (attempt.status) {
+      statuses.add(attempt.status);
     }
-
-    lastActivityMs = Math.max(
-      lastActivityMs,
-      safeDateMs(attempt.finishedAt),
-      safeDateMs(attempt.startedAt)
-    );
   });
 
-  const completedAttempts = rankedAttempts.filter((attempt) => attempt.status !== "in_progress");
+  const lastActivityCandidates = rawAttempts
+    .map((attempt) => latestAttemptActivity(attempt))
+    .filter(Boolean)
+    .map((value) => new Date(value).getTime())
+    .filter((value) => !Number.isNaN(value));
+
+  const completedAttempts = rawAttempts.filter((attempt) => attempt.status !== "in_progress");
+  const completedAttemptSummaries = scoredAttempts
+    .filter((entry) => entry.attempt.status !== "in_progress")
+    .map((entry) => entry.summary);
+
   const tourAnalytics = (olympiad.tours || []).map((tour) => {
-    const values = completedAttempts
-      .map((attempt) =>
-        (attempt.summary.tourScores || []).find((item) => item.tourId === tour.id) || null
-      )
+    const scores = completedAttemptSummaries
+      .map((summary) => summary.tourScores.find((item) => item.tourId === tour.id))
       .filter(Boolean);
 
-    const totalScore = values.reduce((sum, item) => sum + Number(item.finalScore || 0), 0);
-    const totalPenalty = values.reduce((sum, item) => sum + Number(item.penalty || 0), 0);
+    const totalScore = scores.reduce((sum, item) => sum + item.finalScore, 0);
 
     return {
       tourId: tour.id,
       code: tour.code,
       title: tour.title,
-      completedAttempts: values.length,
-      avgScore: values.length ? Math.round((totalScore / values.length) * 100) / 100 : 0,
-      avgPenalty: values.length ? Math.round((totalPenalty / values.length) * 100) / 100 : 0,
+      attempts: scores.length,
+      averageScore: scores.length ? Number((totalScore / scores.length).toFixed(2)) : 0,
+      completionRate: completedAttempts.length
+        ? Number(((scores.length / completedAttempts.length) * 100).toFixed(1))
+        : 0,
       maxScore: tour.maxScore
     };
   });
 
+  ranked.forEach((attempt) => {
+    const participant = attempt.participant || {};
+    const institutionName = participant.institution || "Не указано";
+    if (!institutionMap.has(institutionName)) {
+      institutionMap.set(institutionName, {
+        institution: institutionName,
+        participants: new Set(),
+        groups: new Set(),
+        mentors: new Set(),
+        attempts: 0,
+        completed: 0,
+        active: 0,
+        totalScore: 0
+      });
+    }
+
+    const entry = institutionMap.get(institutionName);
+    entry.attempts += 1;
+    entry.participants.add(
+      makeParticipantSignature({
+        fullName: participant.fullName || "",
+        institution: participant.institution || "",
+        groupName: participant.groupName || "",
+        mentorName: participant.mentorName || ""
+      })
+    );
+    if (participant.groupName) {
+      entry.groups.add(participant.groupName);
+    }
+    if (participant.mentorName) {
+      entry.mentors.add(participant.mentorName);
+    }
+    if (attempt.status === "in_progress") {
+      entry.active += 1;
+    } else {
+      entry.completed += 1;
+      entry.totalScore += Number(attempt.summary.totalFinalScore || 0);
+    }
+  });
+
+  const institutionAnalytics = Array.from(institutionMap.values())
+    .map((entry) => ({
+      institution: entry.institution,
+      participants: entry.participants.size,
+      groups: entry.groups.size,
+      mentors: entry.mentors.size,
+      attempts: entry.attempts,
+      completed: entry.completed,
+      active: entry.active,
+      averageScore: entry.completed
+        ? Number((entry.totalScore / entry.completed).toFixed(2))
+        : 0
+    }))
+    .sort((left, right) => {
+      if (right.attempts !== left.attempts) {
+        return right.attempts - left.attempts;
+      }
+      return left.institution.localeCompare(right.institution, "ru-RU");
+    });
+
+  const suspiciousAttempts = scoredAttempts
+    .map((entry) => buildSuspiciousAttemptReport(olympiad, entry.attempt, entry.summary))
+    .filter(Boolean)
+    .sort((left, right) => {
+      if (right.severity !== left.severity) {
+        return right.severity - left.severity;
+      }
+      return safeDateMs(right.lastActivityAt) - safeDateMs(left.lastActivityAt);
+    })
+    .slice(0, 12);
+
+  const startedDates = rawAttempts
+    .map((attempt) => attempt.startedAt)
+    .filter(Boolean)
+    .map((value) => value.slice(0, 10))
+    .sort();
+
   return {
+    olympiad: getOlympiadPublicData(olympiad),
     counts: {
-      participants: participants.size,
-      attempts: rankedAttempts.length,
+      participants: participantKeys.size,
+      attempts: rawAttempts.length,
       completed: completedAttempts.length,
-      inProgress: statusBuckets.inProgress,
-      reviewed: statusBuckets.reviewed,
-      expired: statusBuckets.expired,
+      activeAttempts: activeAttempts.length,
       institutions: institutions.size,
       groups: groups.size,
       mentors: mentors.size
     },
-    diagnostics: {
-      appVersion: packageInfo.version,
-      serverTime: nowIso(),
-      storageBackend: settings.storageBackend || "file",
+    catalogs: {
+      institutions: sortCatalog(Array.from(institutions)),
+      groups: sortCatalog(Array.from(groups)),
+      mentors: sortCatalog(Array.from(mentors)),
+      statuses: sortCatalog(Array.from(statuses)),
+      startedDateMin: startedDates[0] || "",
+      startedDateMax: startedDates[startedDates.length - 1] || ""
+    },
+    capabilities: {
+      storageBackend: settings.storageBackend,
       yandexDiskEnabled: Boolean(
         settings.yandexDiskIntegration &&
           settings.yandexDiskIntegration.enabled &&
@@ -543,11 +753,24 @@ function buildAdminAnalytics(olympiad, rankedAttempts, settings) {
       yandexDiskFolder:
         settings.yandexDiskIntegration && settings.yandexDiskIntegration.folder
           ? settings.yandexDiskIntegration.folder
-          : "",
-      participantScoreVisible: Boolean(settings.showParticipantScore),
-      lastActivityAt: lastActivityMs ? new Date(lastActivityMs).toISOString() : null
+          : ""
     },
-    tourAnalytics
+    diagnostics: {
+      appVersion: APP_VERSION,
+      storageBackend: settings.storageBackend || "file",
+      refreshedAt: nowIso(),
+      serverTime: nowIso(),
+      lastActivityAt: lastActivityCandidates.length
+        ? new Date(Math.max(...lastActivityCandidates)).toISOString()
+        : null,
+      apiErrors: runtimeDiagnostics.apiErrors,
+      lastApiErrorAt: runtimeDiagnostics.lastApiErrorAt,
+      lastApiErrorMessage: runtimeDiagnostics.lastApiErrorMessage,
+      lastApiErrorRoute: runtimeDiagnostics.lastApiErrorRoute
+    },
+    tourAnalytics,
+    institutionAnalytics,
+    suspiciousAttempts
   };
 }
 
@@ -665,7 +888,7 @@ async function handleApi(req, res, url) {
     sendJson(res, 200, {
       ok: true,
       app: "national-kitchens-olympiad",
-      appVersion: packageInfo.version,
+      appVersion: APP_VERSION,
       now: nowIso(),
       olympiadId: olympiad.id,
       schemaVersion: olympiad.schemaVersion,
@@ -970,28 +1193,32 @@ async function handleApi(req, res, url) {
     }
 
     if (method === "GET" && pathname === "/api/admin/summary") {
-      const attempts = currentOlympiadAttempts(await loadAttempts(), olympiad.id);
-      const ranked = await buildRankedAttempts(olympiad, settings, {
-        attempts,
-        forceScores: true
-      });
-      const analytics = buildAdminAnalytics(olympiad, ranked, settings);
+      const rawAttempts = currentOlympiadAttempts(await loadAttempts(), olympiad.id).map((attempt) =>
+        normalizeAttemptState(olympiad, attempt)
+      );
+      const ranked = rawAttempts
+        .map((attempt) => {
+          const summary = summarizeAttempt(olympiad, attempt);
+          return {
+            rank: 0,
+            id: attempt.id,
+            participant: attempt.participant,
+            status: attempt.status,
+            startedAt: attempt.startedAt,
+            finishedAt: attempt.finishedAt,
+            summary,
+            diploma: diplomaByScore(summary.totalFinalScore)
+          };
+        })
+        .sort(compareAttemptsByRank)
+        .map((attempt, index) => ({
+          ...attempt,
+          rank: index + 1
+        }));
+
       sendJson(res, 200, {
         ok: true,
-        data: {
-          olympiad: getOlympiadPublicData(olympiad),
-          counts: analytics.counts,
-          capabilities: {
-            storageBackend: settings.storageBackend,
-            yandexDiskEnabled: Boolean(
-              settings.yandexDiskIntegration &&
-                settings.yandexDiskIntegration.enabled &&
-                settings.yandexDiskIntegration.oauthToken
-            )
-          },
-          diagnostics: analytics.diagnostics,
-          tourAnalytics: analytics.tourAnalytics
-        }
+        data: buildAdminSummary(olympiad, rawAttempts, ranked, settings)
       });
       return;
     }
@@ -1122,6 +1349,7 @@ const server = http.createServer(async (req, res) => {
 
     serveStatic(req, res, url.pathname);
   } catch (error) {
+    noteApiError(url.pathname, error);
     sendJson(res, 500, {
       ok: false,
       message: error.message || "Внутренняя ошибка сервера."

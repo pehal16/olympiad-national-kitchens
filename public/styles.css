@@ -317,26 +317,6 @@ select {
   margin-top: 18px;
 }
 
-.filter-bar {
-  display: grid;
-  grid-template-columns: minmax(240px, 1.4fr) repeat(3, minmax(160px, 1fr)) auto;
-  gap: 12px;
-  align-items: end;
-  margin: 12px 0 10px;
-}
-
-.compact-field {
-  min-width: 0;
-}
-
-.compact-field span {
-  font-size: 13px;
-}
-
-.table-meta {
-  margin-bottom: 10px;
-}
-
 .message {
   padding: 12px 14px;
   border-radius: 14px;
@@ -351,12 +331,17 @@ select {
   background: rgba(38, 38, 38, 0.1);
 }
 
-.sync-strip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+.message.warning {
+  background: rgba(255, 196, 92, 0.18);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.sync-status-stack {
+  display: grid;
+  gap: 8px;
   margin-top: 14px;
 }
 
@@ -364,39 +349,42 @@ select {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  width: fit-content;
+  max-width: 100%;
   padding: 10px 14px;
   border-radius: 999px;
   font-size: 14px;
   font-weight: 700;
-  background: rgba(38, 38, 38, 0.08);
+  border: 1px solid transparent;
 }
 
 .sync-badge.idle {
-  color: var(--muted);
+  background: rgba(38, 38, 38, 0.08);
+  color: var(--ink);
 }
 
 .sync-badge.pending {
-  background: rgba(255, 201, 72, 0.18);
-  color: #7a5a00;
+  background: rgba(31, 142, 115, 0.12);
+  color: var(--accent);
 }
 
 .sync-badge.success {
-  background: rgba(31, 142, 115, 0.14);
+  background: rgba(31, 142, 115, 0.16);
   color: var(--accent);
 }
 
 .sync-badge.warning {
-  background: rgba(255, 155, 64, 0.16);
-  color: #9a4b08;
+  background: rgba(255, 196, 92, 0.2);
+  color: #7c5a00;
 }
 
 .sync-badge.error {
-  background: rgba(196, 72, 72, 0.14);
-  color: #8f1f1f;
+  background: rgba(179, 68, 68, 0.18);
+  color: #812b2b;
 }
 
-.hidden {
-  display: none !important;
+.sync-meta {
+  font-size: 13px;
 }
 
 .timer-stack {
@@ -411,53 +399,6 @@ select {
   padding: 18px;
   border-radius: 22px;
   background: rgba(24, 51, 71, 0.06);
-}
-
-.diag-card {
-  padding: 18px;
-}
-
-.diag-list {
-  display: grid;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.diag-list div {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: baseline;
-}
-
-.diag-list strong {
-  font-size: 15px;
-  text-align: right;
-}
-
-.tour-analytics {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.tour-pill {
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: rgba(31, 142, 115, 0.08);
-  border: 1px solid rgba(31, 142, 115, 0.1);
-}
-
-.tour-pill strong,
-.tour-pill span {
-  display: block;
-}
-
-.tour-pill span {
-  color: var(--muted);
-  font-size: 13px;
-  margin-top: 4px;
 }
 
 .secondary-timer {
@@ -693,6 +634,93 @@ select {
   background: rgba(255, 255, 255, 0.74);
 }
 
+.diagnostics-grid {
+  align-items: stretch;
+}
+
+.analytics-grid {
+  align-items: stretch;
+}
+
+.diagnostic-card {
+  display: grid;
+  gap: 16px;
+}
+
+.diagnostic-list {
+  display: grid;
+  gap: 10px;
+}
+
+.diagnostic-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(31, 142, 115, 0.04);
+  border: 1px solid rgba(38, 38, 38, 0.06);
+}
+
+.diagnostic-row span {
+  color: var(--muted);
+}
+
+.diagnostic-row strong {
+  text-align: right;
+  max-width: 58%;
+  word-break: break-word;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: end;
+}
+
+.analytics-cards {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.analytics-card,
+.suspicious-card {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.74);
+  display: grid;
+  gap: 10px;
+}
+
+.analytics-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.compact-table {
+  max-height: 360px;
+}
+
+.suspicious-list {
+  display: grid;
+  gap: 14px;
+}
+
+.suspicious-signals {
+  margin: 0;
+}
+
 .review-box {
   display: grid;
   gap: 10px;
@@ -737,13 +765,12 @@ pre {
     grid-template-columns: 1fr;
   }
 
-  .filter-bar {
+  .filters-grid {
     grid-template-columns: 1fr;
   }
 
   .dashboard-head,
-  .footer-note,
-  .sync-strip {
+  .footer-note {
     flex-direction: column;
     align-items: flex-start;
   }
