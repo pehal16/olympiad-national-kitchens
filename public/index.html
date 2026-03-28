@@ -7,10 +7,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Национальные кухни мира</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.2.1" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.2.2" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css?v=1.2.1" />
+    <link rel="stylesheet" href="/styles.css?v=1.2.2" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -198,10 +198,17 @@
       </section>
 
       <section id="result-section" class="hidden">
-        <section class="card hero compact">
-          <div class="eyebrow">Попытка завершена</div>
+        <section class="card hero compact result-hero">
+          <div id="result-eyebrow" class="eyebrow">Попытка завершена</div>
+          <div class="result-head">
+            <div>
           <h2 id="result-title">Результат зафиксирован</h2>
           <p id="result-subtitle" class="lead"></p>
+            </div>
+            <div id="result-award" class="result-award neutral">Итог сохранён</div>
+          </div>
+          <div id="result-overview" class="result-overview"></div>
+          <div id="result-next" class="result-next"></div>
           <div id="result-tours" class="result-grid"></div>
         </section>
       </section>
@@ -210,11 +217,11 @@
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
         <small>
           Разработчик: Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса"
-          • Версия <span id="app-version-label">1.2.1</span>
+          • Версия <span id="app-version-label">1.2.2</span>
         </small>
       </footer>
     </main>
 
-    <script src="/app.js?v=1.2.1"></script>
+    <script src="/app.js?v=1.2.2"></script>
   </body>
 </html>

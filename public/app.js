@@ -73,8 +73,12 @@ const elements = {
   attemptSaveStatus: document.getElementById("attempt-save-status"),
   attemptSyncMeta: document.getElementById("attempt-sync-meta"),
   attemptMessage: document.getElementById("attempt-message"),
+  resultEyebrow: document.getElementById("result-eyebrow"),
   resultTitle: document.getElementById("result-title"),
   resultSubtitle: document.getElementById("result-subtitle"),
+  resultAward: document.getElementById("result-award"),
+  resultOverview: document.getElementById("result-overview"),
+  resultNext: document.getElementById("result-next"),
   resultTours: document.getElementById("result-tours"),
   appVersionLabel: document.getElementById("app-version-label")
 };
@@ -225,9 +229,9 @@ function setParticipantShellState() {
   const totalQuestions = attempt && attempt.progress ? attempt.progress.totalQuestions : 0;
 
   if (!hasAttempt) {
-    setShellBadge(elements.participantModeBadge, "Режим: регистрация", "neutral");
-    setShellBadge(elements.participantStageBadge, "Шаг: ожидание старта", "neutral");
-    setShellBadge(elements.participantStabilityBadge, "Автосохранение готово", "neutral");
+    setShellBadge(elements.participantModeBadge, "Режим: подготовка", "neutral");
+    setShellBadge(elements.participantStageBadge, "Шаг: ждём старт", "neutral");
+    setShellBadge(elements.participantStabilityBadge, "Сохранение: система готова", "neutral");
     return;
   }
 
@@ -240,29 +244,29 @@ function setParticipantShellState() {
   if (attemptInProgress && attempt.currentTour) {
     setShellBadge(
       elements.participantStageBadge,
-      `Шаг: ${attempt.currentTour.code} • ${attempt.progress.tourQuestionIndex}/${attempt.progress.tourQuestionCount}`,
+      `Сейчас: ${attempt.currentTour.code} • ${attempt.progress.tourQuestionIndex}/${attempt.progress.tourQuestionCount}`,
       "active"
     );
   } else {
-    setShellBadge(elements.participantStageBadge, "Шаг: маршрут завершен", "ready");
+    setShellBadge(elements.participantStageBadge, "Сейчас: маршрут завершён", "ready");
   }
 
   if (!state.isOnline) {
-    setShellBadge(elements.participantStabilityBadge, "Связь нестабильна", "warning");
+    setShellBadge(elements.participantStabilityBadge, "Сохранение: связь нестабильна", "warning");
     return;
   }
 
   if (state.isSubmittingAnswer || state.isFinishingAttempt || state.syncInFlight) {
-    setShellBadge(elements.participantStabilityBadge, "Идет синхронизация", "active");
+    setShellBadge(elements.participantStabilityBadge, "Сохранение: идёт отправка", "active");
     return;
   }
 
   if (attemptInProgress || totalQuestions > 0 || questionIndex > 0) {
-    setShellBadge(elements.participantStabilityBadge, "Автосохранение активно", "ready");
+    setShellBadge(elements.participantStabilityBadge, "Сохранение: всё в порядке", "ready");
     return;
   }
 
-  setShellBadge(elements.participantStabilityBadge, "Система готова", "neutral");
+  setShellBadge(elements.participantStabilityBadge, "Сохранение: система готова", "neutral");
 }
 
 function getJourneyProgressModel() {
@@ -310,6 +314,131 @@ function updateJourneyProgress() {
   elements.journeyProgressLabel.textContent = progress.label;
   elements.journeyProgressHint.textContent = progress.hint;
   elements.journeyProgressFill.style.width = `${progress.percent}%`;
+}
+
+function formatDurationLabel(durationMs) {
+  const totalMinutes = Math.max(0, Math.round((Number(durationMs) || 0) / 60000));
+  if (!totalMinutes) {
+    return "менее 1 минуты";
+  }
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours && minutes) {
+    return `${hours} ч ${minutes} мин`;
+  }
+
+  if (hours) {
+    return `${hours} ч`;
+  }
+
+  return `${minutes} мин`;
+}
+
+function fallbackDiplomaByScore(score) {
+  if (score >= 130) {
+    return "Диплом I степени";
+  }
+  if (score >= 110) {
+    return "Диплом II степени";
+  }
+  if (score >= 90) {
+    return "Диплом III степени";
+  }
+  return "Сертификат участника";
+}
+
+function getResultAwardTone(label, scoresVisible) {
+  if (!scoresVisible) {
+    return "neutral";
+  }
+
+  if (label.includes("I степени")) {
+    return "gold";
+  }
+  if (label.includes("II степени")) {
+    return "silver";
+  }
+  if (label.includes("III степени")) {
+    return "bronze";
+  }
+
+  return "neutral";
+}
+
+function renderResultOverview(summary, attempt, scoresVisible) {
+  if (!elements.resultOverview) {
+    return;
+  }
+
+  const diplomaLabel = scoresVisible
+    ? attempt.diploma || fallbackDiplomaByScore(summary.totalFinalScore)
+    : "Результат передан организатору";
+  const completedTours = Array.isArray(summary.tourScores) ? summary.tourScores.length : 0;
+  const metrics = [
+    {
+      label: "Баллы",
+      value: scoresVisible ? `${summary.totalFinalScore} / ${summary.totalMaxScore}` : "скрыто",
+      hint: scoresVisible
+        ? "Баллы рассчитаны автоматически по итогам всех туров."
+        : "До публикации итогов организатор скрывает баллы от участника."
+    },
+    {
+      label: "Статус",
+      value: diplomaLabel,
+      hint: scoresVisible
+        ? "Статус рассчитан автоматически по итоговому баллу."
+        : "Статус участия уже зафиксирован в облаке."
+    },
+    {
+      label: "Время",
+      value: formatDurationLabel(summary.totalDurationMs),
+      hint: "Показано суммарное время прохождения всей олимпиады."
+    },
+    {
+      label: "Маршрут",
+      value: `${completedTours} из ${completedTours} туров`,
+      hint: "Все этапы пройдены и записаны в облаке."
+    }
+  ];
+
+  elements.resultOverview.innerHTML = "";
+  metrics.forEach((metric) => {
+    const card = document.createElement("article");
+    card.className = "result-stat";
+    card.innerHTML = `
+      <span>${metric.label}</span>
+      <strong>${metric.value}</strong>
+      <small>${metric.hint}</small>
+    `;
+    elements.resultOverview.appendChild(card);
+  });
+}
+
+function renderResultNextSteps(scoresVisible) {
+  if (!elements.resultNext) {
+    return;
+  }
+
+  const nextSteps = scoresVisible
+    ? [
+        "Результат уже сохранён в облаке и доступен организатору в админке.",
+        "Подробную раскладку по турам видит только организатор.",
+        "Можно закрыть окно или вернуться на главную страницу олимпиады."
+      ]
+    : [
+        "Попытка завершена, а результат уже сохранён в облаке.",
+        "Итоговый балл и статус увидит организатор в панели управления.",
+        "Можно закрыть окно или дождаться объявления итогов."
+      ];
+
+  elements.resultNext.innerHTML = `
+    <h3>Что дальше</h3>
+    <ul>
+      ${nextSteps.map((step) => `<li>${step}</li>`).join("")}
+    </ul>
+  `;
 }
 
 function showQuestionTransition(message) {
@@ -369,7 +498,7 @@ function setNetworkStatus(isOnline = navigator.onLine) {
   }
 
   state.isOnline = isOnline;
-  elements.networkStatus.textContent = isOnline ? "Сеть: онлайн" : "Сеть: нестабильна";
+  elements.networkStatus.textContent = isOnline ? "Сеть: связь есть" : "Сеть: связь нестабильна";
   elements.networkStatus.className = `network-badge ${isOnline ? "online" : "offline"}`;
   setParticipantShellState();
 }
@@ -380,7 +509,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.2.1");
+    await navigator.serviceWorker.register("/sw.js?v=1.2.2");
   } catch (error) {
     // PWA layer is optional; the olympiad keeps working without service worker support.
   }
@@ -1193,20 +1322,36 @@ function renderAttempt() {
 
 function renderResult() {
   const summary = state.attempt.summary;
+  const scoresVisible = summary.totalFinalScore !== null;
+  const awardLabel = scoresVisible
+    ? state.attempt.diploma || fallbackDiplomaByScore(summary.totalFinalScore)
+    : "Итог сохранён";
   elements.attemptSection.classList.add("hidden");
   elements.resultSection.classList.remove("hidden");
   refreshNavigationState();
   elements.resultTours.innerHTML = "";
 
-  if (summary.totalFinalScore === null) {
+  if (elements.resultEyebrow) {
+    elements.resultEyebrow.textContent = "Маршрут завершён";
+  }
+
+  if (elements.resultAward) {
+    elements.resultAward.textContent = awardLabel;
+    elements.resultAward.className = `result-award ${getResultAwardTone(awardLabel, scoresVisible)}`;
+  }
+
+  if (!scoresVisible) {
     elements.resultTitle.textContent = "Попытка завершена";
     elements.resultSubtitle.textContent =
-      "Результат зафиксирован. Баллы доступны организатору в панели управления.";
+      "Маршрут сохранён в облаке. Итоговый балл и статус увидит организатор в панели управления.";
   } else {
-    elements.resultTitle.textContent = `Итоговый результат: ${summary.totalFinalScore} из ${summary.totalMaxScore}`;
+    elements.resultTitle.textContent = `Ваш результат: ${summary.totalFinalScore} из ${summary.totalMaxScore}`;
     elements.resultSubtitle.textContent =
-      "Правильные ответы не показываются. Организатор видит служебный лог и полную раскладку в админ-панели.";
+      "Все ответы зафиксированы автоматически. Правильные ответы не показываются участнику до завершения олимпиады.";
   }
+
+  renderResultOverview(summary, state.attempt, scoresVisible);
+  renderResultNextSteps(scoresVisible);
 
   (summary.tourScores || []).forEach((tour) => {
     const card = document.createElement("div");
@@ -1214,17 +1359,19 @@ function renderResult() {
     card.innerHTML = `
       <strong>${tour.code}</strong>
       <span>${tour.title}</span>
-      <b>${tour.finalScore === null ? "скрыто" : `${tour.finalScore} / ${tour.maxScore}`}</b>
+      <b>${tour.finalScore === null ? "результат скрыт" : `${tour.finalScore} / ${tour.maxScore}`}</b>
+      <small>${tour.finalScore === null ? "Баллы по туру увидит организатор." : "Баллы рассчитаны автоматически."}</small>
     `;
     elements.resultTours.appendChild(card);
   });
 
   refreshAttemptControls();
   renderJourneyMap();
-  setAttemptSaveStatus("Попытка завершена и сохранена", "success");
+  setAttemptSaveStatus("Финиш принят. Результат сохранён в облаке.", "success");
   setAttemptSyncMeta(
-    `Последняя синхронизация: ${formatDateTime(state.attempt.finishedAt || new Date())}`
+    `Итог записан: ${formatDateTime(state.attempt.finishedAt || new Date())}`
   );
+  requestAnimationFrame(() => scrollToSection(elements.resultSection));
 }
 
 function canSoftSyncAttempt(nextAttempt) {
@@ -1373,15 +1520,15 @@ async function syncAttempt(silent = false) {
     if (data.status === "in_progress") {
       updateTimers();
     }
-    setAttemptSyncMeta(`Последняя синхронизация: ${formatDateTime(new Date())}`);
+    setAttemptSyncMeta(`Последняя проверка связи: ${formatDateTime(new Date())}`);
     if (!silent && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
-      setAttemptSaveStatus("Данные синхронизированы", "success");
+      setAttemptSaveStatus("Данные обновлены", "success");
     }
   } catch (error) {
     const message = formatApiError(error);
-    setAttemptSyncMeta(`Синхронизация: ${message}`);
+    setAttemptSyncMeta(`Проверка связи: ${message}`);
     setAttemptSaveStatus(
-      silent ? "Связь нестабильна, повторим синхронизацию" : "Проблема синхронизации",
+      silent ? "Связь нестабильна, обновим данные ещё раз" : "Не удалось обновить данные",
       silent ? "warning" : "error"
     );
     if (!silent) {
@@ -1437,8 +1584,8 @@ async function handleRegistration(event) {
 async function startAttempt() {
   hideMessage(elements.prestartMessage);
   hideMessage(elements.attemptMessage);
-  setAttemptSaveStatus("Запускаем попытку...", "pending");
-  setAttemptSyncMeta("Подготовка варианта и подключение к облаку...");
+  setAttemptSaveStatus("Открываем маршрут...", "pending");
+  setAttemptSyncMeta("Подбираем вариант и подключаемся к облаку...");
 
   try {
     const attempt = await requestWithRetry(
@@ -1451,7 +1598,7 @@ async function startAttempt() {
         attempts: 2,
         pauseMs: 1000,
         onRetry() {
-          setAttemptSaveStatus("Временный сбой, повторяем запуск...", "warning");
+          setAttemptSaveStatus("Небольшой сбой. Повторяем запуск...", "warning");
         }
       }
     );
@@ -1460,16 +1607,16 @@ async function startAttempt() {
     applyAttemptState(attempt);
     startTimers();
     refreshAttemptControls();
-    setAttemptSaveStatus("Попытка запущена", "success");
-    setAttemptSyncMeta(`Последняя синхронизация: ${formatDateTime(new Date())}`);
+    setAttemptSaveStatus("Маршрут открыт", "success");
+    setAttemptSyncMeta(`Подключение подтверждено: ${formatDateTime(new Date())}`);
     showMessage(
       elements.attemptMessage,
-      "Попытка запущена. Ответы будут автоматически фиксироваться в облаке.",
+      "Маршрут открыт. Ответы будут автоматически сохраняться в облаке.",
       "success"
     );
   } catch (error) {
     const message = formatApiError(error);
-    setAttemptSaveStatus("Не удалось запустить попытку", "error");
+    setAttemptSaveStatus("Не удалось открыть маршрут", "error");
     setAttemptSyncMeta(`Запуск: ${message}`);
     showMessage(elements.prestartMessage, message, "error");
   }
@@ -1485,8 +1632,8 @@ async function submitAnswer() {
   const answerPayload = state.questionController.getAnswer();
   rememberDraft(previousQuestionId, answerPayload);
   state.isSubmittingAnswer = true;
-  setAttemptSaveStatus("Сохраняем ответ в облаке...", "pending");
-  setAttemptSyncMeta("Идёт отправка ответа...");
+  setAttemptSaveStatus("Отправляем ответ...", "pending");
+  setAttemptSyncMeta("Ответ уходит в облако...");
   refreshAttemptControls();
 
   try {
@@ -1504,7 +1651,7 @@ async function submitAnswer() {
         pauseMs: 1200,
         onRetry(error, nextAttempt, maxAttempts) {
           setAttemptSaveStatus(
-            `Временный сбой. Повтор ${nextAttempt} из ${maxAttempts}...`,
+            `Есть задержка. Повтор ${nextAttempt} из ${maxAttempts}...`,
             "warning"
           );
           setAttemptSyncMeta(`Повторная отправка: ${formatApiError(error)}`);
@@ -1516,15 +1663,15 @@ async function submitAnswer() {
     applyAttemptState(data);
     if (data.status === "in_progress") {
       startTimers();
-      setAttemptSaveStatus("Ответ сохранён", "success");
+      setAttemptSaveStatus("Ответ принят", "success");
     } else {
-      setAttemptSaveStatus("Последний ответ сохранён, попытка завершена", "success");
-      showMessage(elements.attemptMessage, "Попытка завершена.", "success");
+      setAttemptSaveStatus("Последний ответ принят. Маршрут завершён.", "success");
+      showMessage(elements.attemptMessage, "Маршрут завершён.", "success");
     }
-    setAttemptSyncMeta(`Последняя синхронизация: ${formatDateTime(new Date())}`);
+    setAttemptSyncMeta(`Ответ записан: ${formatDateTime(new Date())}`);
   } catch (error) {
     const message = formatApiError(error);
-    setAttemptSaveStatus("Не удалось сохранить ответ", "error");
+    setAttemptSaveStatus("Не удалось отправить ответ", "error");
     setAttemptSyncMeta(`Ошибка отправки: ${message}`);
     showMessage(elements.attemptMessage, message, "error");
   } finally {
@@ -1540,7 +1687,7 @@ async function finishAttempt() {
 
   state.isFinishingAttempt = true;
   hideMessage(elements.attemptMessage);
-  setAttemptSaveStatus("Завершаем попытку...", "pending");
+  setAttemptSaveStatus("Завершаем маршрут...", "pending");
   setAttemptSyncMeta("Фиксируем итоговый результат...");
   refreshAttemptControls();
   try {
@@ -1554,18 +1701,18 @@ async function finishAttempt() {
         attempts: 2,
         pauseMs: 1000,
         onRetry(error) {
-          setAttemptSaveStatus("Повторяем завершение после временного сбоя...", "warning");
+          setAttemptSaveStatus("Подтверждаем завершение ещё раз...", "warning");
           setAttemptSyncMeta(`Завершение: ${formatApiError(error)}`);
         }
       }
     );
     state.localDrafts = {};
     applyAttemptState(data);
-    setAttemptSaveStatus("Попытка завершена и зафиксирована", "success");
-    setAttemptSyncMeta(`Последняя синхронизация: ${formatDateTime(new Date())}`);
+    setAttemptSaveStatus("Маршрут завершён и сохранён", "success");
+    setAttemptSyncMeta(`Итог записан: ${formatDateTime(new Date())}`);
   } catch (error) {
     const message = formatApiError(error);
-    setAttemptSaveStatus("Не удалось завершить попытку", "error");
+    setAttemptSaveStatus("Не удалось завершить маршрут", "error");
     setAttemptSyncMeta(`Завершение: ${message}`);
     showMessage(elements.attemptMessage, message, "error");
   } finally {
@@ -1583,20 +1730,20 @@ async function init() {
   setupInstallPrompt();
   setInstallAvailability(false);
   setNetworkStatus(navigator.onLine);
-  setAttemptSaveStatus("Ожидание действия", "idle");
-  setAttemptSyncMeta("Последняя синхронизация: —");
+  setAttemptSaveStatus("Система готова к старту", "idle");
+  setAttemptSyncMeta("Последняя проверка связи: —");
   refreshNavigationState();
 
   window.addEventListener("online", () => {
     setNetworkStatus(true);
-    setAttemptSaveStatus("Связь восстановлена", "success");
+    setAttemptSaveStatus("Связь восстановлена. Можно продолжать.", "success");
     if (state.attempt) {
       syncAttempt(true);
     }
   });
   window.addEventListener("offline", () => {
     setNetworkStatus(false);
-    setAttemptSaveStatus("Связь потеряна. Ответы попробуем отправить повторно.", "warning");
+    setAttemptSaveStatus("Связь нестабильна. Ответ попробуем отправить повторно.", "warning");
     setAttemptSyncMeta("Сервер временно недоступен.");
   });
   elements.navBack.addEventListener("click", goBackOrHome);
