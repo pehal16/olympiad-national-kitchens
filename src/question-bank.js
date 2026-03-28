@@ -261,7 +261,75 @@ function normalizeQuestionRecord(question, tour, extra = {}) {
   };
 }
 
-function buildQuestionCatalog(olympiad) {
+function normalizeCustomQuestionRecord(question, olympiad) {
+  const tour = (olympiad.tours || []).find((item) => item.code === question.tourCode) || olympiad.tours?.[0];
+  const metadata = {
+    ...buildBaseMetadata(
+      {
+        type: question.type || "single_choice",
+        prompt: question.prompt,
+        note: question.note || "",
+        scenario: question.scenario || ""
+      },
+      tour,
+      { poolTitle: question.metadata?.theme || question.dishLabel || "Пользовательский вопрос" }
+    ),
+    ...(question.metadata || {}),
+    difficulty: question.metadata?.difficulty || "basic",
+    difficultyLabel:
+      question.metadata?.difficultyLabel ||
+      (question.metadata?.difficulty === "advanced"
+        ? "Высокий уровень"
+        : question.metadata?.difficulty === "standard"
+          ? "Повышенный уровень"
+          : "Базовый уровень"),
+    estimatedTimeSec: Number(question.metadata?.estimatedTimeSec) || 60,
+    okCodes: Array.isArray(question.metadata?.okCodes) ? question.metadata.okCodes : [],
+    pkFocus: Array.isArray(question.metadata?.pkFocus) ? question.metadata.pkFocus : [],
+    methodicalPurpose: question.metadata?.methodicalPurpose || ""
+  };
+
+  return {
+    id: question.id,
+    sourceId: question.id,
+    sourceKind: "custom_question",
+    poolId: null,
+    poolTitle: question.metadata?.theme || "",
+    caseId: null,
+    caseTitle: "",
+    orderInSource: Number(question.orderInSource) || 1,
+    tourId: tour?.id || "tour-1",
+    tourCode: question.tourCode || tour?.code || "T1",
+    tourTitle: tour?.title || "Один правильный ответ",
+    type: "single_choice",
+    typeLabel: TYPE_LABELS.single_choice,
+    interactive: false,
+    cuisine: question.cuisine || "mixed",
+    cuisineLabel: CUISINE_LABELS[question.cuisine] || question.cuisineLabel || "Смешанный блок",
+    cuisineGroup: question.cuisineGroup || "general",
+    cuisineGroupLabel:
+      CUISINE_GROUP_LABELS[question.cuisineGroup] || question.cuisineGroupLabel || "Общий блок",
+    dishId: question.dishId || null,
+    dishLabel: question.dishLabel || "",
+    prompt: question.prompt,
+    scenario: question.scenario || "",
+    note: question.note || "",
+    maxScore: Number(question.maxScore) || 2,
+    optionCount: Array.isArray(question.options) ? question.options.length : 0,
+    itemCount: 0,
+    slotCount: 0,
+    bucketCount: 0,
+    options: (question.options || []).map((option) => ({
+      id: option.id,
+      text: option.text,
+      isCorrect: Boolean(option.isCorrect)
+    })),
+    items: [],
+    metadata
+  };
+}
+
+function buildQuestionCatalog(olympiad, customQuestionsMap = {}) {
   const records = [];
   const tours = getTourMap(olympiad);
 
@@ -326,6 +394,12 @@ function buildQuestionCatalog(olympiad) {
       );
     });
   });
+
+  Object.values(customQuestionsMap || {})
+    .sort((left, right) => String(left.id).localeCompare(String(right.id), "ru-RU"))
+    .forEach((question) => {
+      records.push(normalizeCustomQuestionRecord(question, olympiad));
+    });
 
   return records.map((record, index) => ({
     ...record,
@@ -425,8 +499,8 @@ function buildQaReport(records) {
   };
 }
 
-function buildQuestionBankSummary(olympiad) {
-  const records = buildQuestionCatalog(olympiad);
+function buildQuestionBankSummary(olympiad, customQuestionsMap = {}) {
+  const records = buildQuestionCatalog(olympiad, customQuestionsMap);
   const qa = buildQaReport(records);
 
   return {

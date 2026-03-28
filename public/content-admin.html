@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1f8e73" />
     <title>Банк заданий олимпиады</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.5.1" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.5.2" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/styles.css?v=1.5.1" />
+    <link rel="stylesheet" href="/styles.css?v=1.5.2" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -150,6 +150,121 @@
             <div id="content-filter-meta" class="pill">показано 0 из 0</div>
           </div>
 
+          <section class="creator-card">
+            <div class="section-row">
+              <div>
+                <h3>Конструктор тестового вопроса</h3>
+                <p class="muted">
+                  Здесь можно добавить новый авторский тест. Сейчас он поддерживается для туров T1 и T4.
+                </p>
+              </div>
+              <div class="actions inline">
+                <button id="content-create-question" class="button primary" type="button">Добавить вопрос</button>
+                <button id="content-reset-creator" class="button secondary" type="button">Очистить форму</button>
+              </div>
+            </div>
+
+            <div class="creator-grid">
+              <label class="field">
+                <span>Тур</span>
+                <select id="creator-tour">
+                  <option value="T1">T1 • Один правильный ответ</option>
+                  <option value="T4">T4 • Технологическая логика</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Кухня</span>
+                <select id="creator-cuisine">
+                  <option value="mixed">Смешанный блок</option>
+                  <option value="ru">Русская кухня</option>
+                  <option value="fr">Французская кухня</option>
+                  <option value="it">Итальянская кухня</option>
+                  <option value="jp">Японская кухня</option>
+                  <option value="mx">Мексиканская кухня</option>
+                  <option value="de">Немецкая кухня</option>
+                  <option value="uk">Английская кухня</option>
+                  <option value="balkan">Балканские кухни</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Блюдо или тема вопроса</span>
+                <input id="creator-dish-label" type="text" placeholder="Например: борщ, паста карбонара" />
+              </label>
+              <label class="field creator-field-wide">
+                <span>Формулировка вопроса</span>
+                <textarea id="creator-prompt" rows="3" placeholder="Введите вопрос в понятной студенческой формулировке"></textarea>
+              </label>
+              <label class="field creator-field-wide">
+                <span>Краткий контекст</span>
+                <input id="creator-scenario" type="text" placeholder="Например: вопрос по технологии приготовления" />
+              </label>
+              <label class="field creator-field-wide">
+                <span>Подсказка для редактора</span>
+                <input id="creator-note" type="text" placeholder="Необязательное служебное примечание" />
+              </label>
+            </div>
+
+            <div class="creator-options-grid">
+              <label class="field creator-option-card">
+                <span>Вариант 1</span>
+                <input id="creator-option-1" type="text" />
+                <label class="inline-choice"><input id="creator-correct-1" type="radio" name="creator-correct" checked /> Правильный ответ</label>
+              </label>
+              <label class="field creator-option-card">
+                <span>Вариант 2</span>
+                <input id="creator-option-2" type="text" />
+                <label class="inline-choice"><input id="creator-correct-2" type="radio" name="creator-correct" /> Правильный ответ</label>
+              </label>
+              <label class="field creator-option-card">
+                <span>Вариант 3</span>
+                <input id="creator-option-3" type="text" />
+                <label class="inline-choice"><input id="creator-correct-3" type="radio" name="creator-correct" /> Правильный ответ</label>
+              </label>
+              <label class="field creator-option-card">
+                <span>Вариант 4</span>
+                <input id="creator-option-4" type="text" />
+                <label class="inline-choice"><input id="creator-correct-4" type="radio" name="creator-correct" /> Правильный ответ</label>
+              </label>
+            </div>
+
+            <div class="creator-grid">
+              <label class="field">
+                <span>Сложность</span>
+                <select id="creator-difficulty">
+                  <option value="basic">Базовый уровень</option>
+                  <option value="standard">Повышенный уровень</option>
+                  <option value="advanced">Высокий уровень</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Тема</span>
+                <input id="creator-theme" type="text" placeholder="Например: национальные кухни" />
+              </label>
+              <label class="field">
+                <span>Подтема</span>
+                <input id="creator-topic" type="text" placeholder="Например: первые блюда" />
+              </label>
+              <label class="field">
+                <span>Профессиональный фокус</span>
+                <input id="creator-focus" type="text" placeholder="Например: состав блюда" />
+              </label>
+              <label class="field">
+                <span>Коды ОК</span>
+                <input id="creator-ok-codes" type="text" placeholder="ОК 01, ОК 02" />
+              </label>
+              <label class="field">
+                <span>Профессиональные акценты</span>
+                <input id="creator-pk-focus" type="text" placeholder="подбор сырья, технология" />
+              </label>
+              <label class="field creator-field-wide">
+                <span>Методическое назначение</span>
+                <textarea id="creator-methodical-purpose" rows="3" placeholder="Что именно проверяет вопрос"></textarea>
+              </label>
+            </div>
+
+            <div id="content-creator-note" class="message hidden"></div>
+          </section>
+
           <div class="filters-grid">
             <label class="field">
               <span>Поиск</span>
@@ -266,11 +381,11 @@
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
         <small>
           Разработчик: Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса"
-          • Версия <span id="content-app-version-label">1.5.1</span>
+          • Версия <span id="content-app-version-label">1.5.2</span>
         </small>
       </footer>
     </main>
 
-    <script src="/content-admin.js?v=1.5.1"></script>
+    <script src="/content-admin.js?v=1.5.2"></script>
   </body>
 </html>

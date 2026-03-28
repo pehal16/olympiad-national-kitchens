@@ -11,6 +11,8 @@ const ATTEMPT_ANSWERS_TABLE =
 const ADMIN_SESSIONS_TABLE = process.env.YDB_ADMIN_SESSIONS_TABLE || "admin_sessions";
 const CONTENT_DRAFTS_TABLE =
   process.env.YDB_CONTENT_DRAFTS_TABLE || "olympiad_content_drafts";
+const CONTENT_QUESTIONS_TABLE =
+  process.env.YDB_CONTENT_QUESTIONS_TABLE || "olympiad_content_questions";
 
 let sqlPromise = null;
 let schemaReady = null;
@@ -81,6 +83,14 @@ async function ensureSchema() {
       `;
       await sql`
         CREATE TABLE IF NOT EXISTS ${identifier(CONTENT_DRAFTS_TABLE)} (
+          question_id Utf8,
+          payload_json Utf8,
+          updated_at Utf8,
+          PRIMARY KEY (question_id)
+        )
+      `;
+      await sql`
+        CREATE TABLE IF NOT EXISTS ${identifier(CONTENT_QUESTIONS_TABLE)} (
           question_id Utf8,
           payload_json Utf8,
           updated_at Utf8,
@@ -496,6 +506,56 @@ async function deleteContentDraft(questionId) {
   `;
 }
 
+async function loadContentCustomQuestions() {
+  const rows = await selectRows(CONTENT_QUESTIONS_TABLE, "question_id");
+  const questions = {};
+
+  rows.forEach((row) => {
+    try {
+      questions[row.question_id] = JSON.parse(row.payload_json);
+    } catch (error) {
+      // Skip malformed custom question rows.
+    }
+  });
+
+  return questions;
+}
+
+async function saveContentCustomQuestions(questions) {
+  const items = Object.entries(questions || {}).map(([questionId, question]) => ({
+    questionId,
+    question
+  }));
+
+  await bulkUpsert(
+    CONTENT_QUESTIONS_TABLE,
+    "question_id",
+    items,
+    (item) => item.questionId
+  );
+}
+
+async function upsertContentCustomQuestion(questionId, question) {
+  if (!questionId || !question) {
+    return;
+  }
+
+  await upsertRow(CONTENT_QUESTIONS_TABLE, "question_id", questionId, question);
+}
+
+async function deleteContentCustomQuestion(questionId) {
+  if (!questionId) {
+    return;
+  }
+
+  await ensureSchema();
+  const sql = await getSql();
+  await sql`
+    DELETE FROM ${identifier(CONTENT_QUESTIONS_TABLE)}
+    WHERE question_id = ${String(questionId)}
+  `;
+}
+
 module.exports = {
   initYdbStorage,
   loadAttempts,
@@ -508,5 +568,9 @@ module.exports = {
   loadContentDrafts,
   saveContentDrafts,
   upsertContentDraft,
-  deleteContentDraft
+  deleteContentDraft,
+  loadContentCustomQuestions,
+  saveContentCustomQuestions,
+  upsertContentCustomQuestion,
+  deleteContentCustomQuestion
 };

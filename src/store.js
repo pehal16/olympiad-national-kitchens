@@ -24,6 +24,7 @@ const SETTINGS_FILE = path.join(CONFIG_DIR, "settings.json");
 const ATTEMPTS_FILE = path.join(STORAGE_DIR, "attempts.json");
 const SESSIONS_FILE = path.join(STORAGE_DIR, "admin-sessions.json");
 const CONTENT_DRAFTS_FILE = path.join(STORAGE_DIR, "content-drafts.json");
+const CONTENT_CUSTOM_FILE = path.join(STORAGE_DIR, "content-custom-questions.json");
 
 const STORAGE_BACKEND = String(
   process.env.STORAGE_BACKEND ||
@@ -64,6 +65,7 @@ function initFileStorage() {
   readJson(ATTEMPTS_FILE, []);
   readJson(SESSIONS_FILE, []);
   readJson(CONTENT_DRAFTS_FILE, {});
+  readJson(CONTENT_CUSTOM_FILE, {});
 }
 
 async function initStorage() {
@@ -115,7 +117,9 @@ function loadSettings() {
       connectionString: process.env.YDB_CONNECTION_STRING || "",
       attemptsTable: process.env.YDB_ATTEMPTS_TABLE || "olympiad_attempts",
       adminSessionsTable: process.env.YDB_ADMIN_SESSIONS_TABLE || "admin_sessions",
-      contentDraftsTable: process.env.YDB_CONTENT_DRAFTS_TABLE || "olympiad_content_drafts"
+      contentDraftsTable: process.env.YDB_CONTENT_DRAFTS_TABLE || "olympiad_content_drafts",
+      contentQuestionsTable:
+        process.env.YDB_CONTENT_QUESTIONS_TABLE || "olympiad_content_questions"
     }
   };
 }
@@ -221,6 +225,43 @@ async function deleteContentDraft(questionId) {
   writeJson(CONTENT_DRAFTS_FILE, drafts);
 }
 
+async function loadContentCustomQuestions() {
+  if (STORAGE_BACKEND === "ydb") {
+    return getYdbStore().loadContentCustomQuestions();
+  }
+  return readJson(CONTENT_CUSTOM_FILE, {});
+}
+
+async function saveContentCustomQuestions(questions) {
+  if (STORAGE_BACKEND === "ydb") {
+    await getYdbStore().saveContentCustomQuestions(questions);
+    return;
+  }
+  writeJson(CONTENT_CUSTOM_FILE, questions || {});
+}
+
+async function upsertContentCustomQuestion(questionId, question) {
+  if (STORAGE_BACKEND === "ydb") {
+    await getYdbStore().upsertContentCustomQuestion(questionId, question);
+    return;
+  }
+
+  const questions = readJson(CONTENT_CUSTOM_FILE, {});
+  questions[questionId] = question;
+  writeJson(CONTENT_CUSTOM_FILE, questions);
+}
+
+async function deleteContentCustomQuestion(questionId) {
+  if (STORAGE_BACKEND === "ydb") {
+    await getYdbStore().deleteContentCustomQuestion(questionId);
+    return;
+  }
+
+  const questions = readJson(CONTENT_CUSTOM_FILE, {});
+  delete questions[questionId];
+  writeJson(CONTENT_CUSTOM_FILE, questions);
+}
+
 module.exports = {
   ROOT_DIR,
   DATA_DIR,
@@ -242,5 +283,9 @@ module.exports = {
   loadContentDrafts,
   saveContentDrafts,
   upsertContentDraft,
-  deleteContentDraft
+  deleteContentDraft,
+  loadContentCustomQuestions,
+  saveContentCustomQuestions,
+  upsertContentCustomQuestion,
+  deleteContentCustomQuestion
 };

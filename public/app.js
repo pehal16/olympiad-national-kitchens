@@ -24,6 +24,7 @@ const elements = {
   navResult: document.getElementById("nav-result"),
   networkStatus: document.getElementById("network-status"),
   installApp: document.getElementById("install-app"),
+  heroFormatBadge: document.getElementById("hero-format-badge"),
   heroSection: document.getElementById("hero-section"),
   heroTitle: document.getElementById("hero-title"),
   heroSubtitle: document.getElementById("hero-subtitle"),
@@ -48,8 +49,19 @@ const elements = {
   resultSection: document.getElementById("result-section"),
   participantName: document.getElementById("participant-name"),
   participantMeta: document.getElementById("participant-meta"),
+  cockpitPaceCard: document.getElementById("cockpit-pace-card"),
+  cockpitRouteCard: document.getElementById("cockpit-route-card"),
+  cockpitAnswerCard: document.getElementById("cockpit-answer-card"),
+  timerTotalBox: document.getElementById("timer-total-box"),
+  timerTourBox: document.getElementById("timer-tour-box"),
   timerTotal: document.getElementById("timer-total"),
   timerTour: document.getElementById("timer-tour"),
+  paceValue: document.getElementById("pace-value"),
+  paceHint: document.getElementById("pace-hint"),
+  routeRemainingValue: document.getElementById("route-remaining-value"),
+  routeRemainingHint: document.getElementById("route-remaining-hint"),
+  answerReadinessValue: document.getElementById("answer-readiness-value"),
+  answerReadinessHint: document.getElementById("answer-readiness-hint"),
   progressGlobal: document.getElementById("progress-global"),
   progressTour: document.getElementById("progress-tour"),
   progressGlobalFill: document.getElementById("progress-global-fill"),
@@ -202,6 +214,7 @@ function setAttemptSaveStatus(message, type = "idle") {
   elements.attemptSaveStatus.textContent = message;
   elements.attemptSaveStatus.className = `sync-badge ${type}`;
   setParticipantShellState();
+  updateExamCockpit();
 }
 
 function setAttemptSyncMeta(message) {
@@ -210,6 +223,7 @@ function setAttemptSyncMeta(message) {
   }
 
   elements.attemptSyncMeta.textContent = message;
+  updateExamCockpit();
 }
 
 function setShellBadge(element, text, tone = "neutral") {
@@ -314,6 +328,123 @@ function updateJourneyProgress() {
   elements.journeyProgressLabel.textContent = progress.label;
   elements.journeyProgressHint.textContent = progress.hint;
   elements.journeyProgressFill.style.width = `${progress.percent}%`;
+}
+
+function hasMeaningfulAnswer(answer) {
+  if (!answer) {
+    return false;
+  }
+
+  if (typeof answer.selectedOptionId === "string" && answer.selectedOptionId.trim()) {
+    return true;
+  }
+
+  if (Array.isArray(answer.order) && answer.order.length) {
+    return true;
+  }
+
+  if (answer.buckets && typeof answer.buckets === "object") {
+    return Object.keys(answer.buckets).length > 0;
+  }
+
+  return false;
+}
+
+function toneTimerBox(node, remainingMs) {
+  if (!node) {
+    return;
+  }
+
+  node.classList.remove("warning", "critical");
+  if (remainingMs <= 120000) {
+    node.classList.add("critical");
+    return;
+  }
+  if (remainingMs <= 300000) {
+    node.classList.add("warning");
+  }
+}
+
+function setCockpitTone(node, tone = "neutral") {
+  if (!node) {
+    return;
+  }
+  node.classList.remove("neutral", "active", "warning");
+  node.classList.add(tone);
+}
+
+function updateExamCockpit() {
+  if (!elements.paceValue || !elements.routeRemainingValue || !elements.answerReadinessValue) {
+    return;
+  }
+
+  const attempt = state.attempt;
+  if (!attempt) {
+    setCockpitTone(elements.cockpitPaceCard, "neutral");
+    setCockpitTone(elements.cockpitRouteCard, "neutral");
+    setCockpitTone(elements.cockpitAnswerCard, "neutral");
+    elements.paceValue.textContent = "—";
+    elements.paceHint.textContent = "После старта появится рекомендуемый темп на вопрос.";
+    elements.routeRemainingValue.textContent = "—";
+    elements.routeRemainingHint.textContent = "Система покажет, сколько вопросов осталось до финиша.";
+    elements.answerReadinessValue.textContent = "Ожидание";
+    elements.answerReadinessHint.textContent = "После выбора ответа здесь появится подсказка.";
+    toneTimerBox(elements.timerTotalBox, Number.MAX_SAFE_INTEGER);
+    toneTimerBox(elements.timerTourBox, Number.MAX_SAFE_INTEGER);
+    return;
+  }
+
+  const totalQuestions = Math.max(1, attempt.progress?.totalQuestions || 1);
+  const answeredQuestions = Math.max(0, (attempt.progress?.currentQuestionIndex || 1) - 1);
+  const remainingQuestions = Math.max(0, totalQuestions - answeredQuestions);
+  const totalRemainingMs = Math.max(0, state.timingSnapshot?.totalRemainingMs || 0);
+  const tourRemainingMs = Math.max(0, state.timingSnapshot?.tourRemainingMs || 0);
+  const recommendedPerQuestion = remainingQuestions
+    ? Math.max(15, Math.round(totalRemainingMs / remainingQuestions / 1000))
+    : 0;
+
+  elements.paceValue.textContent = recommendedPerQuestion ? `${recommendedPerQuestion} сек/вопрос` : "Финиш";
+  setCockpitTone(
+    elements.cockpitPaceCard,
+    recommendedPerQuestion > 75 ? "warning" : recommendedPerQuestion ? "active" : "neutral"
+  );
+  elements.paceHint.textContent = recommendedPerQuestion
+    ? `Чтобы уложиться в лимит, держите темп около ${recommendedPerQuestion} сек. на оставшийся вопрос.`
+    : "Маршрут завершён, темп больше не рассчитывается.";
+
+  elements.routeRemainingValue.textContent = remainingQuestions ? `${remainingQuestions} вопросов` : "Финиш";
+  setCockpitTone(
+    elements.cockpitRouteCard,
+    remainingQuestions > 0 ? "active" : "neutral"
+  );
+  elements.routeRemainingHint.textContent = remainingQuestions
+    ? `Сейчас активен ${attempt.currentTour?.code || "T?"}. До завершения маршрута осталось ${remainingQuestions} вопросов.`
+    : "Все туры закрыты, результат сохранён.";
+
+  const currentAnswer = state.questionController?.getAnswer?.() || null;
+  const savedAnswer =
+    attempt.currentQuestion?.savedAnswer || state.localDrafts[attempt.currentQuestion?.id] || null;
+
+  if (state.isSubmittingAnswer || state.isFinishingAttempt) {
+    setCockpitTone(elements.cockpitAnswerCard, "active");
+    elements.answerReadinessValue.textContent = "Отправляем";
+    elements.answerReadinessHint.textContent = "Подождите, ответ уже уходит в облако.";
+  } else if (hasMeaningfulAnswer(currentAnswer)) {
+    setCockpitTone(elements.cockpitAnswerCard, "active");
+    elements.answerReadinessValue.textContent = "Готов к отправке";
+    elements.answerReadinessHint.textContent = "Ответ выбран. Можно нажимать «Ответить и далее».";
+  } else if (hasMeaningfulAnswer(savedAnswer)) {
+    setCockpitTone(elements.cockpitAnswerCard, "warning");
+    elements.answerReadinessValue.textContent = "Черновик найден";
+    elements.answerReadinessHint.textContent = "По этому вопросу уже есть сохранённый черновой ответ.";
+  } else {
+    setCockpitTone(elements.cockpitAnswerCard, "neutral");
+    elements.answerReadinessValue.textContent = "Ожидание";
+    elements.answerReadinessHint.textContent = "Выберите вариант или заполните интерактивный блок.";
+  }
+
+  toneTimerBox(elements.timerTotalBox, totalRemainingMs || Number.MAX_SAFE_INTEGER);
+  toneTimerBox(elements.timerTourBox, tourRemainingMs || Number.MAX_SAFE_INTEGER);
 }
 
 function formatDurationLabel(durationMs) {
@@ -509,7 +640,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.5.1");
+    await navigator.serviceWorker.register("/sw.js?v=1.5.2");
   } catch (error) {
     // PWA layer is optional; the olympiad keeps working without service worker support.
   }
@@ -710,6 +841,10 @@ function participantFromForm() {
 function renderHero() {
   elements.heroTitle.textContent = state.olympiad.title;
   elements.heroSubtitle.textContent = state.olympiad.description;
+  if (elements.heroFormatBadge) {
+    const totalTours = Array.isArray(state.olympiad.tours) ? state.olympiad.tours.length : 0;
+    elements.heroFormatBadge.textContent = `Экспресс-формат • ${state.olympiad.durationMinutes} минут • ${totalTours} туров`;
+  }
   elements.tourMeta.innerHTML = "";
 
   (state.olympiad.tours || []).forEach((tour) => {
@@ -1274,6 +1409,8 @@ function renderQuestion(question) {
     unsupported.textContent = "Этот тип вопроса не поддерживается интерфейсом.";
     elements.questionBody.appendChild(unsupported);
   }
+
+  updateExamCockpit();
 }
 
 function renderAttempt() {
@@ -1314,6 +1451,7 @@ function renderAttempt() {
   renderQuestion(currentQuestion);
   renderJourneyMap();
   refreshAttemptControls();
+  updateExamCockpit();
   elements.submitAnswer.textContent =
     attempt.progress.currentQuestionIndex >= attempt.progress.totalQuestions
       ? "Ответить и завершить"
@@ -1329,6 +1467,7 @@ function renderResult() {
   elements.attemptSection.classList.add("hidden");
   elements.resultSection.classList.remove("hidden");
   refreshNavigationState();
+  updateExamCockpit();
   elements.resultTours.innerHTML = "";
 
   if (elements.resultEyebrow) {
@@ -1371,6 +1510,7 @@ function renderResult() {
   setAttemptSyncMeta(
     `Итог записан: ${formatDateTime(state.attempt.finishedAt || new Date())}`
   );
+  updateExamCockpit();
   requestAnimationFrame(() => scrollToSection(elements.resultSection));
 }
 
@@ -1484,6 +1624,9 @@ function updateTimers() {
 
   elements.timerTotal.textContent = formatTime(totalRemaining);
   elements.timerTour.textContent = formatTime(tourRemaining);
+  toneTimerBox(elements.timerTotalBox, totalRemaining);
+  toneTimerBox(elements.timerTourBox, tourRemaining);
+  updateExamCockpit();
 
   if ((totalRemaining === 0 || tourRemaining === 0) && !state.syncingAfterTimeout) {
     state.syncingAfterTimeout = true;
@@ -1773,6 +1916,9 @@ async function init() {
   elements.startAttempt.addEventListener("click", startAttempt);
   elements.submitAnswer.addEventListener("click", submitAnswer);
   elements.finishAttempt.addEventListener("click", finishAttempt);
+  elements.questionBody.addEventListener("change", () => updateExamCockpit());
+  elements.questionBody.addEventListener("input", () => updateExamCockpit());
+  elements.questionBody.addEventListener("click", () => updateExamCockpit());
 }
 
 init().catch((error) => {

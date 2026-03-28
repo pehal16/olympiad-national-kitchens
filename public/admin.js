@@ -74,13 +74,19 @@ const elements = {
 
 async function adminApi(path, options = {}) {
   let response;
+  const requestHeaders = {
+    "Content-Type": "application/json",
+    ...(options.headers || {})
+  };
+
+  if (adminState.token) {
+    requestHeaders.Authorization = `Bearer ${adminState.token}`;
+  }
 
   try {
     response = await fetch(path, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${adminState.token}`
-      },
+      credentials: "same-origin",
+      headers: requestHeaders,
       ...options
     });
   } catch (error) {
@@ -791,7 +797,7 @@ async function loadAttemptDetail(attemptId, options = {}) {
 async function refreshPanel(options = {}) {
   const { silent = false } = options;
 
-  if (!adminState.token || adminState.refreshInFlight) {
+  if (adminState.refreshInFlight) {
     return;
   }
 
@@ -963,14 +969,12 @@ async function init() {
     elements.filterReset.addEventListener("click", resetFilters);
   }
 
-  if (adminState.token) {
-    try {
-      showPanel();
-      await refreshPanel();
-      startAutoRefresh();
-    } catch (error) {
-      resetAdminSession();
-    }
+  try {
+    showPanel();
+    await refreshPanel();
+    startAutoRefresh();
+  } catch (error) {
+    resetAdminSession();
   }
 }
 

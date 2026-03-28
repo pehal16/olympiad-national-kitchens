@@ -63,6 +63,30 @@ const elements = {
   saveDraft: document.getElementById("content-save-draft"),
   resetDraft: document.getElementById("content-reset-draft"),
   exportDrafts: document.getElementById("content-export-drafts"),
+  creatorNote: document.getElementById("content-creator-note"),
+  createQuestion: document.getElementById("content-create-question"),
+  resetCreator: document.getElementById("content-reset-creator"),
+  creatorTour: document.getElementById("creator-tour"),
+  creatorCuisine: document.getElementById("creator-cuisine"),
+  creatorDishLabel: document.getElementById("creator-dish-label"),
+  creatorPrompt: document.getElementById("creator-prompt"),
+  creatorScenario: document.getElementById("creator-scenario"),
+  creatorNoteInput: document.getElementById("creator-note"),
+  creatorOption1: document.getElementById("creator-option-1"),
+  creatorOption2: document.getElementById("creator-option-2"),
+  creatorOption3: document.getElementById("creator-option-3"),
+  creatorOption4: document.getElementById("creator-option-4"),
+  creatorCorrect1: document.getElementById("creator-correct-1"),
+  creatorCorrect2: document.getElementById("creator-correct-2"),
+  creatorCorrect3: document.getElementById("creator-correct-3"),
+  creatorCorrect4: document.getElementById("creator-correct-4"),
+  creatorDifficulty: document.getElementById("creator-difficulty"),
+  creatorTheme: document.getElementById("creator-theme"),
+  creatorTopic: document.getElementById("creator-topic"),
+  creatorFocus: document.getElementById("creator-focus"),
+  creatorOkCodes: document.getElementById("creator-ok-codes"),
+  creatorPkFocus: document.getElementById("creator-pk-focus"),
+  creatorMethodicalPurpose: document.getElementById("creator-methodical-purpose"),
   editorTheme: document.getElementById("editor-theme"),
   editorTopic: document.getElementById("editor-topic"),
   editorFocus: document.getElementById("editor-focus"),
@@ -76,11 +100,18 @@ const elements = {
 };
 
 function adminApi(path, options = {}) {
+  const requestHeaders = {
+    "Content-Type": "application/json",
+    ...(options.headers || {})
+  };
+
+  if (state.token) {
+    requestHeaders.Authorization = `Bearer ${state.token}`;
+  }
+
   return fetch(path, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${state.token}`
-    },
+    credentials: "same-origin",
+    headers: requestHeaders,
     ...options
   })
     .then(async (response) => {
@@ -373,6 +404,16 @@ function renderQuestionDetail() {
     <span class="muted">${escapeHtml(question.prompt)}</span>
   `;
 
+  if (Array.isArray(question.options) && question.options.length) {
+    const optionsMarkup = question.options
+      .map(
+        (option) =>
+          `<li>${escapeHtml(option.text)}${option.isCorrect ? ' <span class="pill">ключ</span>' : ""}</li>`
+      )
+      .join("");
+    elements.detailHead.innerHTML += `<div class="content-option-preview"><strong>Варианты:</strong><ul class="flat-list">${optionsMarkup}</ul></div>`;
+  }
+
   elements.editorTheme.value = merged.metadata.theme || "";
   elements.editorTopic.value = merged.metadata.topic || "";
   elements.editorFocus.value = merged.metadata.focus || "";
@@ -556,6 +597,100 @@ function exportDrafts() {
   URL.revokeObjectURL(url);
 }
 
+function collectCreatorPayload() {
+  const options = [
+    {
+      text: elements.creatorOption1.value.trim(),
+      isCorrect: elements.creatorCorrect1.checked
+    },
+    {
+      text: elements.creatorOption2.value.trim(),
+      isCorrect: elements.creatorCorrect2.checked
+    },
+    {
+      text: elements.creatorOption3.value.trim(),
+      isCorrect: elements.creatorCorrect3.checked
+    },
+    {
+      text: elements.creatorOption4.value.trim(),
+      isCorrect: elements.creatorCorrect4.checked
+    }
+  ];
+
+  return {
+    tourCode: elements.creatorTour.value,
+    cuisine: elements.creatorCuisine.value,
+    dishLabel: elements.creatorDishLabel.value.trim(),
+    prompt: elements.creatorPrompt.value.trim(),
+    scenario: elements.creatorScenario.value.trim(),
+    note: elements.creatorNoteInput.value.trim(),
+    options,
+    difficulty: elements.creatorDifficulty.value,
+    theme: elements.creatorTheme.value.trim(),
+    topic: elements.creatorTopic.value.trim(),
+    focus: elements.creatorFocus.value.trim(),
+    okCodes: elements.creatorOkCodes.value.trim(),
+    pkFocus: elements.creatorPkFocus.value.trim(),
+    methodicalPurpose: elements.creatorMethodicalPurpose.value.trim()
+  };
+}
+
+function resetCreatorForm() {
+  elements.creatorTour.value = "T1";
+  elements.creatorCuisine.value = "mixed";
+  elements.creatorDishLabel.value = "";
+  elements.creatorPrompt.value = "";
+  elements.creatorScenario.value = "";
+  elements.creatorNoteInput.value = "";
+  elements.creatorOption1.value = "";
+  elements.creatorOption2.value = "";
+  elements.creatorOption3.value = "";
+  elements.creatorOption4.value = "";
+  elements.creatorCorrect1.checked = true;
+  elements.creatorCorrect2.checked = false;
+  elements.creatorCorrect3.checked = false;
+  elements.creatorCorrect4.checked = false;
+  elements.creatorDifficulty.value = "basic";
+  elements.creatorTheme.value = "";
+  elements.creatorTopic.value = "";
+  elements.creatorFocus.value = "";
+  elements.creatorOkCodes.value = "";
+  elements.creatorPkFocus.value = "";
+  elements.creatorMethodicalPurpose.value = "";
+  hideMessage(elements.creatorNote);
+}
+
+async function createCustomQuestion() {
+  try {
+    elements.createQuestion.disabled = true;
+    hideMessage(elements.creatorNote);
+    const payload = collectCreatorPayload();
+    const question = await adminApi("/api/admin/content/questions", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    showMessage(
+      elements.creatorNote,
+      `Новый тест ${question.id} сохранён в банке заданий.`,
+      "success"
+    );
+    resetCreatorForm();
+    await loadContentPanel();
+    state.selectedQuestionId = question.id;
+    renderQuestionList();
+    renderQuestionDetail();
+  } catch (error) {
+    showMessage(
+      elements.creatorNote,
+      error.message || "Не удалось добавить новый тестовый вопрос.",
+      "error"
+    );
+  } finally {
+    elements.createQuestion.disabled = false;
+  }
+}
+
 function resetFilters() {
   elements.filterSearch.value = "";
   elements.filterTour.value = "";
@@ -592,6 +727,9 @@ async function loadContentPanel() {
   state.summary = summary;
   state.questions = questions;
   state.drafts = drafts || {};
+  if (state.selectedQuestionId && !state.questions.find((item) => item.id === state.selectedQuestionId)) {
+    state.selectedQuestionId = "";
+  }
   populateFilterControls();
   renderSummary();
   applyFilters();
@@ -623,16 +761,18 @@ function initNavigation() {
     elements.editorSection.scrollIntoView({ behavior: "smooth", block: "start" })
   );
   elements.navRefresh.addEventListener("click", async () => {
-    if (!state.token) {
-      showLoginState();
-      return;
-    }
-
     try {
+      showPanel();
       await loadContentPanel();
       showMessage(elements.note, "Панель банка заданий обновлена.", "success");
     } catch (error) {
-      showMessage(elements.note, error.message || "Не удалось обновить контентную панель.", "error");
+      if (error.status === 401) {
+        localStorage.removeItem("olympiad_admin_token");
+        state.token = "";
+        showLoginState();
+      } else {
+        showMessage(elements.note, error.message || "Не удалось обновить контентную панель.", "error");
+      }
     }
   });
 }
@@ -644,19 +784,23 @@ async function init() {
   elements.saveDraft.addEventListener("click", saveDraft);
   elements.resetDraft.addEventListener("click", resetDraft);
   elements.exportDrafts.addEventListener("click", exportDrafts);
-
-  if (!state.token) {
-    showLoginState();
-    return;
-  }
+  elements.createQuestion.addEventListener("click", createCustomQuestion);
+  elements.resetCreator.addEventListener("click", resetCreatorForm);
+  resetCreatorForm();
 
   try {
     showPanel();
     await loadContentPanel();
   } catch (error) {
-    localStorage.removeItem("olympiad_admin_token");
-    state.token = "";
-    showLoginState();
+    if (error.status === 401) {
+      localStorage.removeItem("olympiad_admin_token");
+      state.token = "";
+      showLoginState();
+      return;
+    }
+
+    showPanel();
+    showMessage(elements.note, error.message || "Не удалось загрузить банк заданий.", "error");
   }
 }
 

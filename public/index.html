@@ -7,10 +7,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Национальные кухни мира</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.5.1" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.5.2" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css?v=1.5.1" />
+    <link rel="stylesheet" href="/styles.css?v=1.5.2" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -64,7 +64,7 @@
               </text>
             </svg>
           </div>
-          <div class="game-badge">Маршрут шефа • 5 туров</div>
+          <div id="hero-format-badge" class="game-badge">Экспресс-формат • 45 минут • 5 туров</div>
         </div>
         <div class="eyebrow">Автоматизированная олимпиада</div>
         <h1 id="hero-title">Национальные кухни мира</h1>
@@ -134,15 +134,33 @@
             <p id="participant-meta" class="muted"></p>
           </div>
           <div class="timer-stack">
-            <div class="timer-box">
+            <div id="timer-total-box" class="timer-box">
               <span>Общий лимит</span>
               <strong id="timer-total">--:--</strong>
             </div>
-            <div class="timer-box secondary-timer">
+            <div id="timer-tour-box" class="timer-box secondary-timer">
               <span>Лимит текущего тура</span>
               <strong id="timer-tour">--:--</strong>
             </div>
           </div>
+        </section>
+
+        <section class="card exam-cockpit">
+          <article id="cockpit-pace-card" class="cockpit-card neutral">
+            <span class="cockpit-label">Темп прохождения</span>
+            <strong id="pace-value">—</strong>
+            <small id="pace-hint">После старта появится рекомендуемый темп на вопрос.</small>
+          </article>
+          <article id="cockpit-route-card" class="cockpit-card neutral">
+            <span class="cockpit-label">Маршрут впереди</span>
+            <strong id="route-remaining-value">—</strong>
+            <small id="route-remaining-hint">Система покажет, сколько вопросов осталось до финиша.</small>
+          </article>
+          <article id="cockpit-answer-card" class="cockpit-card neutral">
+            <span class="cockpit-label">Готовность ответа</span>
+            <strong id="answer-readiness-value">Ожидание</strong>
+            <small id="answer-readiness-hint">После выбора ответа здесь появится подсказка.</small>
+          </article>
         </section>
 
         <section class="card">
@@ -185,15 +203,17 @@
             <div id="question-body"></div>
           </article>
 
-          <div class="actions">
-            <button id="submit-answer" class="button primary">Ответить и далее</button>
-            <button id="finish-attempt" class="button secondary">Завершить досрочно</button>
+          <div class="action-deck">
+            <div class="actions">
+              <button id="submit-answer" class="button primary">Ответить и далее</button>
+              <button id="finish-attempt" class="button secondary">Завершить досрочно</button>
+            </div>
+            <div class="sync-strip">
+              <div id="attempt-save-status" class="sync-badge idle">Ожидание действия</div>
+              <div id="attempt-sync-meta" class="muted">Последняя синхронизация: —</div>
+            </div>
+            <div id="attempt-message" class="message hidden"></div>
           </div>
-          <div class="sync-strip">
-            <div id="attempt-save-status" class="sync-badge idle">Ожидание действия</div>
-            <div id="attempt-sync-meta" class="muted">Последняя синхронизация: —</div>
-          </div>
-          <div id="attempt-message" class="message hidden"></div>
         </section>
       </section>
 
@@ -217,11 +237,11 @@
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
         <small>
           Разработчик: Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса"
-          • Версия <span id="app-version-label">1.5.1</span>
+          • Версия <span id="app-version-label">1.5.2</span>
         </small>
       </footer>
     </main>
 
-    <script src="/app.js?v=1.5.1"></script>
+    <script src="/app.js?v=1.5.2"></script>
   </body>
 </html>

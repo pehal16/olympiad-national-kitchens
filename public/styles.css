@@ -607,6 +607,12 @@ select {
   flex-wrap: wrap;
 }
 
+.exam-cockpit {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
 .timer-box,
 .stat-card,
 .result-card {
@@ -619,11 +625,63 @@ select {
   background: rgba(31, 142, 115, 0.12);
 }
 
+.timer-box.warning {
+  background: rgba(255, 196, 92, 0.2);
+}
+
+.timer-box.critical {
+  background: rgba(179, 68, 68, 0.16);
+}
+
 .timer-box strong,
 .stat-card strong {
   display: block;
   margin-top: 6px;
   font-size: 30px;
+}
+
+.cockpit-card {
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(38, 38, 38, 0.08);
+  background: rgba(255, 255, 255, 0.76);
+  display: grid;
+  gap: 8px;
+}
+
+.cockpit-card strong {
+  font-size: 26px;
+  line-height: 1.05;
+}
+
+.cockpit-card small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.cockpit-card.neutral {
+  background: rgba(38, 38, 38, 0.05);
+}
+
+.cockpit-card.active {
+  background: rgba(31, 142, 115, 0.12);
+}
+
+.cockpit-card.warning {
+  background: rgba(255, 196, 92, 0.2);
+}
+
+.cockpit-label {
+  color: var(--muted);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.action-deck {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
 }
 
 .stat-label {
@@ -1149,6 +1207,46 @@ select {
   margin-top: 18px;
 }
 
+.creator-card {
+  margin: 18px 0;
+  padding: 18px;
+  border: 1px solid rgba(31, 142, 115, 0.12);
+  border-radius: 20px;
+  background: rgba(243, 250, 248, 0.88);
+}
+
+.creator-grid,
+.creator-options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+  margin-top: 16px;
+}
+
+.creator-field-wide {
+  grid-column: 1 / -1;
+}
+
+.creator-option-card {
+  border: 1px solid rgba(31, 142, 115, 0.12);
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.inline-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.content-option-preview {
+  margin-top: 12px;
+}
+
 .content-list-card,
 .content-detail-card {
   padding: 18px;
@@ -1218,7 +1316,10 @@ pre {
   .grid-three,
   .grid-four,
   .coverage-grid,
-  .content-workbench {
+  .content-workbench,
+  .exam-cockpit,
+  .creator-grid,
+  .creator-options-grid {
     grid-template-columns: 1fr;
   }
 

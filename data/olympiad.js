@@ -12,7 +12,7 @@ module.exports = {
   subtitle: "Автоматизированная олимпиада по технологии приготовления блюд национальных кухонь",
   description:
     "Индивидуальная цифровая олимпиада с автогенерацией варианта, покадровым прохождением, интерактивными заданиями и полной автоматической проверкой.",
-  durationMinutes: 74,
+  durationMinutes: 45,
   timingMode: "total_and_tour_limits",
   registrationMode: "open_form",
   startAt: "2026-01-01T00:00:00+03:00",
@@ -47,7 +47,7 @@ module.exports = {
       title: "Один правильный ответ",
       description:
         "Базовая технологическая и культурная ориентация в национальных кухнях.",
-      timeLimitMinutes: 8,
+      timeLimitMinutes: 6,
       maxScore: 20,
       generation: {
         mode: "single_choice_pools",
@@ -61,7 +61,7 @@ module.exports = {
       title: "Соотнесение блюда и кухни",
       description:
         "Два интерактивных блока на распознавание блюд и кулинарных традиций.",
-      timeLimitMinutes: 8,
+      timeLimitMinutes: 6,
       maxScore: 20,
       generation: {
         mode: "blocks",
@@ -75,7 +75,7 @@ module.exports = {
       title: "Собери блюдо",
       description:
         "Выбор только профильных ингредиентов с автоматическим штрафом за лишние компоненты.",
-      timeLimitMinutes: 14,
+      timeLimitMinutes: 8,
       maxScore: 30,
       generation: {
         mode: "ingredient_matrices",
@@ -90,7 +90,7 @@ module.exports = {
       title: "Технологическая логика",
       description:
         "Выбор корректных действий, причин дефектов и технологически оправданных решений.",
-      timeLimitMinutes: 16,
+      timeLimitMinutes: 10,
       maxScore: 32,
       generation: {
         mode: "logic_tasks",
@@ -104,7 +104,7 @@ module.exports = {
       title: "Кейс-кластеры",
       description:
         "Три кейса по четырём вопросам, определяющие финальный результат олимпиады.",
-      timeLimitMinutes: 28,
+      timeLimitMinutes: 15,
       maxScore: 48,
       generation: {
         mode: "case_clusters",

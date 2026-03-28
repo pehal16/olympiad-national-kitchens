@@ -17,6 +17,9 @@ const {
   loadContentDrafts,
   upsertContentDraft,
   deleteContentDraft,
+  loadContentCustomQuestions,
+  upsertContentCustomQuestion,
+  deleteContentCustomQuestion,
   ROOT_DIR
 } = require("./src/store");
 const {
@@ -417,10 +420,50 @@ function formatCorrectAnswer(question) {
   return "";
 }
 
+function cloneValue(value) {
+  return global.structuredClone
+    ? global.structuredClone(value)
+    : JSON.parse(JSON.stringify(value));
+}
+
+function parseCookies(req) {
+  const source = String(req.headers.cookie || "");
+  if (!source) {
+    return {};
+  }
+
+  return source.split(";").reduce((accumulator, part) => {
+    const [rawKey, ...rest] = part.split("=");
+    const key = String(rawKey || "").trim();
+    if (!key) {
+      return accumulator;
+    }
+
+    accumulator[key] = decodeURIComponent(rest.join("=").trim());
+    return accumulator;
+  }, {});
+}
+
+function buildAdminCookie(token, expiresAt) {
+  const parts = [
+    `olympiad_admin_token=${encodeURIComponent(token)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax"
+  ];
+
+  if (expiresAt) {
+    parts.push(`Expires=${new Date(expiresAt).toUTCString()}`);
+  }
+
+  return parts.join("; ");
+}
+
 async function requireAdmin(req) {
   const authHeader = req.headers.authorization || "";
   const headerToken = req.headers["x-admin-token"] || "";
-  const token = String(headerToken || authHeader.replace("Bearer ", "")).trim();
+  const cookieToken = parseCookies(req).olympiad_admin_token || "";
+  const token = String(headerToken || authHeader.replace("Bearer ", "") || cookieToken).trim();
   if (!token) {
     return null;
   }
@@ -504,6 +547,104 @@ function normalizeContentDraftPayload(payload) {
   };
 }
 
+function normalizeCustomQuestionPayload(payload) {
+  const text = (value) => String(value || "").trim();
+  const normalizeOption = (value) => text(value).replace(/\s+/g, " ").trim();
+  const parseList = (value) =>
+    String(value || "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+  const allowedTours = new Set(["T1", "T4"]);
+  const cuisineCatalog = {
+    ru: { label: "Русская кухня", group: "slavic", groupLabel: "Славянские кухни" },
+    fr: { label: "Французская кухня", group: "western_europe", groupLabel: "Западная Европа" },
+    it: { label: "Итальянская кухня", group: "western_europe", groupLabel: "Западная Европа" },
+    jp: { label: "Японская кухня", group: "east_asia", groupLabel: "Восточная Азия" },
+    mx: { label: "Мексиканская кухня", group: "latin_america", groupLabel: "Латинская Америка" },
+    de: { label: "Немецкая кухня", group: "western_europe", groupLabel: "Западная Европа" },
+    uk: { label: "Английская кухня", group: "western_europe", groupLabel: "Западная Европа" },
+    balkan: { label: "Балканские кухни", group: "balkan", groupLabel: "Балканский регион" },
+    mixed: { label: "Смешанный блок", group: "general", groupLabel: "Общий блок" }
+  };
+
+  const prompt = text(payload.prompt);
+  if (!prompt) {
+    throw new Error("Введите формулировку вопроса.");
+  }
+
+  const tourCode = text(payload.tourCode || "T1").toUpperCase();
+  if (!allowedTours.has(tourCode)) {
+    throw new Error("Сейчас авторские тесты можно добавлять для туров T1 и T4.");
+  }
+
+  const cuisine = text(payload.cuisine || "mixed").toLowerCase();
+  const cuisineMeta = cuisineCatalog[cuisine];
+  if (!cuisineMeta) {
+    throw new Error("Выберите кухню для нового вопроса.");
+  }
+
+  const options = (Array.isArray(payload.options) ? payload.options : [])
+    .map((option, index) => ({
+      id: `option-${index + 1}`,
+      text: normalizeOption(option.text),
+      isCorrect: Boolean(option.isCorrect)
+    }))
+    .filter((option) => option.text);
+
+  if (options.length < 4) {
+    throw new Error("Заполните не меньше четырёх вариантов ответа.");
+  }
+
+  if (options.filter((option) => option.isCorrect).length !== 1) {
+    throw new Error("Отметьте ровно один правильный вариант ответа.");
+  }
+
+  const difficulty = text(payload.difficulty || "basic");
+  const difficultyMap = {
+    basic: "Базовый уровень",
+    standard: "Повышенный уровень",
+    advanced: "Высокий уровень"
+  };
+
+  const id = text(payload.id) || generateId("custom_test");
+  const dishLabel = text(payload.dishLabel || payload.theme || "Авторский тест");
+  const estimatedTimeSec = Math.max(20, Number(payload.estimatedTimeSec) || 60);
+  const maxScore = Math.max(1, Number(payload.maxScore) || (tourCode === "T4" ? 4 : 2));
+
+  return {
+    id,
+    type: "single_choice",
+    tourCode,
+    cuisine,
+    cuisineLabel: cuisineMeta.label,
+    cuisineGroup: cuisineMeta.group,
+    cuisineGroupLabel: cuisineMeta.groupLabel,
+    dishId: id,
+    dishLabel,
+    prompt,
+    scenario: text(payload.scenario),
+    note: text(payload.note),
+    maxScore,
+    options,
+    metadata: {
+      theme: text(payload.theme || dishLabel),
+      topic: text(payload.topic),
+      focus: text(payload.focus),
+      studentAction: text(payload.studentAction || "Выберите правильный ответ"),
+      difficulty: ["basic", "standard", "advanced"].includes(difficulty) ? difficulty : "basic",
+      difficultyLabel: difficultyMap[difficulty] || difficultyMap.basic,
+      estimatedTimeSec,
+      okCodes: parseList(payload.okCodes),
+      pkFocus: parseList(payload.pkFocus),
+      methodicalPurpose: text(payload.methodicalPurpose),
+      createdAt: nowIso(),
+      updatedAt: nowIso()
+    }
+  };
+}
+
 function latestAttemptActivity(attempt) {
   const timestamps = [attempt.startedAt, attempt.finishedAt];
 
@@ -538,6 +679,48 @@ function sortCatalog(values) {
   return Array.from(new Set(values.filter(Boolean))).sort((left, right) =>
     left.localeCompare(right, "ru-RU")
   );
+}
+
+async function loadCustomQuestionMap() {
+  return (await loadContentCustomQuestions()) || {};
+}
+
+function buildOlympiadWithCustomQuestions(olympiad, customQuestionsMap = {}) {
+  const customQuestions = Object.values(customQuestionsMap || {});
+  if (!customQuestions.length) {
+    return olympiad;
+  }
+
+  const prepared = cloneValue(olympiad);
+  prepared.questionBank = prepared.questionBank || {};
+  prepared.questionBank.tour1Pools = Array.isArray(prepared.questionBank.tour1Pools)
+    ? prepared.questionBank.tour1Pools
+    : [];
+  prepared.questionBank.tour4Tasks = Array.isArray(prepared.questionBank.tour4Tasks)
+    ? prepared.questionBank.tour4Tasks
+    : [];
+
+  const tour1Questions = customQuestions.filter(
+    (question) => question.type === "single_choice" && question.tourCode === "T1"
+  );
+  if (tour1Questions.length) {
+    prepared.questionBank.tour1Pools.push({
+      id: "author-custom-tests",
+      title: "Авторские тестовые вопросы",
+      questions: tour1Questions.map((question) => cloneValue(question))
+    });
+  }
+
+  const tour4Questions = customQuestions.filter(
+    (question) => question.type === "single_choice" && question.tourCode === "T4"
+  );
+  if (tour4Questions.length) {
+    prepared.questionBank.tour4Tasks.push(
+      ...tour4Questions.map((question) => cloneValue(question))
+    );
+  }
+
+  return prepared;
 }
 
 function buildSuspiciousAttemptReport(olympiad, attempt, summary) {
@@ -917,7 +1100,9 @@ async function handleApi(req, res, url) {
 
   const method = req.method;
   const pathname = url.pathname;
-  const olympiad = loadOlympiad();
+  const olympiadBase = loadOlympiad();
+  const customQuestionMap = await loadCustomQuestionMap();
+  const olympiad = buildOlympiadWithCustomQuestions(olympiadBase, customQuestionMap);
   const settings = loadSettings();
 
   if (method === "GET" && pathname === "/api/health") {
@@ -1214,7 +1399,12 @@ async function handleApi(req, res, url) {
       expiresAt: Date.now() + 24 * 60 * 60 * 1000
     });
     await saveAdminSessions(sessions);
-    sendJson(res, 200, { ok: true, data: { token } });
+    sendJson(
+      res,
+      200,
+      { ok: true, data: { token } },
+      { "Set-Cookie": buildAdminCookie(token, sessions.at(-1)?.expiresAt) }
+    );
     return;
   }
 
@@ -1262,7 +1452,7 @@ async function handleApi(req, res, url) {
     if (method === "GET" && pathname === "/api/admin/content/summary") {
       sendJson(res, 200, {
         ok: true,
-        data: buildQuestionBankSummary(olympiad)
+        data: buildQuestionBankSummary(olympiadBase, customQuestionMap)
       });
       return;
     }
@@ -1270,7 +1460,28 @@ async function handleApi(req, res, url) {
     if (method === "GET" && pathname === "/api/admin/content/questions") {
       sendJson(res, 200, {
         ok: true,
-        data: buildQuestionCatalog(olympiad)
+        data: buildQuestionCatalog(olympiadBase, customQuestionMap)
+      });
+      return;
+    }
+
+    if (method === "POST" && pathname === "/api/admin/content/questions") {
+      const body = await parseBody(req);
+      const question = normalizeCustomQuestionPayload(body);
+      await upsertContentCustomQuestion(question.id, question);
+      sendJson(res, 200, {
+        ok: true,
+        data: question
+      });
+      return;
+    }
+
+    if (method === "DELETE" && pathname.match(/^\/api\/admin\/content\/questions\/[^/]+$/)) {
+      const questionId = decodeURIComponent(pathname.split("/")[5] || "");
+      await deleteContentCustomQuestion(questionId);
+      sendJson(res, 200, {
+        ok: true,
+        data: { questionId }
       });
       return;
     }
