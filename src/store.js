@@ -23,6 +23,7 @@ const PARTICIPANTS_FILE = path.join(DATA_DIR, "participants.json");
 const SETTINGS_FILE = path.join(CONFIG_DIR, "settings.json");
 const ATTEMPTS_FILE = path.join(STORAGE_DIR, "attempts.json");
 const SESSIONS_FILE = path.join(STORAGE_DIR, "admin-sessions.json");
+const CONTENT_DRAFTS_FILE = path.join(STORAGE_DIR, "content-drafts.json");
 
 const STORAGE_BACKEND = String(
   process.env.STORAGE_BACKEND ||
@@ -62,6 +63,7 @@ function initFileStorage() {
   ensureDir(EXPORTS_DIR);
   readJson(ATTEMPTS_FILE, []);
   readJson(SESSIONS_FILE, []);
+  readJson(CONTENT_DRAFTS_FILE, {});
 }
 
 async function initStorage() {
@@ -112,7 +114,8 @@ function loadSettings() {
       enabled: STORAGE_BACKEND === "ydb",
       connectionString: process.env.YDB_CONNECTION_STRING || "",
       attemptsTable: process.env.YDB_ATTEMPTS_TABLE || "olympiad_attempts",
-      adminSessionsTable: process.env.YDB_ADMIN_SESSIONS_TABLE || "admin_sessions"
+      adminSessionsTable: process.env.YDB_ADMIN_SESSIONS_TABLE || "admin_sessions",
+      contentDraftsTable: process.env.YDB_CONTENT_DRAFTS_TABLE || "olympiad_content_drafts"
     }
   };
 }
@@ -181,6 +184,43 @@ async function saveAdminSessions(sessions) {
   writeJson(SESSIONS_FILE, sessions);
 }
 
+async function loadContentDrafts() {
+  if (STORAGE_BACKEND === "ydb") {
+    return getYdbStore().loadContentDrafts();
+  }
+  return readJson(CONTENT_DRAFTS_FILE, {});
+}
+
+async function saveContentDrafts(drafts) {
+  if (STORAGE_BACKEND === "ydb") {
+    await getYdbStore().saveContentDrafts(drafts);
+    return;
+  }
+  writeJson(CONTENT_DRAFTS_FILE, drafts || {});
+}
+
+async function upsertContentDraft(questionId, draft) {
+  if (STORAGE_BACKEND === "ydb") {
+    await getYdbStore().upsertContentDraft(questionId, draft);
+    return;
+  }
+
+  const drafts = readJson(CONTENT_DRAFTS_FILE, {});
+  drafts[questionId] = draft;
+  writeJson(CONTENT_DRAFTS_FILE, drafts);
+}
+
+async function deleteContentDraft(questionId) {
+  if (STORAGE_BACKEND === "ydb") {
+    await getYdbStore().deleteContentDraft(questionId);
+    return;
+  }
+
+  const drafts = readJson(CONTENT_DRAFTS_FILE, {});
+  delete drafts[questionId];
+  writeJson(CONTENT_DRAFTS_FILE, drafts);
+}
+
 module.exports = {
   ROOT_DIR,
   DATA_DIR,
@@ -198,5 +238,9 @@ module.exports = {
   loadAttemptById,
   loadAdminSessions,
   saveAdminSessions,
-  loadAdminSessionByToken
+  loadAdminSessionByToken,
+  loadContentDrafts,
+  saveContentDrafts,
+  upsertContentDraft,
+  deleteContentDraft
 };

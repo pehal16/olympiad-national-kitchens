@@ -14,6 +14,9 @@ const {
   loadAttemptById,
   loadAdminSessionByToken,
   saveAdminSessions,
+  loadContentDrafts,
+  upsertContentDraft,
+  deleteContentDraft,
   ROOT_DIR
 } = require("./src/store");
 const {
@@ -470,6 +473,35 @@ function safeDateMs(value) {
   }
   const parsed = new Date(value).getTime();
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function normalizeContentDraftPayload(payload) {
+  const text = (value) => String(value || "").trim();
+  const list = (value) =>
+    (Array.isArray(value) ? value : [])
+      .map((item) => String(item || "").trim())
+      .filter(Boolean);
+
+  const difficulty = text(payload.difficulty || "basic");
+  const difficultyMap = {
+    basic: "Базовый уровень",
+    standard: "Повышенный уровень",
+    advanced: "Высокий уровень"
+  };
+
+  return {
+    theme: text(payload.theme),
+    topic: text(payload.topic),
+    focus: text(payload.focus),
+    studentAction: text(payload.studentAction),
+    difficulty: ["basic", "standard", "advanced"].includes(difficulty) ? difficulty : "basic",
+    difficultyLabel: text(payload.difficultyLabel) || difficultyMap[difficulty] || difficultyMap.basic,
+    estimatedTimeSec: Math.max(15, Number(payload.estimatedTimeSec) || 60),
+    okCodes: list(payload.okCodes),
+    pkFocus: list(payload.pkFocus),
+    methodicalPurpose: text(payload.methodicalPurpose),
+    updatedAt: nowIso()
+  };
 }
 
 function latestAttemptActivity(attempt) {
@@ -1239,6 +1271,39 @@ async function handleApi(req, res, url) {
       sendJson(res, 200, {
         ok: true,
         data: buildQuestionCatalog(olympiad)
+      });
+      return;
+    }
+
+    if (method === "GET" && pathname === "/api/admin/content/drafts") {
+      sendJson(res, 200, {
+        ok: true,
+        data: await loadContentDrafts()
+      });
+      return;
+    }
+
+    if (method === "PUT" && pathname.match(/^\/api\/admin\/content\/drafts\/[^/]+$/)) {
+      const questionId = decodeURIComponent(pathname.split("/")[5] || "");
+      const body = await parseBody(req);
+      const draft = normalizeContentDraftPayload(body);
+      await upsertContentDraft(questionId, draft);
+      sendJson(res, 200, {
+        ok: true,
+        data: {
+          questionId,
+          draft
+        }
+      });
+      return;
+    }
+
+    if (method === "DELETE" && pathname.match(/^\/api\/admin\/content\/drafts\/[^/]+$/)) {
+      const questionId = decodeURIComponent(pathname.split("/")[5] || "");
+      await deleteContentDraft(questionId);
+      sendJson(res, 200, {
+        ok: true,
+        data: { questionId }
       });
       return;
     }

@@ -1,12 +1,11 @@
-const CONTENT_DRAFTS_KEY = "olympiad_content_drafts_v1_5";
-
 const state = {
   token: localStorage.getItem("olympiad_admin_token") || "",
   summary: null,
   questions: [],
   filteredQuestions: [],
   selectedQuestionId: "",
-  drafts: loadDrafts(),
+  drafts: {},
+  draftRequestState: "idle",
   filters: {
     search: "",
     tour: "",
@@ -60,7 +59,6 @@ const elements = {
   detailEmpty: document.getElementById("content-detail-empty"),
   detail: document.getElementById("content-detail"),
   detailHead: document.getElementById("content-detail-head"),
-  detailForm: document.getElementById("content-detail-form"),
   note: document.getElementById("content-detail-note"),
   saveDraft: document.getElementById("content-save-draft"),
   resetDraft: document.getElementById("content-reset-draft"),
@@ -76,19 +74,6 @@ const elements = {
   editorMethodicalPurpose: document.getElementById("editor-methodical-purpose"),
   appVersionLabel: document.getElementById("content-app-version-label")
 };
-
-function loadDrafts() {
-  try {
-    const raw = localStorage.getItem(CONTENT_DRAFTS_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch (error) {
-    return {};
-  }
-}
-
-function persistDrafts() {
-  localStorage.setItem(CONTENT_DRAFTS_KEY, JSON.stringify(state.drafts));
-}
 
 function adminApi(path, options = {}) {
   return fetch(path, {
@@ -185,11 +170,14 @@ function showPanel() {
   elements.panel.classList.remove("hidden");
 }
 
-function fillSelect(select, placeholder, values) {
-  if (!select) {
-    return;
-  }
+function setDraftRequestState(mode) {
+  state.draftRequestState = mode;
+  const locked = mode === "saving" || mode === "resetting";
+  elements.saveDraft.disabled = locked;
+  elements.resetDraft.disabled = locked;
+}
 
+function fillSelect(select, placeholder, values) {
   const current = select.value;
   select.innerHTML = "";
 
@@ -211,10 +199,6 @@ function fillSelect(select, placeholder, values) {
 }
 
 function renderCoverageList(element, items = [], emptyText) {
-  if (!element) {
-    return;
-  }
-
   if (!items.length) {
     element.innerHTML = `<div class="muted">${emptyText}</div>`;
     return;
@@ -229,10 +213,6 @@ function renderCoverageList(element, items = [], emptyText) {
 }
 
 function renderQaList(element, items = [], renderer, emptyText) {
-  if (!element) {
-    return;
-  }
-
   if (!items.length) {
     element.innerHTML = `<div class="muted">${emptyText}</div>`;
     return;
@@ -355,65 +335,6 @@ function syncFiltersFromInputs() {
   };
 }
 
-function applyFilters() {
-  syncFiltersFromInputs();
-
-  state.filteredQuestions = state.questions.filter((question) => {
-    if (state.filters.search && !getQuestionBlob(question).includes(state.filters.search.toLowerCase())) {
-      return false;
-    }
-    if (state.filters.tour && question.tourCode !== state.filters.tour) {
-      return false;
-    }
-    if (state.filters.cuisine && question.cuisineLabel !== state.filters.cuisine) {
-      return false;
-    }
-    if (state.filters.type && question.typeLabel !== state.filters.type) {
-      return false;
-    }
-    if (
-      state.filters.difficulty &&
-      question.metadata.difficultyLabel !== state.filters.difficulty
-    ) {
-      return false;
-    }
-    if (state.filters.theme && question.metadata.theme !== state.filters.theme) {
-      return false;
-    }
-    return true;
-  });
-
-  renderQuestionList();
-}
-
-function populateFilterControls() {
-  fillSelect(
-    elements.filterTour,
-    "Все туры",
-    state.summary?.catalogs?.tours || []
-  );
-  fillSelect(
-    elements.filterCuisine,
-    "Все кухни",
-    state.summary?.catalogs?.cuisines || []
-  );
-  fillSelect(
-    elements.filterType,
-    "Все типы",
-    state.summary?.catalogs?.types || []
-  );
-  fillSelect(
-    elements.filterDifficulty,
-    "Все уровни",
-    state.summary?.catalogs?.difficulties || []
-  );
-  fillSelect(
-    elements.filterTheme,
-    "Все темы",
-    state.summary?.catalogs?.themes || []
-  );
-}
-
 function mergedQuestion(question) {
   const draft = state.drafts[question.id];
   if (!draft) {
@@ -429,55 +350,6 @@ function mergedQuestion(question) {
       pkFocus: draft.pkFocus || question.metadata.pkFocus
     }
   };
-}
-
-function renderQuestionList() {
-  elements.questionList.innerHTML = "";
-  const total = state.questions.length;
-  const shown = state.filteredQuestions.length;
-  elements.filterMeta.textContent = `показано ${shown} из ${total}`;
-  elements.draftMeta.textContent = `черновиков: ${Object.keys(state.drafts).length}`;
-
-  if (!shown) {
-    elements.questionList.innerHTML = '<div class="muted">По текущим фильтрам вопросов не найдено.</div>';
-    if (state.selectedQuestionId && !state.filteredQuestions.find((item) => item.id === state.selectedQuestionId)) {
-      state.selectedQuestionId = "";
-      renderQuestionDetail();
-    }
-    return;
-  }
-
-  state.filteredQuestions.forEach((question) => {
-    const draft = state.drafts[question.id];
-    const row = document.createElement("button");
-    row.type = "button";
-    row.className = `content-question-row${question.id === state.selectedQuestionId ? " is-selected" : ""}`;
-    row.innerHTML = `
-      <div class="content-question-top">
-        <strong>${escapeHtml(question.id)}</strong>
-        <span class="pill">${escapeHtml(question.tourCode)}</span>
-      </div>
-      <div>${escapeHtml(shortText(question.prompt, 110))}</div>
-      <div class="content-question-meta">
-        <span>${escapeHtml(question.cuisineLabel)}</span>
-        <span>${escapeHtml(question.typeLabel)}</span>
-        <span>${escapeHtml(question.metadata.difficultyLabel)}</span>
-        ${draft ? '<span class="pill">есть черновик</span>' : ""}
-      </div>
-    `;
-    row.addEventListener("click", () => {
-      state.selectedQuestionId = question.id;
-      renderQuestionList();
-      renderQuestionDetail();
-    });
-    elements.questionList.appendChild(row);
-  });
-
-  if (!state.selectedQuestionId) {
-    state.selectedQuestionId = state.filteredQuestions[0].id;
-  }
-
-  renderQuestionDetail();
 }
 
 function renderQuestionDetail() {
@@ -512,6 +384,91 @@ function renderQuestionDetail() {
   elements.editorMethodicalPurpose.value = merged.metadata.methodicalPurpose || "";
 }
 
+function renderQuestionList() {
+  elements.questionList.innerHTML = "";
+  const total = state.questions.length;
+  const shown = state.filteredQuestions.length;
+  elements.filterMeta.textContent = `показано ${shown} из ${total}`;
+  elements.draftMeta.textContent = `черновиков: ${Object.keys(state.drafts).length}`;
+
+  if (!shown) {
+    elements.questionList.innerHTML = '<div class="muted">По текущим фильтрам вопросов не найдено.</div>';
+    if (state.selectedQuestionId && !state.filteredQuestions.find((item) => item.id === state.selectedQuestionId)) {
+      state.selectedQuestionId = "";
+      renderQuestionDetail();
+    }
+    return;
+  }
+
+  state.filteredQuestions.forEach((question) => {
+    const draft = state.drafts[question.id];
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = `content-question-row${question.id === state.selectedQuestionId ? " is-selected" : ""}`;
+    row.innerHTML = `
+      <div class="content-question-top">
+        <strong>${escapeHtml(question.id)}</strong>
+        <span class="pill">${escapeHtml(question.tourCode)}</span>
+      </div>
+      <div>${escapeHtml(shortText(question.prompt, 110))}</div>
+      <div class="content-question-meta">
+        <span>${escapeHtml(question.cuisineLabel)}</span>
+        <span>${escapeHtml(question.typeLabel)}</span>
+        <span>${escapeHtml(question.metadata.difficultyLabel)}</span>
+        ${draft ? '<span class="pill">есть серверный черновик</span>' : ""}
+      </div>
+    `;
+    row.addEventListener("click", () => {
+      state.selectedQuestionId = question.id;
+      renderQuestionList();
+      renderQuestionDetail();
+    });
+    elements.questionList.appendChild(row);
+  });
+
+  if (!state.selectedQuestionId) {
+    state.selectedQuestionId = state.filteredQuestions[0].id;
+  }
+
+  renderQuestionDetail();
+}
+
+function applyFilters() {
+  syncFiltersFromInputs();
+
+  state.filteredQuestions = state.questions.filter((question) => {
+    if (state.filters.search && !getQuestionBlob(question).includes(state.filters.search.toLowerCase())) {
+      return false;
+    }
+    if (state.filters.tour && question.tourCode !== state.filters.tour) {
+      return false;
+    }
+    if (state.filters.cuisine && question.cuisineLabel !== state.filters.cuisine) {
+      return false;
+    }
+    if (state.filters.type && question.typeLabel !== state.filters.type) {
+      return false;
+    }
+    if (state.filters.difficulty && question.metadata.difficultyLabel !== state.filters.difficulty) {
+      return false;
+    }
+    if (state.filters.theme && question.metadata.theme !== state.filters.theme) {
+      return false;
+    }
+    return true;
+  });
+
+  renderQuestionList();
+}
+
+function populateFilterControls() {
+  fillSelect(elements.filterTour, "Все туры", state.summary?.catalogs?.tours || []);
+  fillSelect(elements.filterCuisine, "Все кухни", state.summary?.catalogs?.cuisines || []);
+  fillSelect(elements.filterType, "Все типы", state.summary?.catalogs?.types || []);
+  fillSelect(elements.filterDifficulty, "Все уровни", state.summary?.catalogs?.difficulties || []);
+  fillSelect(elements.filterTheme, "Все темы", state.summary?.catalogs?.themes || []);
+}
+
 function collectDraftFromForm() {
   return {
     theme: elements.editorTheme.value.trim(),
@@ -534,29 +491,50 @@ function collectDraftFromForm() {
   };
 }
 
-function saveDraft() {
+async function saveDraft() {
   if (!state.selectedQuestionId) {
     return;
   }
 
-  state.drafts[state.selectedQuestionId] = collectDraftFromForm();
-  persistDrafts();
-  elements.draftMeta.textContent = `черновиков: ${Object.keys(state.drafts).length}`;
-  showMessage(elements.note, "Черновик сохранён локально в браузере.", "success");
-  renderQuestionList();
+  try {
+    setDraftRequestState("saving");
+    hideMessage(elements.note);
+    const payload = collectDraftFromForm();
+    const response = await adminApi(`/api/admin/content/drafts/${encodeURIComponent(state.selectedQuestionId)}`, {
+      method: "PUT",
+      body: JSON.stringify(payload)
+    });
+    state.drafts[state.selectedQuestionId] = response.draft;
+    showMessage(elements.note, "Черновик сохранён на сервере. Он доступен с любого компьютера.", "success");
+    renderQuestionList();
+    renderQuestionDetail();
+  } catch (error) {
+    showMessage(elements.note, error.message || "Не удалось сохранить черновик на сервере.", "error");
+  } finally {
+    setDraftRequestState("idle");
+  }
 }
 
-function resetDraft() {
+async function resetDraft() {
   if (!state.selectedQuestionId) {
     return;
   }
 
-  delete state.drafts[state.selectedQuestionId];
-  persistDrafts();
-  elements.draftMeta.textContent = `черновиков: ${Object.keys(state.drafts).length}`;
-  showMessage(elements.note, "Черновик удалён. Показаны базовые метаданные вопроса.", "success");
-  renderQuestionList();
-  renderQuestionDetail();
+  try {
+    setDraftRequestState("resetting");
+    hideMessage(elements.note);
+    await adminApi(`/api/admin/content/drafts/${encodeURIComponent(state.selectedQuestionId)}`, {
+      method: "DELETE"
+    });
+    delete state.drafts[state.selectedQuestionId];
+    showMessage(elements.note, "Серверный черновик удалён. Показаны базовые метаданные вопроса.", "success");
+    renderQuestionList();
+    renderQuestionDetail();
+  } catch (error) {
+    showMessage(elements.note, error.message || "Не удалось удалить серверный черновик.", "error");
+  } finally {
+    setDraftRequestState("idle");
+  }
 }
 
 function exportDrafts() {
@@ -600,18 +578,20 @@ async function loadPublicVersion() {
       elements.appVersionLabel.textContent = payload.appVersion;
     }
   } catch (error) {
-    // Keep bundled version if health is temporarily unavailable.
+    // keep bundled version if health is temporarily unavailable
   }
 }
 
 async function loadContentPanel() {
-  const [summary, questions] = await Promise.all([
+  const [summary, questions, drafts] = await Promise.all([
     adminApi("/api/admin/content/summary"),
-    adminApi("/api/admin/content/questions")
+    adminApi("/api/admin/content/questions"),
+    adminApi("/api/admin/content/drafts")
   ]);
 
   state.summary = summary;
   state.questions = questions;
+  state.drafts = drafts || {};
   populateFilterControls();
   renderSummary();
   applyFilters();
@@ -650,6 +630,7 @@ function initNavigation() {
 
     try {
       await loadContentPanel();
+      showMessage(elements.note, "Панель банка заданий обновлена.", "success");
     } catch (error) {
       showMessage(elements.note, error.message || "Не удалось обновить контентную панель.", "error");
     }

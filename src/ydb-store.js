@@ -9,6 +9,8 @@ const ATTEMPT_VARIANTS_TABLE =
 const ATTEMPT_ANSWERS_TABLE =
   process.env.YDB_ATTEMPT_ANSWERS_TABLE || "olympiad_attempt_answers";
 const ADMIN_SESSIONS_TABLE = process.env.YDB_ADMIN_SESSIONS_TABLE || "admin_sessions";
+const CONTENT_DRAFTS_TABLE =
+  process.env.YDB_CONTENT_DRAFTS_TABLE || "olympiad_content_drafts";
 
 let sqlPromise = null;
 let schemaReady = null;
@@ -75,6 +77,14 @@ async function ensureSchema() {
           payload_json Utf8,
           updated_at Utf8,
           PRIMARY KEY (token)
+        )
+      `;
+      await sql`
+        CREATE TABLE IF NOT EXISTS ${identifier(CONTENT_DRAFTS_TABLE)} (
+          question_id Utf8,
+          payload_json Utf8,
+          updated_at Utf8,
+          PRIMARY KEY (question_id)
         )
       `;
     })();
@@ -436,6 +446,56 @@ async function saveAdminSessions(sessions) {
   );
 }
 
+async function loadContentDrafts() {
+  const rows = await selectRows(CONTENT_DRAFTS_TABLE, "question_id");
+  const drafts = {};
+
+  rows.forEach((row) => {
+    try {
+      drafts[row.question_id] = JSON.parse(row.payload_json);
+    } catch (error) {
+      // Skip malformed draft rows.
+    }
+  });
+
+  return drafts;
+}
+
+async function saveContentDrafts(drafts) {
+  const items = Object.entries(drafts || {}).map(([questionId, draft]) => ({
+    questionId,
+    draft
+  }));
+
+  await bulkUpsert(
+    CONTENT_DRAFTS_TABLE,
+    "question_id",
+    items,
+    (item) => item.questionId
+  );
+}
+
+async function upsertContentDraft(questionId, draft) {
+  if (!questionId || !draft) {
+    return;
+  }
+
+  await upsertRow(CONTENT_DRAFTS_TABLE, "question_id", questionId, draft);
+}
+
+async function deleteContentDraft(questionId) {
+  if (!questionId) {
+    return;
+  }
+
+  await ensureSchema();
+  const sql = await getSql();
+  await sql`
+    DELETE FROM ${identifier(CONTENT_DRAFTS_TABLE)}
+    WHERE question_id = ${String(questionId)}
+  `;
+}
+
 module.exports = {
   initYdbStorage,
   loadAttempts,
@@ -444,5 +504,9 @@ module.exports = {
   loadAttemptById,
   loadAdminSessions,
   saveAdminSessions,
-  loadAdminSessionByToken
+  loadAdminSessionByToken,
+  loadContentDrafts,
+  saveContentDrafts,
+  upsertContentDraft,
+  deleteContentDraft
 };
