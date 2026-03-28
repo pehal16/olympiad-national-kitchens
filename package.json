@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "export:bank": "node scripts/export-question-bank.js"
   },
   "dependencies": {
     "@ydbjs/auth": "^6.2.1",

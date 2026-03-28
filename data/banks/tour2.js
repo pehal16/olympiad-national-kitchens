@@ -42,9 +42,9 @@ module.exports = [
     "Соотнесите блюда и кухни: блок 3.",
     [
       { dishId: "schnitzel", text: "Шницель", cuisine: "de" },
-      { dishId: "fish_and_chips", text: "Fish and chips", cuisine: "uk" },
+      { dishId: "fish_and_chips", text: "Фиш-энд-чипс (жареная рыба с картофелем)", cuisine: "uk" },
       { dishId: "strudel", text: "Штрудель", cuisine: "de" },
-      { dishId: "shepherds_pie", text: "Shepherd's pie", cuisine: "uk" },
+      { dishId: "shepherds_pie", text: "Пастуший пирог (Shepherd's pie)", cuisine: "uk" },
       { dishId: "pretzel", text: "Брецель", cuisine: "de" }
     ],
     [
