@@ -3,8 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1f8e73" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Национальные кухни мира</title>
-    <link rel="stylesheet" href="/styles.css?v=1.1.0" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.2.0" />
+    <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="stylesheet" href="/styles.css?v=1.2.0" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -17,6 +23,8 @@
         <button id="nav-register" class="button ghost" type="button">Регистрация</button>
         <button id="nav-attempt" class="button ghost" type="button">Текущий тур</button>
         <button id="nav-result" class="button ghost" type="button">Результат</button>
+        <div id="network-status" class="network-badge online">Сеть: онлайн</div>
+        <button id="install-app" class="button primary hidden" type="button">Установить приложение</button>
         <a class="button ghost" href="/admin.html">Облачная админка</a>
       </section>
 
@@ -62,6 +70,15 @@
         <h1 id="hero-title">Национальные кухни мира</h1>
         <p id="hero-subtitle" class="lead"></p>
         <div class="meta-row" id="tour-meta"></div>
+      </section>
+
+      <section class="card journey-panel">
+        <div class="section-row">
+          <h2>Маршрут участника</h2>
+          <div id="journey-status" class="pill">Точка входа: регистрация</div>
+        </div>
+        <div id="journey-map" class="journey-map"></div>
+        <div id="install-message" class="message hidden"></div>
       </section>
 
       <section class="grid-two" id="prestart-section">
@@ -178,11 +195,11 @@
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
         <small>
           Разработчик: Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса"
-          • Версия <span id="app-version-label">1.1.1</span>
+          • Версия <span id="app-version-label">1.2.0</span>
         </small>
       </footer>
     </main>
 
-    <script src="/app.js?v=1.1.1"></script>
+    <script src="/app.js?v=1.2.0"></script>
   </body>
 </html>

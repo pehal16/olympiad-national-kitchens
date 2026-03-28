@@ -1,0 +1,25 @@
+{
+  "name": "Олимпиада «Национальные кухни мира»",
+  "short_name": "Нацкухни",
+  "description": "Цифровая олимпиада по национальным кухням мира для студентов СПО.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f8f7",
+  "theme_color": "#1f8e73",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

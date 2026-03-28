@@ -11,3 +11,4 @@ exports/
 tmp_docx_extract/
 *.log
 *.zip
+.codex_backup_*/

@@ -10,7 +10,9 @@ const state = {
   syncingAfterTimeout: false,
   syncInFlight: false,
   isSubmittingAnswer: false,
-  isFinishingAttempt: false
+  isFinishingAttempt: false,
+  deferredInstallPrompt: null,
+  isOnline: navigator.onLine
 };
 
 const elements = {
@@ -19,10 +21,15 @@ const elements = {
   navRegister: document.getElementById("nav-register"),
   navAttempt: document.getElementById("nav-attempt"),
   navResult: document.getElementById("nav-result"),
+  networkStatus: document.getElementById("network-status"),
+  installApp: document.getElementById("install-app"),
   heroSection: document.getElementById("hero-section"),
   heroTitle: document.getElementById("hero-title"),
   heroSubtitle: document.getElementById("hero-subtitle"),
   tourMeta: document.getElementById("tour-meta"),
+  journeyMap: document.getElementById("journey-map"),
+  journeyStatus: document.getElementById("journey-status"),
+  installMessage: document.getElementById("install-message"),
   rulesList: document.getElementById("rules-list"),
   registrationForm: document.getElementById("registration-form"),
   fullName: document.getElementById("full-name"),
@@ -111,15 +118,27 @@ function refreshAttemptControls() {
 
   if (state.isSubmittingAnswer) {
     elements.submitAnswer.textContent = "Сохранение ответа...";
+    elements.finishAttempt.textContent = "Завершить досрочно";
     return;
   }
 
-  if (attemptInProgress) {
-    elements.submitAnswer.textContent =
-      state.attempt.progress.currentQuestionIndex >= state.attempt.progress.totalQuestions
-        ? "Ответить и завершить"
-        : "Ответить и далее";
+  if (state.isFinishingAttempt) {
+    elements.finishAttempt.textContent = "Завершаем попытку...";
+    elements.submitAnswer.textContent = "Ответить и далее";
+    return;
   }
+
+  elements.finishAttempt.textContent = "Завершить досрочно";
+
+  if (!attemptInProgress) {
+    elements.submitAnswer.textContent = "Ответить и далее";
+    return;
+  }
+
+  elements.submitAnswer.textContent =
+    state.attempt.progress.currentQuestionIndex >= state.attempt.progress.totalQuestions
+      ? "Ответить и завершить"
+      : "Ответить и далее";
 }
 
 function scrollToSection(section) {
@@ -205,6 +224,85 @@ async function loadAppVersion() {
   }
 }
 
+function setInstallAvailability(visible, label = "Установить приложение") {
+  if (!elements.installApp) {
+    return;
+  }
+
+  elements.installApp.textContent = label;
+  elements.installApp.classList.toggle("hidden", !visible);
+}
+
+function setNetworkStatus(isOnline = navigator.onLine) {
+  if (!elements.networkStatus) {
+    return;
+  }
+
+  state.isOnline = isOnline;
+  elements.networkStatus.textContent = isOnline ? "Сеть: онлайн" : "Сеть: нестабильна";
+  elements.networkStatus.className = `network-badge ${isOnline ? "online" : "offline"}`;
+}
+
+async function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) {
+    return;
+  }
+
+  try {
+    await navigator.serviceWorker.register("/sw.js?v=1.2.0");
+  } catch (error) {
+    // PWA layer is optional; the olympiad keeps working without service worker support.
+  }
+}
+
+function setupInstallPrompt() {
+  if (!elements.installApp) {
+    return;
+  }
+
+  setInstallAvailability(false);
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    state.deferredInstallPrompt = event;
+    setInstallAvailability(true);
+    showMessage(
+      elements.installMessage,
+      "Олимпиаду можно установить как приложение на ноутбук или планшет.",
+      "success"
+    );
+  });
+
+  window.addEventListener("appinstalled", () => {
+    state.deferredInstallPrompt = null;
+    setInstallAvailability(false);
+    showMessage(elements.installMessage, "Приложение установлено на устройство.", "success");
+  });
+
+  elements.installApp.addEventListener("click", async () => {
+    if (!state.deferredInstallPrompt) {
+      showMessage(
+        elements.installMessage,
+        "Если кнопка установки неактивна, используйте установку приложения через меню браузера.",
+        "warning"
+      );
+      return;
+    }
+
+    state.deferredInstallPrompt.prompt();
+    const choice = await state.deferredInstallPrompt.userChoice.catch(() => null);
+    state.deferredInstallPrompt = null;
+    setInstallAvailability(false);
+
+    if (choice && choice.outcome === "accepted") {
+      showMessage(elements.installMessage, "Приложение готово к использованию.", "success");
+      return;
+    }
+
+    showMessage(elements.installMessage, "Установку можно повторить позже.", "warning");
+  });
+}
+
 function formatApiError(error, fallback = "Ошибка запроса") {
   if (!error) {
     return fallback;
@@ -268,17 +366,36 @@ async function requestWithRetry(task, options = {}) {
 }
 
 async function api(path, options = {}) {
-  const response = await fetch(path, {
-    headers: {
-      "Content-Type": "application/json"
-    },
-    ...options
-  });
+  let response;
 
-  const data = await response.json();
-  if (!response.ok || data.ok === false) {
-    throw new Error(data.message || data.errorMessage || "Ошибка запроса");
+  try {
+    response = await fetch(path, {
+      headers: {
+        "Content-Type": "application/json"
+      },
+      ...options
+    });
+  } catch (error) {
+    const wrapped = new Error("Не удалось связаться с сервером.");
+    wrapped.status = 0;
+    throw wrapped;
   }
+
+  let data = {};
+  try {
+    data = await response.json();
+  } catch (error) {
+    data = {};
+  }
+
+  if (!response.ok || data.ok === false) {
+    const wrapped = new Error(
+      data.message || data.errorMessage || `Ошибка запроса (${response.status})`
+    );
+    wrapped.status = response.status;
+    throw wrapped;
+  }
+
   return data.data;
 }
 
@@ -341,6 +458,8 @@ function renderHero() {
     pill.textContent = `${tour.code}: ${tour.timeLimitMinutes} мин • ${tour.maxScore} баллов`;
     elements.tourMeta.appendChild(pill);
   });
+
+  renderJourneyMap();
 }
 
 function renderRules() {
@@ -363,6 +482,7 @@ function renderRules() {
 
 function renderParticipant() {
   if (!state.participant) {
+    renderJourneyMap();
     return;
   }
 
@@ -372,6 +492,79 @@ function renderParticipant() {
     meta.push(`Наставник: ${state.participant.mentorName}`);
   }
   elements.participantMeta.textContent = meta.join(" • ");
+  renderJourneyMap();
+}
+
+function buildJourneySteps() {
+  const tours = (state.olympiad && state.olympiad.tours) || [];
+  return [
+    {
+      id: "register",
+      label: "Регистрация",
+      description: "Сохранение данных участника"
+    },
+    ...tours.map((tour) => ({
+      id: tour.id,
+      label: tour.code,
+      description: tour.title
+    })),
+    {
+      id: "result",
+      label: "Финиш",
+      description: "Итоговый экран и фиксация результата"
+    }
+  ];
+}
+
+function renderJourneyMap() {
+  if (!elements.journeyMap || !elements.journeyStatus || !state.olympiad) {
+    return;
+  }
+
+  const steps = buildJourneySteps();
+  const completed = new Set();
+  let currentId = "register";
+  let statusText = "Сначала сохраните данные участника.";
+
+  if (state.participant) {
+    completed.add("register");
+    statusText = "Регистрация сохранена. Можно запускать первый тур.";
+  }
+
+  if (state.attempt) {
+    if (state.attempt.status === "in_progress" && state.attempt.currentTour) {
+      currentId = state.attempt.currentTour.id;
+      const currentOrder = Number(state.attempt.currentTour.order) || 0;
+      ((state.olympiad && state.olympiad.tours) || []).forEach((tour) => {
+        if ((Number(tour.order) || 0) < currentOrder) {
+          completed.add(tour.id);
+        }
+      });
+      statusText = `${state.attempt.currentTour.code}: вопрос ${state.attempt.progress.tourQuestionIndex} из ${state.attempt.progress.tourQuestionCount}.`;
+    } else if (state.attempt.status !== "in_progress") {
+      currentId = "result";
+      ((state.olympiad && state.olympiad.tours) || []).forEach((tour) => completed.add(tour.id));
+      completed.add("result");
+      statusText = "Маршрут завершён. Результат зафиксирован в облаке.";
+    }
+  }
+
+  elements.journeyStatus.textContent = statusText;
+  elements.journeyMap.innerHTML = "";
+
+  steps.forEach((step) => {
+    const isCurrent = step.id === currentId;
+    const isComplete = completed.has(step.id);
+    const isLocked = !isCurrent && !isComplete && !(step.id === "register" && !state.participant);
+    const card = document.createElement("article");
+    card.className = `journey-node${isCurrent ? " current" : ""}${isComplete ? " complete" : ""}${isLocked ? " locked" : ""}${step.id === "result" ? " journey-node-result" : ""}`;
+    card.innerHTML = `
+      <span class="journey-node-state">${isCurrent ? "Сейчас" : isComplete ? "Готово" : isLocked ? "Впереди" : "Старт"}</span>
+      <b>${step.label}</b>
+      <small>${step.description}</small>
+    `;
+    elements.journeyMap.appendChild(card);
+  });
 }
 
 function saveTimingSnapshot(attempt) {
@@ -857,6 +1050,7 @@ function renderAttempt() {
   }
 
   renderQuestion(currentQuestion);
+  renderJourneyMap();
   refreshAttemptControls();
   elements.submitAnswer.textContent =
     attempt.progress.currentQuestionIndex >= attempt.progress.totalQuestions
@@ -893,6 +1087,11 @@ function renderResult() {
   });
 
   refreshAttemptControls();
+  renderJourneyMap();
+  setAttemptSaveStatus("Попытка завершена и сохранена", "success");
+  setAttemptSyncMeta(
+    `Последняя синхронизация: ${formatDateTime(state.attempt.finishedAt || new Date())}`
+  );
 }
 
 function canSoftSyncAttempt(nextAttempt) {
@@ -989,9 +1188,19 @@ async function syncAttempt(silent = false) {
     if (data.status === "in_progress") {
       updateTimers();
     }
+    setAttemptSyncMeta(`Последняя синхронизация: ${formatDateTime(new Date())}`);
+    if (!silent && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
+      setAttemptSaveStatus("Данные синхронизированы", "success");
+    }
   } catch (error) {
+    const message = formatApiError(error);
+    setAttemptSyncMeta(`Синхронизация: ${message}`);
+    setAttemptSaveStatus(
+      silent ? "Связь нестабильна, повторим синхронизацию" : "Проблема синхронизации",
+      silent ? "warning" : "error"
+    );
     if (!silent) {
-      showMessage(elements.attemptMessage, error.message, "error");
+      showMessage(elements.attemptMessage, message, "error");
     }
   } finally {
     state.syncInFlight = false;
@@ -1043,258 +1252,6 @@ async function handleRegistration(event) {
 async function startAttempt() {
   hideMessage(elements.prestartMessage);
   hideMessage(elements.attemptMessage);
-
-  try {
-    const attempt = await api("/api/public/attempts/start", {
-      method: "POST",
-      body: JSON.stringify({ participant: state.participant })
-    });
-    state.participant = attempt.participant;
-    elements.startAttempt.textContent = "Продолжить олимпиаду";
-    applyAttemptState(attempt);
-    startTimers();
-    refreshAttemptControls();
-    showMessage(
-      elements.attemptMessage,
-      "Попытка запущена. Все ответы фиксируются автоматически на сервере.",
-      "success"
-    );
-  } catch (error) {
-    showMessage(elements.prestartMessage, error.message, "error");
-  }
-}
-
-async function submitAnswer() {
-  if (!state.attempt || !state.questionController || state.isSubmittingAnswer || state.isFinishingAttempt) {
-    return;
-  }
-
-  hideMessage(elements.attemptMessage);
-  captureCurrentDraft();
-  const previousQuestionId = state.attempt.currentQuestion && state.attempt.currentQuestion.id;
-  state.isSubmittingAnswer = true;
-  refreshAttemptControls();
-
-  try {
-    const data = await api(`/api/public/attempts/${state.attempt.id}/answer`, {
-      method: "POST",
-      body: JSON.stringify({
-        questionId: previousQuestionId,
-        answerPayload: state.questionController.getAnswer()
-      })
-    });
-
-    clearDraft(previousQuestionId);
-    applyAttemptState(data);
-    if (data.status === "in_progress") {
-      startTimers();
-    } else {
-      showMessage(elements.attemptMessage, "Попытка завершена.", "success");
-    }
-  } catch (error) {
-    showMessage(elements.attemptMessage, error.message, "error");
-  } finally {
-    state.isSubmittingAnswer = false;
-    refreshAttemptControls();
-  }
-}
-
-async function finishAttempt() {
-  if (!state.attempt || state.isSubmittingAnswer || state.isFinishingAttempt) {
-    return;
-  }
-
-  state.isFinishingAttempt = true;
-  refreshAttemptControls();
-  try {
-    captureCurrentDraft();
-    const data = await api(`/api/public/attempts/${state.attempt.id}/finish`, {
-      method: "POST"
-    });
-    state.localDrafts = {};
-    applyAttemptState(data);
-  } catch (error) {
-    showMessage(elements.attemptMessage, error.message, "error");
-  } finally {
-    state.isFinishingAttempt = false;
-    refreshAttemptControls();
-  }
-}
-
-async function init() {
-  await loadAppVersion();
-  state.olympiad = await api("/api/public/olympiad");
-  renderHero();
-  renderRules();
-  refreshNavigationState();
-
-  elements.navBack.addEventListener("click", goBackOrHome);
-  elements.navHome.addEventListener("click", () => scrollToSection(elements.heroSection));
-  elements.navRegister.addEventListener("click", () => {
-    if (elements.prestartSection.classList.contains("hidden")) {
-      scrollToSection(elements.heroSection);
-      return;
-    }
-    scrollToSection(elements.prestartSection);
-  });
-  elements.navAttempt.addEventListener("click", () => {
-    scrollToSection(
-      state.attempt && state.attempt.status === "in_progress"
-        ? elements.attemptSection
-        : elements.heroSection
-    );
-  });
-  elements.navResult.addEventListener("click", () => {
-    scrollToSection(
-      elements.resultSection.classList.contains("hidden")
-        ? elements.heroSection
-        : elements.resultSection
-    );
-  });
-  elements.registrationForm.addEventListener("submit", handleRegistration);
-  elements.startAttempt.addEventListener("click", startAttempt);
-  elements.submitAnswer.addEventListener("click", submitAnswer);
-  elements.finishAttempt.addEventListener("click", finishAttempt);
-}
-
-async function api(path, options = {}) {
-  let response;
-  try {
-    response = await fetch(path, {
-      headers: {
-        "Content-Type": "application/json"
-      },
-      ...options
-    });
-  } catch (error) {
-    const wrapped = new Error("Не удалось связаться с сервером.");
-    wrapped.status = 0;
-    throw wrapped;
-  }
-
-  let data = {};
-  try {
-    data = await response.json();
-  } catch (error) {
-    data = {};
-  }
-
-  if (!response.ok || data.ok === false) {
-    const wrapped = new Error(
-      data.message || data.errorMessage || `Ошибка запроса (${response.status})`
-    );
-    wrapped.status = response.status;
-    throw wrapped;
-  }
-
-  return data.data;
-}
-
-function refreshAttemptControls() {
-  const attemptInProgress = Boolean(state.attempt && state.attempt.status === "in_progress");
-  const hasActiveQuestion = Boolean(
-    attemptInProgress && state.attempt.currentQuestion && state.questionController
-  );
-  const isBusy = state.isSubmittingAnswer || state.isFinishingAttempt;
-
-  elements.submitAnswer.disabled = !hasActiveQuestion || isBusy;
-  elements.finishAttempt.disabled = !attemptInProgress || isBusy;
-
-  if (state.isSubmittingAnswer) {
-    elements.submitAnswer.textContent = "Сохранение ответа...";
-    elements.finishAttempt.textContent = "Завершить досрочно";
-    return;
-  }
-
-  if (state.isFinishingAttempt) {
-    elements.finishAttempt.textContent = "Завершаем попытку...";
-    elements.submitAnswer.textContent = "Ответить и далее";
-    return;
-  }
-
-  elements.finishAttempt.textContent = "Завершить досрочно";
-
-  if (!attemptInProgress) {
-    elements.submitAnswer.textContent = "Ответить и далее";
-    return;
-  }
-
-  elements.submitAnswer.textContent =
-    state.attempt.progress.currentQuestionIndex >= state.attempt.progress.totalQuestions
-      ? "Ответить и завершить"
-      : "Ответить и далее";
-}
-
-function renderResult() {
-  const summary = state.attempt.summary;
-  elements.attemptSection.classList.add("hidden");
-  elements.resultSection.classList.remove("hidden");
-  refreshNavigationState();
-  elements.resultTours.innerHTML = "";
-
-  if (summary.totalFinalScore === null) {
-    elements.resultTitle.textContent = "Попытка завершена";
-    elements.resultSubtitle.textContent =
-      "Результат зафиксирован. Баллы доступны организатору в панели управления.";
-  } else {
-    elements.resultTitle.textContent = `Итоговый результат: ${summary.totalFinalScore} из ${summary.totalMaxScore}`;
-    elements.resultSubtitle.textContent =
-      "Правильные ответы участнику не показываются. Организатор видит служебный лог и полную раскладку в админ-панели.";
-  }
-
-  (summary.tourScores || []).forEach((tour) => {
-    const card = document.createElement("div");
-    card.className = "result-card";
-    card.innerHTML = `
-      <strong>${tour.code}</strong>
-      <span>${tour.title}</span>
-      <b>${tour.finalScore === null ? "скрыто" : `${tour.finalScore} / ${tour.maxScore}`}</b>
-    `;
-    elements.resultTours.appendChild(card);
-  });
-
-  refreshAttemptControls();
-  setAttemptSaveStatus("Попытка завершена и сохранена", "success");
-  setAttemptSyncMeta(
-    `Последняя синхронизация: ${formatDateTime(state.attempt.finishedAt || new Date())}`
-  );
-}
-
-async function syncAttempt(silent = false) {
-  if (!state.attempt || state.isSubmittingAnswer || state.isFinishingAttempt || state.syncInFlight) {
-    return;
-  }
-
-  state.syncInFlight = true;
-  try {
-    captureCurrentDraft();
-    const data = await api(`/api/public/attempts/${state.attempt.id}/current`);
-    applyAttemptState(data, { preserveQuestionRender: true });
-    if (data.status === "in_progress") {
-      updateTimers();
-    }
-    setAttemptSyncMeta(`Последняя синхронизация: ${formatDateTime(new Date())}`);
-    if (!silent && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
-      setAttemptSaveStatus("Данные синхронизированы", "success");
-    }
-  } catch (error) {
-    const message = formatApiError(error);
-    setAttemptSyncMeta(`Синхронизация: ${message}`);
-    setAttemptSaveStatus(
-      silent ? "Связь нестабильна, повторим синхронизацию" : "Проблема синхронизации",
-      silent ? "warning" : "error"
-    );
-    if (!silent) {
-      showMessage(elements.attemptMessage, message, "error");
-    }
-  } finally {
-    state.syncInFlight = false;
-  }
-}
-
-async function startAttempt() {
-  hideMessage(elements.prestartMessage);
-  hideMessage(elements.attemptMessage);
   setAttemptSaveStatus("Запускаем попытку...", "pending");
   setAttemptSyncMeta("Подготовка варианта и подключение к облаку...");
 
@@ -1313,7 +1270,6 @@ async function startAttempt() {
         }
       }
     );
-
     state.participant = attempt.participant;
     elements.startAttempt.textContent = "Продолжить олимпиаду";
     applyAttemptState(attempt);
@@ -1402,7 +1358,6 @@ async function finishAttempt() {
   setAttemptSaveStatus("Завершаем попытку...", "pending");
   setAttemptSyncMeta("Фиксируем итоговый результат...");
   refreshAttemptControls();
-
   try {
     captureCurrentDraft();
     const data = await requestWithRetry(
@@ -1419,7 +1374,6 @@ async function finishAttempt() {
         }
       }
     );
-
     state.localDrafts = {};
     applyAttemptState(data);
     setAttemptSaveStatus("Попытка завершена и зафиксирована", "success");
@@ -1436,13 +1390,30 @@ async function finishAttempt() {
 }
 
 async function init() {
+  await loadAppVersion();
   state.olympiad = await api("/api/public/olympiad");
+  await registerServiceWorker();
   renderHero();
   renderRules();
-  refreshNavigationState();
+  setupInstallPrompt();
+  setInstallAvailability(false);
+  setNetworkStatus(navigator.onLine);
   setAttemptSaveStatus("Ожидание действия", "idle");
   setAttemptSyncMeta("Последняя синхронизация: —");
+  refreshNavigationState();
 
+  window.addEventListener("online", () => {
+    setNetworkStatus(true);
+    setAttemptSaveStatus("Связь восстановлена", "success");
+    if (state.attempt) {
+      syncAttempt(true);
+    }
+  });
+  window.addEventListener("offline", () => {
+    setNetworkStatus(false);
+    setAttemptSaveStatus("Связь потеряна. Ответы попробуем отправить повторно.", "warning");
+    setAttemptSyncMeta("Сервер временно недоступен.");
+  });
   elements.navBack.addEventListener("click", goBackOrHome);
   elements.navHome.addEventListener("click", () => scrollToSection(elements.heroSection));
   elements.navRegister.addEventListener("click", () => {

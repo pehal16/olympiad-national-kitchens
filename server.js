@@ -109,6 +109,7 @@ function getOlympiadPublicData(olympiad) {
     participantFields: olympiad.participantFields || [],
     methodologicalBasis: olympiad.methodologicalBasis || null,
     scoring: olympiad.scoring || null,
+    appVersion: APP_VERSION,
     tours: (olympiad.tours || []).map((tour) => ({
       id: tour.id,
       code: tour.code,
@@ -861,6 +862,8 @@ function serveStatic(req, res, pathname) {
     ".css": "text/css; charset=utf-8",
     ".js": "application/javascript; charset=utf-8",
     ".json": "application/json; charset=utf-8",
+    ".webmanifest": "application/manifest+json; charset=utf-8",
+    ".ico": "image/x-icon",
     ".png": "image/png",
     ".jpg": "image/jpeg",
     ".jpeg": "image/jpeg",
