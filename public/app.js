@@ -60,7 +60,8 @@ const elements = {
   attemptMessage: document.getElementById("attempt-message"),
   resultTitle: document.getElementById("result-title"),
   resultSubtitle: document.getElementById("result-subtitle"),
-  resultTours: document.getElementById("result-tours")
+  resultTours: document.getElementById("result-tours"),
+  appVersionLabel: document.getElementById("app-version-label")
 };
 
 function setButtonAvailability(button, enabled, hint = "") {
@@ -183,6 +184,25 @@ function delay(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+async function loadAppVersion() {
+  if (!elements.appVersionLabel) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/health");
+    if (!response.ok) {
+      return;
+    }
+    const payload = await response.json();
+    if (payload?.appVersion) {
+      elements.appVersionLabel.textContent = payload.appVersion;
+    }
+  } catch (error) {
+    // Footer keeps the bundled fallback version if health is temporarily unavailable.
+  }
 }
 
 function formatApiError(error, fallback = "Ошибка запроса") {
@@ -1102,6 +1122,7 @@ async function finishAttempt() {
 }
 
 async function init() {
+  await loadAppVersion();
   state.olympiad = await api("/api/public/olympiad");
   renderHero();
   renderRules();

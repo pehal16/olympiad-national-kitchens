@@ -47,6 +47,7 @@ const elements = {
   diagApiErrors: document.getElementById("diag-api-errors"),
   diagLastApiError: document.getElementById("diag-last-api-error"),
   diagDiskFolder: document.getElementById("diag-disk-folder"),
+  appVersionLabel: document.getElementById("admin-app-version-label"),
   filterMeta: document.getElementById("attempts-filter-meta"),
   filterSearch: document.getElementById("filter-search"),
   filterInstitution: document.getElementById("filter-institution"),
@@ -171,6 +172,26 @@ function formatAdminError(error) {
   }
 
   return error.message || "Ошибка запроса.";
+}
+
+async function loadPublicVersion() {
+  if (!elements.appVersionLabel) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/health");
+    if (!response.ok) {
+      return;
+    }
+
+    const payload = await response.json();
+    if (payload?.appVersion) {
+      elements.appVersionLabel.textContent = payload.appVersion;
+    }
+  } catch (error) {
+    // Footer keeps the bundled fallback version if health is temporarily unavailable.
+  }
 }
 
 function escapeHtml(value) {
@@ -843,6 +864,7 @@ function resetFilters() {
 }
 
 async function init() {
+  await loadPublicVersion();
   elements.navBack.addEventListener("click", goBackOrHome);
   elements.navTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
   elements.navRating.addEventListener("click", () => {
