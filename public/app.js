@@ -12,7 +12,8 @@ const state = {
   isSubmittingAnswer: false,
   isFinishingAttempt: false,
   deferredInstallPrompt: null,
-  isOnline: navigator.onLine
+  isOnline: navigator.onLine,
+  transitionTimer: null
 };
 
 const elements = {
@@ -29,6 +30,9 @@ const elements = {
   tourMeta: document.getElementById("tour-meta"),
   journeyMap: document.getElementById("journey-map"),
   journeyStatus: document.getElementById("journey-status"),
+  journeyProgressLabel: document.getElementById("journey-progress-label"),
+  journeyProgressHint: document.getElementById("journey-progress-hint"),
+  journeyProgressFill: document.getElementById("journey-progress-fill"),
   installMessage: document.getElementById("install-message"),
   rulesList: document.getElementById("rules-list"),
   registrationForm: document.getElementById("registration-form"),
@@ -50,6 +54,10 @@ const elements = {
   progressTour: document.getElementById("progress-tour"),
   progressGlobalFill: document.getElementById("progress-global-fill"),
   progressTourFill: document.getElementById("progress-tour-fill"),
+  participantModeBadge: document.getElementById("participant-mode-badge"),
+  participantStageBadge: document.getElementById("participant-stage-badge"),
+  participantStabilityBadge: document.getElementById("participant-stability-badge"),
+  questionTransitionBanner: document.getElementById("question-transition-banner"),
   tourCode: document.getElementById("tour-code"),
   tourTitle: document.getElementById("tour-title"),
   tourDescription: document.getElementById("tour-description"),
@@ -189,6 +197,7 @@ function setAttemptSaveStatus(message, type = "idle") {
 
   elements.attemptSaveStatus.textContent = message;
   elements.attemptSaveStatus.className = `sync-badge ${type}`;
+  setParticipantShellState();
 }
 
 function setAttemptSyncMeta(message) {
@@ -197,6 +206,127 @@ function setAttemptSyncMeta(message) {
   }
 
   elements.attemptSyncMeta.textContent = message;
+}
+
+function setShellBadge(element, text, tone = "neutral") {
+  if (!element) {
+    return;
+  }
+
+  element.textContent = text;
+  element.className = `system-pill ${tone}`;
+}
+
+function setParticipantShellState() {
+  const attempt = state.attempt;
+  const hasAttempt = Boolean(attempt);
+  const attemptInProgress = Boolean(hasAttempt && attempt.status === "in_progress");
+  const questionIndex = attempt && attempt.progress ? attempt.progress.currentQuestionIndex : 0;
+  const totalQuestions = attempt && attempt.progress ? attempt.progress.totalQuestions : 0;
+
+  if (!hasAttempt) {
+    setShellBadge(elements.participantModeBadge, "Режим: регистрация", "neutral");
+    setShellBadge(elements.participantStageBadge, "Шаг: ожидание старта", "neutral");
+    setShellBadge(elements.participantStabilityBadge, "Автосохранение готово", "neutral");
+    return;
+  }
+
+  setShellBadge(
+    elements.participantModeBadge,
+    attemptInProgress ? "Режим: прохождение" : "Режим: результат",
+    attemptInProgress ? "active" : "ready"
+  );
+
+  if (attemptInProgress && attempt.currentTour) {
+    setShellBadge(
+      elements.participantStageBadge,
+      `Шаг: ${attempt.currentTour.code} • ${attempt.progress.tourQuestionIndex}/${attempt.progress.tourQuestionCount}`,
+      "active"
+    );
+  } else {
+    setShellBadge(elements.participantStageBadge, "Шаг: маршрут завершен", "ready");
+  }
+
+  if (!state.isOnline) {
+    setShellBadge(elements.participantStabilityBadge, "Связь нестабильна", "warning");
+    return;
+  }
+
+  if (state.isSubmittingAnswer || state.isFinishingAttempt || state.syncInFlight) {
+    setShellBadge(elements.participantStabilityBadge, "Идет синхронизация", "active");
+    return;
+  }
+
+  if (attemptInProgress || totalQuestions > 0 || questionIndex > 0) {
+    setShellBadge(elements.participantStabilityBadge, "Автосохранение активно", "ready");
+    return;
+  }
+
+  setShellBadge(elements.participantStabilityBadge, "Система готова", "neutral");
+}
+
+function getJourneyProgressModel() {
+  if (!state.participant) {
+    return {
+      percent: 0,
+      label: "Готовность маршрута: 0%",
+      hint: "После регистрации система откроет первый тур."
+    };
+  }
+
+  if (!state.attempt) {
+    return {
+      percent: 12,
+      label: "Готовность маршрута: 12%",
+      hint: "Регистрация завершена. Можно запускать первую часть олимпиады."
+    };
+  }
+
+  if (state.attempt.status !== "in_progress") {
+    return {
+      percent: 100,
+      label: "Готовность маршрута: 100%",
+      hint: "Маршрут полностью завершен, результат зафиксирован в облаке."
+    };
+  }
+
+  const totalQuestions = Math.max(1, state.attempt.progress.totalQuestions || 1);
+  const completedQuestions = Math.max(0, (state.attempt.progress.currentQuestionIndex || 1) - 1);
+  const percent = Math.min(96, Math.round(12 + (completedQuestions / totalQuestions) * 84));
+
+  return {
+    percent,
+    label: `Готовность маршрута: ${percent}%`,
+    hint: `Сейчас ${state.attempt.currentTour.code}, вопрос ${state.attempt.progress.tourQuestionIndex} из ${state.attempt.progress.tourQuestionCount}.`
+  };
+}
+
+function updateJourneyProgress() {
+  if (!elements.journeyProgressLabel || !elements.journeyProgressHint || !elements.journeyProgressFill) {
+    return;
+  }
+
+  const progress = getJourneyProgressModel();
+  elements.journeyProgressLabel.textContent = progress.label;
+  elements.journeyProgressHint.textContent = progress.hint;
+  elements.journeyProgressFill.style.width = `${progress.percent}%`;
+}
+
+function showQuestionTransition(message) {
+  if (!elements.questionTransitionBanner || !message) {
+    return;
+  }
+
+  clearTimeout(state.transitionTimer);
+  elements.questionTransitionBanner.textContent = message;
+  elements.questionTransitionBanner.classList.remove("hidden", "show");
+  void elements.questionTransitionBanner.offsetWidth;
+  elements.questionTransitionBanner.classList.add("show");
+
+  state.transitionTimer = setTimeout(() => {
+    elements.questionTransitionBanner.classList.remove("show");
+    elements.questionTransitionBanner.classList.add("hidden");
+  }, 1700);
 }
 
 function delay(ms) {
@@ -241,6 +371,7 @@ function setNetworkStatus(isOnline = navigator.onLine) {
   state.isOnline = isOnline;
   elements.networkStatus.textContent = isOnline ? "Сеть: онлайн" : "Сеть: нестабильна";
   elements.networkStatus.className = `network-badge ${isOnline ? "online" : "offline"}`;
+  setParticipantShellState();
 }
 
 async function registerServiceWorker() {
@@ -249,7 +380,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.2.0");
+    await navigator.serviceWorker.register("/sw.js?v=1.2.1");
   } catch (error) {
     // PWA layer is optional; the olympiad keeps working without service worker support.
   }
@@ -565,6 +696,8 @@ function renderJourneyMap() {
     `;
     elements.journeyMap.appendChild(card);
   });
+
+  updateJourneyProgress();
 }
 
 function saveTimingSnapshot(attempt) {
@@ -1121,17 +1254,63 @@ function canSoftSyncAttempt(nextAttempt) {
   return true;
 }
 
+function describeAttemptTransition(previousAttempt, nextAttempt) {
+  if (!nextAttempt) {
+    return "";
+  }
+
+  if (!previousAttempt && nextAttempt.status === "in_progress" && nextAttempt.currentTour) {
+    return `Старт ${nextAttempt.currentTour.code}: маршрут открыт, можно отвечать.`;
+  }
+
+  if (
+    previousAttempt &&
+    previousAttempt.status === "in_progress" &&
+    nextAttempt.status !== "in_progress"
+  ) {
+    return "Маршрут завершен. Итог сохранен в облаке.";
+  }
+
+  if (nextAttempt.status !== "in_progress" || !nextAttempt.currentTour) {
+    return "";
+  }
+
+  const previousTourId = previousAttempt && previousAttempt.currentTour ? previousAttempt.currentTour.id : "";
+  const nextTourId = nextAttempt.currentTour.id;
+
+  if (previousTourId && previousTourId !== nextTourId) {
+    return `Старт ${nextAttempt.currentTour.code}: ${nextAttempt.currentTour.title}.`;
+  }
+
+  const previousQuestionIndex =
+    previousAttempt && previousAttempt.progress ? previousAttempt.progress.currentQuestionIndex : 0;
+  const nextQuestionIndex = nextAttempt.progress ? nextAttempt.progress.currentQuestionIndex : 0;
+
+  if (previousQuestionIndex && previousQuestionIndex !== nextQuestionIndex) {
+    return `${nextAttempt.currentTour.code}: вопрос ${nextAttempt.progress.tourQuestionIndex} из ${nextAttempt.progress.tourQuestionCount}.`;
+  }
+
+  return "";
+}
+
 function applyAttemptState(attempt, options = {}) {
+  const previousAttempt = state.attempt;
   const preserveQuestionRender =
     options.preserveQuestionRender && canSoftSyncAttempt(attempt);
+  const transitionMessage = preserveQuestionRender
+    ? ""
+    : describeAttemptTransition(previousAttempt, attempt);
   state.attempt = attempt;
   if (!attempt) {
+    setParticipantShellState();
     return;
   }
 
   if (attempt.status === "in_progress") {
     if (preserveQuestionRender) {
       saveTimingSnapshot(attempt);
+      setParticipantShellState();
+      updateJourneyProgress();
       return;
     }
     renderAttempt();
@@ -1139,6 +1318,12 @@ function applyAttemptState(attempt, options = {}) {
     stopTimers();
     renderResult();
   }
+
+  if (transitionMessage && attempt.status === "in_progress") {
+    showQuestionTransition(transitionMessage);
+  }
+
+  setParticipantShellState();
 }
 
 function updateTimers() {

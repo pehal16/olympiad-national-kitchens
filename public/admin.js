@@ -4,6 +4,8 @@ const adminState = {
   refreshTimer: null,
   refreshInFlight: false,
   lastRefreshedAt: null,
+  panelStatus: "idle",
+  lastRefreshMode: "manual",
   summary: null,
   attempts: [],
   filteredAttempts: [],
@@ -43,10 +45,12 @@ const elements = {
   diagRefreshedAt: document.getElementById("diag-refreshed-at"),
   diagServerTime: document.getElementById("diag-server-time"),
   diagLastActivity: document.getElementById("diag-last-activity"),
+  diagPanelState: document.getElementById("diag-panel-state"),
   diagActiveAttempts: document.getElementById("diag-active-attempts"),
   diagApiErrors: document.getElementById("diag-api-errors"),
   diagLastApiError: document.getElementById("diag-last-api-error"),
   diagDiskFolder: document.getElementById("diag-disk-folder"),
+  diagRefreshMode: document.getElementById("diag-refresh-mode"),
   appVersionLabel: document.getElementById("admin-app-version-label"),
   filterMeta: document.getElementById("attempts-filter-meta"),
   filterSearch: document.getElementById("filter-search"),
@@ -174,6 +178,41 @@ function formatAdminError(error) {
   return error.message || "Ошибка запроса.";
 }
 
+function setDiagnosticStatus(element, text, tone = "active") {
+  if (!element) {
+    return;
+  }
+
+  element.textContent = text;
+  element.className = `status-${tone}`;
+}
+
+function getRefreshModeLabel() {
+  return adminState.lastRefreshMode === "auto"
+    ? `Автообновление • каждые ${Math.round(PANEL_REFRESH_MS / 1000)} сек`
+    : "Ручное обновление";
+}
+
+function setPanelStatus(status, message = "") {
+  adminState.panelStatus = status;
+
+  if (elements.diagPanelState) {
+    if (status === "refreshing") {
+      setDiagnosticStatus(elements.diagPanelState, message || "идет синхронизация", "active");
+    } else if (status === "ready") {
+      setDiagnosticStatus(elements.diagPanelState, message || "панель готова", "ready");
+    } else if (status === "error") {
+      setDiagnosticStatus(elements.diagPanelState, message || "есть ошибка", "error");
+    } else {
+      setDiagnosticStatus(elements.diagPanelState, message || "ожидание", "warning");
+    }
+  }
+
+  if (elements.diagRefreshMode) {
+    elements.diagRefreshMode.textContent = getRefreshModeLabel();
+  }
+}
+
 async function loadPublicVersion() {
   if (!elements.appVersionLabel) {
     return;
@@ -255,6 +294,7 @@ function resetAdminSession(message = "") {
   adminState.filteredAttempts = [];
   elements.panel.classList.add("hidden");
   elements.loginCard.classList.remove("hidden");
+  setPanelStatus("warning", "ожидание входа");
 
   if (message) {
     showMessage(elements.loginMessage, message, "error");
@@ -669,10 +709,14 @@ function renderSummary(summary) {
   if (elements.diagDiskFolder) {
     elements.diagDiskFolder.textContent = capabilities.yandexDiskFolder || "—";
   }
+  if (elements.diagRefreshMode) {
+    elements.diagRefreshMode.textContent = getRefreshModeLabel();
+  }
 
   renderTourAnalytics(summary.tourAnalytics || []);
   renderInstitutionAnalytics(summary.institutionAnalytics || []);
   renderSuspiciousAttempts(summary.suspiciousAttempts || []);
+  setPanelStatus("ready", "панель синхронизирована");
 }
 
 async function loadSummary() {
@@ -751,7 +795,9 @@ async function refreshPanel(options = {}) {
     return;
   }
 
+  adminState.lastRefreshMode = silent ? "auto" : "manual";
   adminState.refreshInFlight = true;
+  setPanelStatus("refreshing", silent ? "фоновое обновление" : "ручная синхронизация");
   const selectedAttemptId = adminState.selectedAttemptId;
 
   try {
@@ -766,10 +812,12 @@ async function refreshPanel(options = {}) {
       if (error.status === 401) {
         resetAdminSession("Сеанс администратора завершён. Войдите повторно.");
       } else {
+        setPanelStatus("error", formatAdminError(error));
         showMessage(elements.exportMessage, `Автообновление: ${formatAdminError(error)}`, "warning");
       }
       return;
     }
+    setPanelStatus("error", formatAdminError(error));
     throw error;
   } finally {
     adminState.refreshInFlight = false;
@@ -865,6 +913,7 @@ function resetFilters() {
 
 async function init() {
   await loadPublicVersion();
+  setPanelStatus("warning", "ожидание входа");
   elements.navBack.addEventListener("click", goBackOrHome);
   elements.navTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
   elements.navRating.addEventListener("click", () => {

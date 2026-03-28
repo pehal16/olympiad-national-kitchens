@@ -7,10 +7,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Национальные кухни мира</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.2.0" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.2.1" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css?v=1.2.0" />
+    <link rel="stylesheet" href="/styles.css?v=1.2.1" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -78,6 +78,15 @@
           <div id="journey-status" class="pill">Точка входа: регистрация</div>
         </div>
         <div id="journey-map" class="journey-map"></div>
+        <div class="journey-progress-shell">
+          <div class="journey-progress-copy">
+            <strong id="journey-progress-label">Готовность маршрута: 0%</strong>
+            <span id="journey-progress-hint">После регистрации система откроет первый тур.</span>
+          </div>
+          <div class="progress-line journey-progress-line">
+            <span id="journey-progress-fill"></span>
+          </div>
+        </div>
         <div id="install-message" class="message hidden"></div>
       </section>
 
@@ -149,6 +158,12 @@
               <span id="progress-tour-fill"></span>
             </div>
           </div>
+          <div class="participant-mode-strip">
+            <div id="participant-mode-badge" class="system-pill neutral">Режим: ожидание</div>
+            <div id="participant-stage-badge" class="system-pill neutral">Шаг: старт не выполнен</div>
+            <div id="participant-stability-badge" class="system-pill neutral">Автосохранение готово</div>
+          </div>
+          <div id="question-transition-banner" class="transition-banner hidden"></div>
 
           <div class="tour-head">
             <div>
@@ -195,11 +210,11 @@
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
         <small>
           Разработчик: Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса"
-          • Версия <span id="app-version-label">1.2.0</span>
+          • Версия <span id="app-version-label">1.2.1</span>
         </small>
       </footer>
     </main>
 
-    <script src="/app.js?v=1.2.0"></script>
+    <script src="/app.js?v=1.2.1"></script>
   </body>
 </html>
