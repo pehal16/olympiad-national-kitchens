@@ -1088,6 +1088,125 @@ select {
   letter-spacing: 0.04em;
 }
 
+.grid-four {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.coverage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.coverage-list,
+.qa-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.coverage-item,
+.qa-item,
+.content-question-row {
+  border: 1px solid rgba(31, 142, 115, 0.1);
+  background: rgba(241, 248, 246, 0.88);
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+
+.coverage-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.coverage-item strong {
+  font-size: 16px;
+}
+
+.qa-grid {
+  align-items: start;
+}
+
+.qa-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.qa-item strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.content-workbench {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.content-list-card,
+.content-detail-card {
+  padding: 18px;
+}
+
+.content-question-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 820px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.content-question-row {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.content-question-row:hover,
+.content-question-row:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(31, 142, 115, 0.24);
+  box-shadow: 0 12px 32px rgba(18, 36, 31, 0.08);
+}
+
+.content-question-row.is-selected {
+  border-color: rgba(31, 142, 115, 0.34);
+  background: rgba(223, 242, 236, 0.95);
+}
+
+.content-question-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.content-question-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.editor-form {
+  margin-top: 16px;
+}
+
 pre {
   white-space: pre-wrap;
   word-break: break-word;
@@ -1096,7 +1215,10 @@ pre {
 
 @media (max-width: 900px) {
   .grid-two,
-  .grid-three {
+  .grid-three,
+  .grid-four,
+  .coverage-grid,
+  .content-workbench {
     grid-template-columns: 1fr;
   }
 

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1f8e73" />
+    <title>Банк заданий олимпиады</title>
+    <link rel="manifest" href="/manifest.webmanifest?v=1.5.0" />
+    <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
+    <link rel="stylesheet" href="/styles.css?v=1.5.0" />
+  </head>
+  <body>
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+
+    <main class="shell">
+      <section class="card nav-ribbon">
+        <button id="content-nav-back" class="button ghost" type="button">Назад</button>
+        <a class="button ghost" href="/">Главная олимпиады</a>
+        <a class="button ghost" href="/admin.html">Панель организатора</a>
+        <button id="content-nav-top" class="button ghost" type="button">Наверх</button>
+        <button id="content-nav-summary" class="button ghost" type="button">Сводка</button>
+        <button id="content-nav-qa" class="button ghost" type="button">QA банка</button>
+        <button id="content-nav-editor" class="button ghost" type="button">Редактор</button>
+        <button id="content-refresh" class="button ghost" type="button">Обновить</button>
+      </section>
+
+      <section class="card hero compact">
+        <div class="eyebrow">Контентная платформа</div>
+        <h1>Банк заданий и редакторская панель</h1>
+        <p class="lead">
+          Метаданные вопросов, редакторский контроль, качество distractors и покрытие банка заданий.
+        </p>
+      </section>
+
+      <section id="content-login-card" class="card hidden">
+        <h2>Нужен вход организатора</h2>
+        <p class="muted">
+          Откройте панель организатора, выполните вход и затем вернитесь в кабинет банка заданий.
+        </p>
+        <div class="actions inline">
+          <a class="button primary" href="/admin.html">Открыть админку</a>
+        </div>
+      </section>
+
+      <section id="content-panel" class="hidden">
+        <section id="content-summary-section" class="grid-four content-summary-grid">
+          <article class="card stat-card">
+            <span class="stat-label">Вопросы банка</span>
+            <strong id="content-total-questions">0</strong>
+          </article>
+          <article class="card stat-card">
+            <span class="stat-label">Интерактивные</span>
+            <strong id="content-interactive-questions">0</strong>
+          </article>
+          <article class="card stat-card">
+            <span class="stat-label">Кухни</span>
+            <strong id="content-total-cuisines">0</strong>
+          </article>
+          <article class="card stat-card">
+            <span class="stat-label">Готовность банка</span>
+            <strong id="content-ready-percent">0%</strong>
+          </article>
+        </section>
+
+        <section class="grid-two analytics-grid">
+          <article class="card">
+            <div class="section-row">
+              <h2>Сводка покрытия</h2>
+              <div id="content-generated-at" class="pill">данные не загружены</div>
+            </div>
+            <div class="coverage-grid">
+              <div>
+                <h3>Туры</h3>
+                <div id="coverage-tours" class="coverage-list"></div>
+              </div>
+              <div>
+                <h3>Кухни</h3>
+                <div id="coverage-cuisines" class="coverage-list"></div>
+              </div>
+              <div>
+                <h3>Типы заданий</h3>
+                <div id="coverage-types" class="coverage-list"></div>
+              </div>
+              <div>
+                <h3>Сложность</h3>
+                <div id="coverage-difficulties" class="coverage-list"></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <h2>Методическое покрытие</h2>
+            <div class="coverage-grid">
+              <div>
+                <h3>Темы</h3>
+                <div id="coverage-themes" class="coverage-list"></div>
+              </div>
+              <div>
+                <h3>ОК</h3>
+                <div id="coverage-ok" class="coverage-list"></div>
+              </div>
+              <div>
+                <h3>Профессиональные акценты</h3>
+                <div id="coverage-pk" class="coverage-list"></div>
+              </div>
+              <div>
+                <h3>Баланс</h3>
+                <div id="content-balance" class="coverage-list"></div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section id="content-qa-section" class="grid-two qa-grid">
+          <article class="card">
+            <div class="section-row">
+              <h2>QA банка заданий</h2>
+              <div id="qa-summary-badge" class="pill">проверок: 0</div>
+            </div>
+            <div class="qa-stack">
+              <section>
+                <h3>Дубли формулировок</h3>
+                <div id="qa-duplicates" class="qa-list"></div>
+              </section>
+              <section>
+                <h3>Пробелы метаданных</h3>
+                <div id="qa-metadata" class="qa-list"></div>
+              </section>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="qa-stack">
+              <section>
+                <h3>Слабые distractors</h3>
+                <div id="qa-distractors" class="qa-list"></div>
+              </section>
+              <section>
+                <h3>Точки проверки перевода</h3>
+                <div id="qa-translations" class="qa-list"></div>
+              </section>
+            </div>
+          </article>
+        </section>
+
+        <section id="content-editor-section" class="card">
+          <div class="section-row">
+            <h2>Редактор и фильтры</h2>
+            <div id="content-filter-meta" class="pill">показано 0 из 0</div>
+          </div>
+
+          <div class="filters-grid">
+            <label class="field">
+              <span>Поиск</span>
+              <input id="content-filter-search" type="search" placeholder="ID, блюдо, вопрос, тема" />
+            </label>
+            <label class="field">
+              <span>Тур</span>
+              <select id="content-filter-tour">
+                <option value="">Все туры</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Кухня</span>
+              <select id="content-filter-cuisine">
+                <option value="">Все кухни</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Тип задания</span>
+              <select id="content-filter-type">
+                <option value="">Все типы</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Сложность</span>
+              <select id="content-filter-difficulty">
+                <option value="">Все уровни</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Тема</span>
+              <select id="content-filter-theme">
+                <option value="">Все темы</option>
+              </select>
+            </label>
+            <div class="filter-actions">
+              <button id="content-filter-reset" class="button secondary" type="button">Сбросить фильтры</button>
+            </div>
+          </div>
+
+          <div class="content-workbench">
+            <section class="card content-list-card">
+              <div class="section-row">
+                <h3>Каталог вопросов</h3>
+                <div id="content-draft-meta" class="pill">черновиков: 0</div>
+              </div>
+              <div id="content-question-list" class="content-question-list"></div>
+            </section>
+
+            <section class="card content-detail-card">
+              <div class="section-row">
+                <h3>Карточка вопроса</h3>
+                <div class="actions inline">
+                  <button id="content-save-draft" class="button primary" type="button">Сохранить черновик</button>
+                  <button id="content-reset-draft" class="button secondary" type="button">Сбросить черновик</button>
+                  <button id="content-export-drafts" class="button secondary" type="button">Экспорт черновиков</button>
+                </div>
+              </div>
+              <div id="content-detail-empty" class="muted">
+                Выберите вопрос из списка слева, чтобы посмотреть метаданные и сохранить редакторский черновик.
+              </div>
+              <div id="content-detail" class="hidden">
+                <div id="content-detail-head" class="detail-card"></div>
+                <form id="content-detail-form" class="form-stack editor-form">
+                  <label class="field">
+                    <span>Тема</span>
+                    <input id="editor-theme" type="text" />
+                  </label>
+                  <label class="field">
+                    <span>Подтема</span>
+                    <input id="editor-topic" type="text" />
+                  </label>
+                  <label class="field">
+                    <span>Профессиональный фокус</span>
+                    <input id="editor-focus" type="text" />
+                  </label>
+                  <label class="field">
+                    <span>Действие для студента</span>
+                    <input id="editor-student-action" type="text" />
+                  </label>
+                  <label class="field">
+                    <span>Сложность</span>
+                    <select id="editor-difficulty">
+                      <option value="basic">Базовый уровень</option>
+                      <option value="standard">Повышенный уровень</option>
+                      <option value="advanced">Высокий уровень</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>Оценочное время, сек</span>
+                    <input id="editor-estimated-time" type="number" min="15" step="5" />
+                  </label>
+                  <label class="field">
+                    <span>Коды ОК</span>
+                    <input id="editor-ok-codes" type="text" placeholder="ОК 01, ОК 02" />
+                  </label>
+                  <label class="field">
+                    <span>Профессиональные акценты</span>
+                    <input id="editor-pk-focus" type="text" placeholder="подбор сырья, технология приготовления" />
+                  </label>
+                  <label class="field">
+                    <span>Методическое назначение</span>
+                    <textarea id="editor-methodical-purpose" rows="4"></textarea>
+                  </label>
+                </form>
+                <div id="content-detail-note" class="message hidden"></div>
+              </div>
+            </section>
+          </div>
+        </section>
+      </section>
+
+      <footer class="footer-note">
+        <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
+        <small>
+          Разработчик: Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса"
+          • Версия <span id="content-app-version-label">1.5.0</span>
+        </small>
+      </footer>
+    </main>
+
+    <script src="/content-admin.js?v=1.5.0"></script>
+  </body>
+</html>

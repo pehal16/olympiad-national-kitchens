@@ -30,6 +30,7 @@ const {
   compareAttemptsByRank
 } = require("./src/scoring");
 const { buildVariant, getCurrentQuestion, getCurrentTour, sanitizeQuestion } = require("./src/variant");
+const { buildQuestionCatalog, buildQuestionBankSummary } = require("./src/question-bank");
 const { createAttemptsCsv, saveExportFile } = require("./src/exporter");
 const { ensureFolder, uploadBuffer } = require("./src/yandex-disk");
 
@@ -1222,6 +1223,22 @@ async function handleApi(req, res, url) {
       sendJson(res, 200, {
         ok: true,
         data: buildAdminSummary(olympiad, rawAttempts, ranked, settings)
+      });
+      return;
+    }
+
+    if (method === "GET" && pathname === "/api/admin/content/summary") {
+      sendJson(res, 200, {
+        ok: true,
+        data: buildQuestionBankSummary(olympiad)
+      });
+      return;
+    }
+
+    if (method === "GET" && pathname === "/api/admin/content/questions") {
+      sendJson(res, 200, {
+        ok: true,
+        data: buildQuestionCatalog(olympiad)
       });
       return;
     }
