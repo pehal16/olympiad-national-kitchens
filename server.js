@@ -547,7 +547,7 @@ function normalizeContentDraftPayload(payload) {
   };
 }
 
-function normalizeCustomQuestionPayload(payload) {
+function normalizeCustomQuestionPayload(payload, existingQuestion = null) {
   const text = (value) => String(value || "").trim();
   const normalizeOption = (value) => text(value).replace(/\s+/g, " ").trim();
   const parseList = (value) =>
@@ -608,10 +608,11 @@ function normalizeCustomQuestionPayload(payload) {
     advanced: "Высокий уровень"
   };
 
-  const id = text(payload.id) || generateId("custom_test");
+  const id = existingQuestion?.id || text(payload.id) || generateId("custom_test");
   const dishLabel = text(payload.dishLabel || payload.theme || "Авторский тест");
   const estimatedTimeSec = Math.max(20, Number(payload.estimatedTimeSec) || 60);
   const maxScore = Math.max(1, Number(payload.maxScore) || (tourCode === "T4" ? 4 : 2));
+  const createdAt = existingQuestion?.metadata?.createdAt || nowIso();
 
   return {
     id,
@@ -639,7 +640,7 @@ function normalizeCustomQuestionPayload(payload) {
       okCodes: parseList(payload.okCodes),
       pkFocus: parseList(payload.pkFocus),
       methodicalPurpose: text(payload.methodicalPurpose),
-      createdAt: nowIso(),
+      createdAt,
       updatedAt: nowIso()
     }
   };
@@ -1476,8 +1477,42 @@ async function handleApi(req, res, url) {
       return;
     }
 
+    if (method === "PUT" && pathname.match(/^\/api\/admin\/content\/questions\/[^/]+$/)) {
+      const questionId = decodeURIComponent(pathname.split("/")[5] || "");
+      const existingQuestion = customQuestionMap[questionId];
+      if (!existingQuestion) {
+        sendJson(res, 404, {
+          ok: false,
+          message: "Авторский вопрос не найден."
+        });
+        return;
+      }
+
+      const body = await parseBody(req);
+      const question = normalizeCustomQuestionPayload(
+        {
+          ...body,
+          id: questionId
+        },
+        existingQuestion
+      );
+      await upsertContentCustomQuestion(question.id, question);
+      sendJson(res, 200, {
+        ok: true,
+        data: question
+      });
+      return;
+    }
+
     if (method === "DELETE" && pathname.match(/^\/api\/admin\/content\/questions\/[^/]+$/)) {
       const questionId = decodeURIComponent(pathname.split("/")[5] || "");
+      if (!customQuestionMap[questionId]) {
+        sendJson(res, 404, {
+          ok: false,
+          message: "Авторский вопрос не найден."
+        });
+        return;
+      }
       await deleteContentCustomQuestion(questionId);
       sendJson(res, 200, {
         ok: true,

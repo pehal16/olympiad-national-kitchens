@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1f8e73" />
     <title>Банк заданий олимпиады</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.5.2" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.5.3" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/styles.css?v=1.5.2" />
+    <link rel="stylesheet" href="/styles.css?v=1.5.3" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -159,6 +159,8 @@
                 </p>
               </div>
               <div class="actions inline">
+                <div id="content-creator-mode" class="pill">режим: новый тест</div>
+                <button id="content-cancel-edit" class="button secondary hidden" type="button">Отменить редактирование</button>
                 <button id="content-create-question" class="button primary" type="button">Добавить вопрос</button>
                 <button id="content-reset-creator" class="button secondary" type="button">Очистить форму</button>
               </div>
@@ -318,6 +320,8 @@
               <div class="section-row">
                 <h3>Карточка вопроса</h3>
                 <div class="actions inline">
+                  <button id="content-edit-question" class="button secondary hidden" type="button">Редактировать тест</button>
+                  <button id="content-delete-question" class="button secondary hidden" type="button">Удалить тест</button>
                   <button id="content-save-draft" class="button primary" type="button">Сохранить черновик</button>
                   <button id="content-reset-draft" class="button secondary" type="button">Сбросить черновик</button>
                   <button id="content-export-drafts" class="button secondary" type="button">Экспорт черновиков</button>
@@ -381,11 +385,11 @@
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
         <small>
           Разработчик: Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса"
-          • Версия <span id="content-app-version-label">1.5.2</span>
+          • Версия <span id="content-app-version-label">1.5.3</span>
         </small>
       </footer>
     </main>
 
-    <script src="/content-admin.js?v=1.5.2"></script>
+    <script src="/content-admin.js?v=1.5.3"></script>
   </body>
 </html>

@@ -640,7 +640,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.5.2");
+    await navigator.serviceWorker.register("/sw.js?v=1.5.3");
   } catch (error) {
     // PWA layer is optional; the olympiad keeps working without service worker support.
   }

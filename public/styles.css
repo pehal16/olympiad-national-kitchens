@@ -332,6 +332,12 @@ h3 {
   font-size: 14px;
 }
 
+.pill-accent {
+  background: rgba(31, 142, 115, 0.18);
+  color: var(--accent);
+  border: 1px solid rgba(31, 142, 115, 0.18);
+}
+
 .progress-bars {
   display: grid;
   gap: 10px;
@@ -1292,6 +1298,13 @@ select {
   margin-bottom: 8px;
 }
 
+.content-question-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .content-question-meta {
   display: flex;
   flex-wrap: wrap;
@@ -1303,6 +1316,10 @@ select {
 
 .editor-form {
   margin-top: 16px;
+}
+
+.content-detail-card .actions.inline {
+  align-items: center;
 }
 
 pre {

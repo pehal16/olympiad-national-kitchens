@@ -4,6 +4,8 @@ const state = {
   questions: [],
   filteredQuestions: [],
   selectedQuestionId: "",
+  creatorMode: "create",
+  creatorEditingId: "",
   drafts: {},
   draftRequestState: "idle",
   filters: {
@@ -60,10 +62,14 @@ const elements = {
   detail: document.getElementById("content-detail"),
   detailHead: document.getElementById("content-detail-head"),
   note: document.getElementById("content-detail-note"),
+  editQuestion: document.getElementById("content-edit-question"),
+  deleteQuestion: document.getElementById("content-delete-question"),
   saveDraft: document.getElementById("content-save-draft"),
   resetDraft: document.getElementById("content-reset-draft"),
   exportDrafts: document.getElementById("content-export-drafts"),
   creatorNote: document.getElementById("content-creator-note"),
+  creatorModeBadge: document.getElementById("content-creator-mode"),
+  cancelEdit: document.getElementById("content-cancel-edit"),
   createQuestion: document.getElementById("content-create-question"),
   resetCreator: document.getElementById("content-reset-creator"),
   creatorTour: document.getElementById("creator-tour"),
@@ -383,22 +389,82 @@ function mergedQuestion(question) {
   };
 }
 
+function isCustomQuestion(question) {
+  return question?.sourceKind === "custom_question";
+}
+
+function setCreatorMode(mode = "create", question = null) {
+  state.creatorMode = mode;
+  state.creatorEditingId = mode === "edit" && question ? question.id : "";
+
+  if (mode === "edit" && question) {
+    elements.creatorModeBadge.textContent = `режим: редактирование ${question.id}`;
+    elements.createQuestion.textContent = "Сохранить изменения";
+    elements.cancelEdit.classList.remove("hidden");
+    elements.creatorModeBadge.classList.add("pill-accent");
+    return;
+  }
+
+  elements.creatorModeBadge.textContent = "режим: новый тест";
+  elements.createQuestion.textContent = "Добавить вопрос";
+  elements.cancelEdit.classList.add("hidden");
+  elements.creatorModeBadge.classList.remove("pill-accent");
+}
+
+function fillCreatorFromQuestion(question) {
+  const options = Array.isArray(question.options) ? question.options : [];
+  const option1 = options[0] || { text: "", isCorrect: false };
+  const option2 = options[1] || { text: "", isCorrect: false };
+  const option3 = options[2] || { text: "", isCorrect: false };
+  const option4 = options[3] || { text: "", isCorrect: false };
+
+  elements.creatorTour.value = question.tourCode || "T1";
+  elements.creatorCuisine.value = question.cuisine || "mixed";
+  elements.creatorDishLabel.value = question.dishLabel || "";
+  elements.creatorPrompt.value = question.prompt || "";
+  elements.creatorScenario.value = question.scenario || "";
+  elements.creatorNoteInput.value = question.note || "";
+  elements.creatorOption1.value = option1.text || "";
+  elements.creatorOption2.value = option2.text || "";
+  elements.creatorOption3.value = option3.text || "";
+  elements.creatorOption4.value = option4.text || "";
+  elements.creatorCorrect1.checked = Boolean(option1.isCorrect);
+  elements.creatorCorrect2.checked = Boolean(option2.isCorrect);
+  elements.creatorCorrect3.checked = Boolean(option3.isCorrect);
+  elements.creatorCorrect4.checked = Boolean(option4.isCorrect);
+  elements.creatorDifficulty.value = question.metadata?.difficulty || "basic";
+  elements.creatorTheme.value = question.metadata?.theme || "";
+  elements.creatorTopic.value = question.metadata?.topic || "";
+  elements.creatorFocus.value = question.metadata?.focus || "";
+  elements.creatorOkCodes.value = (question.metadata?.okCodes || []).join(", ");
+  elements.creatorPkFocus.value = (question.metadata?.pkFocus || []).join(", ");
+  elements.creatorMethodicalPurpose.value = question.metadata?.methodicalPurpose || "";
+}
+
 function renderQuestionDetail() {
   const question = state.questions.find((item) => item.id === state.selectedQuestionId);
   if (!question) {
     elements.detailEmpty.classList.remove("hidden");
     elements.detail.classList.add("hidden");
+    elements.editQuestion.classList.add("hidden");
+    elements.deleteQuestion.classList.add("hidden");
     return;
   }
 
   const merged = mergedQuestion(question);
+  const custom = isCustomQuestion(question);
+  const sourceBadge = custom
+    ? '<span class="pill pill-accent">авторский тест</span>'
+    : '<span class="pill">основной банк</span>';
 
   elements.detailEmpty.classList.add("hidden");
   elements.detail.classList.remove("hidden");
   hideMessage(elements.note);
+  elements.editQuestion.classList.toggle("hidden", !custom);
+  elements.deleteQuestion.classList.toggle("hidden", !custom);
 
   elements.detailHead.innerHTML = `
-    <strong>${escapeHtml(question.id)} • ${escapeHtml(question.tourCode)} • ${escapeHtml(question.typeLabel)}</strong><br />
+    <strong>${escapeHtml(question.id)} • ${escapeHtml(question.tourCode)} • ${escapeHtml(question.typeLabel)}</strong> ${sourceBadge}<br />
     <span class="muted">${escapeHtml(question.cuisineLabel)} • ${escapeHtml(question.cuisineGroupLabel)}</span><br />
     <span class="muted">${escapeHtml(question.dishLabel || question.caseTitle || "Без отдельного блюда")}</span><br />
     <span class="muted">${escapeHtml(question.prompt)}</span>
@@ -443,13 +509,17 @@ function renderQuestionList() {
 
   state.filteredQuestions.forEach((question) => {
     const draft = state.drafts[question.id];
+    const custom = isCustomQuestion(question);
     const row = document.createElement("button");
     row.type = "button";
     row.className = `content-question-row${question.id === state.selectedQuestionId ? " is-selected" : ""}`;
     row.innerHTML = `
       <div class="content-question-top">
         <strong>${escapeHtml(question.id)}</strong>
-        <span class="pill">${escapeHtml(question.tourCode)}</span>
+        <div class="content-question-badges">
+          <span class="pill">${escapeHtml(question.tourCode)}</span>
+          ${custom ? '<span class="pill pill-accent">авторский</span>' : ""}
+        </div>
       </div>
       <div>${escapeHtml(shortText(question.prompt, 110))}</div>
       <div class="content-question-meta">
@@ -636,6 +706,7 @@ function collectCreatorPayload() {
 }
 
 function resetCreatorForm() {
+  setCreatorMode("create");
   elements.creatorTour.value = "T1";
   elements.creatorCuisine.value = "mixed";
   elements.creatorDishLabel.value = "";
@@ -660,19 +731,88 @@ function resetCreatorForm() {
   hideMessage(elements.creatorNote);
 }
 
+function startEditingSelectedQuestion() {
+  const question = state.questions.find((item) => item.id === state.selectedQuestionId);
+  if (!question || !isCustomQuestion(question)) {
+    showMessage(elements.note, "Редактировать из конструктора можно только авторские тесты.", "warning");
+    return;
+  }
+
+  fillCreatorFromQuestion(question);
+  setCreatorMode("edit", question);
+  hideMessage(elements.creatorNote);
+  showMessage(elements.creatorNote, `Открыт режим редактирования теста ${question.id}.`, "success");
+  elements.editorSection.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function deleteSelectedQuestion() {
+  const question = state.questions.find((item) => item.id === state.selectedQuestionId);
+  if (!question || !isCustomQuestion(question)) {
+    showMessage(elements.note, "Удалять из интерфейса можно только авторские тесты.", "warning");
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Удалить авторский тест ${question.id}? Это действие затронет банк заданий и облачную версию олимпиады.`
+  );
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    elements.deleteQuestion.disabled = true;
+    hideMessage(elements.note);
+    await adminApi(`/api/admin/content/questions/${encodeURIComponent(question.id)}`, {
+      method: "DELETE"
+    });
+    await adminApi(`/api/admin/content/drafts/${encodeURIComponent(question.id)}`, {
+      method: "DELETE"
+    }).catch(() => undefined);
+
+    if (state.creatorEditingId === question.id) {
+      resetCreatorForm();
+    }
+
+    delete state.drafts[question.id];
+    state.selectedQuestionId = "";
+    await loadContentPanel();
+    showMessage(elements.creatorNote, `Тест ${question.id} удалён из банка заданий.`, "success");
+    showMessage(elements.note, `Тест ${question.id} удалён из банка заданий.`, "success");
+  } catch (error) {
+    showMessage(elements.note, error.message || "Не удалось удалить авторский тест.", "error");
+  } finally {
+    elements.deleteQuestion.disabled = false;
+  }
+}
+
 async function createCustomQuestion() {
+  const editing = state.creatorMode === "edit" && state.creatorEditingId;
+  const requestPath = editing
+    ? `/api/admin/content/questions/${encodeURIComponent(state.creatorEditingId)}`
+    : "/api/admin/content/questions";
+  const requestMethod = editing ? "PUT" : "POST";
+
   try {
     elements.createQuestion.disabled = true;
     hideMessage(elements.creatorNote);
     const payload = collectCreatorPayload();
-    const question = await adminApi("/api/admin/content/questions", {
-      method: "POST",
+    if (editing) {
+      payload.id = state.creatorEditingId;
+    }
+
+    const question = await adminApi(requestPath, {
+      method: requestMethod,
       body: JSON.stringify(payload)
     });
 
+    const successMessage = editing
+      ? `Тест ${question.id} обновлён в банке заданий.`
+      : `Новый тест ${question.id} сохранён в банке заданий.`;
     showMessage(
       elements.creatorNote,
-      `Новый тест ${question.id} сохранён в банке заданий.`,
+      editing
+        ? `Тест ${question.id} обновлён в банке заданий.`
+        : `Новый тест ${question.id} сохранён в банке заданий.`,
       "success"
     );
     resetCreatorForm();
@@ -680,6 +820,7 @@ async function createCustomQuestion() {
     state.selectedQuestionId = question.id;
     renderQuestionList();
     renderQuestionDetail();
+    showMessage(elements.creatorNote, successMessage, "success");
   } catch (error) {
     showMessage(
       elements.creatorNote,
@@ -784,8 +925,11 @@ async function init() {
   elements.saveDraft.addEventListener("click", saveDraft);
   elements.resetDraft.addEventListener("click", resetDraft);
   elements.exportDrafts.addEventListener("click", exportDrafts);
+  elements.editQuestion.addEventListener("click", startEditingSelectedQuestion);
+  elements.deleteQuestion.addEventListener("click", deleteSelectedQuestion);
   elements.createQuestion.addEventListener("click", createCustomQuestion);
   elements.resetCreator.addEventListener("click", resetCreatorForm);
+  elements.cancelEdit.addEventListener("click", resetCreatorForm);
   resetCreatorForm();
 
   try {
