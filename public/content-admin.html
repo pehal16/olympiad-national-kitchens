@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1f8e73" />
     <title>Банк заданий олимпиады</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.5.3" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.5.4" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/styles.css?v=1.5.3" />
+    <link rel="stylesheet" href="/styles.css?v=1.5.4" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -60,6 +60,18 @@
           <article class="card stat-card">
             <span class="stat-label">Готовность банка</span>
             <strong id="content-ready-percent">0%</strong>
+          </article>
+          <article class="card stat-card">
+            <span class="stat-label">Основной банк</span>
+            <strong id="content-base-questions">0</strong>
+          </article>
+          <article class="card stat-card">
+            <span class="stat-label">Авторские тесты</span>
+            <strong id="content-custom-questions">0</strong>
+          </article>
+          <article class="card stat-card">
+            <span class="stat-label">Сигналы QA</span>
+            <strong id="content-flagged-questions">0</strong>
           </article>
         </section>
 
@@ -302,6 +314,24 @@
                 <option value="">Все темы</option>
               </select>
             </label>
+            <label class="field">
+              <span>Источник</span>
+              <select id="content-filter-source">
+                <option value="">Все источники</option>
+                <option value="Основной банк">Основной банк</option>
+                <option value="Авторский тест">Авторский тест</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>QA-статус</span>
+              <select id="content-filter-qa">
+                <option value="">Любой статус</option>
+                <option value="clean">Без замечаний</option>
+                <option value="flagged">Есть сигналы QA</option>
+                <option value="risk">Нужна проверка</option>
+                <option value="draft">Есть серверный черновик</option>
+              </select>
+            </label>
             <div class="filter-actions">
               <button id="content-filter-reset" class="button secondary" type="button">Сбросить фильтры</button>
             </div>
@@ -332,6 +362,8 @@
               </div>
               <div id="content-detail" class="hidden">
                 <div id="content-detail-head" class="detail-card"></div>
+                <div id="content-detail-metrics" class="detail-metrics"></div>
+                <div id="content-detail-qa" class="detail-qa-card"></div>
                 <form id="content-detail-form" class="form-stack editor-form">
                   <label class="field">
                     <span>Тема</span>
@@ -385,11 +417,11 @@
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
         <small>
           Разработчик: Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса"
-          • Версия <span id="content-app-version-label">1.5.3</span>
+          • Версия <span id="content-app-version-label">1.5.4</span>
         </small>
       </footer>
     </main>
 
-    <script src="/content-admin.js?v=1.5.3"></script>
+    <script src="/content-admin.js?v=1.5.4"></script>
   </body>
 </html>

@@ -1158,6 +1158,10 @@ select {
   gap: 18px;
 }
 
+.content-summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
 .coverage-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1204,6 +1208,30 @@ select {
 .qa-item strong {
   display: block;
   margin-bottom: 6px;
+}
+
+.qa-pill {
+  border-color: rgba(31, 142, 115, 0.18);
+}
+
+.qa-pill-clean {
+  background: rgba(230, 247, 239, 0.96);
+  color: #1c6f59;
+}
+
+.qa-pill-warning {
+  background: rgba(255, 244, 214, 0.96);
+  color: #8c5a00;
+}
+
+.qa-pill-risk {
+  background: rgba(255, 229, 229, 0.96);
+  color: #9d2b2b;
+}
+
+.qa-pill-draft {
+  background: rgba(231, 238, 255, 0.96);
+  color: #3b5ea6;
 }
 
 .content-workbench {
@@ -1290,6 +1318,14 @@ select {
   background: rgba(223, 242, 236, 0.95);
 }
 
+.content-question-row.has-issues {
+  border-left: 4px solid rgba(231, 159, 23, 0.72);
+}
+
+.content-question-row.is-risk {
+  border-left-color: rgba(202, 62, 62, 0.74);
+}
+
 .content-question-top {
   display: flex;
   justify-content: space-between;
@@ -1322,6 +1358,50 @@ select {
   align-items: center;
 }
 
+.detail-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.detail-metric,
+.detail-qa-card {
+  border: 1px solid rgba(31, 142, 115, 0.12);
+  border-radius: 18px;
+  background: rgba(243, 250, 248, 0.88);
+  padding: 14px 16px;
+}
+
+.detail-metric strong {
+  display: block;
+  margin-top: 8px;
+  line-height: 1.45;
+}
+
+.detail-qa-card {
+  margin-top: 14px;
+}
+
+.detail-qa-note {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(231, 238, 255, 0.92);
+  color: #35518f;
+  font-size: 13px;
+}
+
+.qa-signal-list {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--text);
+}
+
+.qa-signal-list li + li {
+  margin-top: 6px;
+}
+
 pre {
   white-space: pre-wrap;
   word-break: break-word;
@@ -1336,7 +1416,8 @@ pre {
   .content-workbench,
   .exam-cockpit,
   .creator-grid,
-  .creator-options-grid {
+  .creator-options-grid,
+  .detail-metrics {
     grid-template-columns: 1fr;
   }
 

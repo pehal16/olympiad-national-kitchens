@@ -3,6 +3,7 @@ const state = {
   summary: null,
   questions: [],
   filteredQuestions: [],
+  questionIssueMap: {},
   selectedQuestionId: "",
   creatorMode: "create",
   creatorEditingId: "",
@@ -14,7 +15,9 @@ const state = {
     cuisine: "",
     type: "",
     difficulty: "",
-    theme: ""
+    theme: "",
+    source: "",
+    qa: ""
   }
 };
 
@@ -34,6 +37,9 @@ const elements = {
   interactiveQuestions: document.getElementById("content-interactive-questions"),
   totalCuisines: document.getElementById("content-total-cuisines"),
   readyPercent: document.getElementById("content-ready-percent"),
+  baseQuestions: document.getElementById("content-base-questions"),
+  customQuestions: document.getElementById("content-custom-questions"),
+  flaggedQuestions: document.getElementById("content-flagged-questions"),
   generatedAt: document.getElementById("content-generated-at"),
   coverageTours: document.getElementById("coverage-tours"),
   coverageCuisines: document.getElementById("coverage-cuisines"),
@@ -55,12 +61,16 @@ const elements = {
   filterType: document.getElementById("content-filter-type"),
   filterDifficulty: document.getElementById("content-filter-difficulty"),
   filterTheme: document.getElementById("content-filter-theme"),
+  filterSource: document.getElementById("content-filter-source"),
+  filterQa: document.getElementById("content-filter-qa"),
   filterReset: document.getElementById("content-filter-reset"),
   draftMeta: document.getElementById("content-draft-meta"),
   questionList: document.getElementById("content-question-list"),
   detailEmpty: document.getElementById("content-detail-empty"),
   detail: document.getElementById("content-detail"),
   detailHead: document.getElementById("content-detail-head"),
+  detailMetrics: document.getElementById("content-detail-metrics"),
+  detailQa: document.getElementById("content-detail-qa"),
   note: document.getElementById("content-detail-note"),
   editQuestion: document.getElementById("content-edit-question"),
   deleteQuestion: document.getElementById("content-delete-question"),
@@ -103,6 +113,13 @@ const elements = {
   editorPkFocus: document.getElementById("editor-pk-focus"),
   editorMethodicalPurpose: document.getElementById("editor-methodical-purpose"),
   appVersionLabel: document.getElementById("content-app-version-label")
+};
+
+const QA_CATEGORY_LABELS = {
+  metadata: "Метаданные",
+  distractors: "Варианты ответа",
+  translation: "Перевод",
+  duplicate: "Дубли"
 };
 
 function adminApi(path, options = {}) {
@@ -189,6 +206,45 @@ function shortText(value, max = 120) {
   return `${text.slice(0, max - 1)}…`;
 }
 
+function buildQuestionIssueMap(summary) {
+  const map = {};
+
+  (summary?.qa?.questionIssues || []).forEach((item) => {
+    map[item.id] = item;
+  });
+
+  return map;
+}
+
+function getQuestionIssueInfo(question) {
+  const issue = state.questionIssueMap[question.id];
+  const hasDraft = Boolean(state.drafts[question.id]);
+
+  if (!issue) {
+    return {
+      issueCount: 0,
+      issues: [],
+      categories: [],
+      severity: hasDraft ? "draft" : "clean",
+      label: hasDraft ? "Есть серверный черновик" : "Без замечаний",
+      hasDraft
+    };
+  }
+
+  return {
+    issueCount: issue.issueCount || 0,
+    issues: issue.issues || [],
+    categories: issue.categories || [],
+    severity: issue.severity === "risk" ? "risk" : "warning",
+    label: issue.severity === "risk" ? "Нужна проверка" : "Есть сигналы QA",
+    hasDraft
+  };
+}
+
+function formatQaCategoryLabel(category) {
+  return QA_CATEGORY_LABELS[category] || category;
+}
+
 function goBackOrHome() {
   if (window.history.length > 1) {
     window.history.back();
@@ -268,6 +324,9 @@ function renderSummary() {
   elements.interactiveQuestions.textContent = summary.interactiveQuestions;
   elements.totalCuisines.textContent = summary.cuisines.length;
   elements.readyPercent.textContent = `${summary.qa.readyPercent}%`;
+  elements.baseQuestions.textContent = summary.baseQuestions || 0;
+  elements.customQuestions.textContent = summary.customQuestions || 0;
+  elements.flaggedQuestions.textContent = summary.qa.flaggedQuestionsCount || 0;
   elements.generatedAt.textContent = `обновлено ${formatDateTime(summary.generatedAt)}`;
 
   renderCoverageList(elements.coverageTours, summary.tours, "Данные по турам пока не загружены.");
@@ -288,12 +347,7 @@ function renderSummary() {
     <div class="coverage-item"><span>Минимум по одной кухне</span><strong>${summary.qa.balance.minCuisineCount}</strong></div>
   `;
 
-  const qaCount =
-    summary.qa.duplicatePrompts.length +
-    summary.qa.missingMetadata.length +
-    summary.qa.weakDistractors.length +
-    summary.qa.translationHotspots.length;
-  elements.qaSummaryBadge.textContent = `сигналов: ${qaCount}`;
+  elements.qaSummaryBadge.textContent = `сигналов: ${summary.qa.flaggedQuestionsCount || 0} вопросов`;
 
   renderQaList(
     elements.qaDuplicates,
@@ -368,7 +422,9 @@ function syncFiltersFromInputs() {
     cuisine: elements.filterCuisine.value,
     type: elements.filterType.value,
     difficulty: elements.filterDifficulty.value,
-    theme: elements.filterTheme.value
+    theme: elements.filterTheme.value,
+    source: elements.filterSource.value,
+    qa: elements.filterQa.value
   };
 }
 
@@ -448,6 +504,8 @@ function renderQuestionDetail() {
     elements.detail.classList.add("hidden");
     elements.editQuestion.classList.add("hidden");
     elements.deleteQuestion.classList.add("hidden");
+    elements.detailMetrics.innerHTML = "";
+    elements.detailQa.innerHTML = "";
     return;
   }
 
@@ -456,6 +514,16 @@ function renderQuestionDetail() {
   const sourceBadge = custom
     ? '<span class="pill pill-accent">авторский тест</span>'
     : '<span class="pill">основной банк</span>';
+  const issueInfo = getQuestionIssueInfo(question);
+  const qaBadgeClass =
+    issueInfo.severity === "risk"
+      ? "pill qa-pill qa-pill-risk"
+      : issueInfo.issueCount
+        ? "pill qa-pill qa-pill-warning"
+        : issueInfo.hasDraft
+          ? "pill qa-pill qa-pill-draft"
+          : "pill qa-pill qa-pill-clean";
+  const qaBadge = `<span class="${qaBadgeClass}">${escapeHtml(issueInfo.label)}</span>`;
 
   elements.detailEmpty.classList.add("hidden");
   elements.detail.classList.remove("hidden");
@@ -464,7 +532,7 @@ function renderQuestionDetail() {
   elements.deleteQuestion.classList.toggle("hidden", !custom);
 
   elements.detailHead.innerHTML = `
-    <strong>${escapeHtml(question.id)} • ${escapeHtml(question.tourCode)} • ${escapeHtml(question.typeLabel)}</strong> ${sourceBadge}<br />
+    <strong>${escapeHtml(question.id)} • ${escapeHtml(question.tourCode)} • ${escapeHtml(question.typeLabel)}</strong> ${sourceBadge} ${qaBadge}<br />
     <span class="muted">${escapeHtml(question.cuisineLabel)} • ${escapeHtml(question.cuisineGroupLabel)}</span><br />
     <span class="muted">${escapeHtml(question.dishLabel || question.caseTitle || "Без отдельного блюда")}</span><br />
     <span class="muted">${escapeHtml(question.prompt)}</span>
@@ -479,6 +547,46 @@ function renderQuestionDetail() {
       .join("");
     elements.detailHead.innerHTML += `<div class="content-option-preview"><strong>Варианты:</strong><ul class="flat-list">${optionsMarkup}</ul></div>`;
   }
+
+  elements.detailMetrics.innerHTML = `
+    <article class="detail-metric">
+      <span class="muted">Источник</span>
+      <strong>${escapeHtml(question.sourceLabel || (custom ? "Авторский тест" : "Основной банк"))}</strong>
+    </article>
+    <article class="detail-metric">
+      <span class="muted">Оценочное время</span>
+      <strong>${Number(merged.metadata.estimatedTimeSec || 0)} сек</strong>
+    </article>
+    <article class="detail-metric">
+      <span class="muted">Коды ОК</span>
+      <strong>${escapeHtml((merged.metadata.okCodes || []).join(", ") || "не указаны")}</strong>
+    </article>
+    <article class="detail-metric">
+      <span class="muted">Проф. акценты</span>
+      <strong>${escapeHtml((merged.metadata.pkFocus || []).join(", ") || "не указаны")}</strong>
+    </article>
+  `;
+
+  const categoryBadges = issueInfo.categories.length
+    ? issueInfo.categories
+        .map((category) => `<span class="pill qa-pill">${escapeHtml(formatQaCategoryLabel(category))}</span>`)
+        .join("")
+    : '<span class="pill qa-pill qa-pill-clean">QA без замечаний</span>';
+  const issueListMarkup = issueInfo.issues.length
+    ? `<ul class="qa-signal-list">${issueInfo.issues.map((issue) => `<li>${escapeHtml(issue)}</li>`).join("")}</ul>`
+    : '<div class="muted">Для этого вопроса явных QA-сигналов не найдено.</div>';
+  const draftNote = issueInfo.hasDraft
+    ? '<div class="detail-qa-note">Есть серверный черновик. При необходимости сначала сверьте его с карточкой вопроса.</div>'
+    : "";
+
+  elements.detailQa.innerHTML = `
+    <div class="section-row">
+      <h4>Методический QA вопроса</h4>
+      <div class="content-question-badges">${categoryBadges}</div>
+    </div>
+    ${draftNote}
+    ${issueListMarkup}
+  `;
 
   elements.editorTheme.value = merged.metadata.theme || "";
   elements.editorTopic.value = merged.metadata.topic || "";
@@ -495,8 +603,9 @@ function renderQuestionList() {
   elements.questionList.innerHTML = "";
   const total = state.questions.length;
   const shown = state.filteredQuestions.length;
-  elements.filterMeta.textContent = `показано ${shown} из ${total}`;
-  elements.draftMeta.textContent = `черновиков: ${Object.keys(state.drafts).length}`;
+  const shownFlagged = state.filteredQuestions.filter((question) => getQuestionIssueInfo(question).issueCount > 0).length;
+  elements.filterMeta.textContent = `показано ${shown} из ${total} • с сигналами ${shownFlagged}`;
+  elements.draftMeta.textContent = `черновиков: ${Object.keys(state.drafts).length} • сигналов QA: ${state.summary?.qa?.flaggedQuestionsCount || 0}`;
 
   if (!shown) {
     elements.questionList.innerHTML = '<div class="muted">По текущим фильтрам вопросов не найдено.</div>';
@@ -510,15 +619,25 @@ function renderQuestionList() {
   state.filteredQuestions.forEach((question) => {
     const draft = state.drafts[question.id];
     const custom = isCustomQuestion(question);
+    const issueInfo = getQuestionIssueInfo(question);
     const row = document.createElement("button");
     row.type = "button";
-    row.className = `content-question-row${question.id === state.selectedQuestionId ? " is-selected" : ""}`;
+    row.className = `content-question-row${question.id === state.selectedQuestionId ? " is-selected" : ""}${issueInfo.issueCount ? " has-issues" : ""}${issueInfo.severity === "risk" ? " is-risk" : ""}`;
+    const qaBadgeClass =
+      issueInfo.severity === "risk"
+        ? "pill qa-pill qa-pill-risk"
+        : issueInfo.issueCount
+          ? "pill qa-pill qa-pill-warning"
+          : issueInfo.hasDraft
+            ? "pill qa-pill qa-pill-draft"
+            : "pill qa-pill qa-pill-clean";
     row.innerHTML = `
       <div class="content-question-top">
         <strong>${escapeHtml(question.id)}</strong>
         <div class="content-question-badges">
           <span class="pill">${escapeHtml(question.tourCode)}</span>
           ${custom ? '<span class="pill pill-accent">авторский</span>' : ""}
+          <span class="${qaBadgeClass}">${escapeHtml(issueInfo.label)}</span>
         </div>
       </div>
       <div>${escapeHtml(shortText(question.prompt, 110))}</div>
@@ -526,6 +645,7 @@ function renderQuestionList() {
         <span>${escapeHtml(question.cuisineLabel)}</span>
         <span>${escapeHtml(question.typeLabel)}</span>
         <span>${escapeHtml(question.metadata.difficultyLabel)}</span>
+        <span>${escapeHtml(question.sourceLabel || (custom ? "Авторский тест" : "Основной банк"))}</span>
         ${draft ? '<span class="pill">есть серверный черновик</span>' : ""}
       </div>
     `;
@@ -564,6 +684,22 @@ function applyFilters() {
       return false;
     }
     if (state.filters.theme && question.metadata.theme !== state.filters.theme) {
+      return false;
+    }
+    if (state.filters.source && (question.sourceLabel || "") !== state.filters.source) {
+      return false;
+    }
+    const issueInfo = getQuestionIssueInfo(question);
+    if (state.filters.qa === "clean" && issueInfo.issueCount > 0) {
+      return false;
+    }
+    if (state.filters.qa === "flagged" && issueInfo.issueCount === 0) {
+      return false;
+    }
+    if (state.filters.qa === "risk" && issueInfo.severity !== "risk") {
+      return false;
+    }
+    if (state.filters.qa === "draft" && !state.drafts[question.id]) {
       return false;
     }
     return true;
@@ -839,6 +975,8 @@ function resetFilters() {
   elements.filterType.value = "";
   elements.filterDifficulty.value = "";
   elements.filterTheme.value = "";
+  elements.filterSource.value = "";
+  elements.filterQa.value = "";
   applyFilters();
 }
 
@@ -868,6 +1006,7 @@ async function loadContentPanel() {
   state.summary = summary;
   state.questions = questions;
   state.drafts = drafts || {};
+  state.questionIssueMap = buildQuestionIssueMap(summary);
   if (state.selectedQuestionId && !state.questions.find((item) => item.id === state.selectedQuestionId)) {
     state.selectedQuestionId = "";
   }
@@ -882,7 +1021,9 @@ function bindFilters() {
     elements.filterCuisine,
     elements.filterType,
     elements.filterDifficulty,
-    elements.filterTheme
+    elements.filterTheme,
+    elements.filterSource,
+    elements.filterQa
   ].forEach((element) => element.addEventListener("change", applyFilters));
 
   elements.filterSearch.addEventListener("input", applyFilters);

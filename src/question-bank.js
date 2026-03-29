@@ -223,6 +223,7 @@ function normalizeQuestionRecord(question, tour, extra = {}) {
     id: question.id,
     sourceId: question.id,
     sourceKind: extra.sourceKind || "question",
+    sourceLabel: "Основной банк",
     poolId: extra.poolId || null,
     poolTitle: extra.poolTitle || "",
     caseId: extra.caseId || null,
@@ -293,6 +294,7 @@ function normalizeCustomQuestionRecord(question, olympiad) {
     id: question.id,
     sourceId: question.id,
     sourceKind: "custom_question",
+    sourceLabel: "Авторский тест",
     poolId: null,
     poolTitle: question.metadata?.theme || "",
     caseId: null,
@@ -413,6 +415,31 @@ function buildQaReport(records) {
   const weakDistractors = [];
   const translationHotspots = [];
   const flaggedIds = new Set();
+  const questionIssuesMap = new Map();
+
+  function addQuestionIssue(record, category, description) {
+    if (!record?.id || !description) {
+      return;
+    }
+
+    flaggedIds.add(record.id);
+
+    if (!questionIssuesMap.has(record.id)) {
+      questionIssuesMap.set(record.id, {
+        id: record.id,
+        tourCode: record.tourCode,
+        sourceKind: record.sourceKind,
+        sourceLabel: record.sourceLabel,
+        prompt: record.prompt,
+        categories: new Set(),
+        issues: []
+      });
+    }
+
+    const bucket = questionIssuesMap.get(record.id);
+    bucket.categories.add(category);
+    bucket.issues.push(description);
+  }
 
   records.forEach((record) => {
     const promptKey = normalizeText(`${record.type}|${record.prompt}`);
@@ -429,13 +456,17 @@ function buildQaReport(records) {
     if (!record.metadata.okCodes?.length) missing.push("okCodes");
     if (!record.metadata.pkFocus?.length) missing.push("pkFocus");
     if (missing.length) {
-      flaggedIds.add(record.id);
       missingMetadata.push({
         id: record.id,
         tourCode: record.tourCode,
         prompt: record.prompt,
         fields: missing
       });
+      addQuestionIssue(
+        record,
+        "metadata",
+        `Нужно заполнить: ${missing.join(", ")}`
+      );
     }
 
     if (record.type === "single_choice") {
@@ -447,7 +478,6 @@ function buildQaReport(records) {
         .filter((option) => !option.isCorrect && countWords(option.text) <= 1)
         .map((option) => option.text);
       if (duplicateOptions.length || tooShort.length || (record.options || []).length < 4) {
-        flaggedIds.add(record.id);
         weakDistractors.push({
           id: record.id,
           tourCode: record.tourCode,
@@ -458,6 +488,15 @@ function buildQaReport(records) {
             ...((record.options || []).length < 4 ? ["меньше четырёх вариантов ответа"] : [])
           ]
         });
+        if (duplicateOptions.length) {
+          addQuestionIssue(record, "distractors", "Есть повторяющиеся варианты ответа.");
+        }
+        if (tooShort.length) {
+          addQuestionIssue(record, "distractors", "Есть слишком короткие distractors.");
+        }
+        if ((record.options || []).length < 4) {
+          addQuestionIssue(record, "distractors", "У вопроса меньше четырёх вариантов ответа.");
+        }
       }
     }
 
@@ -467,6 +506,7 @@ function buildQaReport(records) {
         tourCode: record.tourCode,
         prompt: record.prompt
       });
+      addQuestionIssue(record, "translation", "Нужна проверка русского названия и перевода.");
     }
   });
 
@@ -479,18 +519,54 @@ function buildQaReport(records) {
       questionIds: items.map((item) => item.id)
     }));
 
+  duplicatePrompts.forEach((group) => {
+    group.questionIds.forEach((questionId) => {
+      const record = records.find((item) => item.id === questionId);
+      if (record) {
+        addQuestionIssue(record, "duplicate", "Формулировка повторяется в банке.");
+      }
+    });
+  });
+
   const cuisines = countBy(records, (record) => record.cuisine, (record) => record.cuisineLabel);
   const maxCuisineCount = cuisines.length ? cuisines[0].count : 0;
   const minCuisineCount = cuisines.length ? cuisines[cuisines.length - 1].count : 0;
+  const questionIssues = Array.from(questionIssuesMap.values())
+    .map((item) => ({
+      id: item.id,
+      tourCode: item.tourCode,
+      sourceKind: item.sourceKind,
+      sourceLabel: item.sourceLabel,
+      prompt: item.prompt,
+      issueCount: item.issues.length,
+      categories: Array.from(item.categories).sort((left, right) => left.localeCompare(right, "ru-RU")),
+      issues: item.issues,
+      severity: item.issues.length >= 3 ? "risk" : "warning"
+    }))
+    .sort((left, right) => {
+      if (right.issueCount !== left.issueCount) {
+        return right.issueCount - left.issueCount;
+      }
+
+      return String(left.id).localeCompare(String(right.id), "ru-RU");
+    });
 
   return {
     readyPercent: records.length
       ? Number((((records.length - flaggedIds.size) / records.length) * 100).toFixed(1))
       : 0,
+    flaggedQuestionsCount: flaggedIds.size,
     duplicatePrompts,
     missingMetadata,
     weakDistractors,
     translationHotspots,
+    questionIssues,
+    totals: {
+      duplicates: duplicatePrompts.length,
+      metadata: missingMetadata.length,
+      distractors: weakDistractors.length,
+      translations: translationHotspots.length
+    },
     balance: {
       cuisineSpread: maxCuisineCount - minCuisineCount,
       maxCuisineCount,
@@ -510,9 +586,12 @@ function buildQuestionBankSummary(olympiad, customQuestionsMap = {}) {
     totalQuestions: records.length,
     interactiveQuestions: records.filter((record) => record.interactive).length,
     caseQuestions: records.filter((record) => record.caseId).length,
+    customQuestions: records.filter((record) => record.sourceKind === "custom_question").length,
+    baseQuestions: records.filter((record) => record.sourceKind !== "custom_question").length,
     tours: countBy(records, (record) => record.tourCode, (record) => `${record.tourCode} • ${record.tourTitle}`),
     cuisines: countBy(records, (record) => record.cuisine, (record) => record.cuisineLabel),
     types: countBy(records, (record) => record.type, (record) => record.typeLabel),
+    sources: countBy(records, (record) => record.sourceLabel, (record) => record.sourceLabel),
     difficulties: countBy(
       records,
       (record) => record.metadata.difficulty,
@@ -531,6 +610,7 @@ function buildQuestionBankSummary(olympiad, customQuestionsMap = {}) {
       tours: uniqueValues(records, (record) => record.tourCode),
       cuisines: uniqueValues(records, (record) => record.cuisineLabel),
       types: uniqueValues(records, (record) => record.typeLabel),
+      sources: uniqueValues(records, (record) => record.sourceLabel),
       difficulties: uniqueValues(records, (record) => record.metadata.difficultyLabel),
       themes: uniqueValues(records, (record) => record.metadata.theme),
       okCodes: uniqueValues(records, (record) => record.metadata.okCodes),
