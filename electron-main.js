@@ -1,10 +1,39 @@
-const { app, BrowserWindow, Menu, shell } = require("electron");
+const { app, BrowserWindow, Menu, shell, dialog } = require("electron");
 const fs = require("fs");
 const path = require("path");
 const net = require("net");
 const http = require("http");
 
 const APP_TITLE = "Олимпиада: Национальные кухни мира";
+let logFilePath = "";
+
+app.disableHardwareAcceleration();
+
+function writeDesktopLog(message) {
+  try {
+    if (!logFilePath) {
+      return;
+    }
+    const stamp = new Date().toISOString();
+    fs.appendFileSync(logFilePath, `[${stamp}] ${message}\n`, "utf8");
+  } catch (error) {
+    // ignore logging failures
+  }
+}
+
+function showFatalError(error) {
+  const message = String((error && error.stack) || (error && error.message) || error || "Неизвестная ошибка.");
+  writeDesktopLog(`FATAL: ${message}`);
+
+  try {
+    dialog.showErrorBox(
+      "Не удалось запустить олимпиаду",
+      `Приложение не смогло открыть локальный сервер.\n\n${message}\n\nЛог запуска:\n${logFilePath || "лог недоступен"}`
+    );
+  } catch (dialogError) {
+    // ignore
+  }
+}
 
 function getBundledRoot() {
   return app.getAppPath();
@@ -38,14 +67,21 @@ function ensureSeedDirectory(sourceDir, targetDir) {
 function prepareRuntimeDirectories() {
   const bundledRoot = getBundledRoot();
   const runtimeRoot = path.join(app.getPath("userData"), "runtime");
+  const logsDir = path.join(runtimeRoot, "logs");
   const dataDir = path.join(runtimeRoot, "data");
   const configDir = path.join(runtimeRoot, "config");
   const storageDir = path.join(runtimeRoot, "storage");
   const exportsDir = path.join(runtimeRoot, "exports");
 
   fs.mkdirSync(runtimeRoot, { recursive: true });
+  fs.mkdirSync(logsDir, { recursive: true });
   fs.mkdirSync(storageDir, { recursive: true });
   fs.mkdirSync(exportsDir, { recursive: true });
+
+  logFilePath = path.join(logsDir, "desktop-startup.log");
+  fs.writeFileSync(logFilePath, "", "utf8");
+  writeDesktopLog(`runtimeRoot=${runtimeRoot}`);
+  writeDesktopLog(`bundledRoot=${bundledRoot}`);
 
   ensureSeedDirectory(path.join(bundledRoot, "data"), dataDir);
   ensureSeedDirectory(path.join(bundledRoot, "config"), configDir);
@@ -158,10 +194,13 @@ function createAppMenu(baseUrl, mainWindow) {
 async function createMainWindow() {
   const port = await getFreePort(3100);
   process.env.PORT = String(port);
+  writeDesktopLog(`selectedPort=${port}`);
   prepareRuntimeDirectories();
 
   require("./server");
+  writeDesktopLog("server module loaded");
   await waitForServer(port);
+  writeDesktopLog("server responded to /api/health");
 
   const baseUrl = `http://127.0.0.1:${port}`;
 
@@ -186,9 +225,21 @@ async function createMainWindow() {
 
   createAppMenu(baseUrl, mainWindow);
   await mainWindow.loadURL(`${baseUrl}/`);
+  writeDesktopLog(`main window opened at ${baseUrl}/`);
 }
 
-app.whenReady().then(createMainWindow);
+process.on("uncaughtException", (error) => {
+  showFatalError(error);
+});
+
+process.on("unhandledRejection", (error) => {
+  showFatalError(error);
+});
+
+app.whenReady().then(createMainWindow).catch((error) => {
+  showFatalError(error);
+  app.quit();
+});
 
 app.on("window-all-closed", () => {
   app.quit();
@@ -197,7 +248,7 @@ app.on("window-all-closed", () => {
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createMainWindow().catch((error) => {
-      console.error(error);
+      showFatalError(error);
       app.quit();
     });
   }
