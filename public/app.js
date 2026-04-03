@@ -13,7 +13,13 @@ const state = {
   isFinishingAttempt: false,
   deferredInstallPrompt: null,
   isOnline: navigator.onLine,
-  transitionTimer: null
+  transitionTimer: null,
+  examModeEnabled: false,
+  examGuardActive: false,
+  examGuardReason: "",
+  examIncidents: 0,
+  lastRestrictionNoticeAt: 0,
+  blurGuardTimer: null
 };
 
 const elements = {
@@ -68,6 +74,7 @@ const elements = {
   progressTourFill: document.getElementById("progress-tour-fill"),
   participantModeBadge: document.getElementById("participant-mode-badge"),
   participantStageBadge: document.getElementById("participant-stage-badge"),
+  participantExamBadge: document.getElementById("participant-exam-badge"),
   participantStabilityBadge: document.getElementById("participant-stability-badge"),
   questionTransitionBanner: document.getElementById("question-transition-banner"),
   tourCode: document.getElementById("tour-code"),
@@ -92,7 +99,12 @@ const elements = {
   resultOverview: document.getElementById("result-overview"),
   resultNext: document.getElementById("result-next"),
   resultTours: document.getElementById("result-tours"),
-  appVersionLabel: document.getElementById("app-version-label")
+  appVersionLabel: document.getElementById("app-version-label"),
+  examGuardOverlay: document.getElementById("exam-guard-overlay"),
+  examGuardTitle: document.getElementById("exam-guard-title"),
+  examGuardMessage: document.getElementById("exam-guard-message"),
+  examIncidentsBadge: document.getElementById("exam-incidents-badge"),
+  examGuardReturn: document.getElementById("exam-guard-return")
 };
 
 function setButtonAvailability(button, enabled, hint = "") {
@@ -136,9 +148,10 @@ function refreshAttemptControls() {
     attemptInProgress && state.attempt.currentQuestion && state.questionController
   );
   const isBusy = state.isSubmittingAnswer || state.isFinishingAttempt;
+  const isBlockedByGuard = attemptInProgress && state.examGuardActive;
 
-  elements.submitAnswer.disabled = !hasActiveQuestion || isBusy;
-  elements.finishAttempt.disabled = !attemptInProgress || isBusy;
+  elements.submitAnswer.disabled = !hasActiveQuestion || isBusy || isBlockedByGuard;
+  elements.finishAttempt.disabled = !attemptInProgress || isBusy || isBlockedByGuard;
 
   if (state.isSubmittingAnswer) {
     elements.submitAnswer.textContent = "Сохранение ответа...";
@@ -149,6 +162,12 @@ function refreshAttemptControls() {
   if (state.isFinishingAttempt) {
     elements.finishAttempt.textContent = "Завершаем попытку...";
     elements.submitAnswer.textContent = "Ответить и далее";
+    return;
+  }
+
+  if (isBlockedByGuard) {
+    elements.submitAnswer.textContent = "Вернитесь в режим";
+    elements.finishAttempt.textContent = "Вернитесь в режим";
     return;
   }
 
@@ -235,6 +254,310 @@ function setShellBadge(element, text, tone = "neutral") {
   element.className = `system-pill ${tone}`;
 }
 
+function isAttemptInProgress() {
+  return Boolean(state.attempt && state.attempt.status === "in_progress");
+}
+
+function updateExamGuardUi() {
+  if (elements.examIncidentsBadge) {
+    elements.examIncidentsBadge.textContent = `Срабатываний: ${state.examIncidents}`;
+  }
+
+  if (elements.examGuardMessage) {
+    elements.examGuardMessage.textContent =
+      state.examGuardReason ||
+      "Вернитесь в активное окно олимпиады и восстановите полноэкранный режим, чтобы продолжить.";
+  }
+
+  if (elements.examGuardOverlay) {
+    elements.examGuardOverlay.classList.toggle("hidden", !state.examGuardActive);
+  }
+
+  document.body.classList.toggle("exam-mode-active", isAttemptInProgress());
+}
+
+function announceRestriction(message, tone = "warning") {
+  const now = Date.now();
+  if (now - state.lastRestrictionNoticeAt < 1400) {
+    return;
+  }
+  state.lastRestrictionNoticeAt = now;
+  setAttemptSaveStatus(message, tone);
+  showMessage(elements.attemptMessage, message, tone);
+}
+
+function activateExamGuard(reason) {
+  if (!isAttemptInProgress()) {
+    return;
+  }
+
+  const nextReason = reason || "Олимпиада временно поставлена на контроль.";
+  if (!state.examGuardActive || state.examGuardReason !== nextReason) {
+    state.examIncidents += 1;
+  }
+
+  state.examGuardActive = true;
+  state.examGuardReason = nextReason;
+  updateExamGuardUi();
+  refreshAttemptControls();
+  setAttemptSaveStatus("Экзаменационный режим приостановлен", "warning");
+  setAttemptSyncMeta("Вернитесь в активное окно олимпиады и восстановите полноэкранный режим.");
+  showMessage(elements.attemptMessage, nextReason, "warning");
+  updateExamCockpit();
+}
+
+function releaseExamGuard(message = "") {
+  state.examGuardActive = false;
+  state.examGuardReason = "";
+  updateExamGuardUi();
+  refreshAttemptControls();
+  if (message) {
+    setAttemptSaveStatus(message, "success");
+    setAttemptSyncMeta(`Контроль восстановлен: ${formatDateTime(new Date())}`);
+  }
+  updateExamCockpit();
+}
+
+async function tryLockExamKeyboard() {
+  if (!navigator.keyboard || typeof navigator.keyboard.lock !== "function") {
+    return;
+  }
+
+  try {
+    await navigator.keyboard.lock();
+  } catch (error) {
+    // Browser may refuse keyboard lock outside a user gesture. This is best-effort only.
+  }
+}
+
+function unlockExamKeyboard() {
+  if (!navigator.keyboard || typeof navigator.keyboard.unlock !== "function") {
+    return;
+  }
+
+  try {
+    navigator.keyboard.unlock();
+  } catch (error) {
+    // Ignore unlock failures; the browser will release the lock when fullscreen ends.
+  }
+}
+
+async function requestExamFullscreen(options = {}) {
+  if (document.fullscreenElement) {
+    await tryLockExamKeyboard();
+    return true;
+  }
+
+  if (typeof document.documentElement.requestFullscreen !== "function") {
+    return false;
+  }
+
+  try {
+    await document.documentElement.requestFullscreen({ navigationUI: "hide" });
+    await tryLockExamKeyboard();
+    return true;
+  } catch (error) {
+    if (!options.silent) {
+      activateExamGuard("Включите полноэкранный режим, чтобы продолжить олимпиаду.");
+    }
+    return false;
+  }
+}
+
+async function restoreExamMode() {
+  if (!isAttemptInProgress()) {
+    return true;
+  }
+
+  const fullscreenReady = await requestExamFullscreen({ silent: true });
+  const focusReady = document.visibilityState === "visible" && document.hasFocus();
+
+  if (fullscreenReady && focusReady) {
+    releaseExamGuard("Контроль восстановлен. Можно продолжать.");
+    return true;
+  }
+
+  activateExamGuard(
+    !focusReady
+      ? "Вернитесь в активное окно олимпиады, чтобы продолжить."
+      : "Восстановите полноэкранный режим, чтобы продолжить."
+  );
+  return false;
+}
+
+function handleProtectedClipboard(event) {
+  if (!isAttemptInProgress()) {
+    return;
+  }
+
+  event.preventDefault();
+  announceRestriction("Копирование и вырезание текста во время олимпиады отключены.");
+}
+
+function handleProtectedSelection(event) {
+  if (!isAttemptInProgress()) {
+    return;
+  }
+
+  event.preventDefault();
+}
+
+function handleProtectedContextMenu(event) {
+  if (!isAttemptInProgress()) {
+    return;
+  }
+
+  event.preventDefault();
+  announceRestriction("Контекстное меню во время олимпиады отключено.");
+}
+
+function handleProtectedDragStart(event) {
+  if (!isAttemptInProgress()) {
+    return;
+  }
+
+  const dragNode = event.target && event.target.closest && event.target.closest(".drag-chip");
+  if (dragNode) {
+    return;
+  }
+
+  event.preventDefault();
+}
+
+function handleProtectedKeydown(event) {
+  if (!isAttemptInProgress()) {
+    return;
+  }
+
+  const key = String(event.key || "").toLowerCase();
+  const withCtrl = event.ctrlKey || event.metaKey;
+  const blockedCtrlKeys = new Set(["a", "c", "f", "j", "l", "n", "p", "r", "s", "t", "u", "w", "x"]);
+  const blockedFunctionKeys = new Set(["f5", "f6", "f11", "f12"]);
+
+  if (
+    blockedFunctionKeys.has(key) ||
+    (withCtrl && blockedCtrlKeys.has(key)) ||
+    (withCtrl && event.shiftKey && ["c", "i", "j", "n"].includes(key))
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+    announceRestriction("Часть браузерных горячих клавиш временно отключена.");
+  }
+}
+
+function handleExamVisibilityChange() {
+  if (!isAttemptInProgress()) {
+    return;
+  }
+
+  if (document.visibilityState !== "visible") {
+    activateExamGuard("Окно олимпиады покинуло активную вкладку. Вернитесь в неё, чтобы продолжить.");
+    return;
+  }
+
+  if (state.examGuardActive) {
+    restoreExamMode();
+  }
+}
+
+function handleExamWindowBlur() {
+  if (!isAttemptInProgress()) {
+    return;
+  }
+
+  clearTimeout(state.blurGuardTimer);
+  state.blurGuardTimer = setTimeout(() => {
+    if (isAttemptInProgress() && !document.hasFocus()) {
+      activateExamGuard("Окно олимпиады потеряло фокус. Вернитесь к прохождению, чтобы продолжить.");
+    }
+  }, 160);
+}
+
+function handleExamWindowFocus() {
+  clearTimeout(state.blurGuardTimer);
+  if (isAttemptInProgress() && state.examGuardActive) {
+    restoreExamMode();
+  }
+}
+
+function handleExamFullscreenChange() {
+  if (!isAttemptInProgress()) {
+    return;
+  }
+
+  if (!document.fullscreenElement) {
+    activateExamGuard("Полноэкранный режим выключен. Включите его снова, чтобы продолжить.");
+    return;
+  }
+
+  if (state.examGuardActive) {
+    restoreExamMode();
+  }
+}
+
+function handleExamBeforeUnload(event) {
+  if (!isAttemptInProgress()) {
+    return;
+  }
+
+  event.preventDefault();
+  event.returnValue = "";
+}
+
+function enableExamMode() {
+  if (state.examModeEnabled) {
+    updateExamGuardUi();
+    return;
+  }
+
+  state.examModeEnabled = true;
+  updateExamGuardUi();
+  document.addEventListener("copy", handleProtectedClipboard, true);
+  document.addEventListener("cut", handleProtectedClipboard, true);
+  document.addEventListener("contextmenu", handleProtectedContextMenu, true);
+  document.addEventListener("selectstart", handleProtectedSelection, true);
+  document.addEventListener("dragstart", handleProtectedDragStart, true);
+  document.addEventListener("keydown", handleProtectedKeydown, true);
+  document.addEventListener("visibilitychange", handleExamVisibilityChange, true);
+  document.addEventListener("fullscreenchange", handleExamFullscreenChange, true);
+  window.addEventListener("blur", handleExamWindowBlur, true);
+  window.addEventListener("focus", handleExamWindowFocus, true);
+  window.addEventListener("beforeunload", handleExamBeforeUnload, true);
+  requestExamFullscreen({ silent: true }).then((ok) => {
+    if (!ok) {
+      activateExamGuard("Включите полноэкранный режим, чтобы продолжить олимпиаду.");
+    }
+  });
+}
+
+function disableExamMode() {
+  if (!state.examModeEnabled) {
+    updateExamGuardUi();
+    return;
+  }
+
+  state.examModeEnabled = false;
+  state.examGuardActive = false;
+  state.examGuardReason = "";
+  clearTimeout(state.blurGuardTimer);
+  document.removeEventListener("copy", handleProtectedClipboard, true);
+  document.removeEventListener("cut", handleProtectedClipboard, true);
+  document.removeEventListener("contextmenu", handleProtectedContextMenu, true);
+  document.removeEventListener("selectstart", handleProtectedSelection, true);
+  document.removeEventListener("dragstart", handleProtectedDragStart, true);
+  document.removeEventListener("keydown", handleProtectedKeydown, true);
+  document.removeEventListener("visibilitychange", handleExamVisibilityChange, true);
+  document.removeEventListener("fullscreenchange", handleExamFullscreenChange, true);
+  window.removeEventListener("blur", handleExamWindowBlur, true);
+  window.removeEventListener("focus", handleExamWindowFocus, true);
+  window.removeEventListener("beforeunload", handleExamBeforeUnload, true);
+  unlockExamKeyboard();
+  if (document.fullscreenElement && typeof document.exitFullscreen === "function") {
+    document.exitFullscreen().catch(() => {});
+  }
+  updateExamGuardUi();
+}
+
 function setParticipantShellState() {
   const attempt = state.attempt;
   const hasAttempt = Boolean(attempt);
@@ -245,7 +568,9 @@ function setParticipantShellState() {
   if (!hasAttempt) {
     setShellBadge(elements.participantModeBadge, "Режим: подготовка", "neutral");
     setShellBadge(elements.participantStageBadge, "Шаг: ждём старт", "neutral");
+    setShellBadge(elements.participantExamBadge, "Экзаменационный режим: ожидание", "neutral");
     setShellBadge(elements.participantStabilityBadge, "Сохранение: система готова", "neutral");
+    updateExamGuardUi();
     return;
   }
 
@@ -265,22 +590,42 @@ function setParticipantShellState() {
     setShellBadge(elements.participantStageBadge, "Сейчас: маршрут завершён", "ready");
   }
 
+  if (!attemptInProgress) {
+    setShellBadge(elements.participantExamBadge, "Экзаменационный режим: завершён", "ready");
+  } else if (state.examGuardActive) {
+    setShellBadge(
+      elements.participantExamBadge,
+      `Экзаменационный режим: контроль (${state.examIncidents})`,
+      "warning"
+    );
+  } else {
+    setShellBadge(
+      elements.participantExamBadge,
+      `Экзаменационный режим: защищён (${state.examIncidents})`,
+      "ready"
+    );
+  }
+
   if (!state.isOnline) {
     setShellBadge(elements.participantStabilityBadge, "Сохранение: связь нестабильна", "warning");
+    updateExamGuardUi();
     return;
   }
 
   if (state.isSubmittingAnswer || state.isFinishingAttempt || state.syncInFlight) {
     setShellBadge(elements.participantStabilityBadge, "Сохранение: идёт отправка", "active");
+    updateExamGuardUi();
     return;
   }
 
   if (attemptInProgress || totalQuestions > 0 || questionIndex > 0) {
     setShellBadge(elements.participantStabilityBadge, "Сохранение: всё в порядке", "ready");
+    updateExamGuardUi();
     return;
   }
 
   setShellBadge(elements.participantStabilityBadge, "Сохранение: система готова", "neutral");
+  updateExamGuardUi();
 }
 
 function getJourneyProgressModel() {
@@ -640,7 +985,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.5.4");
+    await navigator.serviceWorker.register("/sw.js?v=1.6.0");
   } catch (error) {
     // PWA layer is optional; the olympiad keeps working without service worker support.
   }
@@ -864,7 +1209,8 @@ function renderRules() {
     "Один вопрос показывается на одном экране. Вернуться к предыдущему вопросу нельзя.",
     "Варианты ответа и порядок заданий перемешиваются системой автоматически.",
     "Все задания проверяются автоматически, без ручной экспертной проверки.",
-    "Правильные ответы участнику после завершения не показываются."
+    "Правильные ответы участнику после завершения не показываются.",
+    "После старта включается экзаменационный режим: копирование, контекстное меню и часть браузерных сочетаний клавиш блокируются, при выходе из полноэкранного режима попытка ставится на контроль."
   ];
 
   elements.rulesList.innerHTML = "";
@@ -1420,6 +1766,7 @@ function renderAttempt() {
 
   renderParticipant();
   saveTimingSnapshot(attempt);
+  enableExamMode();
 
   elements.prestartSection.classList.add("hidden");
   elements.resultSection.classList.add("hidden");
@@ -1464,6 +1811,7 @@ function renderResult() {
   const awardLabel = scoresVisible
     ? state.attempt.diploma || fallbackDiplomaByScore(summary.totalFinalScore)
     : "Итог сохранён";
+  disableExamMode();
   elements.attemptSection.classList.add("hidden");
   elements.resultSection.classList.remove("hidden");
   refreshNavigationState();
@@ -1589,11 +1937,13 @@ function applyAttemptState(attempt, options = {}) {
     : describeAttemptTransition(previousAttempt, attempt);
   state.attempt = attempt;
   if (!attempt) {
+    disableExamMode();
     setParticipantShellState();
     return;
   }
 
   if (attempt.status === "in_progress") {
+    enableExamMode();
     if (preserveQuestionRender) {
       saveTimingSnapshot(attempt);
       setParticipantShellState();
@@ -1603,6 +1953,7 @@ function applyAttemptState(attempt, options = {}) {
     renderAttempt();
   } else {
     stopTimers();
+    disableExamMode();
     renderResult();
   }
 
@@ -1754,7 +2105,7 @@ async function startAttempt() {
     setAttemptSyncMeta(`Подключение подтверждено: ${formatDateTime(new Date())}`);
     showMessage(
       elements.attemptMessage,
-      "Маршрут открыт. Ответы будут автоматически сохраняться в облаке.",
+      "Маршрут открыт. Ответы будут автоматически сохраняться в облаке, а экзаменационный режим включён.",
       "success"
     );
   } catch (error) {
@@ -1916,6 +2267,9 @@ async function init() {
   elements.startAttempt.addEventListener("click", startAttempt);
   elements.submitAnswer.addEventListener("click", submitAnswer);
   elements.finishAttempt.addEventListener("click", finishAttempt);
+  if (elements.examGuardReturn) {
+    elements.examGuardReturn.addEventListener("click", restoreExamMode);
+  }
   elements.questionBody.addEventListener("change", () => updateExamCockpit());
   elements.questionBody.addEventListener("input", () => updateExamCockpit());
   elements.questionBody.addEventListener("click", () => updateExamCockpit());

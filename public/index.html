@@ -7,10 +7,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Национальные кухни мира</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.5.6" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.0" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css?v=1.5.6" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.0" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -30,6 +30,7 @@
 
       <section id="hero-section" class="card hero">
         <div class="hero-brand">
+          <div class="hero-brand-lockup">
           <div class="brand-figure" aria-label="Профессионалитет. Туризм и сфера услуг">
             <svg viewBox="0 -24 520 344" role="img" aria-hidden="true">
               <defs>
@@ -64,11 +65,36 @@
               </text>
             </svg>
           </div>
+          <div class="hero-brand-gallery" aria-label="Фирменные изображения олимпиады">
+            <figure class="brand-image-card brand-image-card-round">
+              <img
+                src="/brand-prof-2024.jpg"
+                alt="Эмблема Профессионалитет 2024"
+                loading="eager"
+                decoding="async"
+                fetchpriority="high"
+              />
+            </figure>
+            <figure class="brand-image-card brand-image-card-shield">
+              <img
+                src="/brand-gkts-shield.jpg"
+                alt="Эмблема Горловского колледжа технологий и сервиса"
+                loading="eager"
+                decoding="async"
+                fetchpriority="high"
+              />
+            </figure>
+          </div>
+          </div>
           <div id="hero-format-badge" class="game-badge">Экспресс-формат • 45 минут • 5 туров</div>
         </div>
         <div class="eyebrow">Автоматизированная олимпиада</div>
         <h1 id="hero-title">Национальные кухни мира</h1>
         <p id="hero-subtitle" class="lead"></p>
+        <div class="exam-preflight-note">
+          <strong>Экзаменационный режим включится при старте.</strong>
+          Во время прохождения отключаются копирование, выделение текста, контекстное меню и часть браузерных горячих клавиш. При выходе из активного окна или полноэкранного режима олимпиада ставит попытку на контроль.
+        </div>
         <div class="meta-row" id="tour-meta"></div>
       </section>
 
@@ -179,6 +205,7 @@
           <div class="participant-mode-strip">
             <div id="participant-mode-badge" class="system-pill neutral">Режим: ожидание</div>
             <div id="participant-stage-badge" class="system-pill neutral">Шаг: старт не выполнен</div>
+            <div id="participant-exam-badge" class="system-pill neutral">Экзаменационный режим: ожидание</div>
             <div id="participant-stability-badge" class="system-pill neutral">Автосохранение готово</div>
           </div>
           <div id="question-transition-banner" class="transition-banner hidden"></div>
@@ -237,11 +264,29 @@
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
         <small>
           Разработчик: Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса"
-          • Версия <span id="app-version-label">1.5.6</span>
+          • Версия <span id="app-version-label">1.6.0</span>
         </small>
       </footer>
     </main>
 
-    <script src="/app.js?v=1.5.6"></script>
+    <div id="exam-guard-overlay" class="exam-guard-overlay hidden" aria-live="assertive">
+      <div class="exam-guard-backdrop"></div>
+      <section class="exam-guard-card">
+        <div class="eyebrow">Экзаменационный режим</div>
+        <h2 id="exam-guard-title">Олимпиада временно поставлена на контроль</h2>
+        <p id="exam-guard-message" class="lead">
+          Вернитесь в активное окно олимпиады и восстановите полноэкранный режим, чтобы продолжить.
+        </p>
+        <div class="exam-guard-meta">
+          <div id="exam-incidents-badge" class="pill">Срабатываний: 0</div>
+          <div class="pill">Копирование и контекстное меню отключены</div>
+        </div>
+        <div class="actions">
+          <button id="exam-guard-return" class="button primary" type="button">Вернуться к олимпиаде</button>
+        </div>
+      </section>
+    </div>
+
+    <script src="/app.js?v=1.6.0"></script>
   </body>
 </html>
