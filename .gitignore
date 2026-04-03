@@ -9,6 +9,7 @@ yarn-error.log*
 storage/
 exports/
 tmp_docx_extract/
+dist/
 *.log
 *.zip
 .codex_backup_*/

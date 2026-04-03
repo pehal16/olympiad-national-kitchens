@@ -1,10 +1,13 @@
 {
   "name": "national-kitchens-olympiad",
   "version": "1.5.6",
+  "author": "Постовит Д.А.",
   "description": "Автономная веб-олимпиада по национальным кухням",
-  "main": "server.js",
+  "main": "electron-main.js",
   "scripts": {
     "start": "node server.js",
+    "desktop:start": "electron .",
+    "desktop:dist": "electron-builder --win portable",
     "test": "node --test",
     "export:bank": "node scripts/export-question-bank.js",
     "export:content": "node scripts/export-content-catalog.js"
@@ -17,5 +20,40 @@
   "engines": {
     "node": ">=22"
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "electron": "^41.1.1",
+    "electron-builder": "^26.8.1"
+  },
+  "build": {
+    "appId": "ru.gktis.national-kitchens-olympiad",
+    "productName": "Olympiad National Kitchens",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "server.js",
+      "electron-main.js",
+      "package.json",
+      "config/**/*",
+      "data/**/*",
+      "public/**/*",
+      "src/**/*"
+    ],
+    "extraMetadata": {
+      "main": "electron-main.js"
+    },
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Olympiad-National-Kitchens-${version}.exe"
+    }
+  }
 }
