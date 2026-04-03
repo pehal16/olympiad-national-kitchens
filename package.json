@@ -1,6 +1,6 @@
 {
   "name": "national-kitchens-olympiad",
-  "version": "1.5.4",
+  "version": "1.5.6",
   "description": "Автономная веб-олимпиада по национальным кухням",
   "main": "server.js",
   "scripts": {

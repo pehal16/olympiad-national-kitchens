@@ -449,7 +449,8 @@ function buildAdminCookie(token, expiresAt) {
     `olympiad_admin_token=${encodeURIComponent(token)}`,
     "Path=/",
     "HttpOnly",
-    "SameSite=Lax"
+    "SameSite=Lax",
+    `Max-Age=${24 * 60 * 60}`
   ];
 
   if (expiresAt) {
@@ -459,24 +460,45 @@ function buildAdminCookie(token, expiresAt) {
   return parts.join("; ");
 }
 
-async function requireAdmin(req) {
+function getAdminRequestTokens(req) {
   const authHeader = req.headers.authorization || "";
   const headerToken = req.headers["x-admin-token"] || "";
   const cookieToken = parseCookies(req).olympiad_admin_token || "";
-  const token = String(headerToken || authHeader.replace("Bearer ", "") || cookieToken).trim();
-  if (!token) {
+  const authToken = authHeader.replace("Bearer ", "");
+
+  return Array.from(
+    new Set(
+      [cookieToken, headerToken, authToken]
+        .map((value) => String(value || "").trim())
+        .filter(Boolean)
+    )
+  );
+}
+
+async function requireAdmin(req) {
+  const tokens = getAdminRequestTokens(req);
+  if (!tokens.length) {
     return null;
   }
 
-  const directSession = await loadAdminSessionByToken(token);
-  if (directSession) {
-    return directSession.expiresAt > Date.now() ? directSession : null;
+  for (const token of tokens) {
+    const directSession = await loadAdminSessionByToken(token);
+    if (directSession?.expiresAt > Date.now()) {
+      return directSession;
+    }
   }
 
   const sessions = await loadAdminSessions();
-  return sessions.find(
-    (session) => session.token === token && session.expiresAt > Date.now()
-  );
+  for (const token of tokens) {
+    const session = sessions.find(
+      (entry) => entry.token === token && entry.expiresAt > Date.now()
+    );
+    if (session) {
+      return session;
+    }
+  }
+
+  return null;
 }
 
 async function buildRankedAttempts(olympiad, settings, options = {}) {
@@ -1406,6 +1428,26 @@ async function handleApi(req, res, url) {
       { ok: true, data: { token } },
       { "Set-Cookie": buildAdminCookie(token, sessions.at(-1)?.expiresAt) }
     );
+    return;
+  }
+
+  if (method === "GET" && pathname === "/api/admin/session") {
+    const session = await requireAdmin(req);
+    if (!session) {
+      sendJson(res, 401, {
+        ok: false,
+        message: "Требуется вход администратора."
+      });
+      return;
+    }
+
+    sendJson(res, 200, {
+      ok: true,
+      data: {
+        active: true,
+        expiresAt: session.expiresAt
+      }
+    });
     return;
   }
 

@@ -77,6 +77,13 @@ body {
   padding: 14px 16px;
 }
 
+.nav-ribbon .button.is-active {
+  background: linear-gradient(135deg, rgba(31, 142, 115, 0.18) 0%, rgba(215, 236, 229, 0.88) 100%);
+  border-color: rgba(31, 142, 115, 0.28);
+  color: var(--accent);
+  box-shadow: 0 12px 24px rgba(31, 142, 115, 0.08);
+}
+
 .network-badge {
   display: inline-flex;
   align-items: center;
@@ -1241,6 +1248,25 @@ select {
   margin-top: 18px;
 }
 
+.content-mode-strip {
+  padding: 18px 20px;
+}
+
+.content-guide {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.content-guide-step {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(31, 142, 115, 0.12);
+  background: rgba(243, 250, 248, 0.88);
+  color: var(--muted);
+}
+
 .creator-card {
   margin: 18px 0;
   padding: 18px;
@@ -1286,6 +1312,12 @@ select {
   padding: 18px;
 }
 
+.content-empty-detail-card {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
 .content-question-list {
   display: flex;
   flex-direction: column;
@@ -1326,6 +1358,11 @@ select {
   border-left-color: rgba(202, 62, 62, 0.74);
 }
 
+.content-open-hint {
+  font-weight: 700;
+  color: var(--accent);
+}
+
 .content-question-top {
   display: flex;
   justify-content: space-between;
@@ -1356,6 +1393,40 @@ select {
 
 .content-detail-card .actions.inline {
   align-items: center;
+}
+
+.overlay-active {
+  overflow: hidden;
+}
+
+.overlay-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.overlay-shell.hidden {
+  display: none;
+}
+
+.overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 28, 31, 0.38);
+  backdrop-filter: blur(4px);
+}
+
+.overlay-card {
+  position: relative;
+  z-index: 1;
+  width: min(1040px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  margin: 0;
+  box-shadow: 0 24px 60px rgba(18, 36, 31, 0.22);
 }
 
 .detail-metrics {
@@ -1414,6 +1485,7 @@ pre {
   .grid-four,
   .coverage-grid,
   .content-workbench,
+  .content-guide,
   .exam-cockpit,
   .creator-grid,
   .creator-options-grid,
@@ -1461,6 +1533,15 @@ pre {
   .result-award {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .overlay-shell {
+    padding: 12px;
+  }
+
+  .overlay-card {
+    width: min(100vw - 12px, 100%);
+    max-height: calc(100vh - 20px);
   }
 }
 

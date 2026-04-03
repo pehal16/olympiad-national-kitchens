@@ -1,5 +1,5 @@
 const adminState = {
-  token: localStorage.getItem("olympiad_admin_token") || "",
+  token: "",
   selectedAttemptId: "",
   refreshTimer: null,
   refreshInFlight: false,
@@ -78,10 +78,6 @@ async function adminApi(path, options = {}) {
     "Content-Type": "application/json",
     ...(options.headers || {})
   };
-
-  if (adminState.token) {
-    requestHeaders.Authorization = `Bearer ${adminState.token}`;
-  }
 
   try {
     response = await fetch(path, {
@@ -292,7 +288,6 @@ function stopAutoRefresh() {
 
 function resetAdminSession(message = "") {
   stopAutoRefresh();
-  localStorage.removeItem("olympiad_admin_token");
   adminState.token = "";
   adminState.selectedAttemptId = "";
   adminState.summary = null;
@@ -307,6 +302,23 @@ function resetAdminSession(message = "") {
   } else {
     hideMessage(elements.loginMessage);
   }
+}
+
+async function ensureAdminSession() {
+  const response = await fetch("/api/admin/session", {
+    credentials: "same-origin"
+  });
+
+  const raw = await response.text();
+  const data = raw ? JSON.parse(raw) : {};
+
+  if (!response.ok || data.ok === false) {
+    const error = new Error(data.message || `Ошибка проверки сессии (${response.status}).`);
+    error.status = response.status;
+    throw error;
+  }
+
+  return data.data || { active: true };
 }
 
 function startAutoRefresh() {
@@ -815,7 +827,7 @@ async function refreshPanel(options = {}) {
     }
   } catch (error) {
     if (silent) {
-      if (error.status === 401) {
+      if (error.status === 401 || error.status === 403) {
         resetAdminSession("Сеанс администратора завершён. Войдите повторно.");
       } else {
         setPanelStatus("error", formatAdminError(error));
@@ -846,8 +858,7 @@ async function handleLogin(event) {
       throw new Error(data.message || "Ошибка входа");
     }
 
-    adminState.token = data.data.token;
-    localStorage.setItem("olympiad_admin_token", adminState.token);
+    adminState.token = "";
     showPanel();
     await refreshPanel();
     startAutoRefresh();
@@ -970,6 +981,7 @@ async function init() {
   }
 
   try {
+    await ensureAdminSession();
     showPanel();
     await refreshPanel();
     startAutoRefresh();

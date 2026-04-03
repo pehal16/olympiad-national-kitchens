@@ -1,5 +1,5 @@
 const state = {
-  token: localStorage.getItem("olympiad_admin_token") || "",
+  token: "",
   summary: null,
   questions: [],
   filteredQuestions: [],
@@ -9,6 +9,9 @@ const state = {
   creatorEditingId: "",
   drafts: {},
   draftRequestState: "idle",
+  currentView: "editor",
+  detailOpen: false,
+  editorOpen: false,
   filters: {
     search: "",
     tour: "",
@@ -28,6 +31,14 @@ const elements = {
   navQa: document.getElementById("content-nav-qa"),
   navEditor: document.getElementById("content-nav-editor"),
   navRefresh: document.getElementById("content-refresh"),
+  openCatalog: document.getElementById("content-open-catalog"),
+  openSummary: document.getElementById("content-open-summary"),
+  openQa: document.getElementById("content-open-qa"),
+  openCreateTop: document.getElementById("content-open-create-top"),
+  openCreate: document.getElementById("content-open-create"),
+  openSelected: document.getElementById("content-open-selected"),
+  openSelectedEmpty: document.getElementById("content-open-selected-empty"),
+  openCreateEmpty: document.getElementById("content-open-create-empty"),
   loginCard: document.getElementById("content-login-card"),
   panel: document.getElementById("content-panel"),
   summarySection: document.getElementById("content-summary-section"),
@@ -66,6 +77,10 @@ const elements = {
   filterReset: document.getElementById("content-filter-reset"),
   draftMeta: document.getElementById("content-draft-meta"),
   questionList: document.getElementById("content-question-list"),
+  detailModal: document.getElementById("content-detail-modal"),
+  editorModal: document.getElementById("content-editor-modal"),
+  closeDetail: document.getElementById("content-close-detail"),
+  closeEditor: document.getElementById("content-close-editor"),
   detailEmpty: document.getElementById("content-detail-empty"),
   detail: document.getElementById("content-detail"),
   detailHead: document.getElementById("content-detail-head"),
@@ -128,10 +143,6 @@ function adminApi(path, options = {}) {
     ...(options.headers || {})
   };
 
-  if (state.token) {
-    requestHeaders.Authorization = `Bearer ${state.token}`;
-  }
-
   return fetch(path, {
     credentials: "same-origin",
     headers: requestHeaders,
@@ -158,6 +169,23 @@ function adminApi(path, options = {}) {
       wrapped.status = 0;
       throw wrapped;
     });
+}
+
+async function ensureAdminSession() {
+  const response = await fetch("/api/admin/session", {
+    credentials: "same-origin"
+  });
+
+  const raw = await response.text();
+  const payload = raw ? JSON.parse(raw) : {};
+
+  if (!response.ok || payload.ok === false) {
+    const error = new Error(payload.message || `Ошибка проверки сессии (${response.status}).`);
+    error.status = response.status;
+    throw error;
+  }
+
+  return payload.data || { active: true };
 }
 
 function showMessage(element, message, type = "success") {
@@ -256,11 +284,83 @@ function goBackOrHome() {
 function showLoginState() {
   elements.loginCard.classList.remove("hidden");
   elements.panel.classList.add("hidden");
+  closeDetailModal();
+  closeEditorModal();
 }
 
 function showPanel() {
   elements.loginCard.classList.add("hidden");
   elements.panel.classList.remove("hidden");
+}
+
+function setButtonActive(button, active) {
+  if (!button) {
+    return;
+  }
+  button.classList.toggle("is-active", Boolean(active));
+}
+
+function setContentView(view, options = {}) {
+  state.currentView = view;
+
+  elements.summarySection.classList.toggle("hidden", view !== "summary");
+  elements.qaSection.classList.toggle("hidden", view !== "qa");
+  elements.editorSection.classList.toggle("hidden", view !== "editor");
+
+  setButtonActive(elements.navSummary, view === "summary");
+  setButtonActive(elements.navQa, view === "qa");
+  setButtonActive(elements.navEditor, view === "editor");
+  setButtonActive(elements.openSummary, view === "summary");
+  setButtonActive(elements.openQa, view === "qa");
+  setButtonActive(elements.openCatalog, view === "editor");
+
+  if (options.scroll === false) {
+    return;
+  }
+
+  const target =
+    view === "summary" ? elements.summarySection : view === "qa" ? elements.qaSection : elements.editorSection;
+  target?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function syncBodyOverlayState() {
+  const overlayOpen = state.detailOpen || state.editorOpen;
+  document.body.classList.toggle("overlay-active", overlayOpen);
+}
+
+function closeDetailModal() {
+  state.detailOpen = false;
+  elements.detailModal.classList.add("hidden");
+  syncBodyOverlayState();
+}
+
+function openDetailModal() {
+  if (!state.selectedQuestionId && state.filteredQuestions.length) {
+    state.selectedQuestionId = state.filteredQuestions[0].id;
+    renderQuestionList();
+    renderQuestionDetail();
+  }
+
+  if (!state.selectedQuestionId) {
+    showMessage(elements.creatorNote, "Сначала выберите вопрос из списка.", "warning");
+    return;
+  }
+
+  state.detailOpen = true;
+  elements.detailModal.classList.remove("hidden");
+  syncBodyOverlayState();
+}
+
+function closeEditorModal() {
+  state.editorOpen = false;
+  elements.editorModal.classList.add("hidden");
+  syncBodyOverlayState();
+}
+
+function openEditorModal() {
+  state.editorOpen = true;
+  elements.editorModal.classList.remove("hidden");
+  syncBodyOverlayState();
 }
 
 function setDraftRequestState(mode) {
@@ -506,6 +606,7 @@ function renderQuestionDetail() {
     elements.deleteQuestion.classList.add("hidden");
     elements.detailMetrics.innerHTML = "";
     elements.detailQa.innerHTML = "";
+    closeDetailModal();
     return;
   }
 
@@ -613,7 +714,13 @@ function renderQuestionList() {
       state.selectedQuestionId = "";
       renderQuestionDetail();
     }
+    elements.openSelected.disabled = true;
+    elements.openSelectedEmpty.disabled = true;
     return;
+  }
+
+  if (!state.selectedQuestionId || !state.filteredQuestions.find((item) => item.id === state.selectedQuestionId)) {
+    state.selectedQuestionId = state.filteredQuestions[0].id;
   }
 
   state.filteredQuestions.forEach((question) => {
@@ -1048,9 +1155,7 @@ function initNavigation() {
       await loadContentPanel();
       showMessage(elements.note, "Панель банка заданий обновлена.", "success");
     } catch (error) {
-      if (error.status === 401) {
-        localStorage.removeItem("olympiad_admin_token");
-        state.token = "";
+      if (error.status === 401 || error.status === 403) {
         showLoginState();
       } else {
         showMessage(elements.note, error.message || "Не удалось обновить контентную панель.", "error");
@@ -1077,9 +1182,220 @@ async function init() {
     showPanel();
     await loadContentPanel();
   } catch (error) {
-    if (error.status === 401) {
-      localStorage.removeItem("olympiad_admin_token");
-      state.token = "";
+    if (error.status === 401 || error.status === 403) {
+      showLoginState();
+      return;
+    }
+
+    showPanel();
+    showMessage(elements.note, error.message || "Не удалось загрузить банк заданий.", "error");
+  }
+}
+
+function renderQuestionList() {
+  elements.questionList.innerHTML = "";
+  const total = state.questions.length;
+  const shown = state.filteredQuestions.length;
+  const shownFlagged = state.filteredQuestions.filter((question) => getQuestionIssueInfo(question).issueCount > 0).length;
+  elements.filterMeta.textContent = `показано ${shown} из ${total} • с сигналами ${shownFlagged}`;
+  elements.draftMeta.textContent = `черновиков: ${Object.keys(state.drafts).length} • сигналов QA: ${state.summary?.qa?.flaggedQuestionsCount || 0}`;
+
+  if (!shown) {
+    elements.questionList.innerHTML = '<div class="muted">По текущим фильтрам вопросов не найдено.</div>';
+    if (state.selectedQuestionId && !state.filteredQuestions.find((item) => item.id === state.selectedQuestionId)) {
+      state.selectedQuestionId = "";
+      renderQuestionDetail();
+    }
+    return;
+  }
+
+  state.filteredQuestions.forEach((question) => {
+    const draft = state.drafts[question.id];
+    const custom = isCustomQuestion(question);
+    const issueInfo = getQuestionIssueInfo(question);
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = `content-question-row${question.id === state.selectedQuestionId ? " is-selected" : ""}${issueInfo.issueCount ? " has-issues" : ""}${issueInfo.severity === "risk" ? " is-risk" : ""}`;
+    const qaBadgeClass =
+      issueInfo.severity === "risk"
+        ? "pill qa-pill qa-pill-risk"
+        : issueInfo.issueCount
+          ? "pill qa-pill qa-pill-warning"
+          : issueInfo.hasDraft
+            ? "pill qa-pill qa-pill-draft"
+            : "pill qa-pill qa-pill-clean";
+
+    row.innerHTML = `
+      <div class="content-question-top">
+        <strong>${escapeHtml(question.id)}</strong>
+        <div class="content-question-badges">
+          <span class="pill">${escapeHtml(question.tourCode)}</span>
+          ${custom ? '<span class="pill pill-accent">авторский</span>' : ""}
+          <span class="${qaBadgeClass}">${escapeHtml(issueInfo.label)}</span>
+        </div>
+      </div>
+      <div>${escapeHtml(shortText(question.prompt, 110))}</div>
+      <div class="content-question-meta">
+        <span>${escapeHtml(question.cuisineLabel)}</span>
+        <span>${escapeHtml(question.typeLabel)}</span>
+        <span>${escapeHtml(question.metadata.difficultyLabel)}</span>
+        <span>${escapeHtml(question.sourceLabel || (custom ? "Авторский тест" : "Основной банк"))}</span>
+        <span class="content-open-hint">Открыть</span>
+        ${draft ? '<span class="pill">есть серверный черновик</span>' : ""}
+      </div>
+    `;
+    row.addEventListener("click", () => {
+      state.selectedQuestionId = question.id;
+      renderQuestionList();
+      renderQuestionDetail();
+      openDetailModal();
+    });
+    elements.questionList.appendChild(row);
+  });
+
+  elements.openSelected.disabled = !state.selectedQuestionId;
+  elements.openSelectedEmpty.disabled = !state.selectedQuestionId;
+  renderQuestionDetail();
+}
+
+function startEditingSelectedQuestion() {
+  const question = state.questions.find((item) => item.id === state.selectedQuestionId);
+  if (!question || !isCustomQuestion(question)) {
+    showMessage(elements.note, "Редактировать из конструктора можно только авторские тесты.", "warning");
+    return;
+  }
+
+  fillCreatorFromQuestion(question);
+  setCreatorMode("edit", question);
+  hideMessage(elements.creatorNote);
+  showMessage(elements.creatorNote, `Открыт режим редактирования теста ${question.id}.`, "success");
+  closeDetailModal();
+  openEditorModal();
+}
+
+async function createCustomQuestion() {
+  const editing = state.creatorMode === "edit" && state.creatorEditingId;
+  const requestPath = editing
+    ? `/api/admin/content/questions/${encodeURIComponent(state.creatorEditingId)}`
+    : "/api/admin/content/questions";
+  const requestMethod = editing ? "PUT" : "POST";
+
+  try {
+    elements.createQuestion.disabled = true;
+    hideMessage(elements.creatorNote);
+    const payload = collectCreatorPayload();
+    if (editing) {
+      payload.id = state.creatorEditingId;
+    }
+
+    const question = await adminApi(requestPath, {
+      method: requestMethod,
+      body: JSON.stringify(payload)
+    });
+
+    const successMessage = editing
+      ? `Тест ${question.id} обновлён в банке заданий.`
+      : `Новый тест ${question.id} сохранён в банке заданий.`;
+    showMessage(elements.creatorNote, successMessage, "success");
+    resetCreatorForm();
+    await loadContentPanel();
+    state.selectedQuestionId = question.id;
+    renderQuestionList();
+    renderQuestionDetail();
+    closeEditorModal();
+    openDetailModal();
+    showMessage(elements.note, successMessage, "success");
+  } catch (error) {
+    showMessage(
+      elements.creatorNote,
+      error.message || "Не удалось добавить новый тестовый вопрос.",
+      "error"
+    );
+  } finally {
+    elements.createQuestion.disabled = false;
+  }
+}
+
+function initNavigation() {
+  elements.navBack.addEventListener("click", goBackOrHome);
+  elements.navTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  elements.navSummary.addEventListener("click", () => setContentView("summary"));
+  elements.navQa.addEventListener("click", () => setContentView("qa"));
+  elements.navEditor.addEventListener("click", () => setContentView("editor"));
+  elements.navRefresh.addEventListener("click", async () => {
+    try {
+      showPanel();
+      await loadContentPanel();
+      showMessage(elements.note, "Панель банка заданий обновлена.", "success");
+    } catch (error) {
+      if (error.status === 401 || error.status === 403) {
+        showLoginState();
+      } else {
+        showMessage(elements.note, error.message || "Не удалось обновить контентную панель.", "error");
+      }
+    }
+  });
+  elements.openCatalog.addEventListener("click", () => setContentView("editor"));
+  elements.openSummary.addEventListener("click", () => setContentView("summary"));
+  elements.openQa.addEventListener("click", () => setContentView("qa"));
+  elements.openCreateTop.addEventListener("click", () => {
+    setContentView("editor");
+    resetCreatorForm();
+    openEditorModal();
+  });
+  elements.openCreate.addEventListener("click", () => {
+    setContentView("editor", { scroll: false });
+    resetCreatorForm();
+    openEditorModal();
+  });
+  elements.openCreateEmpty.addEventListener("click", () => {
+    setContentView("editor", { scroll: false });
+    resetCreatorForm();
+    openEditorModal();
+  });
+  [elements.openSelected, elements.openSelectedEmpty].forEach((button) =>
+    button.addEventListener("click", openDetailModal)
+  );
+  elements.closeDetail.addEventListener("click", closeDetailModal);
+  elements.closeEditor.addEventListener("click", closeEditorModal);
+  document.querySelectorAll("[data-close-overlay]").forEach((element) => {
+    element.addEventListener("click", () => {
+      closeDetailModal();
+      closeEditorModal();
+    });
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeDetailModal();
+      closeEditorModal();
+    }
+  });
+}
+
+async function init() {
+  await loadPublicVersion();
+  initNavigation();
+  bindFilters();
+  elements.saveDraft.addEventListener("click", saveDraft);
+  elements.resetDraft.addEventListener("click", resetDraft);
+  elements.exportDrafts.addEventListener("click", exportDrafts);
+  elements.editQuestion.addEventListener("click", startEditingSelectedQuestion);
+  elements.deleteQuestion.addEventListener("click", deleteSelectedQuestion);
+  elements.createQuestion.addEventListener("click", createCustomQuestion);
+  elements.resetCreator.addEventListener("click", resetCreatorForm);
+  elements.cancelEdit.addEventListener("click", () => {
+    resetCreatorForm();
+    closeEditorModal();
+  });
+  resetCreatorForm();
+
+  try {
+    await ensureAdminSession();
+    showPanel();
+    setContentView("editor", { scroll: false });
+    await loadContentPanel();
+  } catch (error) {
+    if (error.status === 401 || error.status === 403) {
       showLoginState();
       return;
     }

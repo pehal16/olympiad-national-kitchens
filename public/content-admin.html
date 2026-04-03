@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1f8e73" />
     <title>Банк заданий олимпиады</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.5.4" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.5.6" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/styles.css?v=1.5.4" />
+    <link rel="stylesheet" href="/styles.css?v=1.5.6" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -21,7 +21,7 @@
         <button id="content-nav-top" class="button ghost" type="button">Наверх</button>
         <button id="content-nav-summary" class="button ghost" type="button">Сводка</button>
         <button id="content-nav-qa" class="button ghost" type="button">QA банка</button>
-        <button id="content-nav-editor" class="button ghost" type="button">Редактор</button>
+        <button id="content-nav-editor" class="button ghost" type="button">Каталог вопросов</button>
         <button id="content-refresh" class="button ghost" type="button">Обновить</button>
       </section>
 
@@ -44,6 +44,21 @@
       </section>
 
       <section id="content-panel" class="hidden">
+        <section class="card content-mode-strip">
+          <div class="section-row">
+            <div>
+              <h2>Быстрые режимы работы</h2>
+              <p class="muted">Начинайте с каталога вопросов. Сводка банка, QA и создание нового теста теперь открываются отдельно и не перегружают экран.</p>
+            </div>
+            <div class="actions inline">
+              <button id="content-open-catalog" class="button primary" type="button">Каталог вопросов</button>
+              <button id="content-open-summary" class="button secondary" type="button">Сводка банка</button>
+              <button id="content-open-qa" class="button secondary" type="button">Проверка QA</button>
+              <button id="content-open-create-top" class="button ghost" type="button">Новый тест</button>
+            </div>
+          </div>
+        </section>
+
         <section id="content-summary-section" class="grid-four content-summary-grid">
           <article class="card stat-card">
             <span class="stat-label">Вопросы банка</span>
@@ -159,10 +174,22 @@
         <section id="content-editor-section" class="card">
           <div class="section-row">
             <h2>Редактор и фильтры</h2>
-            <div id="content-filter-meta" class="pill">показано 0 из 0</div>
+            <div class="actions inline">
+              <div id="content-filter-meta" class="pill">показано 0 из 0</div>
+              <button id="content-open-create" class="button primary" type="button">Новый тест</button>
+              <button id="content-open-selected" class="button secondary" type="button">Открыть вопрос</button>
+            </div>
           </div>
 
-          <section class="creator-card">
+          <div class="content-guide">
+            <div class="content-guide-step"><strong>1.</strong> Найдите вопрос через поиск и фильтры.</div>
+            <div class="content-guide-step"><strong>2.</strong> Нажмите на строку вопроса, чтобы открыть карточку.</div>
+            <div class="content-guide-step"><strong>3.</strong> Для нового задания используйте кнопку «Новый тест».</div>
+          </div>
+
+          <div id="content-editor-modal" class="overlay-shell hidden">
+            <div class="overlay-backdrop" data-close-overlay="editor"></div>
+            <section class="card creator-card overlay-card">
             <div class="section-row">
               <div>
                 <h3>Конструктор тестового вопроса</h3>
@@ -172,6 +199,7 @@
               </div>
               <div class="actions inline">
                 <div id="content-creator-mode" class="pill">режим: новый тест</div>
+                <button id="content-close-editor" class="button ghost" type="button">Закрыть</button>
                 <button id="content-cancel-edit" class="button secondary hidden" type="button">Отменить редактирование</button>
                 <button id="content-create-question" class="button primary" type="button">Добавить вопрос</button>
                 <button id="content-reset-creator" class="button secondary" type="button">Очистить форму</button>
@@ -277,7 +305,8 @@
             </div>
 
             <div id="content-creator-note" class="message hidden"></div>
-          </section>
+            </section>
+          </div>
 
           <div class="filters-grid">
             <label class="field">
@@ -346,82 +375,97 @@
               <div id="content-question-list" class="content-question-list"></div>
             </section>
 
-            <section class="card content-detail-card">
-              <div class="section-row">
-                <h3>Карточка вопроса</h3>
-                <div class="actions inline">
-                  <button id="content-edit-question" class="button secondary hidden" type="button">Редактировать тест</button>
-                  <button id="content-delete-question" class="button secondary hidden" type="button">Удалить тест</button>
-                  <button id="content-save-draft" class="button primary" type="button">Сохранить черновик</button>
-                  <button id="content-reset-draft" class="button secondary" type="button">Сбросить черновик</button>
-                  <button id="content-export-drafts" class="button secondary" type="button">Экспорт черновиков</button>
-                </div>
-              </div>
-              <div id="content-detail-empty" class="muted">
-                Выберите вопрос из списка слева, чтобы посмотреть метаданные и сохранить редакторский черновик.
-              </div>
-              <div id="content-detail" class="hidden">
-                <div id="content-detail-head" class="detail-card"></div>
-                <div id="content-detail-metrics" class="detail-metrics"></div>
-                <div id="content-detail-qa" class="detail-qa-card"></div>
-                <form id="content-detail-form" class="form-stack editor-form">
-                  <label class="field">
-                    <span>Тема</span>
-                    <input id="editor-theme" type="text" />
-                  </label>
-                  <label class="field">
-                    <span>Подтема</span>
-                    <input id="editor-topic" type="text" />
-                  </label>
-                  <label class="field">
-                    <span>Профессиональный фокус</span>
-                    <input id="editor-focus" type="text" />
-                  </label>
-                  <label class="field">
-                    <span>Действие для студента</span>
-                    <input id="editor-student-action" type="text" />
-                  </label>
-                  <label class="field">
-                    <span>Сложность</span>
-                    <select id="editor-difficulty">
-                      <option value="basic">Базовый уровень</option>
-                      <option value="standard">Повышенный уровень</option>
-                      <option value="advanced">Высокий уровень</option>
-                    </select>
-                  </label>
-                  <label class="field">
-                    <span>Оценочное время, сек</span>
-                    <input id="editor-estimated-time" type="number" min="15" step="5" />
-                  </label>
-                  <label class="field">
-                    <span>Коды ОК</span>
-                    <input id="editor-ok-codes" type="text" placeholder="ОК 01, ОК 02" />
-                  </label>
-                  <label class="field">
-                    <span>Профессиональные акценты</span>
-                    <input id="editor-pk-focus" type="text" placeholder="подбор сырья, технология приготовления" />
-                  </label>
-                  <label class="field">
-                    <span>Методическое назначение</span>
-                    <textarea id="editor-methodical-purpose" rows="4"></textarea>
-                  </label>
-                </form>
-                <div id="content-detail-note" class="message hidden"></div>
+            <section class="card content-empty-detail-card">
+              <h3>Карточка вопроса</h3>
+              <p class="muted">
+                Откройте вопрос из списка слева. Карточка и редактирование теперь открываются отдельно, чтобы экран был чище и понятнее.
+              </p>
+              <div class="actions inline">
+                <button id="content-open-selected-empty" class="button secondary" type="button">Открыть выбранный вопрос</button>
+                <button id="content-open-create-empty" class="button ghost" type="button">Создать тест</button>
               </div>
             </section>
           </div>
         </section>
       </section>
 
+      <div id="content-detail-modal" class="overlay-shell hidden">
+        <div class="overlay-backdrop" data-close-overlay="detail"></div>
+        <section class="card content-detail-card overlay-card">
+          <div class="section-row">
+            <h3>Карточка вопроса</h3>
+            <div class="actions inline">
+              <button id="content-close-detail" class="button ghost" type="button">Закрыть</button>
+              <button id="content-edit-question" class="button secondary hidden" type="button">Редактировать тест</button>
+              <button id="content-delete-question" class="button secondary hidden" type="button">Удалить тест</button>
+              <button id="content-save-draft" class="button primary" type="button">Сохранить черновик</button>
+              <button id="content-reset-draft" class="button secondary" type="button">Сбросить черновик</button>
+              <button id="content-export-drafts" class="button secondary" type="button">Экспорт черновиков</button>
+            </div>
+          </div>
+          <div id="content-detail-empty" class="muted">
+            Выберите вопрос из списка, чтобы посмотреть метаданные и сохранить редакторский черновик.
+          </div>
+          <div id="content-detail" class="hidden">
+            <div id="content-detail-head" class="detail-card"></div>
+            <div id="content-detail-metrics" class="detail-metrics"></div>
+            <div id="content-detail-qa" class="detail-qa-card"></div>
+            <form id="content-detail-form" class="form-stack editor-form">
+              <label class="field">
+                <span>Тема</span>
+                <input id="editor-theme" type="text" />
+              </label>
+              <label class="field">
+                <span>Подтема</span>
+                <input id="editor-topic" type="text" />
+              </label>
+              <label class="field">
+                <span>Профессиональный фокус</span>
+                <input id="editor-focus" type="text" />
+              </label>
+              <label class="field">
+                <span>Действие для студента</span>
+                <input id="editor-student-action" type="text" />
+              </label>
+              <label class="field">
+                <span>Сложность</span>
+                <select id="editor-difficulty">
+                  <option value="basic">Базовый уровень</option>
+                  <option value="standard">Повышенный уровень</option>
+                  <option value="advanced">Высокий уровень</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Оценочное время, сек</span>
+                <input id="editor-estimated-time" type="number" min="15" step="5" />
+              </label>
+              <label class="field">
+                <span>Коды ОК</span>
+                <input id="editor-ok-codes" type="text" placeholder="ОК 01, ОК 02" />
+              </label>
+              <label class="field">
+                <span>Профессиональные акценты</span>
+                <input id="editor-pk-focus" type="text" placeholder="подбор сырья, технология приготовления" />
+              </label>
+              <label class="field">
+                <span>Методическое назначение</span>
+                <textarea id="editor-methodical-purpose" rows="4"></textarea>
+              </label>
+            </form>
+            <div id="content-detail-note" class="message hidden"></div>
+          </div>
+        </section>
+      </div>
+
       <footer class="footer-note">
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
         <small>
           Разработчик: Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса"
-          • Версия <span id="content-app-version-label">1.5.4</span>
+          • Версия <span id="content-app-version-label">1.5.6</span>
         </small>
       </footer>
     </main>
 
-    <script src="/content-admin.js?v=1.5.4"></script>
+    <script src="/content-admin.js?v=1.5.6"></script>
   </body>
 </html>
