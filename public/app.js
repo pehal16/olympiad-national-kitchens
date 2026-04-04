@@ -14,6 +14,7 @@ const state = {
   deferredInstallPrompt: null,
   isOnline: navigator.onLine,
   transitionTimer: null,
+  navDrawerOpen: false,
   examModeEnabled: false,
   examGuardActive: false,
   examGuardReason: "",
@@ -23,6 +24,9 @@ const state = {
 };
 
 const elements = {
+  navRibbon: document.getElementById("nav-ribbon"),
+  navMenuToggle: document.getElementById("nav-menu-toggle"),
+  navDrawer: document.getElementById("nav-drawer"),
   navBack: document.getElementById("nav-back"),
   navHome: document.getElementById("nav-home"),
   navRegister: document.getElementById("nav-register"),
@@ -49,6 +53,8 @@ const elements = {
   mentorName: document.getElementById("mentor-name"),
   registrationMessage: document.getElementById("registration-message"),
   prestartMessage: document.getElementById("prestart-message"),
+  startConsent: document.getElementById("start-consent"),
+  startConsentHint: document.getElementById("start-consent-hint"),
   startAttempt: document.getElementById("start-attempt"),
   prestartSection: document.getElementById("prestart-section"),
   attemptSection: document.getElementById("attempt-section"),
@@ -140,6 +146,7 @@ function refreshNavigationState() {
     Boolean(state.attempt && state.attempt.status !== "in_progress"),
     "Результат станет доступен после завершения попытки."
   );
+  updateStartAvailability();
 }
 
 function refreshAttemptControls() {
@@ -189,6 +196,7 @@ function scrollToSection(section) {
     return;
   }
   section.scrollIntoView({ behavior: "smooth", block: "start" });
+  closeNavDrawer();
 }
 
 function goBackOrHome() {
@@ -327,6 +335,53 @@ async function tryLockExamKeyboard() {
     await navigator.keyboard.lock();
   } catch (error) {
     // Browser may refuse keyboard lock outside a user gesture. This is best-effort only.
+  }
+}
+
+function isCompactNavigation() {
+  return window.matchMedia("(max-width: 760px)").matches;
+}
+
+function setNavDrawerOpen(open) {
+  state.navDrawerOpen = Boolean(open && isCompactNavigation());
+  if (elements.navRibbon) {
+    elements.navRibbon.classList.toggle("is-open", state.navDrawerOpen);
+  }
+  if (elements.navMenuToggle) {
+    elements.navMenuToggle.setAttribute("aria-expanded", state.navDrawerOpen ? "true" : "false");
+    elements.navMenuToggle.textContent = state.navDrawerOpen ? "Закрыть меню" : "Меню";
+  }
+}
+
+function closeNavDrawer() {
+  setNavDrawerOpen(false);
+}
+
+function updateStartAvailability() {
+  if (!elements.startAttempt) {
+    return;
+  }
+
+  const blockedByCompletion = elements.startAttempt.dataset.lockReason === "completed";
+  const hasParticipant = Boolean(state.participant);
+  const consentGranted = !elements.startConsent || elements.startConsent.checked;
+
+  elements.startAttempt.disabled = blockedByCompletion || !hasParticipant || !consentGranted;
+
+  if (!elements.startConsentHint) {
+    return;
+  }
+
+  if (blockedByCompletion) {
+    elements.startConsentHint.textContent = "Для этого участника повторный старт уже закрыт.";
+  } else if (!hasParticipant) {
+    elements.startConsentHint.textContent =
+      "Сначала сохраните данные участника, затем подтвердите готовность к 45 минутам без отвлечений.";
+  } else if (!consentGranted) {
+    elements.startConsentHint.textContent =
+      "Подтвердите готовность освободить ближайшие 45 минут, и кнопка старта станет активной.";
+  } else {
+    elements.startConsentHint.textContent = "Подтверждение получено. Можно запускать олимпиаду.";
   }
 }
 
@@ -985,7 +1040,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.6.0");
+    await navigator.serviceWorker.register("/sw.js?v=1.6.1");
   } catch (error) {
     // PWA layer is optional; the olympiad keeps working without service worker support.
   }
@@ -2046,7 +2101,7 @@ async function handleRegistration(event) {
 
     state.participant = data.participant;
     renderParticipant();
-    elements.startAttempt.disabled = data.alreadyCompleted;
+    elements.startAttempt.dataset.lockReason = data.alreadyCompleted ? "completed" : "";
     elements.startAttempt.textContent = data.activeAttemptId
       ? "Продолжить олимпиаду"
       : "Начать олимпиаду";
@@ -2076,6 +2131,16 @@ async function handleRegistration(event) {
 }
 
 async function startAttempt() {
+  if (elements.startConsent && !elements.startConsent.checked) {
+    showMessage(
+      elements.prestartMessage,
+      "Подтвердите, что готовы освободить ближайшие 45 минут и пройти олимпиаду без отвлечений.",
+      "warning"
+    );
+    updateStartAvailability();
+    return;
+  }
+
   hideMessage(elements.prestartMessage);
   hideMessage(elements.attemptMessage);
   setAttemptSaveStatus("Открываем маршрут...", "pending");
@@ -2240,6 +2305,11 @@ async function init() {
     setAttemptSaveStatus("Связь нестабильна. Ответ попробуем отправить повторно.", "warning");
     setAttemptSyncMeta("Сервер временно недоступен.");
   });
+  if (elements.navMenuToggle) {
+    elements.navMenuToggle.addEventListener("click", () => {
+      setNavDrawerOpen(!state.navDrawerOpen);
+    });
+  }
   elements.navBack.addEventListener("click", goBackOrHome);
   elements.navHome.addEventListener("click", () => scrollToSection(elements.heroSection));
   elements.navRegister.addEventListener("click", () => {
@@ -2264,6 +2334,9 @@ async function init() {
     );
   });
   elements.registrationForm.addEventListener("submit", handleRegistration);
+  if (elements.startConsent) {
+    elements.startConsent.addEventListener("change", updateStartAvailability);
+  }
   elements.startAttempt.addEventListener("click", startAttempt);
   elements.submitAnswer.addEventListener("click", submitAnswer);
   elements.finishAttempt.addEventListener("click", finishAttempt);
@@ -2273,6 +2346,20 @@ async function init() {
   elements.questionBody.addEventListener("change", () => updateExamCockpit());
   elements.questionBody.addEventListener("input", () => updateExamCockpit());
   elements.questionBody.addEventListener("click", () => updateExamCockpit());
+  document.addEventListener("click", (event) => {
+    if (!state.navDrawerOpen || !elements.navRibbon) {
+      return;
+    }
+    if (!elements.navRibbon.contains(event.target)) {
+      closeNavDrawer();
+    }
+  });
+  window.addEventListener("resize", () => {
+    if (!isCompactNavigation()) {
+      closeNavDrawer();
+    }
+  });
+  updateStartAvailability();
 }
 
 init().catch((error) => {

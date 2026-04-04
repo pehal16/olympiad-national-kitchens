@@ -23,6 +23,9 @@ const adminState = {
 const PANEL_REFRESH_MS = 15000;
 
 const elements = {
+  navRibbon: document.getElementById("admin-nav-ribbon"),
+  navMenuToggle: document.getElementById("admin-nav-menu-toggle"),
+  navDrawer: document.getElementById("admin-nav-drawer"),
   navBack: document.getElementById("admin-nav-back"),
   navTop: document.getElementById("admin-nav-top"),
   navRating: document.getElementById("admin-nav-rating"),
@@ -71,6 +74,25 @@ const elements = {
   exportJson: document.getElementById("export-json"),
   uploadDisk: document.getElementById("upload-disk")
 };
+
+function isCompactNavigation() {
+  return window.matchMedia("(max-width: 760px)").matches;
+}
+
+function setNavDrawerOpen(open) {
+  const nextState = Boolean(open && isCompactNavigation());
+  if (elements.navRibbon) {
+    elements.navRibbon.classList.toggle("is-open", nextState);
+  }
+  if (elements.navMenuToggle) {
+    elements.navMenuToggle.setAttribute("aria-expanded", nextState ? "true" : "false");
+    elements.navMenuToggle.textContent = nextState ? "Закрыть меню" : "Меню";
+  }
+}
+
+function closeNavDrawer() {
+  setNavDrawerOpen(false);
+}
 
 async function adminApi(path, options = {}) {
   let response;
@@ -272,6 +294,7 @@ function scrollToBlock(block) {
 }
 
 function goBackOrHome() {
+  closeNavDrawer();
   if (window.history.length > 1) {
     window.history.back();
     return;
@@ -931,14 +954,24 @@ function resetFilters() {
 async function init() {
   await loadPublicVersion();
   setPanelStatus("warning", "ожидание входа");
+  if (elements.navMenuToggle) {
+    elements.navMenuToggle.addEventListener("click", () => {
+      const expanded = elements.navMenuToggle.getAttribute("aria-expanded") === "true";
+      setNavDrawerOpen(!expanded);
+    });
+  }
   elements.navBack.addEventListener("click", goBackOrHome);
-  elements.navTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  elements.navTop.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    closeNavDrawer();
+  });
   elements.navRating.addEventListener("click", () => {
     if (elements.panel.classList.contains("hidden")) {
       focusLoginCard();
       return;
     }
     scrollToBlock(elements.ratingSection);
+    closeNavDrawer();
   });
   elements.navDetail.addEventListener("click", () => {
     if (elements.panel.classList.contains("hidden")) {
@@ -946,6 +979,7 @@ async function init() {
       return;
     }
     scrollToBlock(elements.detailSection);
+    closeNavDrawer();
   });
   elements.navRefresh.addEventListener("click", () => {
     if (elements.panel.classList.contains("hidden")) {
@@ -953,6 +987,7 @@ async function init() {
       return;
     }
     refreshPanel();
+    closeNavDrawer();
   });
 
   elements.loginForm.addEventListener("submit", handleLogin);
@@ -988,6 +1023,20 @@ async function init() {
   } catch (error) {
     resetAdminSession();
   }
+
+  document.addEventListener("click", (event) => {
+    if (!elements.navRibbon || !elements.navRibbon.classList.contains("is-open")) {
+      return;
+    }
+    if (!elements.navRibbon.contains(event.target)) {
+      closeNavDrawer();
+    }
+  });
+  window.addEventListener("resize", () => {
+    if (!isCompactNavigation()) {
+      closeNavDrawer();
+    }
+  });
 }
 
 init();

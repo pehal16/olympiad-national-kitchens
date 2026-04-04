@@ -70,11 +70,32 @@ body {
   position: sticky;
   top: 12px;
   z-index: 8;
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.nav-ribbon-head {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nav-ribbon-label {
+  font-weight: 800;
+  color: var(--accent-2);
+}
+
+.nav-ribbon-toggle {
+  min-height: 48px;
+}
+
+.nav-ribbon-drawer {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
   align-items: center;
-  padding: 14px 16px;
 }
 
 .nav-ribbon .button.is-active {
@@ -229,6 +250,31 @@ body {
 .exam-preflight-note strong {
   display: block;
   margin-bottom: 6px;
+}
+
+.start-disclaimer {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(38, 38, 38, 0.08);
+  background: rgba(31, 142, 115, 0.06);
+  display: grid;
+  gap: 10px;
+}
+
+.consent-check {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: flex-start;
+  line-height: 1.55;
+  cursor: pointer;
+}
+
+.consent-check input {
+  margin-top: 4px;
+  inline-size: 20px;
+  block-size: 20px;
 }
 
 .journey-map {
@@ -1717,10 +1763,31 @@ pre {
     padding: 12px;
   }
 
+  .nav-ribbon-head {
+    display: flex;
+  }
+
+  .nav-ribbon-drawer {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nav-ribbon.is-open .nav-ribbon-drawer {
+    display: flex;
+  }
+
   .nav-ribbon .button,
+  .nav-ribbon .network-badge,
   .actions .button {
     flex: 1 1 100%;
     min-height: 52px;
+  }
+
+  .nav-ribbon .network-badge {
+    justify-content: center;
+    margin-left: 0;
   }
 
   .sync-strip,
@@ -1776,6 +1843,14 @@ pre {
 
   .exam-preflight-note {
     font-size: 14px;
+  }
+
+  .consent-check {
+    grid-template-columns: 1fr;
+  }
+
+  .consent-check input {
+    margin-top: 0;
   }
 
   .exam-guard-card {

@@ -7,25 +7,39 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Национальные кухни мира</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.0" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.1" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.0" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.1" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
     <div class="ambient ambient-b"></div>
 
     <main class="shell">
-      <section class="card nav-ribbon">
-        <button id="nav-back" class="button ghost" type="button">Назад</button>
-        <button id="nav-home" class="button ghost" type="button">Главная</button>
-        <button id="nav-register" class="button ghost" type="button">Регистрация</button>
-        <button id="nav-attempt" class="button ghost" type="button">Текущий тур</button>
-        <button id="nav-result" class="button ghost" type="button">Результат</button>
-        <div id="network-status" class="network-badge online">Сеть: онлайн</div>
-        <button id="install-app" class="button primary hidden" type="button">Установить приложение</button>
-        <a class="button ghost" href="/admin.html">Облачная админка</a>
+      <section id="nav-ribbon" class="card nav-ribbon">
+        <div class="nav-ribbon-head">
+          <div class="nav-ribbon-label">Навигация</div>
+          <button
+            id="nav-menu-toggle"
+            class="button ghost nav-ribbon-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="nav-drawer"
+          >
+            Меню
+          </button>
+        </div>
+        <div id="nav-drawer" class="nav-ribbon-drawer">
+          <button id="nav-back" class="button ghost" type="button">Назад</button>
+          <button id="nav-home" class="button ghost" type="button">Главная</button>
+          <button id="nav-register" class="button ghost" type="button">Регистрация</button>
+          <button id="nav-attempt" class="button ghost" type="button">Текущий тур</button>
+          <button id="nav-result" class="button ghost" type="button">Результат</button>
+          <div id="network-status" class="network-badge online">Сеть: онлайн</div>
+          <button id="install-app" class="button primary hidden" type="button">Установить приложение</button>
+          <a class="button ghost" href="/admin.html">Облачная админка</a>
+        </div>
       </section>
 
       <section id="hero-section" class="card hero">
@@ -144,6 +158,18 @@
         <section class="card">
           <h2>Правила прохождения</h2>
           <ul id="rules-list" class="flat-list"></ul>
+          <div class="start-disclaimer">
+            <label class="consent-check">
+              <input id="start-consent" type="checkbox" />
+              <span>
+                Я понимаю, что после старта нужно освободить для олимпиады ближайшие 45 минут и
+                пройти все вопросы без отвлечений.
+              </span>
+            </label>
+            <small id="start-consent-hint" class="muted">
+              Кнопка старта станет активной после подтверждения и сохранения данных участника.
+            </small>
+          </div>
           <div class="actions">
             <button id="start-attempt" class="button primary" disabled>Начать олимпиаду</button>
             <a class="button secondary" href="/admin.html">Панель организатора</a>
@@ -264,7 +290,7 @@
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
         <small>
           Разработчик: Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса"
-          • Версия <span id="app-version-label">1.6.0</span>
+          • Версия <span id="app-version-label">1.6.1</span>
         </small>
       </footer>
     </main>
@@ -287,6 +313,6 @@
       </section>
     </div>
 
-    <script src="/app.js?v=1.6.0"></script>
+    <script src="/app.js?v=1.6.1"></script>
   </body>
 </html>

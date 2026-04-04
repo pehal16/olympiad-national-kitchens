@@ -25,6 +25,9 @@ const state = {
 };
 
 const elements = {
+  navRibbon: document.getElementById("content-nav-ribbon"),
+  navMenuToggle: document.getElementById("content-nav-menu-toggle"),
+  navDrawer: document.getElementById("content-nav-drawer"),
   navBack: document.getElementById("content-nav-back"),
   navTop: document.getElementById("content-nav-top"),
   navSummary: document.getElementById("content-nav-summary"),
@@ -129,6 +132,25 @@ const elements = {
   editorMethodicalPurpose: document.getElementById("editor-methodical-purpose"),
   appVersionLabel: document.getElementById("content-app-version-label")
 };
+
+function isCompactNavigation() {
+  return window.matchMedia("(max-width: 760px)").matches;
+}
+
+function setNavDrawerOpen(open) {
+  const nextState = Boolean(open && isCompactNavigation());
+  if (elements.navRibbon) {
+    elements.navRibbon.classList.toggle("is-open", nextState);
+  }
+  if (elements.navMenuToggle) {
+    elements.navMenuToggle.setAttribute("aria-expanded", nextState ? "true" : "false");
+    elements.navMenuToggle.textContent = nextState ? "Закрыть меню" : "Меню";
+  }
+}
+
+function closeNavDrawer() {
+  setNavDrawerOpen(false);
+}
 
 const QA_CATEGORY_LABELS = {
   metadata: "Метаданные",
@@ -274,6 +296,7 @@ function formatQaCategoryLabel(category) {
 }
 
 function goBackOrHome() {
+  closeNavDrawer();
   if (window.history.length > 1) {
     window.history.back();
     return;
@@ -1138,17 +1161,29 @@ function bindFilters() {
 }
 
 function initNavigation() {
+  if (elements.navMenuToggle) {
+    elements.navMenuToggle.addEventListener("click", () => {
+      const expanded = elements.navMenuToggle.getAttribute("aria-expanded") === "true";
+      setNavDrawerOpen(!expanded);
+    });
+  }
   elements.navBack.addEventListener("click", goBackOrHome);
-  elements.navTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-  elements.navSummary.addEventListener("click", () =>
-    elements.summarySection.scrollIntoView({ behavior: "smooth", block: "start" })
-  );
-  elements.navQa.addEventListener("click", () =>
-    elements.qaSection.scrollIntoView({ behavior: "smooth", block: "start" })
-  );
-  elements.navEditor.addEventListener("click", () =>
-    elements.editorSection.scrollIntoView({ behavior: "smooth", block: "start" })
-  );
+  elements.navTop.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    closeNavDrawer();
+  });
+  elements.navSummary.addEventListener("click", () => {
+    elements.summarySection.scrollIntoView({ behavior: "smooth", block: "start" });
+    closeNavDrawer();
+  });
+  elements.navQa.addEventListener("click", () => {
+    elements.qaSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    closeNavDrawer();
+  });
+  elements.navEditor.addEventListener("click", () => {
+    elements.editorSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    closeNavDrawer();
+  });
   elements.navRefresh.addEventListener("click", async () => {
     try {
       showPanel();
@@ -1161,6 +1196,7 @@ function initNavigation() {
         showMessage(elements.note, error.message || "Не удалось обновить контентную панель.", "error");
       }
     }
+    closeNavDrawer();
   });
 }
 
@@ -1190,6 +1226,20 @@ async function init() {
     showPanel();
     showMessage(elements.note, error.message || "Не удалось загрузить банк заданий.", "error");
   }
+
+  document.addEventListener("click", (event) => {
+    if (!elements.navRibbon || !elements.navRibbon.classList.contains("is-open")) {
+      return;
+    }
+    if (!elements.navRibbon.contains(event.target)) {
+      closeNavDrawer();
+    }
+  });
+  window.addEventListener("resize", () => {
+    if (!isCompactNavigation()) {
+      closeNavDrawer();
+    }
+  });
 }
 
 function renderQuestionList() {

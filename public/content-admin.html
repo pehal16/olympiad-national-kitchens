@@ -5,24 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1f8e73" />
     <title>Банк заданий олимпиады</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.0" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.1" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.0" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.1" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
     <div class="ambient ambient-b"></div>
 
     <main class="shell">
-      <section class="card nav-ribbon">
-        <button id="content-nav-back" class="button ghost" type="button">Назад</button>
-        <a class="button ghost" href="/">Главная олимпиады</a>
-        <a class="button ghost" href="/admin.html">Панель организатора</a>
-        <button id="content-nav-top" class="button ghost" type="button">Наверх</button>
-        <button id="content-nav-summary" class="button ghost" type="button">Сводка</button>
-        <button id="content-nav-qa" class="button ghost" type="button">QA банка</button>
-        <button id="content-nav-editor" class="button ghost" type="button">Каталог вопросов</button>
-        <button id="content-refresh" class="button ghost" type="button">Обновить</button>
+      <section id="content-nav-ribbon" class="card nav-ribbon">
+        <div class="nav-ribbon-head">
+          <div class="nav-ribbon-label">Банк заданий</div>
+          <button
+            id="content-nav-menu-toggle"
+            class="button ghost nav-ribbon-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="content-nav-drawer"
+          >
+            Меню
+          </button>
+        </div>
+        <div id="content-nav-drawer" class="nav-ribbon-drawer">
+          <button id="content-nav-back" class="button ghost" type="button">Назад</button>
+          <a class="button ghost" href="/">Главная олимпиады</a>
+          <a class="button ghost" href="/admin.html">Панель организатора</a>
+          <button id="content-nav-top" class="button ghost" type="button">Наверх</button>
+          <button id="content-nav-summary" class="button ghost" type="button">Сводка</button>
+          <button id="content-nav-qa" class="button ghost" type="button">QA банка</button>
+          <button id="content-nav-editor" class="button ghost" type="button">Каталог вопросов</button>
+          <button id="content-refresh" class="button ghost" type="button">Обновить</button>
+        </div>
       </section>
 
       <section class="card hero compact">
@@ -461,11 +475,11 @@
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
         <small>
           Разработчик: Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса"
-          • Версия <span id="content-app-version-label">1.6.0</span>
+          • Версия <span id="content-app-version-label">1.6.1</span>
         </small>
       </footer>
     </main>
 
-    <script src="/content-admin.js?v=1.6.0"></script>
+    <script src="/content-admin.js?v=1.6.1"></script>
   </body>
 </html>
