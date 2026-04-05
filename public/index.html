@@ -7,10 +7,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Национальные кухни мира</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.4" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.5" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.4" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.5" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -42,20 +42,75 @@
         </div>
       </section>
 
-      <section id="hero-section" class="card hero">
-        <div class="hero-brand">
-          <div class="hero-brand-lockup">
-          <figure class="brand-figure brand-figure-brandbook" aria-label="Профессионалитет. Туризм и сфера услуг">
-            <img
-              src="/brand-prof-brandbook.jpg"
-              alt="Профессионалитет 2024. Туризм и сфера услуг"
-              loading="eager"
-              decoding="async"
-              fetchpriority="high"
-            />
-          </figure>
-          <div class="hero-brand-gallery" aria-label="Фирменные изображения олимпиады">
-            <figure class="brand-image-card brand-image-card-shield">
+      <section id="hero-section" class="card hero hero-intro">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <div class="eyebrow">Персонализированное обучение и цифровизация</div>
+            <h1 id="hero-title">Национальные кухни мира</h1>
+            <p id="hero-subtitle" class="lead"></p>
+            <div id="hero-format-badge" class="game-badge hero-format-badge">Индивидуальная цифровая олимпиада • 45 минут • 5 туров</div>
+            <div class="hero-feature-grid" aria-label="Ключевые возможности платформы">
+              <article class="hero-feature-card">
+                <span class="hero-feature-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M6 7.5C6 5.57 7.57 4 9.5 4h5C16.43 4 18 5.57 18 7.5v9A3.5 3.5 0 0 1 14.5 20h-5A3.5 3.5 0 0 1 6 16.5v-9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                    <path d="M9 8h6M9 11h6M9 14h3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                  </svg>
+                </span>
+                <div>
+                  <strong>Индивидуальный вариант</strong>
+                  <span>Система автоматически формирует для каждого участника персональный маршрут заданий.</span>
+                </div>
+              </article>
+              <article class="hero-feature-card">
+                <span class="hero-feature-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 5v7l4 2.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8" />
+                  </svg>
+                </span>
+                <div>
+                  <strong>Пошаговое прохождение</strong>
+                  <span>На экране всегда только один вопрос, а система фиксирует темп и прогресс по каждому туру.</span>
+                </div>
+              </article>
+              <article class="hero-feature-card">
+                <span class="hero-feature-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M7.5 12.5 10.5 15.5 16.5 8.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    <rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" stroke-width="1.8" />
+                  </svg>
+                </span>
+                <div>
+                  <strong>Автопроверка</strong>
+                  <span>Все ответы обрабатываются автоматически, без ручной экспертной оценки и задержек.</span>
+                </div>
+              </article>
+              <article class="hero-feature-card">
+                <span class="hero-feature-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M7 16.5A3.5 3.5 0 0 1 7 9.5a4.5 4.5 0 0 1 8.72-1.42A3.25 3.25 0 1 1 17.75 16.5H7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                    <path d="M12 9.5v5M12 14.5l-2-2M12 14.5l2-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <div>
+                  <strong>Результаты в облаке</strong>
+                  <span>Ответы сохраняются централизованно и сразу доступны организатору в панели управления.</span>
+                </div>
+              </article>
+            </div>
+          </div>
+          <aside class="hero-brand-aside" aria-label="Фирменные материалы олимпиады">
+            <figure class="brand-figure brand-figure-brandbook brand-figure-compact">
+              <img
+                src="/brand-prof-brandbook.jpg"
+                alt="Профессионалитет 2024. Туризм и сфера услуг"
+                loading="eager"
+                decoding="async"
+                fetchpriority="high"
+              />
+            </figure>
+            <figure class="brand-image-card brand-image-card-shield brand-image-card-compact">
               <img
                 src="/brand-gkts-shield.jpg"
                 alt="Эмблема Горловского колледжа технологий и сервиса"
@@ -64,13 +119,8 @@
                 fetchpriority="high"
               />
             </figure>
-          </div>
-          </div>
-          <div id="hero-format-badge" class="game-badge">Индивидуальная цифровая олимпиада • 45 минут • 5 туров</div>
+          </aside>
         </div>
-        <div class="eyebrow">Персонализированное обучение и цифровизация</div>
-        <h1 id="hero-title">Национальные кухни мира</h1>
-        <p id="hero-subtitle" class="lead"></p>
         <div class="exam-preflight-note">
           <strong>После запуска заданий активируется особый режим.</strong>
           В этом режиме блокируются копирование, контекстное меню и некоторые сочетания клавиш. Если попытаться выйти из активного окна или полноэкранного режима, система это заметит и зафиксирует.
@@ -271,7 +321,7 @@
         <small>
           Разработчик: Постовит Дмитрий Александрович, преподаватель первой категории, профильных
           дисциплин, реализуемых в рамках образовательной программы ГБПОУ "Горловский колледж
-          технологий и сервиса". • Версия <span id="app-version-label">1.6.4</span>
+          технологий и сервиса". • Версия <span id="app-version-label">1.6.5</span>
         </small>
       </footer>
     </main>
@@ -294,6 +344,6 @@
       </section>
     </div>
 
-    <script src="/app.js?v=1.6.4"></script>
+    <script src="/app.js?v=1.6.5"></script>
   </body>
 </html>
