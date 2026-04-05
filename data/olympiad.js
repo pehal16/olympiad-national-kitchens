@@ -11,7 +11,7 @@ module.exports = {
   title: "Национальные кухни мира",
   subtitle: "Автоматизированная олимпиада по технологии приготовления блюд национальных кухонь",
   description:
-    "Индивидуальная цифровая олимпиада с автогенерацией варианта, покадровым прохождением, интерактивными заданиями и полной автоматической проверкой.",
+    "В рамках реализации концепции персонализированного обучения и цифровизации образовательного процесса разработана индивидуальная цифровая олимпиада с автоматизированным формированием заданий, поэтапным прохождением, интерактивными элементами и полной автоматической проверкой результатов.",
   durationMinutes: 45,
   timingMode: "total_and_tour_limits",
   registrationMode: "open_form",
@@ -19,9 +19,13 @@ module.exports = {
   endAt: "2026-12-31T23:59:59+03:00",
   participantFields: [
     { id: "fullName", label: "ФИО участника", required: true },
-    { id: "institution", label: "Учебное заведение", required: true },
-    { id: "groupName", label: "Группа", required: true },
-    { id: "mentorName", label: "Наставник", required: false }
+    { id: "institution", label: "Образовательная организация", required: true },
+    {
+      id: "groupName",
+      label: "Учебная группа, код и название специальности/профессии",
+      required: true
+    },
+    { id: "mentorName", label: "ФИО наставника", required: false }
   ],
   methodologicalBasis: {
     sourceDiscipline: "ОП.11 / ОП.12 «Технология приготовления блюд национальных кухонь»",

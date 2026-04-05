@@ -7,10 +7,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Национальные кухни мира</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.1" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.2" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.1" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.2" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -100,14 +100,14 @@
             </figure>
           </div>
           </div>
-          <div id="hero-format-badge" class="game-badge">Экспресс-формат • 45 минут • 5 туров</div>
+          <div id="hero-format-badge" class="game-badge">Индивидуальная цифровая олимпиада • 45 минут • 5 туров</div>
         </div>
-        <div class="eyebrow">Автоматизированная олимпиада</div>
+        <div class="eyebrow">Персонализированное обучение и цифровизация</div>
         <h1 id="hero-title">Национальные кухни мира</h1>
         <p id="hero-subtitle" class="lead"></p>
         <div class="exam-preflight-note">
-          <strong>Экзаменационный режим включится при старте.</strong>
-          Во время прохождения отключаются копирование, выделение текста, контекстное меню и часть браузерных горячих клавиш. При выходе из активного окна или полноэкранного режима олимпиада ставит попытку на контроль.
+          <strong>После запуска заданий активируется особый режим.</strong>
+          В этом режиме блокируются копирование, контекстное меню и некоторые сочетания клавиш. Если попытаться выйти из активного окна или полноэкранного режима, система это заметит и зафиксирует.
         </div>
         <div class="meta-row" id="tour-meta"></div>
       </section>
@@ -136,19 +136,33 @@
           <form id="registration-form" class="form-stack">
             <label class="field">
               <span>ФИО участника</span>
-              <input id="full-name" type="text" required />
+              <input id="full-name" type="text" placeholder="Иванов Иван Иванович" required />
             </label>
             <label class="field">
-              <span>Учебное заведение</span>
-              <input id="institution" type="text" required />
+              <span>Образовательная организация</span>
+              <input
+                id="institution"
+                type="text"
+                value="ГБПОУ «Горловский колледж технологий и сервиса»"
+                required
+              />
             </label>
             <label class="field">
-              <span>Группа</span>
-              <input id="group-name" type="text" required />
+              <span>Учебная группа, код и название специальности/профессии</span>
+              <input
+                id="group-name"
+                type="text"
+                placeholder="№4/П-24, 43.01.09 Повар, кондитер"
+                required
+              />
             </label>
             <label class="field">
-              <span>Наставник</span>
-              <input id="mentor-name" type="text" />
+              <span>ФИО наставника</span>
+              <input
+                id="mentor-name"
+                type="text"
+                value="Постовит Дмитрий Александрович, преподаватель профильных дисциплин"
+              />
             </label>
             <button class="button primary" type="submit">Сохранить данные</button>
           </form>
@@ -167,7 +181,7 @@
               </span>
             </label>
             <small id="start-consent-hint" class="muted">
-              Кнопка старта станет активной после подтверждения и сохранения данных участника.
+              Сохраните данные участника. Подтвердите готовность работать 45 минут без отвлечений.
             </small>
           </div>
           <div class="actions">
@@ -289,8 +303,9 @@
       <footer class="footer-note">
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
         <small>
-          Разработчик: Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса"
-          • Версия <span id="app-version-label">1.6.1</span>
+          Разработчик: Постовит Дмитрий Александрович, преподаватель высшей категории, профильных
+          дисциплин, реализуемых в рамках образовательной программы ГБПОУ "Горловский колледж
+          технологий и сервиса". • Версия <span id="app-version-label">1.6.2</span>
         </small>
       </footer>
     </main>
@@ -313,6 +328,6 @@
       </section>
     </div>
 
-    <script src="/app.js?v=1.6.1"></script>
+    <script src="/app.js?v=1.6.2"></script>
   </body>
 </html>
