@@ -164,32 +164,29 @@ body {
 }
 
 .hero-brand {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(320px, 520px) minmax(120px, 160px);
+  align-items: end;
   justify-content: space-between;
-  gap: 18px;
+  gap: 28px;
   margin-bottom: 18px;
-  flex-wrap: wrap;
 }
 
 .hero-brand-lockup {
-  display: flex;
-  align-items: flex-end;
-  gap: 18px;
-  flex: 1 1 720px;
-  min-width: min(100%, 320px);
-  flex-wrap: wrap;
+  display: block;
+  min-width: 0;
 }
 
 .brand-figure {
-  width: min(100%, 368px);
-  margin-right: auto;
+  width: 100%;
+  margin: 0;
 }
 
 .brand-figure img {
   display: block;
   width: 100%;
   height: auto;
+  border-radius: 20px;
 }
 
 .brand-figure svg {
@@ -200,9 +197,9 @@ body {
 
 .hero-brand-gallery {
   display: flex;
-  align-items: flex-end;
-  gap: 14px;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 .brand-image-card {
@@ -224,7 +221,7 @@ body {
 }
 
 .brand-image-card-shield {
-  width: 188px;
+  width: 152px;
 }
 
 .game-badge {
@@ -1699,6 +1696,7 @@ pre {
   }
 
   .hero-brand {
+    grid-template-columns: 1fr;
     justify-content: center;
   }
 
@@ -1839,7 +1837,7 @@ pre {
   }
 
   .brand-figure {
-    width: min(100%, 290px);
+    width: min(100%, 320px);
     margin-inline: auto;
   }
 
