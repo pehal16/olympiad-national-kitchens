@@ -186,6 +186,12 @@ body {
   margin-right: auto;
 }
 
+.brand-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .brand-figure svg {
   display: block;
   width: 100%;
@@ -215,10 +221,6 @@ body {
   width: 100%;
   height: auto;
   object-fit: contain;
-}
-
-.brand-image-card-round {
-  width: 168px;
 }
 
 .brand-image-card-shield {

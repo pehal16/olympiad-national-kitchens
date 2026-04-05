@@ -7,10 +7,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Национальные кухни мира</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.2" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.3" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.2" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.3" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -45,50 +45,16 @@
       <section id="hero-section" class="card hero">
         <div class="hero-brand">
           <div class="hero-brand-lockup">
-          <div class="brand-figure" aria-label="Профессионалитет. Туризм и сфера услуг">
-            <svg viewBox="0 -24 520 344" role="img" aria-hidden="true">
-              <defs>
-                <path id="brand-arc" d="M 92 132 A 176 176 0 0 1 428 132" />
-              </defs>
-              <text
-                font-family="Bahnschrift, Segoe UI, sans-serif"
-                font-size="38"
-                font-weight="800"
-                letter-spacing="2.4"
-                fill="#262626"
-              >
-                <textPath href="#brand-arc" startOffset="50%" text-anchor="middle">
-                  ПРОФЕССИОНАЛИТЕТ
-                </textPath>
-              </text>
-              <line x1="74" y1="276" x2="118" y2="232" stroke="#262626" stroke-width="2" />
-              <line x1="246" y1="98" x2="230" y2="66" stroke="#1f8e73" stroke-width="7" stroke-linecap="round" />
-              <line x1="246" y1="98" x2="262" y2="66" stroke="#1f8e73" stroke-width="7" stroke-linecap="round" />
-              <path d="M246 92 L178 214 H314 Z" fill="#1f8e73" />
-              <rect x="170" y="214" width="152" height="12" rx="6" fill="#1f8e73" />
-              <text
-                x="260"
-                y="296"
-                text-anchor="middle"
-                font-family="Bahnschrift, Segoe UI, sans-serif"
-                font-size="34"
-                font-weight="400"
-                fill="#262626"
-              >
-                туризм и сфера услуг
-              </text>
-            </svg>
-          </div>
+          <figure class="brand-figure brand-figure-brandbook" aria-label="Профессионалитет. Туризм и сфера услуг">
+            <img
+              src="/brand-prof-brandbook.svg"
+              alt="Профессионалитет 2024. Туризм и сфера услуг"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+            />
+          </figure>
           <div class="hero-brand-gallery" aria-label="Фирменные изображения олимпиады">
-            <figure class="brand-image-card brand-image-card-round">
-              <img
-                src="/brand-prof-2024.jpg"
-                alt="Эмблема Профессионалитет 2024"
-                loading="eager"
-                decoding="async"
-                fetchpriority="high"
-              />
-            </figure>
             <figure class="brand-image-card brand-image-card-shield">
               <img
                 src="/brand-gkts-shield.jpg"
@@ -161,7 +127,7 @@
               <input
                 id="mentor-name"
                 type="text"
-                value="Постовит Дмитрий Александрович, преподаватель профильных дисциплин"
+                placeholder="Постовит Дмитрий Александрович, преподаватель профильных дисциплин"
               />
             </label>
             <button class="button primary" type="submit">Сохранить данные</button>
@@ -303,9 +269,9 @@
       <footer class="footer-note">
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
         <small>
-          Разработчик: Постовит Дмитрий Александрович, преподаватель высшей категории, профильных
+          Разработчик: Постовит Дмитрий Александрович, преподаватель первой категории, профильных
           дисциплин, реализуемых в рамках образовательной программы ГБПОУ "Горловский колледж
-          технологий и сервиса". • Версия <span id="app-version-label">1.6.2</span>
+          технологий и сервиса". • Версия <span id="app-version-label">1.6.3</span>
         </small>
       </footer>
     </main>
@@ -328,6 +294,6 @@
       </section>
     </div>
 
-    <script src="/app.js?v=1.6.2"></script>
+    <script src="/app.js?v=1.6.3"></script>
   </body>
 </html>
