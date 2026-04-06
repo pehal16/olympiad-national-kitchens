@@ -1,0 +1,25 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="36" fill="#FCFCFB"/>
+  <path d="M103 148.5C141.5 105.5 194.5 81 256 81C320.8 81 376.1 108.8 415.5 155.5" stroke="#242424" stroke-width="22" stroke-linecap="round"/>
+  <path d="M256 150L343 322H169L256 150Z" fill="#1F8E73"/>
+  <path d="M234 124L256 150L278 124" stroke="#1F8E73" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="162" y="318" width="188" height="18" rx="9" fill="#1F8E73"/>
+  <path d="M138 379L105 417" stroke="#6C746F" stroke-width="3" stroke-linecap="round"/>
+  <text x="86" y="126" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(-37 86 126)">П</text>
+  <text x="116" y="101" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(-28 116 101)">Р</text>
+  <text x="149" y="81" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(-20 149 81)">О</text>
+  <text x="185" y="66" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(-11 185 66)">Ф</text>
+  <text x="222" y="57" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(-3 222 57)">Е</text>
+  <text x="257" y="56" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(5 257 56)">С</text>
+  <text x="290" y="60" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(13 290 60)">С</text>
+  <text x="322" y="71" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(21 322 71)">И</text>
+  <text x="352" y="88" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(29 352 88)">О</text>
+  <text x="378" y="112" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(38 378 112)">Н</text>
+  <text x="401" y="141" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(47 401 141)">А</text>
+  <text x="419" y="174" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(56 419 174)">Л</text>
+  <text x="433" y="208" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(64 433 208)">И</text>
+  <text x="441" y="243" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(72 441 243)">Т</text>
+  <text x="444" y="278" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(81 444 278)">Е</text>
+  <text x="440" y="313" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" transform="rotate(90 440 313)">Т</text>
+  <text x="126" y="371" fill="#242424" font-family="Bahnschrift, Segoe UI, Arial, sans-serif" font-size="30" font-weight="300">туризм и сфера услуг</text>
+</svg>
