@@ -1,13 +1,13 @@
-const CACHE_NAME = "national-kitchens-olympiad-v1-6-11";
+﻿const CACHE_NAME = "national-kitchens-olympiad-v1-6-12";
 const PRECACHE_URLS = [
   "/",
   "/admin.html",
   "/content-admin.html",
-  "/styles.css?v=1.6.11",
-  "/app.js?v=1.6.11",
-  "/admin.js?v=1.6.11",
-  "/content-admin.js?v=1.6.11",
-  "/manifest.webmanifest?v=1.6.11",
+  "/styles.css?v=1.6.12",
+  "/app.js?v=1.6.12",
+  "/admin.js?v=1.6.12",
+  "/content-admin.js?v=1.6.12",
+  "/manifest.webmanifest?v=1.6.12",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   "/brand-prof-tourism.png",

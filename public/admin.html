@@ -1,13 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1f8e73" />
-    <title>Панель организатора</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.11" />
+    <title>РџР°РЅРµР»СЊ РѕСЂРіР°РЅРёР·Р°С‚РѕСЂР°</title>
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.12" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.11" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.12" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -16,7 +16,7 @@
     <main class="shell">
       <section id="admin-nav-ribbon" class="card nav-ribbon">
         <div class="nav-ribbon-head">
-          <div class="nav-ribbon-label">Панель организатора</div>
+          <div class="nav-ribbon-label">РџР°РЅРµР»СЊ РѕСЂРіР°РЅРёР·Р°С‚РѕСЂР°</div>
           <button
             id="admin-nav-menu-toggle"
             class="button ghost nav-ribbon-toggle"
@@ -24,36 +24,36 @@
             aria-expanded="false"
             aria-controls="admin-nav-drawer"
           >
-            Меню
+            РњРµРЅСЋ
           </button>
         </div>
         <div id="admin-nav-drawer" class="nav-ribbon-drawer">
-          <button id="admin-nav-back" class="button ghost" type="button">Назад</button>
-          <a class="button ghost" href="/">Главная олимпиады</a>
-          <a class="button ghost" href="/content-admin.html">Банк заданий</a>
-          <button id="admin-nav-top" class="button ghost" type="button">Наверх</button>
-          <button id="admin-nav-rating" class="button ghost" type="button">Рейтинг</button>
-          <button id="admin-nav-detail" class="button ghost" type="button">Карточка</button>
-          <button id="admin-refresh" class="button ghost" type="button">Обновить</button>
+          <button id="admin-nav-back" class="button ghost" type="button">РќР°Р·Р°Рґ</button>
+          <a class="button ghost" href="/">Р“Р»Р°РІРЅР°СЏ РѕР»РёРјРїРёР°РґС‹</a>
+          <a class="button ghost" href="/content-admin.html">Р‘Р°РЅРє Р·Р°РґР°РЅРёР№</a>
+          <button id="admin-nav-top" class="button ghost" type="button">РќР°РІРµСЂС…</button>
+          <button id="admin-nav-rating" class="button ghost" type="button">Р РµР№С‚РёРЅРі</button>
+          <button id="admin-nav-detail" class="button ghost" type="button">РљР°СЂС‚РѕС‡РєР°</button>
+          <button id="admin-refresh" class="button ghost" type="button">РћР±РЅРѕРІРёС‚СЊ</button>
         </div>
       </section>
 
       <section class="card hero compact">
-        <div class="eyebrow">Организатор</div>
-        <h1>Панель управления олимпиадой</h1>
+        <div class="eyebrow">РћСЂРіР°РЅРёР·Р°С‚РѕСЂ</div>
+        <h1>РџР°РЅРµР»СЊ СѓРїСЂР°РІР»РµРЅРёСЏ РѕР»РёРјРїРёР°РґРѕР№</h1>
         <p class="lead">
-          Рейтинг участников, туровые баллы, служебный лог вопросов, ответы и выгрузка протоколов.
+          Р РµР№С‚РёРЅРі СѓС‡Р°СЃС‚РЅРёРєРѕРІ, С‚СѓСЂРѕРІС‹Рµ Р±Р°Р»Р»С‹, СЃР»СѓР¶РµР±РЅС‹Р№ Р»РѕРі РІРѕРїСЂРѕСЃРѕРІ, РѕС‚РІРµС‚С‹ Рё РІС‹РіСЂСѓР·РєР° РїСЂРѕС‚РѕРєРѕР»РѕРІ.
         </p>
       </section>
 
       <section id="admin-login-card" class="card">
-        <h2>Вход администратора</h2>
+        <h2>Р’С…РѕРґ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°</h2>
         <form id="admin-login-form" class="form-stack">
           <label class="field">
-            <span>Пароль</span>
+            <span>РџР°СЂРѕР»СЊ</span>
             <input id="admin-password" type="password" required />
           </label>
-          <button class="button primary" type="submit">Войти</button>
+          <button class="button primary" type="submit">Р’РѕР№С‚Рё</button>
         </form>
         <div id="admin-login-message" class="message hidden"></div>
       </section>
@@ -61,15 +61,15 @@
       <section id="admin-panel" class="hidden">
         <section class="grid-three">
           <article class="card stat-card">
-            <span class="stat-label">Участники</span>
+            <span class="stat-label">РЈС‡Р°СЃС‚РЅРёРєРё</span>
             <strong id="stat-participants">0</strong>
           </article>
           <article class="card stat-card">
-            <span class="stat-label">Попытки</span>
+            <span class="stat-label">РџРѕРїС‹С‚РєРё</span>
             <strong id="stat-attempts">0</strong>
           </article>
           <article class="card stat-card">
-            <span class="stat-label">Завершено</span>
+            <span class="stat-label">Р—Р°РІРµСЂС€РµРЅРѕ</span>
             <strong id="stat-completed">0</strong>
           </article>
         </section>
@@ -77,57 +77,57 @@
         <section class="grid-two diagnostics-grid">
           <article class="card diagnostic-card">
             <div class="section-row">
-              <h2>Диагностика системы</h2>
-              <div id="system-backend-badge" class="pill">backend: —</div>
+              <h2>Р”РёР°РіРЅРѕСЃС‚РёРєР° СЃРёСЃС‚РµРјС‹</h2>
+              <div id="system-backend-badge" class="pill">backend: вЂ”</div>
             </div>
             <div class="diagnostic-list">
               <div class="diagnostic-row">
-                <span>Версия</span>
-                <strong id="diag-version">—</strong>
+                <span>Р’РµСЂСЃРёСЏ</span>
+                <strong id="diag-version">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
-                <span>Последнее обновление панели</span>
-                <strong id="diag-refreshed-at">—</strong>
+                <span>РџРѕСЃР»РµРґРЅРµРµ РѕР±РЅРѕРІР»РµРЅРёРµ РїР°РЅРµР»Рё</span>
+                <strong id="diag-refreshed-at">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
-                <span>Время сервера</span>
-                <strong id="diag-server-time">—</strong>
+                <span>Р’СЂРµРјСЏ СЃРµСЂРІРµСЂР°</span>
+                <strong id="diag-server-time">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
-                <span>Последняя активность участника</span>
-                <strong id="diag-last-activity">—</strong>
+                <span>РџРѕСЃР»РµРґРЅСЏСЏ Р°РєС‚РёРІРЅРѕСЃС‚СЊ СѓС‡Р°СЃС‚РЅРёРєР°</span>
+                <strong id="diag-last-activity">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
-                <span>Состояние панели</span>
-                <strong id="diag-panel-state">—</strong>
+                <span>РЎРѕСЃС‚РѕСЏРЅРёРµ РїР°РЅРµР»Рё</span>
+                <strong id="diag-panel-state">вЂ”</strong>
               </div>
             </div>
           </article>
           <article class="card diagnostic-card">
             <div class="section-row">
-              <h2>Состояние интеграций</h2>
-              <div id="system-disk-badge" class="pill">Яндекс Диск: —</div>
+              <h2>РЎРѕСЃС‚РѕСЏРЅРёРµ РёРЅС‚РµРіСЂР°С†РёР№</h2>
+              <div id="system-disk-badge" class="pill">РЇРЅРґРµРєСЃ Р”РёСЃРє: вЂ”</div>
             </div>
             <div class="diagnostic-list">
               <div class="diagnostic-row">
-                <span>Активные попытки</span>
-                <strong id="diag-active-attempts">—</strong>
+                <span>РђРєС‚РёРІРЅС‹Рµ РїРѕРїС‹С‚РєРё</span>
+                <strong id="diag-active-attempts">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
-                <span>Ошибки API</span>
-                <strong id="diag-api-errors">—</strong>
+                <span>РћС€РёР±РєРё API</span>
+                <strong id="diag-api-errors">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
-                <span>Последняя ошибка API</span>
-                <strong id="diag-last-api-error">—</strong>
+                <span>РџРѕСЃР»РµРґРЅСЏСЏ РѕС€РёР±РєР° API</span>
+                <strong id="diag-last-api-error">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
-                <span>Папка выгрузки</span>
-                <strong id="diag-disk-folder">—</strong>
+                <span>РџР°РїРєР° РІС‹РіСЂСѓР·РєРё</span>
+                <strong id="diag-disk-folder">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
-                <span>Режим обновления</span>
-                <strong id="diag-refresh-mode">—</strong>
+                <span>Р РµР¶РёРј РѕР±РЅРѕРІР»РµРЅРёСЏ</span>
+                <strong id="diag-refresh-mode">вЂ”</strong>
               </div>
             </div>
           </article>
@@ -135,76 +135,76 @@
 
         <section class="card">
           <div class="section-row">
-            <h2>Фильтры и поиск</h2>
-            <div id="attempts-filter-meta" class="pill">Показано 0 из 0</div>
+            <h2>Р¤РёР»СЊС‚СЂС‹ Рё РїРѕРёСЃРє</h2>
+            <div id="attempts-filter-meta" class="pill">РџРѕРєР°Р·Р°РЅРѕ 0 РёР· 0</div>
           </div>
           <div class="filters-grid">
             <label class="field">
-              <span>Поиск по участнику</span>
-              <input id="filter-search" type="search" placeholder="ФИО, учреждение, группа" />
+              <span>РџРѕРёСЃРє РїРѕ СѓС‡Р°СЃС‚РЅРёРєСѓ</span>
+              <input id="filter-search" type="search" placeholder="Р¤РРћ, СѓС‡СЂРµР¶РґРµРЅРёРµ, РіСЂСѓРїРїР°" />
             </label>
             <label class="field">
-              <span>Учреждение</span>
+              <span>РЈС‡СЂРµР¶РґРµРЅРёРµ</span>
               <select id="filter-institution">
-                <option value="">Все учреждения</option>
+                <option value="">Р’СЃРµ СѓС‡СЂРµР¶РґРµРЅРёСЏ</option>
               </select>
             </label>
             <label class="field">
-              <span>Группа</span>
+              <span>Р“СЂСѓРїРїР°</span>
               <select id="filter-group">
-                <option value="">Все группы</option>
+                <option value="">Р’СЃРµ РіСЂСѓРїРїС‹</option>
               </select>
             </label>
             <label class="field">
-              <span>Наставник</span>
+              <span>РќР°СЃС‚Р°РІРЅРёРє</span>
               <select id="filter-mentor">
-                <option value="">Все наставники</option>
+                <option value="">Р’СЃРµ РЅР°СЃС‚Р°РІРЅРёРєРё</option>
               </select>
             </label>
             <label class="field">
-              <span>Статус</span>
+              <span>РЎС‚Р°С‚СѓСЃ</span>
               <select id="filter-status">
-                <option value="">Все статусы</option>
+                <option value="">Р’СЃРµ СЃС‚Р°С‚СѓСЃС‹</option>
               </select>
             </label>
             <label class="field">
-              <span>Дата с</span>
+              <span>Р”Р°С‚Р° СЃ</span>
               <input id="filter-date-from" type="date" />
             </label>
             <label class="field">
-              <span>Дата по</span>
+              <span>Р”Р°С‚Р° РїРѕ</span>
               <input id="filter-date-to" type="date" />
             </label>
             <div class="filter-actions">
-              <button id="filter-reset" class="button secondary" type="button">Сбросить фильтры</button>
+              <button id="filter-reset" class="button secondary" type="button">РЎР±СЂРѕСЃРёС‚СЊ С„РёР»СЊС‚СЂС‹</button>
             </div>
           </div>
         </section>
 
         <section class="grid-two analytics-grid">
           <section class="card">
-            <h2>Аналитика по турам</h2>
+            <h2>РђРЅР°Р»РёС‚РёРєР° РїРѕ С‚СѓСЂР°Рј</h2>
             <div id="tour-analytics-grid" class="analytics-cards">
-              <div class="muted">Данные пока не загружены.</div>
+              <div class="muted">Р”Р°РЅРЅС‹Рµ РїРѕРєР° РЅРµ Р·Р°РіСЂСѓР¶РµРЅС‹.</div>
             </div>
           </section>
 
           <section class="card">
-            <h2>Сводка по учреждениям</h2>
+            <h2>РЎРІРѕРґРєР° РїРѕ СѓС‡СЂРµР¶РґРµРЅРёСЏРј</h2>
             <div class="table-wrap compact-table">
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Учреждение</th>
-                    <th>Участники</th>
-                    <th>Попытки</th>
-                    <th>Завершено</th>
-                    <th>Средний балл</th>
+                    <th>РЈС‡СЂРµР¶РґРµРЅРёРµ</th>
+                    <th>РЈС‡Р°СЃС‚РЅРёРєРё</th>
+                    <th>РџРѕРїС‹С‚РєРё</th>
+                    <th>Р—Р°РІРµСЂС€РµРЅРѕ</th>
+                    <th>РЎСЂРµРґРЅРёР№ Р±Р°Р»Р»</th>
                   </tr>
                 </thead>
                 <tbody id="institution-analytics-body">
                   <tr>
-                    <td colspan="5" class="muted">Данные пока не загружены.</td>
+                    <td colspan="5" class="muted">Р”Р°РЅРЅС‹Рµ РїРѕРєР° РЅРµ Р·Р°РіСЂСѓР¶РµРЅС‹.</td>
                   </tr>
                 </tbody>
               </table>
@@ -214,22 +214,22 @@
 
         <section class="card">
           <div class="section-row">
-            <h2>Журнал подозрительных ситуаций</h2>
-            <div id="suspicious-meta" class="pill">Сигналов: 0</div>
+            <h2>Р–СѓСЂРЅР°Р» РїРѕРґРѕР·СЂРёС‚РµР»СЊРЅС‹С… СЃРёС‚СѓР°С†РёР№</h2>
+            <div id="suspicious-meta" class="pill">РЎРёРіРЅР°Р»РѕРІ: 0</div>
           </div>
           <div id="suspicious-attempts-body" class="suspicious-list">
-            <div class="muted">Подозрительных попыток пока не обнаружено.</div>
+            <div class="muted">РџРѕРґРѕР·СЂРёС‚РµР»СЊРЅС‹С… РїРѕРїС‹С‚РѕРє РїРѕРєР° РЅРµ РѕР±РЅР°СЂСѓР¶РµРЅРѕ.</div>
           </div>
         </section>
 
         <section class="grid-two">
           <section id="admin-rating-section" class="card">
             <div class="section-row">
-              <h2>Рейтинг участников</h2>
+              <h2>Р РµР№С‚РёРЅРі СѓС‡Р°СЃС‚РЅРёРєРѕРІ</h2>
               <div class="actions inline">
-                <button id="export-csv" class="button secondary">Экспорт CSV</button>
-                <button id="export-json" class="button secondary">Резерв JSON</button>
-                <button id="upload-disk" class="button primary">Выгрузить на Яндекс Диск</button>
+                <button id="export-csv" class="button secondary">Р­РєСЃРїРѕСЂС‚ CSV</button>
+                <button id="export-json" class="button secondary">Р РµР·РµСЂРІ JSON</button>
+                <button id="upload-disk" class="button primary">Р’С‹РіСЂСѓР·РёС‚СЊ РЅР° РЇРЅРґРµРєСЃ Р”РёСЃРє</button>
               </div>
             </div>
             <div id="export-message" class="message hidden"></div>
@@ -237,11 +237,11 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Место</th>
-                    <th>Участник</th>
-                    <th>Группа</th>
-                    <th>Статус</th>
-                    <th>Балл</th>
+                    <th>РњРµСЃС‚Рѕ</th>
+                    <th>РЈС‡Р°СЃС‚РЅРёРє</th>
+                    <th>Р“СЂСѓРїРїР°</th>
+                    <th>РЎС‚Р°С‚СѓСЃ</th>
+                    <th>Р‘Р°Р»Р»</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -251,22 +251,22 @@
           </section>
 
           <section id="admin-detail-section" class="card">
-            <h2>Карточка попытки</h2>
-            <div id="attempt-detail" class="muted">Выберите участника из таблицы слева.</div>
+            <h2>РљР°СЂС‚РѕС‡РєР° РїРѕРїС‹С‚РєРё</h2>
+            <div id="attempt-detail" class="muted">Р’С‹Р±РµСЂРёС‚Рµ СѓС‡Р°СЃС‚РЅРёРєР° РёР· С‚Р°Р±Р»РёС†С‹ СЃР»РµРІР°.</div>
           </section>
         </section>
       </section>
 
       <footer class="footer-note">
-        <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
+        <span>Р“Р‘РџРћРЈ "Р“РѕСЂР»РѕРІСЃРєРёР№ РєРѕР»Р»РµРґР¶ С‚РµС…РЅРѕР»РѕРіРёР№ Рё СЃРµСЂРІРёСЃР°"</span>
         <small>
-          Разработчик: Постовит Дмитрий Александрович, преподаватель первой категории, профильных
-          дисциплин, реализуемых в рамках образовательной программы ГБПОУ "Горловский колледж
-          технологий и сервиса". • Версия <span id="admin-app-version-label">1.6.11</span>
+          Р Р°Р·СЂР°Р±РѕС‚С‡РёРє: РџРѕСЃС‚РѕРІРёС‚ Р”РјРёС‚СЂРёР№ РђР»РµРєСЃР°РЅРґСЂРѕРІРёС‡, РїСЂРµРїРѕРґР°РІР°С‚РµР»СЊ РїРµСЂРІРѕР№ РєР°С‚РµРіРѕСЂРёРё, РїСЂРѕС„РёР»СЊРЅС‹С…
+          РґРёСЃС†РёРїР»РёРЅ, СЂРµР°Р»РёР·СѓРµРјС‹С… РІ СЂР°РјРєР°С… РѕР±СЂР°Р·РѕРІР°С‚РµР»СЊРЅРѕР№ РїСЂРѕРіСЂР°РјРјС‹ Р“Р‘РџРћРЈ "Р“РѕСЂР»РѕРІСЃРєРёР№ РєРѕР»Р»РµРґР¶
+          С‚РµС…РЅРѕР»РѕРіРёР№ Рё СЃРµСЂРІРёСЃР°". вЂў Р’РµСЂСЃРёСЏ <span id="admin-app-version-label">1.6.12</span>
         </small>
       </footer>
     </main>
 
-    <script src="/admin.js?v=1.6.11"></script>
+    <script src="/admin.js?v=1.6.12"></script>
   </body>
 </html>

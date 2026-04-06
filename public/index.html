@@ -7,10 +7,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Национальные кухни мира</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.11" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.12" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.11" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.12" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -49,6 +49,12 @@
             <h1 id="hero-title">Национальные кухни мира</h1>
             <p id="hero-subtitle" class="lead"></p>
             <div id="hero-format-badge" class="game-badge hero-format-badge">Индивидуальная цифровая олимпиада • 45 минут • 5 туров</div>
+            <div class="hero-quick-row" aria-label="Короткие характеристики олимпиады">
+              <span class="hero-quick-pill">Автовариант</span>
+              <span class="hero-quick-pill">Один вопрос на экране</span>
+              <span class="hero-quick-pill">Автопроверка</span>
+              <span class="hero-quick-pill">Сохранение в облаке</span>
+            </div>
             <div class="hero-feature-grid" aria-label="Ключевые возможности платформы">
               <article class="hero-feature-card">
                 <span class="hero-feature-icon" aria-hidden="true">
@@ -59,7 +65,7 @@
                 </span>
                 <div>
                   <strong>Индивидуальный вариант</strong>
-                  <span>Система автоматически формирует для каждого участника персональный маршрут заданий.</span>
+                  <span>Система формирует персональный маршрут заданий для каждого участника.</span>
                 </div>
               </article>
               <article class="hero-feature-card">
@@ -71,7 +77,7 @@
                 </span>
                 <div>
                   <strong>Пошаговое прохождение</strong>
-                  <span>На экране всегда только один вопрос, а система фиксирует темп и прогресс по каждому туру.</span>
+                  <span>На экране только один вопрос, а прогресс фиксируется по каждому туру.</span>
                 </div>
               </article>
               <article class="hero-feature-card">
@@ -83,7 +89,7 @@
                 </span>
                 <div>
                   <strong>Автопроверка</strong>
-                  <span>Все ответы обрабатываются автоматически, без ручной экспертной оценки и задержек.</span>
+                  <span>Ответы проверяются автоматически, без ручной экспертной оценки и задержек.</span>
                 </div>
               </article>
               <article class="hero-feature-card">
@@ -95,7 +101,7 @@
                 </span>
                 <div>
                   <strong>Результаты в облаке</strong>
-                  <span>Ответы сохраняются централизованно и сразу доступны организатору в панели управления.</span>
+                  <span>Результаты сохраняются централизованно и доступны организатору в панели управления.</span>
                 </div>
               </article>
             </div>
@@ -160,6 +166,7 @@
       <section class="grid-two" id="prestart-section">
         <section class="card">
           <h2>Регистрация участника</h2>
+          <p class="section-intro">Заполните данные участника перед стартом. После сохранения система откроет подтверждение готовности и запуск маршрута.</p>
           <form id="registration-form" class="form-stack">
             <label class="field">
               <span>ФИО участника</span>
@@ -198,6 +205,7 @@
 
         <section class="card">
           <h2>Правила прохождения</h2>
+          <p class="section-intro">Перед запуском проверьте правила прохождения. После старта олимпиада работает в пошаговом экзаменационном режиме.</p>
           <ul id="rules-list" class="flat-list"></ul>
           <div class="start-disclaimer">
             <label class="consent-check">
@@ -211,7 +219,7 @@
               Сохраните данные участника. Подтвердите готовность работать 45 минут без отвлечений.
             </small>
           </div>
-          <div class="actions">
+          <div class="actions prestart-actions">
             <button id="start-attempt" class="button primary" disabled>Начать олимпиаду</button>
             <a class="button secondary" href="/admin.html">Панель организатора</a>
           </div>
@@ -332,7 +340,7 @@
         <small>
           Разработчик: Постовит Дмитрий Александрович, преподаватель первой категории, профильных
           дисциплин, реализуемых в рамках образовательной программы ГБПОУ "Горловский колледж
-          технологий и сервиса". • Версия <span id="app-version-label">1.6.11</span>
+          технологий и сервиса". • Версия <span id="app-version-label">1.6.12</span>
         </small>
       </footer>
     </main>
@@ -355,6 +363,6 @@
       </section>
     </div>
 
-    <script src="/app.js?v=1.6.11"></script>
+    <script src="/app.js?v=1.6.12"></script>
   </body>
 </html>
