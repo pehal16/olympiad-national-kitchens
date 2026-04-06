@@ -86,7 +86,7 @@ function setNavDrawerOpen(open) {
   }
   if (elements.navMenuToggle) {
     elements.navMenuToggle.setAttribute("aria-expanded", nextState ? "true" : "false");
-    elements.navMenuToggle.textContent = nextState ? "Закрыть меню" : "Меню";
+    elements.navMenuToggle.textContent = nextState ? " " : "";
   }
 }
 
@@ -108,7 +108,7 @@ async function adminApi(path, options = {}) {
       ...options
     });
   } catch (error) {
-    const networkError = new Error("Не удалось связаться с сервером админки.");
+    const networkError = new Error("     .");
     networkError.status = 0;
     networkError.cause = error;
     throw networkError;
@@ -121,7 +121,7 @@ async function adminApi(path, options = {}) {
     try {
       data = JSON.parse(raw);
     } catch (error) {
-      const parseError = new Error(`Сервер вернул некорректный ответ (${response.status}).`);
+      const parseError = new Error(`    (${response.status}).`);
       parseError.status = response.status;
       parseError.cause = error;
       throw parseError;
@@ -130,7 +130,7 @@ async function adminApi(path, options = {}) {
 
   if (!response.ok || data.ok === false) {
     const requestError = new Error(
-      data.message || `Ошибка запроса (${response.status || "без кода"}).`
+      data.message || `  (${response.status || " "}).`
     );
     requestError.status = response.status;
     requestError.payload = data;
@@ -152,12 +152,12 @@ function hideMessage(element) {
 
 function formatDateTime(value) {
   if (!value) {
-    return "—";
+    return "";
   }
 
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "—";
+    return "";
   }
 
   return new Intl.DateTimeFormat("ru-RU", {
@@ -172,11 +172,11 @@ function formatDateTime(value) {
 
 function formatDurationMs(value) {
   if (!Number.isFinite(value) || value <= 0) {
-    return "—";
+    return "";
   }
 
   if (value < 1000) {
-    return `${value} мс`;
+    return `${value} `;
   }
 
   const totalSeconds = Math.round(value / 1000);
@@ -184,22 +184,22 @@ function formatDurationMs(value) {
   const seconds = totalSeconds % 60;
 
   if (!minutes) {
-    return `${seconds} с`;
+    return `${seconds} `;
   }
 
-  return `${minutes} м ${seconds.toString().padStart(2, "0")} с`;
+  return `${minutes}  ${seconds.toString().padStart(2, "0")} `;
 }
 
 function formatAdminError(error) {
   if (!error) {
-    return "Ошибка запроса.";
+    return " .";
   }
 
   if (Number(error.status) === 0) {
-    return "Нет соединения с сервером админки.";
+    return "    .";
   }
 
-  return error.message || "Ошибка запроса.";
+  return error.message || " .";
 }
 
 function setDiagnosticStatus(element, text, tone = "active") {
@@ -213,8 +213,8 @@ function setDiagnosticStatus(element, text, tone = "active") {
 
 function getRefreshModeLabel() {
   return adminState.lastRefreshMode === "auto"
-    ? `Автообновление • каждые ${Math.round(PANEL_REFRESH_MS / 1000)} сек`
-    : "Ручное обновление";
+    ? `   ${Math.round(PANEL_REFRESH_MS / 1000)} `
+    : " ";
 }
 
 function setPanelStatus(status, message = "") {
@@ -222,18 +222,34 @@ function setPanelStatus(status, message = "") {
 
   if (elements.diagPanelState) {
     if (status === "refreshing") {
-      setDiagnosticStatus(elements.diagPanelState, message || "идет синхронизация", "active");
+      setDiagnosticStatus(elements.diagPanelState, message || " ", "active");
     } else if (status === "ready") {
-      setDiagnosticStatus(elements.diagPanelState, message || "панель готова", "ready");
+      setDiagnosticStatus(elements.diagPanelState, message || " ", "ready");
     } else if (status === "error") {
-      setDiagnosticStatus(elements.diagPanelState, message || "есть ошибка", "error");
+      setDiagnosticStatus(elements.diagPanelState, message || " ", "error");
     } else {
-      setDiagnosticStatus(elements.diagPanelState, message || "ожидание", "warning");
+      setDiagnosticStatus(elements.diagPanelState, message || "", "warning");
     }
   }
 
   if (elements.diagRefreshMode) {
     elements.diagRefreshMode.textContent = getRefreshModeLabel();
+  }
+}
+
+async function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) {
+    return;
+  }
+
+  try {
+    await navigator.serviceWorker.register("/sw.js?v=1.6.14");
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (registration) {
+      registration.update().catch(() => {});
+    }
+  } catch (error) {
+    // Admin panel stays functional even without service worker support.
   }
 }
 
@@ -318,7 +334,7 @@ function resetAdminSession(message = "") {
   adminState.filteredAttempts = [];
   elements.panel.classList.add("hidden");
   elements.loginCard.classList.remove("hidden");
-  setPanelStatus("warning", "ожидание входа");
+  setPanelStatus("warning", " ");
 
   if (message) {
     showMessage(elements.loginMessage, message, "error");
@@ -336,7 +352,7 @@ async function ensureAdminSession() {
   const data = raw ? JSON.parse(raw) : {};
 
   if (!response.ok || data.ok === false) {
-    const error = new Error(data.message || `Ошибка проверки сессии (${response.status}).`);
+    const error = new Error(data.message || `   (${response.status}).`);
     error.status = response.status;
     throw error;
   }
@@ -401,7 +417,7 @@ function updateFilterMeta(total, shown) {
   if (!elements.filterMeta) {
     return;
   }
-  elements.filterMeta.textContent = `Показано ${shown} из ${total}`;
+  elements.filterMeta.textContent = ` ${shown}  ${total}`;
 }
 
 function toDateOnly(value) {
@@ -461,10 +477,10 @@ function populateFilterControls() {
     ? catalogs.statuses
     : uniqueSorted(attempts.map((attempt) => attempt.status));
 
-  fillSelectOptions(elements.filterInstitution, "Все учреждения", institutions, filters.institution);
-  fillSelectOptions(elements.filterGroup, "Все группы", groups, filters.group);
-  fillSelectOptions(elements.filterMentor, "Все наставники", mentors, filters.mentor);
-  fillSelectOptions(elements.filterStatus, "Все статусы", statuses, filters.status);
+  fillSelectOptions(elements.filterInstitution, " ", institutions, filters.institution);
+  fillSelectOptions(elements.filterGroup, " ", groups, filters.group);
+  fillSelectOptions(elements.filterMentor, " ", mentors, filters.mentor);
+  fillSelectOptions(elements.filterStatus, " ", statuses, filters.status);
 
   if (elements.filterDateFrom) {
     elements.filterDateFrom.min = catalogs.startedDateMin || "";
@@ -511,7 +527,7 @@ function renderAttempts(attempts) {
 
   if (!attempts.length) {
     const row = document.createElement("tr");
-    row.innerHTML = '<td colspan="6" class="muted">По текущим фильтрам попыток не найдено.</td>';
+    row.innerHTML = '<td colspan="6" class="muted">     .</td>';
     elements.attemptsBody.appendChild(row);
     updateFilterMeta(adminState.attempts.length, 0);
     return;
@@ -523,11 +539,11 @@ function renderAttempts(attempts) {
     row.tabIndex = 0;
     row.innerHTML = `
       <td>${attempt.rank}</td>
-      <td>${escapeHtml(attempt.fullName)}<br /><span class="muted">${escapeHtml(attempt.institution || "—")}</span></td>
-      <td>${escapeHtml(attempt.groupName || "—")}<br /><span class="muted">${escapeHtml(attempt.mentorName || "Наставник не указан")}</span></td>
+      <td>${escapeHtml(attempt.fullName)}<br /><span class="muted">${escapeHtml(attempt.institution || "")}</span></td>
+      <td>${escapeHtml(attempt.groupName || "")}<br /><span class="muted">${escapeHtml(attempt.mentorName || "  ")}</span></td>
       <td>${escapeHtml(attempt.status)}</td>
-      <td>${attempt.totalFinalScore ?? "скрыто"}</td>
-      <td><button class="button secondary" data-attempt="${attempt.id}">Открыть</button></td>
+      <td>${attempt.totalFinalScore ?? ""}</td>
+      <td><button class="button secondary" data-attempt="${attempt.id}"></button></td>
     `;
     if (attempt.id === adminState.selectedAttemptId) {
       row.classList.add("is-selected");
@@ -575,7 +591,7 @@ function renderTourAnalytics(items = []) {
   elements.tourAnalyticsGrid.innerHTML = "";
 
   if (!items.length) {
-    elements.tourAnalyticsGrid.innerHTML = '<div class="muted">Данные по турам пока отсутствуют.</div>';
+    elements.tourAnalyticsGrid.innerHTML = '<div class="muted">    .</div>';
     return;
   }
 
@@ -589,8 +605,8 @@ function renderTourAnalytics(items = []) {
       </div>
       <div>${escapeHtml(tour.title)}</div>
       <div class="analytics-meta">
-        <span>Завершённых попыток: ${tour.attempts}</span>
-        <span>Покрытие: ${tour.completionRate}%</span>
+        <span> : ${tour.attempts}</span>
+        <span>: ${tour.completionRate}%</span>
       </div>
     `;
     elements.tourAnalyticsGrid.appendChild(card);
@@ -606,7 +622,7 @@ function renderInstitutionAnalytics(items = []) {
 
   if (!items.length) {
     const row = document.createElement("tr");
-    row.innerHTML = '<td colspan="5" class="muted">Сводка по учреждениям пока недоступна.</td>';
+    row.innerHTML = '<td colspan="5" class="muted">    .</td>';
     elements.institutionAnalyticsBody.appendChild(row);
     return;
   }
@@ -629,12 +645,12 @@ function renderSuspiciousAttempts(items = []) {
     return;
   }
 
-  elements.suspiciousMeta.textContent = `Сигналов: ${items.length}`;
+  elements.suspiciousMeta.textContent = `: ${items.length}`;
   elements.suspiciousAttemptsBody.innerHTML = "";
 
   if (!items.length) {
     elements.suspiciousAttemptsBody.innerHTML =
-      '<div class="muted">Подозрительных попыток пока не обнаружено.</div>';
+      '<div class="muted">    .</div>';
     return;
   }
 
@@ -647,15 +663,15 @@ function renderSuspiciousAttempts(items = []) {
 
     card.innerHTML = `
       <div class="section-row">
-        <strong>${escapeHtml(entry.participant?.fullName || "Без имени")}</strong>
-        <span class="pill">уровень ${entry.severity}</span>
+        <strong>${escapeHtml(entry.participant?.fullName || " ")}</strong>
+        <span class="pill"> ${entry.severity}</span>
       </div>
-      <div class="muted">${escapeHtml(entry.participant?.institution || "Учреждение не указано")} • ${escapeHtml(entry.participant?.groupName || "Группа не указана")}</div>
+      <div class="muted">${escapeHtml(entry.participant?.institution || "  ")}  ${escapeHtml(entry.participant?.groupName || "  ")}</div>
       <div class="analytics-meta">
-        <span>Статус: ${escapeHtml(entry.status)}</span>
-        <span>Ответов: ${entry.answeredCount} / ${entry.totalQuestions}</span>
-        <span>Среднее время: ${formatDurationMs(entry.averageTimeMs)}</span>
-        <span>Последняя активность: ${formatDateTime(entry.lastActivityAt)}</span>
+        <span>: ${escapeHtml(entry.status)}</span>
+        <span>: ${entry.answeredCount} / ${entry.totalQuestions}</span>
+        <span> : ${formatDurationMs(entry.averageTimeMs)}</span>
+        <span> : ${formatDateTime(entry.lastActivityAt)}</span>
       </div>
       <ul class="flat-list suspicious-signals">${signals}</ul>
     `;
@@ -665,14 +681,14 @@ function renderSuspiciousAttempts(items = []) {
 
 function formatAnswer(question, answer) {
   if (!answer || !answer.answerPayload) {
-    return "Ответ не сохранён";
+    return "  ";
   }
 
   const itemMap = mapById(question.items);
   const optionMap = mapById(question.options);
 
   if (question.type === "single_choice") {
-    return optionMap.get(answer.answerPayload.selectedOptionId)?.text || "Нет выбора";
+    return optionMap.get(answer.answerPayload.selectedOptionId)?.text || " ";
   }
 
   if (question.type === "sequence_drag") {
@@ -682,7 +698,7 @@ function formatAnswer(question, answer) {
     return (question.slots || [])
       .map((slot, index) => {
         const item = itemMap.get(sequence[index]);
-        return `${slot.label}: ${item ? item.text : "—"}`;
+        return `${slot.label}: ${item ? item.text : ""}`;
       })
       .join("\n");
   }
@@ -694,7 +710,7 @@ function formatAnswer(question, answer) {
         const values = (question.items || [])
           .filter((item) => buckets[item.id] === bucket.id)
           .map((item) => item.text);
-        return `${bucket.label}: ${values.length ? values.join(", ") : "—"}`;
+        return `${bucket.label}: ${values.length ? values.join(", ") : ""}`;
       })
       .join("\n");
   }
@@ -712,20 +728,20 @@ function renderSummary(summary) {
   elements.uploadDisk.disabled = !diskEnabled;
   elements.uploadDisk.title = diskEnabled
     ? ""
-    : "Выгрузка на Яндекс Диск недоступна: интеграция ещё не настроена.";
+    : "    :    .";
 
   adminState.lastRefreshedAt = new Date();
   const diagnostics = summary.diagnostics || {};
   const capabilities = summary.capabilities || {};
 
   if (elements.backendBadge) {
-    elements.backendBadge.textContent = `backend: ${capabilities.storageBackend || diagnostics.storageBackend || "—"}`;
+    elements.backendBadge.textContent = `backend: ${capabilities.storageBackend || diagnostics.storageBackend || ""}`;
   }
   if (elements.diskBadge) {
-    elements.diskBadge.textContent = diskEnabled ? "Яндекс Диск: включён" : "Яндекс Диск: выключен";
+    elements.diskBadge.textContent = diskEnabled ? " : " : " : ";
   }
   if (elements.diagVersion) {
-    elements.diagVersion.textContent = diagnostics.appVersion || "—";
+    elements.diagVersion.textContent = diagnostics.appVersion || "";
   }
   if (elements.diagRefreshedAt) {
     elements.diagRefreshedAt.textContent = formatDateTime(adminState.lastRefreshedAt);
@@ -737,7 +753,7 @@ function renderSummary(summary) {
     elements.diagLastActivity.textContent = formatDateTime(diagnostics.lastActivityAt);
   }
   if (elements.diagActiveAttempts) {
-    elements.diagActiveAttempts.textContent = String(summary.counts.activeAttempts ?? "—");
+    elements.diagActiveAttempts.textContent = String(summary.counts.activeAttempts ?? "");
   }
   if (elements.diagApiErrors) {
     elements.diagApiErrors.textContent = String(diagnostics.apiErrors ?? 0);
@@ -745,10 +761,10 @@ function renderSummary(summary) {
   if (elements.diagLastApiError) {
     elements.diagLastApiError.textContent = diagnostics.lastApiErrorMessage
       ? `${diagnostics.lastApiErrorMessage}${diagnostics.lastApiErrorRoute ? ` (${diagnostics.lastApiErrorRoute})` : ""}`
-      : "Ошибок не зафиксировано";
+      : "  ";
   }
   if (elements.diagDiskFolder) {
-    elements.diagDiskFolder.textContent = capabilities.yandexDiskFolder || "—";
+    elements.diagDiskFolder.textContent = capabilities.yandexDiskFolder || "";
   }
   if (elements.diagRefreshMode) {
     elements.diagRefreshMode.textContent = getRefreshModeLabel();
@@ -757,7 +773,7 @@ function renderSummary(summary) {
   renderTourAnalytics(summary.tourAnalytics || []);
   renderInstitutionAnalytics(summary.institutionAnalytics || []);
   renderSuspiciousAttempts(summary.suspiciousAttempts || []);
-  setPanelStatus("ready", "панель синхронизирована");
+  setPanelStatus("ready", " ");
 }
 
 async function loadSummary() {
@@ -786,11 +802,11 @@ async function loadAttemptDetail(attemptId, options = {}) {
   top.className = "detail-card";
   top.innerHTML = `
     <strong>${escapeHtml(data.attempt.participant.fullName)}</strong><br />
-    <span class="muted">${escapeHtml(data.attempt.participant.institution)} • ${escapeHtml(data.attempt.participant.groupName)}</span><br />
-    <span class="muted">${escapeHtml(data.attempt.participant.mentorName || "Наставник не указан")}</span><br />
-    <span class="muted">Статус: ${escapeHtml(data.attempt.status)}</span><br />
-    <span class="muted">Итог: ${summary.totalFinalScore} / ${summary.totalMaxScore}</span><br />
-    <span class="muted">Выданные задания: ${escapeHtml((data.attempt.variantMeta.issuedQuestionIds || []).join(", "))}</span>
+    <span class="muted">${escapeHtml(data.attempt.participant.institution)}  ${escapeHtml(data.attempt.participant.groupName)}</span><br />
+    <span class="muted">${escapeHtml(data.attempt.participant.mentorName || "  ")}</span><br />
+    <span class="muted">: ${escapeHtml(data.attempt.status)}</span><br />
+    <span class="muted">: ${summary.totalFinalScore} / ${summary.totalMaxScore}</span><br />
+    <span class="muted"> : ${escapeHtml((data.attempt.variantMeta.issuedQuestionIds || []).join(", "))}</span>
   `;
   detail.appendChild(top);
 
@@ -798,21 +814,21 @@ async function loadAttemptDetail(attemptId, options = {}) {
     const card = document.createElement("section");
     card.className = "detail-card";
     card.innerHTML = `
-      <h3>${escapeHtml(tour.code)} • ${escapeHtml(tour.title)}</h3>
-      <p class="muted">${tour.questionCount} вопросов • лимит ${tour.timeLimitMinutes} мин • результат ${tour.score ? `${tour.score.finalScore} / ${tour.score.maxScore}` : "0 / 0"}</p>
+      <h3>${escapeHtml(tour.code)}  ${escapeHtml(tour.title)}</h3>
+      <p class="muted">${tour.questionCount}    ${tour.timeLimitMinutes}    ${tour.score ? `${tour.score.finalScore} / ${tour.score.maxScore}` : "0 / 0"}</p>
     `;
 
     tour.questions.forEach((question) => {
       const box = document.createElement("div");
       box.className = "review-box";
       box.innerHTML = `
-        <div><strong>${escapeHtml(question.sourceId)}</strong> • ${escapeHtml(question.prompt)}</div>
+        <div><strong>${escapeHtml(question.sourceId)}</strong>  ${escapeHtml(question.prompt)}</div>
         ${question.caseTitle ? `<div class="message">${escapeHtml(question.caseTitle)}</div>` : ""}
         ${question.scenario ? `<div class="muted">${escapeHtml(question.scenario)}</div>` : ""}
-        <div class="muted">Ответ участника:<pre>${escapeHtml(formatAnswer(question, question.answer))}</pre></div>
-        <div class="muted">Правильный ответ:<pre>${escapeHtml(question.correctAnswer || "—")}</pre></div>
-        <div class="muted">Баллы: ${question.answer ? question.answer.finalScore : 0} / ${question.maxScore}</div>
-        <div class="muted">Время на вопрос: ${question.log && question.log.timeSpentMs ? `${question.log.timeSpentMs} мс` : "нет данных"}</div>
+        <div class="muted"> :<pre>${escapeHtml(formatAnswer(question, question.answer))}</pre></div>
+        <div class="muted"> :<pre>${escapeHtml(question.correctAnswer || "")}</pre></div>
+        <div class="muted">: ${question.answer ? question.answer.finalScore : 0} / ${question.maxScore}</div>
+        <div class="muted">  : ${question.log && question.log.timeSpentMs ? `${question.log.timeSpentMs} ` : " "}</div>
       `;
       card.appendChild(box);
     });
@@ -838,7 +854,7 @@ async function refreshPanel(options = {}) {
 
   adminState.lastRefreshMode = silent ? "auto" : "manual";
   adminState.refreshInFlight = true;
-  setPanelStatus("refreshing", silent ? "фоновое обновление" : "ручная синхронизация");
+  setPanelStatus("refreshing", silent ? " " : " ");
   const selectedAttemptId = adminState.selectedAttemptId;
 
   try {
@@ -851,10 +867,10 @@ async function refreshPanel(options = {}) {
   } catch (error) {
     if (silent) {
       if (error.status === 401 || error.status === 403) {
-        resetAdminSession("Сеанс администратора завершён. Войдите повторно.");
+        resetAdminSession("  .  .");
       } else {
         setPanelStatus("error", formatAdminError(error));
-        showMessage(elements.exportMessage, `Автообновление: ${formatAdminError(error)}`, "warning");
+        showMessage(elements.exportMessage, `: ${formatAdminError(error)}`, "warning");
       }
       return;
     }
@@ -878,7 +894,7 @@ async function handleLogin(event) {
     const data = await response.json();
 
     if (!response.ok || !data.ok) {
-      throw new Error(data.message || "Ошибка входа");
+      throw new Error(data.message || " ");
     }
 
     adminState.token = "";
@@ -897,7 +913,7 @@ async function exportFile(kind) {
     const data = await adminApi(`/api/admin/exports/${kind}`, { method: "POST" });
     showMessage(
       elements.exportMessage,
-      `Файл сформирован: ${data.fileName}. Путь: ${data.filePath}`,
+      ` : ${data.fileName}. : ${data.filePath}`,
       "success"
     );
   } catch (error) {
@@ -912,7 +928,7 @@ async function uploadToDisk() {
     const data = await adminApi("/api/admin/disk/upload", { method: "POST" });
     showMessage(
       elements.exportMessage,
-      `Файлы выгружены на Яндекс Диск в папку ${data.folder}.`,
+      `       ${data.folder}.`,
       "success"
     );
   } catch (error) {
@@ -952,8 +968,9 @@ function resetFilters() {
 }
 
 async function init() {
+  await registerServiceWorker();
   await loadPublicVersion();
-  setPanelStatus("warning", "ожидание входа");
+  setPanelStatus("warning", " ");
   if (elements.navMenuToggle) {
     elements.navMenuToggle.addEventListener("click", () => {
       const expanded = elements.navMenuToggle.getAttribute("aria-expanded") === "true";

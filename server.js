@@ -336,6 +336,21 @@ function buildAttemptView(olympiad, attempt, settings) {
   const summary = summarizeAttempt(olympiad, attempt);
   const currentQuestion = getCurrentQuestion(attempt);
   const currentTour = getCurrentTour(attempt);
+  const routeTours = (attempt.variant?.tours || []).map((tour) => ({
+    id: tour.id,
+    code: tour.code,
+    order: tour.order,
+    title: tour.title,
+    description: tour.description,
+    timeLimitMinutes: tour.timeLimitMinutes,
+    maxScore: tour.maxScore,
+    questionCount: tour.questionCount,
+    stepStart: tour.stepStart,
+    stepEnd: tour.stepEnd
+  }));
+  const routeQuestions = (attempt.variant?.questions || []).map((question) =>
+    sanitizeQuestion(question, attempt)
+  );
 
   return {
     id: attempt.id,
@@ -374,6 +389,10 @@ function buildAttemptView(olympiad, attempt, settings) {
             maxScore: tour.maxScore,
             penalty: null
           }))
+    },
+    route: {
+      tours: routeTours,
+      questions: routeQuestions
     }
   };
 }

@@ -9,6 +9,10 @@ const state = {
   timingSnapshot: null,
   syncingAfterTimeout: false,
   syncInFlight: false,
+  pendingAnswerQueue: [],
+  pendingFlushInFlight: false,
+  pendingFlushRetryTimer: null,
+  pendingQueueAttemptId: "",
   isSubmittingAnswer: false,
   isFinishingAttempt: false,
   deferredInstallPrompt: null,
@@ -1040,7 +1044,11 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.6.1");
+    await navigator.serviceWorker.register("/sw.js?v=1.6.14");
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (registration) {
+      registration.update().catch(() => {});
+    }
   } catch (error) {
     // PWA layer is optional; the olympiad keeps working without service worker support.
   }
@@ -1212,6 +1220,152 @@ function clearDraft(questionId) {
     return;
   }
   delete state.localDrafts[questionId];
+}
+
+function cloneClientValue(value) {
+  return globalThis.structuredClone
+    ? globalThis.structuredClone(value)
+    : JSON.parse(JSON.stringify(value));
+}
+
+function pendingQueueStorageKey(attemptId) {
+  return attemptId ? `nko_pending_answers_${attemptId}` : "";
+}
+
+function persistPendingAnswerQueue() {
+  const storageKey = pendingQueueStorageKey(state.pendingQueueAttemptId);
+  if (!storageKey) {
+    return;
+  }
+
+  if (!state.pendingAnswerQueue.length) {
+    localStorage.removeItem(storageKey);
+    return;
+  }
+
+  localStorage.setItem(storageKey, JSON.stringify(state.pendingAnswerQueue));
+}
+
+function loadPendingAnswerQueue(attemptId) {
+  const storageKey = pendingQueueStorageKey(attemptId);
+  if (!storageKey) {
+    return [];
+  }
+
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    localStorage.removeItem(storageKey);
+    return [];
+  }
+}
+
+function setPendingQueueForAttempt(attemptId, queue) {
+  state.pendingQueueAttemptId = attemptId || "";
+  state.pendingAnswerQueue = Array.isArray(queue) ? queue : [];
+  persistPendingAnswerQueue();
+}
+
+function clearPendingAnswerQueue(attemptId = state.pendingQueueAttemptId) {
+  const storageKey = pendingQueueStorageKey(attemptId);
+  if (storageKey) {
+    localStorage.removeItem(storageKey);
+  }
+  if (!attemptId || attemptId === state.pendingQueueAttemptId) {
+    state.pendingQueueAttemptId = attemptId ? "" : state.pendingQueueAttemptId;
+    state.pendingAnswerQueue = [];
+  }
+}
+
+function hasPendingAnswers() {
+  return state.pendingAnswerQueue.length > 0;
+}
+
+function cancelPendingFlushRetry() {
+  if (!state.pendingFlushRetryTimer) {
+    return;
+  }
+  clearTimeout(state.pendingFlushRetryTimer);
+  state.pendingFlushRetryTimer = null;
+}
+
+function schedulePendingFlushRetry() {
+  cancelPendingFlushRetry();
+  state.pendingFlushRetryTimer = setTimeout(() => {
+    state.pendingFlushRetryTimer = null;
+    flushPendingAnswers();
+  }, 2500);
+}
+
+function attachPendingQueue(attempt) {
+  if (!attempt || !attempt.id) {
+    setPendingQueueForAttempt("", []);
+    return;
+  }
+
+  const shouldReloadQueue = state.pendingQueueAttemptId !== attempt.id;
+  if (shouldReloadQueue) {
+    setPendingQueueForAttempt(attempt.id, loadPendingAnswerQueue(attempt.id));
+  }
+
+  if (attempt.status !== "in_progress") {
+    clearPendingAnswerQueue(attempt.id);
+  }
+}
+
+function buildProgressFromRoute(route, nextStepIndex) {
+  const questions = Array.isArray(route?.questions) ? route.questions : [];
+  const tours = Array.isArray(route?.tours) ? route.tours : [];
+  const totalQuestions = questions.length;
+  const safeStepIndex = Math.max(0, Math.min(nextStepIndex, Math.max(0, totalQuestions - 1)));
+  const nextQuestion = questions[safeStepIndex] || null;
+  const nextTour = nextQuestion
+    ? tours.find((tour) => tour.id === nextQuestion.tourId) || null
+    : null;
+  const tourQuestionIndex = nextQuestion ? nextQuestion.sequenceInTour : nextTour?.questionCount || 0;
+  const tourQuestionCount = nextTour?.questionCount || 0;
+
+  return {
+    currentQuestionIndex: nextQuestion ? nextQuestion.globalIndex : totalQuestions,
+    totalQuestions,
+    tourQuestionIndex,
+    tourQuestionCount
+  };
+}
+
+function buildOptimisticAttemptAfterAnswer(attempt, answerPayload) {
+  const route = attempt?.route;
+  const currentQuestion = attempt?.currentQuestion;
+  const currentStepIndex = Number(attempt?.currentStepIndex) || 0;
+  const questions = Array.isArray(route?.questions) ? route.questions : [];
+
+  if (!attempt || !route || !currentQuestion || currentStepIndex >= questions.length - 1) {
+    return null;
+  }
+
+  const optimistic = cloneClientValue(attempt);
+  const optimisticQuestions = optimistic.route?.questions || [];
+  const questionToUpdate = optimisticQuestions.find((question) => question.id === currentQuestion.id);
+  if (questionToUpdate) {
+    questionToUpdate.savedAnswer = answerPayload;
+  }
+
+  const nextStepIndex = currentStepIndex + 1;
+  const nextQuestion = optimisticQuestions[nextStepIndex] || null;
+  const nextTour = nextQuestion
+    ? (optimistic.route?.tours || []).find((tour) => tour.id === nextQuestion.tourId) || null
+    : null;
+
+  optimistic.currentStepIndex = nextStepIndex;
+  optimistic.currentQuestion = nextQuestion;
+  optimistic.currentTour = nextTour;
+  optimistic.progress = buildProgressFromRoute(optimistic.route, nextStepIndex);
+  return optimistic;
 }
 
 function captureCurrentDraft() {
@@ -1991,6 +2145,7 @@ function applyAttemptState(attempt, options = {}) {
     ? ""
     : describeAttemptTransition(previousAttempt, attempt);
   state.attempt = attempt;
+  attachPendingQueue(attempt);
   if (!attempt) {
     disableExamMode();
     setParticipantShellState();
@@ -2017,6 +2172,11 @@ function applyAttemptState(attempt, options = {}) {
   }
 
   setParticipantShellState();
+
+  if (attempt.status === "in_progress" && hasPendingAnswers() && !state.pendingFlushInFlight) {
+    setAttemptSyncMeta("Найдены локально сохранённые ответы. Догружаем их в облако.");
+    flushPendingAnswers();
+  }
 }
 
 function updateTimers() {
@@ -2053,11 +2213,18 @@ function startTimers() {
   stopTimers();
   updateTimers();
   state.timerInterval = setInterval(updateTimers, 1000);
-  state.syncInterval = setInterval(() => syncAttempt(true), 10000);
+  state.syncInterval = setInterval(() => syncAttempt(true), 30000);
 }
 
 async function syncAttempt(silent = false) {
-  if (!state.attempt || state.isSubmittingAnswer || state.isFinishingAttempt || state.syncInFlight) {
+  if (
+    !state.attempt ||
+    state.isSubmittingAnswer ||
+    state.isFinishingAttempt ||
+    state.syncInFlight ||
+    state.pendingFlushInFlight ||
+    hasPendingAnswers()
+  ) {
     return;
   }
 
@@ -2085,6 +2252,76 @@ async function syncAttempt(silent = false) {
     }
   } finally {
     state.syncInFlight = false;
+  }
+}
+
+async function flushPendingAnswers(options = {}) {
+  if (
+    !state.attempt ||
+    state.pendingFlushInFlight ||
+    state.isFinishingAttempt ||
+    !hasPendingAnswers()
+  ) {
+    return;
+  }
+
+  cancelPendingFlushRetry();
+  state.pendingFlushInFlight = true;
+  let lastSyncedAttempt = null;
+
+  try {
+    while (state.pendingAnswerQueue.length) {
+      const pendingItem = state.pendingAnswerQueue[0];
+      const data = await requestWithRetry(
+        () =>
+          api(`/api/public/attempts/${state.attempt.id}/answer`, {
+            method: "POST",
+            body: JSON.stringify({
+              questionId: pendingItem.questionId,
+              answerPayload: pendingItem.answerPayload
+            })
+          }),
+        {
+          attempts: options.blocking ? 3 : 2,
+          pauseMs: 1200,
+          onRetry(error, nextAttempt, maxAttempts) {
+            setAttemptSaveStatus(
+              `Синхронизация ответа: повтор ${nextAttempt} из ${maxAttempts}.`,
+              "warning"
+            );
+            setAttemptSyncMeta(`Фоновая синхронизация: ${formatApiError(error)}`);
+          }
+        }
+      );
+
+      state.pendingAnswerQueue.shift();
+      persistPendingAnswerQueue();
+      lastSyncedAttempt = data;
+
+      if (data.status !== "in_progress" || !state.attempt || data.currentStepIndex >= state.attempt.currentStepIndex) {
+        applyAttemptState(data, { preserveQuestionRender: true });
+      }
+    }
+
+    setAttemptSaveStatus("Ответы сохранены в облаке", "success");
+    setAttemptSyncMeta(`Синхронизация завершена: ${formatDateTime(new Date())}`);
+    return lastSyncedAttempt;
+  } catch (error) {
+    const message = formatApiError(error);
+    setAttemptSaveStatus(
+      options.blocking
+        ? "Не удалось сохранить ответы перед завершением"
+        : "Ответ принят, но облачная синхронизация временно задержалась",
+      options.blocking ? "error" : "warning"
+    );
+    setAttemptSyncMeta(`Синхронизация: ${message}`);
+    if (options.blocking) {
+      throw error;
+    }
+    schedulePendingFlushRetry();
+  } finally {
+    state.pendingFlushInFlight = false;
+    refreshAttemptControls();
   }
 }
 
@@ -2173,6 +2410,9 @@ async function startAttempt() {
       "Маршрут открыт. Ответы будут автоматически сохраняться в облаке, а экзаменационный режим включён.",
       "success"
     );
+    if (hasPendingAnswers()) {
+      flushPendingAnswers();
+    }
   } catch (error) {
     const message = formatApiError(error);
     setAttemptSaveStatus("Не удалось открыть маршрут", "error");
@@ -2190,41 +2430,43 @@ async function submitAnswer() {
   const previousQuestionId = state.attempt.currentQuestion && state.attempt.currentQuestion.id;
   const answerPayload = state.questionController.getAnswer();
   rememberDraft(previousQuestionId, answerPayload);
+  const isLastQuestion =
+    state.attempt.progress.currentQuestionIndex >= state.attempt.progress.totalQuestions;
+
+  state.pendingAnswerQueue.push({
+    questionId: previousQuestionId,
+    answerPayload
+  });
+  persistPendingAnswerQueue();
+  clearDraft(previousQuestionId);
+
+  if (!isLastQuestion) {
+    const optimisticAttempt = buildOptimisticAttemptAfterAnswer(state.attempt, answerPayload);
+    if (optimisticAttempt) {
+      applyAttemptState(optimisticAttempt);
+      startTimers();
+    }
+
+    setAttemptSaveStatus("Ответ принят. Облачная синхронизация идёт в фоне.", "pending");
+    setAttemptSyncMeta("Переходим дальше сразу, не останавливая таймер на ожидании сети.");
+    refreshAttemptControls();
+    flushPendingAnswers();
+    return;
+  }
+
   state.isSubmittingAnswer = true;
-  setAttemptSaveStatus("Отправляем ответ...", "pending");
-  setAttemptSyncMeta("Ответ уходит в облако...");
+  setAttemptSaveStatus("Отправляем финальный ответ...", "pending");
+  setAttemptSyncMeta("Досинхронизируем очередь и фиксируем финальный шаг...");
   refreshAttemptControls();
 
   try {
-    const data = await requestWithRetry(
-      () =>
-        api(`/api/public/attempts/${state.attempt.id}/answer`, {
-          method: "POST",
-          body: JSON.stringify({
-            questionId: previousQuestionId,
-            answerPayload
-          })
-        }),
-      {
-        attempts: 3,
-        pauseMs: 1200,
-        onRetry(error, nextAttempt, maxAttempts) {
-          setAttemptSaveStatus(
-            `Есть задержка. Повтор ${nextAttempt} из ${maxAttempts}...`,
-            "warning"
-          );
-          setAttemptSyncMeta(`Повторная отправка: ${formatApiError(error)}`);
-        }
-      }
-    );
+    const data = await flushPendingAnswers({ blocking: true });
 
-    clearDraft(previousQuestionId);
-    applyAttemptState(data);
-    if (data.status === "in_progress") {
+    if (data && data.status === "in_progress") {
       startTimers();
       setAttemptSaveStatus("Ответ принят", "success");
     } else {
-      setAttemptSaveStatus("Последний ответ принят. Маршрут завершён.", "success");
+      setAttemptSaveStatus("Финальный ответ принят. Маршрут завершён.", "success");
       showMessage(elements.attemptMessage, "Маршрут завершён.", "success");
     }
     setAttemptSyncMeta(`Ответ записан: ${formatDateTime(new Date())}`);
@@ -2247,10 +2489,11 @@ async function finishAttempt() {
   state.isFinishingAttempt = true;
   hideMessage(elements.attemptMessage);
   setAttemptSaveStatus("Завершаем маршрут...", "pending");
-  setAttemptSyncMeta("Фиксируем итоговый результат...");
+  setAttemptSyncMeta("Проверяем очередь ответов и фиксируем итог...");
   refreshAttemptControls();
   try {
     captureCurrentDraft();
+    await flushPendingAnswers({ blocking: true });
     const data = await requestWithRetry(
       () =>
         api(`/api/public/attempts/${state.attempt.id}/finish`, {
@@ -2297,6 +2540,7 @@ async function init() {
     setNetworkStatus(true);
     setAttemptSaveStatus("Связь восстановлена. Можно продолжать.", "success");
     if (state.attempt) {
+      flushPendingAnswers();
       syncAttempt(true);
     }
   });

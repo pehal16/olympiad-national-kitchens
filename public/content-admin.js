@@ -144,7 +144,7 @@ function setNavDrawerOpen(open) {
   }
   if (elements.navMenuToggle) {
     elements.navMenuToggle.setAttribute("aria-expanded", nextState ? "true" : "false");
-    elements.navMenuToggle.textContent = nextState ? "Закрыть меню" : "Меню";
+    elements.navMenuToggle.textContent = nextState ? " " : "";
   }
 }
 
@@ -152,11 +152,27 @@ function closeNavDrawer() {
   setNavDrawerOpen(false);
 }
 
+async function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) {
+    return;
+  }
+
+  try {
+    await navigator.serviceWorker.register("/sw.js?v=1.6.14");
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (registration) {
+      registration.update().catch(() => {});
+    }
+  } catch (error) {
+    // Content panel stays functional even without service worker support.
+  }
+}
+
 const QA_CATEGORY_LABELS = {
-  metadata: "Метаданные",
-  distractors: "Варианты ответа",
-  translation: "Перевод",
-  duplicate: "Дубли"
+  metadata: "",
+  distractors: " ",
+  translation: "",
+  duplicate: ""
 };
 
 function adminApi(path, options = {}) {
@@ -175,7 +191,7 @@ function adminApi(path, options = {}) {
       const payload = raw ? JSON.parse(raw) : {};
 
       if (!response.ok || payload.ok === false) {
-        const error = new Error(payload.message || `Ошибка запроса (${response.status}).`);
+        const error = new Error(payload.message || `  (${response.status}).`);
         error.status = response.status;
         throw error;
       }
@@ -187,7 +203,7 @@ function adminApi(path, options = {}) {
         throw error;
       }
 
-      const wrapped = new Error("Не удалось получить данные от сервера.");
+      const wrapped = new Error("     .");
       wrapped.status = 0;
       throw wrapped;
     });
@@ -202,7 +218,7 @@ async function ensureAdminSession() {
   const payload = raw ? JSON.parse(raw) : {};
 
   if (!response.ok || payload.ok === false) {
-    const error = new Error(payload.message || `Ошибка проверки сессии (${response.status}).`);
+    const error = new Error(payload.message || `   (${response.status}).`);
     error.status = response.status;
     throw error;
   }
@@ -231,12 +247,12 @@ function escapeHtml(value) {
 
 function formatDateTime(value) {
   if (!value) {
-    return "—";
+    return "";
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "—";
+    return "";
   }
 
   return new Intl.DateTimeFormat("ru-RU", {
@@ -253,7 +269,7 @@ function shortText(value, max = 120) {
   if (text.length <= max) {
     return text;
   }
-  return `${text.slice(0, max - 1)}…`;
+  return `${text.slice(0, max - 1)}`;
 }
 
 function buildQuestionIssueMap(summary) {
@@ -276,7 +292,7 @@ function getQuestionIssueInfo(question) {
       issues: [],
       categories: [],
       severity: hasDraft ? "draft" : "clean",
-      label: hasDraft ? "Есть серверный черновик" : "Без замечаний",
+      label: hasDraft ? "  " : " ",
       hasDraft
     };
   }
@@ -286,7 +302,7 @@ function getQuestionIssueInfo(question) {
     issues: issue.issues || [],
     categories: issue.categories || [],
     severity: issue.severity === "risk" ? "risk" : "warning",
-    label: issue.severity === "risk" ? "Нужна проверка" : "Есть сигналы QA",
+    label: issue.severity === "risk" ? " " : "  QA",
     hasDraft
   };
 }
@@ -365,7 +381,7 @@ function openDetailModal() {
   }
 
   if (!state.selectedQuestionId) {
-    showMessage(elements.creatorNote, "Сначала выберите вопрос из списка.", "warning");
+    showMessage(elements.creatorNote, "    .", "warning");
     return;
   }
 
@@ -450,27 +466,27 @@ function renderSummary() {
   elements.baseQuestions.textContent = summary.baseQuestions || 0;
   elements.customQuestions.textContent = summary.customQuestions || 0;
   elements.flaggedQuestions.textContent = summary.qa.flaggedQuestionsCount || 0;
-  elements.generatedAt.textContent = `обновлено ${formatDateTime(summary.generatedAt)}`;
+  elements.generatedAt.textContent = ` ${formatDateTime(summary.generatedAt)}`;
 
-  renderCoverageList(elements.coverageTours, summary.tours, "Данные по турам пока не загружены.");
-  renderCoverageList(elements.coverageCuisines, summary.cuisines, "Кухни пока не определены.");
-  renderCoverageList(elements.coverageTypes, summary.types, "Типы заданий пока не определены.");
+  renderCoverageList(elements.coverageTours, summary.tours, "     .");
+  renderCoverageList(elements.coverageCuisines, summary.cuisines, "   .");
+  renderCoverageList(elements.coverageTypes, summary.types, "    .");
   renderCoverageList(
     elements.coverageDifficulties,
     summary.difficulties,
-    "Уровни сложности пока не определены."
+    "    ."
   );
-  renderCoverageList(elements.coverageThemes, summary.themes.slice(0, 10), "Темы пока не определены.");
-  renderCoverageList(elements.coverageOk, summary.okCoverage, "ОК пока не привязаны.");
-  renderCoverageList(elements.coveragePk, summary.pkCoverage, "Профессиональные акценты пока не привязаны.");
+  renderCoverageList(elements.coverageThemes, summary.themes.slice(0, 10), "   .");
+  renderCoverageList(elements.coverageOk, summary.okCoverage, "   .");
+  renderCoverageList(elements.coveragePk, summary.pkCoverage, "    .");
 
   elements.balance.innerHTML = `
-    <div class="coverage-item"><span>Разброс по кухням</span><strong>${summary.qa.balance.cuisineSpread}</strong></div>
-    <div class="coverage-item"><span>Максимум по одной кухне</span><strong>${summary.qa.balance.maxCuisineCount}</strong></div>
-    <div class="coverage-item"><span>Минимум по одной кухне</span><strong>${summary.qa.balance.minCuisineCount}</strong></div>
+    <div class="coverage-item"><span>  </span><strong>${summary.qa.balance.cuisineSpread}</strong></div>
+    <div class="coverage-item"><span>   </span><strong>${summary.qa.balance.maxCuisineCount}</strong></div>
+    <div class="coverage-item"><span>   </span><strong>${summary.qa.balance.minCuisineCount}</strong></div>
   `;
 
-  elements.qaSummaryBadge.textContent = `сигналов: ${summary.qa.flaggedQuestionsCount || 0} вопросов`;
+  elements.qaSummaryBadge.textContent = `: ${summary.qa.flaggedQuestionsCount || 0} `;
 
   renderQaList(
     elements.qaDuplicates,
@@ -481,7 +497,7 @@ function renderSummary() {
         <div class="muted">${escapeHtml(item.questionIds.join(", "))}</div>
       </article>
     `,
-    "Явных дублей формулировок пока не найдено."
+    "     ."
   );
 
   renderQaList(
@@ -491,10 +507,10 @@ function renderSummary() {
       <article class="qa-item">
         <strong>${escapeHtml(item.id)}</strong>
         <div>${escapeHtml(shortText(item.prompt, 90))}</div>
-        <div class="muted">Поля: ${escapeHtml(item.fields.join(", "))}</div>
+        <div class="muted">: ${escapeHtml(item.fields.join(", "))}</div>
       </article>
     `,
-    "Пробелов метаданных пока не найдено."
+    "    ."
   );
 
   renderQaList(
@@ -504,10 +520,10 @@ function renderSummary() {
       <article class="qa-item">
         <strong>${escapeHtml(item.id)}</strong>
         <div>${escapeHtml(shortText(item.prompt, 90))}</div>
-        <div class="muted">${escapeHtml(item.issues.join(" • "))}</div>
+        <div class="muted">${escapeHtml(item.issues.join("  "))}</div>
       </article>
     `,
-    "Слабых distractors пока не найдено."
+    " distractors   ."
   );
 
   renderQaList(
@@ -519,7 +535,7 @@ function renderSummary() {
         <div>${escapeHtml(shortText(item.prompt, 90))}</div>
       </article>
     `,
-    "Точек проверки перевода пока нет."
+    "    ."
   );
 }
 
@@ -577,15 +593,15 @@ function setCreatorMode(mode = "create", question = null) {
   state.creatorEditingId = mode === "edit" && question ? question.id : "";
 
   if (mode === "edit" && question) {
-    elements.creatorModeBadge.textContent = `режим: редактирование ${question.id}`;
-    elements.createQuestion.textContent = "Сохранить изменения";
+    elements.creatorModeBadge.textContent = `:  ${question.id}`;
+    elements.createQuestion.textContent = " ";
     elements.cancelEdit.classList.remove("hidden");
     elements.creatorModeBadge.classList.add("pill-accent");
     return;
   }
 
-  elements.creatorModeBadge.textContent = "режим: новый тест";
-  elements.createQuestion.textContent = "Добавить вопрос";
+  elements.creatorModeBadge.textContent = ":  ";
+  elements.createQuestion.textContent = " ";
   elements.cancelEdit.classList.add("hidden");
   elements.creatorModeBadge.classList.remove("pill-accent");
 }
@@ -636,8 +652,8 @@ function renderQuestionDetail() {
   const merged = mergedQuestion(question);
   const custom = isCustomQuestion(question);
   const sourceBadge = custom
-    ? '<span class="pill pill-accent">авторский тест</span>'
-    : '<span class="pill">основной банк</span>';
+    ? '<span class="pill pill-accent"> </span>'
+    : '<span class="pill"> </span>';
   const issueInfo = getQuestionIssueInfo(question);
   const qaBadgeClass =
     issueInfo.severity === "risk"
@@ -656,9 +672,9 @@ function renderQuestionDetail() {
   elements.deleteQuestion.classList.toggle("hidden", !custom);
 
   elements.detailHead.innerHTML = `
-    <strong>${escapeHtml(question.id)} • ${escapeHtml(question.tourCode)} • ${escapeHtml(question.typeLabel)}</strong> ${sourceBadge} ${qaBadge}<br />
-    <span class="muted">${escapeHtml(question.cuisineLabel)} • ${escapeHtml(question.cuisineGroupLabel)}</span><br />
-    <span class="muted">${escapeHtml(question.dishLabel || question.caseTitle || "Без отдельного блюда")}</span><br />
+    <strong>${escapeHtml(question.id)}  ${escapeHtml(question.tourCode)}  ${escapeHtml(question.typeLabel)}</strong> ${sourceBadge} ${qaBadge}<br />
+    <span class="muted">${escapeHtml(question.cuisineLabel)}  ${escapeHtml(question.cuisineGroupLabel)}</span><br />
+    <span class="muted">${escapeHtml(question.dishLabel || question.caseTitle || "  ")}</span><br />
     <span class="muted">${escapeHtml(question.prompt)}</span>
   `;
 
@@ -666,28 +682,28 @@ function renderQuestionDetail() {
     const optionsMarkup = question.options
       .map(
         (option) =>
-          `<li>${escapeHtml(option.text)}${option.isCorrect ? ' <span class="pill">ключ</span>' : ""}</li>`
+          `<li>${escapeHtml(option.text)}${option.isCorrect ? ' <span class="pill"></span>' : ""}</li>`
       )
       .join("");
-    elements.detailHead.innerHTML += `<div class="content-option-preview"><strong>Варианты:</strong><ul class="flat-list">${optionsMarkup}</ul></div>`;
+    elements.detailHead.innerHTML += `<div class="content-option-preview"><strong>:</strong><ul class="flat-list">${optionsMarkup}</ul></div>`;
   }
 
   elements.detailMetrics.innerHTML = `
     <article class="detail-metric">
-      <span class="muted">Источник</span>
-      <strong>${escapeHtml(question.sourceLabel || (custom ? "Авторский тест" : "Основной банк"))}</strong>
+      <span class="muted"></span>
+      <strong>${escapeHtml(question.sourceLabel || (custom ? " " : " "))}</strong>
     </article>
     <article class="detail-metric">
-      <span class="muted">Оценочное время</span>
-      <strong>${Number(merged.metadata.estimatedTimeSec || 0)} сек</strong>
+      <span class="muted"> </span>
+      <strong>${Number(merged.metadata.estimatedTimeSec || 0)} </strong>
     </article>
     <article class="detail-metric">
-      <span class="muted">Коды ОК</span>
-      <strong>${escapeHtml((merged.metadata.okCodes || []).join(", ") || "не указаны")}</strong>
+      <span class="muted"> </span>
+      <strong>${escapeHtml((merged.metadata.okCodes || []).join(", ") || " ")}</strong>
     </article>
     <article class="detail-metric">
-      <span class="muted">Проф. акценты</span>
-      <strong>${escapeHtml((merged.metadata.pkFocus || []).join(", ") || "не указаны")}</strong>
+      <span class="muted">. </span>
+      <strong>${escapeHtml((merged.metadata.pkFocus || []).join(", ") || " ")}</strong>
     </article>
   `;
 
@@ -695,17 +711,17 @@ function renderQuestionDetail() {
     ? issueInfo.categories
         .map((category) => `<span class="pill qa-pill">${escapeHtml(formatQaCategoryLabel(category))}</span>`)
         .join("")
-    : '<span class="pill qa-pill qa-pill-clean">QA без замечаний</span>';
+    : '<span class="pill qa-pill qa-pill-clean">QA  </span>';
   const issueListMarkup = issueInfo.issues.length
     ? `<ul class="qa-signal-list">${issueInfo.issues.map((issue) => `<li>${escapeHtml(issue)}</li>`).join("")}</ul>`
-    : '<div class="muted">Для этого вопроса явных QA-сигналов не найдено.</div>';
+    : '<div class="muted">    QA-  .</div>';
   const draftNote = issueInfo.hasDraft
-    ? '<div class="detail-qa-note">Есть серверный черновик. При необходимости сначала сверьте его с карточкой вопроса.</div>'
+    ? '<div class="detail-qa-note">  .        .</div>'
     : "";
 
   elements.detailQa.innerHTML = `
     <div class="section-row">
-      <h4>Методический QA вопроса</h4>
+      <h4> QA </h4>
       <div class="content-question-badges">${categoryBadges}</div>
     </div>
     ${draftNote}
@@ -728,11 +744,11 @@ function renderQuestionList() {
   const total = state.questions.length;
   const shown = state.filteredQuestions.length;
   const shownFlagged = state.filteredQuestions.filter((question) => getQuestionIssueInfo(question).issueCount > 0).length;
-  elements.filterMeta.textContent = `показано ${shown} из ${total} • с сигналами ${shownFlagged}`;
-  elements.draftMeta.textContent = `черновиков: ${Object.keys(state.drafts).length} • сигналов QA: ${state.summary?.qa?.flaggedQuestionsCount || 0}`;
+  elements.filterMeta.textContent = ` ${shown}  ${total}    ${shownFlagged}`;
+  elements.draftMeta.textContent = `: ${Object.keys(state.drafts).length}   QA: ${state.summary?.qa?.flaggedQuestionsCount || 0}`;
 
   if (!shown) {
-    elements.questionList.innerHTML = '<div class="muted">По текущим фильтрам вопросов не найдено.</div>';
+    elements.questionList.innerHTML = '<div class="muted">     .</div>';
     if (state.selectedQuestionId && !state.filteredQuestions.find((item) => item.id === state.selectedQuestionId)) {
       state.selectedQuestionId = "";
       renderQuestionDetail();
@@ -766,7 +782,7 @@ function renderQuestionList() {
         <strong>${escapeHtml(question.id)}</strong>
         <div class="content-question-badges">
           <span class="pill">${escapeHtml(question.tourCode)}</span>
-          ${custom ? '<span class="pill pill-accent">авторский</span>' : ""}
+          ${custom ? '<span class="pill pill-accent"></span>' : ""}
           <span class="${qaBadgeClass}">${escapeHtml(issueInfo.label)}</span>
         </div>
       </div>
@@ -775,8 +791,8 @@ function renderQuestionList() {
         <span>${escapeHtml(question.cuisineLabel)}</span>
         <span>${escapeHtml(question.typeLabel)}</span>
         <span>${escapeHtml(question.metadata.difficultyLabel)}</span>
-        <span>${escapeHtml(question.sourceLabel || (custom ? "Авторский тест" : "Основной банк"))}</span>
-        ${draft ? '<span class="pill">есть серверный черновик</span>' : ""}
+        <span>${escapeHtml(question.sourceLabel || (custom ? " " : " "))}</span>
+        ${draft ? '<span class="pill">  </span>' : ""}
       </div>
     `;
     row.addEventListener("click", () => {
@@ -839,11 +855,11 @@ function applyFilters() {
 }
 
 function populateFilterControls() {
-  fillSelect(elements.filterTour, "Все туры", state.summary?.catalogs?.tours || []);
-  fillSelect(elements.filterCuisine, "Все кухни", state.summary?.catalogs?.cuisines || []);
-  fillSelect(elements.filterType, "Все типы", state.summary?.catalogs?.types || []);
-  fillSelect(elements.filterDifficulty, "Все уровни", state.summary?.catalogs?.difficulties || []);
-  fillSelect(elements.filterTheme, "Все темы", state.summary?.catalogs?.themes || []);
+  fillSelect(elements.filterTour, " ", state.summary?.catalogs?.tours || []);
+  fillSelect(elements.filterCuisine, " ", state.summary?.catalogs?.cuisines || []);
+  fillSelect(elements.filterType, " ", state.summary?.catalogs?.types || []);
+  fillSelect(elements.filterDifficulty, " ", state.summary?.catalogs?.difficulties || []);
+  fillSelect(elements.filterTheme, " ", state.summary?.catalogs?.themes || []);
 }
 
 function collectDraftFromForm() {
@@ -882,11 +898,11 @@ async function saveDraft() {
       body: JSON.stringify(payload)
     });
     state.drafts[state.selectedQuestionId] = response.draft;
-    showMessage(elements.note, "Черновик сохранён на сервере. Он доступен с любого компьютера.", "success");
+    showMessage(elements.note, "   .     .", "success");
     renderQuestionList();
     renderQuestionDetail();
   } catch (error) {
-    showMessage(elements.note, error.message || "Не удалось сохранить черновик на сервере.", "error");
+    showMessage(elements.note, error.message || "     .", "error");
   } finally {
     setDraftRequestState("idle");
   }
@@ -904,11 +920,11 @@ async function resetDraft() {
       method: "DELETE"
     });
     delete state.drafts[state.selectedQuestionId];
-    showMessage(elements.note, "Серверный черновик удалён. Показаны базовые метаданные вопроса.", "success");
+    showMessage(elements.note, "  .    .", "success");
     renderQuestionList();
     renderQuestionDetail();
   } catch (error) {
-    showMessage(elements.note, error.message || "Не удалось удалить серверный черновик.", "error");
+    showMessage(elements.note, error.message || "    .", "error");
   } finally {
     setDraftRequestState("idle");
   }
@@ -1000,26 +1016,26 @@ function resetCreatorForm() {
 function startEditingSelectedQuestion() {
   const question = state.questions.find((item) => item.id === state.selectedQuestionId);
   if (!question || !isCustomQuestion(question)) {
-    showMessage(elements.note, "Редактировать из конструктора можно только авторские тесты.", "warning");
+    showMessage(elements.note, "      .", "warning");
     return;
   }
 
   fillCreatorFromQuestion(question);
   setCreatorMode("edit", question);
   hideMessage(elements.creatorNote);
-  showMessage(elements.creatorNote, `Открыт режим редактирования теста ${question.id}.`, "success");
+  showMessage(elements.creatorNote, `    ${question.id}.`, "success");
   elements.editorSection.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 async function deleteSelectedQuestion() {
   const question = state.questions.find((item) => item.id === state.selectedQuestionId);
   if (!question || !isCustomQuestion(question)) {
-    showMessage(elements.note, "Удалять из интерфейса можно только авторские тесты.", "warning");
+    showMessage(elements.note, "      .", "warning");
     return;
   }
 
   const confirmed = window.confirm(
-    `Удалить авторский тест ${question.id}? Это действие затронет банк заданий и облачную версию олимпиады.`
+    `   ${question.id}?         .`
   );
   if (!confirmed) {
     return;
@@ -1042,10 +1058,10 @@ async function deleteSelectedQuestion() {
     delete state.drafts[question.id];
     state.selectedQuestionId = "";
     await loadContentPanel();
-    showMessage(elements.creatorNote, `Тест ${question.id} удалён из банка заданий.`, "success");
-    showMessage(elements.note, `Тест ${question.id} удалён из банка заданий.`, "success");
+    showMessage(elements.creatorNote, ` ${question.id}    .`, "success");
+    showMessage(elements.note, ` ${question.id}    .`, "success");
   } catch (error) {
-    showMessage(elements.note, error.message || "Не удалось удалить авторский тест.", "error");
+    showMessage(elements.note, error.message || "    .", "error");
   } finally {
     elements.deleteQuestion.disabled = false;
   }
@@ -1072,13 +1088,13 @@ async function createCustomQuestion() {
     });
 
     const successMessage = editing
-      ? `Тест ${question.id} обновлён в банке заданий.`
-      : `Новый тест ${question.id} сохранён в банке заданий.`;
+      ? ` ${question.id}    .`
+      : `  ${question.id}    .`;
     showMessage(
       elements.creatorNote,
       editing
-        ? `Тест ${question.id} обновлён в банке заданий.`
-        : `Новый тест ${question.id} сохранён в банке заданий.`,
+        ? ` ${question.id}    .`
+        : `  ${question.id}    .`,
       "success"
     );
     resetCreatorForm();
@@ -1090,7 +1106,7 @@ async function createCustomQuestion() {
   } catch (error) {
     showMessage(
       elements.creatorNote,
-      error.message || "Не удалось добавить новый тестовый вопрос.",
+      error.message || "     .",
       "error"
     );
   } finally {
@@ -1188,12 +1204,12 @@ function initNavigation() {
     try {
       showPanel();
       await loadContentPanel();
-      showMessage(elements.note, "Панель банка заданий обновлена.", "success");
+      showMessage(elements.note, "   .", "success");
     } catch (error) {
       if (error.status === 401 || error.status === 403) {
         showLoginState();
       } else {
-        showMessage(elements.note, error.message || "Не удалось обновить контентную панель.", "error");
+        showMessage(elements.note, error.message || "    .", "error");
       }
     }
     closeNavDrawer();
@@ -1201,6 +1217,7 @@ function initNavigation() {
 }
 
 async function init() {
+  await registerServiceWorker();
   await loadPublicVersion();
   initNavigation();
   bindFilters();
@@ -1224,7 +1241,7 @@ async function init() {
     }
 
     showPanel();
-    showMessage(elements.note, error.message || "Не удалось загрузить банк заданий.", "error");
+    showMessage(elements.note, error.message || "    .", "error");
   }
 
   document.addEventListener("click", (event) => {
@@ -1247,11 +1264,11 @@ function renderQuestionList() {
   const total = state.questions.length;
   const shown = state.filteredQuestions.length;
   const shownFlagged = state.filteredQuestions.filter((question) => getQuestionIssueInfo(question).issueCount > 0).length;
-  elements.filterMeta.textContent = `показано ${shown} из ${total} • с сигналами ${shownFlagged}`;
-  elements.draftMeta.textContent = `черновиков: ${Object.keys(state.drafts).length} • сигналов QA: ${state.summary?.qa?.flaggedQuestionsCount || 0}`;
+  elements.filterMeta.textContent = ` ${shown}  ${total}    ${shownFlagged}`;
+  elements.draftMeta.textContent = `: ${Object.keys(state.drafts).length}   QA: ${state.summary?.qa?.flaggedQuestionsCount || 0}`;
 
   if (!shown) {
-    elements.questionList.innerHTML = '<div class="muted">По текущим фильтрам вопросов не найдено.</div>';
+    elements.questionList.innerHTML = '<div class="muted">     .</div>';
     if (state.selectedQuestionId && !state.filteredQuestions.find((item) => item.id === state.selectedQuestionId)) {
       state.selectedQuestionId = "";
       renderQuestionDetail();
@@ -1280,7 +1297,7 @@ function renderQuestionList() {
         <strong>${escapeHtml(question.id)}</strong>
         <div class="content-question-badges">
           <span class="pill">${escapeHtml(question.tourCode)}</span>
-          ${custom ? '<span class="pill pill-accent">авторский</span>' : ""}
+          ${custom ? '<span class="pill pill-accent"></span>' : ""}
           <span class="${qaBadgeClass}">${escapeHtml(issueInfo.label)}</span>
         </div>
       </div>
@@ -1289,9 +1306,9 @@ function renderQuestionList() {
         <span>${escapeHtml(question.cuisineLabel)}</span>
         <span>${escapeHtml(question.typeLabel)}</span>
         <span>${escapeHtml(question.metadata.difficultyLabel)}</span>
-        <span>${escapeHtml(question.sourceLabel || (custom ? "Авторский тест" : "Основной банк"))}</span>
-        <span class="content-open-hint">Открыть</span>
-        ${draft ? '<span class="pill">есть серверный черновик</span>' : ""}
+        <span>${escapeHtml(question.sourceLabel || (custom ? " " : " "))}</span>
+        <span class="content-open-hint"></span>
+        ${draft ? '<span class="pill">  </span>' : ""}
       </div>
     `;
     row.addEventListener("click", () => {
@@ -1311,14 +1328,14 @@ function renderQuestionList() {
 function startEditingSelectedQuestion() {
   const question = state.questions.find((item) => item.id === state.selectedQuestionId);
   if (!question || !isCustomQuestion(question)) {
-    showMessage(elements.note, "Редактировать из конструктора можно только авторские тесты.", "warning");
+    showMessage(elements.note, "      .", "warning");
     return;
   }
 
   fillCreatorFromQuestion(question);
   setCreatorMode("edit", question);
   hideMessage(elements.creatorNote);
-  showMessage(elements.creatorNote, `Открыт режим редактирования теста ${question.id}.`, "success");
+  showMessage(elements.creatorNote, `    ${question.id}.`, "success");
   closeDetailModal();
   openEditorModal();
 }
@@ -1344,8 +1361,8 @@ async function createCustomQuestion() {
     });
 
     const successMessage = editing
-      ? `Тест ${question.id} обновлён в банке заданий.`
-      : `Новый тест ${question.id} сохранён в банке заданий.`;
+      ? ` ${question.id}    .`
+      : `  ${question.id}    .`;
     showMessage(elements.creatorNote, successMessage, "success");
     resetCreatorForm();
     await loadContentPanel();
@@ -1358,7 +1375,7 @@ async function createCustomQuestion() {
   } catch (error) {
     showMessage(
       elements.creatorNote,
-      error.message || "Не удалось добавить новый тестовый вопрос.",
+      error.message || "     .",
       "error"
     );
   } finally {
@@ -1376,12 +1393,12 @@ function initNavigation() {
     try {
       showPanel();
       await loadContentPanel();
-      showMessage(elements.note, "Панель банка заданий обновлена.", "success");
+      showMessage(elements.note, "   .", "success");
     } catch (error) {
       if (error.status === 401 || error.status === 403) {
         showLoginState();
       } else {
-        showMessage(elements.note, error.message || "Не удалось обновить контентную панель.", "error");
+        showMessage(elements.note, error.message || "    .", "error");
       }
     }
   });
@@ -1451,7 +1468,7 @@ async function init() {
     }
 
     showPanel();
-    showMessage(elements.note, error.message || "Не удалось загрузить банк заданий.", "error");
+    showMessage(elements.note, error.message || "    .", "error");
   }
 }
 

@@ -1,13 +1,13 @@
-﻿const CACHE_NAME = "national-kitchens-olympiad-v1-6-12";
+const CACHE_NAME = "national-kitchens-olympiad-v1-6-14";
 const PRECACHE_URLS = [
   "/",
   "/admin.html",
   "/content-admin.html",
-  "/styles.css?v=1.6.12",
-  "/app.js?v=1.6.12",
-  "/admin.js?v=1.6.12",
-  "/content-admin.js?v=1.6.12",
-  "/manifest.webmanifest?v=1.6.12",
+  "/styles.css?v=1.6.14",
+  "/app.js?v=1.6.14",
+  "/admin.js?v=1.6.14",
+  "/content-admin.js?v=1.6.14",
+  "/manifest.webmanifest?v=1.6.14",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   "/brand-prof-tourism.png",
@@ -16,7 +16,10 @@ const PRECACHE_URLS = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)).then(() => self.skipWaiting())
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -34,13 +37,30 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
+  const pathname = url.pathname;
+  const isCoreShellAsset =
+    pathname === "/" ||
+    pathname.endsWith(".html") ||
+    pathname.endsWith(".js") ||
+    pathname.endsWith(".css") ||
+    pathname.endsWith(".webmanifest");
 
-  if (request.method !== "GET" || url.pathname.startsWith("/api/")) {
+  if (request.method !== "GET" || pathname.startsWith("/api/")) {
     return;
   }
 
-  if (request.mode === "navigate") {
-    event.respondWith(fetch(request).catch(() => caches.match("/")));
+  if (request.mode === "navigate" || isCoreShellAsset) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const cloned = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, cloned));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match("/")))
+    );
     return;
   }
 
