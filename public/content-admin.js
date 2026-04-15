@@ -16,6 +16,8 @@ const state = {
   importOpen: false,
   parsedImportItems: [],
   importPreview: null,
+  page: 1,
+  pageSize: 10,
   filters: {
     search: "",
     tour: "",
@@ -86,7 +88,20 @@ const elements = {
   filterQa: document.getElementById("content-filter-qa"),
   filterReset: document.getElementById("content-filter-reset"),
   draftMeta: document.getElementById("content-draft-meta"),
+  pageMeta: document.getElementById("content-page-meta"),
+  pagePrev: document.getElementById("content-page-prev"),
+  pageNext: document.getElementById("content-page-next"),
   questionList: document.getElementById("content-question-list"),
+  sideStatus: document.getElementById("content-side-status"),
+  sideEmpty: document.getElementById("content-side-empty"),
+  sideDetail: document.getElementById("content-side-detail"),
+  sideHead: document.getElementById("content-side-head"),
+  sideMeta: document.getElementById("content-side-meta"),
+  sideOptions: document.getElementById("content-side-options"),
+  sideQa: document.getElementById("content-side-qa"),
+  sidePrev: document.getElementById("content-side-prev"),
+  sideNext: document.getElementById("content-side-next"),
+  sideEdit: document.getElementById("content-side-edit"),
   detailModal: document.getElementById("content-detail-modal"),
   editorModal: document.getElementById("content-editor-modal"),
   importModal: document.getElementById("content-import-modal"),
@@ -182,7 +197,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.6.15");
+    await navigator.serviceWorker.register("/sw.js?v=1.6.16");
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       registration.update().catch(() => {});
@@ -827,6 +842,69 @@ function renderQuestionDetail() {
   elements.editorOkCodes.value = (merged.metadata.okCodes || []).join(", ");
   elements.editorPkFocus.value = (merged.metadata.pkFocus || []).join(", ");
   elements.editorMethodicalPurpose.value = merged.metadata.methodicalPurpose || "";
+  renderSideQuestionCard(question, merged, issueInfo, custom);
+}
+
+function renderSideQuestionCard(question, merged, issueInfo, custom) {
+  if (!question) {
+    elements.sideStatus.textContent = "ничего не выбрано";
+    elements.sideEmpty.classList.remove("hidden");
+    elements.sideDetail.classList.add("hidden");
+    elements.sideEdit.disabled = true;
+    elements.sidePrev.disabled = true;
+    elements.sideNext.disabled = true;
+    return;
+  }
+
+  const selectedIndex = state.filteredQuestions.findIndex((item) => item.id === question.id);
+  const optionsMarkup = Array.isArray(question.options) && question.options.length
+    ? `<ul class="flat-list">${question.options
+        .map((option) => `<li>${escapeHtml(option.text)}${option.isCorrect ? ' <span class="pill pill-accent">ключ</span>' : ""}</li>`)
+        .join("")}</ul>`
+    : '<div class="muted">Для этого типа вопроса список вариантов не отображается.</div>';
+  const issueMarkup = issueInfo.issueCount
+    ? `<ul class="qa-signal-list">${issueInfo.issues.map((issue) => `<li>${escapeHtml(issue)}</li>`).join("")}</ul>`
+    : '<div class="muted">Сигналов QA по этому вопросу сейчас нет.</div>';
+
+  elements.sideStatus.textContent = `${selectedIndex + 1} из ${state.filteredQuestions.length}`;
+  elements.sideEmpty.classList.add("hidden");
+  elements.sideDetail.classList.remove("hidden");
+  elements.sideHead.innerHTML = `
+    <strong>${escapeHtml(question.id)} • ${escapeHtml(question.tourCode)} • ${escapeHtml(question.typeLabel)}</strong>
+    <div class="muted">${escapeHtml(question.dishLabel || question.caseTitle || "Без отдельного названия")}</div>
+    <div>${escapeHtml(question.prompt)}</div>
+  `;
+  elements.sideMeta.innerHTML = `
+    <div class="coverage-item"><span>Кухня</span><strong>${escapeHtml(question.cuisineLabel)}</strong></div>
+    <div class="coverage-item"><span>Сложность</span><strong>${escapeHtml(question.metadata.difficultyLabel)}</strong></div>
+    <div class="coverage-item"><span>Источник</span><strong>${escapeHtml(question.sourceLabel || (custom ? "Авторский тест" : "Основной банк"))}</strong></div>
+    <div class="coverage-item"><span>ОК</span><strong>${escapeHtml((merged.metadata.okCodes || []).join(", ") || "не указаны")}</strong></div>
+  `;
+  elements.sideOptions.innerHTML = `
+    <h4>Варианты ответа</h4>
+    ${optionsMarkup}
+  `;
+  elements.sideQa.innerHTML = `
+    <h4>Сигналы QA</h4>
+    ${issueMarkup}
+  `;
+  elements.sideEdit.disabled = !custom;
+  elements.sidePrev.disabled = selectedIndex <= 0;
+  elements.sideNext.disabled = selectedIndex === -1 || selectedIndex >= state.filteredQuestions.length - 1;
+}
+
+function goToRelativeQuestion(step) {
+  const currentIndex = state.filteredQuestions.findIndex((item) => item.id === state.selectedQuestionId);
+  if (currentIndex === -1) {
+    return;
+  }
+  const nextIndex = currentIndex + step;
+  if (nextIndex < 0 || nextIndex >= state.filteredQuestions.length) {
+    return;
+  }
+  state.selectedQuestionId = state.filteredQuestions[nextIndex].id;
+  renderQuestionList();
+  renderQuestionDetail();
 }
 
 function renderQuestionList() {
@@ -845,14 +923,28 @@ function renderQuestionList() {
     }
     elements.openSelected.disabled = true;
     elements.openSelectedEmpty.disabled = true;
+    elements.pageMeta.textContent = "страница 0";
+    renderSideQuestionCard(null);
     return;
   }
 
+  const selectedIndex = state.filteredQuestions.findIndex((item) => item.id === state.selectedQuestionId);
+  const totalPages = Math.max(1, Math.ceil(shown / state.pageSize));
+  if (selectedIndex >= 0) {
+    state.page = Math.floor(selectedIndex / state.pageSize) + 1;
+  }
+  state.page = Math.min(Math.max(1, state.page), totalPages);
+  const startIndex = (state.page - 1) * state.pageSize;
+  const pageItems = state.filteredQuestions.slice(startIndex, startIndex + state.pageSize);
+  elements.pageMeta.textContent = `страница ${state.page} из ${totalPages}`;
+  elements.pagePrev.disabled = state.page === 1;
+  elements.pageNext.disabled = state.page >= totalPages;
+
   if (!state.selectedQuestionId || !state.filteredQuestions.find((item) => item.id === state.selectedQuestionId)) {
-    state.selectedQuestionId = state.filteredQuestions[0].id;
+    state.selectedQuestionId = pageItems[0]?.id || state.filteredQuestions[0].id;
   }
 
-  state.filteredQuestions.forEach((question) => {
+  pageItems.forEach((question) => {
     const draft = state.drafts[question.id];
     const custom = isCustomQuestion(question);
     const issueInfo = getQuestionIssueInfo(question);
@@ -889,15 +981,16 @@ function renderQuestionList() {
       state.selectedQuestionId = question.id;
       renderQuestionList();
       renderQuestionDetail();
-      openDetailModal();
     });
     elements.questionList.appendChild(row);
   });
 
   if (!state.selectedQuestionId) {
-    state.selectedQuestionId = state.filteredQuestions[0].id;
+    state.selectedQuestionId = pageItems[0]?.id || state.filteredQuestions[0].id;
   }
 
+  elements.openSelected.disabled = false;
+  elements.openSelectedEmpty.disabled = false;
   renderQuestionDetail();
 }
 
@@ -942,6 +1035,7 @@ function applyFilters() {
     return true;
   });
 
+  state.page = 1;
   renderQuestionList();
 }
 
@@ -1724,6 +1818,19 @@ function initNavigation() {
   [elements.openSelected, elements.openSelectedEmpty].forEach((button) => {
     button.addEventListener("click", openDetailModal);
   });
+  elements.pagePrev.addEventListener("click", () => {
+    if (state.page > 1) {
+      state.page -= 1;
+      renderQuestionList();
+    }
+  });
+  elements.pageNext.addEventListener("click", () => {
+    state.page += 1;
+    renderQuestionList();
+  });
+  elements.sidePrev.addEventListener("click", () => goToRelativeQuestion(-1));
+  elements.sideNext.addEventListener("click", () => goToRelativeQuestion(1));
+  elements.sideEdit.addEventListener("click", startEditingSelectedQuestion);
 
   elements.closeDetail.addEventListener("click", closeDetailModal);
   elements.closeEditor.addEventListener("click", closeEditorModal);

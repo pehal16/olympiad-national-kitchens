@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1f8e73" />
     <title>Банк заданий олимпиады</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.15" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.16" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.15" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.16" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -412,20 +412,39 @@
             <section class="card content-list-card">
               <div class="section-row">
                 <h3>Каталог вопросов</h3>
-                <div id="content-draft-meta" class="pill">черновиков: 0</div>
+                <div class="actions inline compact-actions">
+                  <div id="content-draft-meta" class="pill">черновиков: 0</div>
+                  <div id="content-page-meta" class="pill">страница 1</div>
+                </div>
+              </div>
+              <div class="list-toolbar">
+                <button id="content-page-prev" class="button ghost" type="button">← Назад</button>
+                <button id="content-page-next" class="button ghost" type="button">Вперёд →</button>
               </div>
               <div id="content-question-list" class="content-question-list"></div>
             </section>
 
-            <section class="card content-empty-detail-card">
-              <h3>Карточка вопроса</h3>
-              <p class="muted">
-                Откройте вопрос из списка слева. Карточка и редактирование теперь открываются отдельно, чтобы экран был чище и понятнее.
-              </p>
-              <div class="actions inline">
-                <button id="content-open-selected-empty" class="button secondary" type="button">Открыть выбранный вопрос</button>
-                <button id="content-open-create-empty" class="button ghost" type="button">Создать тест</button>
-                <button id="content-open-import-empty" class="button ghost" type="button">Импортировать список</button>
+            <section class="card content-empty-detail-card content-side-panel">
+              <div class="section-row">
+                <h3>Выбранный вопрос</h3>
+                <div id="content-side-status" class="pill">ничего не выбрано</div>
+              </div>
+              <div id="content-side-empty" class="muted">
+                Выберите вопрос слева. Здесь появится краткая карточка, чтобы не приходилось искать всё в длинном списке.
+              </div>
+              <div id="content-side-detail" class="hidden">
+                <div id="content-side-head" class="side-detail-head"></div>
+                <div id="content-side-meta" class="side-detail-meta"></div>
+                <div id="content-side-options" class="side-detail-options"></div>
+                <div id="content-side-qa" class="side-detail-qa"></div>
+              </div>
+              <div class="actions inline side-actions">
+                <button id="content-side-prev" class="button ghost" type="button">← Предыдущий</button>
+                <button id="content-side-next" class="button ghost" type="button">Следующий →</button>
+                <button id="content-open-selected-empty" class="button secondary" type="button">Открыть полностью</button>
+                <button id="content-side-edit" class="button secondary" type="button">Редактировать</button>
+                <button id="content-open-create-empty" class="button ghost" type="button">Новый тест</button>
+                <button id="content-open-import-empty" class="button ghost" type="button">Импорт</button>
               </div>
             </section>
           </div>
@@ -599,11 +618,11 @@ D. Хаш
         <small>
           Разработчик: Постовит Дмитрий Александрович, преподаватель первой категории, профильных
           дисциплин, реализуемых в рамках образовательной программы ГБПОУ "Горловский колледж
-          технологий и сервиса". • Версия <span id="content-app-version-label">1.6.15</span>
+          технологий и сервиса". • Версия <span id="content-app-version-label">1.6.16</span>
         </small>
       </footer>
     </main>
 
-    <script src="/content-admin.js?v=1.6.15"></script>
+    <script src="/content-admin.js?v=1.6.16"></script>
   </body>
 </html>
