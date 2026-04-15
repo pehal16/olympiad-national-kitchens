@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1f8e73" />
     <title>Банк заданий олимпиады</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.14" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.15" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.14" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.15" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -69,6 +69,7 @@
               <button id="content-open-summary" class="button secondary" type="button">Сводка банка</button>
               <button id="content-open-qa" class="button secondary" type="button">Проверка QA</button>
               <button id="content-open-create-top" class="button ghost" type="button">Новый тест</button>
+              <button id="content-open-import-top" class="button ghost" type="button">Импортировать список</button>
             </div>
           </div>
         </section>
@@ -191,14 +192,15 @@
             <div class="actions inline">
               <div id="content-filter-meta" class="pill">показано 0 из 0</div>
               <button id="content-open-create" class="button primary" type="button">Новый тест</button>
+              <button id="content-open-import" class="button secondary" type="button">Импортировать список</button>
               <button id="content-open-selected" class="button secondary" type="button">Открыть вопрос</button>
             </div>
           </div>
 
           <div class="content-guide">
-            <div class="content-guide-step"><strong>1.</strong> Найдите вопрос через поиск и фильтры.</div>
-            <div class="content-guide-step"><strong>2.</strong> Нажмите на строку вопроса, чтобы открыть карточку.</div>
-            <div class="content-guide-step"><strong>3.</strong> Для нового задания используйте кнопку «Новый тест».</div>
+            <div class="content-guide-step"><strong>1.</strong> Найдите вопрос через каталог, поиск и фильтры.</div>
+            <div class="content-guide-step"><strong>2.</strong> Откройте карточку вопроса отдельно, без перегруженного экрана.</div>
+            <div class="content-guide-step"><strong>3.</strong> Для новых заданий используйте мастер или импорт списка вопросов.</div>
           </div>
 
           <div id="content-editor-modal" class="overlay-shell hidden">
@@ -220,6 +222,14 @@
               </div>
             </div>
 
+            <div id="content-creator-stepper" class="wizard-stepper">
+              <button class="wizard-step is-active" type="button" data-creator-step="structure">1. Основа</button>
+              <button class="wizard-step" type="button" data-creator-step="answers">2. Варианты</button>
+              <button class="wizard-step" type="button" data-creator-step="metadata">3. Методика</button>
+              <button class="wizard-step" type="button" data-creator-step="preview">4. Предпросмотр</button>
+            </div>
+
+            <section class="creator-step-panel" data-creator-step-panel="structure">
             <div class="creator-grid">
               <label class="field">
                 <span>Тур</span>
@@ -259,7 +269,10 @@
                 <input id="creator-note" type="text" placeholder="Необязательное служебное примечание" />
               </label>
             </div>
+            </section>
 
+            <section class="creator-step-panel hidden" data-creator-step-panel="answers">
+            <div class="wizard-hint">Заполните варианты ответа и отметьте ровно один правильный вариант.</div>
             <div class="creator-options-grid">
               <label class="field creator-option-card">
                 <span>Вариант 1</span>
@@ -282,7 +295,10 @@
                 <label class="inline-choice"><input id="creator-correct-4" type="radio" name="creator-correct" /> Правильный ответ</label>
               </label>
             </div>
+            </section>
 
+            <section class="creator-step-panel hidden" data-creator-step-panel="metadata">
+            <div class="wizard-hint">Метаданные можно заполнить сразу или уточнить позже через карточку вопроса.</div>
             <div class="creator-grid">
               <label class="field">
                 <span>Сложность</span>
@@ -316,6 +332,18 @@
                 <span>Методическое назначение</span>
                 <textarea id="creator-methodical-purpose" rows="3" placeholder="Что именно проверяет вопрос"></textarea>
               </label>
+            </div>
+            </section>
+
+            <section class="creator-step-panel hidden" data-creator-step-panel="preview">
+              <div class="wizard-hint">Проверьте карточку вопроса перед сохранением. Здесь видно, как система соберёт новый тест.</div>
+              <div id="creator-preview-card" class="creator-preview-card"></div>
+            </section>
+
+            <div class="wizard-footer">
+              <button id="content-creator-prev" class="button ghost" type="button">Назад</button>
+              <div id="content-creator-step-label" class="pill">Шаг 1 из 4</div>
+              <button id="content-creator-next" class="button secondary" type="button">Далее</button>
             </div>
 
             <div id="content-creator-note" class="message hidden"></div>
@@ -397,11 +425,106 @@
               <div class="actions inline">
                 <button id="content-open-selected-empty" class="button secondary" type="button">Открыть выбранный вопрос</button>
                 <button id="content-open-create-empty" class="button ghost" type="button">Создать тест</button>
+                <button id="content-open-import-empty" class="button ghost" type="button">Импортировать список</button>
               </div>
             </section>
           </div>
         </section>
       </section>
+
+      <div id="content-import-modal" class="overlay-shell hidden">
+        <div class="overlay-backdrop" data-close-overlay="import"></div>
+        <section class="card overlay-card import-card">
+          <div class="section-row">
+            <div>
+              <h3>Импорт тестов списком</h3>
+              <p class="muted">
+                Вставьте несколько простых тестовых вопросов. Система сама попробует определить,
+                где вопрос, варианты ответов и правильный ответ, а затем покажет предпросмотр перед сохранением.
+              </p>
+            </div>
+            <div class="actions inline">
+              <button id="content-close-import" class="button ghost" type="button">Закрыть</button>
+              <button id="content-parse-import" class="button secondary" type="button">Проверить импорт</button>
+              <button id="content-apply-import" class="button primary" type="button" disabled>Сохранить в банк</button>
+            </div>
+          </div>
+
+          <div class="import-layout">
+            <section class="import-config">
+              <div class="creator-grid">
+                <label class="field">
+                  <span>Тур по умолчанию</span>
+                  <select id="import-default-tour">
+                    <option value="T1">T1 • Один правильный ответ</option>
+                    <option value="T4">T4 • Технологические ситуации</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Кухня по умолчанию</span>
+                  <select id="import-default-cuisine">
+                    <option value="mixed">Смешанный блок</option>
+                    <option value="ru">Русская кухня</option>
+                    <option value="fr">Французская кухня</option>
+                    <option value="it">Итальянская кухня</option>
+                    <option value="jp">Японская кухня</option>
+                    <option value="mx">Мексиканская кухня</option>
+                    <option value="de">Немецкая кухня</option>
+                    <option value="uk">Английская кухня</option>
+                    <option value="balkan">Балканские кухни</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Сложность по умолчанию</span>
+                  <select id="import-default-difficulty">
+                    <option value="basic">Базовый уровень</option>
+                    <option value="standard">Повышенный уровень</option>
+                    <option value="advanced">Высокий уровень</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Тема по умолчанию</span>
+                  <input id="import-default-theme" type="text" placeholder="Например: национальные кухни" />
+                </label>
+              </div>
+
+              <div class="import-help">
+                <strong>Поддерживаемый формат:</strong>
+                <pre>1. Какой продукт входит в состав борща?
+A. Картофель
+B. Манго
+C. Рис
+D. Банан
+Ответ: A
+
+2. Какое блюдо относится к итальянской кухне?
+A. Борщ
+B. Ризотто
+C. Щи
+D. Хаш
+Ответ: B</pre>
+                <p class="muted">Также можно использовать «А)», «1)», маркер «*» у правильного ответа и строку «Правильный ответ: …».</p>
+              </div>
+
+              <label class="field import-field-wide">
+                <span>Текст для импорта</span>
+                <textarea id="content-import-text" rows="16" placeholder="Вставьте список вопросов сюда"></textarea>
+              </label>
+              <div id="content-import-note" class="message hidden"></div>
+            </section>
+
+            <section class="import-preview-card">
+              <div class="section-row">
+                <h4>Предпросмотр</h4>
+                <div id="content-import-meta" class="pill">ещё не проверено</div>
+              </div>
+              <div id="content-import-preview" class="import-preview-list">
+                <div class="muted">После проверки здесь появятся найденные вопросы, правильные ответы и замечания по блокам.</div>
+              </div>
+            </section>
+          </div>
+        </section>
+      </div>
 
       <div id="content-detail-modal" class="overlay-shell hidden">
         <div class="overlay-backdrop" data-close-overlay="detail"></div>
@@ -476,11 +599,11 @@
         <small>
           Разработчик: Постовит Дмитрий Александрович, преподаватель первой категории, профильных
           дисциплин, реализуемых в рамках образовательной программы ГБПОУ "Горловский колледж
-          технологий и сервиса". • Версия <span id="content-app-version-label">1.6.14</span>
+          технологий и сервиса". • Версия <span id="content-app-version-label">1.6.15</span>
         </small>
       </footer>
     </main>
 
-    <script src="/content-admin.js?v=1.6.14"></script>
+    <script src="/content-admin.js?v=1.6.15"></script>
   </body>
 </html>

@@ -7,11 +7,15 @@ const state = {
   selectedQuestionId: "",
   creatorMode: "create",
   creatorEditingId: "",
+  creatorStep: "structure",
   drafts: {},
   draftRequestState: "idle",
   currentView: "editor",
   detailOpen: false,
   editorOpen: false,
+  importOpen: false,
+  parsedImportItems: [],
+  importPreview: null,
   filters: {
     search: "",
     tour: "",
@@ -38,10 +42,13 @@ const elements = {
   openSummary: document.getElementById("content-open-summary"),
   openQa: document.getElementById("content-open-qa"),
   openCreateTop: document.getElementById("content-open-create-top"),
+  openImportTop: document.getElementById("content-open-import-top"),
   openCreate: document.getElementById("content-open-create"),
+  openImport: document.getElementById("content-open-import"),
   openSelected: document.getElementById("content-open-selected"),
   openSelectedEmpty: document.getElementById("content-open-selected-empty"),
   openCreateEmpty: document.getElementById("content-open-create-empty"),
+  openImportEmpty: document.getElementById("content-open-import-empty"),
   loginCard: document.getElementById("content-login-card"),
   panel: document.getElementById("content-panel"),
   summarySection: document.getElementById("content-summary-section"),
@@ -82,8 +89,10 @@ const elements = {
   questionList: document.getElementById("content-question-list"),
   detailModal: document.getElementById("content-detail-modal"),
   editorModal: document.getElementById("content-editor-modal"),
+  importModal: document.getElementById("content-import-modal"),
   closeDetail: document.getElementById("content-close-detail"),
   closeEditor: document.getElementById("content-close-editor"),
+  closeImport: document.getElementById("content-close-import"),
   detailEmpty: document.getElementById("content-detail-empty"),
   detail: document.getElementById("content-detail"),
   detailHead: document.getElementById("content-detail-head"),
@@ -97,6 +106,11 @@ const elements = {
   exportDrafts: document.getElementById("content-export-drafts"),
   creatorNote: document.getElementById("content-creator-note"),
   creatorModeBadge: document.getElementById("content-creator-mode"),
+  creatorStepper: document.getElementById("content-creator-stepper"),
+  creatorPrev: document.getElementById("content-creator-prev"),
+  creatorNext: document.getElementById("content-creator-next"),
+  creatorStepLabel: document.getElementById("content-creator-step-label"),
+  creatorPreviewCard: document.getElementById("creator-preview-card"),
   cancelEdit: document.getElementById("content-cancel-edit"),
   createQuestion: document.getElementById("content-create-question"),
   resetCreator: document.getElementById("content-reset-creator"),
@@ -121,6 +135,16 @@ const elements = {
   creatorOkCodes: document.getElementById("creator-ok-codes"),
   creatorPkFocus: document.getElementById("creator-pk-focus"),
   creatorMethodicalPurpose: document.getElementById("creator-methodical-purpose"),
+  importDefaultTour: document.getElementById("import-default-tour"),
+  importDefaultCuisine: document.getElementById("import-default-cuisine"),
+  importDefaultDifficulty: document.getElementById("import-default-difficulty"),
+  importDefaultTheme: document.getElementById("import-default-theme"),
+  importText: document.getElementById("content-import-text"),
+  importNote: document.getElementById("content-import-note"),
+  parseImport: document.getElementById("content-parse-import"),
+  applyImport: document.getElementById("content-apply-import"),
+  importMeta: document.getElementById("content-import-meta"),
+  importPreview: document.getElementById("content-import-preview"),
   editorTheme: document.getElementById("editor-theme"),
   editorTopic: document.getElementById("editor-topic"),
   editorFocus: document.getElementById("editor-focus"),
@@ -158,7 +182,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.6.14");
+    await navigator.serviceWorker.register("/sw.js?v=1.6.15");
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       registration.update().catch(() => {});
@@ -174,6 +198,13 @@ const QA_CATEGORY_LABELS = {
   translation: "",
   duplicate: ""
 };
+
+const CREATOR_STEPS = [
+  { id: "structure", label: "Шаг 1 из 4" },
+  { id: "answers", label: "Шаг 2 из 4" },
+  { id: "metadata", label: "Шаг 3 из 4" },
+  { id: "preview", label: "Шаг 4 из 4" }
+];
 
 function adminApi(path, options = {}) {
   const requestHeaders = {
@@ -363,7 +394,7 @@ function setContentView(view, options = {}) {
 }
 
 function syncBodyOverlayState() {
-  const overlayOpen = state.detailOpen || state.editorOpen;
+  const overlayOpen = state.detailOpen || state.editorOpen || state.importOpen;
   document.body.classList.toggle("overlay-active", overlayOpen);
 }
 
@@ -400,6 +431,65 @@ function openEditorModal() {
   state.editorOpen = true;
   elements.editorModal.classList.remove("hidden");
   syncBodyOverlayState();
+}
+
+function closeImportModal() {
+  state.importOpen = false;
+  elements.importModal.classList.add("hidden");
+  syncBodyOverlayState();
+}
+
+function openImportModal() {
+  state.importOpen = true;
+  elements.importModal.classList.remove("hidden");
+  syncBodyOverlayState();
+}
+
+function setCreatorStep(stepId) {
+  if (!CREATOR_STEPS.find((step) => step.id === stepId)) {
+    return;
+  }
+
+  state.creatorStep = stepId;
+  const currentIndex = CREATOR_STEPS.findIndex((step) => step.id === stepId);
+  const panels = document.querySelectorAll("[data-creator-step-panel]");
+  const buttons = document.querySelectorAll("[data-creator-step]");
+
+  panels.forEach((panel) => {
+    panel.classList.toggle("hidden", panel.dataset.creatorStepPanel !== stepId);
+  });
+
+  buttons.forEach((button, index) => {
+    const active = button.dataset.creatorStep === stepId;
+    button.classList.toggle("is-active", active);
+    button.classList.toggle("is-complete", index < currentIndex);
+  });
+
+  if (elements.creatorStepLabel) {
+    elements.creatorStepLabel.textContent = CREATOR_STEPS[currentIndex].label;
+  }
+  if (elements.creatorPrev) {
+    elements.creatorPrev.disabled = currentIndex === 0;
+  }
+  if (elements.creatorNext) {
+    elements.creatorNext.textContent = currentIndex === CREATOR_STEPS.length - 1 ? "К шагу 1" : "Далее";
+  }
+
+  renderCreatorPreview();
+}
+
+function stepCreator(delta) {
+  const currentIndex = CREATOR_STEPS.findIndex((step) => step.id === state.creatorStep);
+  if (currentIndex === -1) {
+    setCreatorStep("structure");
+    return;
+  }
+  if (delta > 0 && currentIndex === CREATOR_STEPS.length - 1) {
+    setCreatorStep("structure");
+    return;
+  }
+  const nextIndex = Math.max(0, Math.min(CREATOR_STEPS.length - 1, currentIndex + delta));
+  setCreatorStep(CREATOR_STEPS[nextIndex].id);
 }
 
 function setDraftRequestState(mode) {
@@ -799,6 +889,7 @@ function renderQuestionList() {
       state.selectedQuestionId = question.id;
       renderQuestionList();
       renderQuestionDetail();
+      openDetailModal();
     });
     elements.questionList.appendChild(row);
   });
@@ -987,6 +1078,267 @@ function collectCreatorPayload() {
   };
 }
 
+function renderCreatorPreview() {
+  if (!elements.creatorPreviewCard) {
+    return;
+  }
+
+  const payload = collectCreatorPayload();
+  const correctIndex = payload.options.findIndex((option) => option.isCorrect);
+  const optionsMarkup = payload.options
+    .filter((option) => option.text)
+    .map(
+      (option, index) =>
+        `<li>${escapeHtml(option.text)}${index === correctIndex ? ' <span class="pill pill-accent">правильный ответ</span>' : ""}</li>`
+    )
+    .join("");
+
+  elements.creatorPreviewCard.innerHTML = `
+    <div class="creator-preview-head">
+      <strong>${escapeHtml(payload.tourCode)} • ${escapeHtml(payload.dishLabel || payload.theme || "Новый тест")}</strong>
+      <div class="content-question-badges">
+        <span class="pill">${escapeHtml(payload.cuisine)}</span>
+        <span class="pill">${escapeHtml(payload.difficulty)}</span>
+      </div>
+    </div>
+    <h4>${escapeHtml(payload.prompt || "Формулировка вопроса появится здесь после заполнения")}</h4>
+    <p class="muted">${escapeHtml(payload.scenario || "Добавьте краткий контекст, если он нужен для понимания вопроса.")}</p>
+    <div class="creator-preview-grid">
+      <div>
+        <span class="muted">Тема</span>
+        <strong>${escapeHtml(payload.theme || "не указана")}</strong>
+      </div>
+      <div>
+        <span class="muted">Подтема</span>
+        <strong>${escapeHtml(payload.topic || "не указана")}</strong>
+      </div>
+      <div>
+        <span class="muted">Фокус</span>
+        <strong>${escapeHtml(payload.focus || "не указан")}</strong>
+      </div>
+      <div>
+        <span class="muted">ОК</span>
+        <strong>${escapeHtml(payload.okCodes || "не указаны")}</strong>
+      </div>
+    </div>
+    <div class="creator-preview-options">
+      <strong>Варианты ответа</strong>
+      ${
+        optionsMarkup
+          ? `<ul class="flat-list">${optionsMarkup}</ul>`
+          : '<div class="muted">Добавьте минимум четыре варианта ответа, чтобы увидеть полноценный предпросмотр.</div>'
+      }
+    </div>
+    <div class="creator-preview-note">
+      <span class="muted">Методическое назначение</span>
+      <p>${escapeHtml(payload.methodicalPurpose || "Можно заполнить позже, но лучше сразу зафиксировать, что именно проверяет вопрос.")}</p>
+    </div>
+  `;
+}
+
+function parseCorrectAnswerToken(value) {
+  const normalized = String(value || "")
+    .trim()
+    .replace(/^вариант\s+/i, "")
+    .replace(/^ответ\s+/i, "")
+    .replace(/[().]/g, "")
+    .trim();
+
+  const letterMap = {
+    A: 0,
+    B: 1,
+    C: 2,
+    D: 3,
+    E: 4,
+    А: 0,
+    Б: 1,
+    В: 2,
+    Г: 3,
+    Д: 4
+  };
+
+  if (letterMap[normalized.toUpperCase()] !== undefined) {
+    return { type: "index", value: letterMap[normalized.toUpperCase()] };
+  }
+
+  const numberMatch = normalized.match(/^\d+$/);
+  if (numberMatch) {
+    return { type: "index", value: Number(normalized) - 1 };
+  }
+
+  return { type: "text", value: normalized.toLowerCase() };
+}
+
+function parseQuestionBlock(block, defaults, index) {
+  const lines = block
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const meta = {
+    tourCode: defaults.tourCode,
+    cuisine: defaults.cuisine,
+    difficulty: defaults.difficulty,
+    theme: defaults.theme
+  };
+
+  const contentLines = [];
+  lines.forEach((line) => {
+    const metaMatch = line.match(/^(Тур|Кухня|Сложность|Тема)\s*:\s*(.+)$/i);
+    if (metaMatch) {
+      const [, key, value] = metaMatch;
+      const normalizedKey = key.toLowerCase();
+      if (normalizedKey === "тур") meta.tourCode = value.trim().toUpperCase();
+      if (normalizedKey === "кухня") meta.cuisine = value.trim().toLowerCase();
+      if (normalizedKey === "сложность") meta.difficulty = value.trim().toLowerCase();
+      if (normalizedKey === "тема") meta.theme = value.trim();
+      return;
+    }
+    contentLines.push(line);
+  });
+
+  let prompt = "";
+  const options = [];
+  let explicitAnswer = null;
+
+  contentLines.forEach((line) => {
+    const answerMatch = line.match(/^(Ответ|Правильный ответ)\s*:\s*(.+)$/i);
+    if (answerMatch) {
+      explicitAnswer = parseCorrectAnswerToken(answerMatch[2]);
+      return;
+    }
+
+    const starredMatch = line.match(/^[*★]\s+(.+)$/);
+    if (starredMatch) {
+      options.push({ text: starredMatch[1].trim(), isCorrect: true });
+      return;
+    }
+
+    const optionMatch = line.match(/^(?:[A-Za-zА-Яа-я]\)|[A-Za-zА-Яа-я]\.|[0-9]+\)|[0-9]+\.|[-•–])\s*(.+)$/);
+    if (optionMatch) {
+      options.push({ text: optionMatch[1].trim(), isCorrect: false });
+      return;
+    }
+
+    if (!prompt) {
+      prompt = line.replace(/^\d+[.)]\s*/, "").trim();
+      return;
+    }
+
+    prompt = `${prompt} ${line}`.trim();
+  });
+
+  if (explicitAnswer) {
+    if (explicitAnswer.type === "index" && options[explicitAnswer.value]) {
+      options[explicitAnswer.value].isCorrect = true;
+    } else if (explicitAnswer.type === "text") {
+      const matched = options.find((option) => option.text.toLowerCase() === explicitAnswer.value);
+      if (matched) {
+        matched.isCorrect = true;
+      }
+    }
+  }
+
+  const errors = [];
+  if (!prompt) {
+    errors.push("не удалось определить формулировку вопроса");
+  }
+  if (options.length < 4) {
+    errors.push("найдено меньше четырёх вариантов ответа");
+  }
+  if (options.filter((option) => option.isCorrect).length !== 1) {
+    errors.push("не удалось определить ровно один правильный ответ");
+  }
+
+  const theme = meta.theme || defaults.theme || `Импортированный блок ${index + 1}`;
+  const dishLabel = prompt ? prompt.slice(0, 72) : `Импортированный вопрос ${index + 1}`;
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    payload: {
+      tourCode: ["T1", "T4"].includes(meta.tourCode) ? meta.tourCode : defaults.tourCode,
+      cuisine: meta.cuisine || defaults.cuisine,
+      difficulty: ["basic", "standard", "advanced"].includes(meta.difficulty) ? meta.difficulty : defaults.difficulty,
+      theme,
+      topic: dishLabel,
+      dishLabel,
+      prompt,
+      scenario: "",
+      note: "Импортировано списком",
+      focus: "",
+      okCodes: "",
+      pkFocus: "",
+      methodicalPurpose: "Автоматически импортированный тестовый вопрос",
+      options
+    }
+  };
+}
+
+function parseImportText(rawText, defaults) {
+  const blocks = String(rawText || "")
+    .replace(/\r/g, "")
+    .split(/\n\s*\n+/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+
+  const parsed = blocks.map((block, index) => parseQuestionBlock(block, defaults, index));
+  return {
+    totalBlocks: blocks.length,
+    items: parsed,
+    validItems: parsed.filter((item) => item.valid),
+    invalidItems: parsed.filter((item) => !item.valid)
+  };
+}
+
+function renderImportPreview() {
+  const result = state.importPreview;
+  if (!result) {
+    elements.importMeta.textContent = "ещё не проверено";
+    elements.importPreview.innerHTML =
+      '<div class="muted">После проверки здесь появятся найденные вопросы, правильные ответы и замечания по блокам.</div>';
+    elements.applyImport.disabled = true;
+    return;
+  }
+
+  elements.importMeta.textContent = `распознано ${result.validItems.length} из ${result.totalBlocks}`;
+  elements.applyImport.disabled = result.validItems.length === 0;
+  elements.importPreview.innerHTML = result.items
+    .map((item, index) => {
+      const options = item.payload.options
+        .map(
+          (option) =>
+            `<li>${escapeHtml(option.text)}${option.isCorrect ? ' <span class="pill pill-accent">ключ</span>' : ""}</li>`
+        )
+        .join("");
+      const errors = item.errors.length
+        ? `<div class="import-issue-list">${item.errors.map((error) => `<div>• ${escapeHtml(error)}</div>`).join("")}</div>`
+        : '<div class="import-ok">Блок готов к сохранению.</div>';
+
+      return `
+        <article class="import-preview-item${item.valid ? "" : " has-errors"}">
+          <div class="section-row">
+            <strong>Блок ${index + 1}</strong>
+            <span class="pill ${item.valid ? "qa-pill-clean" : "qa-pill-warning"}">${item.valid ? "готов" : "нужна правка"}</span>
+          </div>
+          <div class="import-preview-question">${escapeHtml(item.payload.prompt || "Вопрос не распознан")}</div>
+          <div class="muted">Тур: ${escapeHtml(item.payload.tourCode)} • Кухня: ${escapeHtml(item.payload.cuisine)} • Сложность: ${escapeHtml(item.payload.difficulty)}</div>
+          <ul class="flat-list">${options}</ul>
+          ${errors}
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function resetImportState() {
+  state.importPreview = null;
+  state.parsedImportItems = [];
+  elements.importText.value = "";
+  hideMessage(elements.importNote);
+  renderImportPreview();
+}
+
 function resetCreatorForm() {
   setCreatorMode("create");
   elements.creatorTour.value = "T1";
@@ -1010,33 +1362,145 @@ function resetCreatorForm() {
   elements.creatorOkCodes.value = "";
   elements.creatorPkFocus.value = "";
   elements.creatorMethodicalPurpose.value = "";
+  setCreatorStep("structure");
   hideMessage(elements.creatorNote);
+}
+
+function getImportDefaults() {
+  return {
+    tourCode: elements.importDefaultTour.value || "T1",
+    cuisine: elements.importDefaultCuisine.value || "mixed",
+    difficulty: elements.importDefaultDifficulty.value || "basic",
+    theme: elements.importDefaultTheme.value.trim()
+  };
+}
+
+async function handleParseImport() {
+  const rawText = elements.importText.value.trim();
+  if (!rawText) {
+    state.importPreview = null;
+    state.parsedImportItems = [];
+    renderImportPreview();
+    showMessage(elements.importNote, "Вставьте список вопросов, прежде чем запускать проверку.", "warning");
+    return;
+  }
+
+  hideMessage(elements.importNote);
+  const result = parseImportText(rawText, getImportDefaults());
+  state.importPreview = result;
+  state.parsedImportItems = result.validItems.map((item) => item.payload);
+  renderImportPreview();
+
+  if (result.validItems.length === result.totalBlocks) {
+    showMessage(elements.importNote, `Готово: распознано ${result.validItems.length} вопросов без замечаний.`, "success");
+    return;
+  }
+
+  if (!result.validItems.length) {
+    showMessage(elements.importNote, "Ни один блок не прошёл проверку. Исправьте замечания в предпросмотре и попробуйте снова.", "warning");
+    return;
+  }
+
+  showMessage(
+    elements.importNote,
+    `Распознано ${result.validItems.length} из ${result.totalBlocks}. Некорректные блоки подсвечены ниже.`,
+    "warning"
+  );
+}
+
+async function applyImportBatch() {
+  if (!state.importPreview || !state.importPreview.validItems.length) {
+    showMessage(elements.importNote, "Сначала проверьте список и убедитесь, что есть готовые к сохранению блоки.", "warning");
+    return;
+  }
+
+  const validItems = state.importPreview.validItems;
+  const createdIds = [];
+  const errors = [];
+
+  elements.parseImport.disabled = true;
+  elements.applyImport.disabled = true;
+  hideMessage(elements.importNote);
+
+  try {
+    for (let index = 0; index < validItems.length; index += 1) {
+      const item = validItems[index];
+      try {
+        const question = await adminApi("/api/admin/content/questions", {
+          method: "POST",
+          body: JSON.stringify(item.payload)
+        });
+        createdIds.push(question.id);
+      } catch (error) {
+        errors.push(`Блок ${index + 1}: ${error.message || "не удалось сохранить вопрос"}`);
+      }
+    }
+
+    await loadContentPanel();
+    if (createdIds.length) {
+      state.selectedQuestionId = createdIds[createdIds.length - 1];
+      renderQuestionList();
+      renderQuestionDetail();
+    }
+
+    if (!errors.length) {
+      closeImportModal();
+      resetImportState();
+      showMessage(
+        elements.note,
+        `Импорт завершён: добавлено ${createdIds.length} вопросов.`,
+        "success"
+      );
+      return;
+    }
+
+    showMessage(
+      elements.importNote,
+      `Часть вопросов сохранена (${createdIds.length}), но есть ошибки: ${errors.join(" | ")}`,
+      "warning"
+    );
+  } finally {
+    elements.parseImport.disabled = false;
+    renderImportPreview();
+  }
+}
+
+function openCreateFlow() {
+  setContentView("editor", { scroll: false });
+  resetCreatorForm();
+  openEditorModal();
+}
+
+function openImportFlow() {
+  setContentView("editor", { scroll: false });
+  resetImportState();
+  openImportModal();
 }
 
 function startEditingSelectedQuestion() {
   const question = state.questions.find((item) => item.id === state.selectedQuestionId);
   if (!question || !isCustomQuestion(question)) {
-    showMessage(elements.note, "      .", "warning");
+    showMessage(elements.note, "Выберите авторский вопрос, который можно редактировать.", "warning");
     return;
   }
 
   fillCreatorFromQuestion(question);
   setCreatorMode("edit", question);
+  setCreatorStep("structure");
   hideMessage(elements.creatorNote);
-  showMessage(elements.creatorNote, `    ${question.id}.`, "success");
-  elements.editorSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  showMessage(elements.creatorNote, `Открыт режим редактирования вопроса ${question.id}.`, "success");
+  closeDetailModal();
+  openEditorModal();
 }
 
 async function deleteSelectedQuestion() {
   const question = state.questions.find((item) => item.id === state.selectedQuestionId);
   if (!question || !isCustomQuestion(question)) {
-    showMessage(elements.note, "      .", "warning");
+    showMessage(elements.note, "Можно удалить только авторский вопрос.", "warning");
     return;
   }
 
-  const confirmed = window.confirm(
-    `   ${question.id}?         .`
-  );
+  const confirmed = window.confirm(`Удалить вопрос ${question.id}? Это действие нельзя отменить.`);
   if (!confirmed) {
     return;
   }
@@ -1058,10 +1522,11 @@ async function deleteSelectedQuestion() {
     delete state.drafts[question.id];
     state.selectedQuestionId = "";
     await loadContentPanel();
-    showMessage(elements.creatorNote, ` ${question.id}    .`, "success");
-    showMessage(elements.note, ` ${question.id}    .`, "success");
+    closeDetailModal();
+    showMessage(elements.creatorNote, `Вопрос ${question.id} удалён из банка.`, "success");
+    showMessage(elements.note, `Вопрос ${question.id} удалён из банка.`, "success");
   } catch (error) {
-    showMessage(elements.note, error.message || "    .", "error");
+    showMessage(elements.note, error.message || "Не удалось удалить вопрос.", "error");
   } finally {
     elements.deleteQuestion.disabled = false;
   }
@@ -1088,13 +1553,11 @@ async function createCustomQuestion() {
     });
 
     const successMessage = editing
-      ? ` ${question.id}    .`
-      : `  ${question.id}    .`;
+      ? `Вопрос ${question.id} обновлён и сохранён.`
+      : `Новый вопрос ${question.id} добавлен в банк.`;
     showMessage(
       elements.creatorNote,
-      editing
-        ? ` ${question.id}    .`
-        : `  ${question.id}    .`,
+      successMessage,
       "success"
     );
     resetCreatorForm();
@@ -1102,11 +1565,13 @@ async function createCustomQuestion() {
     state.selectedQuestionId = question.id;
     renderQuestionList();
     renderQuestionDetail();
-    showMessage(elements.creatorNote, successMessage, "success");
+    closeEditorModal();
+    openDetailModal();
+    showMessage(elements.note, successMessage, "success");
   } catch (error) {
     showMessage(
       elements.creatorNote,
-      error.message || "     .",
+      error.message || "Не удалось сохранить вопрос.",
       "error"
     );
   } finally {
@@ -1161,6 +1626,38 @@ async function loadContentPanel() {
   applyFilters();
 }
 
+function bindCreatorInputs() {
+  const inputLike = [
+    elements.creatorDishLabel,
+    elements.creatorPrompt,
+    elements.creatorScenario,
+    elements.creatorNoteInput,
+    elements.creatorOption1,
+    elements.creatorOption2,
+    elements.creatorOption3,
+    elements.creatorOption4,
+    elements.creatorTheme,
+    elements.creatorTopic,
+    elements.creatorFocus,
+    elements.creatorOkCodes,
+    elements.creatorPkFocus,
+    elements.creatorMethodicalPurpose
+  ];
+
+  const changeLike = [
+    elements.creatorTour,
+    elements.creatorCuisine,
+    elements.creatorDifficulty,
+    elements.creatorCorrect1,
+    elements.creatorCorrect2,
+    elements.creatorCorrect3,
+    elements.creatorCorrect4
+  ];
+
+  inputLike.forEach((element) => element?.addEventListener("input", renderCreatorPreview));
+  changeLike.forEach((element) => element?.addEventListener("change", renderCreatorPreview));
+}
+
 function bindFilters() {
   [
     elements.filterTour,
@@ -1189,30 +1686,72 @@ function initNavigation() {
     closeNavDrawer();
   });
   elements.navSummary.addEventListener("click", () => {
-    elements.summarySection.scrollIntoView({ behavior: "smooth", block: "start" });
+    setContentView("summary");
     closeNavDrawer();
   });
   elements.navQa.addEventListener("click", () => {
-    elements.qaSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    setContentView("qa");
     closeNavDrawer();
   });
   elements.navEditor.addEventListener("click", () => {
-    elements.editorSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    setContentView("editor");
     closeNavDrawer();
   });
   elements.navRefresh.addEventListener("click", async () => {
     try {
       showPanel();
       await loadContentPanel();
-      showMessage(elements.note, "   .", "success");
+      showMessage(elements.note, "Список вопросов и сводка обновлены.", "success");
     } catch (error) {
       if (error.status === 401 || error.status === 403) {
         showLoginState();
       } else {
-        showMessage(elements.note, error.message || "    .", "error");
+        showMessage(elements.note, error.message || "Не удалось обновить банк заданий.", "error");
       }
     }
     closeNavDrawer();
+  });
+
+  elements.openCatalog.addEventListener("click", () => setContentView("editor"));
+  elements.openSummary.addEventListener("click", () => setContentView("summary"));
+  elements.openQa.addEventListener("click", () => setContentView("qa"));
+  elements.openCreateTop.addEventListener("click", openCreateFlow);
+  elements.openCreate.addEventListener("click", openCreateFlow);
+  elements.openCreateEmpty.addEventListener("click", openCreateFlow);
+  elements.openImportTop.addEventListener("click", openImportFlow);
+  elements.openImport.addEventListener("click", openImportFlow);
+  elements.openImportEmpty.addEventListener("click", openImportFlow);
+  [elements.openSelected, elements.openSelectedEmpty].forEach((button) => {
+    button.addEventListener("click", openDetailModal);
+  });
+
+  elements.closeDetail.addEventListener("click", closeDetailModal);
+  elements.closeEditor.addEventListener("click", closeEditorModal);
+  elements.closeImport.addEventListener("click", closeImportModal);
+
+  document.querySelectorAll("[data-close-overlay]").forEach((element) => {
+    element.addEventListener("click", () => {
+      closeDetailModal();
+      closeEditorModal();
+      closeImportModal();
+    });
+  });
+
+  document.querySelectorAll("[data-creator-step]").forEach((button) => {
+    button.addEventListener("click", () => setCreatorStep(button.dataset.creatorStep));
+  });
+  elements.creatorPrev.addEventListener("click", () => stepCreator(-1));
+  elements.creatorNext.addEventListener("click", () => stepCreator(1));
+
+  elements.parseImport.addEventListener("click", handleParseImport);
+  elements.applyImport.addEventListener("click", applyImportBatch);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeDetailModal();
+      closeEditorModal();
+      closeImportModal();
+    }
   });
 }
 
@@ -1221,6 +1760,7 @@ async function init() {
   await loadPublicVersion();
   initNavigation();
   bindFilters();
+  bindCreatorInputs();
   elements.saveDraft.addEventListener("click", saveDraft);
   elements.resetDraft.addEventListener("click", resetDraft);
   elements.exportDrafts.addEventListener("click", exportDrafts);
@@ -1228,10 +1768,16 @@ async function init() {
   elements.deleteQuestion.addEventListener("click", deleteSelectedQuestion);
   elements.createQuestion.addEventListener("click", createCustomQuestion);
   elements.resetCreator.addEventListener("click", resetCreatorForm);
-  elements.cancelEdit.addEventListener("click", resetCreatorForm);
+  elements.cancelEdit.addEventListener("click", () => {
+    resetCreatorForm();
+    closeEditorModal();
+  });
   resetCreatorForm();
+  resetImportState();
+  setContentView("editor", { scroll: false });
 
   try {
+    await ensureAdminSession();
     showPanel();
     await loadContentPanel();
   } catch (error) {
@@ -1241,7 +1787,7 @@ async function init() {
     }
 
     showPanel();
-    showMessage(elements.note, error.message || "    .", "error");
+    showMessage(elements.note, error.message || "Не удалось загрузить банк заданий.", "error");
   }
 
   document.addEventListener("click", (event) => {
@@ -1257,219 +1803,6 @@ async function init() {
       closeNavDrawer();
     }
   });
-}
-
-function renderQuestionList() {
-  elements.questionList.innerHTML = "";
-  const total = state.questions.length;
-  const shown = state.filteredQuestions.length;
-  const shownFlagged = state.filteredQuestions.filter((question) => getQuestionIssueInfo(question).issueCount > 0).length;
-  elements.filterMeta.textContent = ` ${shown}  ${total}    ${shownFlagged}`;
-  elements.draftMeta.textContent = `: ${Object.keys(state.drafts).length}   QA: ${state.summary?.qa?.flaggedQuestionsCount || 0}`;
-
-  if (!shown) {
-    elements.questionList.innerHTML = '<div class="muted">     .</div>';
-    if (state.selectedQuestionId && !state.filteredQuestions.find((item) => item.id === state.selectedQuestionId)) {
-      state.selectedQuestionId = "";
-      renderQuestionDetail();
-    }
-    return;
-  }
-
-  state.filteredQuestions.forEach((question) => {
-    const draft = state.drafts[question.id];
-    const custom = isCustomQuestion(question);
-    const issueInfo = getQuestionIssueInfo(question);
-    const row = document.createElement("button");
-    row.type = "button";
-    row.className = `content-question-row${question.id === state.selectedQuestionId ? " is-selected" : ""}${issueInfo.issueCount ? " has-issues" : ""}${issueInfo.severity === "risk" ? " is-risk" : ""}`;
-    const qaBadgeClass =
-      issueInfo.severity === "risk"
-        ? "pill qa-pill qa-pill-risk"
-        : issueInfo.issueCount
-          ? "pill qa-pill qa-pill-warning"
-          : issueInfo.hasDraft
-            ? "pill qa-pill qa-pill-draft"
-            : "pill qa-pill qa-pill-clean";
-
-    row.innerHTML = `
-      <div class="content-question-top">
-        <strong>${escapeHtml(question.id)}</strong>
-        <div class="content-question-badges">
-          <span class="pill">${escapeHtml(question.tourCode)}</span>
-          ${custom ? '<span class="pill pill-accent"></span>' : ""}
-          <span class="${qaBadgeClass}">${escapeHtml(issueInfo.label)}</span>
-        </div>
-      </div>
-      <div>${escapeHtml(shortText(question.prompt, 110))}</div>
-      <div class="content-question-meta">
-        <span>${escapeHtml(question.cuisineLabel)}</span>
-        <span>${escapeHtml(question.typeLabel)}</span>
-        <span>${escapeHtml(question.metadata.difficultyLabel)}</span>
-        <span>${escapeHtml(question.sourceLabel || (custom ? " " : " "))}</span>
-        <span class="content-open-hint"></span>
-        ${draft ? '<span class="pill">  </span>' : ""}
-      </div>
-    `;
-    row.addEventListener("click", () => {
-      state.selectedQuestionId = question.id;
-      renderQuestionList();
-      renderQuestionDetail();
-      openDetailModal();
-    });
-    elements.questionList.appendChild(row);
-  });
-
-  elements.openSelected.disabled = !state.selectedQuestionId;
-  elements.openSelectedEmpty.disabled = !state.selectedQuestionId;
-  renderQuestionDetail();
-}
-
-function startEditingSelectedQuestion() {
-  const question = state.questions.find((item) => item.id === state.selectedQuestionId);
-  if (!question || !isCustomQuestion(question)) {
-    showMessage(elements.note, "      .", "warning");
-    return;
-  }
-
-  fillCreatorFromQuestion(question);
-  setCreatorMode("edit", question);
-  hideMessage(elements.creatorNote);
-  showMessage(elements.creatorNote, `    ${question.id}.`, "success");
-  closeDetailModal();
-  openEditorModal();
-}
-
-async function createCustomQuestion() {
-  const editing = state.creatorMode === "edit" && state.creatorEditingId;
-  const requestPath = editing
-    ? `/api/admin/content/questions/${encodeURIComponent(state.creatorEditingId)}`
-    : "/api/admin/content/questions";
-  const requestMethod = editing ? "PUT" : "POST";
-
-  try {
-    elements.createQuestion.disabled = true;
-    hideMessage(elements.creatorNote);
-    const payload = collectCreatorPayload();
-    if (editing) {
-      payload.id = state.creatorEditingId;
-    }
-
-    const question = await adminApi(requestPath, {
-      method: requestMethod,
-      body: JSON.stringify(payload)
-    });
-
-    const successMessage = editing
-      ? ` ${question.id}    .`
-      : `  ${question.id}    .`;
-    showMessage(elements.creatorNote, successMessage, "success");
-    resetCreatorForm();
-    await loadContentPanel();
-    state.selectedQuestionId = question.id;
-    renderQuestionList();
-    renderQuestionDetail();
-    closeEditorModal();
-    openDetailModal();
-    showMessage(elements.note, successMessage, "success");
-  } catch (error) {
-    showMessage(
-      elements.creatorNote,
-      error.message || "     .",
-      "error"
-    );
-  } finally {
-    elements.createQuestion.disabled = false;
-  }
-}
-
-function initNavigation() {
-  elements.navBack.addEventListener("click", goBackOrHome);
-  elements.navTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-  elements.navSummary.addEventListener("click", () => setContentView("summary"));
-  elements.navQa.addEventListener("click", () => setContentView("qa"));
-  elements.navEditor.addEventListener("click", () => setContentView("editor"));
-  elements.navRefresh.addEventListener("click", async () => {
-    try {
-      showPanel();
-      await loadContentPanel();
-      showMessage(elements.note, "   .", "success");
-    } catch (error) {
-      if (error.status === 401 || error.status === 403) {
-        showLoginState();
-      } else {
-        showMessage(elements.note, error.message || "    .", "error");
-      }
-    }
-  });
-  elements.openCatalog.addEventListener("click", () => setContentView("editor"));
-  elements.openSummary.addEventListener("click", () => setContentView("summary"));
-  elements.openQa.addEventListener("click", () => setContentView("qa"));
-  elements.openCreateTop.addEventListener("click", () => {
-    setContentView("editor");
-    resetCreatorForm();
-    openEditorModal();
-  });
-  elements.openCreate.addEventListener("click", () => {
-    setContentView("editor", { scroll: false });
-    resetCreatorForm();
-    openEditorModal();
-  });
-  elements.openCreateEmpty.addEventListener("click", () => {
-    setContentView("editor", { scroll: false });
-    resetCreatorForm();
-    openEditorModal();
-  });
-  [elements.openSelected, elements.openSelectedEmpty].forEach((button) =>
-    button.addEventListener("click", openDetailModal)
-  );
-  elements.closeDetail.addEventListener("click", closeDetailModal);
-  elements.closeEditor.addEventListener("click", closeEditorModal);
-  document.querySelectorAll("[data-close-overlay]").forEach((element) => {
-    element.addEventListener("click", () => {
-      closeDetailModal();
-      closeEditorModal();
-    });
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closeDetailModal();
-      closeEditorModal();
-    }
-  });
-}
-
-async function init() {
-  await loadPublicVersion();
-  initNavigation();
-  bindFilters();
-  elements.saveDraft.addEventListener("click", saveDraft);
-  elements.resetDraft.addEventListener("click", resetDraft);
-  elements.exportDrafts.addEventListener("click", exportDrafts);
-  elements.editQuestion.addEventListener("click", startEditingSelectedQuestion);
-  elements.deleteQuestion.addEventListener("click", deleteSelectedQuestion);
-  elements.createQuestion.addEventListener("click", createCustomQuestion);
-  elements.resetCreator.addEventListener("click", resetCreatorForm);
-  elements.cancelEdit.addEventListener("click", () => {
-    resetCreatorForm();
-    closeEditorModal();
-  });
-  resetCreatorForm();
-
-  try {
-    await ensureAdminSession();
-    showPanel();
-    setContentView("editor", { scroll: false });
-    await loadContentPanel();
-  } catch (error) {
-    if (error.status === 401 || error.status === 403) {
-      showLoginState();
-      return;
-    }
-
-    showPanel();
-    showMessage(elements.note, error.message || "    .", "error");
-  }
 }
 
 init();
