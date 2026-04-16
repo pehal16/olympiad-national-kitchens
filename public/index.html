@@ -7,10 +7,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Национальные кухни мира</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.17" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.18" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.17" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.18" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -26,21 +26,19 @@
             type="button"
             aria-expanded="false"
             aria-controls="nav-drawer"
-          >
-            Меню
-          </button>
+          >Меню</button>
         </div>
         <div id="nav-drawer" class="nav-ribbon-drawer">
           <div class="nav-ribbon-summary" aria-hidden="true">
             <div class="nav-ribbon-title">Платформа олимпиады</div>
-            <small>Участник, результаты и организационный контур собраны в одной системе.</small>
+            <small>Регистрация, прохождение и результаты в одном окне.</small>
           </div>
           <button id="nav-back" class="button ghost" type="button">Назад</button>
           <button id="nav-home" class="button ghost" type="button">Главная</button>
           <button id="nav-register" class="button ghost" type="button">Регистрация</button>
           <button id="nav-attempt" class="button ghost" type="button">Текущий тур</button>
           <button id="nav-result" class="button ghost" type="button">Результат</button>
-          <div id="network-status" class="network-badge online">Сеть: онлайн</div>
+          <div id="network-status" class="network-badge online">Сеть: связь есть</div>
           <button id="install-app" class="button primary hidden" type="button">Установить приложение</button>
           <a class="button ghost" href="/admin.html">Облачная админка</a>
         </div>
@@ -49,7 +47,7 @@
       <section id="hero-section" class="card hero hero-intro">
         <div class="hero-grid">
           <div class="hero-copy">
-            <div class="eyebrow">Персонализированное обучение и цифровизация</div>
+            <div class="eyebrow">Цифровая олимпиада</div>
             <h1 id="hero-title">Национальные кухни мира</h1>
             <p id="hero-subtitle" class="lead"></p>
             <div id="hero-format-badge" class="game-badge hero-format-badge">Индивидуальная цифровая олимпиада • 45 минут • 5 туров</div>
@@ -69,7 +67,7 @@
                 </span>
                 <div>
                   <strong>Индивидуальный вариант</strong>
-                  <span>Система формирует персональный маршрут заданий для каждого участника.</span>
+                  <span>Для каждого участника формируется свой вариант.</span>
                 </div>
               </article>
               <article class="hero-feature-card">
@@ -81,7 +79,7 @@
                 </span>
                 <div>
                   <strong>Пошаговое прохождение</strong>
-                  <span>На экране только один вопрос, а прогресс фиксируется по каждому туру.</span>
+                  <span>На экране только один вопрос без возврата назад.</span>
                 </div>
               </article>
               <article class="hero-feature-card">
@@ -93,7 +91,7 @@
                 </span>
                 <div>
                   <strong>Автопроверка</strong>
-                  <span>Ответы проверяются автоматически, без ручной экспертной оценки и задержек.</span>
+                  <span>Ответы проверяются автоматически и без задержек.</span>
                 </div>
               </article>
               <article class="hero-feature-card">
@@ -105,7 +103,7 @@
                 </span>
                 <div>
                   <strong>Результаты в облаке</strong>
-                  <span>Результаты сохраняются централизованно и доступны организатору в панели управления.</span>
+                  <span>Результаты сохраняются в облаке и доступны организатору.</span>
                 </div>
               </article>
             </div>
@@ -119,24 +117,24 @@
             <div class="hero-dashboard-card">
               <div class="hero-dashboard-top">
                 <span class="eyebrow">Оперативный контур</span>
-                <strong>Платформа готова к проведению маршрута</strong>
-                <p class="muted">Все ключевые сценарии уже в одном окне: регистрация, прохождение, контроль и итоговая фиксация.</p>
+                <strong>Платформа готова к проведению</strong>
+                <p class="muted">Быстрый старт, пошаговый маршрут и сохранение результатов.</p>
               </div>
               <div class="hero-status-grid">
                 <article class="hero-status-card">
                   <span>Этап</span>
                   <strong id="hero-stage-value">Подготовка</strong>
-                  <small id="hero-stage-note">Сначала заполните данные участника и проверьте правила прохождения.</small>
+                  <small id="hero-stage-note">Заполните данные участника перед стартом.</small>
                 </article>
                 <article class="hero-status-card">
                   <span>Маршрут</span>
                   <strong id="hero-progress-value">0%</strong>
-                  <small id="hero-progress-note">Прогресс по турам появится после регистрации.</small>
+                  <small id="hero-progress-note">Прогресс появится после регистрации.</small>
                 </article>
                 <article class="hero-status-card">
                   <span>Синхронизация</span>
                   <strong id="hero-sync-value">Онлайн</strong>
-                  <small id="hero-sync-note">Результаты будут фиксироваться в облаке организатора.</small>
+                  <small id="hero-sync-note">Результаты сохраняются в облаке организатора.</small>
                 </article>
               </div>
               <div class="hero-brand-strip">
@@ -171,10 +169,7 @@
             </div>
           </aside>
         </div>
-        <div class="exam-preflight-note">
-          <strong>После запуска заданий активируется особый режим.</strong>
-          В этом режиме блокируются копирование, контекстное меню и некоторые сочетания клавиш. Если попытаться выйти из активного окна или полноэкранного режима, система это заметит и зафиксирует.
-        </div>
+        <div class="exam-preflight-note"><strong>После старта включается экзаменационный режим.</strong> Копирование и выход из активного окна фиксируются автоматически.</div>
         <div class="meta-row" id="tour-meta"></div>
       </section>
 
@@ -373,7 +368,7 @@
         <small>
           Разработчик: Постовит Дмитрий Александрович, преподаватель первой категории, профильных
           дисциплин, реализуемых в рамках образовательной программы ГБПОУ "Горловский колледж
-          технологий и сервиса". • Версия <span id="app-version-label">1.6.17</span>
+          технологий и сервиса". • Версия <span id="app-version-label">1.6.18</span>
         </small>
       </footer>
     </main>
@@ -396,6 +391,6 @@
       </section>
     </div>
 
-    <script src="/app.js?v=1.6.17"></script>
+    <script src="/app.js?v=1.6.18"></script>
   </body>
 </html>

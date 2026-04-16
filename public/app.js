@@ -127,6 +127,116 @@ const elements = {
   examGuardReturn: document.getElementById("exam-guard-return")
 };
 
+function applyStaticRussianCopy() {
+  const setText = (selector, text) => {
+    const node = document.querySelector(selector);
+    if (node) {
+      node.textContent = text;
+    }
+  };
+
+  setText(".nav-ribbon-label", "Навигация");
+  setText("#nav-menu-toggle", "Меню");
+  setText(".nav-ribbon-title", "Платформа олимпиады");
+  setText(".nav-ribbon-summary small", "Регистрация, прохождение и результаты в одном окне.");
+  setText("#nav-back", "Назад");
+  setText("#nav-home", "Главная");
+  setText("#nav-register", "Регистрация");
+  setText("#nav-attempt", "Текущий тур");
+  setText("#nav-result", "Результат");
+  setText("#network-status", "Сеть: связь есть");
+  setText("#install-app", "Установить приложение");
+  const adminLink = document.querySelector('a[href="/admin.html"]');
+  if (adminLink) {
+    adminLink.textContent = "Облачная админка";
+  }
+
+  setText(".hero-copy .eyebrow", "Цифровая олимпиада");
+  setText("#hero-title", "Национальные кухни мира");
+  setText("#hero-subtitle", "Индивидуальная олимпиада с автоматической проверкой, пошаговым прохождением и сохранением результатов в облаке.");
+  setText("#hero-format-badge", "Индивидуальная цифровая олимпиада • 45 минут • 5 туров");
+  setText(".hero-dashboard-top .eyebrow", "Оперативный контур");
+  setText(".hero-dashboard-top strong", "Платформа готова к проведению");
+  setText(".hero-dashboard-top .muted", "Быстрый старт, пошаговый маршрут и сохранение результатов.");
+
+  setText("#hero-stage-value", "Подготовка");
+  setText("#hero-stage-note", "Заполните данные участника перед стартом.");
+  setText("#hero-progress-note", "Прогресс появится после регистрации.");
+  setText("#hero-sync-value", "Онлайн");
+  setText("#hero-sync-note", "Результаты сохраняются в облаке организатора.");
+  setText(".exam-preflight-note", "После старта включается экзаменационный режим. Копирование и выход из активного окна фиксируются автоматически.");
+  const preflightStrong = document.querySelector(".exam-preflight-note strong");
+  if (preflightStrong) {
+    preflightStrong.textContent = "После старта включается экзаменационный режим.";
+  }
+
+  setText("#journey-status", "Точка входа: регистрация");
+  setText("#journey-progress-label", "Готовность маршрута: 0%");
+  setText("#journey-progress-hint", "После регистрации система откроет первый тур.");
+
+  const sectionIntro = document.querySelectorAll(".section-intro");
+  if (sectionIntro[0]) {
+    sectionIntro[0].textContent = "Заполните данные участника перед стартом.";
+  }
+  if (sectionIntro[1]) {
+    sectionIntro[1].textContent = "Перед стартом подтвердите готовность и проверьте правила.";
+  }
+
+  const featureTexts = [
+    ["Индивидуальный вариант", "Для каждого участника формируется свой вариант."],
+    ["Пошаговое прохождение", "На экране только один вопрос без возврата назад."],
+    ["Автопроверка", "Ответы проверяются автоматически и без задержек."],
+    ["Результаты в облаке", "Результаты сохраняются в облаке и доступны организатору."]
+  ];
+  document.querySelectorAll(".hero-feature-card").forEach((card, index) => {
+    const title = card.querySelector("strong");
+    const text = card.querySelector("span");
+    if (title && featureTexts[index]) {
+      title.textContent = featureTexts[index][0];
+    }
+    if (text && featureTexts[index]) {
+      text.textContent = featureTexts[index][1];
+    }
+  });
+
+  const registrationLabels = document.querySelectorAll("#registration-form .field span");
+  const registrationTexts = [
+    "ФИО участника",
+    "Образовательная организация",
+    "Учебная группа, код и название специальности/профессии",
+    "ФИО наставника"
+  ];
+  registrationLabels.forEach((label, index) => {
+    if (registrationTexts[index]) {
+      label.textContent = registrationTexts[index];
+    }
+  });
+
+  if (elements.fullName) {
+    elements.fullName.placeholder = "Иванов Иван Иванович";
+  }
+  if (elements.institution) {
+    elements.institution.value = "ГБПОУ «Горловский колледж технологий и сервиса»";
+  }
+  if (elements.groupName) {
+    elements.groupName.placeholder = "№4/П-24, 43.01.09 Повар, кондитер";
+  }
+  if (elements.mentorName) {
+    elements.mentorName.placeholder = "Постовит Дмитрий Александрович, преподаватель профильных дисциплин";
+  }
+
+  setText("#start-consent-hint", "Сохраните данные участника и подтвердите готовность работать 45 минут без отвлечений.");
+  const consentText = document.querySelector(".consent-check span");
+  if (consentText) {
+    consentText.textContent = "Я понимаю, что после старта нужно выделить 45 минут и пройти олимпиаду без отвлечений.";
+  }
+  const registrationSubmit = document.querySelector('#registration-form button[type=\"submit\"]');
+  if (registrationSubmit) {
+    registrationSubmit.textContent = "Сохранить данные";
+  }
+  setText("#start-attempt", "Начать олимпиаду");
+}
+
 function setButtonAvailability(button, enabled, hint = "") {
   if (!button) {
     return;
@@ -142,42 +252,23 @@ function setButtonAvailability(button, enabled, hint = "") {
 
 function refreshNavigationState() {
   const attemptActive = Boolean(state.attempt && state.attempt.status === "in_progress");
-  const resultVisible =
-    Boolean(state.attempt) && !elements.resultSection.classList.contains("hidden");
+  const resultVisible = Boolean(state.attempt) && !elements.resultSection.classList.contains("hidden");
 
-  setButtonAvailability(
-    elements.navRegister,
-    !attemptActive && !resultVisible,
-    "Р В Р ВµР С–Р С‘РЎРѓРЎвЂљРЎР‚Р В°РЎвЂ Р С‘РЎРЏ Р Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р Р…Р В° Р Т‘Р С• Р Р…Р В°РЎвЂЎР В°Р В»Р В° Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р С‘."
-  );
-  setButtonAvailability(
-    elements.heroActionRegister,
-    !attemptActive && !resultVisible,
-    "Р В Р ВµР С–Р С‘РЎРѓРЎвЂљРЎР‚Р В°РЎвЂ Р С‘РЎРЏ Р Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р Р…Р В° Р Т‘Р С• Р Р…Р В°РЎвЂЎР В°Р В»Р В° Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р С‘."
-  );
-  setButtonAvailability(
-    elements.navAttempt,
-    attemptActive,
-    "Р СћР ВµР С”РЎС“РЎвЂ°Р С‘Р в„– РЎвЂљРЎС“РЎР‚ Р С—Р С•РЎРЏР Р†Р С‘РЎвЂљРЎРѓРЎРЏ Р С—Р С•РЎРѓР В»Р Вµ Р В·Р В°Р С—РЎС“РЎРѓР С”Р В° Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р С‘."
-  );
-  setButtonAvailability(
-    elements.heroActionAttempt,
-    attemptActive,
-    "Р СћР ВµР С”РЎС“РЎвЂ°Р С‘Р в„– РЎвЂљРЎС“РЎР‚ Р С—Р С•РЎРЏР Р†Р С‘РЎвЂљРЎРѓРЎРЏ Р С—Р С•РЎРѓР В»Р Вµ Р В·Р В°Р С—РЎС“РЎРѓР С”Р В° Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р С‘."
-  );
-  setButtonAvailability(
-    elements.navResult,
-    Boolean(state.attempt && state.attempt.status !== "in_progress"),
-    "Р В Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ РЎРѓРЎвЂљР В°Р Р…Р ВµРЎвЂљ Р Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р ВµР Р… Р С—Р С•РЎРѓР В»Р Вµ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р С‘РЎРЏ Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р С‘."
-  );
-  setButtonAvailability(
-    elements.heroActionResult,
-    Boolean(state.attempt && state.attempt.status !== "in_progress"),
-    "Р В Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ РЎРѓРЎвЂљР В°Р Р…Р ВµРЎвЂљ Р Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р ВµР Р… Р С—Р С•РЎРѓР В»Р Вµ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р С‘РЎРЏ Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р С‘."
-  );
+  const registerHint = "Регистрация доступна до старта олимпиады.";
+  const attemptHint = "Текущий тур откроется после запуска маршрута.";
+  const resultHint = "Результат появится после завершения попытки.";
+
+  setButtonAvailability(elements.navRegister, !attemptActive && !resultVisible, registerHint);
+  setButtonAvailability(elements.heroActionRegister, !attemptActive && !resultVisible, registerHint);
+  setButtonAvailability(elements.navAttempt, attemptActive, attemptHint);
+  setButtonAvailability(elements.heroActionAttempt, attemptActive, attemptHint);
+  setButtonAvailability(elements.navResult, Boolean(state.attempt && state.attempt.status !== "in_progress"), resultHint);
+  setButtonAvailability(elements.heroActionResult, Boolean(state.attempt && state.attempt.status !== "in_progress"), resultHint);
+
   updateHeroSnapshot();
   updateStartAvailability();
 }
+
 
 function refreshAttemptControls() {
   const attemptInProgress = Boolean(state.attempt && state.attempt.status === "in_progress");
@@ -191,35 +282,36 @@ function refreshAttemptControls() {
   elements.finishAttempt.disabled = !attemptInProgress || isBusy || isBlockedByGuard;
 
   if (state.isSubmittingAnswer) {
-    elements.submitAnswer.textContent = "Р РЋР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р С‘Р Вµ Р С•РЎвЂљР Р†Р ВµРЎвЂљР В°...";
-    elements.finishAttempt.textContent = "Р вЂ”Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р С‘РЎвЂљРЎРЉ Р Т‘Р С•РЎРѓРЎР‚Р С•РЎвЂЎР Р…Р С•";
+    elements.submitAnswer.textContent = "Отправляем ответ...";
+    elements.finishAttempt.textContent = "Завершить досрочно";
     return;
   }
 
   if (state.isFinishingAttempt) {
-    elements.finishAttempt.textContent = "Р вЂ”Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р В°Р ВµР С Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”РЎС“...";
-    elements.submitAnswer.textContent = "Р С›РЎвЂљР Р†Р ВµРЎвЂљР С‘РЎвЂљРЎРЉ Р С‘ Р Т‘Р В°Р В»Р ВµР Вµ";
+    elements.finishAttempt.textContent = "Завершаем попытку...";
+    elements.submitAnswer.textContent = "Ответить и далее";
     return;
   }
 
   if (isBlockedByGuard) {
-    elements.submitAnswer.textContent = "Р вЂ™Р ВµРЎР‚Р Р…Р С‘РЎвЂљР ВµРЎРѓРЎРЉ Р Р† РЎР‚Р ВµР В¶Р С‘Р С";
-    elements.finishAttempt.textContent = "Р вЂ™Р ВµРЎР‚Р Р…Р С‘РЎвЂљР ВµРЎРѓРЎРЉ Р Р† РЎР‚Р ВµР В¶Р С‘Р С";
+    elements.submitAnswer.textContent = "Вернуться в окно";
+    elements.finishAttempt.textContent = "Вернуться в окно";
     return;
   }
 
-  elements.finishAttempt.textContent = "Р вЂ”Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р С‘РЎвЂљРЎРЉ Р Т‘Р С•РЎРѓРЎР‚Р С•РЎвЂЎР Р…Р С•";
+  elements.finishAttempt.textContent = "Завершить досрочно";
 
   if (!attemptInProgress) {
-    elements.submitAnswer.textContent = "Р С›РЎвЂљР Р†Р ВµРЎвЂљР С‘РЎвЂљРЎРЉ Р С‘ Р Т‘Р В°Р В»Р ВµР Вµ";
+    elements.submitAnswer.textContent = "Ответить и далее";
     return;
   }
 
   elements.submitAnswer.textContent =
     state.attempt.progress.currentQuestionIndex >= state.attempt.progress.totalQuestions
-      ? "Р С›РЎвЂљР Р†Р ВµРЎвЂљР С‘РЎвЂљРЎРЉ Р С‘ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р С‘РЎвЂљРЎРЉ"
-      : "Р С›РЎвЂљР Р†Р ВµРЎвЂљР С‘РЎвЂљРЎРЉ Р С‘ Р Т‘Р В°Р В»Р ВµР Вµ";
+      ? "Ответить и завершить"
+      : "Ответить и далее";
 }
+
 
 function scrollToSection(section) {
   if (!section || section.classList.contains("hidden")) {
@@ -300,37 +392,37 @@ function updateHeroSnapshot() {
   }
 
   const progress = getJourneyProgressModel();
-  let stageValue = "Р СџР С•Р Т‘Р С–Р С•РЎвЂљР С•Р Р†Р С”Р В°";
-  let stageNote = "Р РЋР Р…Р В°РЎвЂЎР В°Р В»Р В° Р В·Р В°Р С—Р С•Р В»Р Р…Р С‘РЎвЂљР Вµ Р Т‘Р В°Р Р…Р Р…РЎвЂ№Р Вµ РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”Р В° Р С‘ Р С—РЎР‚Р С•Р Р†Р ВµРЎР‚РЎРЉРЎвЂљР Вµ Р С—РЎР‚Р В°Р Р†Р С‘Р В»Р В° Р С—РЎР‚Р С•РЎвЂ¦Р С•Р В¶Р Т‘Р ВµР Р…Р С‘РЎРЏ.";
+  let stageValue = "Подготовка";
+  let stageNote = "Заполните данные участника перед стартом.";
 
   if (state.participant) {
-    stageValue = "Р вЂњР С•РЎвЂљР С•Р Р† Р С” РЎРѓРЎвЂљР В°РЎР‚РЎвЂљРЎС“";
-    stageNote = "Р В Р ВµР С–Р С‘РЎРѓРЎвЂљРЎР‚Р В°РЎвЂ Р С‘РЎРЏ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р В°. Р СљР С•Р В¶Р Р…Р С• Р В·Р В°Р С—РЎС“РЎРѓР С”Р В°РЎвЂљРЎРЉ Р С—Р ВµРЎР‚Р Р†РЎвЂ№Р в„– РЎвЂљРЎС“РЎР‚ Р С‘ Р С—Р ВµРЎР‚Р ВµРЎвЂ¦Р С•Р Т‘Р С‘РЎвЂљРЎРЉ Р Р† РЎРЊР С”Р В·Р В°Р СР ВµР Р…Р В°РЎвЂ Р С‘Р С•Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С.";
+    stageValue = "Регистрация завершена";
+    stageNote = "Можно подтвердить готовность и начать маршрут.";
   }
 
   if (state.attempt && state.attempt.status === "in_progress") {
     const currentTour = state.attempt.currentTour;
-    stageValue = currentTour ? `${currentTour.code} Р Р† РЎР‚Р В°Р В±Р С•РЎвЂљР Вµ` : "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р В°Р С”РЎвЂљР С‘Р Р†Р ВµР Р…";
+    stageValue = currentTour ? `${currentTour.code} • в работе` : "Олимпиада идёт";
     stageNote = currentTour
-      ? `Р РЋР ВµР в„–РЎвЂЎР В°РЎРѓ Р С•РЎвЂљР С”РЎР‚РЎвЂ№РЎвЂљ ${currentTour.title}. Р вЂ™Р С•Р С—РЎР‚Р С•РЎРѓ ${state.attempt.progress.tourQuestionIndex} Р С‘Р В· ${state.attempt.progress.tourQuestionCount}.`
-      : "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ РЎС“Р В¶Р Вµ Р В·Р В°Р С—РЎС“РЎвЂ°Р ВµР Р…. Р СџР ВµРЎР‚Р ВµРЎвЂ¦Р С•Р Т‘Р С‘РЎвЂљР Вµ Р С” РЎвЂљР ВµР С”РЎС“РЎвЂ°Р ВµР СРЎС“ Р Р†Р С•Р С—РЎР‚Р С•РЎРѓРЎС“.";
+      ? `${currentTour.title}. Вопрос ${state.attempt.progress.tourQuestionIndex} из ${state.attempt.progress.tourQuestionCount}.`
+      : "Маршрут выполняется по шагам.";
   } else if (state.attempt && state.attempt.status !== "in_progress") {
-    stageValue = "Р В¤Р С‘Р Р…Р С‘РЎв‚¬ Р В·Р В°РЎвЂћР С‘Р С”РЎРѓР С‘РЎР‚Р С•Р Р†Р В°Р Р…";
-    stageNote = "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬РЎвЂР Р…, Р В° Р С‘РЎвЂљР С•Р С– Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С‘ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…РЎвЂР Р… Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ Р С•РЎР‚Р С–Р В°Р Р…Р С‘Р В·Р В°РЎвЂљР С•РЎР‚Р В°.";
+    stageValue = "Маршрут завершён";
+    stageNote = "Попытка сохранена, итог доступен организатору.";
   }
 
-  let syncValue = state.isOnline ? "Р С›Р Р…Р В»Р В°Р в„–Р Р…" : "Р С›РЎвЂћР В»Р В°Р в„–Р Р…";
+  let syncValue = state.isOnline ? "Онлайн" : "Нет связи";
   if (state.attempt && state.attempt.status === "in_progress") {
-    syncValue = state.isOnline ? "Р ТђР С•Р Т‘ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…РЎРЏР ВµРЎвЂљРЎРѓРЎРЏ" : "Р вЂєР С•Р С”Р В°Р В»РЎРЉР Р…РЎвЂ№Р в„– Р В±РЎС“РЎвЂћР ВµРЎР‚";
+    syncValue = state.isOnline ? "Сохранение активно" : "Ожидание сети";
   } else if (state.attempt && state.attempt.status !== "in_progress") {
-    syncValue = state.isOnline ? "Р ВРЎвЂљР С•Р С– Р В·Р В°Р С—Р С‘РЎРѓР В°Р Р…" : "Р С›Р В¶Р С‘Р Т‘Р В°Р ВµРЎвЂљ Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р С”Р С‘";
+    syncValue = state.isOnline ? "Итог сохранён" : "Сохранится при сети";
   }
 
   const syncNote =
-    (elements.attemptSyncMeta && elements.attemptSyncMeta.textContent) ||
-    (state.isOnline
-      ? "Р В Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљРЎвЂ№ Р В±РЎС“Р Т‘РЎС“РЎвЂљ РЎвЂћР С‘Р С”РЎРѓР С‘РЎР‚Р С•Р Р†Р В°РЎвЂљРЎРЉРЎРѓРЎРЏ Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ Р С•РЎР‚Р С–Р В°Р Р…Р С‘Р В·Р В°РЎвЂљР С•РЎР‚Р В°."
-      : "Р РЋР Р†РЎРЏР В·РЎРЉ Р Р…Р ВµРЎРѓРЎвЂљР В°Р В±Р С‘Р В»РЎРЉР Р…Р В°. Р СџР В»Р В°РЎвЂљРЎвЂћР С•РЎР‚Р СР В° Р С—РЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р С‘РЎвЂљ РЎР‚Р В°Р В±Р С•РЎвЂљРЎС“ Р С‘ Р С—Р С•Р Р†РЎвЂљР С•РЎР‚Р С‘РЎвЂљ Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р С”РЎС“ Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С‘.");
+      (elements.attemptSyncMeta && elements.attemptSyncMeta.textContent) ||
+      (state.isOnline
+        ? "Результаты сохраняются в облаке организатора."
+        : "Связь нестабильна. Данные будут отправлены позже.");
 
   elements.heroStageValue.textContent = stageValue;
   elements.heroStageNote.textContent = stageNote;
@@ -339,6 +431,7 @@ function updateHeroSnapshot() {
   elements.heroSyncValue.textContent = syncValue;
   elements.heroSyncNote.textContent = syncNote;
 }
+
 
 function isAttemptInProgress() {
   return Boolean(state.attempt && state.attempt.status === "in_progress");
@@ -699,90 +792,83 @@ function setParticipantShellState() {
   const totalQuestions = attempt && attempt.progress ? attempt.progress.totalQuestions : 0;
 
   if (!hasAttempt) {
-    setShellBadge(elements.participantModeBadge, "Р В Р ВµР В¶Р С‘Р С: Р С—Р С•Р Т‘Р С–Р С•РЎвЂљР С•Р Р†Р С”Р В°", "neutral");
-    setShellBadge(elements.participantStageBadge, "Р РЃР В°Р С–: Р В¶Р Т‘РЎвЂР С РЎРѓРЎвЂљР В°РЎР‚РЎвЂљ", "neutral");
-    setShellBadge(elements.participantExamBadge, "Р В­Р С”Р В·Р В°Р СР ВµР Р…Р В°РЎвЂ Р С‘Р С•Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С: Р С•Р В¶Р С‘Р Т‘Р В°Р Р…Р С‘Р Вµ", "neutral");
-    setShellBadge(elements.participantStabilityBadge, "Р РЋР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р С‘Р Вµ: РЎРѓР С‘РЎРѓРЎвЂљР ВµР СР В° Р С–Р С•РЎвЂљР С•Р Р†Р В°", "neutral");
+    setShellBadge(elements.participantModeBadge, "Режим: ожидание", "neutral");
+    setShellBadge(elements.participantStageBadge, "Этап: стартовая подготовка", "neutral");
+    setShellBadge(elements.participantExamBadge, "Экзаменационный режим: не активен", "neutral");
+    setShellBadge(elements.participantStabilityBadge, "Синхронизация: готова к старту", "neutral");
     updateExamGuardUi();
     return;
   }
 
   setShellBadge(
     elements.participantModeBadge,
-    attemptInProgress ? "Р В Р ВµР В¶Р С‘Р С: Р С—РЎР‚Р С•РЎвЂ¦Р С•Р В¶Р Т‘Р ВµР Р…Р С‘Р Вµ" : "Р В Р ВµР В¶Р С‘Р С: РЎР‚Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ",
+    attemptInProgress ? "Режим: прохождение" : "Режим: завершён",
     attemptInProgress ? "active" : "ready"
   );
 
   if (attemptInProgress && attempt.currentTour) {
     setShellBadge(
       elements.participantStageBadge,
-      `Р РЋР ВµР в„–РЎвЂЎР В°РЎРѓ: ${attempt.currentTour.code} РІР‚Сћ ${attempt.progress.tourQuestionIndex}/${attempt.progress.tourQuestionCount}`,
+      `Этап: ${attempt.currentTour.code} • ${attempt.progress.tourQuestionIndex}/${attempt.progress.tourQuestionCount}`,
       "active"
     );
   } else {
-    setShellBadge(elements.participantStageBadge, "Р РЋР ВµР в„–РЎвЂЎР В°РЎРѓ: Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬РЎвЂР Р…", "ready");
+    setShellBadge(elements.participantStageBadge, "Этап: маршрут завершён", "ready");
   }
 
   if (!attemptInProgress) {
-    setShellBadge(elements.participantExamBadge, "Р В­Р С”Р В·Р В°Р СР ВµР Р…Р В°РЎвЂ Р С‘Р С•Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С: Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬РЎвЂР Р…", "ready");
+    setShellBadge(elements.participantExamBadge, "Экзаменационный режим: завершён", "ready");
   } else if (state.examGuardActive) {
-    setShellBadge(
-      elements.participantExamBadge,
-      `Р В­Р С”Р В·Р В°Р СР ВµР Р…Р В°РЎвЂ Р С‘Р С•Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С: Р С”Р С•Р Р…РЎвЂљРЎР‚Р С•Р В»РЎРЉ (${state.examIncidents})`,
-      "warning"
-    );
+    setShellBadge(elements.participantExamBadge, `Экзаменационный режим: контроль (${state.examIncidents})`, "warning");
   } else {
-    setShellBadge(
-      elements.participantExamBadge,
-      `Р В­Р С”Р В·Р В°Р СР ВµР Р…Р В°РЎвЂ Р С‘Р С•Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С: Р В·Р В°РЎвЂ°Р С‘РЎвЂ°РЎвЂР Р… (${state.examIncidents})`,
-      "ready"
-    );
+    setShellBadge(elements.participantExamBadge, `Экзаменационный режим: активен (${state.examIncidents})`, "ready");
   }
 
   if (!state.isOnline) {
-    setShellBadge(elements.participantStabilityBadge, "Р РЋР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р С‘Р Вµ: РЎРѓР Р†РЎРЏР В·РЎРЉ Р Р…Р ВµРЎРѓРЎвЂљР В°Р В±Р С‘Р В»РЎРЉР Р…Р В°", "warning");
+    setShellBadge(elements.participantStabilityBadge, "Синхронизация: нет связи", "warning");
     updateExamGuardUi();
     return;
   }
 
   if (state.isSubmittingAnswer || state.isFinishingAttempt || state.syncInFlight) {
-    setShellBadge(elements.participantStabilityBadge, "Р РЋР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р С‘Р Вµ: Р С‘Р Т‘РЎвЂРЎвЂљ Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р С”Р В°", "active");
+    setShellBadge(elements.participantStabilityBadge, "Синхронизация: идёт отправка", "active");
     updateExamGuardUi();
     return;
   }
 
   if (attemptInProgress || totalQuestions > 0 || questionIndex > 0) {
-    setShellBadge(elements.participantStabilityBadge, "Р РЋР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р С‘Р Вµ: Р Р†РЎРѓРЎвЂ Р Р† Р С—Р С•РЎР‚РЎРЏР Т‘Р С”Р Вµ", "ready");
+    setShellBadge(elements.participantStabilityBadge, "Синхронизация: данные сохранены", "ready");
     updateExamGuardUi();
     return;
   }
 
-  setShellBadge(elements.participantStabilityBadge, "Р РЋР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р С‘Р Вµ: РЎРѓР С‘РЎРѓРЎвЂљР ВµР СР В° Р С–Р С•РЎвЂљР С•Р Р†Р В°", "neutral");
+  setShellBadge(elements.participantStabilityBadge, "Синхронизация: готова к старту", "neutral");
   updateExamGuardUi();
 }
+
 
 function getJourneyProgressModel() {
   if (!state.participant) {
     return {
       percent: 0,
-      label: "Р вЂњР С•РЎвЂљР С•Р Р†Р Р…Р С•РЎРѓРЎвЂљРЎРЉ Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљР В°: 0%",
-      hint: "Р СџР С•РЎРѓР В»Р Вµ РЎР‚Р ВµР С–Р С‘РЎРѓРЎвЂљРЎР‚Р В°РЎвЂ Р С‘Р С‘ РЎРѓР С‘РЎРѓРЎвЂљР ВµР СР В° Р С•РЎвЂљР С”РЎР‚Р С•Р ВµРЎвЂљ Р С—Р ВµРЎР‚Р Р†РЎвЂ№Р в„– РЎвЂљРЎС“РЎР‚."
+      label: "Готовность маршрута: 0%",
+      hint: "После регистрации система откроет первый тур."
     };
   }
 
   if (!state.attempt) {
     return {
       percent: 12,
-      label: "Р вЂњР С•РЎвЂљР С•Р Р†Р Р…Р С•РЎРѓРЎвЂљРЎРЉ Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљР В°: 12%",
-      hint: "Р В Р ВµР С–Р С‘РЎРѓРЎвЂљРЎР‚Р В°РЎвЂ Р С‘РЎРЏ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р В°. Р СљР С•Р В¶Р Р…Р С• Р В·Р В°Р С—РЎС“РЎРѓР С”Р В°РЎвЂљРЎРЉ Р С—Р ВµРЎР‚Р Р†РЎС“РЎР‹ РЎвЂЎР В°РЎРѓРЎвЂљРЎРЉ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎвЂ№."
+      label: "Готовность маршрута: 12%",
+      hint: "Данные участника сохранены. Можно запускать первый тур."
     };
   }
 
   if (state.attempt.status !== "in_progress") {
     return {
       percent: 100,
-      label: "Р вЂњР С•РЎвЂљР С•Р Р†Р Р…Р С•РЎРѓРЎвЂљРЎРЉ Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљР В°: 100%",
-      hint: "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р С—Р С•Р В»Р Р…Р С•РЎРѓРЎвЂљРЎРЉРЎР‹ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…, РЎР‚Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ Р В·Р В°РЎвЂћР С‘Р С”РЎРѓР С‘РЎР‚Р С•Р Р†Р В°Р Р… Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ."
+      label: "Готовность маршрута: 100%",
+      hint: "Маршрут завершён. Результат сохранён в облаке."
     };
   }
 
@@ -792,8 +878,8 @@ function getJourneyProgressModel() {
 
   return {
     percent,
-    label: `Р вЂњР С•РЎвЂљР С•Р Р†Р Р…Р С•РЎРѓРЎвЂљРЎРЉ Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљР В°: ${percent}%`,
-    hint: `Р РЋР ВµР в„–РЎвЂЎР В°РЎРѓ ${state.attempt.currentTour.code}, Р Р†Р С•Р С—РЎР‚Р С•РЎРѓ ${state.attempt.progress.tourQuestionIndex} Р С‘Р В· ${state.attempt.progress.tourQuestionCount}.`
+    label: `Готовность маршрута: ${percent}%`,
+    hint: `Сейчас ${state.attempt.currentTour.code}, вопрос ${state.attempt.progress.tourQuestionIndex} из ${state.attempt.progress.tourQuestionCount}.`
   };
 }
 
@@ -1107,7 +1193,7 @@ function setNetworkStatus(isOnline = navigator.onLine) {
   }
 
   state.isOnline = isOnline;
-  elements.networkStatus.textContent = isOnline ? "Р РЋР ВµРЎвЂљРЎРЉ: РЎРѓР Р†РЎРЏР В·РЎРЉ Р ВµРЎРѓРЎвЂљРЎРЉ" : "Р РЋР ВµРЎвЂљРЎРЉ: РЎРѓР Р†РЎРЏР В·РЎРЉ Р Р…Р ВµРЎРѓРЎвЂљР В°Р В±Р С‘Р В»РЎРЉР Р…Р В°";
+  elements.networkStatus.textContent = isOnline ? "\u0421\u0435\u0442\u044c: \u0441\u0432\u044f\u0437\u044c \u0435\u0441\u0442\u044c" : "\u0421\u0435\u0442\u044c: \u0441\u0432\u044f\u0437\u044c \u043d\u0435\u0441\u0442\u0430\u0431\u0438\u043b\u044c\u043d\u0430";
   elements.networkStatus.className = `network-badge ${isOnline ? "online" : "offline"}`;
   setParticipantShellState();
   updateHeroSnapshot();
@@ -1119,7 +1205,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.6.17");
+    await navigator.serviceWorker.register("/sw.js?v=1.6.18");
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       registration.update().catch(() => {});
@@ -1486,32 +1572,32 @@ function participantFromForm() {
 
 function renderHero() {
   elements.heroTitle.textContent = state.olympiad.title;
-  elements.heroSubtitle.textContent = state.olympiad.description;
+  elements.heroSubtitle.textContent = "Индивидуальная цифровая олимпиада с автоматической проверкой и сохранением результатов в облаке.";
   if (elements.heroFormatBadge) {
     const totalTours = Array.isArray(state.olympiad.tours) ? state.olympiad.tours.length : 0;
-    elements.heroFormatBadge.textContent = `Р ВР Р…Р Т‘Р С‘Р Р†Р С‘Р Т‘РЎС“Р В°Р В»РЎРЉР Р…Р В°РЎРЏ РЎвЂ Р С‘РЎвЂћРЎР‚Р С•Р Р†Р В°РЎРЏ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘Р В° РІР‚Сћ ${state.olympiad.durationMinutes} Р СР С‘Р Р…РЎС“РЎвЂљ РІР‚Сћ ${totalTours} РЎвЂљРЎС“РЎР‚Р С•Р Р†`;
+    elements.heroFormatBadge.textContent = `Индивидуальная цифровая олимпиада • ${state.olympiad.durationMinutes} минут • ${totalTours} туров`;
   }
   elements.tourMeta.innerHTML = "";
 
   (state.olympiad.tours || []).forEach((tour) => {
     const pill = document.createElement("div");
     pill.className = "pill";
-    pill.textContent = `${tour.code}: ${tour.timeLimitMinutes} Р СР С‘Р Р… РІР‚Сћ ${tour.maxScore} Р В±Р В°Р В»Р В»Р С•Р Р†`;
+    pill.textContent = `${tour.code}: ${tour.timeLimitMinutes} мин • до ${tour.maxScore} баллов`;
     elements.tourMeta.appendChild(pill);
   });
 
   renderJourneyMap();
 }
 
+
 function renderRules() {
   const rules = [
-    `Р вЂ™РЎР‚Р ВµР СРЎРЏ Р Р…Р В° Р Р†РЎвЂ№Р С—Р С•Р В»Р Р…Р ВµР Р…Р С‘Р Вµ: ${state.olympiad.durationMinutes} Р СР С‘Р Р…РЎС“РЎвЂљ.`,
-    "Р СџР С•РЎРѓР В»Р Вµ Р В·Р В°Р С—РЎС“РЎРѓР С”Р В° Р Р†Р С”Р В»РЎР‹РЎвЂЎР В°Р ВµРЎвЂљРЎРѓРЎРЏ РЎРЊР С”Р В·Р В°Р СР ВµР Р…Р В°РЎвЂ Р С‘Р С•Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С. Р С™Р С•Р С—Р С‘РЎР‚Р С•Р Р†Р В°Р Р…Р С‘Р Вµ, Р С”Р С•Р Р…РЎвЂљР ВµР С”РЎРѓРЎвЂљР Р…Р С•Р Вµ Р СР ВµР Р…РЎР‹ Р С‘ РЎвЂЎР В°РЎРѓРЎвЂљРЎРЉ РЎРѓР С•РЎвЂЎР ВµРЎвЂљР В°Р Р…Р С‘Р в„– Р С”Р В»Р В°Р Р†Р С‘РЎв‚¬ Р В±РЎР‚Р В°РЎС“Р В·Р ВµРЎР‚Р В° Р В±Р В»Р С•Р С”Р С‘РЎР‚РЎС“РЎР‹РЎвЂљРЎРѓРЎРЏ. Р СџРЎР‚Р С‘ Р Р†РЎвЂ№РЎвЂ¦Р С•Р Т‘Р Вµ Р С‘Р В· Р С—Р С•Р В»Р Р…Р С•РЎРЊР С”РЎР‚Р В°Р Р…Р Р…Р С•Р С–Р С• РЎР‚Р ВµР В¶Р С‘Р СР В° Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р В° Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С‘ РЎвЂћР С‘Р С”РЎРѓР С‘РЎР‚РЎС“Р ВµРЎвЂљРЎРѓРЎРЏ.",
-    "Р С™Р В°Р В¶Р Т‘Р С•Р СРЎС“ РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”РЎС“ Р С—РЎР‚Р ВµР Т‘Р С•РЎРѓРЎвЂљР В°Р Р†Р В»РЎРЏР ВµРЎвЂљРЎРѓРЎРЏ Р С‘Р Р…Р Т‘Р С‘Р Р†Р С‘Р Т‘РЎС“Р В°Р В»РЎРЉР Р…Р С• РЎР‚Р В°Р В·РЎР‚Р В°Р В±Р С•РЎвЂљР В°Р Р…Р Р…РЎвЂ№Р в„– Р Р†Р В°РЎР‚Р С‘Р В°Р Р…РЎвЂљ Р В·Р В°Р Т‘Р В°Р Р…Р С‘РЎРЏ.",
-    "Р СњР В° РЎРЊР С”РЎР‚Р В°Р Р…Р Вµ Р С•РЎвЂљР С•Р В±РЎР‚Р В°Р В¶Р В°Р ВµРЎвЂљРЎРѓРЎРЏ РЎвЂљР С•Р В»РЎРЉР С”Р С• Р С•Р Т‘Р С‘Р Р… Р Р†Р С•Р С—РЎР‚Р С•РЎРѓ. Р вЂ™Р ВµРЎР‚Р Р…РЎС“РЎвЂљРЎРЉРЎРѓРЎРЏ Р С” Р С—РЎР‚Р ВµР Т‘РЎвЂ№Р Т‘РЎС“РЎвЂ°Р ВµР СРЎС“ Р Р†Р С•Р С—РЎР‚Р С•РЎРѓРЎС“ Р Р…Р ВµР Р†Р С•Р В·Р СР С•Р В¶Р Р…Р С•.",
-    "Р РЋР С‘РЎРѓРЎвЂљР ВµР СР В° Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С‘ Р С—Р ВµРЎР‚Р ВµР СР ВµРЎв‚¬Р С‘Р Р†Р В°Р ВµРЎвЂљ Р Р†Р В°РЎР‚Р С‘Р В°Р Р…РЎвЂљРЎвЂ№ Р С•РЎвЂљР Р†Р ВµРЎвЂљР С•Р Р† Р С‘ Р С—Р С•РЎР‚РЎРЏР Т‘Р С•Р С” Р В·Р В°Р Т‘Р В°Р Р…Р С‘Р в„–.",
-    "Р вЂ™РЎРѓР Вµ Р В·Р В°Р Т‘Р В°Р Р…Р С‘РЎРЏ Р С—Р С•Р Т‘Р Р†Р ВµРЎР‚Р С–Р В°РЎР‹РЎвЂљРЎРѓРЎРЏ Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С•Р в„– Р Р†Р ВµРЎР‚Р С‘РЎвЂћР С‘Р С”Р В°РЎвЂ Р С‘Р С‘, Р С‘РЎРѓР С”Р В»РЎР‹РЎвЂЎР В°РЎРЏ Р Р…Р ВµР С•Р В±РЎвЂ¦Р С•Р Т‘Р С‘Р СР С•РЎРѓРЎвЂљРЎРЉ Р Р† РЎР‚РЎС“РЎвЂЎР Р…Р С•Р в„– РЎРЊР С”РЎРѓР С—Р ВµРЎР‚РЎвЂљР Р…Р С•Р в„– Р С•РЎвЂ Р ВµР Р…Р С”Р Вµ.",
-    "Р В Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљРЎвЂ№ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎвЂ№ Р Р…Р Вµ Р С—Р С•Р С”Р В°Р В·РЎвЂ№Р Р†Р В°РЎР‹РЎвЂљРЎРѓРЎРЏ РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”РЎС“ РЎРѓРЎР‚Р В°Р В·РЎС“ Р С—Р С•РЎРѓР В»Р Вµ Р ВµРЎвЂ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р С‘РЎРЏ."
+    `Время прохождения: ${state.olympiad.durationMinutes} минут.`,
+    "Каждому участнику выдается индивидуальный вариант.",
+    "На экране отображается только один вопрос без возврата назад.",
+    "Порядок заданий и вариантов ответа перемешивается автоматически.",
+    "Ответы проверяются автоматически и сохраняются в облаке.",
+    "После завершения правильные ответы участнику не показываются."
   ];
 
   elements.rulesList.innerHTML = "";
@@ -1522,6 +1608,7 @@ function renderRules() {
   });
 }
 
+
 function renderParticipant() {
   if (!state.participant) {
     renderJourneyMap();
@@ -1531,9 +1618,9 @@ function renderParticipant() {
   elements.participantName.textContent = state.participant.fullName;
   const meta = [state.participant.institution, state.participant.groupName];
   if (state.participant.mentorName) {
-    meta.push(`Р СњР В°РЎРѓРЎвЂљР В°Р Р†Р Р…Р С‘Р С”: ${state.participant.mentorName}`);
+    meta.push(`\u041d\u0430\u0441\u0442\u0430\u0432\u043d\u0438\u043a: ${state.participant.mentorName}`);
   }
-  elements.participantMeta.textContent = meta.join(" РІР‚Сћ ");
+  elements.participantMeta.textContent = meta.join(" \u2022 ");
   renderJourneyMap();
 }
 
@@ -2635,6 +2722,7 @@ async function finishAttempt() {
 }
 
 async function init() {
+  applyStaticRussianCopy();
   await loadAppVersion();
   state.olympiad = await api("/api/public/olympiad");
   await registerServiceWorker();
