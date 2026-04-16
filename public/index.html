@@ -7,10 +7,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Национальные кухни мира</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.16" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.17" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.16" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.17" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -31,6 +31,10 @@
           </button>
         </div>
         <div id="nav-drawer" class="nav-ribbon-drawer">
+          <div class="nav-ribbon-summary" aria-hidden="true">
+            <div class="nav-ribbon-title">Платформа олимпиады</div>
+            <small>Участник, результаты и организационный контур собраны в одной системе.</small>
+          </div>
           <button id="nav-back" class="button ghost" type="button">Назад</button>
           <button id="nav-home" class="button ghost" type="button">Главная</button>
           <button id="nav-register" class="button ghost" type="button">Регистрация</button>
@@ -105,36 +109,65 @@
                 </div>
               </article>
             </div>
+            <div class="hero-actions">
+              <button id="hero-action-register" class="button primary" type="button">Перейти к регистрации</button>
+              <button id="hero-action-attempt" class="button secondary" type="button">Открыть текущий тур</button>
+              <button id="hero-action-result" class="button ghost" type="button">Посмотреть результат</button>
+            </div>
           </div>
-          <aside class="hero-brand-panel" aria-label="Фирменные иконки олимпиады">
-            <div class="hero-brand-strip">
-              <figure class="brand-mini-card">
-                <img
-                  src="/brand-prof-tourism.png"
-                  alt="Профессионалитет 2024. Туризм и сфера услуг"
-                  loading="eager"
-                  decoding="async"
-                  fetchpriority="high"
-                />
-              </figure>
-              <figure class="brand-mini-card">
-                <img
-                  src="/brand-prof-2024.jpg"
-                  alt="Профессионалитет 2024"
-                  loading="eager"
-                  decoding="async"
-                  fetchpriority="high"
-                />
-              </figure>
-              <figure class="brand-mini-card">
-                <img
-                  src="/brand-gkts-shield.jpg"
-                  alt="Эмблема Горловского колледжа технологий и сервиса"
-                  loading="eager"
-                  decoding="async"
-                  fetchpriority="high"
-                />
-              </figure>
+          <aside class="hero-brand-panel" aria-label="Фирменные и оперативные показатели олимпиады">
+            <div class="hero-dashboard-card">
+              <div class="hero-dashboard-top">
+                <span class="eyebrow">Оперативный контур</span>
+                <strong>Платформа готова к проведению маршрута</strong>
+                <p class="muted">Все ключевые сценарии уже в одном окне: регистрация, прохождение, контроль и итоговая фиксация.</p>
+              </div>
+              <div class="hero-status-grid">
+                <article class="hero-status-card">
+                  <span>Этап</span>
+                  <strong id="hero-stage-value">Подготовка</strong>
+                  <small id="hero-stage-note">Сначала заполните данные участника и проверьте правила прохождения.</small>
+                </article>
+                <article class="hero-status-card">
+                  <span>Маршрут</span>
+                  <strong id="hero-progress-value">0%</strong>
+                  <small id="hero-progress-note">Прогресс по турам появится после регистрации.</small>
+                </article>
+                <article class="hero-status-card">
+                  <span>Синхронизация</span>
+                  <strong id="hero-sync-value">Онлайн</strong>
+                  <small id="hero-sync-note">Результаты будут фиксироваться в облаке организатора.</small>
+                </article>
+              </div>
+              <div class="hero-brand-strip">
+                <figure class="brand-mini-card">
+                  <img
+                    src="/brand-prof-tourism.png"
+                    alt="Профессионалитет 2024. Туризм и сфера услуг"
+                    loading="eager"
+                    decoding="async"
+                    fetchpriority="high"
+                  />
+                </figure>
+                <figure class="brand-mini-card">
+                  <img
+                    src="/brand-prof-2024.jpg"
+                    alt="Профессионалитет 2024"
+                    loading="eager"
+                    decoding="async"
+                    fetchpriority="high"
+                  />
+                </figure>
+                <figure class="brand-mini-card">
+                  <img
+                    src="/brand-gkts-shield.jpg"
+                    alt="Эмблема Горловского колледжа технологий и сервиса"
+                    loading="eager"
+                    decoding="async"
+                    fetchpriority="high"
+                  />
+                </figure>
+              </div>
             </div>
           </aside>
         </div>
@@ -340,7 +373,7 @@
         <small>
           Разработчик: Постовит Дмитрий Александрович, преподаватель первой категории, профильных
           дисциплин, реализуемых в рамках образовательной программы ГБПОУ "Горловский колледж
-          технологий и сервиса". • Версия <span id="app-version-label">1.6.16</span>
+          технологий и сервиса". • Версия <span id="app-version-label">1.6.17</span>
         </small>
       </footer>
     </main>
@@ -363,6 +396,6 @@
       </section>
     </div>
 
-    <script src="/app.js?v=1.6.16"></script>
+    <script src="/app.js?v=1.6.17"></script>
   </body>
 </html>

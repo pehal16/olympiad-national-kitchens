@@ -52,6 +52,20 @@ const runtimeDiagnostics = {
   lastApiErrorRoute: ""
 };
 
+const CACHE_TTL_MS = 10_000;
+const CONTENT_CACHE_TTL_MS = 20_000;
+const runtimeCache = {
+  settings: { value: null, loadedAt: 0 },
+  olympiadBase: { value: null, loadedAt: 0 },
+  customQuestionMap: { value: null, loadedAt: 0 },
+  olympiadResolved: { value: null, loadedAt: 0 },
+  adminAnalytics: { value: null, loadedAt: 0, revision: -1, olympiadId: "" },
+  questionCatalog: { value: null, loadedAt: 0, revision: -1, olympiadId: "" },
+  questionSummary: { value: null, loadedAt: 0, revision: -1, olympiadId: "" }
+};
+let attemptsRevision = 0;
+let contentRevision = 0;
+
 const storageReady = initStorage();
 
 function noteApiError(pathname, error) {
@@ -61,6 +75,93 @@ function noteApiError(pathname, error) {
     (error && error.message) || "Неизвестная ошибка сервера."
   );
   runtimeDiagnostics.lastApiErrorRoute = pathname || "";
+}
+
+function isCacheFresh(entry, ttlMs) {
+  return Boolean(entry && entry.value) && Date.now() - entry.loadedAt < ttlMs;
+}
+
+function getCachedSettings() {
+  if (isCacheFresh(runtimeCache.settings, CACHE_TTL_MS)) {
+    return runtimeCache.settings.value;
+  }
+
+  const settings = loadSettings();
+  runtimeCache.settings = {
+    value: settings,
+    loadedAt: Date.now()
+  };
+  return settings;
+}
+
+function getCachedOlympiadBase() {
+  if (isCacheFresh(runtimeCache.olympiadBase, CACHE_TTL_MS)) {
+    return runtimeCache.olympiadBase.value;
+  }
+
+  const olympiadBase = loadOlympiad();
+  runtimeCache.olympiadBase = {
+    value: olympiadBase,
+    loadedAt: Date.now()
+  };
+  return olympiadBase;
+}
+
+async function getCachedCustomQuestionMap() {
+  if (isCacheFresh(runtimeCache.customQuestionMap, CONTENT_CACHE_TTL_MS)) {
+    return runtimeCache.customQuestionMap.value;
+  }
+
+  const customQuestionMap = await loadCustomQuestionMap();
+  runtimeCache.customQuestionMap = {
+    value: customQuestionMap,
+    loadedAt: Date.now()
+  };
+  return customQuestionMap;
+}
+
+async function getResolvedOlympiad() {
+  if (isCacheFresh(runtimeCache.olympiadResolved, CONTENT_CACHE_TTL_MS)) {
+    return runtimeCache.olympiadResolved.value;
+  }
+
+  const olympiad = buildOlympiadWithCustomQuestions(
+    getCachedOlympiadBase(),
+    await getCachedCustomQuestionMap()
+  );
+  runtimeCache.olympiadResolved = {
+    value: olympiad,
+    loadedAt: Date.now()
+  };
+  return olympiad;
+}
+
+function invalidateAttemptCaches() {
+  attemptsRevision += 1;
+  runtimeCache.adminAnalytics = {
+    value: null,
+    loadedAt: 0,
+    revision: -1,
+    olympiadId: ""
+  };
+}
+
+function invalidateContentCaches() {
+  contentRevision += 1;
+  runtimeCache.customQuestionMap = { value: null, loadedAt: 0 };
+  runtimeCache.olympiadResolved = { value: null, loadedAt: 0 };
+  runtimeCache.questionCatalog = {
+    value: null,
+    loadedAt: 0,
+    revision: -1,
+    olympiadId: ""
+  };
+  runtimeCache.questionSummary = {
+    value: null,
+    loadedAt: 0,
+    revision: -1,
+    olympiadId: ""
+  };
 }
 
 function isOlympiadAvailable(olympiad) {
@@ -298,6 +399,7 @@ async function normalizeAndPersistIfChanged(olympiad, attempt) {
 
   if (before !== after) {
     await upsertAttempt(normalized);
+    invalidateAttemptCaches();
   }
 
   return normalized;
@@ -394,6 +496,39 @@ function buildAttemptView(olympiad, attempt, settings) {
       tours: routeTours,
       questions: routeQuestions
     }
+  };
+}
+
+function buildAttemptPulse(olympiad, attempt, settings) {
+  const currentTour = getCurrentTour(attempt);
+  const summary = summarizeAttempt(olympiad, attempt);
+
+  return {
+    id: attempt.id,
+    status: attempt.status,
+    startedAt: attempt.startedAt,
+    finishedAt: attempt.finishedAt,
+    expiresAt: attempt.expiresAt,
+    currentStepIndex: attempt.currentStepIndex,
+    progress: buildProgress(attempt),
+    timing: getTiming(attempt),
+    currentTour: currentTour
+      ? {
+          id: currentTour.id,
+          code: currentTour.code,
+          order: currentTour.order,
+          title: currentTour.title,
+          timeLimitMinutes: currentTour.timeLimitMinutes,
+          maxScore: currentTour.maxScore
+        }
+      : null,
+    summary:
+      attempt.status === "in_progress"
+        ? null
+        : {
+            ...summary,
+            totalFinalScore: settings.showParticipantScore ? summary.totalFinalScore : null
+          }
   };
 }
 
@@ -586,6 +721,74 @@ function normalizeContentDraftPayload(payload) {
     methodicalPurpose: text(payload.methodicalPurpose),
     updatedAt: nowIso()
   };
+}
+
+async function getCachedAdminAnalytics(olympiad, settings) {
+  if (
+    runtimeCache.adminAnalytics.value &&
+    runtimeCache.adminAnalytics.revision === attemptsRevision &&
+    runtimeCache.adminAnalytics.olympiadId === olympiad.id &&
+    Date.now() - runtimeCache.adminAnalytics.loadedAt < CACHE_TTL_MS
+  ) {
+    return runtimeCache.adminAnalytics.value;
+  }
+
+  const rawAttempts = currentOlympiadAttempts(await loadAttempts(), olympiad.id).map((attempt) =>
+    normalizeAttemptState(olympiad, attempt)
+  );
+  const ranked = await buildRankedAttempts(olympiad, settings, {
+    attempts: rawAttempts,
+    forceScores: true
+  });
+
+  const analytics = { rawAttempts, ranked };
+  runtimeCache.adminAnalytics = {
+    value: analytics,
+    loadedAt: Date.now(),
+    revision: attemptsRevision,
+    olympiadId: olympiad.id
+  };
+  return analytics;
+}
+
+async function getCachedQuestionCatalog(olympiadBase, customQuestionMap) {
+  if (
+    runtimeCache.questionCatalog.value &&
+    runtimeCache.questionCatalog.revision === contentRevision &&
+    runtimeCache.questionCatalog.olympiadId === olympiadBase.id &&
+    Date.now() - runtimeCache.questionCatalog.loadedAt < CONTENT_CACHE_TTL_MS
+  ) {
+    return runtimeCache.questionCatalog.value;
+  }
+
+  const catalog = buildQuestionCatalog(olympiadBase, customQuestionMap);
+  runtimeCache.questionCatalog = {
+    value: catalog,
+    loadedAt: Date.now(),
+    revision: contentRevision,
+    olympiadId: olympiadBase.id
+  };
+  return catalog;
+}
+
+async function getCachedQuestionSummary(olympiadBase, customQuestionMap) {
+  if (
+    runtimeCache.questionSummary.value &&
+    runtimeCache.questionSummary.revision === contentRevision &&
+    runtimeCache.questionSummary.olympiadId === olympiadBase.id &&
+    Date.now() - runtimeCache.questionSummary.loadedAt < CONTENT_CACHE_TTL_MS
+  ) {
+    return runtimeCache.questionSummary.value;
+  }
+
+  const summary = buildQuestionBankSummary(olympiadBase, customQuestionMap);
+  runtimeCache.questionSummary = {
+    value: summary,
+    loadedAt: Date.now(),
+    revision: contentRevision,
+    olympiadId: olympiadBase.id
+  };
+  return summary;
 }
 
 function normalizeCustomQuestionPayload(payload, existingQuestion = null) {
@@ -1142,30 +1345,51 @@ async function handleApi(req, res, url) {
 
   const method = req.method;
   const pathname = url.pathname;
-  const olympiadBase = loadOlympiad();
-  const customQuestionMap = await loadCustomQuestionMap();
-  const olympiad = buildOlympiadWithCustomQuestions(olympiadBase, customQuestionMap);
-  const settings = loadSettings();
+  const settings = getCachedSettings();
+  let olympiadBase = null;
+  let customQuestionMap = null;
+  let olympiad = null;
+
+  const ensureOlympiadBase = () => {
+    olympiadBase = olympiadBase || getCachedOlympiadBase();
+    return olympiadBase;
+  };
+
+  const ensureCustomQuestionMap = async () => {
+    customQuestionMap = customQuestionMap || (await getCachedCustomQuestionMap());
+    return customQuestionMap;
+  };
+
+  const ensureOlympiad = async () => {
+    if (!olympiad) {
+      olympiad = await getResolvedOlympiad();
+      olympiadBase = olympiadBase || getCachedOlympiadBase();
+      customQuestionMap = customQuestionMap || (await getCachedCustomQuestionMap());
+    }
+    return olympiad;
+  };
 
   if (method === "GET" && pathname === "/api/health") {
+    const olympiadHealth = ensureOlympiadBase();
     sendJson(res, 200, {
       ok: true,
       app: "national-kitchens-olympiad",
       appVersion: APP_VERSION,
       now: nowIso(),
-      olympiadId: olympiad.id,
-      schemaVersion: olympiad.schemaVersion,
+      olympiadId: olympiadHealth.id,
+      schemaVersion: olympiadHealth.schemaVersion,
       storageBackend: settings.storageBackend || "file"
     });
     return;
   }
 
   if (method === "GET" && pathname === "/api/public/olympiad") {
-    sendJson(res, 200, { ok: true, data: getOlympiadPublicData(olympiad) });
+    sendJson(res, 200, { ok: true, data: getOlympiadPublicData(await ensureOlympiad()) });
     return;
   }
 
   if (method === "POST" && pathname === "/api/public/register") {
+    const olympiadData = await ensureOlympiad();
     const body = await parseBody(req);
     const validation = validateParticipantProfile(body);
     if (!validation.valid) {
@@ -1173,13 +1397,13 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    if (!isOlympiadAvailable(olympiad)) {
+    if (!isOlympiadAvailable(olympiadData)) {
       sendJson(res, 403, { ok: false, message: "Олимпиада сейчас недоступна." });
       return;
     }
 
     const signature = makeParticipantSignature(validation.profile);
-    const attempts = currentOlympiadAttempts(await loadAttempts(), olympiad.id).filter(
+    const attempts = currentOlympiadAttempts(await loadAttempts(), olympiadData.id).filter(
       (attempt) => attempt.participantSignature === signature
     );
     const activeAttempt = attempts.find((attempt) => attempt.status === "in_progress");
@@ -1197,6 +1421,7 @@ async function handleApi(req, res, url) {
   }
 
   if (method === "POST" && pathname === "/api/public/attempts/start") {
+    const olympiadData = await ensureOlympiad();
     const body = await parseBody(req);
     const validation = validateParticipantProfile(body.participant || body);
     if (!validation.valid) {
@@ -1206,7 +1431,7 @@ async function handleApi(req, res, url) {
 
     const participantSignature = makeParticipantSignature(validation.profile);
     const allAttempts = await loadAttempts();
-    const currentAttempts = currentOlympiadAttempts(allAttempts, olympiad.id);
+    const currentAttempts = currentOlympiadAttempts(allAttempts, olympiadData.id);
     const activeAttempt = currentAttempts.find(
       (attempt) =>
         attempt.participantSignature === participantSignature &&
@@ -1214,11 +1439,12 @@ async function handleApi(req, res, url) {
     );
 
     if (activeAttempt) {
-      const normalized = normalizeAttemptState(olympiad, activeAttempt);
+      const normalized = normalizeAttemptState(olympiadData, activeAttempt);
       await saveAttempt(allAttempts, normalized);
+      invalidateAttemptCaches();
       sendJson(res, 200, {
         ok: true,
-        data: buildAttemptView(olympiad, normalized, settings)
+        data: buildAttemptView(olympiadData, normalized, settings)
       });
       return;
     }
@@ -1236,16 +1462,16 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    const variant = buildVariant(olympiad);
+    const variant = buildVariant(olympiadData);
     const attempt = {
       id: generateId("attempt"),
-      olympiadId: olympiad.id,
-      schemaVersion: olympiad.schemaVersion || 2,
+      olympiadId: olympiadData.id,
+      schemaVersion: olympiadData.schemaVersion || 2,
       participant: validation.profile,
       participantSignature,
       startedAt: nowIso(),
       expiresAt: new Date(
-        Date.now() + olympiad.durationMinutes * 60 * 1000
+        Date.now() + olympiadData.durationMinutes * 60 * 1000
       ).toISOString(),
       finishedAt: null,
       status: "in_progress",
@@ -1266,59 +1492,81 @@ async function handleApi(req, res, url) {
     markQuestionPresented(attempt);
     allAttempts.push(attempt);
     await upsertAttempt(attempt);
+    invalidateAttemptCaches();
 
     sendJson(res, 201, {
       ok: true,
-      data: buildAttemptView(olympiad, attempt, settings)
+      data: buildAttemptView(olympiadData, attempt, settings)
     });
     return;
   }
 
   if (method === "GET" && pathname.match(/^\/api\/public\/attempts\/[^/]+$/)) {
+    const olympiadData = await ensureOlympiad();
     const attemptId = pathname.split("/")[4];
     const attempt = await loadAttemptById(attemptId);
-    if (!attempt || attempt.olympiadId !== olympiad.id) {
+    if (!attempt || attempt.olympiadId !== olympiadData.id) {
       sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
       return;
     }
 
-    const normalized = await normalizeAndPersistIfChanged(olympiad, attempt);
+    const normalized = await normalizeAndPersistIfChanged(olympiadData, attempt);
     sendJson(res, 200, {
       ok: true,
-      data: buildAttemptView(olympiad, normalized, settings)
+      data: buildAttemptView(olympiadData, normalized, settings)
     });
     return;
   }
 
   if (method === "GET" && pathname.match(/^\/api\/public\/attempts\/[^/]+\/current$/)) {
+    const olympiadData = await ensureOlympiad();
     const attemptId = pathname.split("/")[4];
     const attempt = await loadAttemptById(attemptId);
-    if (!attempt || attempt.olympiadId !== olympiad.id) {
+    if (!attempt || attempt.olympiadId !== olympiadData.id) {
       sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
       return;
     }
 
-    const normalized = await normalizeAndPersistIfChanged(olympiad, attempt);
+    const normalized = await normalizeAndPersistIfChanged(olympiadData, attempt);
     sendJson(res, 200, {
       ok: true,
-      data: buildAttemptView(olympiad, normalized, settings)
+      data: buildAttemptView(olympiadData, normalized, settings)
+    });
+    return;
+  }
+
+  if (method === "GET" && pathname.match(/^\/api\/public\/attempts\/[^/]+\/pulse$/)) {
+    const olympiadData = await ensureOlympiad();
+    const attemptId = pathname.split("/")[4];
+    const attempt = await loadAttemptById(attemptId);
+    if (!attempt || attempt.olympiadId !== olympiadData.id) {
+      sendJson(res, 404, { ok: false, message: "РџРѕРїС‹С‚РєР° РЅРµ РЅР°Р№РґРµРЅР°." });
+      return;
+    }
+
+    const normalized = await normalizeAndPersistIfChanged(olympiadData, attempt);
+    sendJson(res, 200, {
+      ok: true,
+      data: buildAttemptPulse(olympiadData, normalized, settings)
     });
     return;
   }
 
   if (method === "POST" && pathname.match(/^\/api\/public\/attempts\/[^/]+\/answer$/)) {
+    const olympiadData = await ensureOlympiad();
     const attemptId = pathname.split("/")[4];
     const body = await parseBody(req);
     let attempt = await loadAttemptById(attemptId);
 
-    if (!attempt || attempt.olympiadId !== olympiad.id) {
+    if (!attempt || attempt.olympiadId !== olympiadData.id) {
       sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
       return;
     }
 
-    attempt = normalizeAttemptState(olympiad, attempt);
+    attempt = normalizeAttemptState(olympiadData, attempt);
     if (attempt.status !== "in_progress") {
       await upsertAttempt(attempt);
+      invalidateAttemptCaches();
       sendJson(res, 409, {
         ok: false,
         message: "Попытка уже завершена."
@@ -1328,11 +1576,12 @@ async function handleApi(req, res, url) {
 
     const currentQuestion = getCurrentQuestion(attempt);
     if (!currentQuestion) {
-      const finalized = finalizeAttempt(olympiad, attempt, "finished");
+      const finalized = finalizeAttempt(olympiadData, attempt, "finished");
       await upsertAttempt(finalized);
+      invalidateAttemptCaches();
       sendJson(res, 200, {
         ok: true,
-        data: buildAttemptView(olympiad, finalized, settings)
+        data: buildAttemptView(olympiadData, finalized, settings)
       });
       return;
     }
@@ -1340,7 +1589,7 @@ async function handleApi(req, res, url) {
     if (body.questionId && body.questionId !== currentQuestion.id) {
       sendJson(res, 200, {
         ok: true,
-        data: buildAttemptView(olympiad, attempt, settings)
+        data: buildAttemptView(olympiadData, attempt, settings)
       });
       return;
     }
@@ -1370,11 +1619,12 @@ async function handleApi(req, res, url) {
 
     attempt.currentStepIndex += 1;
     if (attempt.currentStepIndex >= questionCount(attempt)) {
-      attempt = finalizeAttempt(olympiad, attempt, "finished");
+      attempt = finalizeAttempt(olympiadData, attempt, "finished");
       await upsertAttempt(attempt);
+      invalidateAttemptCaches();
       sendJson(res, 200, {
         ok: true,
-        data: buildAttemptView(olympiad, attempt, settings)
+        data: buildAttemptView(olympiadData, attempt, settings)
       });
       return;
     }
@@ -1393,30 +1643,33 @@ async function handleApi(req, res, url) {
     }
 
     markQuestionPresented(attempt);
-    attempt = normalizeAttemptState(olympiad, attempt);
+    attempt = normalizeAttemptState(olympiadData, attempt);
     await upsertAttempt(attempt);
+    invalidateAttemptCaches();
 
     sendJson(res, 200, {
       ok: true,
-      data: buildAttemptView(olympiad, attempt, settings)
+      data: buildAttemptView(olympiadData, attempt, settings)
     });
     return;
   }
 
   if (method === "POST" && pathname.match(/^\/api\/public\/attempts\/[^/]+\/finish$/)) {
+    const olympiadData = await ensureOlympiad();
     const attemptId = pathname.split("/")[4];
     let attempt = await loadAttemptById(attemptId);
 
-    if (!attempt || attempt.olympiadId !== olympiad.id) {
+    if (!attempt || attempt.olympiadId !== olympiadData.id) {
       sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
       return;
     }
 
-    attempt = finalizeAttempt(olympiad, attempt, "finished");
+    attempt = finalizeAttempt(olympiadData, attempt, "finished");
     await upsertAttempt(attempt);
+    invalidateAttemptCaches();
     sendJson(res, 200, {
       ok: true,
-      data: buildAttemptView(olympiad, attempt, settings)
+      data: buildAttemptView(olympiadData, attempt, settings)
     });
     return;
   }
@@ -1480,49 +1733,38 @@ async function handleApi(req, res, url) {
       return;
     }
 
+    if (pathname.startsWith("/api/admin/content/")) {
+      olympiadBase = ensureOlympiadBase();
+      customQuestionMap = await ensureCustomQuestionMap();
+    }
+
     if (method === "GET" && pathname === "/api/admin/summary") {
-      const rawAttempts = currentOlympiadAttempts(await loadAttempts(), olympiad.id).map((attempt) =>
-        normalizeAttemptState(olympiad, attempt)
-      );
-      const ranked = rawAttempts
-        .map((attempt) => {
-          const summary = summarizeAttempt(olympiad, attempt);
-          return {
-            rank: 0,
-            id: attempt.id,
-            participant: attempt.participant,
-            status: attempt.status,
-            startedAt: attempt.startedAt,
-            finishedAt: attempt.finishedAt,
-            summary,
-            diploma: diplomaByScore(summary.totalFinalScore)
-          };
-        })
-        .sort(compareAttemptsByRank)
-        .map((attempt, index) => ({
-          ...attempt,
-          rank: index + 1
-        }));
+      const olympiadData = await ensureOlympiad();
+      const { rawAttempts, ranked } = await getCachedAdminAnalytics(olympiadData, settings);
 
       sendJson(res, 200, {
         ok: true,
-        data: buildAdminSummary(olympiad, rawAttempts, ranked, settings)
+        data: buildAdminSummary(olympiadData, rawAttempts, ranked, settings)
       });
       return;
     }
 
     if (method === "GET" && pathname === "/api/admin/content/summary") {
+      const olympiadBaseData = ensureOlympiadBase();
+      const customQuestionMapData = await ensureCustomQuestionMap();
       sendJson(res, 200, {
         ok: true,
-        data: buildQuestionBankSummary(olympiadBase, customQuestionMap)
+        data: await getCachedQuestionSummary(olympiadBaseData, customQuestionMapData)
       });
       return;
     }
 
     if (method === "GET" && pathname === "/api/admin/content/questions") {
+      const olympiadBaseData = ensureOlympiadBase();
+      const customQuestionMapData = await ensureCustomQuestionMap();
       sendJson(res, 200, {
         ok: true,
-        data: buildQuestionCatalog(olympiadBase, customQuestionMap)
+        data: await getCachedQuestionCatalog(olympiadBaseData, customQuestionMapData)
       });
       return;
     }
@@ -1531,6 +1773,7 @@ async function handleApi(req, res, url) {
       const body = await parseBody(req);
       const question = normalizeCustomQuestionPayload(body);
       await upsertContentCustomQuestion(question.id, question);
+      invalidateContentCaches();
       sendJson(res, 200, {
         ok: true,
         data: question
@@ -1539,8 +1782,9 @@ async function handleApi(req, res, url) {
     }
 
     if (method === "PUT" && pathname.match(/^\/api\/admin\/content\/questions\/[^/]+$/)) {
+      const customQuestionMapData = await ensureCustomQuestionMap();
       const questionId = decodeURIComponent(pathname.split("/")[5] || "");
-      const existingQuestion = customQuestionMap[questionId];
+      const existingQuestion = customQuestionMapData[questionId];
       if (!existingQuestion) {
         sendJson(res, 404, {
           ok: false,
@@ -1558,6 +1802,7 @@ async function handleApi(req, res, url) {
         existingQuestion
       );
       await upsertContentCustomQuestion(question.id, question);
+      invalidateContentCaches();
       sendJson(res, 200, {
         ok: true,
         data: question
@@ -1616,9 +1861,9 @@ async function handleApi(req, res, url) {
     }
 
     if (method === "GET" && pathname === "/api/admin/attempts") {
-      const attempts = (
-        await buildRankedAttempts(olympiad, settings, { forceScores: true })
-      ).map((attempt) => ({
+      const olympiadData = await ensureOlympiad();
+      const { ranked } = await getCachedAdminAnalytics(olympiadData, settings);
+      const attempts = ranked.map((attempt) => ({
         rank: attempt.rank,
         id: attempt.id,
         fullName: attempt.participant.fullName,
@@ -1637,16 +1882,17 @@ async function handleApi(req, res, url) {
     }
 
     if (method === "GET" && pathname.match(/^\/api\/admin\/attempts\/[^/]+$/)) {
+      const olympiadData = await ensureOlympiad();
       const attemptId = pathname.split("/")[4];
       const allAttempts = await loadAttempts();
       const attempt = findAttemptById(allAttempts, attemptId);
 
-      if (!attempt || attempt.olympiadId !== olympiad.id) {
+      if (!attempt || attempt.olympiadId !== olympiadData.id) {
         sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
         return;
       }
 
-      const summary = summarizeAttempt(olympiad, attempt);
+      const summary = summarizeAttempt(olympiadData, attempt);
       const detailTours = (attempt.variant.tours || []).map((tour) => ({
         id: tour.id,
         code: tour.code,
@@ -1704,24 +1950,27 @@ async function handleApi(req, res, url) {
     }
 
     if (method === "POST" && pathname === "/api/admin/exports/csv") {
+      const olympiadData = await ensureOlympiad();
       const fileName = `results_${Date.now()}.csv`;
-      const filePath = saveExportFile(fileName, createAttemptsCsv(await buildExportRows(olympiad)));
+      const filePath = saveExportFile(fileName, createAttemptsCsv(await buildExportRows(olympiadData)));
       sendJson(res, 200, { ok: true, data: { fileName, filePath } });
       return;
     }
 
     if (method === "POST" && pathname === "/api/admin/exports/json") {
+      const olympiadData = await ensureOlympiad();
       const fileName = `results_${Date.now()}.json`;
       const filePath = saveExportFile(
         fileName,
-        JSON.stringify(currentOlympiadAttempts(await loadAttempts(), olympiad.id), null, 2)
+        JSON.stringify(currentOlympiadAttempts(await loadAttempts(), olympiadData.id), null, 2)
       );
       sendJson(res, 200, { ok: true, data: { fileName, filePath } });
       return;
     }
 
     if (method === "POST" && pathname === "/api/admin/disk/upload") {
-      const result = await uploadExportsToYandexDisk(olympiad, settings);
+      const olympiadData = await ensureOlympiad();
+      const result = await uploadExportsToYandexDisk(olympiadData, settings);
       sendJson(res, 200, { ok: true, data: result });
       return;
     }

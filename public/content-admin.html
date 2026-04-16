@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1f8e73" />
     <title>Банк заданий олимпиады</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.16" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.17" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.16" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.17" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -28,6 +28,10 @@
           </button>
         </div>
         <div id="content-nav-drawer" class="nav-ribbon-drawer">
+          <div class="nav-ribbon-summary" aria-hidden="true">
+            <div class="nav-ribbon-title">Редактор платформы</div>
+            <small>Каталог вопросов, QA-контроль и создание новых материалов в едином контуре.</small>
+          </div>
           <button id="content-nav-back" class="button ghost" type="button">Назад</button>
           <a class="button ghost" href="/">Главная олимпиады</a>
           <a class="button ghost" href="/admin.html">Панель организатора</a>
@@ -45,6 +49,28 @@
         <p class="lead">
           Метаданные вопросов, редакторский контроль, качество distractors и покрытие банка заданий.
         </p>
+        <div class="hero-control-grid">
+          <article class="hero-control-card">
+            <span>Фокус работы</span>
+            <strong id="content-hero-focus-value">Каталог вопросов</strong>
+            <small id="content-hero-focus-note">По умолчанию открыт основной рабочий режим редактора.</small>
+          </article>
+          <article class="hero-control-card">
+            <span>QA-состояние</span>
+            <strong id="content-hero-health-value">Нет данных</strong>
+            <small id="content-hero-health-note">После загрузки покажем готовность банка и число сигналов QA.</small>
+          </article>
+          <article class="hero-control-card">
+            <span>Текущий выбор</span>
+            <strong id="content-hero-selection-value">Вопрос не выбран</strong>
+            <small id="content-hero-selection-note">Можно быстро перейти к сводке, QA или созданию нового теста.</small>
+          </article>
+        </div>
+        <div class="hero-actions">
+          <button id="content-hero-open-summary" class="button secondary" type="button">Открыть сводку</button>
+          <button id="content-hero-open-qa" class="button ghost" type="button">Открыть QA</button>
+          <button id="content-hero-open-create" class="button primary" type="button">Создать новый тест</button>
+        </div>
       </section>
 
       <section id="content-login-card" class="card hidden">
@@ -418,7 +444,7 @@
                 </div>
               </div>
               <div class="list-toolbar">
-                <button id="content-page-prev" class="button ghost" type="button">← Назад</button>
+                <button id="content-page-prev" class="button ghost" type="button">в†ђ Назад</button>
                 <button id="content-page-next" class="button ghost" type="button">Вперёд →</button>
               </div>
               <div id="content-question-list" class="content-question-list"></div>
@@ -439,7 +465,7 @@
                 <div id="content-side-qa" class="side-detail-qa"></div>
               </div>
               <div class="actions inline side-actions">
-                <button id="content-side-prev" class="button ghost" type="button">← Предыдущий</button>
+                <button id="content-side-prev" class="button ghost" type="button">в†ђ Предыдущий</button>
                 <button id="content-side-next" class="button ghost" type="button">Следующий →</button>
                 <button id="content-open-selected-empty" class="button secondary" type="button">Открыть полностью</button>
                 <button id="content-side-edit" class="button secondary" type="button">Редактировать</button>
@@ -618,11 +644,11 @@ D. Хаш
         <small>
           Разработчик: Постовит Дмитрий Александрович, преподаватель первой категории, профильных
           дисциплин, реализуемых в рамках образовательной программы ГБПОУ "Горловский колледж
-          технологий и сервиса". • Версия <span id="content-app-version-label">1.6.16</span>
+          технологий и сервиса". • Версия <span id="content-app-version-label">1.6.17</span>
         </small>
       </footer>
     </main>
 
-    <script src="/content-admin.js?v=1.6.16"></script>
+    <script src="/content-admin.js?v=1.6.17"></script>
   </body>
 </html>

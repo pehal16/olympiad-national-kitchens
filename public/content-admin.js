@@ -40,6 +40,15 @@ const elements = {
   navQa: document.getElementById("content-nav-qa"),
   navEditor: document.getElementById("content-nav-editor"),
   navRefresh: document.getElementById("content-refresh"),
+  heroOpenSummary: document.getElementById("content-hero-open-summary"),
+  heroOpenQa: document.getElementById("content-hero-open-qa"),
+  heroOpenCreate: document.getElementById("content-hero-open-create"),
+  heroFocusValue: document.getElementById("content-hero-focus-value"),
+  heroFocusNote: document.getElementById("content-hero-focus-note"),
+  heroHealthValue: document.getElementById("content-hero-health-value"),
+  heroHealthNote: document.getElementById("content-hero-health-note"),
+  heroSelectionValue: document.getElementById("content-hero-selection-value"),
+  heroSelectionNote: document.getElementById("content-hero-selection-note"),
   openCatalog: document.getElementById("content-open-catalog"),
   openSummary: document.getElementById("content-open-summary"),
   openQa: document.getElementById("content-open-qa"),
@@ -183,7 +192,7 @@ function setNavDrawerOpen(open) {
   }
   if (elements.navMenuToggle) {
     elements.navMenuToggle.setAttribute("aria-expanded", nextState ? "true" : "false");
-    elements.navMenuToggle.textContent = nextState ? " " : "";
+    elements.navMenuToggle.textContent = nextState ? "Закрыть меню" : "Меню";
   }
 }
 
@@ -197,7 +206,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.6.16");
+    await navigator.serviceWorker.register("/sw.js?v=1.6.17");
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       registration.update().catch(() => {});
@@ -208,10 +217,10 @@ async function registerServiceWorker() {
 }
 
 const QA_CATEGORY_LABELS = {
-  metadata: "",
-  distractors: " ",
-  translation: "",
-  duplicate: ""
+  metadata: "метаданные",
+  distractors: "варианты ответа",
+  translation: "перевод и формулировка",
+  duplicate: "дубли"
 };
 
 const CREATOR_STEPS = [
@@ -371,11 +380,13 @@ function showLoginState() {
   elements.panel.classList.add("hidden");
   closeDetailModal();
   closeEditorModal();
+  updateWorkspaceHero();
 }
 
 function showPanel() {
   elements.loginCard.classList.add("hidden");
   elements.panel.classList.remove("hidden");
+  updateWorkspaceHero();
 }
 
 function setButtonActive(button, active) {
@@ -383,6 +394,69 @@ function setButtonActive(button, active) {
     return;
   }
   button.classList.toggle("is-active", Boolean(active));
+}
+
+function updateWorkspaceHero() {
+  if (!elements.heroFocusValue) {
+    return;
+  }
+
+  const panelVisible = Boolean(elements.panel && !elements.panel.classList.contains("hidden"));
+  const summary = state.summary;
+  const totalQuestions = state.questions.length;
+  const shownQuestions = state.filteredQuestions.length;
+  const draftsCount = Object.keys(state.drafts || {}).length;
+
+  let focusValue = "Требуется вход";
+  let focusNote = "Панель редактора откроется после подтверждения административной сессии.";
+
+  if (panelVisible) {
+    if (state.currentView === "summary") {
+      focusValue = "Сводка покрытия";
+      focusNote = "Здесь видно баланс туров, кухонь, типов заданий и методических акцентов.";
+    } else if (state.currentView === "qa") {
+      focusValue = "QA-контур";
+      focusNote = "Проверяйте дубли, слабые distractors и пробелы в метаданных до публикации.";
+    } else {
+      focusValue = "Каталог вопросов";
+      focusNote = "Основной рабочий режим: поиск, фильтры, карточка вопроса и быстрый переход в редактор.";
+    }
+  }
+
+  const healthValue = summary ? `${summary.qa.readyPercent}% готовности` : "Нет данных";
+  const healthNote = summary
+    ? `Сигналов QA: ${summary.qa.flaggedQuestionsCount || 0}. Интерактивных заданий: ${summary.interactiveQuestions || 0}.`
+    : "После загрузки банка появится готовность, QA-сигналы и объём интерактивных заданий.";
+
+  let selectionValue = panelVisible ? "Вопрос не выбран" : "Вход закрыт";
+  let selectionNote = panelVisible
+    ? "Переключайтесь между сводкой, QA и созданием новых материалов одним кликом."
+    : "После входа здесь появится текущий выбранный вопрос и объём рабочего набора.";
+
+  if (panelVisible && state.selectedQuestionId) {
+    selectionValue = state.selectedQuestionId;
+    selectionNote = `Показано ${shownQuestions} из ${totalQuestions}. Черновиков: ${draftsCount}.`;
+  } else if (panelVisible && totalQuestions) {
+    selectionValue = `${shownQuestions} из ${totalQuestions}`;
+    selectionNote = `Вопрос ещё не выбран. Черновиков: ${draftsCount}. Можно открыть карточку или создать новый тест.`;
+  }
+
+  elements.heroFocusValue.textContent = focusValue;
+  elements.heroFocusNote.textContent = focusNote;
+  elements.heroHealthValue.textContent = healthValue;
+  elements.heroHealthNote.textContent = healthNote;
+  elements.heroSelectionValue.textContent = selectionValue;
+  elements.heroSelectionNote.textContent = selectionNote;
+
+  if (elements.heroOpenSummary) {
+    elements.heroOpenSummary.disabled = !panelVisible;
+  }
+  if (elements.heroOpenQa) {
+    elements.heroOpenQa.disabled = !panelVisible;
+  }
+  if (elements.heroOpenCreate) {
+    elements.heroOpenCreate.disabled = !panelVisible;
+  }
 }
 
 function setContentView(view, options = {}) {
@@ -398,6 +472,7 @@ function setContentView(view, options = {}) {
   setButtonActive(elements.openSummary, view === "summary");
   setButtonActive(elements.openQa, view === "qa");
   setButtonActive(elements.openCatalog, view === "editor");
+  updateWorkspaceHero();
 
   if (options.scroll === false) {
     return;
@@ -561,6 +636,7 @@ function renderQaList(element, items = [], renderer, emptyText) {
 function renderSummary() {
   const summary = state.summary;
   if (!summary) {
+    updateWorkspaceHero();
     return;
   }
 
@@ -642,6 +718,7 @@ function renderSummary() {
     `,
     "    ."
   );
+  updateWorkspaceHero();
 }
 
 function getQuestionBlob(question) {
@@ -751,6 +828,7 @@ function renderQuestionDetail() {
     elements.detailMetrics.innerHTML = "";
     elements.detailQa.innerHTML = "";
     closeDetailModal();
+    updateWorkspaceHero();
     return;
   }
 
@@ -843,6 +921,7 @@ function renderQuestionDetail() {
   elements.editorPkFocus.value = (merged.metadata.pkFocus || []).join(", ");
   elements.editorMethodicalPurpose.value = merged.metadata.methodicalPurpose || "";
   renderSideQuestionCard(question, merged, issueInfo, custom);
+  updateWorkspaceHero();
 }
 
 function renderSideQuestionCard(question, merged, issueInfo, custom) {
@@ -903,6 +982,7 @@ function goToRelativeQuestion(step) {
     return;
   }
   state.selectedQuestionId = state.filteredQuestions[nextIndex].id;
+  state.page = Math.floor(nextIndex / state.pageSize) + 1;
   renderQuestionList();
   renderQuestionDetail();
 }
@@ -925,14 +1005,11 @@ function renderQuestionList() {
     elements.openSelectedEmpty.disabled = true;
     elements.pageMeta.textContent = "страница 0";
     renderSideQuestionCard(null);
+    updateWorkspaceHero();
     return;
   }
 
-  const selectedIndex = state.filteredQuestions.findIndex((item) => item.id === state.selectedQuestionId);
   const totalPages = Math.max(1, Math.ceil(shown / state.pageSize));
-  if (selectedIndex >= 0) {
-    state.page = Math.floor(selectedIndex / state.pageSize) + 1;
-  }
   state.page = Math.min(Math.max(1, state.page), totalPages);
   const startIndex = (state.page - 1) * state.pageSize;
   const pageItems = state.filteredQuestions.slice(startIndex, startIndex + state.pageSize);
@@ -940,7 +1017,8 @@ function renderQuestionList() {
   elements.pagePrev.disabled = state.page === 1;
   elements.pageNext.disabled = state.page >= totalPages;
 
-  if (!state.selectedQuestionId || !state.filteredQuestions.find((item) => item.id === state.selectedQuestionId)) {
+  const selectedOnCurrentPage = pageItems.some((item) => item.id === state.selectedQuestionId);
+  if (!state.selectedQuestionId || !state.filteredQuestions.find((item) => item.id === state.selectedQuestionId) || !selectedOnCurrentPage) {
     state.selectedQuestionId = pageItems[0]?.id || state.filteredQuestions[0].id;
   }
 
@@ -992,6 +1070,7 @@ function renderQuestionList() {
   elements.openSelected.disabled = false;
   elements.openSelectedEmpty.disabled = false;
   renderQuestionDetail();
+  updateWorkspaceHero();
 }
 
 function applyFilters() {
@@ -1302,7 +1381,7 @@ function parseQuestionBlock(block, defaults, index) {
       return;
     }
 
-    const starredMatch = line.match(/^[*★]\s+(.+)$/);
+    const starredMatch = line.match(/^[*в…]\s+(.+)$/);
     if (starredMatch) {
       options.push({ text: starredMatch[1].trim(), isCorrect: true });
       return;
@@ -1809,6 +1888,15 @@ function initNavigation() {
   elements.openCatalog.addEventListener("click", () => setContentView("editor"));
   elements.openSummary.addEventListener("click", () => setContentView("summary"));
   elements.openQa.addEventListener("click", () => setContentView("qa"));
+  if (elements.heroOpenSummary) {
+    elements.heroOpenSummary.addEventListener("click", () => setContentView("summary"));
+  }
+  if (elements.heroOpenQa) {
+    elements.heroOpenQa.addEventListener("click", () => setContentView("qa"));
+  }
+  if (elements.heroOpenCreate) {
+    elements.heroOpenCreate.addEventListener("click", openCreateFlow);
+  }
   elements.openCreateTop.addEventListener("click", openCreateFlow);
   elements.openCreate.addEventListener("click", openCreateFlow);
   elements.openCreateEmpty.addEventListener("click", openCreateFlow);

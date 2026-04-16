@@ -31,6 +31,15 @@ const elements = {
   navRating: document.getElementById("admin-nav-rating"),
   navDetail: document.getElementById("admin-nav-detail"),
   navRefresh: document.getElementById("admin-refresh"),
+  heroRefresh: document.getElementById("admin-hero-refresh"),
+  heroRatingJump: document.getElementById("admin-hero-rating-jump"),
+  heroDetailJump: document.getElementById("admin-hero-detail-jump"),
+  heroStateValue: document.getElementById("admin-hero-state-value"),
+  heroStateNote: document.getElementById("admin-hero-state-note"),
+  heroRefreshValue: document.getElementById("admin-hero-refresh-value"),
+  heroRefreshNote: document.getElementById("admin-hero-refresh-note"),
+  heroWatchValue: document.getElementById("admin-hero-watch-value"),
+  heroWatchNote: document.getElementById("admin-hero-watch-note"),
   ratingSection: document.getElementById("admin-rating-section"),
   detailSection: document.getElementById("admin-detail-section"),
   loginCard: document.getElementById("admin-login-card"),
@@ -86,7 +95,7 @@ function setNavDrawerOpen(open) {
   }
   if (elements.navMenuToggle) {
     elements.navMenuToggle.setAttribute("aria-expanded", nextState ? "true" : "false");
-    elements.navMenuToggle.textContent = nextState ? " " : "";
+    elements.navMenuToggle.textContent = nextState ? "Закрыть меню" : "Меню";
   }
 }
 
@@ -108,7 +117,7 @@ async function adminApi(path, options = {}) {
       ...options
     });
   } catch (error) {
-    const networkError = new Error("     .");
+    const networkError = new Error("Не удалось связаться с сервером админки.");
     networkError.status = 0;
     networkError.cause = error;
     throw networkError;
@@ -121,7 +130,7 @@ async function adminApi(path, options = {}) {
     try {
       data = JSON.parse(raw);
     } catch (error) {
-      const parseError = new Error(`    (${response.status}).`);
+      const parseError = new Error(`Сервер вернул некорректный ответ (${response.status}).`);
       parseError.status = response.status;
       parseError.cause = error;
       throw parseError;
@@ -130,7 +139,7 @@ async function adminApi(path, options = {}) {
 
   if (!response.ok || data.ok === false) {
     const requestError = new Error(
-      data.message || `  (${response.status || " "}).`
+      data.message || `Ошибка запроса (${response.status || "без статуса"}).`
     );
     requestError.status = response.status;
     requestError.payload = data;
@@ -172,11 +181,11 @@ function formatDateTime(value) {
 
 function formatDurationMs(value) {
   if (!Number.isFinite(value) || value <= 0) {
-    return "";
+    return "вЂ”";
   }
 
   if (value < 1000) {
-    return `${value} `;
+    return `${value} мс`;
   }
 
   const totalSeconds = Math.round(value / 1000);
@@ -184,22 +193,22 @@ function formatDurationMs(value) {
   const seconds = totalSeconds % 60;
 
   if (!minutes) {
-    return `${seconds} `;
+    return `${seconds} СЃ`;
   }
 
-  return `${minutes}  ${seconds.toString().padStart(2, "0")} `;
+  return `${minutes} мин ${seconds.toString().padStart(2, "0")} СЃ`;
 }
 
 function formatAdminError(error) {
   if (!error) {
-    return " .";
+    return "Неизвестная ошибка.";
   }
 
   if (Number(error.status) === 0) {
-    return "    .";
+    return "Сервер недоступен. Проверьте соединение и попробуйте ещё раз.";
   }
 
-  return error.message || " .";
+  return error.message || "Не удалось выполнить действие.";
 }
 
 function setDiagnosticStatus(element, text, tone = "active") {
@@ -213,8 +222,8 @@ function setDiagnosticStatus(element, text, tone = "active") {
 
 function getRefreshModeLabel() {
   return adminState.lastRefreshMode === "auto"
-    ? `   ${Math.round(PANEL_REFRESH_MS / 1000)} `
-    : " ";
+    ? `Автообновление каждые ${Math.round(PANEL_REFRESH_MS / 1000)} с`
+    : "Ручное обновление";
 }
 
 function setPanelStatus(status, message = "") {
@@ -222,18 +231,91 @@ function setPanelStatus(status, message = "") {
 
   if (elements.diagPanelState) {
     if (status === "refreshing") {
-      setDiagnosticStatus(elements.diagPanelState, message || " ", "active");
+      setDiagnosticStatus(elements.diagPanelState, message || "Идёт обновление панели", "active");
     } else if (status === "ready") {
-      setDiagnosticStatus(elements.diagPanelState, message || " ", "ready");
+      setDiagnosticStatus(elements.diagPanelState, message || "Панель работает штатно", "ready");
     } else if (status === "error") {
-      setDiagnosticStatus(elements.diagPanelState, message || " ", "error");
+      setDiagnosticStatus(elements.diagPanelState, message || "Ошибка панели", "error");
     } else {
-      setDiagnosticStatus(elements.diagPanelState, message || "", "warning");
+      setDiagnosticStatus(elements.diagPanelState, message || "Ожидание входа", "warning");
     }
   }
 
   if (elements.diagRefreshMode) {
     elements.diagRefreshMode.textContent = getRefreshModeLabel();
+  }
+
+  updateHeroOverview();
+}
+
+function updateHeroOverview() {
+  if (!elements.heroStateValue) {
+    return;
+  }
+
+  const summary = adminState.summary;
+  const diagnostics = summary?.diagnostics || {};
+  const counts = summary?.counts || {};
+  const suspiciousCount = Array.isArray(summary?.suspiciousAttempts)
+    ? summary.suspiciousAttempts.length
+    : 0;
+  const panelVisible = Boolean(elements.panel && !elements.panel.classList.contains("hidden"));
+
+  let stateValue = "Ожидание входа";
+  let stateNote = "Панель защищена. После авторизации откроется оперативная сводка и управление экспортом.";
+
+  if (panelVisible) {
+    if (adminState.panelStatus === "refreshing") {
+      stateValue = "Обновляем данные";
+      stateNote = "Получаем свежие данные по попыткам, аналитике и техническому состоянию.";
+    } else if (adminState.panelStatus === "ready") {
+      stateValue = "Контур активен";
+      stateNote = "Панель работает штатно и готова к мониторингу проведения олимпиады.";
+    } else if (adminState.panelStatus === "error") {
+      stateValue = "Нужно внимание";
+      stateNote = "Во время обновления произошла ошибка. Проверьте сеть, сервер или повторите запрос.";
+    } else {
+      stateValue = "Проверка связи";
+      stateNote = "Сессия подтверждена, ожидаем первую загрузку оперативной сводки.";
+    }
+  }
+
+  const refreshValue = summary
+    ? `${counts.activeAttempts ?? 0} активных`
+    : "Нет данных";
+  const refreshNote = summary
+    ? `Последнее обновление: ${formatDateTime(adminState.lastRefreshedAt) || "—"}. ${getRefreshModeLabel()}.`
+    : "После загрузки здесь появится число активных попыток и режим обновления панели.";
+
+  let watchValue = summary ? (suspiciousCount ? `${suspiciousCount} сигналов` : "Под контролем") : "Нет данных";
+  let watchNote = summary
+    ? suspiciousCount
+      ? "Есть подозрительные ситуации: откройте журнал и проверьте карточки попыток."
+      : "Подозрительных попыток пока не обнаружено."
+    : "Сигналы QA, API-ошибки и риски проведения будут собираться в отдельный контур.";
+
+  if (summary && Number(diagnostics.apiErrors) > 0) {
+    watchValue = `${diagnostics.apiErrors} API-ошибок`;
+    watchNote = diagnostics.lastApiErrorMessage
+      ? `Последняя ошибка: ${diagnostics.lastApiErrorMessage}.`
+      : "Зафиксированы ошибки API, стоит перепроверить журнал диагностики.";
+  }
+
+  elements.heroStateValue.textContent = stateValue;
+  elements.heroStateNote.textContent = stateNote;
+  elements.heroRefreshValue.textContent = refreshValue;
+  elements.heroRefreshNote.textContent = refreshNote;
+  elements.heroWatchValue.textContent = watchValue;
+  elements.heroWatchNote.textContent = watchNote;
+
+  if (elements.heroRefresh) {
+    elements.heroRefresh.disabled = !panelVisible;
+  }
+  if (elements.heroRatingJump) {
+    elements.heroRatingJump.disabled = !panelVisible;
+  }
+  if (elements.heroDetailJump) {
+    elements.heroDetailJump.disabled = !panelVisible;
   }
 }
 
@@ -243,7 +325,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.6.14");
+    await navigator.serviceWorker.register("/sw.js?v=1.6.17");
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       registration.update().catch(() => {});
@@ -295,6 +377,7 @@ function mapById(items = []) {
 function showPanel() {
   elements.loginCard.classList.add("hidden");
   elements.panel.classList.remove("hidden");
+  updateHeroOverview();
 }
 
 function focusLoginCard() {
@@ -334,7 +417,7 @@ function resetAdminSession(message = "") {
   adminState.filteredAttempts = [];
   elements.panel.classList.add("hidden");
   elements.loginCard.classList.remove("hidden");
-  setPanelStatus("warning", " ");
+  setPanelStatus("warning", "Нужен вход администратора");
 
   if (message) {
     showMessage(elements.loginMessage, message, "error");
@@ -352,7 +435,7 @@ async function ensureAdminSession() {
   const data = raw ? JSON.parse(raw) : {};
 
   if (!response.ok || data.ok === false) {
-    const error = new Error(data.message || `   (${response.status}).`);
+    const error = new Error(data.message || `Сессия не подтверждена (${response.status}).`);
     error.status = response.status;
     throw error;
   }
@@ -417,7 +500,7 @@ function updateFilterMeta(total, shown) {
   if (!elements.filterMeta) {
     return;
   }
-  elements.filterMeta.textContent = ` ${shown}  ${total}`;
+  elements.filterMeta.textContent = `Показано ${shown} из ${total}`;
 }
 
 function toDateOnly(value) {
@@ -477,10 +560,10 @@ function populateFilterControls() {
     ? catalogs.statuses
     : uniqueSorted(attempts.map((attempt) => attempt.status));
 
-  fillSelectOptions(elements.filterInstitution, " ", institutions, filters.institution);
-  fillSelectOptions(elements.filterGroup, " ", groups, filters.group);
-  fillSelectOptions(elements.filterMentor, " ", mentors, filters.mentor);
-  fillSelectOptions(elements.filterStatus, " ", statuses, filters.status);
+  fillSelectOptions(elements.filterInstitution, "Все учреждения", institutions, filters.institution);
+  fillSelectOptions(elements.filterGroup, "Все группы", groups, filters.group);
+  fillSelectOptions(elements.filterMentor, "Все наставники", mentors, filters.mentor);
+  fillSelectOptions(elements.filterStatus, "Все статусы", statuses, filters.status);
 
   if (elements.filterDateFrom) {
     elements.filterDateFrom.min = catalogs.startedDateMin || "";
@@ -527,7 +610,7 @@ function renderAttempts(attempts) {
 
   if (!attempts.length) {
     const row = document.createElement("tr");
-    row.innerHTML = '<td colspan="6" class="muted">     .</td>';
+    row.innerHTML = '<td colspan="6" class="muted">По текущим фильтрам данные не найдены.</td>';
     elements.attemptsBody.appendChild(row);
     updateFilterMeta(adminState.attempts.length, 0);
     return;
@@ -540,10 +623,10 @@ function renderAttempts(attempts) {
     row.innerHTML = `
       <td>${attempt.rank}</td>
       <td>${escapeHtml(attempt.fullName)}<br /><span class="muted">${escapeHtml(attempt.institution || "")}</span></td>
-      <td>${escapeHtml(attempt.groupName || "")}<br /><span class="muted">${escapeHtml(attempt.mentorName || "  ")}</span></td>
+      <td>${escapeHtml(attempt.groupName || "")}<br /><span class="muted">${escapeHtml(attempt.mentorName || "Наставник не указан")}</span></td>
       <td>${escapeHtml(attempt.status)}</td>
       <td>${attempt.totalFinalScore ?? ""}</td>
-      <td><button class="button secondary" data-attempt="${attempt.id}"></button></td>
+      <td><button class="button secondary" data-attempt="${attempt.id}">Открыть</button></td>
     `;
     if (attempt.id === adminState.selectedAttemptId) {
       row.classList.add("is-selected");
@@ -591,7 +674,7 @@ function renderTourAnalytics(items = []) {
   elements.tourAnalyticsGrid.innerHTML = "";
 
   if (!items.length) {
-    elements.tourAnalyticsGrid.innerHTML = '<div class="muted">    .</div>';
+    elements.tourAnalyticsGrid.innerHTML = '<div class="muted">Туровая аналитика пока не накоплена.</div>';
     return;
   }
 
@@ -605,8 +688,8 @@ function renderTourAnalytics(items = []) {
       </div>
       <div>${escapeHtml(tour.title)}</div>
       <div class="analytics-meta">
-        <span> : ${tour.attempts}</span>
-        <span>: ${tour.completionRate}%</span>
+        <span>Попыток: ${tour.attempts}</span>
+        <span>Завершение: ${tour.completionRate}%</span>
       </div>
     `;
     elements.tourAnalyticsGrid.appendChild(card);
@@ -622,7 +705,7 @@ function renderInstitutionAnalytics(items = []) {
 
   if (!items.length) {
     const row = document.createElement("tr");
-    row.innerHTML = '<td colspan="5" class="muted">    .</td>';
+    row.innerHTML = '<td colspan="5" class="muted">По учреждениям данных пока нет.</td>';
     elements.institutionAnalyticsBody.appendChild(row);
     return;
   }
@@ -645,12 +728,12 @@ function renderSuspiciousAttempts(items = []) {
     return;
   }
 
-  elements.suspiciousMeta.textContent = `: ${items.length}`;
+  elements.suspiciousMeta.textContent = `Сигналов: ${items.length}`;
   elements.suspiciousAttemptsBody.innerHTML = "";
 
   if (!items.length) {
     elements.suspiciousAttemptsBody.innerHTML =
-      '<div class="muted">    .</div>';
+      '<div class="muted">Подозрительных попыток не найдено.</div>';
     return;
   }
 
@@ -663,15 +746,15 @@ function renderSuspiciousAttempts(items = []) {
 
     card.innerHTML = `
       <div class="section-row">
-        <strong>${escapeHtml(entry.participant?.fullName || " ")}</strong>
-        <span class="pill"> ${entry.severity}</span>
+        <strong>${escapeHtml(entry.participant?.fullName || "Участник")}</strong>
+        <span class="pill">Риск: ${entry.severity}</span>
       </div>
-      <div class="muted">${escapeHtml(entry.participant?.institution || "  ")}  ${escapeHtml(entry.participant?.groupName || "  ")}</div>
+      <div class="muted">${escapeHtml(entry.participant?.institution || "Учреждение не указано")} • ${escapeHtml(entry.participant?.groupName || "Группа не указана")}</div>
       <div class="analytics-meta">
-        <span>: ${escapeHtml(entry.status)}</span>
-        <span>: ${entry.answeredCount} / ${entry.totalQuestions}</span>
-        <span> : ${formatDurationMs(entry.averageTimeMs)}</span>
-        <span> : ${formatDateTime(entry.lastActivityAt)}</span>
+        <span>Статус: ${escapeHtml(entry.status)}</span>
+        <span>Ответов: ${entry.answeredCount} / ${entry.totalQuestions}</span>
+        <span>Среднее время: ${formatDurationMs(entry.averageTimeMs)}</span>
+        <span>Последняя активность: ${formatDateTime(entry.lastActivityAt)}</span>
       </div>
       <ul class="flat-list suspicious-signals">${signals}</ul>
     `;
@@ -681,14 +764,14 @@ function renderSuspiciousAttempts(items = []) {
 
 function formatAnswer(question, answer) {
   if (!answer || !answer.answerPayload) {
-    return "  ";
+    return "Нет ответа";
   }
 
   const itemMap = mapById(question.items);
   const optionMap = mapById(question.options);
 
   if (question.type === "single_choice") {
-    return optionMap.get(answer.answerPayload.selectedOptionId)?.text || " ";
+    return optionMap.get(answer.answerPayload.selectedOptionId)?.text || "Вариант не выбран";
   }
 
   if (question.type === "sequence_drag") {
@@ -728,7 +811,7 @@ function renderSummary(summary) {
   elements.uploadDisk.disabled = !diskEnabled;
   elements.uploadDisk.title = diskEnabled
     ? ""
-    : "    :    .";
+    : "Яндекс Диск не настроен в секретах или переменных окружения.";
 
   adminState.lastRefreshedAt = new Date();
   const diagnostics = summary.diagnostics || {};
@@ -738,7 +821,7 @@ function renderSummary(summary) {
     elements.backendBadge.textContent = `backend: ${capabilities.storageBackend || diagnostics.storageBackend || ""}`;
   }
   if (elements.diskBadge) {
-    elements.diskBadge.textContent = diskEnabled ? " : " : " : ";
+    elements.diskBadge.textContent = diskEnabled ? "Яндекс Диск: включён" : "Яндекс Диск: выключен";
   }
   if (elements.diagVersion) {
     elements.diagVersion.textContent = diagnostics.appVersion || "";
@@ -761,7 +844,7 @@ function renderSummary(summary) {
   if (elements.diagLastApiError) {
     elements.diagLastApiError.textContent = diagnostics.lastApiErrorMessage
       ? `${diagnostics.lastApiErrorMessage}${diagnostics.lastApiErrorRoute ? ` (${diagnostics.lastApiErrorRoute})` : ""}`
-      : "  ";
+      : "Ошибок не зафиксировано";
   }
   if (elements.diagDiskFolder) {
     elements.diagDiskFolder.textContent = capabilities.yandexDiskFolder || "";
@@ -773,7 +856,7 @@ function renderSummary(summary) {
   renderTourAnalytics(summary.tourAnalytics || []);
   renderInstitutionAnalytics(summary.institutionAnalytics || []);
   renderSuspiciousAttempts(summary.suspiciousAttempts || []);
-  setPanelStatus("ready", " ");
+  setPanelStatus("ready", "Данные панели актуальны");
 }
 
 async function loadSummary() {
@@ -802,11 +885,11 @@ async function loadAttemptDetail(attemptId, options = {}) {
   top.className = "detail-card";
   top.innerHTML = `
     <strong>${escapeHtml(data.attempt.participant.fullName)}</strong><br />
-    <span class="muted">${escapeHtml(data.attempt.participant.institution)}  ${escapeHtml(data.attempt.participant.groupName)}</span><br />
-    <span class="muted">${escapeHtml(data.attempt.participant.mentorName || "  ")}</span><br />
-    <span class="muted">: ${escapeHtml(data.attempt.status)}</span><br />
-    <span class="muted">: ${summary.totalFinalScore} / ${summary.totalMaxScore}</span><br />
-    <span class="muted"> : ${escapeHtml((data.attempt.variantMeta.issuedQuestionIds || []).join(", "))}</span>
+    <span class="muted">${escapeHtml(data.attempt.participant.institution)} • ${escapeHtml(data.attempt.participant.groupName)}</span><br />
+    <span class="muted">${escapeHtml(data.attempt.participant.mentorName || "Наставник не указан")}</span><br />
+    <span class="muted">Статус: ${escapeHtml(data.attempt.status)}</span><br />
+    <span class="muted">Баллы: ${summary.totalFinalScore} / ${summary.totalMaxScore}</span><br />
+    <span class="muted">Выданные вопросы: ${escapeHtml((data.attempt.variantMeta.issuedQuestionIds || []).join(", "))}</span>
   `;
   detail.appendChild(top);
 
@@ -814,21 +897,21 @@ async function loadAttemptDetail(attemptId, options = {}) {
     const card = document.createElement("section");
     card.className = "detail-card";
     card.innerHTML = `
-      <h3>${escapeHtml(tour.code)}  ${escapeHtml(tour.title)}</h3>
-      <p class="muted">${tour.questionCount}    ${tour.timeLimitMinutes}    ${tour.score ? `${tour.score.finalScore} / ${tour.score.maxScore}` : "0 / 0"}</p>
+      <h3>${escapeHtml(tour.code)} • ${escapeHtml(tour.title)}</h3>
+      <p class="muted">${tour.questionCount} вопросов • ${tour.timeLimitMinutes} минут • ${tour.score ? `${tour.score.finalScore} / ${tour.score.maxScore}` : "0 / 0"}</p>
     `;
 
     tour.questions.forEach((question) => {
       const box = document.createElement("div");
       box.className = "review-box";
       box.innerHTML = `
-        <div><strong>${escapeHtml(question.sourceId)}</strong>  ${escapeHtml(question.prompt)}</div>
+        <div><strong>${escapeHtml(question.sourceId)}</strong> • ${escapeHtml(question.prompt)}</div>
         ${question.caseTitle ? `<div class="message">${escapeHtml(question.caseTitle)}</div>` : ""}
         ${question.scenario ? `<div class="muted">${escapeHtml(question.scenario)}</div>` : ""}
-        <div class="muted"> :<pre>${escapeHtml(formatAnswer(question, question.answer))}</pre></div>
-        <div class="muted"> :<pre>${escapeHtml(question.correctAnswer || "")}</pre></div>
-        <div class="muted">: ${question.answer ? question.answer.finalScore : 0} / ${question.maxScore}</div>
-        <div class="muted">  : ${question.log && question.log.timeSpentMs ? `${question.log.timeSpentMs} ` : " "}</div>
+        <div class="muted">Ответ участника:<pre>${escapeHtml(formatAnswer(question, question.answer))}</pre></div>
+        <div class="muted">Правильный ответ:<pre>${escapeHtml(question.correctAnswer || "")}</pre></div>
+        <div class="muted">Баллы: ${question.answer ? question.answer.finalScore : 0} / ${question.maxScore}</div>
+        <div class="muted">Время на вопрос: ${question.log && question.log.timeSpentMs ? formatDurationMs(question.log.timeSpentMs) : "вЂ”"}</div>
       `;
       card.appendChild(box);
     });
@@ -854,12 +937,11 @@ async function refreshPanel(options = {}) {
 
   adminState.lastRefreshMode = silent ? "auto" : "manual";
   adminState.refreshInFlight = true;
-  setPanelStatus("refreshing", silent ? " " : " ");
+  setPanelStatus("refreshing", silent ? "Автообновление данных" : "Обновляем сводку и попытки");
   const selectedAttemptId = adminState.selectedAttemptId;
 
   try {
-    await loadSummary();
-    await loadAttempts();
+    await Promise.all([loadSummary(), loadAttempts()]);
 
     if (selectedAttemptId) {
       await loadAttemptDetail(selectedAttemptId, { preserveSelection: true });
@@ -867,10 +949,10 @@ async function refreshPanel(options = {}) {
   } catch (error) {
     if (silent) {
       if (error.status === 401 || error.status === 403) {
-        resetAdminSession("  .  .");
+        resetAdminSession("Сессия администратора истекла. Войдите повторно.");
       } else {
         setPanelStatus("error", formatAdminError(error));
-        showMessage(elements.exportMessage, `: ${formatAdminError(error)}`, "warning");
+        showMessage(elements.exportMessage, `Ошибка панели: ${formatAdminError(error)}`, "warning");
       }
       return;
     }
@@ -894,7 +976,7 @@ async function handleLogin(event) {
     const data = await response.json();
 
     if (!response.ok || !data.ok) {
-      throw new Error(data.message || " ");
+      throw new Error(data.message || "Не удалось выполнить вход.");
     }
 
     adminState.token = "";
@@ -913,7 +995,7 @@ async function exportFile(kind) {
     const data = await adminApi(`/api/admin/exports/${kind}`, { method: "POST" });
     showMessage(
       elements.exportMessage,
-      ` : ${data.fileName}. : ${data.filePath}`,
+      `Экспорт готов: ${data.fileName}. Файл сохранён в ${data.filePath}`,
       "success"
     );
   } catch (error) {
@@ -928,7 +1010,7 @@ async function uploadToDisk() {
     const data = await adminApi("/api/admin/disk/upload", { method: "POST" });
     showMessage(
       elements.exportMessage,
-      `       ${data.folder}.`,
+      `Архивы выгружены на Яндекс Диск в папку ${data.folder}.`,
       "success"
     );
   } catch (error) {
@@ -970,7 +1052,7 @@ function resetFilters() {
 async function init() {
   await registerServiceWorker();
   await loadPublicVersion();
-  setPanelStatus("warning", " ");
+  setPanelStatus("warning", "Ожидание входа администратора");
   if (elements.navMenuToggle) {
     elements.navMenuToggle.addEventListener("click", () => {
       const expanded = elements.navMenuToggle.getAttribute("aria-expanded") === "true";
@@ -1006,6 +1088,33 @@ async function init() {
     refreshPanel();
     closeNavDrawer();
   });
+  if (elements.heroRefresh) {
+    elements.heroRefresh.addEventListener("click", () => {
+      if (elements.panel.classList.contains("hidden")) {
+        focusLoginCard();
+        return;
+      }
+      refreshPanel();
+    });
+  }
+  if (elements.heroRatingJump) {
+    elements.heroRatingJump.addEventListener("click", () => {
+      if (elements.panel.classList.contains("hidden")) {
+        focusLoginCard();
+        return;
+      }
+      scrollToBlock(elements.ratingSection);
+    });
+  }
+  if (elements.heroDetailJump) {
+    elements.heroDetailJump.addEventListener("click", () => {
+      if (elements.panel.classList.contains("hidden")) {
+        focusLoginCard();
+        return;
+      }
+      scrollToBlock(elements.detailSection);
+    });
+  }
 
   elements.loginForm.addEventListener("submit", handleLogin);
   elements.exportCsv.addEventListener("click", () => exportFile("csv"));

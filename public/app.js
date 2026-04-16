@@ -12,6 +12,7 @@ const state = {
   pendingAnswerQueue: [],
   pendingFlushInFlight: false,
   pendingFlushRetryTimer: null,
+  pendingFlushDebounceTimer: null,
   pendingQueueAttemptId: "",
   isSubmittingAnswer: false,
   isFinishingAttempt: false,
@@ -42,6 +43,15 @@ const elements = {
   heroSection: document.getElementById("hero-section"),
   heroTitle: document.getElementById("hero-title"),
   heroSubtitle: document.getElementById("hero-subtitle"),
+  heroStageValue: document.getElementById("hero-stage-value"),
+  heroStageNote: document.getElementById("hero-stage-note"),
+  heroProgressValue: document.getElementById("hero-progress-value"),
+  heroProgressNote: document.getElementById("hero-progress-note"),
+  heroSyncValue: document.getElementById("hero-sync-value"),
+  heroSyncNote: document.getElementById("hero-sync-note"),
+  heroActionRegister: document.getElementById("hero-action-register"),
+  heroActionAttempt: document.getElementById("hero-action-attempt"),
+  heroActionResult: document.getElementById("hero-action-result"),
   tourMeta: document.getElementById("tour-meta"),
   journeyMap: document.getElementById("journey-map"),
   journeyStatus: document.getElementById("journey-status"),
@@ -138,18 +148,34 @@ function refreshNavigationState() {
   setButtonAvailability(
     elements.navRegister,
     !attemptActive && !resultVisible,
-    "Регистрация доступна до начала попытки."
+    "Р В Р ВµР С–Р С‘РЎРѓРЎвЂљРЎР‚Р В°РЎвЂ Р С‘РЎРЏ Р Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р Р…Р В° Р Т‘Р С• Р Р…Р В°РЎвЂЎР В°Р В»Р В° Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р С‘."
+  );
+  setButtonAvailability(
+    elements.heroActionRegister,
+    !attemptActive && !resultVisible,
+    "Р В Р ВµР С–Р С‘РЎРѓРЎвЂљРЎР‚Р В°РЎвЂ Р С‘РЎРЏ Р Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р Р…Р В° Р Т‘Р С• Р Р…Р В°РЎвЂЎР В°Р В»Р В° Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р С‘."
   );
   setButtonAvailability(
     elements.navAttempt,
     attemptActive,
-    "Текущий тур появится после запуска попытки."
+    "Р СћР ВµР С”РЎС“РЎвЂ°Р С‘Р в„– РЎвЂљРЎС“РЎР‚ Р С—Р С•РЎРЏР Р†Р С‘РЎвЂљРЎРѓРЎРЏ Р С—Р С•РЎРѓР В»Р Вµ Р В·Р В°Р С—РЎС“РЎРѓР С”Р В° Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р С‘."
+  );
+  setButtonAvailability(
+    elements.heroActionAttempt,
+    attemptActive,
+    "Р СћР ВµР С”РЎС“РЎвЂ°Р С‘Р в„– РЎвЂљРЎС“РЎР‚ Р С—Р С•РЎРЏР Р†Р С‘РЎвЂљРЎРѓРЎРЏ Р С—Р С•РЎРѓР В»Р Вµ Р В·Р В°Р С—РЎС“РЎРѓР С”Р В° Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р С‘."
   );
   setButtonAvailability(
     elements.navResult,
     Boolean(state.attempt && state.attempt.status !== "in_progress"),
-    "Результат станет доступен после завершения попытки."
+    "Р В Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ РЎРѓРЎвЂљР В°Р Р…Р ВµРЎвЂљ Р Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р ВµР Р… Р С—Р С•РЎРѓР В»Р Вµ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р С‘РЎРЏ Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р С‘."
   );
+  setButtonAvailability(
+    elements.heroActionResult,
+    Boolean(state.attempt && state.attempt.status !== "in_progress"),
+    "Р В Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ РЎРѓРЎвЂљР В°Р Р…Р ВµРЎвЂљ Р Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р ВµР Р… Р С—Р С•РЎРѓР В»Р Вµ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р С‘РЎРЏ Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р С‘."
+  );
+  updateHeroSnapshot();
   updateStartAvailability();
 }
 
@@ -165,34 +191,34 @@ function refreshAttemptControls() {
   elements.finishAttempt.disabled = !attemptInProgress || isBusy || isBlockedByGuard;
 
   if (state.isSubmittingAnswer) {
-    elements.submitAnswer.textContent = "Сохранение ответа...";
-    elements.finishAttempt.textContent = "Завершить досрочно";
+    elements.submitAnswer.textContent = "Р РЋР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р С‘Р Вµ Р С•РЎвЂљР Р†Р ВµРЎвЂљР В°...";
+    elements.finishAttempt.textContent = "Р вЂ”Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р С‘РЎвЂљРЎРЉ Р Т‘Р С•РЎРѓРЎР‚Р С•РЎвЂЎР Р…Р С•";
     return;
   }
 
   if (state.isFinishingAttempt) {
-    elements.finishAttempt.textContent = "Завершаем попытку...";
-    elements.submitAnswer.textContent = "Ответить и далее";
+    elements.finishAttempt.textContent = "Р вЂ”Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р В°Р ВµР С Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”РЎС“...";
+    elements.submitAnswer.textContent = "Р С›РЎвЂљР Р†Р ВµРЎвЂљР С‘РЎвЂљРЎРЉ Р С‘ Р Т‘Р В°Р В»Р ВµР Вµ";
     return;
   }
 
   if (isBlockedByGuard) {
-    elements.submitAnswer.textContent = "Вернитесь в режим";
-    elements.finishAttempt.textContent = "Вернитесь в режим";
+    elements.submitAnswer.textContent = "Р вЂ™Р ВµРЎР‚Р Р…Р С‘РЎвЂљР ВµРЎРѓРЎРЉ Р Р† РЎР‚Р ВµР В¶Р С‘Р С";
+    elements.finishAttempt.textContent = "Р вЂ™Р ВµРЎР‚Р Р…Р С‘РЎвЂљР ВµРЎРѓРЎРЉ Р Р† РЎР‚Р ВµР В¶Р С‘Р С";
     return;
   }
 
-  elements.finishAttempt.textContent = "Завершить досрочно";
+  elements.finishAttempt.textContent = "Р вЂ”Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р С‘РЎвЂљРЎРЉ Р Т‘Р С•РЎРѓРЎР‚Р С•РЎвЂЎР Р…Р С•";
 
   if (!attemptInProgress) {
-    elements.submitAnswer.textContent = "Ответить и далее";
+    elements.submitAnswer.textContent = "Р С›РЎвЂљР Р†Р ВµРЎвЂљР С‘РЎвЂљРЎРЉ Р С‘ Р Т‘Р В°Р В»Р ВµР Вµ";
     return;
   }
 
   elements.submitAnswer.textContent =
     state.attempt.progress.currentQuestionIndex >= state.attempt.progress.totalQuestions
-      ? "Ответить и завершить"
-      : "Ответить и далее";
+      ? "Р С›РЎвЂљР Р†Р ВµРЎвЂљР С‘РЎвЂљРЎРЉ Р С‘ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р С‘РЎвЂљРЎРЉ"
+      : "Р С›РЎвЂљР Р†Р ВµРЎвЂљР С‘РЎвЂљРЎРЉ Р С‘ Р Т‘Р В°Р В»Р ВµР Вµ";
 }
 
 function scrollToSection(section) {
@@ -218,12 +244,12 @@ function goBackOrHome() {
 
 function formatDateTime(value) {
   if (!value) {
-    return "—";
+    return "РІР‚вЂќ";
   }
 
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "—";
+    return "РІР‚вЂќ";
   }
 
   return date.toLocaleString("ru-RU", {
@@ -246,6 +272,7 @@ function setAttemptSaveStatus(message, type = "idle") {
   elements.attemptSaveStatus.className = `sync-badge ${type}`;
   setParticipantShellState();
   updateExamCockpit();
+  updateHeroSnapshot();
 }
 
 function setAttemptSyncMeta(message) {
@@ -255,6 +282,7 @@ function setAttemptSyncMeta(message) {
 
   elements.attemptSyncMeta.textContent = message;
   updateExamCockpit();
+  updateHeroSnapshot();
 }
 
 function setShellBadge(element, text, tone = "neutral") {
@@ -266,19 +294,65 @@ function setShellBadge(element, text, tone = "neutral") {
   element.className = `system-pill ${tone}`;
 }
 
+function updateHeroSnapshot() {
+  if (!elements.heroStageValue || !state.olympiad) {
+    return;
+  }
+
+  const progress = getJourneyProgressModel();
+  let stageValue = "Р СџР С•Р Т‘Р С–Р С•РЎвЂљР С•Р Р†Р С”Р В°";
+  let stageNote = "Р РЋР Р…Р В°РЎвЂЎР В°Р В»Р В° Р В·Р В°Р С—Р С•Р В»Р Р…Р С‘РЎвЂљР Вµ Р Т‘Р В°Р Р…Р Р…РЎвЂ№Р Вµ РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”Р В° Р С‘ Р С—РЎР‚Р С•Р Р†Р ВµРЎР‚РЎРЉРЎвЂљР Вµ Р С—РЎР‚Р В°Р Р†Р С‘Р В»Р В° Р С—РЎР‚Р С•РЎвЂ¦Р С•Р В¶Р Т‘Р ВµР Р…Р С‘РЎРЏ.";
+
+  if (state.participant) {
+    stageValue = "Р вЂњР С•РЎвЂљР С•Р Р† Р С” РЎРѓРЎвЂљР В°РЎР‚РЎвЂљРЎС“";
+    stageNote = "Р В Р ВµР С–Р С‘РЎРѓРЎвЂљРЎР‚Р В°РЎвЂ Р С‘РЎРЏ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р В°. Р СљР С•Р В¶Р Р…Р С• Р В·Р В°Р С—РЎС“РЎРѓР С”Р В°РЎвЂљРЎРЉ Р С—Р ВµРЎР‚Р Р†РЎвЂ№Р в„– РЎвЂљРЎС“РЎР‚ Р С‘ Р С—Р ВµРЎР‚Р ВµРЎвЂ¦Р С•Р Т‘Р С‘РЎвЂљРЎРЉ Р Р† РЎРЊР С”Р В·Р В°Р СР ВµР Р…Р В°РЎвЂ Р С‘Р С•Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С.";
+  }
+
+  if (state.attempt && state.attempt.status === "in_progress") {
+    const currentTour = state.attempt.currentTour;
+    stageValue = currentTour ? `${currentTour.code} Р Р† РЎР‚Р В°Р В±Р С•РЎвЂљР Вµ` : "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р В°Р С”РЎвЂљР С‘Р Р†Р ВµР Р…";
+    stageNote = currentTour
+      ? `Р РЋР ВµР в„–РЎвЂЎР В°РЎРѓ Р С•РЎвЂљР С”РЎР‚РЎвЂ№РЎвЂљ ${currentTour.title}. Р вЂ™Р С•Р С—РЎР‚Р С•РЎРѓ ${state.attempt.progress.tourQuestionIndex} Р С‘Р В· ${state.attempt.progress.tourQuestionCount}.`
+      : "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ РЎС“Р В¶Р Вµ Р В·Р В°Р С—РЎС“РЎвЂ°Р ВµР Р…. Р СџР ВµРЎР‚Р ВµРЎвЂ¦Р С•Р Т‘Р С‘РЎвЂљР Вµ Р С” РЎвЂљР ВµР С”РЎС“РЎвЂ°Р ВµР СРЎС“ Р Р†Р С•Р С—РЎР‚Р С•РЎРѓРЎС“.";
+  } else if (state.attempt && state.attempt.status !== "in_progress") {
+    stageValue = "Р В¤Р С‘Р Р…Р С‘РЎв‚¬ Р В·Р В°РЎвЂћР С‘Р С”РЎРѓР С‘РЎР‚Р С•Р Р†Р В°Р Р…";
+    stageNote = "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬РЎвЂР Р…, Р В° Р С‘РЎвЂљР С•Р С– Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С‘ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…РЎвЂР Р… Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ Р С•РЎР‚Р С–Р В°Р Р…Р С‘Р В·Р В°РЎвЂљР С•РЎР‚Р В°.";
+  }
+
+  let syncValue = state.isOnline ? "Р С›Р Р…Р В»Р В°Р в„–Р Р…" : "Р С›РЎвЂћР В»Р В°Р в„–Р Р…";
+  if (state.attempt && state.attempt.status === "in_progress") {
+    syncValue = state.isOnline ? "Р ТђР С•Р Т‘ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…РЎРЏР ВµРЎвЂљРЎРѓРЎРЏ" : "Р вЂєР С•Р С”Р В°Р В»РЎРЉР Р…РЎвЂ№Р в„– Р В±РЎС“РЎвЂћР ВµРЎР‚";
+  } else if (state.attempt && state.attempt.status !== "in_progress") {
+    syncValue = state.isOnline ? "Р ВРЎвЂљР С•Р С– Р В·Р В°Р С—Р С‘РЎРѓР В°Р Р…" : "Р С›Р В¶Р С‘Р Т‘Р В°Р ВµРЎвЂљ Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р С”Р С‘";
+  }
+
+  const syncNote =
+    (elements.attemptSyncMeta && elements.attemptSyncMeta.textContent) ||
+    (state.isOnline
+      ? "Р В Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљРЎвЂ№ Р В±РЎС“Р Т‘РЎС“РЎвЂљ РЎвЂћР С‘Р С”РЎРѓР С‘РЎР‚Р С•Р Р†Р В°РЎвЂљРЎРЉРЎРѓРЎРЏ Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ Р С•РЎР‚Р С–Р В°Р Р…Р С‘Р В·Р В°РЎвЂљР С•РЎР‚Р В°."
+      : "Р РЋР Р†РЎРЏР В·РЎРЉ Р Р…Р ВµРЎРѓРЎвЂљР В°Р В±Р С‘Р В»РЎРЉР Р…Р В°. Р СџР В»Р В°РЎвЂљРЎвЂћР С•РЎР‚Р СР В° Р С—РЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р С‘РЎвЂљ РЎР‚Р В°Р В±Р С•РЎвЂљРЎС“ Р С‘ Р С—Р С•Р Р†РЎвЂљР С•РЎР‚Р С‘РЎвЂљ Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р С”РЎС“ Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С‘.");
+
+  elements.heroStageValue.textContent = stageValue;
+  elements.heroStageNote.textContent = stageNote;
+  elements.heroProgressValue.textContent = `${progress.percent}%`;
+  elements.heroProgressNote.textContent = progress.hint || progress.label;
+  elements.heroSyncValue.textContent = syncValue;
+  elements.heroSyncNote.textContent = syncNote;
+}
+
 function isAttemptInProgress() {
   return Boolean(state.attempt && state.attempt.status === "in_progress");
 }
 
 function updateExamGuardUi() {
   if (elements.examIncidentsBadge) {
-    elements.examIncidentsBadge.textContent = `Срабатываний: ${state.examIncidents}`;
+    elements.examIncidentsBadge.textContent = `Р РЋРЎР‚Р В°Р В±Р В°РЎвЂљРЎвЂ№Р Р†Р В°Р Р…Р С‘Р в„–: ${state.examIncidents}`;
   }
 
   if (elements.examGuardMessage) {
     elements.examGuardMessage.textContent =
       state.examGuardReason ||
-      "Вернитесь в активное окно олимпиады и восстановите полноэкранный режим, чтобы продолжить.";
+      "Р вЂ™Р ВµРЎР‚Р Р…Р С‘РЎвЂљР ВµРЎРѓРЎРЉ Р Р† Р В°Р С”РЎвЂљР С‘Р Р†Р Р…Р С•Р Вµ Р С•Р С”Р Р…Р С• Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎвЂ№ Р С‘ Р Р†Р С•РЎРѓРЎРѓРЎвЂљР В°Р Р…Р С•Р Р†Р С‘РЎвЂљР Вµ Р С—Р С•Р В»Р Р…Р С•РЎРЊР С”РЎР‚Р В°Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С, РЎвЂЎРЎвЂљР С•Р В±РЎвЂ№ Р С—РЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р С‘РЎвЂљРЎРЉ.";
   }
 
   if (elements.examGuardOverlay) {
@@ -303,7 +377,7 @@ function activateExamGuard(reason) {
     return;
   }
 
-  const nextReason = reason || "Олимпиада временно поставлена на контроль.";
+  const nextReason = reason || "Р С›Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘Р В° Р Р†РЎР‚Р ВµР СР ВµР Р…Р Р…Р С• Р С—Р С•РЎРѓРЎвЂљР В°Р Р†Р В»Р ВµР Р…Р В° Р Р…Р В° Р С”Р С•Р Р…РЎвЂљРЎР‚Р С•Р В»РЎРЉ.";
   if (!state.examGuardActive || state.examGuardReason !== nextReason) {
     state.examIncidents += 1;
   }
@@ -312,8 +386,8 @@ function activateExamGuard(reason) {
   state.examGuardReason = nextReason;
   updateExamGuardUi();
   refreshAttemptControls();
-  setAttemptSaveStatus("Экзаменационный режим приостановлен", "warning");
-  setAttemptSyncMeta("Вернитесь в активное окно олимпиады и восстановите полноэкранный режим.");
+  setAttemptSaveStatus("Р В­Р С”Р В·Р В°Р СР ВµР Р…Р В°РЎвЂ Р С‘Р С•Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С Р С—РЎР‚Р С‘Р С•РЎРѓРЎвЂљР В°Р Р…Р С•Р Р†Р В»Р ВµР Р…", "warning");
+  setAttemptSyncMeta("Р вЂ™Р ВµРЎР‚Р Р…Р С‘РЎвЂљР ВµРЎРѓРЎРЉ Р Р† Р В°Р С”РЎвЂљР С‘Р Р†Р Р…Р С•Р Вµ Р С•Р С”Р Р…Р С• Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎвЂ№ Р С‘ Р Р†Р С•РЎРѓРЎРѓРЎвЂљР В°Р Р…Р С•Р Р†Р С‘РЎвЂљР Вµ Р С—Р С•Р В»Р Р…Р С•РЎРЊР С”РЎР‚Р В°Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С.");
   showMessage(elements.attemptMessage, nextReason, "warning");
   updateExamCockpit();
 }
@@ -325,7 +399,7 @@ function releaseExamGuard(message = "") {
   refreshAttemptControls();
   if (message) {
     setAttemptSaveStatus(message, "success");
-    setAttemptSyncMeta(`Контроль восстановлен: ${formatDateTime(new Date())}`);
+    setAttemptSyncMeta(`Р С™Р С•Р Р…РЎвЂљРЎР‚Р С•Р В»РЎРЉ Р Р†Р С•РЎРѓРЎРѓРЎвЂљР В°Р Р…Р С•Р Р†Р В»Р ВµР Р…: ${formatDateTime(new Date())}`);
   }
   updateExamCockpit();
 }
@@ -353,7 +427,7 @@ function setNavDrawerOpen(open) {
   }
   if (elements.navMenuToggle) {
     elements.navMenuToggle.setAttribute("aria-expanded", state.navDrawerOpen ? "true" : "false");
-    elements.navMenuToggle.textContent = state.navDrawerOpen ? "Закрыть меню" : "Меню";
+    elements.navMenuToggle.textContent = state.navDrawerOpen ? "Р вЂ”Р В°Р С”РЎР‚РЎвЂ№РЎвЂљРЎРЉ Р СР ВµР Р…РЎР‹" : "Р СљР ВµР Р…РЎР‹";
   }
 }
 
@@ -377,15 +451,15 @@ function updateStartAvailability() {
   }
 
   if (blockedByCompletion) {
-    elements.startConsentHint.textContent = "Для этого участника повторный старт уже закрыт.";
+    elements.startConsentHint.textContent = "Р вЂќР В»РЎРЏ РЎРЊРЎвЂљР С•Р С–Р С• РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”Р В° Р С—Р С•Р Р†РЎвЂљР С•РЎР‚Р Р…РЎвЂ№Р в„– РЎРѓРЎвЂљР В°РЎР‚РЎвЂљ РЎС“Р В¶Р Вµ Р В·Р В°Р С”РЎР‚РЎвЂ№РЎвЂљ.";
   } else if (!hasParticipant) {
     elements.startConsentHint.textContent =
-      "Сохраните данные участника. Подтвердите готовность работать 45 минут без отвлечений.";
+      "Р РЋР С•РЎвЂ¦РЎР‚Р В°Р Р…Р С‘РЎвЂљР Вµ Р Т‘Р В°Р Р…Р Р…РЎвЂ№Р Вµ РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”Р В°. Р СџР С•Р Т‘РЎвЂљР Р†Р ВµРЎР‚Р Т‘Р С‘РЎвЂљР Вµ Р С–Р С•РЎвЂљР С•Р Р†Р Р…Р С•РЎРѓРЎвЂљРЎРЉ РЎР‚Р В°Р В±Р С•РЎвЂљР В°РЎвЂљРЎРЉ 45 Р СР С‘Р Р…РЎС“РЎвЂљ Р В±Р ВµР В· Р С•РЎвЂљР Р†Р В»Р ВµРЎвЂЎР ВµР Р…Р С‘Р в„–.";
   } else if (!consentGranted) {
     elements.startConsentHint.textContent =
-      "Подтвердите готовность работать 45 минут без отвлечений.";
+      "Р СџР С•Р Т‘РЎвЂљР Р†Р ВµРЎР‚Р Т‘Р С‘РЎвЂљР Вµ Р С–Р С•РЎвЂљР С•Р Р†Р Р…Р С•РЎРѓРЎвЂљРЎРЉ РЎР‚Р В°Р В±Р С•РЎвЂљР В°РЎвЂљРЎРЉ 45 Р СР С‘Р Р…РЎС“РЎвЂљ Р В±Р ВµР В· Р С•РЎвЂљР Р†Р В»Р ВµРЎвЂЎР ВµР Р…Р С‘Р в„–.";
   } else {
-    elements.startConsentHint.textContent = "Подтверждение получено. Можно запускать олимпиаду.";
+    elements.startConsentHint.textContent = "Р СџР С•Р Т‘РЎвЂљР Р†Р ВµРЎР‚Р В¶Р Т‘Р ВµР Р…Р С‘Р Вµ Р С—Р С•Р В»РЎС“РЎвЂЎР ВµР Р…Р С•. Р СљР С•Р В¶Р Р…Р С• Р В·Р В°Р С—РЎС“РЎРѓР С”Р В°РЎвЂљРЎРЉ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎС“.";
   }
 }
 
@@ -417,7 +491,7 @@ async function requestExamFullscreen(options = {}) {
     return true;
   } catch (error) {
     if (!options.silent) {
-      activateExamGuard("Включите полноэкранный режим, чтобы продолжить олимпиаду.");
+      activateExamGuard("Р вЂ™Р С”Р В»РЎР‹РЎвЂЎР С‘РЎвЂљР Вµ Р С—Р С•Р В»Р Р…Р С•РЎРЊР С”РЎР‚Р В°Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С, РЎвЂЎРЎвЂљР С•Р В±РЎвЂ№ Р С—РЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р С‘РЎвЂљРЎРЉ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎС“.");
     }
     return false;
   }
@@ -432,14 +506,14 @@ async function restoreExamMode() {
   const focusReady = document.visibilityState === "visible" && document.hasFocus();
 
   if (fullscreenReady && focusReady) {
-    releaseExamGuard("Контроль восстановлен. Можно продолжать.");
+    releaseExamGuard("Р С™Р С•Р Р…РЎвЂљРЎР‚Р С•Р В»РЎРЉ Р Р†Р С•РЎРѓРЎРѓРЎвЂљР В°Р Р…Р С•Р Р†Р В»Р ВµР Р…. Р СљР С•Р В¶Р Р…Р С• Р С—РЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р В°РЎвЂљРЎРЉ.");
     return true;
   }
 
   activateExamGuard(
     !focusReady
-      ? "Вернитесь в активное окно олимпиады, чтобы продолжить."
-      : "Восстановите полноэкранный режим, чтобы продолжить."
+      ? "Р вЂ™Р ВµРЎР‚Р Р…Р С‘РЎвЂљР ВµРЎРѓРЎРЉ Р Р† Р В°Р С”РЎвЂљР С‘Р Р†Р Р…Р С•Р Вµ Р С•Р С”Р Р…Р С• Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎвЂ№, РЎвЂЎРЎвЂљР С•Р В±РЎвЂ№ Р С—РЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р С‘РЎвЂљРЎРЉ."
+      : "Р вЂ™Р С•РЎРѓРЎРѓРЎвЂљР В°Р Р…Р С•Р Р†Р С‘РЎвЂљР Вµ Р С—Р С•Р В»Р Р…Р С•РЎРЊР С”РЎР‚Р В°Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С, РЎвЂЎРЎвЂљР С•Р В±РЎвЂ№ Р С—РЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р С‘РЎвЂљРЎРЉ."
   );
   return false;
 }
@@ -450,7 +524,7 @@ function handleProtectedClipboard(event) {
   }
 
   event.preventDefault();
-  announceRestriction("Копирование и вырезание текста во время олимпиады отключены.");
+  announceRestriction("Р С™Р С•Р С—Р С‘РЎР‚Р С•Р Р†Р В°Р Р…Р С‘Р Вµ Р С‘ Р Р†РЎвЂ№РЎР‚Р ВµР В·Р В°Р Р…Р С‘Р Вµ РЎвЂљР ВµР С”РЎРѓРЎвЂљР В° Р Р†Р С• Р Р†РЎР‚Р ВµР СРЎРЏ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎвЂ№ Р С•РЎвЂљР С”Р В»РЎР‹РЎвЂЎР ВµР Р…РЎвЂ№.");
 }
 
 function handleProtectedSelection(event) {
@@ -467,7 +541,7 @@ function handleProtectedContextMenu(event) {
   }
 
   event.preventDefault();
-  announceRestriction("Контекстное меню во время олимпиады отключено.");
+  announceRestriction("Р С™Р С•Р Р…РЎвЂљР ВµР С”РЎРѓРЎвЂљР Р…Р С•Р Вµ Р СР ВµР Р…РЎР‹ Р Р†Р С• Р Р†РЎР‚Р ВµР СРЎРЏ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎвЂ№ Р С•РЎвЂљР С”Р В»РЎР‹РЎвЂЎР ВµР Р…Р С•.");
 }
 
 function handleProtectedDragStart(event) {
@@ -500,7 +574,7 @@ function handleProtectedKeydown(event) {
   ) {
     event.preventDefault();
     event.stopPropagation();
-    announceRestriction("Часть браузерных горячих клавиш временно отключена.");
+    announceRestriction("Р В§Р В°РЎРѓРЎвЂљРЎРЉ Р В±РЎР‚Р В°РЎС“Р В·Р ВµРЎР‚Р Р…РЎвЂ№РЎвЂ¦ Р С–Р С•РЎР‚РЎРЏРЎвЂЎР С‘РЎвЂ¦ Р С”Р В»Р В°Р Р†Р С‘РЎв‚¬ Р Р†РЎР‚Р ВµР СР ВµР Р…Р Р…Р С• Р С•РЎвЂљР С”Р В»РЎР‹РЎвЂЎР ВµР Р…Р В°.");
   }
 }
 
@@ -510,7 +584,7 @@ function handleExamVisibilityChange() {
   }
 
   if (document.visibilityState !== "visible") {
-    activateExamGuard("Окно олимпиады покинуло активную вкладку. Вернитесь в неё, чтобы продолжить.");
+    activateExamGuard("Р С›Р С”Р Р…Р С• Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎвЂ№ Р С—Р С•Р С”Р С‘Р Р…РЎС“Р В»Р С• Р В°Р С”РЎвЂљР С‘Р Р†Р Р…РЎС“РЎР‹ Р Р†Р С”Р В»Р В°Р Т‘Р С”РЎС“. Р вЂ™Р ВµРЎР‚Р Р…Р С‘РЎвЂљР ВµРЎРѓРЎРЉ Р Р† Р Р…Р ВµРЎвЂ, РЎвЂЎРЎвЂљР С•Р В±РЎвЂ№ Р С—РЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р С‘РЎвЂљРЎРЉ.");
     return;
   }
 
@@ -527,7 +601,7 @@ function handleExamWindowBlur() {
   clearTimeout(state.blurGuardTimer);
   state.blurGuardTimer = setTimeout(() => {
     if (isAttemptInProgress() && !document.hasFocus()) {
-      activateExamGuard("Окно олимпиады потеряло фокус. Вернитесь к прохождению, чтобы продолжить.");
+      activateExamGuard("Р С›Р С”Р Р…Р С• Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎвЂ№ Р С—Р С•РЎвЂљР ВµРЎР‚РЎРЏР В»Р С• РЎвЂћР С•Р С”РЎС“РЎРѓ. Р вЂ™Р ВµРЎР‚Р Р…Р С‘РЎвЂљР ВµРЎРѓРЎРЉ Р С” Р С—РЎР‚Р С•РЎвЂ¦Р С•Р В¶Р Т‘Р ВµР Р…Р С‘РЎР‹, РЎвЂЎРЎвЂљР С•Р В±РЎвЂ№ Р С—РЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р С‘РЎвЂљРЎРЉ.");
     }
   }, 160);
 }
@@ -545,7 +619,7 @@ function handleExamFullscreenChange() {
   }
 
   if (!document.fullscreenElement) {
-    activateExamGuard("Полноэкранный режим выключен. Включите его снова, чтобы продолжить.");
+    activateExamGuard("Р СџР С•Р В»Р Р…Р С•РЎРЊР С”РЎР‚Р В°Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С Р Р†РЎвЂ№Р С”Р В»РЎР‹РЎвЂЎР ВµР Р…. Р вЂ™Р С”Р В»РЎР‹РЎвЂЎР С‘РЎвЂљР Вµ Р ВµР С–Р С• РЎРѓР Р…Р С•Р Р†Р В°, РЎвЂЎРЎвЂљР С•Р В±РЎвЂ№ Р С—РЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р С‘РЎвЂљРЎРЉ.");
     return;
   }
 
@@ -584,7 +658,7 @@ function enableExamMode() {
   window.addEventListener("beforeunload", handleExamBeforeUnload, true);
   requestExamFullscreen({ silent: true }).then((ok) => {
     if (!ok) {
-      activateExamGuard("Включите полноэкранный режим, чтобы продолжить олимпиаду.");
+      activateExamGuard("Р вЂ™Р С”Р В»РЎР‹РЎвЂЎР С‘РЎвЂљР Вµ Р С—Р С•Р В»Р Р…Р С•РЎРЊР С”РЎР‚Р В°Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С, РЎвЂЎРЎвЂљР С•Р В±РЎвЂ№ Р С—РЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р С‘РЎвЂљРЎРЉ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎС“.");
     }
   });
 }
@@ -625,65 +699,65 @@ function setParticipantShellState() {
   const totalQuestions = attempt && attempt.progress ? attempt.progress.totalQuestions : 0;
 
   if (!hasAttempt) {
-    setShellBadge(elements.participantModeBadge, "Режим: подготовка", "neutral");
-    setShellBadge(elements.participantStageBadge, "Шаг: ждём старт", "neutral");
-    setShellBadge(elements.participantExamBadge, "Экзаменационный режим: ожидание", "neutral");
-    setShellBadge(elements.participantStabilityBadge, "Сохранение: система готова", "neutral");
+    setShellBadge(elements.participantModeBadge, "Р В Р ВµР В¶Р С‘Р С: Р С—Р С•Р Т‘Р С–Р С•РЎвЂљР С•Р Р†Р С”Р В°", "neutral");
+    setShellBadge(elements.participantStageBadge, "Р РЃР В°Р С–: Р В¶Р Т‘РЎвЂР С РЎРѓРЎвЂљР В°РЎР‚РЎвЂљ", "neutral");
+    setShellBadge(elements.participantExamBadge, "Р В­Р С”Р В·Р В°Р СР ВµР Р…Р В°РЎвЂ Р С‘Р С•Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С: Р С•Р В¶Р С‘Р Т‘Р В°Р Р…Р С‘Р Вµ", "neutral");
+    setShellBadge(elements.participantStabilityBadge, "Р РЋР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р С‘Р Вµ: РЎРѓР С‘РЎРѓРЎвЂљР ВµР СР В° Р С–Р С•РЎвЂљР С•Р Р†Р В°", "neutral");
     updateExamGuardUi();
     return;
   }
 
   setShellBadge(
     elements.participantModeBadge,
-    attemptInProgress ? "Режим: прохождение" : "Режим: результат",
+    attemptInProgress ? "Р В Р ВµР В¶Р С‘Р С: Р С—РЎР‚Р С•РЎвЂ¦Р С•Р В¶Р Т‘Р ВµР Р…Р С‘Р Вµ" : "Р В Р ВµР В¶Р С‘Р С: РЎР‚Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ",
     attemptInProgress ? "active" : "ready"
   );
 
   if (attemptInProgress && attempt.currentTour) {
     setShellBadge(
       elements.participantStageBadge,
-      `Сейчас: ${attempt.currentTour.code} • ${attempt.progress.tourQuestionIndex}/${attempt.progress.tourQuestionCount}`,
+      `Р РЋР ВµР в„–РЎвЂЎР В°РЎРѓ: ${attempt.currentTour.code} РІР‚Сћ ${attempt.progress.tourQuestionIndex}/${attempt.progress.tourQuestionCount}`,
       "active"
     );
   } else {
-    setShellBadge(elements.participantStageBadge, "Сейчас: маршрут завершён", "ready");
+    setShellBadge(elements.participantStageBadge, "Р РЋР ВµР в„–РЎвЂЎР В°РЎРѓ: Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬РЎвЂР Р…", "ready");
   }
 
   if (!attemptInProgress) {
-    setShellBadge(elements.participantExamBadge, "Экзаменационный режим: завершён", "ready");
+    setShellBadge(elements.participantExamBadge, "Р В­Р С”Р В·Р В°Р СР ВµР Р…Р В°РЎвЂ Р С‘Р С•Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С: Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬РЎвЂР Р…", "ready");
   } else if (state.examGuardActive) {
     setShellBadge(
       elements.participantExamBadge,
-      `Экзаменационный режим: контроль (${state.examIncidents})`,
+      `Р В­Р С”Р В·Р В°Р СР ВµР Р…Р В°РЎвЂ Р С‘Р С•Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С: Р С”Р С•Р Р…РЎвЂљРЎР‚Р С•Р В»РЎРЉ (${state.examIncidents})`,
       "warning"
     );
   } else {
     setShellBadge(
       elements.participantExamBadge,
-      `Экзаменационный режим: защищён (${state.examIncidents})`,
+      `Р В­Р С”Р В·Р В°Р СР ВµР Р…Р В°РЎвЂ Р С‘Р С•Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С: Р В·Р В°РЎвЂ°Р С‘РЎвЂ°РЎвЂР Р… (${state.examIncidents})`,
       "ready"
     );
   }
 
   if (!state.isOnline) {
-    setShellBadge(elements.participantStabilityBadge, "Сохранение: связь нестабильна", "warning");
+    setShellBadge(elements.participantStabilityBadge, "Р РЋР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р С‘Р Вµ: РЎРѓР Р†РЎРЏР В·РЎРЉ Р Р…Р ВµРЎРѓРЎвЂљР В°Р В±Р С‘Р В»РЎРЉР Р…Р В°", "warning");
     updateExamGuardUi();
     return;
   }
 
   if (state.isSubmittingAnswer || state.isFinishingAttempt || state.syncInFlight) {
-    setShellBadge(elements.participantStabilityBadge, "Сохранение: идёт отправка", "active");
+    setShellBadge(elements.participantStabilityBadge, "Р РЋР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р С‘Р Вµ: Р С‘Р Т‘РЎвЂРЎвЂљ Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р С”Р В°", "active");
     updateExamGuardUi();
     return;
   }
 
   if (attemptInProgress || totalQuestions > 0 || questionIndex > 0) {
-    setShellBadge(elements.participantStabilityBadge, "Сохранение: всё в порядке", "ready");
+    setShellBadge(elements.participantStabilityBadge, "Р РЋР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р С‘Р Вµ: Р Р†РЎРѓРЎвЂ Р Р† Р С—Р С•РЎР‚РЎРЏР Т‘Р С”Р Вµ", "ready");
     updateExamGuardUi();
     return;
   }
 
-  setShellBadge(elements.participantStabilityBadge, "Сохранение: система готова", "neutral");
+  setShellBadge(elements.participantStabilityBadge, "Р РЋР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р С‘Р Вµ: РЎРѓР С‘РЎРѓРЎвЂљР ВµР СР В° Р С–Р С•РЎвЂљР С•Р Р†Р В°", "neutral");
   updateExamGuardUi();
 }
 
@@ -691,24 +765,24 @@ function getJourneyProgressModel() {
   if (!state.participant) {
     return {
       percent: 0,
-      label: "Готовность маршрута: 0%",
-      hint: "После регистрации система откроет первый тур."
+      label: "Р вЂњР С•РЎвЂљР С•Р Р†Р Р…Р С•РЎРѓРЎвЂљРЎРЉ Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљР В°: 0%",
+      hint: "Р СџР С•РЎРѓР В»Р Вµ РЎР‚Р ВµР С–Р С‘РЎРѓРЎвЂљРЎР‚Р В°РЎвЂ Р С‘Р С‘ РЎРѓР С‘РЎРѓРЎвЂљР ВµР СР В° Р С•РЎвЂљР С”РЎР‚Р С•Р ВµРЎвЂљ Р С—Р ВµРЎР‚Р Р†РЎвЂ№Р в„– РЎвЂљРЎС“РЎР‚."
     };
   }
 
   if (!state.attempt) {
     return {
       percent: 12,
-      label: "Готовность маршрута: 12%",
-      hint: "Регистрация завершена. Можно запускать первую часть олимпиады."
+      label: "Р вЂњР С•РЎвЂљР С•Р Р†Р Р…Р С•РЎРѓРЎвЂљРЎРЉ Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљР В°: 12%",
+      hint: "Р В Р ВµР С–Р С‘РЎРѓРЎвЂљРЎР‚Р В°РЎвЂ Р С‘РЎРЏ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р В°. Р СљР С•Р В¶Р Р…Р С• Р В·Р В°Р С—РЎС“РЎРѓР С”Р В°РЎвЂљРЎРЉ Р С—Р ВµРЎР‚Р Р†РЎС“РЎР‹ РЎвЂЎР В°РЎРѓРЎвЂљРЎРЉ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎвЂ№."
     };
   }
 
   if (state.attempt.status !== "in_progress") {
     return {
       percent: 100,
-      label: "Готовность маршрута: 100%",
-      hint: "Маршрут полностью завершен, результат зафиксирован в облаке."
+      label: "Р вЂњР С•РЎвЂљР С•Р Р†Р Р…Р С•РЎРѓРЎвЂљРЎРЉ Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљР В°: 100%",
+      hint: "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р С—Р С•Р В»Р Р…Р С•РЎРѓРЎвЂљРЎРЉРЎР‹ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…, РЎР‚Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ Р В·Р В°РЎвЂћР С‘Р С”РЎРѓР С‘РЎР‚Р С•Р Р†Р В°Р Р… Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ."
     };
   }
 
@@ -718,8 +792,8 @@ function getJourneyProgressModel() {
 
   return {
     percent,
-    label: `Готовность маршрута: ${percent}%`,
-    hint: `Сейчас ${state.attempt.currentTour.code}, вопрос ${state.attempt.progress.tourQuestionIndex} из ${state.attempt.progress.tourQuestionCount}.`
+    label: `Р вЂњР С•РЎвЂљР С•Р Р†Р Р…Р С•РЎРѓРЎвЂљРЎРЉ Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљР В°: ${percent}%`,
+    hint: `Р РЋР ВµР в„–РЎвЂЎР В°РЎРѓ ${state.attempt.currentTour.code}, Р Р†Р С•Р С—РЎР‚Р С•РЎРѓ ${state.attempt.progress.tourQuestionIndex} Р С‘Р В· ${state.attempt.progress.tourQuestionCount}.`
   };
 }
 
@@ -787,12 +861,12 @@ function updateExamCockpit() {
     setCockpitTone(elements.cockpitPaceCard, "neutral");
     setCockpitTone(elements.cockpitRouteCard, "neutral");
     setCockpitTone(elements.cockpitAnswerCard, "neutral");
-    elements.paceValue.textContent = "—";
-    elements.paceHint.textContent = "После старта появится рекомендуемый темп на вопрос.";
-    elements.routeRemainingValue.textContent = "—";
-    elements.routeRemainingHint.textContent = "Система покажет, сколько вопросов осталось до финиша.";
-    elements.answerReadinessValue.textContent = "Ожидание";
-    elements.answerReadinessHint.textContent = "После выбора ответа здесь появится подсказка.";
+    elements.paceValue.textContent = "РІР‚вЂќ";
+    elements.paceHint.textContent = "Р СџР С•РЎРѓР В»Р Вµ РЎРѓРЎвЂљР В°РЎР‚РЎвЂљР В° Р С—Р С•РЎРЏР Р†Р С‘РЎвЂљРЎРѓРЎРЏ РЎР‚Р ВµР С”Р С•Р СР ВµР Р…Р Т‘РЎС“Р ВµР СРЎвЂ№Р в„– РЎвЂљР ВµР СР С— Р Р…Р В° Р Р†Р С•Р С—РЎР‚Р С•РЎРѓ.";
+    elements.routeRemainingValue.textContent = "РІР‚вЂќ";
+    elements.routeRemainingHint.textContent = "Р РЋР С‘РЎРѓРЎвЂљР ВµР СР В° Р С—Р С•Р С”Р В°Р В¶Р ВµРЎвЂљ, РЎРѓР С”Р С•Р В»РЎРЉР С”Р С• Р Р†Р С•Р С—РЎР‚Р С•РЎРѓР С•Р Р† Р С•РЎРѓРЎвЂљР В°Р В»Р С•РЎРѓРЎРЉ Р Т‘Р С• РЎвЂћР С‘Р Р…Р С‘РЎв‚¬Р В°.";
+    elements.answerReadinessValue.textContent = "Р С›Р В¶Р С‘Р Т‘Р В°Р Р…Р С‘Р Вµ";
+    elements.answerReadinessHint.textContent = "Р СџР С•РЎРѓР В»Р Вµ Р Р†РЎвЂ№Р В±Р С•РЎР‚Р В° Р С•РЎвЂљР Р†Р ВµРЎвЂљР В° Р В·Р Т‘Р ВµРЎРѓРЎРЉ Р С—Р С•РЎРЏР Р†Р С‘РЎвЂљРЎРѓРЎРЏ Р С—Р С•Р Т‘РЎРѓР С”Р В°Р В·Р С”Р В°.";
     toneTimerBox(elements.timerTotalBox, Number.MAX_SAFE_INTEGER);
     toneTimerBox(elements.timerTourBox, Number.MAX_SAFE_INTEGER);
     return;
@@ -807,23 +881,23 @@ function updateExamCockpit() {
     ? Math.max(15, Math.round(totalRemainingMs / remainingQuestions / 1000))
     : 0;
 
-  elements.paceValue.textContent = recommendedPerQuestion ? `${recommendedPerQuestion} сек/вопрос` : "Финиш";
+  elements.paceValue.textContent = recommendedPerQuestion ? `${recommendedPerQuestion} РЎРѓР ВµР С”/Р Р†Р С•Р С—РЎР‚Р С•РЎРѓ` : "Р В¤Р С‘Р Р…Р С‘РЎв‚¬";
   setCockpitTone(
     elements.cockpitPaceCard,
     recommendedPerQuestion > 75 ? "warning" : recommendedPerQuestion ? "active" : "neutral"
   );
   elements.paceHint.textContent = recommendedPerQuestion
-    ? `Чтобы уложиться в лимит, держите темп около ${recommendedPerQuestion} сек. на оставшийся вопрос.`
-    : "Маршрут завершён, темп больше не рассчитывается.";
+    ? `Р В§РЎвЂљР С•Р В±РЎвЂ№ РЎС“Р В»Р С•Р В¶Р С‘РЎвЂљРЎРЉРЎРѓРЎРЏ Р Р† Р В»Р С‘Р СР С‘РЎвЂљ, Р Т‘Р ВµРЎР‚Р В¶Р С‘РЎвЂљР Вµ РЎвЂљР ВµР СР С— Р С•Р С”Р С•Р В»Р С• ${recommendedPerQuestion} РЎРѓР ВµР С”. Р Р…Р В° Р С•РЎРѓРЎвЂљР В°Р Р†РЎв‚¬Р С‘Р в„–РЎРѓРЎРЏ Р Р†Р С•Р С—РЎР‚Р С•РЎРѓ.`
+    : "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬РЎвЂР Р…, РЎвЂљР ВµР СР С— Р В±Р С•Р В»РЎРЉРЎв‚¬Р Вµ Р Р…Р Вµ РЎР‚Р В°РЎРѓРЎРѓРЎвЂЎР С‘РЎвЂљРЎвЂ№Р Р†Р В°Р ВµРЎвЂљРЎРѓРЎРЏ.";
 
-  elements.routeRemainingValue.textContent = remainingQuestions ? `${remainingQuestions} вопросов` : "Финиш";
+  elements.routeRemainingValue.textContent = remainingQuestions ? `${remainingQuestions} Р Р†Р С•Р С—РЎР‚Р С•РЎРѓР С•Р Р†` : "Р В¤Р С‘Р Р…Р С‘РЎв‚¬";
   setCockpitTone(
     elements.cockpitRouteCard,
     remainingQuestions > 0 ? "active" : "neutral"
   );
   elements.routeRemainingHint.textContent = remainingQuestions
-    ? `Сейчас активен ${attempt.currentTour?.code || "T?"}. До завершения маршрута осталось ${remainingQuestions} вопросов.`
-    : "Все туры закрыты, результат сохранён.";
+    ? `Р РЋР ВµР в„–РЎвЂЎР В°РЎРѓ Р В°Р С”РЎвЂљР С‘Р Р†Р ВµР Р… ${attempt.currentTour?.code || "T?"}. Р вЂќР С• Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р С‘РЎРЏ Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљР В° Р С•РЎРѓРЎвЂљР В°Р В»Р С•РЎРѓРЎРЉ ${remainingQuestions} Р Р†Р С•Р С—РЎР‚Р С•РЎРѓР С•Р Р†.`
+    : "Р вЂ™РЎРѓР Вµ РЎвЂљРЎС“РЎР‚РЎвЂ№ Р В·Р В°Р С”РЎР‚РЎвЂ№РЎвЂљРЎвЂ№, РЎР‚Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…РЎвЂР Р….";
 
   const currentAnswer = state.questionController?.getAnswer?.() || null;
   const savedAnswer =
@@ -831,20 +905,20 @@ function updateExamCockpit() {
 
   if (state.isSubmittingAnswer || state.isFinishingAttempt) {
     setCockpitTone(elements.cockpitAnswerCard, "active");
-    elements.answerReadinessValue.textContent = "Отправляем";
-    elements.answerReadinessHint.textContent = "Подождите, ответ уже уходит в облако.";
+    elements.answerReadinessValue.textContent = "Р С›РЎвЂљР С—РЎР‚Р В°Р Р†Р В»РЎРЏР ВµР С";
+    elements.answerReadinessHint.textContent = "Р СџР С•Р Т‘Р С•Р В¶Р Т‘Р С‘РЎвЂљР Вµ, Р С•РЎвЂљР Р†Р ВµРЎвЂљ РЎС“Р В¶Р Вµ РЎС“РЎвЂ¦Р С•Р Т‘Р С‘РЎвЂљ Р Р† Р С•Р В±Р В»Р В°Р С”Р С•.";
   } else if (hasMeaningfulAnswer(currentAnswer)) {
     setCockpitTone(elements.cockpitAnswerCard, "active");
-    elements.answerReadinessValue.textContent = "Готов к отправке";
-    elements.answerReadinessHint.textContent = "Ответ выбран. Можно нажимать «Ответить и далее».";
+    elements.answerReadinessValue.textContent = "Р вЂњР С•РЎвЂљР С•Р Р† Р С” Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р С”Р Вµ";
+    elements.answerReadinessHint.textContent = "Р С›РЎвЂљР Р†Р ВµРЎвЂљ Р Р†РЎвЂ№Р В±РЎР‚Р В°Р Р…. Р СљР С•Р В¶Р Р…Р С• Р Р…Р В°Р В¶Р С‘Р СР В°РЎвЂљРЎРЉ Р’В«Р С›РЎвЂљР Р†Р ВµРЎвЂљР С‘РЎвЂљРЎРЉ Р С‘ Р Т‘Р В°Р В»Р ВµР ВµР’В».";
   } else if (hasMeaningfulAnswer(savedAnswer)) {
     setCockpitTone(elements.cockpitAnswerCard, "warning");
-    elements.answerReadinessValue.textContent = "Черновик найден";
-    elements.answerReadinessHint.textContent = "По этому вопросу уже есть сохранённый черновой ответ.";
+    elements.answerReadinessValue.textContent = "Р В§Р ВµРЎР‚Р Р…Р С•Р Р†Р С‘Р С” Р Р…Р В°Р в„–Р Т‘Р ВµР Р…";
+    elements.answerReadinessHint.textContent = "Р СџР С• РЎРЊРЎвЂљР С•Р СРЎС“ Р Р†Р С•Р С—РЎР‚Р С•РЎРѓРЎС“ РЎС“Р В¶Р Вµ Р ВµРЎРѓРЎвЂљРЎРЉ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…РЎвЂР Р…Р Р…РЎвЂ№Р в„– РЎвЂЎР ВµРЎР‚Р Р…Р С•Р Р†Р С•Р в„– Р С•РЎвЂљР Р†Р ВµРЎвЂљ.";
   } else {
     setCockpitTone(elements.cockpitAnswerCard, "neutral");
-    elements.answerReadinessValue.textContent = "Ожидание";
-    elements.answerReadinessHint.textContent = "Выберите вариант или заполните интерактивный блок.";
+    elements.answerReadinessValue.textContent = "Р С›Р В¶Р С‘Р Т‘Р В°Р Р…Р С‘Р Вµ";
+    elements.answerReadinessHint.textContent = "Р вЂ™РЎвЂ№Р В±Р ВµРЎР‚Р С‘РЎвЂљР Вµ Р Р†Р В°РЎР‚Р С‘Р В°Р Р…РЎвЂљ Р С‘Р В»Р С‘ Р В·Р В°Р С—Р С•Р В»Р Р…Р С‘РЎвЂљР Вµ Р С‘Р Р…РЎвЂљР ВµРЎР‚Р В°Р С”РЎвЂљР С‘Р Р†Р Р…РЎвЂ№Р в„– Р В±Р В»Р С•Р С”.";
   }
 
   toneTimerBox(elements.timerTotalBox, totalRemainingMs || Number.MAX_SAFE_INTEGER);
@@ -854,34 +928,34 @@ function updateExamCockpit() {
 function formatDurationLabel(durationMs) {
   const totalMinutes = Math.max(0, Math.round((Number(durationMs) || 0) / 60000));
   if (!totalMinutes) {
-    return "менее 1 минуты";
+    return "Р СР ВµР Р…Р ВµР Вµ 1 Р СР С‘Р Р…РЎС“РЎвЂљРЎвЂ№";
   }
 
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
 
   if (hours && minutes) {
-    return `${hours} ч ${minutes} мин`;
+    return `${hours} РЎвЂЎ ${minutes} Р СР С‘Р Р…`;
   }
 
   if (hours) {
-    return `${hours} ч`;
+    return `${hours} РЎвЂЎ`;
   }
 
-  return `${minutes} мин`;
+  return `${minutes} Р СР С‘Р Р…`;
 }
 
 function fallbackDiplomaByScore(score) {
   if (score >= 130) {
-    return "Диплом I степени";
+    return "Р вЂќР С‘Р С—Р В»Р С•Р С I РЎРѓРЎвЂљР ВµР С—Р ВµР Р…Р С‘";
   }
   if (score >= 110) {
-    return "Диплом II степени";
+    return "Р вЂќР С‘Р С—Р В»Р С•Р С II РЎРѓРЎвЂљР ВµР С—Р ВµР Р…Р С‘";
   }
   if (score >= 90) {
-    return "Диплом III степени";
+    return "Р вЂќР С‘Р С—Р В»Р С•Р С III РЎРѓРЎвЂљР ВµР С—Р ВµР Р…Р С‘";
   }
-  return "Сертификат участника";
+  return "Р РЋР ВµРЎР‚РЎвЂљР С‘РЎвЂћР С‘Р С”Р В°РЎвЂљ РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”Р В°";
 }
 
 function getResultAwardTone(label, scoresVisible) {
@@ -889,13 +963,13 @@ function getResultAwardTone(label, scoresVisible) {
     return "neutral";
   }
 
-  if (label.includes("I степени")) {
+  if (label.includes("I РЎРѓРЎвЂљР ВµР С—Р ВµР Р…Р С‘")) {
     return "gold";
   }
-  if (label.includes("II степени")) {
+  if (label.includes("II РЎРѓРЎвЂљР ВµР С—Р ВµР Р…Р С‘")) {
     return "silver";
   }
-  if (label.includes("III степени")) {
+  if (label.includes("III РЎРѓРЎвЂљР ВµР С—Р ВµР Р…Р С‘")) {
     return "bronze";
   }
 
@@ -909,32 +983,32 @@ function renderResultOverview(summary, attempt, scoresVisible) {
 
   const diplomaLabel = scoresVisible
     ? attempt.diploma || fallbackDiplomaByScore(summary.totalFinalScore)
-    : "Результат передан организатору";
+    : "Р В Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ Р С—Р ВµРЎР‚Р ВµР Т‘Р В°Р Р… Р С•РЎР‚Р С–Р В°Р Р…Р С‘Р В·Р В°РЎвЂљР С•РЎР‚РЎС“";
   const completedTours = Array.isArray(summary.tourScores) ? summary.tourScores.length : 0;
   const metrics = [
     {
-      label: "Баллы",
-      value: scoresVisible ? `${summary.totalFinalScore} / ${summary.totalMaxScore}` : "скрыто",
+      label: "Р вЂР В°Р В»Р В»РЎвЂ№",
+      value: scoresVisible ? `${summary.totalFinalScore} / ${summary.totalMaxScore}` : "РЎРѓР С”РЎР‚РЎвЂ№РЎвЂљР С•",
       hint: scoresVisible
-        ? "Баллы рассчитаны автоматически по итогам всех туров."
-        : "До публикации итогов организатор скрывает баллы от участника."
+        ? "Р вЂР В°Р В»Р В»РЎвЂ№ РЎР‚Р В°РЎРѓРЎРѓРЎвЂЎР С‘РЎвЂљР В°Р Р…РЎвЂ№ Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С‘ Р С—Р С• Р С‘РЎвЂљР С•Р С–Р В°Р С Р Р†РЎРѓР ВµРЎвЂ¦ РЎвЂљРЎС“РЎР‚Р С•Р Р†."
+        : "Р вЂќР С• Р С—РЎС“Р В±Р В»Р С‘Р С”Р В°РЎвЂ Р С‘Р С‘ Р С‘РЎвЂљР С•Р С–Р С•Р Р† Р С•РЎР‚Р С–Р В°Р Р…Р С‘Р В·Р В°РЎвЂљР С•РЎР‚ РЎРѓР С”РЎР‚РЎвЂ№Р Р†Р В°Р ВµРЎвЂљ Р В±Р В°Р В»Р В»РЎвЂ№ Р С•РЎвЂљ РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”Р В°."
     },
     {
-      label: "Статус",
+      label: "Р РЋРЎвЂљР В°РЎвЂљРЎС“РЎРѓ",
       value: diplomaLabel,
       hint: scoresVisible
-        ? "Статус рассчитан автоматически по итоговому баллу."
-        : "Статус участия уже зафиксирован в облаке."
+        ? "Р РЋРЎвЂљР В°РЎвЂљРЎС“РЎРѓ РЎР‚Р В°РЎРѓРЎРѓРЎвЂЎР С‘РЎвЂљР В°Р Р… Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С‘ Р С—Р С• Р С‘РЎвЂљР С•Р С–Р С•Р Р†Р С•Р СРЎС“ Р В±Р В°Р В»Р В»РЎС“."
+        : "Р РЋРЎвЂљР В°РЎвЂљРЎС“РЎРѓ РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР С‘РЎРЏ РЎС“Р В¶Р Вµ Р В·Р В°РЎвЂћР С‘Р С”РЎРѓР С‘РЎР‚Р С•Р Р†Р В°Р Р… Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ."
     },
     {
-      label: "Время",
+      label: "Р вЂ™РЎР‚Р ВµР СРЎРЏ",
       value: formatDurationLabel(summary.totalDurationMs),
-      hint: "Показано суммарное время прохождения всей олимпиады."
+      hint: "Р СџР С•Р С”Р В°Р В·Р В°Р Р…Р С• РЎРѓРЎС“Р СР СР В°РЎР‚Р Р…Р С•Р Вµ Р Р†РЎР‚Р ВµР СРЎРЏ Р С—РЎР‚Р С•РЎвЂ¦Р С•Р В¶Р Т‘Р ВµР Р…Р С‘РЎРЏ Р Р†РЎРѓР ВµР в„– Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎвЂ№."
     },
     {
-      label: "Маршрут",
-      value: `${completedTours} из ${completedTours} туров`,
-      hint: "Все этапы пройдены и записаны в облаке."
+      label: "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ",
+      value: `${completedTours} Р С‘Р В· ${completedTours} РЎвЂљРЎС“РЎР‚Р С•Р Р†`,
+      hint: "Р вЂ™РЎРѓР Вµ РЎРЊРЎвЂљР В°Р С—РЎвЂ№ Р С—РЎР‚Р С•Р в„–Р Т‘Р ВµР Р…РЎвЂ№ Р С‘ Р В·Р В°Р С—Р С‘РЎРѓР В°Р Р…РЎвЂ№ Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ."
     }
   ];
 
@@ -958,18 +1032,18 @@ function renderResultNextSteps(scoresVisible) {
 
   const nextSteps = scoresVisible
     ? [
-        "Результат уже сохранён в облаке и доступен организатору в админке.",
-        "Подробную раскладку по турам видит только организатор.",
-        "Можно закрыть окно или вернуться на главную страницу олимпиады."
+        "Р В Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ РЎС“Р В¶Р Вµ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…РЎвЂР Р… Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ Р С‘ Р Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р ВµР Р… Р С•РЎР‚Р С–Р В°Р Р…Р С‘Р В·Р В°РЎвЂљР С•РЎР‚РЎС“ Р Р† Р В°Р Т‘Р СР С‘Р Р…Р С”Р Вµ.",
+        "Р СџР С•Р Т‘РЎР‚Р С•Р В±Р Р…РЎС“РЎР‹ РЎР‚Р В°РЎРѓР С”Р В»Р В°Р Т‘Р С”РЎС“ Р С—Р С• РЎвЂљРЎС“РЎР‚Р В°Р С Р Р†Р С‘Р Т‘Р С‘РЎвЂљ РЎвЂљР С•Р В»РЎРЉР С”Р С• Р С•РЎР‚Р С–Р В°Р Р…Р С‘Р В·Р В°РЎвЂљР С•РЎР‚.",
+        "Р СљР С•Р В¶Р Р…Р С• Р В·Р В°Р С”РЎР‚РЎвЂ№РЎвЂљРЎРЉ Р С•Р С”Р Р…Р С• Р С‘Р В»Р С‘ Р Р†Р ВµРЎР‚Р Р…РЎС“РЎвЂљРЎРЉРЎРѓРЎРЏ Р Р…Р В° Р С–Р В»Р В°Р Р†Р Р…РЎС“РЎР‹ РЎРѓРЎвЂљРЎР‚Р В°Р Р…Р С‘РЎвЂ РЎС“ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎвЂ№."
       ]
     : [
-        "Попытка завершена, результат сохранён в облаке.",
-        "Организатор увидит итоговый балл и статус в панели управления.",
-        "Можно закрыть окно или дождаться объявления итогов."
+        "Р СџР С•Р С—РЎвЂ№РЎвЂљР С”Р В° Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р В°, РЎР‚Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…РЎвЂР Р… Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ.",
+        "Р С›РЎР‚Р С–Р В°Р Р…Р С‘Р В·Р В°РЎвЂљР С•РЎР‚ РЎС“Р Р†Р С‘Р Т‘Р С‘РЎвЂљ Р С‘РЎвЂљР С•Р С–Р С•Р Р†РЎвЂ№Р в„– Р В±Р В°Р В»Р В» Р С‘ РЎРѓРЎвЂљР В°РЎвЂљРЎС“РЎРѓ Р Р† Р С—Р В°Р Р…Р ВµР В»Р С‘ РЎС“Р С—РЎР‚Р В°Р Р†Р В»Р ВµР Р…Р С‘РЎРЏ.",
+        "Р СљР С•Р В¶Р Р…Р С• Р В·Р В°Р С”РЎР‚РЎвЂ№РЎвЂљРЎРЉ Р С•Р С”Р Р…Р С• Р С‘Р В»Р С‘ Р Т‘Р С•Р В¶Р Т‘Р В°РЎвЂљРЎРЉРЎРѓРЎРЏ Р С•Р В±РЎР‰РЎРЏР Р†Р В»Р ВµР Р…Р С‘РЎРЏ Р С‘РЎвЂљР С•Р С–Р С•Р Р†."
       ];
 
   elements.resultNext.innerHTML = `
-    <h3>Что дальше</h3>
+    <h3>Р В§РЎвЂљР С• Р Т‘Р В°Р В»РЎРЉРЎв‚¬Р Вµ</h3>
     <ul>
       ${nextSteps.map((step) => `<li>${step}</li>`).join("")}
     </ul>
@@ -1018,7 +1092,7 @@ async function loadAppVersion() {
   }
 }
 
-function setInstallAvailability(visible, label = "Установить приложение") {
+function setInstallAvailability(visible, label = "Р Р€РЎРѓРЎвЂљР В°Р Р…Р С•Р Р†Р С‘РЎвЂљРЎРЉ Р С—РЎР‚Р С‘Р В»Р С•Р В¶Р ВµР Р…Р С‘Р Вµ") {
   if (!elements.installApp) {
     return;
   }
@@ -1033,9 +1107,10 @@ function setNetworkStatus(isOnline = navigator.onLine) {
   }
 
   state.isOnline = isOnline;
-  elements.networkStatus.textContent = isOnline ? "Сеть: связь есть" : "Сеть: связь нестабильна";
+  elements.networkStatus.textContent = isOnline ? "Р РЋР ВµРЎвЂљРЎРЉ: РЎРѓР Р†РЎРЏР В·РЎРЉ Р ВµРЎРѓРЎвЂљРЎРЉ" : "Р РЋР ВµРЎвЂљРЎРЉ: РЎРѓР Р†РЎРЏР В·РЎРЉ Р Р…Р ВµРЎРѓРЎвЂљР В°Р В±Р С‘Р В»РЎРЉР Р…Р В°";
   elements.networkStatus.className = `network-badge ${isOnline ? "online" : "offline"}`;
   setParticipantShellState();
+  updateHeroSnapshot();
 }
 
 async function registerServiceWorker() {
@@ -1044,7 +1119,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.6.14");
+    await navigator.serviceWorker.register("/sw.js?v=1.6.17");
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       registration.update().catch(() => {});
@@ -1067,7 +1142,7 @@ function setupInstallPrompt() {
     setInstallAvailability(true);
     showMessage(
       elements.installMessage,
-      "Олимпиаду можно установить как приложение на ноутбук или планшет.",
+      "Р С›Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎС“ Р СР С•Р В¶Р Р…Р С• РЎС“РЎРѓРЎвЂљР В°Р Р…Р С•Р Р†Р С‘РЎвЂљРЎРЉ Р С”Р В°Р С” Р С—РЎР‚Р С‘Р В»Р С•Р В¶Р ВµР Р…Р С‘Р Вµ Р Р…Р В° Р Р…Р С•РЎС“РЎвЂљР В±РЎС“Р С” Р С‘Р В»Р С‘ Р С—Р В»Р В°Р Р…РЎв‚¬Р ВµРЎвЂљ.",
       "success"
     );
   });
@@ -1075,14 +1150,14 @@ function setupInstallPrompt() {
   window.addEventListener("appinstalled", () => {
     state.deferredInstallPrompt = null;
     setInstallAvailability(false);
-    showMessage(elements.installMessage, "Приложение установлено на устройство.", "success");
+    showMessage(elements.installMessage, "Р СџРЎР‚Р С‘Р В»Р С•Р В¶Р ВµР Р…Р С‘Р Вµ РЎС“РЎРѓРЎвЂљР В°Р Р…Р С•Р Р†Р В»Р ВµР Р…Р С• Р Р…Р В° РЎС“РЎРѓРЎвЂљРЎР‚Р С•Р в„–РЎРѓРЎвЂљР Р†Р С•.", "success");
   });
 
   elements.installApp.addEventListener("click", async () => {
     if (!state.deferredInstallPrompt) {
       showMessage(
         elements.installMessage,
-        "Если кнопка установки неактивна, используйте установку приложения через меню браузера.",
+        "Р вЂўРЎРѓР В»Р С‘ Р С”Р Р…Р С•Р С—Р С”Р В° РЎС“РЎРѓРЎвЂљР В°Р Р…Р С•Р Р†Р С”Р С‘ Р Р…Р ВµР В°Р С”РЎвЂљР С‘Р Р†Р Р…Р В°, Р С‘РЎРѓР С—Р С•Р В»РЎРЉР В·РЎС“Р в„–РЎвЂљР Вµ РЎС“РЎРѓРЎвЂљР В°Р Р…Р С•Р Р†Р С”РЎС“ Р С—РЎР‚Р С‘Р В»Р С•Р В¶Р ВµР Р…Р С‘РЎРЏ РЎвЂЎР ВµРЎР‚Р ВµР В· Р СР ВµР Р…РЎР‹ Р В±РЎР‚Р В°РЎС“Р В·Р ВµРЎР‚Р В°.",
         "warning"
       );
       return;
@@ -1094,15 +1169,15 @@ function setupInstallPrompt() {
     setInstallAvailability(false);
 
     if (choice && choice.outcome === "accepted") {
-      showMessage(elements.installMessage, "Приложение готово к использованию.", "success");
+      showMessage(elements.installMessage, "Р СџРЎР‚Р С‘Р В»Р С•Р В¶Р ВµР Р…Р С‘Р Вµ Р С–Р С•РЎвЂљР С•Р Р†Р С• Р С” Р С‘РЎРѓР С—Р С•Р В»РЎРЉР В·Р С•Р Р†Р В°Р Р…Р С‘РЎР‹.", "success");
       return;
     }
 
-    showMessage(elements.installMessage, "Установку можно повторить позже.", "warning");
+    showMessage(elements.installMessage, "Р Р€РЎРѓРЎвЂљР В°Р Р…Р С•Р Р†Р С”РЎС“ Р СР С•Р В¶Р Р…Р С• Р С—Р С•Р Р†РЎвЂљР С•РЎР‚Р С‘РЎвЂљРЎРЉ Р С—Р С•Р В·Р В¶Р Вµ.", "warning");
   });
 }
 
-function formatApiError(error, fallback = "Ошибка запроса") {
+function formatApiError(error, fallback = "Р С›РЎв‚¬Р С‘Р В±Р С”Р В° Р В·Р В°Р С—РЎР‚Р С•РЎРѓР В°") {
   if (!error) {
     return fallback;
   }
@@ -1132,9 +1207,9 @@ function isRetriableError(error) {
     message.includes("network") ||
     message.includes("timeout") ||
     message.includes("timed out") ||
-    message.includes("сервером") ||
-    message.includes("временно") ||
-    message.includes("подождите")
+    message.includes("РЎРѓР ВµРЎР‚Р Р†Р ВµРЎР‚Р С•Р С") ||
+    message.includes("Р Р†РЎР‚Р ВµР СР ВµР Р…Р Р…Р С•") ||
+    message.includes("Р С—Р С•Р Т‘Р С•Р В¶Р Т‘Р С‘РЎвЂљР Вµ")
   );
 }
 
@@ -1161,7 +1236,7 @@ async function requestWithRetry(task, options = {}) {
     }
   }
 
-  throw lastError || new Error("Не удалось выполнить запрос.");
+  throw lastError || new Error("Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ Р Р†РЎвЂ№Р С—Р С•Р В»Р Р…Р С‘РЎвЂљРЎРЉ Р В·Р В°Р С—РЎР‚Р С•РЎРѓ.");
 }
 
 async function api(path, options = {}) {
@@ -1175,7 +1250,7 @@ async function api(path, options = {}) {
       ...options
     });
   } catch (error) {
-    const wrapped = new Error("Не удалось связаться с сервером.");
+    const wrapped = new Error("Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ РЎРѓР Р†РЎРЏР В·Р В°РЎвЂљРЎРЉРЎРѓРЎРЏ РЎРѓ РЎРѓР ВµРЎР‚Р Р†Р ВµРЎР‚Р С•Р С.");
     wrapped.status = 0;
     throw wrapped;
   }
@@ -1189,7 +1264,7 @@ async function api(path, options = {}) {
 
   if (!response.ok || data.ok === false) {
     const wrapped = new Error(
-      data.message || data.errorMessage || `Ошибка запроса (${response.status})`
+      data.message || data.errorMessage || `Р С›РЎв‚¬Р С‘Р В±Р С”Р В° Р В·Р В°Р С—РЎР‚Р С•РЎРѓР В° (${response.status})`
     );
     wrapped.status = response.status;
     throw wrapped;
@@ -1277,6 +1352,7 @@ function clearPendingAnswerQueue(attemptId = state.pendingQueueAttemptId) {
     localStorage.removeItem(storageKey);
   }
   if (!attemptId || attemptId === state.pendingQueueAttemptId) {
+    cancelPendingFlushDebounce();
     state.pendingQueueAttemptId = attemptId ? "" : state.pendingQueueAttemptId;
     state.pendingAnswerQueue = [];
   }
@@ -1292,6 +1368,22 @@ function cancelPendingFlushRetry() {
   }
   clearTimeout(state.pendingFlushRetryTimer);
   state.pendingFlushRetryTimer = null;
+}
+
+function cancelPendingFlushDebounce() {
+  if (!state.pendingFlushDebounceTimer) {
+    return;
+  }
+  clearTimeout(state.pendingFlushDebounceTimer);
+  state.pendingFlushDebounceTimer = null;
+}
+
+function schedulePendingFlush(delayMs = 2000) {
+  cancelPendingFlushDebounce();
+  state.pendingFlushDebounceTimer = setTimeout(() => {
+    state.pendingFlushDebounceTimer = null;
+    flushPendingAnswers();
+  }, delayMs);
 }
 
 function schedulePendingFlushRetry() {
@@ -1397,14 +1489,14 @@ function renderHero() {
   elements.heroSubtitle.textContent = state.olympiad.description;
   if (elements.heroFormatBadge) {
     const totalTours = Array.isArray(state.olympiad.tours) ? state.olympiad.tours.length : 0;
-    elements.heroFormatBadge.textContent = `Индивидуальная цифровая олимпиада • ${state.olympiad.durationMinutes} минут • ${totalTours} туров`;
+    elements.heroFormatBadge.textContent = `Р ВР Р…Р Т‘Р С‘Р Р†Р С‘Р Т‘РЎС“Р В°Р В»РЎРЉР Р…Р В°РЎРЏ РЎвЂ Р С‘РЎвЂћРЎР‚Р С•Р Р†Р В°РЎРЏ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘Р В° РІР‚Сћ ${state.olympiad.durationMinutes} Р СР С‘Р Р…РЎС“РЎвЂљ РІР‚Сћ ${totalTours} РЎвЂљРЎС“РЎР‚Р С•Р Р†`;
   }
   elements.tourMeta.innerHTML = "";
 
   (state.olympiad.tours || []).forEach((tour) => {
     const pill = document.createElement("div");
     pill.className = "pill";
-    pill.textContent = `${tour.code}: ${tour.timeLimitMinutes} мин • ${tour.maxScore} баллов`;
+    pill.textContent = `${tour.code}: ${tour.timeLimitMinutes} Р СР С‘Р Р… РІР‚Сћ ${tour.maxScore} Р В±Р В°Р В»Р В»Р С•Р Р†`;
     elements.tourMeta.appendChild(pill);
   });
 
@@ -1413,13 +1505,13 @@ function renderHero() {
 
 function renderRules() {
   const rules = [
-    `Время на выполнение: ${state.olympiad.durationMinutes} минут.`,
-    "После запуска включается экзаменационный режим. Копирование, контекстное меню и часть сочетаний клавиш браузера блокируются. При выходе из полноэкранного режима попытка автоматически фиксируется.",
-    "Каждому участнику предоставляется индивидуально разработанный вариант задания.",
-    "На экране отображается только один вопрос. Вернуться к предыдущему вопросу невозможно.",
-    "Система автоматически перемешивает варианты ответов и порядок заданий.",
-    "Все задания подвергаются автоматической верификации, исключая необходимость в ручной экспертной оценке.",
-    "Результаты олимпиады не показываются участнику сразу после её завершения."
+    `Р вЂ™РЎР‚Р ВµР СРЎРЏ Р Р…Р В° Р Р†РЎвЂ№Р С—Р С•Р В»Р Р…Р ВµР Р…Р С‘Р Вµ: ${state.olympiad.durationMinutes} Р СР С‘Р Р…РЎС“РЎвЂљ.`,
+    "Р СџР С•РЎРѓР В»Р Вµ Р В·Р В°Р С—РЎС“РЎРѓР С”Р В° Р Р†Р С”Р В»РЎР‹РЎвЂЎР В°Р ВµРЎвЂљРЎРѓРЎРЏ РЎРЊР С”Р В·Р В°Р СР ВµР Р…Р В°РЎвЂ Р С‘Р С•Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С. Р С™Р С•Р С—Р С‘РЎР‚Р С•Р Р†Р В°Р Р…Р С‘Р Вµ, Р С”Р С•Р Р…РЎвЂљР ВµР С”РЎРѓРЎвЂљР Р…Р С•Р Вµ Р СР ВµР Р…РЎР‹ Р С‘ РЎвЂЎР В°РЎРѓРЎвЂљРЎРЉ РЎРѓР С•РЎвЂЎР ВµРЎвЂљР В°Р Р…Р С‘Р в„– Р С”Р В»Р В°Р Р†Р С‘РЎв‚¬ Р В±РЎР‚Р В°РЎС“Р В·Р ВµРЎР‚Р В° Р В±Р В»Р С•Р С”Р С‘РЎР‚РЎС“РЎР‹РЎвЂљРЎРѓРЎРЏ. Р СџРЎР‚Р С‘ Р Р†РЎвЂ№РЎвЂ¦Р С•Р Т‘Р Вµ Р С‘Р В· Р С—Р С•Р В»Р Р…Р С•РЎРЊР С”РЎР‚Р В°Р Р…Р Р…Р С•Р С–Р С• РЎР‚Р ВµР В¶Р С‘Р СР В° Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р В° Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С‘ РЎвЂћР С‘Р С”РЎРѓР С‘РЎР‚РЎС“Р ВµРЎвЂљРЎРѓРЎРЏ.",
+    "Р С™Р В°Р В¶Р Т‘Р С•Р СРЎС“ РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”РЎС“ Р С—РЎР‚Р ВµР Т‘Р С•РЎРѓРЎвЂљР В°Р Р†Р В»РЎРЏР ВµРЎвЂљРЎРѓРЎРЏ Р С‘Р Р…Р Т‘Р С‘Р Р†Р С‘Р Т‘РЎС“Р В°Р В»РЎРЉР Р…Р С• РЎР‚Р В°Р В·РЎР‚Р В°Р В±Р С•РЎвЂљР В°Р Р…Р Р…РЎвЂ№Р в„– Р Р†Р В°РЎР‚Р С‘Р В°Р Р…РЎвЂљ Р В·Р В°Р Т‘Р В°Р Р…Р С‘РЎРЏ.",
+    "Р СњР В° РЎРЊР С”РЎР‚Р В°Р Р…Р Вµ Р С•РЎвЂљР С•Р В±РЎР‚Р В°Р В¶Р В°Р ВµРЎвЂљРЎРѓРЎРЏ РЎвЂљР С•Р В»РЎРЉР С”Р С• Р С•Р Т‘Р С‘Р Р… Р Р†Р С•Р С—РЎР‚Р С•РЎРѓ. Р вЂ™Р ВµРЎР‚Р Р…РЎС“РЎвЂљРЎРЉРЎРѓРЎРЏ Р С” Р С—РЎР‚Р ВµР Т‘РЎвЂ№Р Т‘РЎС“РЎвЂ°Р ВµР СРЎС“ Р Р†Р С•Р С—РЎР‚Р С•РЎРѓРЎС“ Р Р…Р ВµР Р†Р С•Р В·Р СР С•Р В¶Р Р…Р С•.",
+    "Р РЋР С‘РЎРѓРЎвЂљР ВµР СР В° Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С‘ Р С—Р ВµРЎР‚Р ВµР СР ВµРЎв‚¬Р С‘Р Р†Р В°Р ВµРЎвЂљ Р Р†Р В°РЎР‚Р С‘Р В°Р Р…РЎвЂљРЎвЂ№ Р С•РЎвЂљР Р†Р ВµРЎвЂљР С•Р Р† Р С‘ Р С—Р С•РЎР‚РЎРЏР Т‘Р С•Р С” Р В·Р В°Р Т‘Р В°Р Р…Р С‘Р в„–.",
+    "Р вЂ™РЎРѓР Вµ Р В·Р В°Р Т‘Р В°Р Р…Р С‘РЎРЏ Р С—Р С•Р Т‘Р Р†Р ВµРЎР‚Р С–Р В°РЎР‹РЎвЂљРЎРѓРЎРЏ Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С•Р в„– Р Р†Р ВµРЎР‚Р С‘РЎвЂћР С‘Р С”Р В°РЎвЂ Р С‘Р С‘, Р С‘РЎРѓР С”Р В»РЎР‹РЎвЂЎР В°РЎРЏ Р Р…Р ВµР С•Р В±РЎвЂ¦Р С•Р Т‘Р С‘Р СР С•РЎРѓРЎвЂљРЎРЉ Р Р† РЎР‚РЎС“РЎвЂЎР Р…Р С•Р в„– РЎРЊР С”РЎРѓР С—Р ВµРЎР‚РЎвЂљР Р…Р С•Р в„– Р С•РЎвЂ Р ВµР Р…Р С”Р Вµ.",
+    "Р В Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљРЎвЂ№ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎвЂ№ Р Р…Р Вµ Р С—Р С•Р С”Р В°Р В·РЎвЂ№Р Р†Р В°РЎР‹РЎвЂљРЎРѓРЎРЏ РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”РЎС“ РЎРѓРЎР‚Р В°Р В·РЎС“ Р С—Р С•РЎРѓР В»Р Вµ Р ВµРЎвЂ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р С‘РЎРЏ."
   ];
 
   elements.rulesList.innerHTML = "";
@@ -1439,9 +1531,9 @@ function renderParticipant() {
   elements.participantName.textContent = state.participant.fullName;
   const meta = [state.participant.institution, state.participant.groupName];
   if (state.participant.mentorName) {
-    meta.push(`Наставник: ${state.participant.mentorName}`);
+    meta.push(`Р СњР В°РЎРѓРЎвЂљР В°Р Р†Р Р…Р С‘Р С”: ${state.participant.mentorName}`);
   }
-  elements.participantMeta.textContent = meta.join(" • ");
+  elements.participantMeta.textContent = meta.join(" РІР‚Сћ ");
   renderJourneyMap();
 }
 
@@ -1450,8 +1542,8 @@ function buildJourneySteps() {
   return [
     {
       id: "register",
-      label: "Регистрация",
-      description: "Сохранение данных участника"
+      label: "Р В Р ВµР С–Р С‘РЎРѓРЎвЂљРЎР‚Р В°РЎвЂ Р С‘РЎРЏ",
+      description: "Р РЋР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р С‘Р Вµ Р Т‘Р В°Р Р…Р Р…РЎвЂ№РЎвЂ¦ РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”Р В°"
     },
     ...tours.map((tour) => ({
       id: tour.id,
@@ -1460,8 +1552,8 @@ function buildJourneySteps() {
     })),
     {
       id: "result",
-      label: "Финиш",
-      description: "Итоговый экран и фиксация результата"
+      label: "Р В¤Р С‘Р Р…Р С‘РЎв‚¬",
+      description: "Р ВРЎвЂљР С•Р С–Р С•Р Р†РЎвЂ№Р в„– РЎРЊР С”РЎР‚Р В°Р Р… Р С‘ РЎвЂћР С‘Р С”РЎРѓР В°РЎвЂ Р С‘РЎРЏ РЎР‚Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљР В°"
     }
   ];
 }
@@ -1474,11 +1566,11 @@ function renderJourneyMap() {
   const steps = buildJourneySteps();
   const completed = new Set();
   let currentId = "register";
-  let statusText = "Сначала сохраните данные участника.";
+  let statusText = "Р РЋР Р…Р В°РЎвЂЎР В°Р В»Р В° РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…Р С‘РЎвЂљР Вµ Р Т‘Р В°Р Р…Р Р…РЎвЂ№Р Вµ РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”Р В°.";
 
   if (state.participant) {
     completed.add("register");
-    statusText = "Регистрация сохранена. Можно запускать первый тур.";
+    statusText = "Р В Р ВµР С–Р С‘РЎРѓРЎвЂљРЎР‚Р В°РЎвЂ Р С‘РЎРЏ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…Р В°. Р СљР С•Р В¶Р Р…Р С• Р В·Р В°Р С—РЎС“РЎРѓР С”Р В°РЎвЂљРЎРЉ Р С—Р ВµРЎР‚Р Р†РЎвЂ№Р в„– РЎвЂљРЎС“РЎР‚.";
   }
 
   if (state.attempt) {
@@ -1490,12 +1582,12 @@ function renderJourneyMap() {
           completed.add(tour.id);
         }
       });
-      statusText = `${state.attempt.currentTour.code}: вопрос ${state.attempt.progress.tourQuestionIndex} из ${state.attempt.progress.tourQuestionCount}.`;
+      statusText = `${state.attempt.currentTour.code}: Р Р†Р С•Р С—РЎР‚Р С•РЎРѓ ${state.attempt.progress.tourQuestionIndex} Р С‘Р В· ${state.attempt.progress.tourQuestionCount}.`;
     } else if (state.attempt.status !== "in_progress") {
       currentId = "result";
       ((state.olympiad && state.olympiad.tours) || []).forEach((tour) => completed.add(tour.id));
       completed.add("result");
-      statusText = "Маршрут завершён. Результат зафиксирован в облаке.";
+      statusText = "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬РЎвЂР Р…. Р В Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ Р В·Р В°РЎвЂћР С‘Р С”РЎРѓР С‘РЎР‚Р С•Р Р†Р В°Р Р… Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ.";
     }
   }
 
@@ -1509,7 +1601,7 @@ function renderJourneyMap() {
     const card = document.createElement("article");
     card.className = `journey-node${isCurrent ? " current" : ""}${isComplete ? " complete" : ""}${isLocked ? " locked" : ""}${step.id === "result" ? " journey-node-result" : ""}`;
     card.innerHTML = `
-      <span class="journey-node-state">${isCurrent ? "Сейчас" : isComplete ? "Готово" : isLocked ? "Впереди" : "Старт"}</span>
+      <span class="journey-node-state">${isCurrent ? "Р РЋР ВµР в„–РЎвЂЎР В°РЎРѓ" : isComplete ? "Р вЂњР С•РЎвЂљР С•Р Р†Р С•" : isLocked ? "Р вЂ™Р С—Р ВµРЎР‚Р ВµР Т‘Р С‘" : "Р РЋРЎвЂљР В°РЎР‚РЎвЂљ"}</span>
       <b>${step.label}</b>
       <small>${step.description}</small>
     `;
@@ -1517,6 +1609,7 @@ function renderJourneyMap() {
   });
 
   updateJourneyProgress();
+  updateHeroSnapshot();
 }
 
 function saveTimingSnapshot(attempt) {
@@ -1689,7 +1782,7 @@ function renderSequenceDrag(question) {
 
     const bank = document.createElement("section");
     bank.className = "drag-bank";
-    bank.innerHTML = `<div class="drag-bank-header">Карточки</div>`;
+    bank.innerHTML = `<div class="drag-bank-header">Р С™Р В°РЎР‚РЎвЂљР С•РЎвЂЎР С”Р С‘</div>`;
     const bankItems = document.createElement("div");
     bankItems.className = "drag-bank-items";
     const freeItems = (question.items || []).filter((item) => !sequence.includes(item.id));
@@ -1697,7 +1790,7 @@ function renderSequenceDrag(question) {
     if (!freeItems.length) {
       const empty = document.createElement("div");
       empty.className = "drop-slot-empty";
-      empty.textContent = "Все шаги заполнены.";
+      empty.textContent = "Р вЂ™РЎРѓР Вµ РЎв‚¬Р В°Р С–Р С‘ Р В·Р В°Р С—Р С•Р В»Р Р…Р ВµР Р…РЎвЂ№.";
       bankItems.appendChild(empty);
     } else {
       freeItems.forEach((item) =>
@@ -1716,7 +1809,7 @@ function renderSequenceDrag(question) {
     slots.className = "drop-grid";
     const progress = document.createElement("div");
     progress.className = "interaction-summary";
-    progress.textContent = `Заполнено шагов: ${sequence.filter(Boolean).length} из ${
+    progress.textContent = `Р вЂ”Р В°Р С—Р С•Р В»Р Р…Р ВµР Р…Р С• РЎв‚¬Р В°Р С–Р С•Р Р†: ${sequence.filter(Boolean).length} Р С‘Р В· ${
       (question.slots || []).length
     }`;
     layout.append(bank, progress, slots);
@@ -1739,7 +1832,7 @@ function renderSequenceDrag(question) {
       } else {
         const placeholder = document.createElement("div");
         placeholder.className = "drop-slot-empty";
-        placeholder.textContent = "Перетащите карточку или выберите слот и нажмите на карточку";
+        placeholder.textContent = "Р СџР ВµРЎР‚Р ВµРЎвЂљР В°РЎвЂ°Р С‘РЎвЂљР Вµ Р С”Р В°РЎР‚РЎвЂљР С•РЎвЂЎР С”РЎС“ Р С‘Р В»Р С‘ Р Р†РЎвЂ№Р В±Р ВµРЎР‚Р С‘РЎвЂљР Вµ РЎРѓР В»Р С•РЎвЂљ Р С‘ Р Р…Р В°Р В¶Р СР С‘РЎвЂљР Вµ Р Р…Р В° Р С”Р В°РЎР‚РЎвЂљР С•РЎвЂЎР С”РЎС“";
         body.appendChild(placeholder);
       }
 
@@ -1812,7 +1905,7 @@ function renderBucketController(question) {
 
     const bank = document.createElement("section");
     bank.className = "drag-bank";
-    bank.innerHTML = `<div class="drag-bank-header">Банк карточек</div>`;
+    bank.innerHTML = `<div class="drag-bank-header">Р вЂР В°Р Р…Р С” Р С”Р В°РЎР‚РЎвЂљР С•РЎвЂЎР ВµР С”</div>`;
     const bankItems = document.createElement("div");
     bankItems.className = "drag-bank-items";
 
@@ -1820,7 +1913,7 @@ function renderBucketController(question) {
     if (!freeItems.length) {
       const empty = document.createElement("div");
       empty.className = "drop-slot-empty";
-      empty.textContent = "Все карточки распределены.";
+      empty.textContent = "Р вЂ™РЎРѓР Вµ Р С”Р В°РЎР‚РЎвЂљР С•РЎвЂЎР С”Р С‘ РЎР‚Р В°РЎРѓР С—РЎР‚Р ВµР Т‘Р ВµР В»Р ВµР Р…РЎвЂ№.";
       bankItems.appendChild(empty);
     } else {
       freeItems.forEach((item) =>
@@ -1839,9 +1932,9 @@ function renderBucketController(question) {
     bucketGrid.className = "bucket-grid";
     const progress = document.createElement("div");
     progress.className = "interaction-summary";
-    progress.textContent = `Распределено карточек: ${
+    progress.textContent = `Р В Р В°РЎРѓР С—РЎР‚Р ВµР Т‘Р ВµР В»Р ВµР Р…Р С• Р С”Р В°РЎР‚РЎвЂљР С•РЎвЂЎР ВµР С”: ${
       Object.values(placements).filter(Boolean).length
-    } из ${(question.items || []).length}`;
+    } Р С‘Р В· ${(question.items || []).length}`;
     layout.append(bank, progress, bucketGrid);
 
     (question.buckets || []).forEach((bucket) => {
@@ -1861,7 +1954,7 @@ function renderBucketController(question) {
       if (!bucketItems.length) {
         const placeholder = document.createElement("div");
         placeholder.className = "drop-slot-empty";
-        placeholder.textContent = "Перетащите карточки или выберите зону и нажмите на карточку";
+        placeholder.textContent = "Р СџР ВµРЎР‚Р ВµРЎвЂљР В°РЎвЂ°Р С‘РЎвЂљР Вµ Р С”Р В°РЎР‚РЎвЂљР С•РЎвЂЎР С”Р С‘ Р С‘Р В»Р С‘ Р Р†РЎвЂ№Р В±Р ВµРЎР‚Р С‘РЎвЂљР Вµ Р В·Р С•Р Р…РЎС“ Р С‘ Р Р…Р В°Р В¶Р СР С‘РЎвЂљР Вµ Р Р…Р В° Р С”Р В°РЎР‚РЎвЂљР С•РЎвЂЎР С”РЎС“";
         body.appendChild(placeholder);
       } else {
         bucketItems.forEach((item) =>
@@ -1900,8 +1993,8 @@ function renderQuestion(question) {
   state.questionController = null;
 
   if (!question) {
-    elements.questionPrompt.textContent = "Вопрос не загружен";
-    elements.questionPoints.textContent = "0 баллов";
+    elements.questionPrompt.textContent = "Р вЂ™Р С•Р С—РЎР‚Р С•РЎРѓ Р Р…Р Вµ Р В·Р В°Р С–РЎР‚РЎС“Р В¶Р ВµР Р…";
+    elements.questionPoints.textContent = "0 Р В±Р В°Р В»Р В»Р С•Р Р†";
     hideMessage(elements.questionCase);
     elements.questionNote.classList.add("hidden");
     return;
@@ -1913,12 +2006,12 @@ function renderQuestion(question) {
   };
 
   elements.questionPrompt.textContent = hydratedQuestion.prompt;
-  elements.questionPoints.textContent = `${hydratedQuestion.maxScore} баллов`;
+  elements.questionPoints.textContent = `${hydratedQuestion.maxScore} Р В±Р В°Р В»Р В»Р С•Р Р†`;
 
   if (hydratedQuestion.caseTitle) {
     showMessage(
       elements.questionCase,
-      `${hydratedQuestion.caseTitle} • вопрос ${hydratedQuestion.caseOrder} из ${hydratedQuestion.caseTotal}`,
+      `${hydratedQuestion.caseTitle} РІР‚Сћ Р Р†Р С•Р С—РЎР‚Р С•РЎРѓ ${hydratedQuestion.caseOrder} Р С‘Р В· ${hydratedQuestion.caseTotal}`,
       "success"
     );
   } else if (hydratedQuestion.scenario) {
@@ -1932,9 +2025,9 @@ function renderQuestion(question) {
   );
   const interactionHint =
     hydratedQuestion.type === "sequence_drag"
-      ? "Можно не только перетаскивать мышью, но и выбрать шаг кликом, а затем нажать на карточку."
+      ? "Р СљР С•Р В¶Р Р…Р С• Р Р…Р Вµ РЎвЂљР С•Р В»РЎРЉР С”Р С• Р С—Р ВµРЎР‚Р ВµРЎвЂљР В°РЎРѓР С”Р С‘Р Р†Р В°РЎвЂљРЎРЉ Р СРЎвЂ№РЎв‚¬РЎРЉРЎР‹, Р Р…Р С• Р С‘ Р Р†РЎвЂ№Р В±РЎР‚Р В°РЎвЂљРЎРЉ РЎв‚¬Р В°Р С– Р С”Р В»Р С‘Р С”Р С•Р С, Р В° Р В·Р В°РЎвЂљР ВµР С Р Р…Р В°Р В¶Р В°РЎвЂљРЎРЉ Р Р…Р В° Р С”Р В°РЎР‚РЎвЂљР С•РЎвЂЎР С”РЎС“."
       : isInteractive
-        ? "Можно не только перетаскивать мышью, но и выбрать нужную зону кликом, а затем нажать на карточку."
+        ? "Р СљР С•Р В¶Р Р…Р С• Р Р…Р Вµ РЎвЂљР С•Р В»РЎРЉР С”Р С• Р С—Р ВµРЎР‚Р ВµРЎвЂљР В°РЎРѓР С”Р С‘Р Р†Р В°РЎвЂљРЎРЉ Р СРЎвЂ№РЎв‚¬РЎРЉРЎР‹, Р Р…Р С• Р С‘ Р Р†РЎвЂ№Р В±РЎР‚Р В°РЎвЂљРЎРЉ Р Р…РЎС“Р В¶Р Р…РЎС“РЎР‹ Р В·Р С•Р Р…РЎС“ Р С”Р В»Р С‘Р С”Р С•Р С, Р В° Р В·Р В°РЎвЂљР ВµР С Р Р…Р В°Р В¶Р В°РЎвЂљРЎРЉ Р Р…Р В° Р С”Р В°РЎР‚РЎвЂљР С•РЎвЂЎР С”РЎС“."
         : "";
   const noteText = [hydratedQuestion.note, interactionHint].filter(Boolean).join(" ");
 
@@ -1961,7 +2054,7 @@ function renderQuestion(question) {
   } else {
     const unsupported = document.createElement("div");
     unsupported.className = "message error";
-    unsupported.textContent = "Этот тип вопроса не поддерживается интерфейсом.";
+    unsupported.textContent = "Р В­РЎвЂљР С•РЎвЂљ РЎвЂљР С‘Р С— Р Р†Р С•Р С—РЎР‚Р С•РЎРѓР В° Р Р…Р Вµ Р С—Р С•Р Т‘Р Т‘Р ВµРЎР‚Р В¶Р С‘Р Р†Р В°Р ВµРЎвЂљРЎРѓРЎРЏ Р С‘Р Р…РЎвЂљР ВµРЎР‚РЎвЂћР ВµР в„–РЎРѓР С•Р С.";
     elements.questionBody.appendChild(unsupported);
   }
 
@@ -1982,25 +2075,25 @@ function renderAttempt() {
   elements.attemptSection.classList.remove("hidden");
   refreshNavigationState();
 
-  elements.progressGlobal.textContent = `Вопрос ${attempt.progress.currentQuestionIndex} из ${attempt.progress.totalQuestions}`;
+  elements.progressGlobal.textContent = `Р вЂ™Р С•Р С—РЎР‚Р С•РЎРѓ ${attempt.progress.currentQuestionIndex} Р С‘Р В· ${attempt.progress.totalQuestions}`;
   elements.progressGlobalFill.style.width = `${
     (attempt.progress.currentQuestionIndex / Math.max(1, attempt.progress.totalQuestions)) * 100
   }%`;
   if (currentTour) {
-    elements.progressTour.textContent = `${currentTour.code} • вопрос ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`;
+    elements.progressTour.textContent = `${currentTour.code} РІР‚Сћ Р Р†Р С•Р С—РЎР‚Р С•РЎРѓ ${attempt.progress.tourQuestionIndex} Р С‘Р В· ${attempt.progress.tourQuestionCount}`;
     elements.progressTourFill.style.width = `${
       (attempt.progress.tourQuestionIndex / Math.max(1, attempt.progress.tourQuestionCount)) * 100
     }%`;
     elements.tourCode.textContent = currentTour.code;
     elements.tourTitle.textContent = currentTour.title;
     elements.tourDescription.textContent = currentTour.description || "";
-    elements.tourLimit.textContent = `${currentTour.timeLimitMinutes} минут`;
+    elements.tourLimit.textContent = `${currentTour.timeLimitMinutes} Р СР С‘Р Р…РЎС“РЎвЂљ`;
   } else {
-    elements.progressTour.textContent = "Тур завершён";
+    elements.progressTour.textContent = "Р СћРЎС“РЎР‚ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬РЎвЂР Р…";
     elements.tourCode.textContent = "FIN";
-    elements.tourTitle.textContent = "Олимпиада завершена";
+    elements.tourTitle.textContent = "Р С›Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘Р В° Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р В°";
     elements.tourDescription.textContent = "";
-    elements.tourLimit.textContent = "0 минут";
+    elements.tourLimit.textContent = "0 Р СР С‘Р Р…РЎС“РЎвЂљ";
     elements.progressTourFill.style.width = "100%";
   }
 
@@ -2010,8 +2103,8 @@ function renderAttempt() {
   updateExamCockpit();
   elements.submitAnswer.textContent =
     attempt.progress.currentQuestionIndex >= attempt.progress.totalQuestions
-      ? "Ответить и завершить"
-      : "Ответить и далее";
+      ? "Р С›РЎвЂљР Р†Р ВµРЎвЂљР С‘РЎвЂљРЎРЉ Р С‘ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р С‘РЎвЂљРЎРЉ"
+      : "Р С›РЎвЂљР Р†Р ВµРЎвЂљР С‘РЎвЂљРЎРЉ Р С‘ Р Т‘Р В°Р В»Р ВµР Вµ";
 }
 
 function renderResult() {
@@ -2019,7 +2112,7 @@ function renderResult() {
   const scoresVisible = summary.totalFinalScore !== null;
   const awardLabel = scoresVisible
     ? state.attempt.diploma || fallbackDiplomaByScore(summary.totalFinalScore)
-    : "Итог сохранён";
+    : "Р ВРЎвЂљР С•Р С– РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…РЎвЂР Р…";
   disableExamMode();
   elements.attemptSection.classList.add("hidden");
   elements.resultSection.classList.remove("hidden");
@@ -2028,7 +2121,7 @@ function renderResult() {
   elements.resultTours.innerHTML = "";
 
   if (elements.resultEyebrow) {
-    elements.resultEyebrow.textContent = "Маршрут завершён";
+    elements.resultEyebrow.textContent = "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬РЎвЂР Р…";
   }
 
   if (elements.resultAward) {
@@ -2037,13 +2130,13 @@ function renderResult() {
   }
 
   if (!scoresVisible) {
-    elements.resultTitle.textContent = "Попытка завершена";
+    elements.resultTitle.textContent = "Р СџР С•Р С—РЎвЂ№РЎвЂљР С”Р В° Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р В°";
     elements.resultSubtitle.textContent =
-      "Попытка завершена, результат сохранён в облаке. Организатор увидит итоговый балл и статус в панели управления.";
+      "Р СџР С•Р С—РЎвЂ№РЎвЂљР С”Р В° Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р В°, РЎР‚Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…РЎвЂР Р… Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ. Р С›РЎР‚Р С–Р В°Р Р…Р С‘Р В·Р В°РЎвЂљР С•РЎР‚ РЎС“Р Р†Р С‘Р Т‘Р С‘РЎвЂљ Р С‘РЎвЂљР С•Р С–Р С•Р Р†РЎвЂ№Р в„– Р В±Р В°Р В»Р В» Р С‘ РЎРѓРЎвЂљР В°РЎвЂљРЎС“РЎРѓ Р Р† Р С—Р В°Р Р…Р ВµР В»Р С‘ РЎС“Р С—РЎР‚Р В°Р Р†Р В»Р ВµР Р…Р С‘РЎРЏ.";
   } else {
-    elements.resultTitle.textContent = `Ваш результат: ${summary.totalFinalScore} из ${summary.totalMaxScore}`;
+    elements.resultTitle.textContent = `Р вЂ™Р В°РЎв‚¬ РЎР‚Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ: ${summary.totalFinalScore} Р С‘Р В· ${summary.totalMaxScore}`;
     elements.resultSubtitle.textContent =
-      "Все ответы зафиксированы автоматически. Результаты олимпиады не показываются участнику сразу после её завершения.";
+      "Р вЂ™РЎРѓР Вµ Р С•РЎвЂљР Р†Р ВµРЎвЂљРЎвЂ№ Р В·Р В°РЎвЂћР С‘Р С”РЎРѓР С‘РЎР‚Р С•Р Р†Р В°Р Р…РЎвЂ№ Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С‘. Р В Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљРЎвЂ№ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎвЂ№ Р Р…Р Вµ Р С—Р С•Р С”Р В°Р В·РЎвЂ№Р Р†Р В°РЎР‹РЎвЂљРЎРѓРЎРЏ РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”РЎС“ РЎРѓРЎР‚Р В°Р В·РЎС“ Р С—Р С•РЎРѓР В»Р Вµ Р ВµРЎвЂ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р С‘РЎРЏ.";
   }
 
   renderResultOverview(summary, state.attempt, scoresVisible);
@@ -2055,17 +2148,17 @@ function renderResult() {
     card.innerHTML = `
       <strong>${tour.code}</strong>
       <span>${tour.title}</span>
-      <b>${tour.finalScore === null ? "результат скрыт" : `${tour.finalScore} / ${tour.maxScore}`}</b>
-      <small>${tour.finalScore === null ? "Баллы по туру увидит организатор." : "Баллы рассчитаны автоматически."}</small>
+      <b>${tour.finalScore === null ? "РЎР‚Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ РЎРѓР С”РЎР‚РЎвЂ№РЎвЂљ" : `${tour.finalScore} / ${tour.maxScore}`}</b>
+      <small>${tour.finalScore === null ? "Р вЂР В°Р В»Р В»РЎвЂ№ Р С—Р С• РЎвЂљРЎС“РЎР‚РЎС“ РЎС“Р Р†Р С‘Р Т‘Р С‘РЎвЂљ Р С•РЎР‚Р С–Р В°Р Р…Р С‘Р В·Р В°РЎвЂљР С•РЎР‚." : "Р вЂР В°Р В»Р В»РЎвЂ№ РЎР‚Р В°РЎРѓРЎРѓРЎвЂЎР С‘РЎвЂљР В°Р Р…РЎвЂ№ Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С‘."}</small>
     `;
     elements.resultTours.appendChild(card);
   });
 
   refreshAttemptControls();
   renderJourneyMap();
-  setAttemptSaveStatus("Финиш принят. Результат сохранён в облаке.", "success");
+  setAttemptSaveStatus("Р В¤Р С‘Р Р…Р С‘РЎв‚¬ Р С—РЎР‚Р С‘Р Р…РЎРЏРЎвЂљ. Р В Р ВµР В·РЎС“Р В»РЎРЉРЎвЂљР В°РЎвЂљ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…РЎвЂР Р… Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ.", "success");
   setAttemptSyncMeta(
-    `Итог записан: ${formatDateTime(state.attempt.finishedAt || new Date())}`
+    `Р ВРЎвЂљР С•Р С– Р В·Р В°Р С—Р С‘РЎРѓР В°Р Р…: ${formatDateTime(state.attempt.finishedAt || new Date())}`
   );
   updateExamCockpit();
   requestAnimationFrame(() => scrollToSection(elements.resultSection));
@@ -2104,7 +2197,7 @@ function describeAttemptTransition(previousAttempt, nextAttempt) {
   }
 
   if (!previousAttempt && nextAttempt.status === "in_progress" && nextAttempt.currentTour) {
-    return `Старт ${nextAttempt.currentTour.code}: маршрут открыт, можно отвечать.`;
+    return `Р РЋРЎвЂљР В°РЎР‚РЎвЂљ ${nextAttempt.currentTour.code}: Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р С•РЎвЂљР С”РЎР‚РЎвЂ№РЎвЂљ, Р СР С•Р В¶Р Р…Р С• Р С•РЎвЂљР Р†Р ВµРЎвЂЎР В°РЎвЂљРЎРЉ.`;
   }
 
   if (
@@ -2112,7 +2205,7 @@ function describeAttemptTransition(previousAttempt, nextAttempt) {
     previousAttempt.status === "in_progress" &&
     nextAttempt.status !== "in_progress"
   ) {
-    return "Маршрут завершен. Итог сохранен в облаке.";
+    return "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…. Р ВРЎвЂљР С•Р С– РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р… Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ.";
   }
 
   if (nextAttempt.status !== "in_progress" || !nextAttempt.currentTour) {
@@ -2123,7 +2216,7 @@ function describeAttemptTransition(previousAttempt, nextAttempt) {
   const nextTourId = nextAttempt.currentTour.id;
 
   if (previousTourId && previousTourId !== nextTourId) {
-    return `Старт ${nextAttempt.currentTour.code}: ${nextAttempt.currentTour.title}.`;
+    return `Р РЋРЎвЂљР В°РЎР‚РЎвЂљ ${nextAttempt.currentTour.code}: ${nextAttempt.currentTour.title}.`;
   }
 
   const previousQuestionIndex =
@@ -2131,7 +2224,7 @@ function describeAttemptTransition(previousAttempt, nextAttempt) {
   const nextQuestionIndex = nextAttempt.progress ? nextAttempt.progress.currentQuestionIndex : 0;
 
   if (previousQuestionIndex && previousQuestionIndex !== nextQuestionIndex) {
-    return `${nextAttempt.currentTour.code}: вопрос ${nextAttempt.progress.tourQuestionIndex} из ${nextAttempt.progress.tourQuestionCount}.`;
+    return `${nextAttempt.currentTour.code}: Р Р†Р С•Р С—РЎР‚Р С•РЎРѓ ${nextAttempt.progress.tourQuestionIndex} Р С‘Р В· ${nextAttempt.progress.tourQuestionCount}.`;
   }
 
   return "";
@@ -2174,7 +2267,7 @@ function applyAttemptState(attempt, options = {}) {
   setParticipantShellState();
 
   if (attempt.status === "in_progress" && hasPendingAnswers() && !state.pendingFlushInFlight) {
-    setAttemptSyncMeta("Найдены локально сохранённые ответы. Догружаем их в облако.");
+    setAttemptSyncMeta("Р СњР В°Р в„–Р Т‘Р ВµР Р…РЎвЂ№ Р В»Р С•Р С”Р В°Р В»РЎРЉР Р…Р С• РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…РЎвЂР Р…Р Р…РЎвЂ№Р Вµ Р С•РЎвЂљР Р†Р ВµРЎвЂљРЎвЂ№. Р вЂќР С•Р С–РЎР‚РЎС“Р В¶Р В°Р ВµР С Р С‘РЎвЂ¦ Р Р† Р С•Р В±Р В»Р В°Р С”Р С•.");
     flushPendingAnswers();
   }
 }
@@ -2213,7 +2306,7 @@ function startTimers() {
   stopTimers();
   updateTimers();
   state.timerInterval = setInterval(updateTimers, 1000);
-  state.syncInterval = setInterval(() => syncAttempt(true), 30000);
+  state.syncInterval = setInterval(() => syncAttempt(true), 45000);
 }
 
 async function syncAttempt(silent = false) {
@@ -2231,10 +2324,27 @@ async function syncAttempt(silent = false) {
   state.syncInFlight = true;
   try {
     captureCurrentDraft();
-    const data = await api(`/api/public/attempts/${state.attempt.id}/current`);
-    applyAttemptState(data, { preserveQuestionRender: true });
-    if (data.status === "in_progress") {
+    const pulse = await api(`/api/public/attempts/${state.attempt.id}/pulse`);
+    if (
+      pulse.status === "in_progress" &&
+      state.attempt.status === "in_progress" &&
+      pulse.currentStepIndex === state.attempt.currentStepIndex
+    ) {
+      state.attempt.expiresAt = pulse.expiresAt;
+      state.attempt.timing = pulse.timing;
+      if (pulse.currentTour) {
+        state.attempt.currentTour = pulse.currentTour;
+      }
+      if (pulse.progress) {
+        state.attempt.progress = pulse.progress;
+      }
       updateTimers();
+    } else {
+      const data = await api(`/api/public/attempts/${state.attempt.id}/current`);
+      applyAttemptState(data, { preserveQuestionRender: true });
+      if (data.status === "in_progress") {
+        updateTimers();
+      }
     }
     setAttemptSyncMeta(`Последняя проверка связи: ${formatDateTime(new Date())}`);
     if (!silent && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
@@ -2242,9 +2352,9 @@ async function syncAttempt(silent = false) {
     }
   } catch (error) {
     const message = formatApiError(error);
-    setAttemptSyncMeta(`Проверка связи: ${message}`);
+    setAttemptSyncMeta(`Р СџРЎР‚Р С•Р Р†Р ВµРЎР‚Р С”Р В° РЎРѓР Р†РЎРЏР В·Р С‘: ${message}`);
     setAttemptSaveStatus(
-      silent ? "Связь нестабильна, обновим данные ещё раз" : "Не удалось обновить данные",
+      silent ? "Р РЋР Р†РЎРЏР В·РЎРЉ Р Р…Р ВµРЎРѓРЎвЂљР В°Р В±Р С‘Р В»РЎРЉР Р…Р В°, Р С•Р В±Р Р…Р С•Р Р†Р С‘Р С Р Т‘Р В°Р Р…Р Р…РЎвЂ№Р Вµ Р ВµРЎвЂ°РЎвЂ РЎР‚Р В°Р В·" : "Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ Р С•Р В±Р Р…Р С•Р Р†Р С‘РЎвЂљРЎРЉ Р Т‘Р В°Р Р…Р Р…РЎвЂ№Р Вµ",
       silent ? "warning" : "error"
     );
     if (!silent) {
@@ -2265,6 +2375,7 @@ async function flushPendingAnswers(options = {}) {
     return;
   }
 
+  cancelPendingFlushDebounce();
   cancelPendingFlushRetry();
   state.pendingFlushInFlight = true;
   let lastSyncedAttempt = null;
@@ -2286,10 +2397,10 @@ async function flushPendingAnswers(options = {}) {
           pauseMs: 1200,
           onRetry(error, nextAttempt, maxAttempts) {
             setAttemptSaveStatus(
-              `Синхронизация ответа: повтор ${nextAttempt} из ${maxAttempts}.`,
+              `Р РЋР С‘Р Р…РЎвЂ¦РЎР‚Р С•Р Р…Р С‘Р В·Р В°РЎвЂ Р С‘РЎРЏ Р С•РЎвЂљР Р†Р ВµРЎвЂљР В°: Р С—Р С•Р Р†РЎвЂљР С•РЎР‚ ${nextAttempt} Р С‘Р В· ${maxAttempts}.`,
               "warning"
             );
-            setAttemptSyncMeta(`Фоновая синхронизация: ${formatApiError(error)}`);
+            setAttemptSyncMeta(`Р В¤Р С•Р Р…Р С•Р Р†Р В°РЎРЏ РЎРѓР С‘Р Р…РЎвЂ¦РЎР‚Р С•Р Р…Р С‘Р В·Р В°РЎвЂ Р С‘РЎРЏ: ${formatApiError(error)}`);
           }
         }
       );
@@ -2303,18 +2414,18 @@ async function flushPendingAnswers(options = {}) {
       }
     }
 
-    setAttemptSaveStatus("Ответы сохранены в облаке", "success");
-    setAttemptSyncMeta(`Синхронизация завершена: ${formatDateTime(new Date())}`);
+    setAttemptSaveStatus("Р С›РЎвЂљР Р†Р ВµРЎвЂљРЎвЂ№ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…РЎвЂ№ Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ", "success");
+    setAttemptSyncMeta(`Р РЋР С‘Р Р…РЎвЂ¦РЎР‚Р С•Р Р…Р С‘Р В·Р В°РЎвЂ Р С‘РЎРЏ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р В°: ${formatDateTime(new Date())}`);
     return lastSyncedAttempt;
   } catch (error) {
     const message = formatApiError(error);
     setAttemptSaveStatus(
       options.blocking
-        ? "Не удалось сохранить ответы перед завершением"
-        : "Ответ принят, но облачная синхронизация временно задержалась",
+        ? "Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…Р С‘РЎвЂљРЎРЉ Р С•РЎвЂљР Р†Р ВµРЎвЂљРЎвЂ№ Р С—Р ВµРЎР‚Р ВµР Т‘ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р С‘Р ВµР С"
+        : "Р С›РЎвЂљР Р†Р ВµРЎвЂљ Р С—РЎР‚Р С‘Р Р…РЎРЏРЎвЂљ, Р Р…Р С• Р С•Р В±Р В»Р В°РЎвЂЎР Р…Р В°РЎРЏ РЎРѓР С‘Р Р…РЎвЂ¦РЎР‚Р С•Р Р…Р С‘Р В·Р В°РЎвЂ Р С‘РЎРЏ Р Р†РЎР‚Р ВµР СР ВµР Р…Р Р…Р С• Р В·Р В°Р Т‘Р ВµРЎР‚Р В¶Р В°Р В»Р В°РЎРѓРЎРЉ",
       options.blocking ? "error" : "warning"
     );
-    setAttemptSyncMeta(`Синхронизация: ${message}`);
+    setAttemptSyncMeta(`Р РЋР С‘Р Р…РЎвЂ¦РЎР‚Р С•Р Р…Р С‘Р В·Р В°РЎвЂ Р С‘РЎРЏ: ${message}`);
     if (options.blocking) {
       throw error;
     }
@@ -2340,15 +2451,15 @@ async function handleRegistration(event) {
     renderParticipant();
     elements.startAttempt.dataset.lockReason = data.alreadyCompleted ? "completed" : "";
     elements.startAttempt.textContent = data.activeAttemptId
-      ? "Продолжить олимпиаду"
-      : "Начать олимпиаду";
+      ? "Р СџРЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р С‘РЎвЂљРЎРЉ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎС“"
+      : "Р СњР В°РЎвЂЎР В°РЎвЂљРЎРЉ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎС“";
 
     if (data.alreadyCompleted) {
-      elements.startAttempt.textContent = "Попытка завершена";
+      elements.startAttempt.textContent = "Р СџР С•Р С—РЎвЂ№РЎвЂљР С”Р В° Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р В°";
       refreshNavigationState();
       showMessage(
         elements.prestartMessage,
-        "Для этого участника попытка уже завершена. Повторный старт недоступен.",
+        "Р вЂќР В»РЎРЏ РЎРЊРЎвЂљР С•Р С–Р С• РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”Р В° Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р В° РЎС“Р В¶Р Вµ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р В°. Р СџР С•Р Р†РЎвЂљР С•РЎР‚Р Р…РЎвЂ№Р в„– РЎРѓРЎвЂљР В°РЎР‚РЎвЂљ Р Р…Р ВµР Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р ВµР Р….",
         "error"
       );
       return;
@@ -2357,8 +2468,8 @@ async function handleRegistration(event) {
     showMessage(
       elements.registrationMessage,
       data.activeAttemptId
-        ? "Найдена незавершённая попытка. Можно продолжить."
-        : "Данные участника сохранены. Можно начинать олимпиаду.",
+        ? "Р СњР В°Р в„–Р Т‘Р ВµР Р…Р В° Р Р…Р ВµР В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬РЎвЂР Р…Р Р…Р В°РЎРЏ Р С—Р С•Р С—РЎвЂ№РЎвЂљР С”Р В°. Р СљР С•Р В¶Р Р…Р С• Р С—РЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р С‘РЎвЂљРЎРЉ."
+        : "Р вЂќР В°Р Р…Р Р…РЎвЂ№Р Вµ РЎС“РЎвЂЎР В°РЎРѓРЎвЂљР Р…Р С‘Р С”Р В° РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…Р ВµР Р…РЎвЂ№. Р СљР С•Р В¶Р Р…Р С• Р Р…Р В°РЎвЂЎР С‘Р Р…Р В°РЎвЂљРЎРЉ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎС“.",
       "success"
     );
     refreshNavigationState();
@@ -2371,7 +2482,7 @@ async function startAttempt() {
   if (elements.startConsent && !elements.startConsent.checked) {
     showMessage(
       elements.prestartMessage,
-      "Подтвердите готовность работать 45 минут без отвлечений.",
+      "Р СџР С•Р Т‘РЎвЂљР Р†Р ВµРЎР‚Р Т‘Р С‘РЎвЂљР Вµ Р С–Р С•РЎвЂљР С•Р Р†Р Р…Р С•РЎРѓРЎвЂљРЎРЉ РЎР‚Р В°Р В±Р С•РЎвЂљР В°РЎвЂљРЎРЉ 45 Р СР С‘Р Р…РЎС“РЎвЂљ Р В±Р ВµР В· Р С•РЎвЂљР Р†Р В»Р ВµРЎвЂЎР ВµР Р…Р С‘Р в„–.",
       "warning"
     );
     updateStartAvailability();
@@ -2380,8 +2491,8 @@ async function startAttempt() {
 
   hideMessage(elements.prestartMessage);
   hideMessage(elements.attemptMessage);
-  setAttemptSaveStatus("Открываем маршрут...", "pending");
-  setAttemptSyncMeta("Подбираем вариант и подключаемся к облаку...");
+  setAttemptSaveStatus("Р С›РЎвЂљР С”РЎР‚РЎвЂ№Р Р†Р В°Р ВµР С Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ...", "pending");
+  setAttemptSyncMeta("Р СџР С•Р Т‘Р В±Р С‘РЎР‚Р В°Р ВµР С Р Р†Р В°РЎР‚Р С‘Р В°Р Р…РЎвЂљ Р С‘ Р С—Р С•Р Т‘Р С”Р В»РЎР‹РЎвЂЎР В°Р ВµР СРЎРѓРЎРЏ Р С” Р С•Р В±Р В»Р В°Р С”РЎС“...");
 
   try {
     const attempt = await requestWithRetry(
@@ -2394,20 +2505,20 @@ async function startAttempt() {
         attempts: 2,
         pauseMs: 1000,
         onRetry() {
-          setAttemptSaveStatus("Небольшой сбой. Повторяем запуск...", "warning");
+          setAttemptSaveStatus("Р СњР ВµР В±Р С•Р В»РЎРЉРЎв‚¬Р С•Р в„– РЎРѓР В±Р С•Р в„–. Р СџР С•Р Р†РЎвЂљР С•РЎР‚РЎРЏР ВµР С Р В·Р В°Р С—РЎС“РЎРѓР С”...", "warning");
         }
       }
     );
     state.participant = attempt.participant;
-    elements.startAttempt.textContent = "Продолжить олимпиаду";
+    elements.startAttempt.textContent = "Р СџРЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р С‘РЎвЂљРЎРЉ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎС“";
     applyAttemptState(attempt);
     startTimers();
     refreshAttemptControls();
-    setAttemptSaveStatus("Маршрут открыт", "success");
-    setAttemptSyncMeta(`Подключение подтверждено: ${formatDateTime(new Date())}`);
+    setAttemptSaveStatus("Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р С•РЎвЂљР С”РЎР‚РЎвЂ№РЎвЂљ", "success");
+    setAttemptSyncMeta(`Р СџР С•Р Т‘Р С”Р В»РЎР‹РЎвЂЎР ВµР Р…Р С‘Р Вµ Р С—Р С•Р Т‘РЎвЂљР Р†Р ВµРЎР‚Р В¶Р Т‘Р ВµР Р…Р С•: ${formatDateTime(new Date())}`);
     showMessage(
       elements.attemptMessage,
-      "Маршрут открыт. Ответы будут автоматически сохраняться в облаке, а экзаменационный режим включён.",
+      "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р С•РЎвЂљР С”РЎР‚РЎвЂ№РЎвЂљ. Р С›РЎвЂљР Р†Р ВµРЎвЂљРЎвЂ№ Р В±РЎС“Р Т‘РЎС“РЎвЂљ Р В°Р Р†РЎвЂљР С•Р СР В°РЎвЂљР С‘РЎвЂЎР ВµРЎРѓР С”Р С‘ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…РЎРЏРЎвЂљРЎРЉРЎРѓРЎРЏ Р Р† Р С•Р В±Р В»Р В°Р С”Р Вµ, Р В° РЎРЊР С”Р В·Р В°Р СР ВµР Р…Р В°РЎвЂ Р С‘Р С•Р Р…Р Р…РЎвЂ№Р в„– РЎР‚Р ВµР В¶Р С‘Р С Р Р†Р С”Р В»РЎР‹РЎвЂЎРЎвЂР Р….",
       "success"
     );
     if (hasPendingAnswers()) {
@@ -2415,8 +2526,8 @@ async function startAttempt() {
     }
   } catch (error) {
     const message = formatApiError(error);
-    setAttemptSaveStatus("Не удалось открыть маршрут", "error");
-    setAttemptSyncMeta(`Запуск: ${message}`);
+    setAttemptSaveStatus("Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ Р С•РЎвЂљР С”РЎР‚РЎвЂ№РЎвЂљРЎРЉ Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ", "error");
+    setAttemptSyncMeta(`Р вЂ”Р В°Р С—РЎС“РЎРѓР С”: ${message}`);
     showMessage(elements.prestartMessage, message, "error");
   }
 }
@@ -2447,16 +2558,16 @@ async function submitAnswer() {
       startTimers();
     }
 
-    setAttemptSaveStatus("Ответ принят. Облачная синхронизация идёт в фоне.", "pending");
-    setAttemptSyncMeta("Переходим дальше сразу, не останавливая таймер на ожидании сети.");
+    setAttemptSaveStatus("Р С›РЎвЂљР Р†Р ВµРЎвЂљ Р С—РЎР‚Р С‘Р Р…РЎРЏРЎвЂљ. Р С›Р В±Р В»Р В°РЎвЂЎР Р…Р В°РЎРЏ РЎРѓР С‘Р Р…РЎвЂ¦РЎР‚Р С•Р Р…Р С‘Р В·Р В°РЎвЂ Р С‘РЎРЏ Р С‘Р Т‘РЎвЂРЎвЂљ Р Р† РЎвЂћР С•Р Р…Р Вµ.", "pending");
+    setAttemptSyncMeta("Р СџР ВµРЎР‚Р ВµРЎвЂ¦Р С•Р Т‘Р С‘Р С Р Т‘Р В°Р В»РЎРЉРЎв‚¬Р Вµ РЎРѓРЎР‚Р В°Р В·РЎС“, Р Р…Р Вµ Р С•РЎРѓРЎвЂљР В°Р Р…Р В°Р Р†Р В»Р С‘Р Р†Р В°РЎРЏ РЎвЂљР В°Р в„–Р СР ВµРЎР‚ Р Р…Р В° Р С•Р В¶Р С‘Р Т‘Р В°Р Р…Р С‘Р С‘ РЎРѓР ВµРЎвЂљР С‘.");
     refreshAttemptControls();
-    flushPendingAnswers();
+    schedulePendingFlush(2500);
     return;
   }
 
   state.isSubmittingAnswer = true;
-  setAttemptSaveStatus("Отправляем финальный ответ...", "pending");
-  setAttemptSyncMeta("Досинхронизируем очередь и фиксируем финальный шаг...");
+  setAttemptSaveStatus("Р С›РЎвЂљР С—РЎР‚Р В°Р Р†Р В»РЎРЏР ВµР С РЎвЂћР С‘Р Р…Р В°Р В»РЎРЉР Р…РЎвЂ№Р в„– Р С•РЎвЂљР Р†Р ВµРЎвЂљ...", "pending");
+  setAttemptSyncMeta("Р вЂќР С•РЎРѓР С‘Р Р…РЎвЂ¦РЎР‚Р С•Р Р…Р С‘Р В·Р С‘РЎР‚РЎС“Р ВµР С Р С•РЎвЂЎР ВµРЎР‚Р ВµР Т‘РЎРЉ Р С‘ РЎвЂћР С‘Р С”РЎРѓР С‘РЎР‚РЎС“Р ВµР С РЎвЂћР С‘Р Р…Р В°Р В»РЎРЉР Р…РЎвЂ№Р в„– РЎв‚¬Р В°Р С–...");
   refreshAttemptControls();
 
   try {
@@ -2464,16 +2575,16 @@ async function submitAnswer() {
 
     if (data && data.status === "in_progress") {
       startTimers();
-      setAttemptSaveStatus("Ответ принят", "success");
+      setAttemptSaveStatus("Р С›РЎвЂљР Р†Р ВµРЎвЂљ Р С—РЎР‚Р С‘Р Р…РЎРЏРЎвЂљ", "success");
     } else {
-      setAttemptSaveStatus("Финальный ответ принят. Маршрут завершён.", "success");
-      showMessage(elements.attemptMessage, "Маршрут завершён.", "success");
+      setAttemptSaveStatus("Р В¤Р С‘Р Р…Р В°Р В»РЎРЉР Р…РЎвЂ№Р в„– Р С•РЎвЂљР Р†Р ВµРЎвЂљ Р С—РЎР‚Р С‘Р Р…РЎРЏРЎвЂљ. Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬РЎвЂР Р….", "success");
+      showMessage(elements.attemptMessage, "Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬РЎвЂР Р….", "success");
     }
-    setAttemptSyncMeta(`Ответ записан: ${formatDateTime(new Date())}`);
+    setAttemptSyncMeta(`Р С›РЎвЂљР Р†Р ВµРЎвЂљ Р В·Р В°Р С—Р С‘РЎРѓР В°Р Р…: ${formatDateTime(new Date())}`);
   } catch (error) {
     const message = formatApiError(error);
-    setAttemptSaveStatus("Не удалось отправить ответ", "error");
-    setAttemptSyncMeta(`Ошибка отправки: ${message}`);
+    setAttemptSaveStatus("Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р С‘РЎвЂљРЎРЉ Р С•РЎвЂљР Р†Р ВµРЎвЂљ", "error");
+    setAttemptSyncMeta(`Р С›РЎв‚¬Р С‘Р В±Р С”Р В° Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р С”Р С‘: ${message}`);
     showMessage(elements.attemptMessage, message, "error");
   } finally {
     state.isSubmittingAnswer = false;
@@ -2488,8 +2599,8 @@ async function finishAttempt() {
 
   state.isFinishingAttempt = true;
   hideMessage(elements.attemptMessage);
-  setAttemptSaveStatus("Завершаем маршрут...", "pending");
-  setAttemptSyncMeta("Проверяем очередь ответов и фиксируем итог...");
+  setAttemptSaveStatus("Р вЂ”Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р В°Р ВµР С Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ...", "pending");
+  setAttemptSyncMeta("Р СџРЎР‚Р С•Р Р†Р ВµРЎР‚РЎРЏР ВµР С Р С•РЎвЂЎР ВµРЎР‚Р ВµР Т‘РЎРЉ Р С•РЎвЂљР Р†Р ВµРЎвЂљР С•Р Р† Р С‘ РЎвЂћР С‘Р С”РЎРѓР С‘РЎР‚РЎС“Р ВµР С Р С‘РЎвЂљР С•Р С–...");
   refreshAttemptControls();
   try {
     captureCurrentDraft();
@@ -2503,19 +2614,19 @@ async function finishAttempt() {
         attempts: 2,
         pauseMs: 1000,
         onRetry(error) {
-          setAttemptSaveStatus("Подтверждаем завершение ещё раз...", "warning");
-          setAttemptSyncMeta(`Завершение: ${formatApiError(error)}`);
+          setAttemptSaveStatus("Р СџР С•Р Т‘РЎвЂљР Р†Р ВµРЎР‚Р В¶Р Т‘Р В°Р ВµР С Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р С‘Р Вµ Р ВµРЎвЂ°РЎвЂ РЎР‚Р В°Р В·...", "warning");
+          setAttemptSyncMeta(`Р вЂ”Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р С‘Р Вµ: ${formatApiError(error)}`);
         }
       }
     );
     state.localDrafts = {};
     applyAttemptState(data);
-    setAttemptSaveStatus("Маршрут завершён и сохранён", "success");
-    setAttemptSyncMeta(`Итог записан: ${formatDateTime(new Date())}`);
+    setAttemptSaveStatus("Р СљР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬РЎвЂР Р… Р С‘ РЎРѓР С•РЎвЂ¦РЎР‚Р В°Р Р…РЎвЂР Р…", "success");
+    setAttemptSyncMeta(`Р ВРЎвЂљР С•Р С– Р В·Р В°Р С—Р С‘РЎРѓР В°Р Р…: ${formatDateTime(new Date())}`);
   } catch (error) {
     const message = formatApiError(error);
-    setAttemptSaveStatus("Не удалось завершить маршрут", "error");
-    setAttemptSyncMeta(`Завершение: ${message}`);
+    setAttemptSaveStatus("Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ Р В·Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р С‘РЎвЂљРЎРЉ Р СР В°РЎР‚РЎв‚¬РЎР‚РЎС“РЎвЂљ", "error");
+    setAttemptSyncMeta(`Р вЂ”Р В°Р Р†Р ВµРЎР‚РЎв‚¬Р ВµР Р…Р С‘Р Вµ: ${message}`);
     showMessage(elements.attemptMessage, message, "error");
   } finally {
     state.isFinishingAttempt = false;
@@ -2532,13 +2643,13 @@ async function init() {
   setupInstallPrompt();
   setInstallAvailability(false);
   setNetworkStatus(navigator.onLine);
-  setAttemptSaveStatus("Система готова к старту", "idle");
-  setAttemptSyncMeta("Последняя проверка связи: —");
+  setAttemptSaveStatus("Р РЋР С‘РЎРѓРЎвЂљР ВµР СР В° Р С–Р С•РЎвЂљР С•Р Р†Р В° Р С” РЎРѓРЎвЂљР В°РЎР‚РЎвЂљРЎС“", "idle");
+  setAttemptSyncMeta("Р СџР С•РЎРѓР В»Р ВµР Т‘Р Р…РЎРЏРЎРЏ Р С—РЎР‚Р С•Р Р†Р ВµРЎР‚Р С”Р В° РЎРѓР Р†РЎРЏР В·Р С‘: РІР‚вЂќ");
   refreshNavigationState();
 
   window.addEventListener("online", () => {
     setNetworkStatus(true);
-    setAttemptSaveStatus("Связь восстановлена. Можно продолжать.", "success");
+    setAttemptSaveStatus("Р РЋР Р†РЎРЏР В·РЎРЉ Р Р†Р С•РЎРѓРЎРѓРЎвЂљР В°Р Р…Р С•Р Р†Р В»Р ВµР Р…Р В°. Р СљР С•Р В¶Р Р…Р С• Р С—РЎР‚Р С•Р Т‘Р С•Р В»Р В¶Р В°РЎвЂљРЎРЉ.", "success");
     if (state.attempt) {
       flushPendingAnswers();
       syncAttempt(true);
@@ -2546,8 +2657,8 @@ async function init() {
   });
   window.addEventListener("offline", () => {
     setNetworkStatus(false);
-    setAttemptSaveStatus("Связь нестабильна. Ответ попробуем отправить повторно.", "warning");
-    setAttemptSyncMeta("Сервер временно недоступен.");
+    setAttemptSaveStatus("Р РЋР Р†РЎРЏР В·РЎРЉ Р Р…Р ВµРЎРѓРЎвЂљР В°Р В±Р С‘Р В»РЎРЉР Р…Р В°. Р С›РЎвЂљР Р†Р ВµРЎвЂљ Р С—Р С•Р С—РЎР‚Р С•Р В±РЎС“Р ВµР С Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р С‘РЎвЂљРЎРЉ Р С—Р С•Р Р†РЎвЂљР С•РЎР‚Р Р…Р С•.", "warning");
+    setAttemptSyncMeta("Р РЋР ВµРЎР‚Р Р†Р ВµРЎР‚ Р Р†РЎР‚Р ВµР СР ВµР Р…Р Р…Р С• Р Р…Р ВµР Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р ВµР Р….");
   });
   if (elements.navMenuToggle) {
     elements.navMenuToggle.addEventListener("click", () => {
@@ -2577,6 +2688,33 @@ async function init() {
         : elements.resultSection
     );
   });
+  if (elements.heroActionRegister) {
+    elements.heroActionRegister.addEventListener("click", () => {
+      if (elements.prestartSection.classList.contains("hidden")) {
+        scrollToSection(elements.heroSection);
+        return;
+      }
+      scrollToSection(elements.prestartSection);
+    });
+  }
+  if (elements.heroActionAttempt) {
+    elements.heroActionAttempt.addEventListener("click", () => {
+      scrollToSection(
+        state.attempt && state.attempt.status === "in_progress"
+          ? elements.attemptSection
+          : elements.heroSection
+      );
+    });
+  }
+  if (elements.heroActionResult) {
+    elements.heroActionResult.addEventListener("click", () => {
+      scrollToSection(
+        elements.resultSection.classList.contains("hidden")
+          ? elements.heroSection
+          : elements.resultSection
+      );
+    });
+  }
   elements.registrationForm.addEventListener("submit", handleRegistration);
   if (elements.startConsent) {
     elements.startConsent.addEventListener("change", updateStartAvailability);
@@ -2608,6 +2746,6 @@ async function init() {
 
 init().catch((error) => {
   showMessage(elements.registrationMessage, formatApiError(error), "error");
-  setAttemptSaveStatus("Не удалось загрузить олимпиаду", "error");
-  setAttemptSyncMeta(`Инициализация: ${formatApiError(error)}`);
+  setAttemptSaveStatus("Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ Р В·Р В°Р С–РЎР‚РЎС“Р В·Р С‘РЎвЂљРЎРЉ Р С•Р В»Р С‘Р СР С—Р С‘Р В°Р Т‘РЎС“", "error");
+  setAttemptSyncMeta(`Р ВР Р…Р С‘РЎвЂ Р С‘Р В°Р В»Р С‘Р В·Р В°РЎвЂ Р С‘РЎРЏ: ${formatApiError(error)}`);
 });

@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1f8e73" />
     <title>Панель организатора</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.16" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.17" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.16" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.17" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -28,6 +28,10 @@
           </button>
         </div>
         <div id="admin-nav-drawer" class="nav-ribbon-drawer">
+          <div class="nav-ribbon-summary" aria-hidden="true">
+            <div class="nav-ribbon-title">Операционный центр</div>
+            <small>Мониторинг попыток, экспорт итогов и контроль состояния платформы.</small>
+          </div>
           <button id="admin-nav-back" class="button ghost" type="button">Назад</button>
           <a class="button ghost" href="/">Главная олимпиады</a>
           <a class="button ghost" href="/content-admin.html">Банк заданий</a>
@@ -44,6 +48,28 @@
         <p class="lead">
           Рейтинг участников, туровые баллы, служебный лог вопросов, ответы и выгрузка протоколов.
         </p>
+        <div class="hero-control-grid">
+          <article class="hero-control-card">
+            <span>Состояние панели</span>
+            <strong id="admin-hero-state-value">Ожидание входа</strong>
+            <small id="admin-hero-state-note">После авторизации откроется оперативная сводка по платформе.</small>
+          </article>
+          <article class="hero-control-card">
+            <span>Живая сводка</span>
+            <strong id="admin-hero-refresh-value">Нет данных</strong>
+            <small id="admin-hero-refresh-note">Покажем активные попытки и время последнего обновления.</small>
+          </article>
+          <article class="hero-control-card">
+            <span>Зона внимания</span>
+            <strong id="admin-hero-watch-value">Под контролем</strong>
+            <small id="admin-hero-watch-note">Сигналы, API-ошибки и подозрительные ситуации будут видны здесь.</small>
+          </article>
+        </div>
+        <div class="hero-actions">
+          <button id="admin-hero-refresh" class="button primary" type="button">Обновить панель</button>
+          <button id="admin-hero-rating-jump" class="button secondary" type="button">К рейтингу</button>
+          <button id="admin-hero-detail-jump" class="button ghost" type="button">К карточке попытки</button>
+        </div>
       </section>
 
       <section id="admin-login-card" class="card">
@@ -78,28 +104,28 @@
           <article class="card diagnostic-card">
             <div class="section-row">
               <h2>Диагностика системы</h2>
-              <div id="system-backend-badge" class="pill">backend: —</div>
+              <div id="system-backend-badge" class="pill">backend: вЂ”</div>
             </div>
             <div class="diagnostic-list">
               <div class="diagnostic-row">
                 <span>Версия</span>
-                <strong id="diag-version">—</strong>
+                <strong id="diag-version">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
                 <span>Последнее обновление панели</span>
-                <strong id="diag-refreshed-at">—</strong>
+                <strong id="diag-refreshed-at">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
                 <span>Время сервера</span>
-                <strong id="diag-server-time">—</strong>
+                <strong id="diag-server-time">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
                 <span>Последняя активность участника</span>
-                <strong id="diag-last-activity">—</strong>
+                <strong id="diag-last-activity">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
                 <span>Состояние панели</span>
-                <strong id="diag-panel-state">—</strong>
+                <strong id="diag-panel-state">вЂ”</strong>
               </div>
             </div>
           </article>
@@ -111,23 +137,23 @@
             <div class="diagnostic-list">
               <div class="diagnostic-row">
                 <span>Активные попытки</span>
-                <strong id="diag-active-attempts">—</strong>
+                <strong id="diag-active-attempts">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
                 <span>Ошибки API</span>
-                <strong id="diag-api-errors">—</strong>
+                <strong id="diag-api-errors">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
                 <span>Последняя ошибка API</span>
-                <strong id="diag-last-api-error">—</strong>
+                <strong id="diag-last-api-error">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
                 <span>Папка выгрузки</span>
-                <strong id="diag-disk-folder">—</strong>
+                <strong id="diag-disk-folder">вЂ”</strong>
               </div>
               <div class="diagnostic-row">
                 <span>Режим обновления</span>
-                <strong id="diag-refresh-mode">—</strong>
+                <strong id="diag-refresh-mode">вЂ”</strong>
               </div>
             </div>
           </article>
@@ -262,11 +288,11 @@
         <small>
           Разработчик: Постовит Дмитрий Александрович, преподаватель первой категории, профильных
           дисциплин, реализуемых в рамках образовательной программы ГБПОУ "Горловский колледж
-          технологий и сервиса". • Версия <span id="admin-app-version-label">1.6.16</span>
+          технологий и сервиса". • Версия <span id="admin-app-version-label">1.6.17</span>
         </small>
       </footer>
     </main>
 
-    <script src="/admin.js?v=1.6.16"></script>
+    <script src="/admin.js?v=1.6.17"></script>
   </body>
 </html>
