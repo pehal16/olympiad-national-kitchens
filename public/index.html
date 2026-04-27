@@ -7,10 +7,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Национальные кухни мира</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.18" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.6.19" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.18" />
+    <link rel="stylesheet" href="/styles.css?v=1.6.19" />
   </head>
   <body>
     <div class="ambient ambient-a"></div>
@@ -30,17 +30,17 @@
         </div>
         <div id="nav-drawer" class="nav-ribbon-drawer">
           <div class="nav-ribbon-summary" aria-hidden="true">
-            <div class="nav-ribbon-title">Платформа олимпиады</div>
-            <small>Регистрация, прохождение и результаты в одном окне.</small>
+            <div class="nav-ribbon-title">Платформа</div>
+            <small>Регистрация, прохождение и результат в одном окне.</small>
           </div>
           <button id="nav-back" class="button ghost" type="button">Назад</button>
           <button id="nav-home" class="button ghost" type="button">Главная</button>
           <button id="nav-register" class="button ghost" type="button">Регистрация</button>
           <button id="nav-attempt" class="button ghost" type="button">Текущий тур</button>
           <button id="nav-result" class="button ghost" type="button">Результат</button>
-          <div id="network-status" class="network-badge online">Сеть: связь есть</div>
+          <div id="network-status" class="network-badge online">Онлайн</div>
           <button id="install-app" class="button primary hidden" type="button">Установить приложение</button>
-          <a class="button ghost" href="/admin.html">Облачная админка</a>
+          <a class="button ghost" href="/admin.html">Кабинет организатора</a>
         </div>
       </section>
 
@@ -50,12 +50,12 @@
             <div class="eyebrow">Цифровая олимпиада</div>
             <h1 id="hero-title">Национальные кухни мира</h1>
             <p id="hero-subtitle" class="lead"></p>
-            <div id="hero-format-badge" class="game-badge hero-format-badge">Индивидуальная цифровая олимпиада • 45 минут • 5 туров</div>
+            <div id="hero-format-badge" class="game-badge hero-format-badge">Индивидуальный формат • 45 минут • 5 этапов</div>
             <div class="hero-quick-row" aria-label="Короткие характеристики олимпиады">
-              <span class="hero-quick-pill">Автовариант</span>
+              <span class="hero-quick-pill">Индивидуальный маршрут</span>
               <span class="hero-quick-pill">Один вопрос на экране</span>
               <span class="hero-quick-pill">Автопроверка</span>
-              <span class="hero-quick-pill">Сохранение в облаке</span>
+              <span class="hero-quick-pill">Сохранение результата</span>
             </div>
             <div class="hero-feature-grid" aria-label="Ключевые возможности платформы">
               <article class="hero-feature-card">
@@ -67,7 +67,7 @@
                 </span>
                 <div>
                   <strong>Индивидуальный вариант</strong>
-                  <span>Для каждого участника формируется свой вариант.</span>
+                  <span>Свой набор заданий.</span>
                 </div>
               </article>
               <article class="hero-feature-card">
@@ -78,8 +78,8 @@
                   </svg>
                 </span>
                 <div>
-                  <strong>Пошаговое прохождение</strong>
-                  <span>На экране только один вопрос без возврата назад.</span>
+                  <strong>Пошаговый формат</strong>
+                  <span>Без возврата к предыдущим вопросам.</span>
                 </div>
               </article>
               <article class="hero-feature-card">
@@ -91,7 +91,7 @@
                 </span>
                 <div>
                   <strong>Автопроверка</strong>
-                  <span>Ответы проверяются автоматически и без задержек.</span>
+                  <span>Результат считается автоматически.</span>
                 </div>
               </article>
               <article class="hero-feature-card">
@@ -102,39 +102,39 @@
                   </svg>
                 </span>
                 <div>
-                  <strong>Результаты в облаке</strong>
-                  <span>Результаты сохраняются в облаке и доступны организатору.</span>
+                  <strong>Облачное сохранение</strong>
+                  <span>Данные доступны организатору.</span>
                 </div>
               </article>
             </div>
             <div class="hero-actions">
-              <button id="hero-action-register" class="button primary" type="button">Перейти к регистрации</button>
-              <button id="hero-action-attempt" class="button secondary" type="button">Открыть текущий тур</button>
-              <button id="hero-action-result" class="button ghost" type="button">Посмотреть результат</button>
+              <button id="hero-action-register" class="button primary" type="button">Начать</button>
+              <button id="hero-action-attempt" class="button secondary" type="button">Продолжить</button>
+              <button id="hero-action-result" class="button ghost" type="button">Результат</button>
             </div>
           </div>
-          <aside class="hero-brand-panel" aria-label="Фирменные и оперативные показатели олимпиады">
+          <aside class="hero-brand-panel" aria-label="Статус и фирменный блок олимпиады">
             <div class="hero-dashboard-card">
               <div class="hero-dashboard-top">
-                <span class="eyebrow">Оперативный контур</span>
-                <strong>Платформа готова к проведению</strong>
-                <p class="muted">Быстрый старт, пошаговый маршрут и сохранение результатов.</p>
+                <span class="eyebrow">Статус</span>
+                <strong>Платформа готова</strong>
+                <p class="muted">Короткий путь от регистрации до результата.</p>
               </div>
               <div class="hero-status-grid">
                 <article class="hero-status-card">
-                  <span>Этап</span>
-                  <strong id="hero-stage-value">Подготовка</strong>
-                  <small id="hero-stage-note">Заполните данные участника перед стартом.</small>
+                  <span>Старт</span>
+                  <strong id="hero-stage-value">Готовность</strong>
+                  <small id="hero-stage-note">Заполните данные участника.</small>
                 </article>
                 <article class="hero-status-card">
-                  <span>Маршрут</span>
+                  <span>Прогресс</span>
                   <strong id="hero-progress-value">0%</strong>
-                  <small id="hero-progress-note">Прогресс появится после регистрации.</small>
+                  <small id="hero-progress-note">Появится после запуска.</small>
                 </article>
                 <article class="hero-status-card">
-                  <span>Синхронизация</span>
+                  <span>Сеть</span>
                   <strong id="hero-sync-value">Онлайн</strong>
-                  <small id="hero-sync-note">Результаты сохраняются в облаке организатора.</small>
+                  <small id="hero-sync-note">Результаты сохраняются автоматически.</small>
                 </article>
               </div>
               <div class="hero-brand-strip">
@@ -169,20 +169,20 @@
             </div>
           </aside>
         </div>
-        <div class="exam-preflight-note"><strong>После старта включается экзаменационный режим.</strong> Копирование и выход из активного окна фиксируются автоматически.</div>
+        <div class="exam-preflight-note"><strong>После старта включается защищённый режим.</strong> Работа продолжается в полноэкранном формате.</div>
         <div class="meta-row" id="tour-meta"></div>
       </section>
 
       <section class="card journey-panel">
         <div class="section-row">
-          <h2>Маршрут участника</h2>
-          <div id="journey-status" class="pill">Точка входа: регистрация</div>
+          <h2>Этапы</h2>
+          <div id="journey-status" class="pill">Подготовка</div>
         </div>
         <div id="journey-map" class="journey-map"></div>
         <div class="journey-progress-shell">
           <div class="journey-progress-copy">
-            <strong id="journey-progress-label">Готовность маршрута: 0%</strong>
-            <span id="journey-progress-hint">После регистрации система откроет первый тур.</span>
+            <strong id="journey-progress-label">Готовность: 0%</strong>
+            <span id="journey-progress-hint">Сохраните данные участника.</span>
           </div>
           <div class="progress-line journey-progress-line">
             <span id="journey-progress-fill"></span>
@@ -193,15 +193,15 @@
 
       <section class="grid-two" id="prestart-section">
         <section class="card">
-          <h2>Регистрация участника</h2>
-          <p class="section-intro">Заполните данные участника перед стартом. После сохранения система откроет подтверждение готовности и запуск маршрута.</p>
+          <h2>Данные участника</h2>
+          <p class="section-intro">Короткая регистрация перед началом.</p>
           <form id="registration-form" class="form-stack">
             <label class="field">
-              <span>ФИО участника</span>
+              <span>ФИО</span>
               <input id="full-name" type="text" placeholder="Иванов Иван Иванович" required />
             </label>
             <label class="field">
-              <span>Образовательная организация</span>
+              <span>Организация</span>
               <input
                 id="institution"
                 type="text"
@@ -209,8 +209,8 @@
                 required
               />
             </label>
-            <label class="field">
-              <span>Учебная группа, код и название специальности/профессии</span>
+            <label class="field field-wide">
+              <span>Группа и специальность</span>
               <input
                 id="group-name"
                 type="text"
@@ -219,37 +219,36 @@
               />
             </label>
             <label class="field">
-              <span>ФИО наставника</span>
+              <span>Наставник</span>
               <input
                 id="mentor-name"
                 type="text"
-                placeholder="Постовит Дмитрий Александрович, преподаватель профильных дисциплин"
+                placeholder="ФИО наставника"
               />
             </label>
-            <button class="button primary" type="submit">Сохранить данные</button>
+            <button class="button primary" type="submit">Сохранить</button>
           </form>
           <div id="registration-message" class="message hidden"></div>
         </section>
 
         <section class="card">
-          <h2>Правила прохождения</h2>
-          <p class="section-intro">Перед запуском проверьте правила прохождения. После старта олимпиада работает в пошаговом экзаменационном режиме.</p>
+          <h2>Перед стартом</h2>
+          <p class="section-intro">Подтвердите готовность и начните олимпиаду.</p>
           <ul id="rules-list" class="flat-list"></ul>
           <div class="start-disclaimer">
             <label class="consent-check">
               <input id="start-consent" type="checkbox" />
               <span>
-                Я понимаю, что после старта нужно освободить для олимпиады ближайшие 45 минут и
-                пройти все вопросы без отвлечений.
+                Подтверждаю готовность пройти олимпиаду без отвлечений в течение 45 минут.
               </span>
             </label>
             <small id="start-consent-hint" class="muted">
-              Сохраните данные участника. Подтвердите готовность работать 45 минут без отвлечений.
+              Сначала сохраните данные участника.
             </small>
           </div>
           <div class="actions prestart-actions">
-            <button id="start-attempt" class="button primary" disabled>Начать олимпиаду</button>
-            <a class="button secondary" href="/admin.html">Панель организатора</a>
+            <button id="start-attempt" class="button primary" disabled>Начать</button>
+            <a class="button secondary" href="/admin.html">Кабинет организатора</a>
           </div>
           <div id="prestart-message" class="message hidden"></div>
         </section>
@@ -365,11 +364,7 @@
 
       <footer class="footer-note">
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
-        <small>
-          Разработчик: Постовит Дмитрий Александрович, преподаватель первой категории, профильных
-          дисциплин, реализуемых в рамках образовательной программы ГБПОУ "Горловский колледж
-          технологий и сервиса". • Версия <span id="app-version-label">1.6.18</span>
-        </small>
+        <small>Версия <span id="app-version-label">1.6.19</span></small>
       </footer>
     </main>
 
@@ -391,6 +386,6 @@
       </section>
     </div>
 
-    <script src="/app.js?v=1.6.18"></script>
+    <script src="/app.js?v=1.6.19"></script>
   </body>
 </html>

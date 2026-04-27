@@ -377,15 +377,13 @@ function updateStartAvailability() {
   }
 
   if (blockedByCompletion) {
-    elements.startConsentHint.textContent = "Для этого участника повторный старт уже закрыт.";
+    elements.startConsentHint.textContent = "Повторный старт недоступен.";
   } else if (!hasParticipant) {
-    elements.startConsentHint.textContent =
-      "Сохраните данные участника. Подтвердите готовность работать 45 минут без отвлечений.";
+    elements.startConsentHint.textContent = "Сначала сохраните данные участника.";
   } else if (!consentGranted) {
-    elements.startConsentHint.textContent =
-      "Подтвердите готовность работать 45 минут без отвлечений.";
+    elements.startConsentHint.textContent = "Подтвердите готовность к старту.";
   } else {
-    elements.startConsentHint.textContent = "Подтверждение получено. Можно запускать олимпиаду.";
+    elements.startConsentHint.textContent = "Можно начинать.";
   }
 }
 
@@ -625,17 +623,17 @@ function setParticipantShellState() {
   const totalQuestions = attempt && attempt.progress ? attempt.progress.totalQuestions : 0;
 
   if (!hasAttempt) {
-    setShellBadge(elements.participantModeBadge, "Режим: подготовка", "neutral");
-    setShellBadge(elements.participantStageBadge, "Шаг: ждём старт", "neutral");
-    setShellBadge(elements.participantExamBadge, "Экзаменационный режим: ожидание", "neutral");
-    setShellBadge(elements.participantStabilityBadge, "Сохранение: система готова", "neutral");
+    setShellBadge(elements.participantModeBadge, "Подготовка", "neutral");
+    setShellBadge(elements.participantStageBadge, "Ожидание старта", "neutral");
+    setShellBadge(elements.participantExamBadge, "Защищённый режим: ожидание", "neutral");
+    setShellBadge(elements.participantStabilityBadge, "Сохранение готово", "neutral");
     updateExamGuardUi();
     return;
   }
 
   setShellBadge(
     elements.participantModeBadge,
-    attemptInProgress ? "Режим: прохождение" : "Режим: результат",
+    attemptInProgress ? "Прохождение" : "Результат",
     attemptInProgress ? "active" : "ready"
   );
 
@@ -650,40 +648,40 @@ function setParticipantShellState() {
   }
 
   if (!attemptInProgress) {
-    setShellBadge(elements.participantExamBadge, "Экзаменационный режим: завершён", "ready");
+    setShellBadge(elements.participantExamBadge, "Защищённый режим завершён", "ready");
   } else if (state.examGuardActive) {
     setShellBadge(
       elements.participantExamBadge,
-      `Экзаменационный режим: контроль (${state.examIncidents})`,
+      `Защищённый режим: контроль (${state.examIncidents})`,
       "warning"
     );
   } else {
     setShellBadge(
       elements.participantExamBadge,
-      `Экзаменационный режим: защищён (${state.examIncidents})`,
+      `Защищённый режим: активен (${state.examIncidents})`,
       "ready"
     );
   }
 
   if (!state.isOnline) {
-    setShellBadge(elements.participantStabilityBadge, "Сохранение: связь нестабильна", "warning");
+    setShellBadge(elements.participantStabilityBadge, "Связь нестабильна", "warning");
     updateExamGuardUi();
     return;
   }
 
   if (state.isSubmittingAnswer || state.isFinishingAttempt || state.syncInFlight) {
-    setShellBadge(elements.participantStabilityBadge, "Сохранение: идёт отправка", "active");
+    setShellBadge(elements.participantStabilityBadge, "Идёт сохранение", "active");
     updateExamGuardUi();
     return;
   }
 
   if (attemptInProgress || totalQuestions > 0 || questionIndex > 0) {
-    setShellBadge(elements.participantStabilityBadge, "Сохранение: всё в порядке", "ready");
+    setShellBadge(elements.participantStabilityBadge, "Данные сохранены", "ready");
     updateExamGuardUi();
     return;
   }
 
-  setShellBadge(elements.participantStabilityBadge, "Сохранение: система готова", "neutral");
+  setShellBadge(elements.participantStabilityBadge, "Сохранение готово", "neutral");
   updateExamGuardUi();
 }
 
@@ -691,24 +689,24 @@ function getJourneyProgressModel() {
   if (!state.participant) {
     return {
       percent: 0,
-      label: "Готовность маршрута: 0%",
-      hint: "После регистрации система откроет первый тур."
+      label: "Готовность: 0%",
+      hint: "Сохраните данные участника."
     };
   }
 
   if (!state.attempt) {
     return {
       percent: 12,
-      label: "Готовность маршрута: 12%",
-      hint: "Регистрация завершена. Можно запускать первую часть олимпиады."
+      label: "Готовность: 12%",
+      hint: "Регистрация завершена."
     };
   }
 
   if (state.attempt.status !== "in_progress") {
     return {
       percent: 100,
-      label: "Готовность маршрута: 100%",
-      hint: "Маршрут полностью завершен, результат зафиксирован в облаке."
+      label: "Готовность: 100%",
+      hint: "Результат сохранён."
     };
   }
 
@@ -718,8 +716,8 @@ function getJourneyProgressModel() {
 
   return {
     percent,
-    label: `Готовность маршрута: ${percent}%`,
-    hint: `Сейчас ${state.attempt.currentTour.code}, вопрос ${state.attempt.progress.tourQuestionIndex} из ${state.attempt.progress.tourQuestionCount}.`
+    label: `Готовность: ${percent}%`,
+    hint: `${state.attempt.currentTour.code} • ${state.attempt.progress.tourQuestionIndex}/${state.attempt.progress.tourQuestionCount}`
   };
 }
 
@@ -1033,7 +1031,7 @@ function setNetworkStatus(isOnline = navigator.onLine) {
   }
 
   state.isOnline = isOnline;
-  elements.networkStatus.textContent = isOnline ? "Сеть: связь есть" : "Сеть: связь нестабильна";
+  elements.networkStatus.textContent = isOnline ? "Онлайн" : "Офлайн";
   elements.networkStatus.className = `network-badge ${isOnline ? "online" : "offline"}`;
   setParticipantShellState();
 }
@@ -1044,7 +1042,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.6.14");
+    await navigator.serviceWorker.register("/sw.js?v=1.6.19");
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       registration.update().catch(() => {});
@@ -1397,14 +1395,14 @@ function renderHero() {
   elements.heroSubtitle.textContent = state.olympiad.description;
   if (elements.heroFormatBadge) {
     const totalTours = Array.isArray(state.olympiad.tours) ? state.olympiad.tours.length : 0;
-    elements.heroFormatBadge.textContent = `Индивидуальная цифровая олимпиада • ${state.olympiad.durationMinutes} минут • ${totalTours} туров`;
+    elements.heroFormatBadge.textContent = `Индивидуальный формат • ${state.olympiad.durationMinutes} минут • ${totalTours} этапов`;
   }
   elements.tourMeta.innerHTML = "";
 
   (state.olympiad.tours || []).forEach((tour) => {
     const pill = document.createElement("div");
     pill.className = "pill";
-    pill.textContent = `${tour.code}: ${tour.timeLimitMinutes} мин • ${tour.maxScore} баллов`;
+    pill.textContent = `${tour.code} • ${tour.timeLimitMinutes} мин`;
     elements.tourMeta.appendChild(pill);
   });
 
@@ -1413,13 +1411,12 @@ function renderHero() {
 
 function renderRules() {
   const rules = [
-    `Время на выполнение: ${state.olympiad.durationMinutes} минут.`,
-    "После запуска включается экзаменационный режим. Копирование, контекстное меню и часть сочетаний клавиш браузера блокируются. При выходе из полноэкранного режима попытка автоматически фиксируется.",
-    "Каждому участнику предоставляется индивидуально разработанный вариант задания.",
-    "На экране отображается только один вопрос. Вернуться к предыдущему вопросу невозможно.",
-    "Система автоматически перемешивает варианты ответов и порядок заданий.",
-    "Все задания подвергаются автоматической верификации, исключая необходимость в ручной экспертной оценке.",
-    "Результаты олимпиады не показываются участнику сразу после её завершения."
+    `Общий лимит: ${state.olympiad.durationMinutes} минут.`,
+    "После старта работает защищённый полноэкранный режим.",
+    "У каждого участника индивидуальный вариант.",
+    "Один вопрос на экране без возврата назад.",
+    "Ответы проверяются автоматически.",
+    "Итог фиксируется после завершения."
   ];
 
   elements.rulesList.innerHTML = "";
@@ -1451,7 +1448,7 @@ function buildJourneySteps() {
     {
       id: "register",
       label: "Регистрация",
-      description: "Сохранение данных участника"
+      description: "Данные участника"
     },
     ...tours.map((tour) => ({
       id: tour.id,
@@ -1461,7 +1458,7 @@ function buildJourneySteps() {
     {
       id: "result",
       label: "Финиш",
-      description: "Итоговый экран и фиксация результата"
+      description: "Итог"
     }
   ];
 }
@@ -1474,11 +1471,11 @@ function renderJourneyMap() {
   const steps = buildJourneySteps();
   const completed = new Set();
   let currentId = "register";
-  let statusText = "Сначала сохраните данные участника.";
+  let statusText = "Ожидается регистрация.";
 
   if (state.participant) {
     completed.add("register");
-    statusText = "Регистрация сохранена. Можно запускать первый тур.";
+    statusText = "Регистрация завершена.";
   }
 
   if (state.attempt) {
@@ -1490,12 +1487,12 @@ function renderJourneyMap() {
           completed.add(tour.id);
         }
       });
-      statusText = `${state.attempt.currentTour.code}: вопрос ${state.attempt.progress.tourQuestionIndex} из ${state.attempt.progress.tourQuestionCount}.`;
+      statusText = `${state.attempt.currentTour.code} • ${state.attempt.progress.tourQuestionIndex}/${state.attempt.progress.tourQuestionCount}`;
     } else if (state.attempt.status !== "in_progress") {
       currentId = "result";
       ((state.olympiad && state.olympiad.tours) || []).forEach((tour) => completed.add(tour.id));
       completed.add("result");
-      statusText = "Маршрут завершён. Результат зафиксирован в облаке.";
+      statusText = "Олимпиада завершена.";
     }
   }
 
@@ -2236,17 +2233,14 @@ async function syncAttempt(silent = false) {
     if (data.status === "in_progress") {
       updateTimers();
     }
-    setAttemptSyncMeta(`Последняя проверка связи: ${formatDateTime(new Date())}`);
+    setAttemptSyncMeta(`Обновлено: ${formatDateTime(new Date())}`);
     if (!silent && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
       setAttemptSaveStatus("Данные обновлены", "success");
     }
   } catch (error) {
     const message = formatApiError(error);
     setAttemptSyncMeta(`Проверка связи: ${message}`);
-    setAttemptSaveStatus(
-      silent ? "Связь нестабильна, обновим данные ещё раз" : "Не удалось обновить данные",
-      silent ? "warning" : "error"
-    );
+      setAttemptSaveStatus(silent ? "Связь нестабильна" : "Не удалось обновить данные", silent ? "warning" : "error");
     if (!silent) {
       showMessage(elements.attemptMessage, message, "error");
     }
@@ -2532,13 +2526,13 @@ async function init() {
   setupInstallPrompt();
   setInstallAvailability(false);
   setNetworkStatus(navigator.onLine);
-  setAttemptSaveStatus("Система готова к старту", "idle");
-  setAttemptSyncMeta("Последняя проверка связи: —");
+  setAttemptSaveStatus("Система готова", "idle");
+  setAttemptSyncMeta("Обновление: —");
   refreshNavigationState();
 
   window.addEventListener("online", () => {
     setNetworkStatus(true);
-    setAttemptSaveStatus("Связь восстановлена. Можно продолжать.", "success");
+      setAttemptSaveStatus("Связь восстановлена", "success");
     if (state.attempt) {
       flushPendingAnswers();
       syncAttempt(true);
@@ -2546,8 +2540,8 @@ async function init() {
   });
   window.addEventListener("offline", () => {
     setNetworkStatus(false);
-    setAttemptSaveStatus("Связь нестабильна. Ответ попробуем отправить повторно.", "warning");
-    setAttemptSyncMeta("Сервер временно недоступен.");
+      setAttemptSaveStatus("Связь нестабильна", "warning");
+      setAttemptSyncMeta("Сервер временно недоступен");
   });
   if (elements.navMenuToggle) {
     elements.navMenuToggle.addEventListener("click", () => {
