@@ -228,18 +228,37 @@
 
   function renderModuleRail() {
     const attempt = state.attempt;
+    const moduleScores = new Map(
+      (attempt.summary?.moduleScores || []).map((module) => [module.moduleId, module])
+    );
     elements.moduleRail.innerHTML = "";
     (attempt.route.modules || []).forEach((module) => {
-      const node = document.createElement("article");
-      node.className = "module-step";
+      const canJump = attempt.mode === "training" && attempt.status === "in_progress";
+      const node = canJump
+        ? createButton("module-step module-step-button", "", () => jumpToModule(module.id))
+        : document.createElement("article");
+      if (!canJump) {
+        node.className = "module-step";
+      }
       const current = attempt.currentModule && attempt.currentModule.id === module.id;
-      const done = module.stepEnd < attempt.currentStepIndex;
+      const score = moduleScores.get(module.id);
+      const done =
+        attempt.mode === "training"
+          ? Number(score?.answered || 0) >= Number(module.questionCount || 0)
+          : module.stepEnd < attempt.currentStepIndex;
       node.classList.toggle("is-current", current);
       node.classList.toggle("is-done", done);
+      if (canJump) {
+        node.setAttribute("aria-label", `Открыть ${module.code} ${module.title}`);
+        node.title = "Открыть модуль в тренировке";
+      }
       const title = document.createElement("strong");
       title.textContent = `${module.code} ${module.title}`;
       const meta = document.createElement("span");
-      meta.textContent = `${module.questionCount} заданий · ${module.maxScore} баллов`;
+      meta.textContent =
+        canJump
+          ? `${module.questionCount} заданий · ${module.maxScore} баллов · выбрать`
+          : `${module.questionCount} заданий · ${module.maxScore} баллов`;
       node.append(title, meta);
       elements.moduleRail.appendChild(node);
     });
@@ -1127,6 +1146,26 @@
   async function loadAttempt(attemptId) {
     const attempt = await api(`/api/pm01/public/attempts/${encodeURIComponent(attemptId)}`);
     renderAttempt(attempt);
+  }
+
+  async function jumpToModule(moduleId) {
+    if (!state.attempt || state.attempt.mode !== "training") {
+      return;
+    }
+
+    hideMessage(elements.taskMessage);
+    setSaveStatus("перехожу...");
+    try {
+      const attempt = await api(`/api/pm01/public/attempts/${encodeURIComponent(state.attempt.id)}/jump`, {
+        method: "POST",
+        body: JSON.stringify({ moduleId })
+      });
+      renderAttempt(attempt);
+      setSaveStatus("готово");
+    } catch (error) {
+      setSaveStatus("ошибка");
+      showMessage(elements.taskMessage, error.message, "error");
+    }
   }
 
   async function startAttempt(event) {

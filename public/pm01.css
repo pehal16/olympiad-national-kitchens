@@ -524,6 +524,30 @@ select:focus {
   border-left: 5px solid transparent;
 }
 
+button.module-step {
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+button.module-step:hover {
+  transform: translateY(-1px);
+  border-color: rgba(28, 117, 93, 0.28);
+  box-shadow: 0 8px 18px rgba(27, 41, 36, 0.08);
+}
+
+button.module-step:focus-visible {
+  outline: 3px solid rgba(35, 107, 181, 0.22);
+  outline-offset: 2px;
+}
+
 .module-step.is-current {
   border-left-color: var(--green-700);
   background: #eef8f4;

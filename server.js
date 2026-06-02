@@ -2121,6 +2121,57 @@ async function handleApi(req, res, url) {
     return;
   }
 
+  if (method === "POST" && pathname.match(/^\/api\/pm01\/public\/attempts\/[^/]+\/jump$/)) {
+    const exam = getPm01Exam();
+    const attemptId = pathname.split("/")[5];
+    const body = await parseBody(req);
+    let attempt = await loadAttemptById(attemptId);
+
+    if (!attempt || attempt.olympiadId !== exam.id) {
+      sendJson(res, 404, { ok: false, message: "Попытка ПМ.01 не найдена." });
+      return;
+    }
+
+    attempt = normalizePm01AttemptState(exam, attempt);
+    if (attempt.status !== "in_progress") {
+      await upsertAttempt(attempt);
+      invalidateAttemptCaches();
+      sendJson(res, 409, {
+        ok: false,
+        message: "Попытка ПМ.01 уже завершена.",
+        data: buildPm01StudentAttemptView(exam, attempt)
+      });
+      return;
+    }
+
+    if ((attempt.mode || "exam") !== "training") {
+      sendJson(res, 403, {
+        ok: false,
+        message: "Выбор модуля доступен только в тренировочном режиме."
+      });
+      return;
+    }
+
+    const moduleId = String(body.moduleId || "").trim();
+    const module = (attempt.variant?.modules || []).find((entry) => entry.id === moduleId);
+    if (!module || !Number.isInteger(module.stepStart)) {
+      sendJson(res, 400, { ok: false, message: "Выберите корректный модуль ПМ.01." });
+      return;
+    }
+
+    attempt.currentStepIndex = module.stepStart;
+    attempt.lastFeedback = null;
+    markPm01QuestionPresented(attempt);
+    await upsertAttempt(attempt);
+    invalidateAttemptCaches();
+
+    sendJson(res, 200, {
+      ok: true,
+      data: buildPm01StudentAttemptView(exam, attempt)
+    });
+    return;
+  }
+
   if (method === "POST" && pathname.match(/^\/api\/pm01\/public\/attempts\/[^/]+\/answer$/)) {
     const exam = getPm01Exam();
     const attemptId = pathname.split("/")[5];
