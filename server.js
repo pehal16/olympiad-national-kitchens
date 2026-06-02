@@ -36,6 +36,19 @@ const {
   compareAttemptsByRank
 } = require("./src/scoring");
 const { buildVariant, getCurrentQuestion, getCurrentTour, sanitizeQuestion } = require("./src/variant");
+const {
+  getPm01Exam,
+  getPm01PublicData,
+  buildPm01Variant,
+  getPm01CurrentQuestion,
+  getPm01CurrentModule,
+  scorePm01Question,
+  summarizePm01Attempt,
+  buildPm01AttemptView,
+  finalizePm01Attempt,
+  applyPm01VoiceReview,
+  formatPm01CorrectAnswer
+} = require("./src/pm01-engine");
 const { buildQuestionCatalog, buildQuestionBankSummary } = require("./src/question-bank");
 const { createAttemptsCsv, saveExportFile } = require("./src/exporter");
 const { ensureFolder, uploadBuffer } = require("./src/yandex-disk");
@@ -574,6 +587,373 @@ function formatCorrectAnswer(question) {
   return "";
 }
 
+function pm01QuestionCount(attempt) {
+  return attempt.variant && Array.isArray(attempt.variant.questions)
+    ? attempt.variant.questions.length
+    : 0;
+}
+
+function markPm01QuestionPresented(attempt) {
+  const question = getPm01CurrentQuestion(attempt);
+  if (!question) {
+    return;
+  }
+
+  const entry = getQuestionLog(attempt, question.id);
+  if (!entry.presentedAt) {
+    entry.presentedAt = nowIso();
+    entry.sourceId = question.sourceId;
+    entry.moduleId = question.moduleId;
+    entry.moduleCode = question.moduleCode;
+    entry.optionOrder = Array.isArray(question.options)
+      ? question.options.map((option) => option.id)
+      : [];
+    entry.itemOrder = Array.isArray(question.items)
+      ? question.items.map((item) => item.id)
+      : [];
+  }
+}
+
+function normalizePm01AttemptState(exam, attempt) {
+  if (!attempt || attempt.status !== "in_progress" || !attempt.variant) {
+    return attempt;
+  }
+
+  if (attempt.expiresAt && Date.now() > new Date(attempt.expiresAt).getTime()) {
+    return finalizePm01Attempt(exam, attempt, "expired");
+  }
+
+  if (!getPm01CurrentQuestion(attempt)) {
+    return finalizePm01Attempt(exam, attempt, "finished");
+  }
+
+  markPm01QuestionPresented(attempt);
+  return attempt;
+}
+
+async function normalizePm01AndPersistIfChanged(exam, attempt) {
+  if (!attempt) {
+    return attempt;
+  }
+
+  const before = JSON.stringify(attempt);
+  const normalized = normalizePm01AttemptState(exam, attempt);
+  const after = JSON.stringify(normalized);
+
+  if (before !== after) {
+    await upsertAttempt(normalized);
+    invalidateAttemptCaches();
+  }
+
+  return normalized;
+}
+
+function buildPm01TrainingFeedback(question, result) {
+  return {
+    questionId: question.id,
+    sourceId: question.sourceId,
+    moduleId: question.moduleId,
+    moduleCode: question.moduleCode,
+    prompt: question.prompt,
+    score: result.finalScore,
+    maxScore: question.maxScore,
+    correctAnswer: formatPm01CorrectAnswer(question),
+    explanation:
+      question.explanation ||
+      (Array.isArray(question.solutionSteps) ? question.solutionSteps.join("\n") : "") ||
+      (Array.isArray(question.answerPlan) ? question.answerPlan.join("\n") : ""),
+    savedAt: nowIso()
+  };
+}
+
+function buildPm01StudentAttemptView(exam, attempt) {
+  return buildPm01AttemptView(exam, attempt, {
+    hideScores: attempt.status === "in_progress" && (attempt.mode || "exam") === "exam"
+  });
+}
+
+function summarizePm01AttemptsForAdmin(exam, attempts, settings) {
+  const normalizedAttempts = attempts.map((attempt) => normalizePm01AttemptState(exam, attempt));
+  const participantKeys = new Set();
+  const institutions = new Set();
+  const groups = new Set();
+  const mentors = new Set();
+  const statuses = new Set();
+  const gradeMap = new Map();
+
+  const scoredAttempts = normalizedAttempts.map((attempt) => ({
+    attempt,
+    summary: summarizePm01Attempt(exam, attempt)
+  }));
+
+  scoredAttempts.forEach(({ attempt, summary }) => {
+    const participant = attempt.participant || {};
+    participantKeys.add(
+      attempt.participantSignature ||
+        makeParticipantSignature({
+          fullName: participant.fullName || "",
+          institution: participant.institution || "",
+          groupName: participant.groupName || "",
+          mentorName: participant.mentorName || ""
+        })
+    );
+    if (participant.institution) {
+      institutions.add(participant.institution);
+    }
+    if (participant.groupName) {
+      groups.add(participant.groupName);
+    }
+    if (participant.mentorName) {
+      mentors.add(participant.mentorName);
+    }
+    if (attempt.status) {
+      statuses.add(attempt.status);
+    }
+    if (attempt.status !== "in_progress") {
+      gradeMap.set(summary.grade, (gradeMap.get(summary.grade) || 0) + 1);
+    }
+  });
+
+  const completed = scoredAttempts.filter(({ attempt }) => attempt.status !== "in_progress");
+  const moduleAnalytics = (exam.modules || []).map((module) => {
+    const scores = completed
+      .map(({ summary }) => summary.moduleScores.find((item) => item.moduleId === module.id))
+      .filter(Boolean);
+    const total = scores.reduce((sum, item) => sum + Number(item.finalScore || 0), 0);
+    const pendingManualReviews = scoredAttempts.reduce((sum, { summary }) => {
+      const moduleScore = summary.moduleScores.find((item) => item.moduleId === module.id);
+      return sum + Number(moduleScore?.pendingManualReviews || 0);
+    }, 0);
+
+    return {
+      moduleId: module.id,
+      code: module.code,
+      title: module.title,
+      maxScore: module.maxScore,
+      attempts: scores.length,
+      averageScore: scores.length ? Number((total / scores.length).toFixed(2)) : 0,
+      pendingManualReviews
+    };
+  });
+
+  const pendingVoice = scoredAttempts
+    .flatMap(({ attempt }) =>
+      (attempt.variant?.questions || [])
+        .filter((question) => question.type === "voice_response")
+        .map((question) => ({
+          attempt,
+          question,
+          answer: attempt.answers?.[question.id] || null
+        }))
+    )
+    .filter((entry) => entry.answer?.manualStatus === "pending_review")
+    .map(({ attempt, question, answer }) => ({
+      attemptId: attempt.id,
+      questionId: question.id,
+      participant: attempt.participant,
+      variantTitle: attempt.variant?.variantTitle || "",
+      prompt: question.prompt,
+      savedAt: answer.savedAt || null
+    }))
+    .sort((left, right) => safeDateMs(left.savedAt) - safeDateMs(right.savedAt));
+
+  const lastActivityCandidates = normalizedAttempts
+    .map((attempt) => latestAttemptActivity(attempt))
+    .filter(Boolean)
+    .map((value) => new Date(value).getTime())
+    .filter((value) => !Number.isNaN(value));
+
+  return {
+    exam: getPm01PublicData(exam),
+    counts: {
+      participants: participantKeys.size,
+      attempts: normalizedAttempts.length,
+      activeAttempts: normalizedAttempts.filter((attempt) => attempt.status === "in_progress").length,
+      completed: normalizedAttempts.filter((attempt) => attempt.status !== "in_progress").length,
+      pendingReview: normalizedAttempts.filter((attempt) => attempt.status === "pending_review").length,
+      reviewed: normalizedAttempts.filter((attempt) => attempt.status === "reviewed").length,
+      institutions: institutions.size,
+      groups: groups.size,
+      mentors: mentors.size
+    },
+    catalogs: {
+      institutions: sortCatalog(Array.from(institutions)),
+      groups: sortCatalog(Array.from(groups)),
+      mentors: sortCatalog(Array.from(mentors)),
+      statuses: sortCatalog(Array.from(statuses))
+    },
+    gradeDistribution: Array.from(gradeMap.entries()).map(([grade, count]) => ({ grade, count })),
+    moduleAnalytics,
+    pendingVoice,
+    capabilities: {
+      storageBackend: settings.storageBackend || "file"
+    },
+    diagnostics: {
+      appVersion: APP_VERSION,
+      refreshedAt: nowIso(),
+      serverTime: nowIso(),
+      lastActivityAt: lastActivityCandidates.length
+        ? new Date(Math.max(...lastActivityCandidates)).toISOString()
+        : null,
+      apiErrors: runtimeDiagnostics.apiErrors,
+      lastApiErrorAt: runtimeDiagnostics.lastApiErrorAt,
+      lastApiErrorMessage: runtimeDiagnostics.lastApiErrorMessage,
+      lastApiErrorRoute: runtimeDiagnostics.lastApiErrorRoute
+    }
+  };
+}
+
+function buildPm01AdminAttemptDetail(exam, attempt) {
+  const summary = summarizePm01Attempt(exam, attempt);
+  const modules = (attempt.variant?.modules || attempt.variant?.tours || []).map((module) => ({
+    id: module.id,
+    code: module.code,
+    title: module.title,
+    maxScore: module.maxScore,
+    questionCount: module.questionCount,
+    score: summary.moduleScores.find((item) => item.moduleId === module.id) || null,
+    questions: (attempt.variant?.questions || [])
+      .filter((question) => question.moduleId === module.id)
+      .map((question) => ({
+        id: question.id,
+        sourceId: question.sourceId,
+        type: question.type,
+        prompt: question.prompt,
+        note: question.note || "",
+        image: question.image || "",
+        moduleId: question.moduleId,
+        moduleCode: question.moduleCode,
+        maxScore: question.maxScore,
+        options: (question.options || []).map((option) => ({
+          id: option.id,
+          text: option.text,
+          isCorrect: option.isCorrect
+        })),
+        items: question.items || [],
+        slots: question.slots || [],
+        buckets: question.buckets || [],
+        fields: (question.fields || []).map((field) => ({ ...field })),
+        hotspots: (question.hotspots || []).map((hotspot) => ({ ...hotspot })),
+        answerPlan: question.answerPlan || [],
+        rubric: question.rubric || [],
+        formulas: question.formulas || [],
+        solutionSteps: question.solutionSteps || [],
+        explanation: question.explanation || "",
+        correctAnswer: formatPm01CorrectAnswer(question),
+        answer: attempt.answers?.[question.id] || null,
+        log: attempt.questionLog ? attempt.questionLog[question.id] || null : null
+      }))
+  }));
+
+  return {
+    attempt: {
+      id: attempt.id,
+      olympiadId: attempt.olympiadId,
+      participant: attempt.participant,
+      participantSignature: attempt.participantSignature,
+      selectedVariantId: attempt.selectedVariantId,
+      mode: attempt.mode || "exam",
+      status: attempt.status,
+      startedAt: attempt.startedAt,
+      finishedAt: attempt.finishedAt,
+      expiresAt: attempt.expiresAt,
+      variantMeta: {
+        variantId: attempt.variant?.variantId,
+        variantTitle: attempt.variant?.variantTitle,
+        issuedQuestionIds: attempt.variant?.issuedQuestionIds || []
+      }
+    },
+    summary,
+    modules
+  };
+}
+
+function csvEscape(value) {
+  const text = String(value ?? "");
+  return `"${text.replace(/"/g, "\"\"")}"`;
+}
+
+async function buildPm01ExportRows(exam) {
+  return currentOlympiadAttempts(await loadAttempts(), exam.id).map((attempt) => {
+    const summary = summarizePm01Attempt(exam, attempt);
+    const byModule = Object.fromEntries(
+      summary.moduleScores.map((module) => [module.moduleId, module.finalScore])
+    );
+    return {
+      fullName: attempt.participant?.fullName || "",
+      institution: attempt.participant?.institution || "",
+      groupName: attempt.participant?.groupName || "",
+      mentorName: attempt.participant?.mentorName || "",
+      mode: attempt.mode || "exam",
+      variantTitle: attempt.variant?.variantTitle || "",
+      status: attempt.status,
+      startedAt: attempt.startedAt || "",
+      finishedAt: attempt.finishedAt || "",
+      situation: byModule.situation || 0,
+      test: byModule.test || 0,
+      calculation: byModule.calculation || 0,
+      voice: byModule.voice || 0,
+      simulation: byModule.simulation || 0,
+      totalFinalScore: summary.totalFinalScore,
+      grade: summary.grade,
+      pendingManualReviews: summary.pendingManualReviews,
+      totalDurationMs: summary.totalDurationMs
+    };
+  });
+}
+
+function createPm01AttemptsCsv(rows) {
+  const headers = [
+    "ФИО",
+    "Учреждение",
+    "Группа",
+    "Преподаватель",
+    "Режим",
+    "Вариант",
+    "Статус",
+    "Начало",
+    "Завершение",
+    "М0 Ситуация",
+    "М1 Тест",
+    "М2 Расчет",
+    "М3 Голос",
+    "М4 Симуляция",
+    "Итоговый балл",
+    "Оценка",
+    "Ожидает проверки",
+    "Время (мс)"
+  ];
+
+  const lines = [headers.map(csvEscape).join(";")];
+  rows.forEach((row) => {
+    lines.push(
+      [
+        row.fullName,
+        row.institution,
+        row.groupName,
+        row.mentorName,
+        row.mode,
+        row.variantTitle,
+        row.status,
+        row.startedAt,
+        row.finishedAt,
+        row.situation,
+        row.test,
+        row.calculation,
+        row.voice,
+        row.simulation,
+        row.totalFinalScore,
+        row.grade,
+        row.pendingManualReviews,
+        row.totalDurationMs
+      ]
+        .map(csvEscape)
+        .join(";")
+    );
+  });
+  return `\ufeff${lines.join("\n")}`;
+}
+
 function cloneValue(value) {
   return global.structuredClone
     ? global.structuredClone(value)
@@ -1038,6 +1418,208 @@ function buildSuspiciousAttemptReport(olympiad, attempt, summary) {
   };
 }
 
+function getQuestionMetadata(question) {
+  return question && question.metadata && typeof question.metadata === "object"
+    ? question.metadata
+    : {};
+}
+
+function metadataList(metadata, ...keys) {
+  const values = keys.flatMap((key) => {
+    const value = metadata[key];
+    if (Array.isArray(value)) {
+      return value;
+    }
+    return value ? [value] : [];
+  });
+
+  return Array.from(
+    new Set(values.map((value) => String(value || "").trim()).filter(Boolean))
+  );
+}
+
+function buildQuestionAnalytics(attempts) {
+  const bySource = new Map();
+
+  attempts.forEach((attempt) => {
+    const questions = attempt.variant && Array.isArray(attempt.variant.questions)
+      ? attempt.variant.questions
+      : [];
+
+    questions.forEach((question) => {
+      const answer = attempt.answers ? attempt.answers[question.id] || null : null;
+      const log = attempt.questionLog ? attempt.questionLog[question.id] || null : null;
+      const sourceId = question.sourceId || question.id;
+      const metadata = getQuestionMetadata(question);
+      const competencyTags = metadataList(metadata, "competencyTags", "pkFocus");
+      const fgosCodes = metadataList(metadata, "fgosCodes", "okCodes");
+
+      if (!bySource.has(sourceId)) {
+        bySource.set(sourceId, {
+          sourceId,
+          prompt: question.prompt,
+          tourCode: question.tourCode || "",
+          cuisine: question.cuisine || "mixed",
+          dishLabel: question.dishLabel || "",
+          difficulty: metadata.difficulty || "standard",
+          taskKind: metadata.taskKind || metadata.typeLabel || question.type,
+          theme: metadata.theme || "",
+          competencyTags,
+          fgosCodes,
+          attempts: 0,
+          answered: 0,
+          totalScore: 0,
+          totalMaxScore: 0,
+          totalTimeMs: 0,
+          tooFastCount: 0
+        });
+      }
+
+      const row = bySource.get(sourceId);
+      row.attempts += 1;
+
+      if (answer) {
+        const timeSpentMs = Number(
+          answer.timeSpentMs || (log && log.timeSpentMs) || 0
+        );
+        row.answered += 1;
+        row.totalScore += Number(answer.finalScore || 0);
+        row.totalMaxScore += Number(question.maxScore || 0);
+        row.totalTimeMs += timeSpentMs;
+        if (timeSpentMs > 0 && timeSpentMs < 2500) {
+          row.tooFastCount += 1;
+        }
+      } else if (log && log.answeredAt) {
+        row.answered += 1;
+      }
+    });
+  });
+
+  return [...bySource.values()]
+    .map((row) => {
+      const avgScore = row.answered ? row.totalScore / row.answered : 0;
+      const avgTimeMs = row.answered ? row.totalTimeMs / row.answered : 0;
+      const successRate = row.totalMaxScore
+        ? row.totalScore / row.totalMaxScore
+        : 0;
+
+      return {
+        ...row,
+        avgScore: Math.round(avgScore * 100) / 100,
+        avgTimeMs: Math.round(avgTimeMs),
+        successRate: Math.round(successRate * 1000) / 10,
+        heatScore: Math.round((1 - successRate) * 1000) / 10
+      };
+    })
+    .sort((left, right) => {
+      if (right.heatScore !== left.heatScore) {
+        return right.heatScore - left.heatScore;
+      }
+      return right.attempts - left.attempts;
+    });
+}
+
+function buildCompetencyCoverage(attempts) {
+  const coverage = new Map();
+
+  attempts.forEach((attempt) => {
+    const questions = attempt.variant && Array.isArray(attempt.variant.questions)
+      ? attempt.variant.questions
+      : [];
+
+    questions.forEach((question) => {
+      const metadata = getQuestionMetadata(question);
+      const codes = metadataList(metadata, "fgosCodes", "okCodes");
+      const competencyTags = metadataList(metadata, "competencyTags", "pkFocus");
+      const labels = [
+        ...codes.map((code) => ({ id: code, label: code })),
+        ...competencyTags.map((tag) => ({ id: `tag:${tag}`, label: tag }))
+      ];
+
+      labels.forEach((item) => {
+        if (!coverage.has(item.id)) {
+          coverage.set(item.id, {
+            id: item.id,
+            label: item.label,
+            questionCount: 0,
+            attempts: 0,
+            totalScore: 0,
+            totalMaxScore: 0
+          });
+        }
+        const bucket = coverage.get(item.id);
+        bucket.questionCount += 1;
+
+        const answer = attempt.answers ? attempt.answers[question.id] || null : null;
+        if (answer) {
+          bucket.attempts += 1;
+          bucket.totalScore += Number(answer.finalScore || 0);
+          bucket.totalMaxScore += Number(question.maxScore || 0);
+        }
+      });
+    });
+  });
+
+  return [...coverage.values()]
+    .map((item) => ({
+      ...item,
+      successRate: item.totalMaxScore
+        ? Math.round((item.totalScore / item.totalMaxScore) * 1000) / 10
+        : 0
+    }))
+    .sort((left, right) => left.label.localeCompare(right.label, "ru"));
+}
+
+function buildSuspiciousEvents(attempts) {
+  const events = [];
+
+  attempts.forEach((attempt) => {
+    const participant = attempt.participant || {};
+    const base = {
+      attemptId: attempt.id,
+      fullName: participant.fullName || "Без имени",
+      institution: participant.institution || "",
+      groupName: participant.groupName || ""
+    };
+
+    const answeredCount = Object.keys(attempt.answers || {}).length;
+    const totalQuestions =
+      attempt.variant && Array.isArray(attempt.variant.questions)
+        ? attempt.variant.questions.length
+        : 0;
+
+    if (attempt.status === "expired" && answeredCount && totalQuestions) {
+      events.push({
+        ...base,
+        type: "expired_attempt",
+        severity: answeredCount < Math.ceil(totalQuestions * 0.5) ? "medium" : "low",
+        label: "Попытка завершилась по таймауту",
+        detail: `Отвечено ${answeredCount} из ${totalQuestions}`,
+        happenedAt: attempt.finishedAt || attempt.startedAt || null
+      });
+    }
+
+    const logs = attempt.questionLog || {};
+    Object.entries(logs).forEach(([questionId, log]) => {
+      const timeSpentMs = Number(log && log.timeSpentMs ? log.timeSpentMs : 0);
+      if (timeSpentMs > 0 && timeSpentMs < 2500) {
+        events.push({
+          ...base,
+          type: "too_fast_answer",
+          severity: timeSpentMs < 1200 ? "high" : "medium",
+          label: "Подозрительно быстрый ответ",
+          detail: `${questionId}: ${timeSpentMs} мс`,
+          happenedAt: log.answeredAt || log.presentedAt || attempt.startedAt || null
+        });
+      }
+    });
+  });
+
+  return events
+    .sort((left, right) => safeDateMs(right.happenedAt) - safeDateMs(left.happenedAt))
+    .slice(0, 40);
+}
+
 function buildAdminSummary(olympiad, rawAttempts, ranked, settings) {
   const participantKeys = new Set();
   const institutions = new Set();
@@ -1232,7 +1814,10 @@ function buildAdminSummary(olympiad, rawAttempts, ranked, settings) {
     },
     tourAnalytics,
     institutionAnalytics,
-    suspiciousAttempts
+    suspiciousAttempts,
+    questionAnalytics: buildQuestionAnalytics(rawAttempts),
+    competencyCoverage: buildCompetencyCoverage(rawAttempts),
+    suspiciousEvents: buildSuspiciousEvents(rawAttempts)
   };
 }
 
@@ -1371,6 +1956,7 @@ async function handleApi(req, res, url) {
 
   if (method === "GET" && pathname === "/api/health") {
     const olympiadHealth = ensureOlympiadBase();
+    const pm01Health = getPm01Exam();
     sendJson(res, 200, {
       ok: true,
       app: "national-kitchens-olympiad",
@@ -1378,7 +1964,280 @@ async function handleApi(req, res, url) {
       now: nowIso(),
       olympiadId: olympiadHealth.id,
       schemaVersion: olympiadHealth.schemaVersion,
+      pm01: {
+        id: pm01Health.id,
+        schemaVersion: pm01Health.schemaVersion,
+        variants: Array.isArray(pm01Health.variants) ? pm01Health.variants.length : 0,
+        modules: Array.isArray(pm01Health.modules) ? pm01Health.modules.length : 0,
+        totalMaxScore: pm01Health.scoring?.totalMaxScore || 0,
+        routes: {
+          student: "/pm01.html",
+          admin: "/pm01-admin.html"
+        }
+      },
       storageBackend: settings.storageBackend || "file"
+    });
+    return;
+  }
+
+  if (method === "GET" && pathname === "/api/pm01/public/exam") {
+    const exam = getPm01Exam();
+    sendJson(res, 200, {
+      ok: true,
+      data: {
+        ...getPm01PublicData(exam),
+        appVersion: APP_VERSION
+      }
+    });
+    return;
+  }
+
+  if (method === "POST" && pathname === "/api/pm01/public/register") {
+    const exam = getPm01Exam();
+    const body = await parseBody(req);
+    const validation = validateParticipantProfile(body);
+    if (!validation.valid) {
+      sendJson(res, 400, { ok: false, message: validation.message });
+      return;
+    }
+
+    const signature = makeParticipantSignature(validation.profile);
+    const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id).filter(
+      (attempt) => attempt.participantSignature === signature
+    );
+    const activeExamAttempt = attempts.find(
+      (attempt) => (attempt.mode || "exam") === "exam" && attempt.status === "in_progress"
+    );
+    const completedExamAttempt = attempts.find(
+      (attempt) => (attempt.mode || "exam") === "exam" && attempt.status !== "in_progress"
+    );
+
+    sendJson(res, 200, {
+      ok: true,
+      data: {
+        participant: validation.profile,
+        activeAttemptId: activeExamAttempt ? activeExamAttempt.id : null,
+        alreadyCompleted: Boolean(completedExamAttempt && !activeExamAttempt)
+      }
+    });
+    return;
+  }
+
+  if (method === "POST" && pathname === "/api/pm01/public/attempts/start") {
+    const exam = getPm01Exam();
+    const body = await parseBody(req);
+    const validation = validateParticipantProfile(body.participant || body);
+    if (!validation.valid) {
+      sendJson(res, 400, { ok: false, message: validation.message });
+      return;
+    }
+
+    const mode = body.mode === "training" ? "training" : "exam";
+    const variantId = String(body.variantId || "").trim();
+    if (variantId && !exam.variants.some((variant) => variant.id === variantId)) {
+      sendJson(res, 400, { ok: false, message: "Выберите корректный вариант ПМ.01." });
+      return;
+    }
+
+    const participantSignature = makeParticipantSignature(validation.profile);
+    const allAttempts = await loadAttempts();
+    const currentAttempts = currentOlympiadAttempts(allAttempts, exam.id);
+    const matchingAttempts = currentAttempts.filter(
+      (attempt) =>
+        attempt.participantSignature === participantSignature &&
+        (attempt.mode || "exam") === mode
+    );
+    const activeAttempt = matchingAttempts.find((attempt) => attempt.status === "in_progress");
+
+    if (activeAttempt) {
+      const normalized = normalizePm01AttemptState(exam, activeAttempt);
+      await saveAttempt(allAttempts, normalized);
+      invalidateAttemptCaches();
+      sendJson(res, 200, {
+        ok: true,
+        data: buildPm01StudentAttemptView(exam, normalized)
+      });
+      return;
+    }
+
+    const completedAttempt = matchingAttempts.find((attempt) => attempt.status !== "in_progress");
+    if (mode === "exam" && completedAttempt) {
+      sendJson(res, 403, {
+        ok: false,
+        message: "Для этого участника экзаменационная попытка ПМ.01 уже завершена."
+      });
+      return;
+    }
+
+    const variant = buildPm01Variant(exam, variantId || exam.variants[0].id);
+    const startedAt = nowIso();
+    const attempt = {
+      id: generateId("pm01_attempt"),
+      olympiadId: exam.id,
+      schemaVersion: exam.schemaVersion || 1,
+      participant: validation.profile,
+      participantSignature,
+      selectedVariantId: variant.variantId,
+      mode,
+      startedAt,
+      expiresAt: new Date(Date.now() + exam.durationMinutes * 60 * 1000).toISOString(),
+      finishedAt: null,
+      status: "in_progress",
+      currentStepIndex: 0,
+      variant,
+      answers: {},
+      questionLog: {},
+      lastFeedback: null,
+      totalFinalScore: 0,
+      totalPenalty: 0
+    };
+
+    markPm01QuestionPresented(attempt);
+    allAttempts.push(attempt);
+    await upsertAttempt(attempt);
+    invalidateAttemptCaches();
+
+    sendJson(res, 201, {
+      ok: true,
+      data: buildPm01StudentAttemptView(exam, attempt)
+    });
+    return;
+  }
+
+  if (method === "GET" && pathname.match(/^\/api\/pm01\/public\/attempts\/[^/]+$/)) {
+    const exam = getPm01Exam();
+    const attemptId = pathname.split("/")[5];
+    const attempt = await loadAttemptById(attemptId);
+    if (!attempt || attempt.olympiadId !== exam.id) {
+      sendJson(res, 404, { ok: false, message: "Попытка ПМ.01 не найдена." });
+      return;
+    }
+
+    const normalized = await normalizePm01AndPersistIfChanged(exam, attempt);
+    sendJson(res, 200, {
+      ok: true,
+      data: buildPm01StudentAttemptView(exam, normalized)
+    });
+    return;
+  }
+
+  if (method === "POST" && pathname.match(/^\/api\/pm01\/public\/attempts\/[^/]+\/answer$/)) {
+    const exam = getPm01Exam();
+    const attemptId = pathname.split("/")[5];
+    const body = await parseBody(req);
+    let attempt = await loadAttemptById(attemptId);
+
+    if (!attempt || attempt.olympiadId !== exam.id) {
+      sendJson(res, 404, { ok: false, message: "Попытка ПМ.01 не найдена." });
+      return;
+    }
+
+    attempt = normalizePm01AttemptState(exam, attempt);
+    if (attempt.status !== "in_progress") {
+      await upsertAttempt(attempt);
+      invalidateAttemptCaches();
+      sendJson(res, 409, {
+        ok: false,
+        message: "Попытка ПМ.01 уже завершена.",
+        data: buildPm01StudentAttemptView(exam, attempt)
+      });
+      return;
+    }
+
+    const currentQuestion = getPm01CurrentQuestion(attempt);
+    if (!currentQuestion) {
+      const finalized = finalizePm01Attempt(exam, attempt, "finished");
+      await upsertAttempt(finalized);
+      invalidateAttemptCaches();
+      sendJson(res, 200, {
+        ok: true,
+        data: buildPm01StudentAttemptView(exam, finalized)
+      });
+      return;
+    }
+
+    if (body.questionId && body.questionId !== currentQuestion.id) {
+      sendJson(res, 200, {
+        ok: true,
+        data: buildPm01StudentAttemptView(exam, attempt)
+      });
+      return;
+    }
+
+    const savedAt = nowIso();
+    const logEntry = getQuestionLog(attempt, currentQuestion.id);
+    const timeSpentMs = logEntry.presentedAt
+      ? Math.max(0, new Date(savedAt).getTime() - new Date(logEntry.presentedAt).getTime())
+      : 0;
+    const previousAnswer = attempt.answers[currentQuestion.id] || null;
+    const result = scorePm01Question(currentQuestion, body.answerPayload, previousAnswer);
+
+    attempt.answers[currentQuestion.id] = {
+      questionId: currentQuestion.id,
+      sourceId: currentQuestion.sourceId,
+      moduleId: currentQuestion.moduleId,
+      moduleCode: currentQuestion.moduleCode,
+      answerPayload: body.answerPayload || {},
+      autoScore: result.autoScore,
+      finalScore: result.finalScore,
+      penalty: result.penalty || 0,
+      details: result.details || {},
+      manualStatus: result.manualStatus || null,
+      manualReview: previousAnswer ? previousAnswer.manualReview || null : null,
+      savedAt,
+      timeSpentMs
+    };
+
+    if (attempt.mode === "training") {
+      attempt.lastFeedback = buildPm01TrainingFeedback(currentQuestion, result);
+    } else {
+      attempt.lastFeedback = null;
+    }
+
+    logEntry.answeredAt = savedAt;
+    logEntry.timeSpentMs = timeSpentMs;
+    attempt._lastChangedQuestionId = currentQuestion.id;
+    attempt.currentStepIndex += 1;
+
+    if (attempt.currentStepIndex >= pm01QuestionCount(attempt)) {
+      attempt = finalizePm01Attempt(exam, attempt, "finished");
+      await upsertAttempt(attempt);
+      invalidateAttemptCaches();
+      sendJson(res, 200, {
+        ok: true,
+        data: buildPm01StudentAttemptView(exam, attempt)
+      });
+      return;
+    }
+
+    markPm01QuestionPresented(attempt);
+    attempt = normalizePm01AttemptState(exam, attempt);
+    await upsertAttempt(attempt);
+    invalidateAttemptCaches();
+
+    sendJson(res, 200, {
+      ok: true,
+      data: buildPm01StudentAttemptView(exam, attempt)
+    });
+    return;
+  }
+
+  if (method === "POST" && pathname.match(/^\/api\/pm01\/public\/attempts\/[^/]+\/finish$/)) {
+    const exam = getPm01Exam();
+    const attemptId = pathname.split("/")[5];
+    let attempt = await loadAttemptById(attemptId);
+
+    if (!attempt || attempt.olympiadId !== exam.id) {
+      sendJson(res, 404, { ok: false, message: "Попытка ПМ.01 не найдена." });
+      return;
+    }
+
+    attempt = finalizePm01Attempt(exam, attempt, "finished");
+    await upsertAttempt(attempt);
+    invalidateAttemptCaches();
+    sendJson(res, 200, {
+      ok: true,
+      data: buildPm01StudentAttemptView(exam, attempt)
     });
     return;
   }
@@ -1736,6 +2595,127 @@ async function handleApi(req, res, url) {
     if (pathname.startsWith("/api/admin/content/")) {
       olympiadBase = ensureOlympiadBase();
       customQuestionMap = await ensureCustomQuestionMap();
+    }
+
+    if (method === "GET" && pathname === "/api/admin/pm01/summary") {
+      const exam = getPm01Exam();
+      const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id);
+      sendJson(res, 200, {
+        ok: true,
+        data: summarizePm01AttemptsForAdmin(exam, attempts, settings)
+      });
+      return;
+    }
+
+    if (method === "GET" && pathname === "/api/admin/pm01/attempts") {
+      const exam = getPm01Exam();
+      const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id)
+        .map((attempt) => normalizePm01AttemptState(exam, attempt))
+        .map((attempt) => {
+          const summary = summarizePm01Attempt(exam, attempt);
+          return {
+            id: attempt.id,
+            fullName: attempt.participant?.fullName || "",
+            institution: attempt.participant?.institution || "",
+            groupName: attempt.participant?.groupName || "",
+            mentorName: attempt.participant?.mentorName || "",
+            mode: attempt.mode || "exam",
+            selectedVariantId: attempt.selectedVariantId || attempt.variant?.variantId || "",
+            variantNumber: attempt.variant?.variantNumber || null,
+            variantTitle: attempt.variant?.variantTitle || "",
+            status: attempt.status,
+            startedAt: attempt.startedAt,
+            finishedAt: attempt.finishedAt,
+            totalFinalScore: summary.totalFinalScore,
+            grade: summary.grade,
+            moduleScores: summary.moduleScores.map((module) => ({
+              moduleId: module.moduleId,
+              code: module.code,
+              title: module.title,
+              finalScore: module.finalScore,
+              maxScore: module.maxScore,
+              answered: module.answered,
+              questionCount: module.questionCount,
+              pendingManualReviews: module.pendingManualReviews
+            })),
+            pendingManualReviews: summary.pendingManualReviews
+          };
+        })
+        .sort((left, right) => {
+          if (Number(right.totalFinalScore) !== Number(left.totalFinalScore)) {
+            return Number(right.totalFinalScore) - Number(left.totalFinalScore);
+          }
+          return safeDateMs(right.startedAt) - safeDateMs(left.startedAt);
+        });
+
+      sendJson(res, 200, { ok: true, data: attempts });
+      return;
+    }
+
+    if (method === "GET" && pathname.match(/^\/api\/admin\/pm01\/attempts\/[^/]+$/)) {
+      const exam = getPm01Exam();
+      const attemptId = pathname.split("/")[5];
+      const attempt = await loadAttemptById(attemptId);
+
+      if (!attempt || attempt.olympiadId !== exam.id) {
+        sendJson(res, 404, { ok: false, message: "Попытка ПМ.01 не найдена." });
+        return;
+      }
+
+      const normalized = await normalizePm01AndPersistIfChanged(exam, attempt);
+      sendJson(res, 200, {
+        ok: true,
+        data: buildPm01AdminAttemptDetail(exam, normalized)
+      });
+      return;
+    }
+
+    if (method === "POST" && pathname.match(/^\/api\/admin\/pm01\/attempts\/[^/]+\/voice\/[^/]+\/review$/)) {
+      const exam = getPm01Exam();
+      const attemptId = pathname.split("/")[5];
+      const questionId = decodeURIComponent(pathname.split("/")[7] || "");
+      const body = await parseBody(req);
+      const attempt = await loadAttemptById(attemptId);
+
+      if (!attempt || attempt.olympiadId !== exam.id) {
+        sendJson(res, 404, { ok: false, message: "Попытка ПМ.01 не найдена." });
+        return;
+      }
+
+      try {
+        const reviewed = applyPm01VoiceReview(exam, attempt, questionId, body);
+        await upsertAttempt(reviewed);
+        invalidateAttemptCaches();
+        sendJson(res, 200, {
+          ok: true,
+          data: buildPm01AdminAttemptDetail(exam, reviewed)
+        });
+      } catch (error) {
+        sendJson(res, 400, {
+          ok: false,
+          message: error.message || "Не удалось сохранить проверку голосового ответа."
+        });
+      }
+      return;
+    }
+
+    if (method === "POST" && pathname === "/api/admin/pm01/exports/csv") {
+      const exam = getPm01Exam();
+      const fileName = `pm01_results_${Date.now()}.csv`;
+      const filePath = saveExportFile(fileName, createPm01AttemptsCsv(await buildPm01ExportRows(exam)));
+      sendJson(res, 200, { ok: true, data: { fileName, filePath } });
+      return;
+    }
+
+    if (method === "POST" && pathname === "/api/admin/pm01/exports/json") {
+      const exam = getPm01Exam();
+      const fileName = `pm01_results_${Date.now()}.json`;
+      const filePath = saveExportFile(
+        fileName,
+        JSON.stringify(currentOlympiadAttempts(await loadAttempts(), exam.id), null, 2)
+      );
+      sendJson(res, 200, { ok: true, data: { fileName, filePath } });
+      return;
     }
 
     if (method === "GET" && pathname === "/api/admin/summary") {

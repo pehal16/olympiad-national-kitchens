@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#123f35" />
+    <title>ПМ.01 · Кабинет преподавателя</title>
+    <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
+    <link rel="stylesheet" href="/pm01.css?v=1.0.0" />
+  </head>
+  <body>
+    <header class="pm01-topbar">
+      <div class="pm01-brand">
+        <span class="brand-mark" aria-hidden="true">ПМ</span>
+        <div>
+          <strong>Кабинет преподавателя</strong>
+          <span>ПМ.01 · голосовые ответы и итоговая ведомость</span>
+        </div>
+      </div>
+      <div class="top-status">
+        <span id="admin-refreshed">ожидание</span>
+        <span id="admin-backend">storage</span>
+      </div>
+      <nav class="top-actions" aria-label="PM01 admin">
+        <a href="/pm01.html" class="button ghost">Студент</a>
+        <a href="/admin.html" class="button ghost">Основной кабинет</a>
+      </nav>
+    </header>
+
+    <main class="pm01-admin-shell">
+      <section id="login-panel" class="admin-login-panel">
+        <form id="login-form" class="form-grid">
+          <label class="field">
+            <span>Пароль администратора</span>
+            <input id="admin-password" type="password" autocomplete="current-password" required />
+          </label>
+          <button class="button primary" type="submit">Войти</button>
+          <div id="login-message" class="message hidden field-wide"></div>
+        </form>
+      </section>
+
+      <section id="admin-panel" class="pm01-admin-panel hidden">
+        <div class="admin-toolbar">
+          <div>
+            <p class="overline">ПМ.01</p>
+            <h1>Итоги интерактивного экзамена</h1>
+          </div>
+          <div class="top-actions">
+            <button id="refresh-admin" class="button secondary" type="button">Обновить</button>
+            <button id="export-csv" class="button ghost" type="button">CSV</button>
+            <button id="export-json" class="button ghost" type="button">JSON</button>
+          </div>
+        </div>
+
+        <div id="admin-message" class="message hidden"></div>
+        <div id="admin-stats" class="admin-stat-grid"></div>
+
+        <section class="admin-filters" aria-label="Фильтры попыток PM01">
+          <label class="field">
+            <span>Поиск</span>
+            <input id="filter-search" type="search" placeholder="ФИО, группа, организация" />
+          </label>
+          <label class="field">
+            <span>Вариант</span>
+            <select id="filter-variant">
+              <option value="">Все варианты</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Группа</span>
+            <select id="filter-group">
+              <option value="">Все группы</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Статус</span>
+            <select id="filter-status">
+              <option value="">Все статусы</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Режим</span>
+            <select id="filter-mode">
+              <option value="">Все режимы</option>
+              <option value="exam">Экзамен</option>
+              <option value="training">Тренировка</option>
+            </select>
+          </label>
+          <label class="filter-check">
+            <input id="filter-pending" type="checkbox" />
+            <span>Ожидает голосовой проверки</span>
+          </label>
+          <button id="filter-reset" class="button ghost" type="button">Сбросить</button>
+        </section>
+
+        <section class="admin-layout">
+          <div class="admin-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Студент</th>
+                  <th>Вариант</th>
+                  <th>Режим</th>
+                  <th>Статус</th>
+                  <th>M1</th>
+                  <th>M2</th>
+                  <th>M3</th>
+                  <th>M4</th>
+                  <th>Балл</th>
+                  <th>Оценка</th>
+                  <th>Голос</th>
+                </tr>
+              </thead>
+              <tbody id="attempts-body"></tbody>
+            </table>
+          </div>
+
+          <aside id="detail-panel" class="admin-detail-panel">
+            <p class="overline">Карточка</p>
+            <h2>Выберите попытку</h2>
+            <p class="lead">Детали ответа появятся справа от таблицы.</p>
+          </aside>
+        </section>
+      </section>
+    </main>
+
+    <script src="/pm01-admin.js?v=1.0.0"></script>
+  </body>
+</html>

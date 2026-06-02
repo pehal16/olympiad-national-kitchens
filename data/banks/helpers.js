@@ -6,6 +6,43 @@ function makeOptions(options, correctId) {
   }));
 }
 
+function toArray(value) {
+  if (!value) {
+    return [];
+  }
+  return Array.isArray(value) ? value.filter(Boolean) : [value].filter(Boolean);
+}
+
+function buildQuestionMetadata(meta = {}, fallback = {}) {
+  return {
+    theme: meta.theme || fallback.theme || "",
+    difficulty: meta.difficulty || fallback.difficulty || "standard",
+    taskKind: meta.taskKind || fallback.taskKind || "generic",
+    competencyTags: uniqueText([
+      ...toArray(fallback.competencyTags),
+      ...toArray(meta.competencyTags)
+    ]),
+    fgosCodes: uniqueText([
+      ...toArray(fallback.fgosCodes),
+      ...toArray(meta.fgosCodes)
+    ]),
+    estimatedSeconds:
+      Number(meta.estimatedSeconds || fallback.estimatedSeconds || 60) || 60,
+    assetRefs: uniqueText([...toArray(fallback.assetRefs), ...toArray(meta.assetRefs)]),
+    qualityFlags: uniqueText([
+      ...toArray(fallback.qualityFlags),
+      ...toArray(meta.qualityFlags)
+    ]),
+    methodicalFocus: meta.methodicalFocus || fallback.methodicalFocus || "",
+    cuisineLabel: meta.cuisineLabel || fallback.cuisineLabel || "",
+    dishLabel: meta.dishLabel || fallback.dishLabel || ""
+  };
+}
+
+function uniqueText(items) {
+  return [...new Set((items || []).filter(Boolean).map((item) => String(item).trim()).filter(Boolean))];
+}
+
 function makeSingleChoice(id, poolId, prompt, options, correctId, meta = {}) {
   return {
     id,
@@ -18,6 +55,12 @@ function makeSingleChoice(id, poolId, prompt, options, correctId, meta = {}) {
     cuisine: meta.cuisine || "mixed",
     cuisineGroup: meta.cuisineGroup || "general",
     dishId: meta.dishId || null,
+    metadata: buildQuestionMetadata(meta, {
+      taskKind: "single_choice",
+      estimatedSeconds: 45,
+      dishLabel: meta.dishLabel || "",
+      cuisineLabel: meta.cuisineLabel || ""
+    }),
     options: makeOptions(options, correctId)
   };
 }
@@ -36,6 +79,13 @@ function makeMatchBlock(id, prompt, pairs, buckets, meta = {}) {
     cuisineGroup: "mixed",
     dishIds: pairs.map((pair) => pair.dishId),
     cuisines: pairs.map((pair) => pair.cuisine),
+    metadata: buildQuestionMetadata(meta, {
+      taskKind: "bucket_sort",
+      theme: "Соотнесение блюда и кухни",
+      estimatedSeconds: 90,
+      competencyTags: ["идентификация блюд", "национальные кухни"],
+      cuisineLabel: "mixed"
+    }),
     items: pairs.map((pair) => ({
       id: pair.dishId,
       text: pair.text
@@ -68,6 +118,13 @@ function makeIngredientMatrix(id, dishId, dishName, cuisine, cuisineGroup, ingre
     dishLabel: dishName,
     cuisine,
     cuisineGroup,
+    metadata: buildQuestionMetadata(meta, {
+      taskKind: "ingredient_matrix",
+      theme: dishName,
+      estimatedSeconds: 100,
+      dishLabel: dishName,
+      cuisineLabel: cuisine
+    }),
     items: ingredients.map(([itemId, text]) => ({
       id: itemId,
       text
@@ -96,6 +153,13 @@ function makeSequenceTask(id, dishId, dishName, cuisine, cuisineGroup, prompt, s
     dishLabel: dishName,
     cuisine,
     cuisineGroup,
+    metadata: buildQuestionMetadata(meta, {
+      taskKind: "sequence_drag",
+      theme: dishName,
+      estimatedSeconds: 90,
+      dishLabel: dishName,
+      cuisineLabel: cuisine
+    }),
     items: [...steps, ...distractors].map(([itemId, text]) => ({
       id: itemId,
       text
@@ -126,6 +190,13 @@ function makeBucketTask(id, dishId, dishName, cuisine, cuisineGroup, prompt, ite
     dishLabel: dishName,
     cuisine,
     cuisineGroup,
+    metadata: buildQuestionMetadata(meta, {
+      taskKind: "bucket_sort",
+      theme: dishName,
+      estimatedSeconds: 85,
+      dishLabel: dishName,
+      cuisineLabel: cuisine
+    }),
     items: items.map(([itemId, text]) => ({
       id: itemId,
       text
@@ -152,6 +223,13 @@ function makeLogicChoice(id, dishId, dishName, cuisine, cuisineGroup, prompt, op
     dishLabel: dishName,
     cuisine,
     cuisineGroup,
+    metadata: buildQuestionMetadata(meta, {
+      taskKind: "single_choice_logic",
+      theme: dishName,
+      estimatedSeconds: 60,
+      dishLabel: dishName,
+      cuisineLabel: cuisine
+    }),
     options: makeOptions(options, correctId)
   };
 }
@@ -175,6 +253,14 @@ function makeCaseCluster(caseId, caseTitle, cuisine, cuisineGroup, dishId, scena
       dishLabel: caseTitle,
       cuisine,
       cuisineGroup,
+      metadata: buildQuestionMetadata(question, {
+        taskKind: "case_choice",
+        theme: caseTitle,
+        estimatedSeconds: 75,
+        dishLabel: caseTitle,
+        cuisineLabel: cuisine,
+        competencyTags: question.competencyTags || []
+      }),
       options: makeOptions(question.options, question.correctId)
     }))
   };

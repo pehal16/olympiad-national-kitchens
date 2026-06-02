@@ -21,6 +21,8 @@ YDB_CONNECTION_STRING=grpcs://...
 YDB_METADATA_CREDENTIALS=1
 YDB_ATTEMPTS_TABLE=olympiad_attempts
 YDB_ADMIN_SESSIONS_TABLE=admin_sessions
+YDB_CONTENT_DRAFTS_TABLE=olympiad_content_drafts
+YDB_CONTENT_QUESTIONS_TABLE=olympiad_content_questions
 ```
 
 ## Что подготовить заранее
@@ -103,6 +105,8 @@ YDB_CONNECTION_STRING=ваша_строка_подключения
 YDB_METADATA_CREDENTIALS=1
 YDB_ATTEMPTS_TABLE=olympiad_attempts
 YDB_ADMIN_SESSIONS_TABLE=admin_sessions
+YDB_CONTENT_DRAFTS_TABLE=olympiad_content_drafts
+YDB_CONTENT_QUESTIONS_TABLE=olympiad_content_questions
 ADMIN_PASSWORD=ваш_пароль
 YANDEX_DISK_ENABLED=true
 YANDEX_DISK_OAUTH_TOKEN=ваш_токен
@@ -136,6 +140,22 @@ https://<адрес-контейнера>/api/health
 - старт попытки;
 - экспорт;
 - выгрузку на Яндекс Диск.
+
+### PM01 после деплоя
+
+PM01 работает отдельными маршрутами и не заменяет главную олимпиаду:
+
+- `/pm01.html` — студент;
+- `/pm01-admin.html` — преподаватель;
+- `/api/pm01/public/exam` — публичные данные экзамена.
+
+После деплоя на домен запустить:
+
+```powershell
+npm.cmd run verify:pm01 -- https://olympiada.gorlkts.ru
+```
+
+Ожидаемый результат: `ok: true`, `pm01.id: "pm01-2026-exam"`, 5 вариантов и 5 модулей.
 
 ## Что участники будут открывать
 

@@ -62,3 +62,21 @@ npm start
 
 После заполнения токена в админке будет доступна кнопка
 `Выгрузить на Яндекс Диск`.
+
+## PM01 интерактивный экзамен
+
+PM01 добавлен как отдельный модуль и не заменяет основную олимпиаду на `/`.
+
+- студент: [http://localhost:3100/pm01.html](http://localhost:3100/pm01.html)
+- преподаватель: [http://localhost:3100/pm01-admin.html](http://localhost:3100/pm01-admin.html)
+- API экзамена: `/api/pm01/public/exam`
+- проверка выкатки: `npm.cmd run verify:pm01 -- http://localhost:3100`
+
+Для production-домена после деплоя:
+
+```powershell
+npm.cmd run verify:pm01 -- https://olympiada.gorlkts.ru
+```
+
+Подробный порядок выкатки PM01 описан в
+[docs/pm01-production-rollout.md](D:\Кодекс\olympiad-github-work\docs\pm01-production-rollout.md).

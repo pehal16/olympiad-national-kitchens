@@ -1,0 +1,1225 @@
+(function () {
+  const state = {
+    exam: null,
+    attempt: null,
+    selectedVariantId: "",
+    mode: "exam",
+    controller: null,
+    timer: null
+  };
+
+  const elements = {
+    topTitle: document.getElementById("top-title"),
+    topSubtitle: document.getElementById("top-subtitle"),
+    topMode: document.getElementById("top-mode"),
+    topVariant: document.getElementById("top-variant"),
+    topModule: document.getElementById("top-module"),
+    topScore: document.getElementById("top-score"),
+    topTimer: document.getElementById("top-timer"),
+    topSaveStatus: document.getElementById("top-save-status"),
+    entryScreen: document.getElementById("entry-screen"),
+    workspaceScreen: document.getElementById("workspace-screen"),
+    resultScreen: document.getElementById("result-screen"),
+    examTitle: document.getElementById("exam-title"),
+    examDescription: document.getElementById("exam-description"),
+    modulePreview: document.getElementById("module-preview"),
+    startForm: document.getElementById("start-form"),
+    fullName: document.getElementById("full-name"),
+    institution: document.getElementById("institution"),
+    groupName: document.getElementById("group-name"),
+    mentorName: document.getElementById("mentor-name"),
+    variantGrid: document.getElementById("variant-grid"),
+    entryMessage: document.getElementById("entry-message"),
+    startButton: document.getElementById("start-button"),
+    participantName: document.getElementById("participant-name"),
+    participantMeta: document.getElementById("participant-meta"),
+    moduleRail: document.getElementById("module-rail"),
+    feedback: document.getElementById("training-feedback"),
+    moduleCode: document.getElementById("module-code"),
+    questionTitle: document.getElementById("question-title"),
+    questionPoints: document.getElementById("question-points"),
+    questionNote: document.getElementById("question-note"),
+    questionBody: document.getElementById("question-body"),
+    taskMessage: document.getElementById("task-message"),
+    submitAnswer: document.getElementById("submit-answer"),
+    finishAttempt: document.getElementById("finish-attempt"),
+    variantImage: document.getElementById("variant-image"),
+    variantTitle: document.getElementById("variant-title"),
+    variantScenario: document.getElementById("variant-scenario"),
+    competencyList: document.getElementById("competency-list"),
+    progressLabel: document.getElementById("progress-label"),
+    progressFill: document.getElementById("progress-fill"),
+    resultTitle: document.getElementById("result-title"),
+    resultSubtitle: document.getElementById("result-subtitle"),
+    resultModules: document.getElementById("result-modules")
+  };
+
+  function formatTime(ms) {
+    const totalSeconds = Math.max(0, Math.ceil(Number(ms || 0) / 1000));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  function scoreLabel(summary) {
+    if (!summary || summary.totalFinalScore === null || summary.totalFinalScore === undefined) {
+      return "баллы скрыты";
+    }
+    return `${summary.totalFinalScore} / ${summary.totalMaxScore}`;
+  }
+
+  function showMessage(element, message, type = "success") {
+    if (!element) {
+      return;
+    }
+    element.textContent = message;
+    element.className = `message ${type}`;
+  }
+
+  function hideMessage(element) {
+    if (!element) {
+      return;
+    }
+    element.textContent = "";
+    element.className = "message hidden";
+  }
+
+  function setSaveStatus(text) {
+    if (elements.topSaveStatus) {
+      elements.topSaveStatus.textContent = text;
+    }
+  }
+
+  async function api(path, options = {}) {
+    let response;
+    try {
+      response = await fetch(path, {
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        },
+        ...options
+      });
+    } catch (error) {
+      const networkError = new Error("Нет соединения с сервером.");
+      networkError.cause = error;
+      throw networkError;
+    }
+
+    const raw = await response.text();
+    let payload = {};
+    if (raw) {
+      payload = JSON.parse(raw);
+    }
+    if (!response.ok || payload.ok === false) {
+      const requestError = new Error(payload.message || "Сервер вернул ошибку.");
+      requestError.status = response.status;
+      requestError.payload = payload;
+      throw requestError;
+    }
+    return payload.data;
+  }
+
+  function createButton(className, text, onClick) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = className;
+    button.textContent = text;
+    if (onClick) {
+      button.addEventListener("click", onClick);
+    }
+    return button;
+  }
+
+  function renderModulePreview() {
+    elements.modulePreview.innerHTML = "";
+    (state.exam.modules || []).forEach((module) => {
+      const node = document.createElement("article");
+      node.className = "module-chip";
+      const title = document.createElement("strong");
+      title.textContent = `${module.code} ${module.title}`;
+      const meta = document.createElement("span");
+      meta.textContent = `${module.maxScore} баллов`;
+      node.append(title, meta);
+      elements.modulePreview.appendChild(node);
+    });
+  }
+
+  function renderVariants() {
+    elements.variantGrid.innerHTML = "";
+    (state.exam.variants || []).forEach((variant) => {
+      const card = createButton("variant-card", "", () => {
+        state.selectedVariantId = variant.id;
+        renderVariants();
+      });
+      if (variant.id === state.selectedVariantId) {
+        card.classList.add("is-selected");
+      }
+      const image = document.createElement("img");
+      image.src = variant.image;
+      image.alt = variant.title;
+      image.loading = "lazy";
+      const number = document.createElement("span");
+      number.textContent = `Вариант ${variant.number}`;
+      const title = document.createElement("strong");
+      title.textContent = variant.title;
+      card.append(image, number, title);
+      elements.variantGrid.appendChild(card);
+    });
+  }
+
+  function setMode(mode) {
+    state.mode = mode === "training" ? "training" : "exam";
+    document.querySelectorAll("[data-mode]").forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.mode === state.mode);
+    });
+    elements.topMode.textContent = state.mode === "training" ? "Тренировка" : "Экзамен";
+  }
+
+  function participantPayload() {
+    return {
+      fullName: elements.fullName.value.trim(),
+      institution: elements.institution.value.trim(),
+      groupName: elements.groupName.value.trim(),
+      mentorName: elements.mentorName.value.trim()
+    };
+  }
+
+  function refreshTopbar() {
+    const attempt = state.attempt;
+    elements.topTitle.textContent = state.exam ? "ПМ.01" : "ПМ.01";
+    elements.topSubtitle.textContent = state.exam ? state.exam.subtitle : "Интерактивный экзамен";
+    elements.topMode.textContent = state.mode === "training" ? "Тренировка" : "Экзамен";
+    elements.topVariant.textContent = attempt?.selectedVariant
+      ? attempt.selectedVariant.title
+      : "Вариант не выбран";
+    elements.topModule.textContent = attempt?.currentModule
+      ? `${attempt.currentModule.code} ${attempt.currentModule.title}`
+      : "M0";
+    elements.topScore.textContent = attempt ? scoreLabel(attempt.summary) : "0 / 100";
+    elements.topTimer.textContent = attempt?.timing
+      ? formatTime(attempt.timing.totalRemainingMs)
+      : `${state.exam?.durationMinutes || 90}:00`;
+    elements.topSaveStatus.textContent = attempt ? "готово" : "ожидание";
+  }
+
+  function refreshTimer() {
+    if (state.timer) {
+      clearInterval(state.timer);
+    }
+    state.timer = setInterval(() => {
+      if (!state.attempt || state.attempt.status !== "in_progress") {
+        return;
+      }
+      const remaining = Math.max(0, new Date(state.attempt.expiresAt).getTime() - Date.now());
+      elements.topTimer.textContent = formatTime(remaining);
+      if (remaining <= 0) {
+        loadAttempt(state.attempt.id).catch(() => {});
+      }
+    }, 1000);
+  }
+
+  function setScreens(screen) {
+    elements.entryScreen.classList.toggle("hidden", screen !== "entry");
+    elements.workspaceScreen.classList.toggle("hidden", screen !== "workspace");
+    elements.resultScreen.classList.toggle("hidden", screen !== "result");
+  }
+
+  function renderModuleRail() {
+    const attempt = state.attempt;
+    elements.moduleRail.innerHTML = "";
+    (attempt.route.modules || []).forEach((module) => {
+      const node = document.createElement("article");
+      node.className = "module-step";
+      const current = attempt.currentModule && attempt.currentModule.id === module.id;
+      const done = module.stepEnd < attempt.currentStepIndex;
+      node.classList.toggle("is-current", current);
+      node.classList.toggle("is-done", done);
+      const title = document.createElement("strong");
+      title.textContent = `${module.code} ${module.title}`;
+      const meta = document.createElement("span");
+      meta.textContent = `${module.questionCount} заданий · ${module.maxScore} баллов`;
+      node.append(title, meta);
+      elements.moduleRail.appendChild(node);
+    });
+  }
+
+  function renderFeedback() {
+    const feedback = state.attempt?.lastFeedback;
+    if (!feedback) {
+      elements.feedback.classList.add("hidden");
+      elements.feedback.innerHTML = "";
+      return;
+    }
+    elements.feedback.classList.remove("hidden");
+    elements.feedback.innerHTML = "";
+    const title = document.createElement("strong");
+    title.textContent = `Тренировка: ${feedback.score} из ${feedback.maxScore}`;
+    const answer = document.createElement("p");
+    answer.textContent = feedback.correctAnswer ? `Эталон: ${feedback.correctAnswer}` : "";
+    const explanation = document.createElement("p");
+    explanation.textContent = feedback.explanation || "";
+    elements.feedback.append(title);
+    if (answer.textContent) {
+      elements.feedback.appendChild(answer);
+    }
+    if (explanation.textContent) {
+      elements.feedback.appendChild(explanation);
+    }
+  }
+
+  function renderReferencePanel() {
+    const variant = state.attempt.selectedVariant;
+    elements.variantImage.src = variant.image;
+    elements.variantImage.alt = variant.title;
+    elements.variantTitle.textContent = variant.title;
+    elements.variantScenario.textContent = variant.scenario;
+    elements.competencyList.innerHTML = "";
+    (variant.competencies || []).forEach((competency) => {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = competency;
+      elements.competencyList.appendChild(tag);
+    });
+    const progress = state.attempt.progress;
+    elements.progressLabel.textContent = `${progress.currentQuestionIndex} / ${progress.totalQuestions}`;
+    const percent = progress.totalQuestions
+      ? Math.min(100, (progress.currentQuestionIndex / progress.totalQuestions) * 100)
+      : 0;
+    elements.progressFill.style.width = `${percent}%`;
+  }
+
+  function renderSituation(question) {
+    const card = document.createElement("article");
+    card.className = "situation-card";
+    const image = document.createElement("img");
+    image.src = question.image || state.attempt.selectedVariant.image;
+    image.alt = question.variantTitle || "Производственная ситуация";
+    image.style.borderRadius = "8px";
+    const text = document.createElement("p");
+    text.textContent = question.prompt;
+    const tags = document.createElement("div");
+    tags.className = "tag-list";
+    (question.competencies || []).forEach((item) => {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = item;
+      tags.appendChild(tag);
+    });
+    card.append(image, text, tags);
+    elements.questionBody.appendChild(card);
+    return {
+      isValid: () => true,
+      getAnswer: () => ({ acknowledged: true })
+    };
+  }
+
+  function renderChoice(question) {
+    const selected = new Set();
+    if (question.savedAnswer?.selectedOptionId) {
+      selected.add(question.savedAnswer.selectedOptionId);
+    }
+    (question.savedAnswer?.selectedOptionIds || []).forEach((id) => selected.add(id));
+    const list = document.createElement("div");
+    list.className = "option-list";
+
+    function rerender() {
+      list.innerHTML = "";
+      (question.options || []).forEach((option) => {
+        const button = createButton("option-button", option.text, () => {
+          if (question.type === "single_choice") {
+            selected.clear();
+            selected.add(option.id);
+          } else if (selected.has(option.id)) {
+            selected.delete(option.id);
+          } else {
+            selected.add(option.id);
+          }
+          rerender();
+        });
+        button.classList.toggle("is-selected", selected.has(option.id));
+        list.appendChild(button);
+      });
+    }
+
+    rerender();
+    elements.questionBody.appendChild(list);
+    return {
+      isValid: () => selected.size > 0,
+      getAnswer: () =>
+        question.type === "single_choice"
+          ? { selectedOptionId: Array.from(selected)[0] || "" }
+          : { selectedOptionIds: Array.from(selected) }
+    };
+  }
+
+  function renderSequence(question) {
+    const itemMap = new Map((question.items || []).map((item) => [item.id, item]));
+    const sequence = (question.slots || []).map(() => null);
+    (question.savedAnswer?.sequence || []).forEach((itemId, index) => {
+      if (index < sequence.length && itemMap.has(itemId)) {
+        sequence[index] = itemId;
+      }
+    });
+
+    let activeItemId = "";
+    let lastDroppedIndex = -1;
+    const layout = document.createElement("div");
+    layout.className = "sequence-layout";
+    const slots = document.createElement("div");
+    slots.className = "option-list";
+    const bank = document.createElement("div");
+    bank.className = "option-list";
+
+    function moveItemToSlot(itemId, slotIndex) {
+      if (!itemMap.has(itemId) || slotIndex < 0 || slotIndex >= sequence.length) {
+        return;
+      }
+      const displaced = sequence[slotIndex];
+      sequence.forEach((value, index) => {
+        if (value === itemId) {
+          sequence[index] = null;
+        }
+      });
+      sequence[slotIndex] = itemId;
+
+      if (displaced && displaced !== itemId) {
+        const emptyIndex = sequence.findIndex((value, index) => value === null && index !== slotIndex);
+        if (emptyIndex >= 0) {
+          sequence[emptyIndex] = displaced;
+        }
+      }
+
+      activeItemId = "";
+      lastDroppedIndex = slotIndex;
+      rerender();
+    }
+
+    function removeAt(index) {
+      sequence[index] = null;
+      activeItemId = "";
+      rerender();
+    }
+
+    function createSequenceChip(item, placed = false) {
+      const chip = createButton(
+        `sequence-chip${item.id === activeItemId ? " is-selected" : ""}${placed ? " is-placed" : ""}`,
+        item.text,
+        (event) => {
+          event.stopPropagation();
+          if (placed) {
+            removeAt(sequence.findIndex((value) => value === item.id));
+            return;
+          }
+          activeItemId = activeItemId === item.id ? "" : item.id;
+          rerender();
+        }
+      );
+      chip.draggable = true;
+      chip.addEventListener("dragstart", (event) => {
+        event.dataTransfer.setData("text/plain", item.id);
+        event.dataTransfer.effectAllowed = "move";
+        chip.classList.add("is-dragging");
+      });
+      chip.addEventListener("dragend", () => {
+        chip.classList.remove("is-dragging");
+      });
+      return chip;
+    }
+
+    function rerender() {
+      slots.innerHTML = "";
+      bank.innerHTML = "";
+      sequence.forEach((itemId, index) => {
+        const slot = document.createElement("article");
+        slot.className = `slot-card${itemId ? " is-filled" : ""}${
+          index === lastDroppedIndex ? " just-dropped" : ""
+        }`;
+        slot.tabIndex = 0;
+        const label = document.createElement("strong");
+        label.textContent = question.slots[index]?.label || `Шаг ${index + 1}`;
+        const drop = document.createElement("div");
+        drop.className = "sequence-slot-drop";
+        if (itemId && itemMap.has(itemId)) {
+          drop.appendChild(createSequenceChip(itemMap.get(itemId), true));
+        } else {
+          drop.textContent = activeItemId
+            ? "Нажмите, чтобы поставить выбранную операцию"
+            : "Перетащите операцию сюда";
+        }
+
+        function setOver(over) {
+          slot.classList.toggle("is-over", over);
+        }
+
+        slot.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "move";
+          setOver(true);
+        });
+        slot.addEventListener("dragleave", () => setOver(false));
+        slot.addEventListener("drop", (event) => {
+          event.preventDefault();
+          setOver(false);
+          moveItemToSlot(event.dataTransfer.getData("text/plain"), index);
+        });
+        slot.addEventListener("click", () => {
+          if (activeItemId) {
+            moveItemToSlot(activeItemId, index);
+          }
+        });
+        slot.addEventListener("keydown", (event) => {
+          if ((event.key === "Enter" || event.key === " ") && activeItemId) {
+            event.preventDefault();
+            moveItemToSlot(activeItemId, index);
+          }
+        });
+
+        slot.append(label, drop);
+        slots.appendChild(slot);
+      });
+
+      const freeItems = (question.items || []).filter((item) => !sequence.includes(item.id));
+      if (freeItems.length) {
+        freeItems.forEach((item) => {
+          bank.appendChild(createSequenceChip(item));
+        });
+      } else {
+        const empty = document.createElement("div");
+        empty.className = "sequence-bank-empty";
+        empty.textContent = "Все операции распределены. Нажмите на шаг, чтобы снять операцию и переставить ее.";
+        bank.appendChild(empty);
+      }
+
+      if (lastDroppedIndex >= 0) {
+        window.setTimeout(() => {
+          lastDroppedIndex = -1;
+          slots.querySelectorAll(".just-dropped").forEach((node) => node.classList.remove("just-dropped"));
+        }, 520);
+      }
+    }
+
+    rerender();
+    layout.append(slots, bank);
+    elements.questionBody.appendChild(layout);
+    return {
+      isValid: () => sequence.every(Boolean),
+      getAnswer: () => ({ sequence: sequence.filter(Boolean) })
+    };
+  }
+
+  function renderCutShapeMatching(question) {
+    const placements = {};
+    Object.entries(question.savedAnswer?.buckets || {}).forEach(([itemId, bucketId]) => {
+      placements[itemId] = bucketId;
+    });
+
+    let activeItemId = "";
+    let lastDroppedBucketId = "";
+    const itemMap = new Map((question.items || []).map((item) => [item.id, item]));
+    const wrapper = document.createElement("div");
+    wrapper.className = "cut-match";
+
+    if (question.interactionHint) {
+      const hint = document.createElement("p");
+      hint.className = "cut-match-hint";
+      hint.textContent = question.interactionHint;
+      wrapper.appendChild(hint);
+    }
+
+    const tray = document.createElement("div");
+    tray.className = "cut-name-tray";
+    const grid = document.createElement("div");
+    grid.className = "cut-target-grid";
+    wrapper.append(tray, grid);
+    elements.questionBody.appendChild(wrapper);
+
+    function bucketItem(bucketId) {
+      return (question.items || []).find((item) => placements[item.id] === bucketId) || null;
+    }
+
+    function placeItem(itemId, bucketId) {
+      if (!itemMap.has(itemId) || !bucketId) {
+        return;
+      }
+
+      Object.entries(placements).forEach(([placedItemId, placedBucketId]) => {
+        if (placedBucketId === bucketId) {
+          delete placements[placedItemId];
+        }
+      });
+      placements[itemId] = bucketId;
+      activeItemId = "";
+      lastDroppedBucketId = bucketId;
+      rerender();
+    }
+
+    function removeItem(itemId) {
+      delete placements[itemId];
+      if (activeItemId === itemId) {
+        activeItemId = "";
+      }
+      rerender();
+    }
+
+    function createNameChip(item, placed = false) {
+      const chip = createButton(
+        `cut-name-chip${item.id === activeItemId ? " is-active" : ""}${placed ? " is-placed" : ""}`,
+        item.text,
+        (event) => {
+          event.stopPropagation();
+          if (placed) {
+            removeItem(item.id);
+            return;
+          }
+          activeItemId = activeItemId === item.id ? "" : item.id;
+          rerender();
+        }
+      );
+      chip.draggable = true;
+      chip.addEventListener("dragstart", (event) => {
+        event.dataTransfer.setData("text/plain", item.id);
+        event.dataTransfer.effectAllowed = "move";
+        chip.classList.add("is-dragging");
+      });
+      chip.addEventListener("dragend", () => {
+        chip.classList.remove("is-dragging");
+      });
+      return chip;
+    }
+
+    function createTarget(bucket) {
+      const placedItem = bucketItem(bucket.id);
+      const target = document.createElement("article");
+      target.className = `cut-target${placedItem ? " is-filled" : ""}${
+        bucket.id === lastDroppedBucketId ? " just-dropped" : ""
+      }`;
+      target.tabIndex = 0;
+
+      const imageWrap = document.createElement("figure");
+      imageWrap.className = "cut-target-image";
+      const image = document.createElement("img");
+      image.src = bucket.image || state.attempt.selectedVariant.image;
+      image.alt = bucket.visualTitle || bucket.label;
+      image.loading = "lazy";
+      image.decoding = "async";
+      imageWrap.appendChild(image);
+
+      const copy = document.createElement("div");
+      copy.className = "cut-target-copy";
+      const title = document.createElement("strong");
+      title.textContent = bucket.visualTitle || bucket.label;
+      const label = document.createElement("span");
+      label.textContent = bucket.label;
+      const detail = document.createElement("p");
+      detail.textContent = bucket.detail || "";
+      copy.append(title, label);
+      if (detail.textContent) {
+        copy.appendChild(detail);
+      }
+
+      const drop = document.createElement("div");
+      drop.className = "cut-drop-slot";
+      if (placedItem) {
+        drop.appendChild(createNameChip(placedItem, true));
+      } else {
+        drop.textContent = activeItemId ? "Нажмите, чтобы поставить выбранное название" : "Перетащите название сюда";
+      }
+
+      function setOver(over) {
+        target.classList.toggle("is-over", over);
+      }
+
+      target.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+        setOver(true);
+      });
+      target.addEventListener("dragleave", () => setOver(false));
+      target.addEventListener("drop", (event) => {
+        event.preventDefault();
+        setOver(false);
+        placeItem(event.dataTransfer.getData("text/plain"), bucket.id);
+      });
+      target.addEventListener("click", () => {
+        if (activeItemId) {
+          placeItem(activeItemId, bucket.id);
+        }
+      });
+      target.addEventListener("keydown", (event) => {
+        if ((event.key === "Enter" || event.key === " ") && activeItemId) {
+          event.preventDefault();
+          placeItem(activeItemId, bucket.id);
+        }
+      });
+
+      target.append(imageWrap, copy, drop);
+      return target;
+    }
+
+    function rerender() {
+      tray.innerHTML = "";
+      grid.innerHTML = "";
+
+      const freeItems = (question.items || []).filter((item) => !placements[item.id]);
+      if (freeItems.length) {
+        freeItems.forEach((item) => tray.appendChild(createNameChip(item)));
+      } else {
+        const done = document.createElement("div");
+        done.className = "cut-name-tray-empty";
+        done.textContent = "Все названия распределены. Можно снять название с фото и перенести заново.";
+        tray.appendChild(done);
+      }
+
+      (question.buckets || []).forEach((bucket) => {
+        grid.appendChild(createTarget(bucket));
+      });
+
+      if (lastDroppedBucketId) {
+        window.setTimeout(() => {
+          lastDroppedBucketId = "";
+          grid.querySelectorAll(".just-dropped").forEach((node) => node.classList.remove("just-dropped"));
+        }, 520);
+      }
+    }
+
+    rerender();
+    return {
+      isValid: () => Object.keys(placements).length > 0,
+      getAnswer: () => ({ buckets: { ...placements } })
+    };
+  }
+
+  function renderBucket(question) {
+    if (question.visualMode === "cut_shapes") {
+      return renderCutShapeMatching(question);
+    }
+
+    const placements = {};
+    Object.entries(question.savedAnswer?.buckets || {}).forEach(([itemId, bucketId]) => {
+      placements[itemId] = bucketId;
+    });
+    let activeBucketId = question.buckets?.[0]?.id || "";
+    let lastDroppedBucketId = "";
+    const itemMap = new Map((question.items || []).map((item) => [item.id, item]));
+
+    const bank = document.createElement("div");
+    bank.className = "option-list";
+    const grid = document.createElement("div");
+    grid.className = "bucket-grid";
+    elements.questionBody.append(bank, grid);
+
+    function assign(itemId, bucketId = activeBucketId) {
+      if (!itemMap.has(itemId) || !bucketId) {
+        return;
+      }
+      placements[itemId] = bucketId;
+      activeBucketId = bucketId;
+      lastDroppedBucketId = bucketId;
+      rerender();
+    }
+
+    function remove(itemId) {
+      delete placements[itemId];
+      rerender();
+    }
+
+    function createBucketChip(item, placed = false) {
+      const isProductCard = question.visualMode === "product_cards" && item.image;
+      const chip = createButton(
+        `bucket-chip${placed ? " is-placed" : ""}${isProductCard ? " product-chip" : ""}`,
+        isProductCard ? "" : item.text,
+        (event) => {
+          event.stopPropagation();
+          if (placed) {
+            remove(item.id);
+            return;
+          }
+          assign(item.id);
+        }
+      );
+      if (isProductCard) {
+        chip.setAttribute("aria-label", item.text);
+        const image = document.createElement("img");
+        image.src = item.image;
+        image.alt = item.text;
+        image.loading = "lazy";
+
+        const copy = document.createElement("span");
+        copy.className = "product-chip-copy";
+        const title = document.createElement("strong");
+        title.textContent = item.text;
+        copy.appendChild(title);
+        if (item.detail) {
+          const detail = document.createElement("span");
+          detail.textContent = item.detail;
+          copy.appendChild(detail);
+        }
+        chip.append(image, copy);
+      }
+      chip.draggable = true;
+      chip.addEventListener("dragstart", (event) => {
+        event.dataTransfer.setData("text/plain", item.id);
+        event.dataTransfer.effectAllowed = "move";
+        chip.classList.add("is-dragging");
+      });
+      chip.addEventListener("dragend", () => {
+        chip.classList.remove("is-dragging");
+      });
+      return chip;
+    }
+
+    function rerender() {
+      bank.innerHTML = "";
+      grid.innerHTML = "";
+      const freeItems = (question.items || []).filter((item) => !placements[item.id]);
+      if (freeItems.length) {
+        freeItems.forEach((item) => bank.appendChild(createBucketChip(item)));
+      } else {
+        const empty = document.createElement("div");
+        empty.className = "bucket-bank-empty";
+        empty.textContent = "Все карточки распределены. Нажмите на карточку в колонке, чтобы вернуть ее.";
+        bank.appendChild(empty);
+      }
+
+      (question.buckets || []).forEach((bucket) => {
+        const column = document.createElement("article");
+        column.className = `bucket-column${bucket.id === activeBucketId ? " is-active" : ""}${
+          bucket.id === lastDroppedBucketId ? " just-dropped" : ""
+        }`;
+        column.tabIndex = 0;
+        column.addEventListener("click", () => {
+          activeBucketId = bucket.id;
+          rerender();
+        });
+        column.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            activeBucketId = bucket.id;
+            rerender();
+          }
+        });
+        column.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "move";
+          column.classList.add("is-over");
+        });
+        column.addEventListener("dragleave", () => {
+          column.classList.remove("is-over");
+        });
+        column.addEventListener("drop", (event) => {
+          event.preventDefault();
+          column.classList.remove("is-over");
+          assign(event.dataTransfer.getData("text/plain"), bucket.id);
+        });
+        const title = document.createElement("strong");
+        title.textContent = bucket.label;
+        const body = document.createElement("div");
+        body.className = "bucket-items";
+        const placedItems = (question.items || []).filter((item) => placements[item.id] === bucket.id);
+        if (placedItems.length) {
+          placedItems.forEach((item) => {
+            body.appendChild(createBucketChip(item, true));
+          });
+        } else {
+          const empty = document.createElement("span");
+          empty.className = "bucket-empty";
+          empty.textContent = "Перетащите карточки сюда";
+          body.appendChild(empty);
+        }
+        column.append(title, body);
+        grid.appendChild(column);
+      });
+
+      if (lastDroppedBucketId) {
+        window.setTimeout(() => {
+          lastDroppedBucketId = "";
+          grid.querySelectorAll(".just-dropped").forEach((node) => node.classList.remove("just-dropped"));
+        }, 520);
+      }
+    }
+
+    rerender();
+    return {
+      isValid: () => Object.keys(placements).length > 0,
+      getAnswer: () => ({ buckets: { ...placements } })
+    };
+  }
+
+  function renderCalculation(question) {
+    if (question.formulas && question.formulas.length) {
+      const formulas = document.createElement("div");
+      formulas.className = "formula-list";
+      question.formulas.forEach((formula) => {
+        const node = document.createElement("span");
+        node.textContent = formula;
+        formulas.appendChild(node);
+      });
+      elements.questionBody.appendChild(formulas);
+    }
+
+    const values = { ...(question.savedAnswer?.values || {}) };
+    const grid = document.createElement("div");
+    grid.className = "calc-grid";
+    (question.fields || []).forEach((field) => {
+      const card = document.createElement("label");
+      card.className = "calc-card";
+      const label = document.createElement("strong");
+      label.textContent = `${field.label}${field.unit ? `, ${field.unit}` : ""}`;
+      const input = document.createElement("input");
+      input.type = "number";
+      input.step = "0.01";
+      input.inputMode = "decimal";
+      input.value = values[field.id] || "";
+      input.addEventListener("input", () => {
+        values[field.id] = input.value;
+      });
+      card.append(label, input);
+      grid.appendChild(card);
+    });
+    elements.questionBody.appendChild(grid);
+    return {
+      isValid: () => (question.fields || []).some((field) => String(values[field.id] || "").trim()),
+      getAnswer: () => ({ values })
+    };
+  }
+
+  function renderVoice(question) {
+    let mediaRecorder = null;
+    let startedAt = 0;
+    let audioDataUrl = question.savedAnswer?.audioDataUrl || "";
+    let durationMs = Number(question.savedAnswer?.durationMs || 0);
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "option-list";
+    const controls = document.createElement("div");
+    controls.className = "voice-controls";
+    const start = createButton("button secondary", "Запись", async () => {
+      hideMessage(elements.taskMessage);
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const chunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.addEventListener("dataavailable", (event) => {
+          if (event.data.size) {
+            chunks.push(event.data);
+          }
+        });
+        mediaRecorder.addEventListener("stop", () => {
+          const blob = new Blob(chunks, { type: mediaRecorder.mimeType || "audio/webm" });
+          const reader = new FileReader();
+          reader.addEventListener("loadend", () => {
+            audioDataUrl = String(reader.result || "");
+            preview.src = audioDataUrl;
+            preview.classList.remove("hidden");
+            meter.textContent = `Запись готова · ${Math.round(durationMs / 1000)} сек.`;
+          });
+          reader.readAsDataURL(blob);
+          stream.getTracks().forEach((track) => track.stop());
+        });
+        startedAt = Date.now();
+        mediaRecorder.start();
+        meter.textContent = "Идет запись";
+        start.disabled = true;
+        stop.disabled = false;
+      } catch (error) {
+        showMessage(elements.taskMessage, "Микрофон недоступен. Можно оставить текстовую заметку.", "error");
+      }
+    });
+    const stop = createButton("button secondary", "Стоп", () => {
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        durationMs = Date.now() - startedAt;
+        mediaRecorder.stop();
+      }
+      start.disabled = false;
+      stop.disabled = true;
+    });
+    stop.disabled = true;
+    const meter = document.createElement("span");
+    meter.className = "voice-meter";
+    meter.textContent = audioDataUrl ? "Запись сохранена" : "Запись не начата";
+    controls.append(start, stop, meter);
+
+    const preview = document.createElement("audio");
+    preview.className = `voice-preview${audioDataUrl ? "" : " hidden"}`;
+    preview.controls = true;
+    preview.src = audioDataUrl;
+
+    const note = document.createElement("label");
+    note.className = "voice-field";
+    const noteLabel = document.createElement("span");
+    noteLabel.textContent = "Заметка к ответу";
+    const textarea = document.createElement("textarea");
+    textarea.value = question.savedAnswer?.transcriptNote || "";
+    note.append(noteLabel, textarea);
+
+    const rubric = document.createElement("div");
+    rubric.className = "tag-list";
+    (question.rubric || []).forEach((criterion) => {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = `${criterion.label}: ${criterion.maxScore}`;
+      rubric.appendChild(tag);
+    });
+
+    wrapper.append(controls, preview, note, rubric);
+    elements.questionBody.appendChild(wrapper);
+
+    return {
+      isValid: () => Boolean(audioDataUrl || textarea.value.trim()),
+      getAnswer: () => ({
+        audioDataUrl,
+        durationMs,
+        transcriptNote: textarea.value.trim(),
+        audioName: audioDataUrl ? `${question.id}.webm` : ""
+      })
+    };
+  }
+
+  function renderHotspot(question) {
+    const points = Array.isArray(question.savedAnswer?.points)
+      ? question.savedAnswer.points.map((point) => ({ x: Number(point.x), y: Number(point.y) }))
+      : [];
+    const stage = document.createElement("div");
+    stage.className = "hotspot-stage";
+    const image = document.createElement("img");
+    image.src = question.image || state.attempt.selectedVariant.image;
+    image.alt = question.prompt;
+    const summary = document.createElement("div");
+    summary.className = "hotspot-summary";
+
+    function addPoint(event) {
+      if (event.target.tagName === "BUTTON") {
+        return;
+      }
+      const rect = stage.getBoundingClientRect();
+      points.push({
+        x: Number((((event.clientX - rect.left) / rect.width) * 100).toFixed(2)),
+        y: Number((((event.clientY - rect.top) / rect.height) * 100).toFixed(2))
+      });
+      rerender();
+    }
+
+    function rerender() {
+      stage.innerHTML = "";
+      stage.appendChild(image);
+      points.forEach((point, index) => {
+        const marker = createButton("", String(index + 1), (event) => {
+          event.stopPropagation();
+          points.splice(index, 1);
+          rerender();
+        });
+        marker.style.left = `${point.x}%`;
+        marker.style.top = `${point.y}%`;
+        stage.appendChild(marker);
+      });
+      summary.textContent = `Отмечено зон: ${points.length} из ${question.hotspotTargetCount || "?"}`;
+    }
+
+    stage.addEventListener("click", addPoint);
+    rerender();
+    elements.questionBody.append(stage, summary);
+
+    return {
+      isValid: () => points.length > 0,
+      getAnswer: () => ({ points: points.map((point) => ({ ...point })) })
+    };
+  }
+
+  function renderQuestion() {
+    const question = state.attempt.currentQuestion;
+    state.controller = null;
+    elements.questionBody.innerHTML = "";
+    hideMessage(elements.taskMessage);
+    if (!question) {
+      elements.questionTitle.textContent = "Маршрут завершен";
+      elements.questionNote.textContent = "";
+      return;
+    }
+
+    elements.moduleCode.textContent = question.moduleCode || question.tourCode || "";
+    elements.questionTitle.textContent = question.prompt;
+    elements.questionPoints.textContent = `${question.maxScore || 0} баллов`;
+    elements.questionNote.textContent = question.note || "";
+
+    if (question.type === "situation") {
+      state.controller = renderSituation(question);
+    } else if (question.type === "single_choice" || question.type === "multiple_choice") {
+      state.controller = renderChoice(question);
+    } else if (question.type === "sequence_drag") {
+      state.controller = renderSequence(question);
+    } else if (question.type === "bucket_sort") {
+      state.controller = renderBucket(question);
+    } else if (question.type === "calculation_task") {
+      state.controller = renderCalculation(question);
+    } else if (question.type === "voice_response") {
+      state.controller = renderVoice(question);
+    } else if (question.type === "hotspot_scene") {
+      state.controller = renderHotspot(question);
+    } else {
+      const fallback = document.createElement("p");
+      fallback.textContent = "Тип задания пока не поддержан.";
+      elements.questionBody.appendChild(fallback);
+      state.controller = {
+        isValid: () => false,
+        getAnswer: () => ({})
+      };
+    }
+
+    elements.submitAnswer.textContent =
+      state.attempt.progress.currentQuestionIndex >= state.attempt.progress.totalQuestions
+        ? "Ответить и завершить"
+        : "Ответить и далее";
+  }
+
+  function resetWorkspaceScroll() {
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    });
+  }
+
+  function renderAttempt(attempt) {
+    state.attempt = attempt;
+    state.mode = attempt.mode || "exam";
+    refreshTopbar();
+
+    if (attempt.status !== "in_progress") {
+      renderResult();
+      return;
+    }
+
+    setScreens("workspace");
+    elements.participantName.textContent = attempt.participant.fullName;
+    elements.participantMeta.textContent = `${attempt.participant.groupName} · ${attempt.participant.institution}`;
+    renderModuleRail();
+    renderFeedback();
+    renderReferencePanel();
+    renderQuestion();
+    resetWorkspaceScroll();
+    refreshTimer();
+  }
+
+  function renderResult() {
+    setScreens("result");
+    const summary = state.attempt.summary;
+    const pending = Number(summary.pendingManualReviews || 0);
+    elements.resultTitle.textContent = pending
+      ? "Ожидается проверка голосового ответа"
+      : `Оценка ${summary.grade}`;
+    elements.resultSubtitle.textContent = pending
+      ? `Автоматическая часть сохранена. После ручной проверки будет обновлен итоговый балл. Сейчас: ${summary.totalFinalScore} из ${summary.totalMaxScore}.`
+      : `Итоговый балл: ${summary.totalFinalScore} из ${summary.totalMaxScore}.`;
+    elements.resultModules.innerHTML = "";
+    (summary.moduleScores || []).forEach((module) => {
+      const node = document.createElement("article");
+      node.className = "result-module";
+      const title = document.createElement("strong");
+      title.textContent = `${module.code} ${module.title}`;
+      const score = document.createElement("span");
+      score.textContent = `${module.finalScore} / ${module.maxScore}`;
+      node.append(title, score);
+      elements.resultModules.appendChild(node);
+    });
+    refreshTopbar();
+  }
+
+  async function loadAttempt(attemptId) {
+    const attempt = await api(`/api/pm01/public/attempts/${encodeURIComponent(attemptId)}`);
+    renderAttempt(attempt);
+  }
+
+  async function startAttempt(event) {
+    event.preventDefault();
+    hideMessage(elements.entryMessage);
+    elements.startButton.disabled = true;
+    setSaveStatus("запуск...");
+    try {
+      const attempt = await api("/api/pm01/public/attempts/start", {
+        method: "POST",
+        body: JSON.stringify({
+          participant: participantPayload(),
+          variantId: state.selectedVariantId,
+          mode: state.mode
+        })
+      });
+      renderAttempt(attempt);
+    } catch (error) {
+      setSaveStatus("ошибка");
+      showMessage(elements.entryMessage, error.message, "error");
+    } finally {
+      elements.startButton.disabled = false;
+    }
+  }
+
+  async function submitAnswer() {
+    hideMessage(elements.taskMessage);
+    if (!state.attempt || !state.controller) {
+      return;
+    }
+    if (!state.controller.isValid()) {
+      showMessage(elements.taskMessage, "Заполните ответ перед переходом дальше.", "error");
+      return;
+    }
+    elements.submitAnswer.disabled = true;
+    setSaveStatus("сохраняю...");
+    try {
+      const attempt = await api(`/api/pm01/public/attempts/${encodeURIComponent(state.attempt.id)}/answer`, {
+        method: "POST",
+        body: JSON.stringify({
+          questionId: state.attempt.currentQuestion.id,
+          answerPayload: state.controller.getAnswer()
+        })
+      });
+      renderAttempt(attempt);
+    } catch (error) {
+      setSaveStatus("ошибка");
+      showMessage(elements.taskMessage, error.message, "error");
+    } finally {
+      elements.submitAnswer.disabled = false;
+    }
+  }
+
+  async function finishAttempt() {
+    if (!state.attempt) {
+      return;
+    }
+    elements.finishAttempt.disabled = true;
+    setSaveStatus("завершение...");
+    try {
+      const attempt = await api(`/api/pm01/public/attempts/${encodeURIComponent(state.attempt.id)}/finish`, {
+        method: "POST",
+        body: JSON.stringify({})
+      });
+      renderAttempt(attempt);
+    } catch (error) {
+      setSaveStatus("ошибка");
+      showMessage(elements.taskMessage, error.message, "error");
+    } finally {
+      elements.finishAttempt.disabled = false;
+    }
+  }
+
+  async function init() {
+    try {
+      state.exam = await api("/api/pm01/public/exam");
+      state.selectedVariantId = state.exam.variants?.[0]?.id || "";
+      elements.examTitle.textContent = state.exam.title;
+      elements.examDescription.textContent = state.exam.description;
+      renderModulePreview();
+      renderVariants();
+      refreshTopbar();
+    } catch (error) {
+      showMessage(elements.entryMessage, error.message, "error");
+    }
+  }
+
+  document.querySelectorAll("[data-mode]").forEach((button) => {
+    button.addEventListener("click", () => setMode(button.dataset.mode));
+  });
+  elements.startForm.addEventListener("submit", startAttempt);
+  elements.submitAnswer.addEventListener("click", submitAnswer);
+  elements.finishAttempt.addEventListener("click", finishAttempt);
+  setMode("exam");
+  init();
+})();

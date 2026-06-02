@@ -449,6 +449,11 @@ function sanitizeQuestion(question, attempt) {
     caseTitle: question.caseTitle || null,
     caseOrder: question.caseOrder || null,
     caseTotal: question.caseTotal || null,
+    dishId: question.dishId || null,
+    dishLabel: question.dishLabel || "",
+    cuisine: question.cuisine || "mixed",
+    cuisineGroup: question.cuisineGroup || "general",
+    metadata: question.metadata || null,
     options: Array.isArray(question.options)
       ? question.options.map((option) => ({
           id: option.id,

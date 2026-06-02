@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#123f35" />
+    <title>Интерактивный экзамен ПМ.01</title>
+    <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
+    <link rel="stylesheet" href="/pm01.css?v=1.0.0" />
+  </head>
+  <body>
+    <header class="pm01-topbar">
+      <div class="pm01-brand">
+        <span class="brand-mark" aria-hidden="true">ПМ</span>
+        <div>
+          <strong id="top-title">ПМ.01</strong>
+          <span id="top-subtitle">Интерактивный экзамен</span>
+        </div>
+      </div>
+      <div class="top-status" aria-live="polite">
+        <span id="top-mode">Экзамен</span>
+        <span id="top-variant">Вариант не выбран</span>
+        <span id="top-module">M0</span>
+        <span id="top-score">0 / 100</span>
+        <span id="top-timer">90:00</span>
+        <span id="top-save-status">готово</span>
+      </div>
+      <nav class="top-actions" aria-label="PM01">
+        <a href="/" class="icon-button" title="Главная">⌂</a>
+        <a href="/pm01-admin.html" class="button ghost">Преподаватель</a>
+      </nav>
+    </header>
+
+    <main class="pm01-shell">
+      <section id="entry-screen" class="entry-grid">
+        <section class="intro-panel">
+          <div class="intro-copy">
+            <p class="overline">43.01.09 Повар, кондитер</p>
+            <h1 id="exam-title">Интерактивный экзамен ПМ.01</h1>
+            <p id="exam-description" class="lead">
+              Тест, расчет, голосовой ответ и производственная симуляция в одном маршруте.
+            </p>
+          </div>
+          <figure class="concept-frame">
+            <img
+              src="/assets/pm01/complex-workshop.png"
+              alt="Учебная производственная мастерская"
+              loading="eager"
+              decoding="async"
+            />
+          </figure>
+          <div id="module-preview" class="module-preview"></div>
+        </section>
+
+        <section class="start-panel">
+          <form id="start-form" class="form-grid">
+            <label class="field">
+              <span>ФИО студента</span>
+              <input id="full-name" type="text" autocomplete="name" required />
+            </label>
+            <label class="field">
+              <span>Образовательная организация</span>
+              <input
+                id="institution"
+                type="text"
+                value="ГБПОУ «Горловский колледж технологий и сервиса»"
+                required
+              />
+            </label>
+            <label class="field">
+              <span>Группа</span>
+              <input id="group-name" type="text" placeholder="№4/П-24" required />
+            </label>
+            <label class="field">
+              <span>Преподаватель</span>
+              <input id="mentor-name" type="text" />
+            </label>
+
+            <div class="field field-wide">
+              <span>Режим</span>
+              <div class="segmented" role="radiogroup" aria-label="Режим">
+                <button class="segment is-active" type="button" data-mode="exam">Экзамен</button>
+                <button class="segment" type="button" data-mode="training">Тренировка</button>
+              </div>
+            </div>
+
+            <div class="field field-wide">
+              <span>Вариант</span>
+              <div id="variant-grid" class="variant-grid"></div>
+            </div>
+
+            <div id="entry-message" class="message hidden"></div>
+            <button id="start-button" class="button primary field-wide" type="submit">
+              Начать ПМ.01
+            </button>
+          </form>
+        </section>
+      </section>
+
+      <section id="workspace-screen" class="workspace hidden">
+        <aside class="module-rail">
+          <div class="participant-card">
+            <strong id="participant-name">Студент</strong>
+            <span id="participant-meta">Группа</span>
+          </div>
+          <div id="module-rail" class="module-steps"></div>
+        </aside>
+
+        <section class="task-panel">
+          <div id="training-feedback" class="feedback-panel hidden"></div>
+          <div class="task-head">
+            <div>
+              <p id="module-code" class="overline">M0</p>
+              <h2 id="question-title">Производственная ситуация</h2>
+            </div>
+            <div class="points-pill" id="question-points">0 баллов</div>
+          </div>
+          <p id="question-note" class="task-note"></p>
+          <div id="question-body" class="question-body"></div>
+          <div id="task-message" class="message hidden"></div>
+          <div class="task-actions">
+            <button id="submit-answer" class="button primary" type="button">Ответить и далее</button>
+            <button id="finish-attempt" class="button secondary" type="button">Завершить</button>
+          </div>
+        </section>
+
+        <aside class="reference-panel">
+          <figure class="workshop-frame">
+            <img id="variant-image" src="/assets/pm01/complex-workshop.png" alt="Сцена варианта" />
+          </figure>
+          <div class="reference-block">
+            <p class="overline">Ситуация</p>
+            <h3 id="variant-title">Вариант</h3>
+            <p id="variant-scenario"></p>
+          </div>
+          <div class="reference-block">
+            <p class="overline">Компетенции</p>
+            <div id="competency-list" class="tag-list"></div>
+          </div>
+          <div class="score-board">
+            <div>
+              <span>Прогресс</span>
+              <strong id="progress-label">0 / 20</strong>
+            </div>
+            <div class="progress-track">
+              <span id="progress-fill"></span>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section id="result-screen" class="result-screen hidden">
+        <section class="result-hero">
+          <p class="overline">Итог ПМ.01</p>
+          <h2 id="result-title">Маршрут завершен</h2>
+          <p id="result-subtitle" class="lead"></p>
+        </section>
+        <div id="result-modules" class="result-modules"></div>
+        <div class="result-actions">
+          <a class="button secondary" href="/pm01.html">Новая попытка</a>
+          <a class="button ghost" href="/pm01-admin.html">Проверка преподавателя</a>
+        </div>
+      </section>
+    </main>
+
+    <script src="/pm01.js?v=1.0.0"></script>
+  </body>
+</html>

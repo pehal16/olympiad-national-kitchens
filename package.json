@@ -10,7 +10,8 @@
     "desktop:dist": "electron-builder --win portable",
     "test": "node --test",
     "export:bank": "node scripts/export-question-bank.js",
-    "export:content": "node scripts/export-content-catalog.js"
+    "export:content": "node scripts/export-content-catalog.js",
+    "verify:pm01": "node scripts/verify-pm01-production.js"
   },
   "dependencies": {
     "@ydbjs/auth": "^6.2.1",

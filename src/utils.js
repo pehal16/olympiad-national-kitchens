@@ -14,7 +14,7 @@ function ensureJsonFile(filePath, fallbackData) {
 
 function readJson(filePath, fallbackData) {
   ensureJsonFile(filePath, fallbackData);
-  const raw = fs.readFileSync(filePath, "utf8");
+  const raw = fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, "");
   return JSON.parse(raw);
 }
 
