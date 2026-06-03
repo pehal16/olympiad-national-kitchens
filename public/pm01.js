@@ -422,8 +422,11 @@
     }
 
     function createSequenceChip(item, placed = false) {
+      const isVisualStep = Boolean(item.image);
       const chip = createButton(
-        `sequence-chip${item.id === activeItemId ? " is-selected" : ""}${placed ? " is-placed" : ""}`,
+        `sequence-chip${isVisualStep ? " visual-sequence-chip" : ""}${
+          item.id === activeItemId ? " is-selected" : ""
+        }${placed ? " is-placed" : ""}`,
         item.text,
         (event) => {
           event.stopPropagation();
@@ -435,6 +438,28 @@
           rerender();
         }
       );
+      if (isVisualStep) {
+        chip.textContent = "";
+        chip.setAttribute("aria-label", item.text);
+
+        const image = document.createElement("img");
+        image.src = item.image;
+        image.alt = item.text;
+        image.loading = "lazy";
+
+        const copy = document.createElement("span");
+        copy.className = "visual-sequence-copy";
+        const title = document.createElement("strong");
+        title.textContent = item.text;
+        copy.appendChild(title);
+        if (item.detail) {
+          const detail = document.createElement("span");
+          detail.textContent = item.detail;
+          copy.appendChild(detail);
+        }
+
+        chip.append(image, copy);
+      }
       chip.draggable = true;
       chip.addEventListener("dragstart", (event) => {
         event.dataTransfer.setData("text/plain", item.id);

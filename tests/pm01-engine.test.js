@@ -51,8 +51,24 @@ test("PM01 public data exposes asset registry without visual answer keys", () =>
   const publicQuestion = sanitizePm01Question(visualBucket, { answers: {} });
 
   assert.equal(publicData.assetRegistry.workshops.vegetables.includes("vegetable-workshop.png"), true);
+  assert.equal(publicData.assetRegistry.cutShapes.batonnet.endsWith("batonnet.png"), true);
+  assert.equal(publicData.assetRegistry.violationScenes.vegetables.endsWith("vegetable.png"), true);
   assert.equal(publicQuestion.buckets.every((bucket) => bucket.image), true);
+  assert.equal(publicQuestion.buckets.some((bucket) => bucket.image.endsWith(".svg")), false);
   assert.equal("correctBuckets" in publicQuestion, false);
+  assert.equal("correctAnswer" in publicQuestion, false);
+});
+
+test("PM01 vegetable sequence steps use visual process cards without answer keys", () => {
+  const exam = getPm01Exam();
+  const variant = buildPm01Variant(exam, "vegetables");
+  const sequenceQuestion = variant.questions.find((item) => item.id.startsWith("veg-t1-seq-potato"));
+  const publicQuestion = sanitizePm01Question(sequenceQuestion, { answers: {} });
+
+  assert.equal(publicQuestion.items.length, 6);
+  assert.equal(publicQuestion.items.every((item) => item.image && item.detail), true);
+  assert.equal(publicQuestion.items.every((item) => item.image.includes("/assets/pm01/process/")), true);
+  assert.equal("correctSequence" in publicQuestion, false);
   assert.equal("correctAnswer" in publicQuestion, false);
 });
 
@@ -70,6 +86,7 @@ test("PM01 product cards and hotspot scenes stay visual but sanitized", () => {
   const hotspotQuestion = vegetableVariant.questions.find((item) => item.id.startsWith("veg-sim-hotspot"));
   const publicHotspotQuestion = sanitizePm01Question(hotspotQuestion, { answers: {} });
 
+  assert.equal(publicHotspotQuestion.image.endsWith("vegetable.png"), true);
   assert.equal(publicHotspotQuestion.hotspotTargetCount, hotspotQuestion.hotspots.length);
   assert.equal("hotspots" in publicHotspotQuestion, false);
 });

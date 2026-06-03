@@ -186,10 +186,19 @@ module.exports = {
       brunoise: "/assets/pm01/cuts/brunoise.png",
       rondelle: "/assets/pm01/cuts/rondelle.png",
       mirepoix: "/assets/pm01/cuts/mirepoix.png",
-      batonnet: "/assets/pm01/cuts/batonnet.svg",
-      wedges: "/assets/pm01/cuts/wedges.svg",
-      rings: "/assets/pm01/cuts/rings.svg",
-      slices: "/assets/pm01/cuts/slices.svg"
+      batonnet: "/assets/pm01/cuts/batonnet.png",
+      wedges: "/assets/pm01/cuts/wedges.png",
+      rings: "/assets/pm01/cuts/rings.png",
+      slices: "/assets/pm01/cuts/slices.png"
+    },
+    processSteps: {
+      sort: "/assets/pm01/process/veg-sort.png",
+      calibrate: "/assets/pm01/process/veg-calibrate.png",
+      wash: "/assets/pm01/process/veg-wash.png",
+      peel: "/assets/pm01/process/veg-peel.png",
+      finish: "/assets/pm01/process/veg-finish.png",
+      rinse: "/assets/pm01/process/veg-rinse.png",
+      cut: "/assets/pm01/process/veg-cut.png"
     },
     fishSemiProducts: {
       fillet: "/assets/pm01/fish-products/fish-fillet.png",
@@ -207,11 +216,11 @@ module.exports = {
       romsteak: "/assets/pm01/meat-products/romsteak.png"
     },
     violationScenes: {
-      vegetables: "/assets/pm01/violations/vegetable.svg",
-      fish: "/assets/pm01/violations/fish.svg",
-      meat: "/assets/pm01/violations/meat.svg",
-      poultry: "/assets/pm01/violations/poultry.svg",
-      complex: "/assets/pm01/violations/complex.svg"
+      vegetables: "/assets/pm01/violations/vegetable.png",
+      fish: "/assets/pm01/violations/fish.png",
+      meat: "/assets/pm01/violations/meat.png",
+      poultry: "/assets/pm01/violations/poultry.png",
+      complex: "/assets/pm01/violations/complex.png"
     }
   },
   variants: [
@@ -231,12 +240,54 @@ module.exports = {
           "veg-t1-seq-potato",
           "Установите правильную последовательность механической обработки картофеля.",
           [
-            ["sort", "сортировка"],
-            ["calibrate", "калибровка"],
-            ["wash", "мойка"],
-            ["peel", "очистка"],
-            ["finish", "доочистка"],
-            ["cut", "нарезка"]
+            [
+              "sort",
+              "сортировка",
+              {
+                image: "/assets/pm01/process/veg-sort.png",
+                detail: "Отделить пригодные клубни от поврежденных, загнивших и сильно загрязненных."
+              }
+            ],
+            [
+              "calibrate",
+              "калибровка",
+              {
+                image: "/assets/pm01/process/veg-calibrate.png",
+                detail: "Разделить картофель по размеру для равномерной машинной очистки и снижения отходов."
+              }
+            ],
+            [
+              "wash",
+              "мойка",
+              {
+                image: "/assets/pm01/process/veg-wash.png",
+                detail: "Промыть сырье проточной водой до очистки, удаляя землю и поверхностные загрязнения."
+              }
+            ],
+            [
+              "peel",
+              "очистка",
+              {
+                image: "/assets/pm01/process/veg-peel.png",
+                detail: "Снять кожуру механическим или ручным способом, не допуская лишних потерь сырья."
+              }
+            ],
+            [
+              "finish",
+              "доочистка",
+              {
+                image: "/assets/pm01/process/veg-finish.png",
+                detail: "Удалить глазки, остатки кожуры и мелкие дефекты после основной очистки."
+              }
+            ],
+            [
+              "cut",
+              "нарезка",
+              {
+                image: "/assets/pm01/process/veg-cut.png",
+                detail: "Нарезать очищенные овощи заданной формой на чистой доске безопасным приемом."
+              }
+            ]
           ],
           ["sort", "calibrate", "wash", "peel", "finish", "cut"],
           { explanation: "Калибровка до машинной очистки снижает отходы." }
@@ -286,7 +337,7 @@ module.exports = {
               "batons",
               "брусочки",
               {
-                image: "/assets/pm01/cuts/batonnet.svg",
+                image: "/assets/pm01/cuts/batonnet.png",
                 visualTitle: "Брусочки",
                 detail: "Продолговатые бруски одинаковой толщины для картофеля, корнеплодов, супов и гарниров."
               }
@@ -313,7 +364,7 @@ module.exports = {
               "wedges",
               "дольки",
               {
-                image: "/assets/pm01/cuts/wedges.svg",
+                image: "/assets/pm01/cuts/wedges.png",
                 visualTitle: "Дольки",
                 detail: "Клиновидные части овоща для картофеля, томатов, запекания и тушения."
               }
@@ -322,7 +373,7 @@ module.exports = {
               "rings",
               "кольца",
               {
-                image: "/assets/pm01/cuts/rings.svg",
+                image: "/assets/pm01/cuts/rings.png",
                 visualTitle: "Кольца",
                 detail: "Поперечная нарезка лука или овощей с выраженным центральным отверстием."
               }
@@ -331,7 +382,7 @@ module.exports = {
               "slices",
               "ломтики",
               {
-                image: "/assets/pm01/cuts/slices.svg",
+                image: "/assets/pm01/cuts/slices.png",
                 visualTitle: "Ломтики",
                 detail: "Плоские ровные пластины одинаковой толщины для гарниров, салатов и дальнейшей обработки."
               }
@@ -444,13 +495,62 @@ module.exports = {
           "veg-sim-chain",
           "Расставьте этапы обработки овощей.",
           [
-            ["sort", "сортировка"],
-            ["calibrate", "калибровка"],
-            ["wash", "мойка"],
-            ["peel", "очистка"],
-            ["finish", "доочистка"],
-            ["rinse", "промывание"],
-            ["cut", "нарезка"]
+            [
+              "sort",
+              "сортировка",
+              {
+                image: "/assets/pm01/process/veg-sort.png",
+                detail: "Отобрать качественное сырье и удалить непригодные овощи."
+              }
+            ],
+            [
+              "calibrate",
+              "калибровка",
+              {
+                image: "/assets/pm01/process/veg-calibrate.png",
+                detail: "Разделить овощи на крупные, средние и мелкие партии."
+              }
+            ],
+            [
+              "wash",
+              "мойка",
+              {
+                image: "/assets/pm01/process/veg-wash.png",
+                detail: "Вымыть овощи проточной водой перед очисткой."
+              }
+            ],
+            [
+              "peel",
+              "очистка",
+              {
+                image: "/assets/pm01/process/veg-peel.png",
+                detail: "Снять кожуру и собрать отходы отдельно от чистого сырья."
+              }
+            ],
+            [
+              "finish",
+              "доочистка",
+              {
+                image: "/assets/pm01/process/veg-finish.png",
+                detail: "Удалить глазки, остатки кожуры и точечные дефекты."
+              }
+            ],
+            [
+              "rinse",
+              "промывание",
+              {
+                image: "/assets/pm01/process/veg-rinse.png",
+                detail: "Промыть очищенные клубни и держать их в чистой холодной воде при кратковременном хранении."
+              }
+            ],
+            [
+              "cut",
+              "нарезка",
+              {
+                image: "/assets/pm01/process/veg-cut.png",
+                detail: "Выполнить нарезку выбранной формы на чистой доске."
+              }
+            ]
           ],
           ["sort", "calibrate", "wash", "peel", "finish", "rinse", "cut"],
           { maxScore: 6 }
@@ -480,7 +580,7 @@ module.exports = {
               "soup",
               "супы и гарниры",
               {
-                image: "/assets/pm01/cuts/batonnet.svg",
+                image: "/assets/pm01/cuts/batonnet.png",
                 visualTitle: "Брусочки",
                 detail: "Продолговатые бруски для картофеля, моркови, супов и гарниров."
               }
@@ -498,7 +598,7 @@ module.exports = {
               "bake",
               "запекание и тушение",
               {
-                image: "/assets/pm01/cuts/wedges.svg",
+                image: "/assets/pm01/cuts/wedges.png",
                 visualTitle: "Дольки",
                 detail: "Клиновидные части картофеля, томатов и корнеплодов для запекания и тушения."
               }
@@ -507,7 +607,7 @@ module.exports = {
               "serve",
               "подача и холодные блюда",
               {
-                image: "/assets/pm01/cuts/slices.svg",
+                image: "/assets/pm01/cuts/slices.png",
                 visualTitle: "Ломтики",
                 detail: "Плоские ровные пластины для гарниров, салатов и дальнейшей обработки."
               }
@@ -537,11 +637,11 @@ module.exports = {
           ["board", "доска и ножи"],
           ["mixer", "планетарный миксер"]
         ], ["table", "bath", "peeler", "cutter", "board"], { maxScore: 6 }),
-        hotspot("veg-sim-hotspot", "Найдите нарушения на овощном участке.", "/assets/pm01/violations/vegetable.svg", [
-          { id: "dry-potato", label: "Очищенный картофель хранится без воды", x: 30, y: 86, radius: 9 },
-          { id: "knife", label: "Нож лежит на краю стола и выступает за край", x: 90, y: 78, radius: 7 },
-          { id: "waste", label: "Отходы находятся рядом с чистыми овощами", x: 79, y: 58, radius: 9 },
-          { id: "no-label-board", label: "Разделочная доска без маркировки участка", x: 60, y: 84, radius: 8 }
+        hotspot("veg-sim-hotspot", "Найдите нарушения на овощном участке.", "/assets/pm01/violations/vegetable.png", [
+          { id: "dry-potato", label: "Очищенный картофель хранится без воды", x: 22, y: 72, radius: 12 },
+          { id: "knife", label: "Нож лежит на краю стола и выступает за край", x: 86, y: 76, radius: 10 },
+          { id: "waste", label: "Отходы находятся рядом с чистыми овощами", x: 82, y: 49, radius: 11 },
+          { id: "no-label-board", label: "Разделочная доска без маркировки участка", x: 55, y: 70, radius: 12 }
         ], { maxScore: 6 }),
         calculation(
           "veg-sim-request",
@@ -606,11 +706,11 @@ module.exports = {
       simulation: [
         sequence("fish-sim-chain", "Соберите технологическую цепочку обработки рыбы.", [["quality", "проверка качества"], ["defrost", "размораживание"], ["scale", "очистка"], ["gut", "потрошение"], ["trim", "удаление плавников/головы"], ["rinse", "промывание"], ["portion", "нарезка/формование"], ["cool", "охлаждение"]], ["quality", "defrost", "scale", "gut", "trim", "rinse", "portion", "cool"], { maxScore: 6 }),
         multiple("fish-sim-inventory", "Выберите инвентарь рыбного участка.", [["board", "доска РС"], ["knife", "нож"], ["scaler", "рыбочистка"], ["scraper", "нож-скребок"], ["trays", "лотки"], ["scales", "весы"], ["fridge", "холодильный шкаф"], ["table", "стол"], ["musat", "мусат для мясного цеха"]], ["board", "knife", "scaler", "scraper", "trays", "scales", "fridge", "table"], { maxScore: 6 }),
-        hotspot("fish-sim-hotspot", "Найдите нарушения в рыбном цехе.", "/assets/pm01/violations/fish.svg", [
-          { id: "no-cooling", label: "Рыба находится в теплой зоне без охлаждения", x: 47, y: 50, radius: 8 },
-          { id: "raw-ready", label: "Сырая рыба соприкасается с готовыми овощами", x: 64, y: 84, radius: 9 },
-          { id: "waste", label: "Отходы/нечистая тара оставлены на рабочем столе", x: 25, y: 58, radius: 8 },
-          { id: "knife", label: "Нож лежит на краю стола", x: 92, y: 78, radius: 7 }
+        hotspot("fish-sim-hotspot", "Найдите нарушения в рыбном цехе.", "/assets/pm01/violations/fish.png", [
+          { id: "no-cooling", label: "Рыба находится в теплой зоне без охлаждения", x: 51, y: 48, radius: 12 },
+          { id: "raw-ready", label: "Сырая рыба соприкасается с готовыми овощами", x: 78, y: 57, radius: 11 },
+          { id: "waste", label: "Отходы/нечистая тара оставлены на рабочем столе", x: 18, y: 51, radius: 10 },
+          { id: "knife", label: "Нож лежит на краю стола", x: 56, y: 81, radius: 10 }
         ], { maxScore: 6 }),
         bucket(
           "fish-sim-products",
@@ -780,11 +880,11 @@ module.exports = {
             interactionHint: "Перенесите карточку полуфабриката в группу по способу подготовки."
           }
         ),
-        hotspot("meat-sim-hotspot", "Найдите нарушения в мясном цехе.", "/assets/pm01/violations/meat.svg", [
-          { id: "hand", label: "Мясо проталкивают рукой вместо толкателя", x: 36, y: 37, radius: 9 },
-          { id: "no-cold", label: "Фарш/мясной полуфабрикат находится без охлаждения", x: 66, y: 84, radius: 8 },
-          { id: "knives", label: "Ножи оставлены небезопасно в рабочей зоне", x: 27, y: 85, radius: 9 },
-          { id: "knife-edge", label: "Нож лежит на краю стола", x: 93, y: 78, radius: 7 }
+        hotspot("meat-sim-hotspot", "Найдите нарушения в мясном цехе.", "/assets/pm01/violations/meat.png", [
+          { id: "hand", label: "Мясорубка работает с сырьем в загрузочной зоне без видимого толкателя", x: 34, y: 43, radius: 11 },
+          { id: "no-cold", label: "Фарш/мясной полуфабрикат находится без охлаждения", x: 67, y: 57, radius: 12 },
+          { id: "knives", label: "Ножи оставлены небезопасно в рабочей зоне", x: 24, y: 82, radius: 12 },
+          { id: "knife-edge", label: "Нож лежит на краю стола", x: 86, y: 82, radius: 10 }
         ], { maxScore: 6 }),
         sequence("meat-sim-finish", "Выберите действия после работы.", [["off", "отключить"], ["stop", "дождаться остановки"], ["disassemble", "разобрать"], ["wash", "вымыть"], ["disinfect", "продезинфицировать"], ["dry", "просушить"], ["store", "убрать место"]], ["off", "stop", "disassemble", "wash", "disinfect", "dry", "store"], { maxScore: 6 })
       ]
@@ -829,11 +929,11 @@ module.exports = {
         sequence("poultry-sim-chain", "Соберите технологическую цепочку обработки птицы.", [["quality", "проверка качества"], ["defrost", "размораживание"], ["flame", "опаливание"], ["pins", "удаление пеньков"], ["gut", "потрошение"], ["rinse", "промывание"], ["cut", "разделка"], ["shape", "формование"], ["cool", "охлаждение"]], ["quality", "defrost", "flame", "pins", "gut", "rinse", "cut", "shape", "cool"], { maxScore: 6 }),
         multiple("poultry-sim-bad", "Выберите признаки недоброкачественной птицы.", [["smell", "неприятный запах"], ["slime", "слизь"], ["mold", "плесень"], ["green", "позеленение"], ["dark", "потемнение"], ["loose", "дряблая консистенция"], ["dry", "чистая сухая поверхность"]], ["smell", "slime", "mold", "green", "dark", "loose"], { maxScore: 6 }),
         bucket("poultry-sim-parts", "Соотнесите полуфабрикат и часть птицы.", [["fillet", "филе"], ["leg", "окорочок"], ["drumstick", "голень"], ["thigh", "бедро"], ["mince", "котлетная масса"]], [["breast", "грудная часть"], ["leg-full", "бедро и голень"], ["lower", "нижняя часть ноги"], ["upper", "верхняя часть ноги"], ["flesh", "мякоть"]], { fillet: "breast", leg: "leg-full", drumstick: "lower", thigh: "upper", mince: "flesh" }, { maxScore: 6 }),
-        hotspot("poultry-sim-hotspot", "Найдите нарушения при работе с птицей.", "/assets/pm01/violations/poultry.svg", [
-          { id: "no-cooling", label: "Тушки птицы находятся без охлаждения", x: 30, y: 84, radius: 10 },
-          { id: "dirty-board", label: "Доска загрязнена после сырой птицы", x: 60, y: 85, radius: 8 },
-          { id: "cross", label: "Сырая птица находится рядом с овощами", x: 75, y: 84, radius: 8 },
-          { id: "knife", label: "Нож лежит на краю стола", x: 93, y: 78, radius: 7 }
+        hotspot("poultry-sim-hotspot", "Найдите нарушения при работе с птицей.", "/assets/pm01/violations/poultry.png", [
+          { id: "no-cooling", label: "Тушки птицы находятся без охлаждения", x: 19, y: 57, radius: 11 },
+          { id: "dirty-board", label: "Доска загрязнена после сырой птицы", x: 52, y: 66, radius: 12 },
+          { id: "cross", label: "Сырая птица находится рядом с овощами", x: 80, y: 48, radius: 12 },
+          { id: "knife", label: "Нож лежит на краю стола", x: 81, y: 78, radius: 10 }
         ], { maxScore: 6 }),
         multiple("poultry-sim-label", "Выберите правильную маркировку тары.", [["name", "наименование"], ["date", "дата и время изготовления"], ["mass", "масса"], ["storage", "условия хранения"], ["term", "срок реализации"], ["teacher", "любимое блюдо повара"]], ["name", "date", "mass", "storage", "term"], { maxScore: 6 })
       ]
@@ -884,11 +984,11 @@ module.exports = {
         bucket("complex-sim-zones", "Распределите сырье по участкам.", [["veg", "овощи"], ["fish", "рыба"], ["beef", "говядина/свинина/баранина"], ["bird", "птица/дичь/кролик"]], [["veg-zone", "овощной цех"], ["fish-zone", "рыбный/мясорыбный цех"], ["meat-zone", "мясной цех"], ["bird-zone", "отдельная линия или мясной цех"]], { veg: "veg-zone", fish: "fish-zone", beef: "meat-zone", bird: "bird-zone" }, { maxScore: 6 }),
         sequence("complex-sim-order", "Соберите порядок выполнения комплексного заказа.", [["order", "принять заказ"], ["check", "проверить сырье"], ["calc", "рассчитать массу"], ["places", "подготовить рабочие места"], ["process", "обработать сырье"], ["semi", "приготовить полуфабрикаты"], ["quality", "проверить качество и массу"], ["pack", "упаковать"], ["mark", "промаркировать"], ["store", "хранить/реализовать"]], ["order", "check", "calc", "places", "process", "semi", "quality", "pack", "mark", "store"], { maxScore: 6 }),
         multiple("complex-sim-pack", "Выберите правильную упаковку.", [["container", "пищевой контейнер"], ["tray", "лоток с пленкой"], ["bag", "пакет для пищевых продуктов"], ["gastronorm", "гастроемкость с крышкой"], ["newspaper", "газета"]], ["container", "tray", "bag", "gastronorm"], { maxScore: 6 }),
-        hotspot("complex-sim-hotspot", "Найдите нарушения хранения.", "/assets/pm01/violations/complex.svg", [
-          { id: "fish-meat", label: "Рыба и мясо находятся в одной таре", x: 48, y: 85, radius: 9 },
-          { id: "raw-ready", label: "Готовые полуфабрикаты соприкасаются с сырым сырьем", x: 69, y: 64, radius: 9 },
-          { id: "no-label", label: "Тара без маркировки", x: 83, y: 84, radius: 8 },
-          { id: "bad-pack", label: "Упаковка повреждена", x: 76, y: 84, radius: 7 }
+        hotspot("complex-sim-hotspot", "Найдите нарушения хранения.", "/assets/pm01/violations/complex.png", [
+          { id: "fish-meat", label: "Рыба и мясо находятся в одной таре", x: 18, y: 61, radius: 14 },
+          { id: "raw-ready", label: "Готовые полуфабрикаты соприкасаются с сырым сырьем", x: 51, y: 45, radius: 12 },
+          { id: "no-label", label: "Тара без маркировки", x: 84, y: 72, radius: 10 },
+          { id: "bad-pack", label: "Упаковка повреждена", x: 81, y: 40, radius: 11 }
         ], { maxScore: 6 }),
         multiple("complex-sim-consult", "Выберите правильную консультацию потребителю.", [["fridge", "хранить в холодильнике"], ["term", "соблюдать срок"], ["closed", "не вскрывать заранее"], ["separate", "не хранить рыбу/мясо с готовыми блюдами"], ["check", "проверять вид и запах"], ["warm", "хранить у плиты"]], ["fridge", "term", "closed", "separate", "check"], { maxScore: 6 })
       ]

@@ -215,15 +215,8 @@ function violationScene(kind) {
 }
 
 [
-  ["cuts/batonnet.svg", cutAsset("batonnet")],
-  ["cuts/wedges.svg", cutAsset("wedges")],
-  ["cuts/rings.svg", cutAsset("rings")],
-  ["cuts/slices.svg", cutAsset("slices")],
-  ["violations/vegetable.svg", violationScene("vegetable")],
-  ["violations/fish.svg", violationScene("fish")],
-  ["violations/meat.svg", violationScene("meat")],
-  ["violations/poultry.svg", violationScene("poultry")],
-  ["violations/complex.svg", violationScene("complex")]
+  // PM01 now uses curated PNG assets for cut shapes and violation scenes.
+  // Keep this legacy SVG helper inert so a future run cannot reintroduce placeholders.
 ].forEach(([relativePath, svg]) => writeAsset(relativePath, svg));
 
-console.log("PM01 visual assets generated.");
+console.log("PM01 legacy SVG generator skipped; curated PNG assets are used.");

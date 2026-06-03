@@ -725,6 +725,43 @@ button.module-step:focus-visible {
   background: #eef8f4;
 }
 
+.visual-sequence-chip {
+  min-height: 104px;
+  display: grid;
+  grid-template-columns: 118px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+}
+
+.visual-sequence-chip img {
+  width: 118px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f4f7f2;
+}
+
+.visual-sequence-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.visual-sequence-copy strong {
+  margin: 0;
+  color: var(--green-900);
+  font-size: 14px;
+  line-height: 1.18;
+}
+
+.visual-sequence-copy span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.32;
+}
+
 .product-chip {
   min-height: 136px;
   display: grid;
@@ -1465,6 +1502,20 @@ tr[data-attempt-id]:hover {
 
   .product-chip img {
     width: 108px;
+  }
+
+  .visual-sequence-chip {
+    grid-template-columns: 96px minmax(0, 1fr);
+    min-height: 96px;
+    gap: 10px;
+  }
+
+  .visual-sequence-chip img {
+    width: 96px;
+  }
+
+  .visual-sequence-copy span {
+    font-size: 11px;
   }
 }
 
