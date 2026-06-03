@@ -646,7 +646,7 @@
       const image = document.createElement("img");
       image.src = bucket.image || state.attempt.selectedVariant.image;
       image.alt = bucket.visualTitle || bucket.label;
-      image.loading = "lazy";
+      image.loading = "eager";
       image.decoding = "async";
       imageWrap.appendChild(image);
 

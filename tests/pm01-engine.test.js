@@ -1,5 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const {
   getPm01Exam,
@@ -49,14 +51,43 @@ test("PM01 public data exposes asset registry without visual answer keys", () =>
   const variant = buildPm01Variant(exam, "vegetables");
   const visualBucket = variant.questions.find((item) => item.visualMode === "cut_shapes");
   const publicQuestion = sanitizePm01Question(visualBucket, { answers: {} });
+  const visualSimulation = variant.questions.find((item) => item.id.startsWith("veg-sim-cuts"));
+  const publicSimulation = sanitizePm01Question(visualSimulation, { answers: {} });
+  const requiredCutShapes = [
+    "julienne",
+    "brunoise",
+    "rondelle",
+    "mirepoix",
+    "batonnet",
+    "wedges",
+    "rings",
+    "slices",
+    "halfRings",
+    "mediumCubes",
+    "largeCubes",
+    "shashki",
+    "shavings",
+    "balls"
+  ];
 
   assert.equal(publicData.assetRegistry.workshops.vegetables.includes("vegetable-workshop.png"), true);
   assert.equal(publicData.assetRegistry.cutShapes.batonnet.endsWith("batonnet.png"), true);
+  assert.equal(publicData.assetRegistry.cutShapes.slices.endsWith("slices.png"), true);
+  assert.equal(requiredCutShapes.every((key) => publicData.assetRegistry.cutShapes[key]), true);
+  requiredCutShapes.forEach((key) => {
+    const assetPath = path.join(__dirname, "..", "public", publicData.assetRegistry.cutShapes[key].replace(/^\//, ""));
+    assert.equal(fs.existsSync(assetPath), true, `${key} asset exists`);
+  });
   assert.equal(publicData.assetRegistry.violationScenes.vegetables.endsWith("vegetable.png"), true);
+  assert.equal(publicQuestion.items.length, 14);
+  assert.equal(publicQuestion.buckets.length, 14);
   assert.equal(publicQuestion.buckets.every((bucket) => bucket.image), true);
   assert.equal(publicQuestion.buckets.some((bucket) => bucket.image.endsWith(".svg")), false);
+  assert.equal(publicSimulation.items.length, 11);
+  assert.equal(publicSimulation.buckets.length, 11);
   assert.equal("correctBuckets" in publicQuestion, false);
   assert.equal("correctAnswer" in publicQuestion, false);
+  assert.equal("correctBuckets" in publicSimulation, false);
 });
 
 test("PM01 vegetable sequence steps use visual process cards without answer keys", () => {

@@ -189,7 +189,13 @@ module.exports = {
       batonnet: "/assets/pm01/cuts/batonnet.png",
       wedges: "/assets/pm01/cuts/wedges.png",
       rings: "/assets/pm01/cuts/rings.png",
-      slices: "/assets/pm01/cuts/slices.png"
+      slices: "/assets/pm01/cuts/slices.png",
+      halfRings: "/assets/pm01/cuts/half-rings.png",
+      mediumCubes: "/assets/pm01/cuts/medium-cubes.png",
+      largeCubes: "/assets/pm01/cuts/large-cubes.png",
+      shashki: "/assets/pm01/cuts/shashki.png",
+      shavings: "/assets/pm01/cuts/shavings.png",
+      balls: "/assets/pm01/cuts/balls.png"
     },
     processSteps: {
       sort: "/assets/pm01/process/veg-sort.png",
@@ -317,11 +323,17 @@ module.exports = {
             ["julienne", "соломка"],
             ["batonnet", "брусочки"],
             ["brunoise", "мелкие кубики"],
+            ["mediumCubes", "средние кубики"],
+            ["largeCubes", "крупные кубики"],
             ["rondelle", "кружочки"],
             ["wedges", "дольки"],
             ["rings", "кольца"],
+            ["halfRings", "полукольца"],
             ["slices", "ломтики"],
-            ["mirepoix", "крупная нарезка"]
+            ["mirepoix", "крупная нарезка"],
+            ["shashki", "шашки"],
+            ["shavings", "стружка"],
+            ["balls", "шарики"]
           ],
           [
             [
@@ -352,6 +364,24 @@ module.exports = {
               }
             ],
             [
+              "medium",
+              "средние кубики",
+              {
+                image: "/assets/pm01/cuts/medium-cubes.png",
+                visualTitle: "Средние кубики",
+                detail: "Равные кубики среднего размера для салатов, винегретов, супов и гарниров."
+              }
+            ],
+            [
+              "large",
+              "крупные кубики",
+              {
+                image: "/assets/pm01/cuts/large-cubes.png",
+                visualTitle: "Крупные кубики",
+                detail: "Крупные одинаковые кубики для тушения, супов и блюд с длительной тепловой обработкой."
+              }
+            ],
+            [
               "round",
               "кружочки",
               {
@@ -379,12 +409,21 @@ module.exports = {
               }
             ],
             [
+              "halfRings",
+              "полукольца",
+              {
+                image: "/assets/pm01/cuts/half-rings.png",
+                visualTitle: "Полукольца",
+                detail: "Лук разрезают пополам и нарезают поперек на равные полукруглые полосы."
+              }
+            ],
+            [
               "slices",
               "ломтики",
               {
                 image: "/assets/pm01/cuts/slices.png",
                 visualTitle: "Ломтики",
-                detail: "Плоские ровные пластины одинаковой толщины для гарниров, салатов и дальнейшей обработки."
+                detail: "Тонкие плоские пластины из половинок или четвертинок клубня, не клиновидные дольки."
               }
             ],
             [
@@ -395,17 +434,50 @@ module.exports = {
                 visualTitle: "Крупная нарезка",
                 detail: "Крупные кусочки овощей для основы бульонов, тушения и ароматизации."
               }
+            ],
+            [
+              "shashki",
+              "шашки",
+              {
+                image: "/assets/pm01/cuts/shashki.png",
+                visualTitle: "Шашки",
+                detail: "Плоские квадратные или прямоугольные кусочки капусты для супов и тушения."
+              }
+            ],
+            [
+              "shavings",
+              "стружка",
+              {
+                image: "/assets/pm01/cuts/shavings.png",
+                visualTitle: "Стружка",
+                detail: "Очень тонкие гибкие ленты овоща, полученные строганием или овощечисткой."
+              }
+            ],
+            [
+              "balls",
+              "шарики",
+              {
+                image: "/assets/pm01/cuts/balls.png",
+                visualTitle: "Шарики",
+                detail: "Фигурная нарезка круглой формы, выполненная специальной выемкой."
+              }
             ]
           ],
           {
             julienne: "thin",
             batonnet: "batons",
             brunoise: "small",
+            mediumCubes: "medium",
+            largeCubes: "large",
             rondelle: "round",
             wedges: "wedges",
             rings: "rings",
+            halfRings: "halfRings",
             slices: "slices",
-            mirepoix: "rough"
+            mirepoix: "rough",
+            shashki: "shashki",
+            shavings: "shavings",
+            balls: "balls"
           },
           {
             visualMode: "cut_shapes",
@@ -561,10 +633,15 @@ module.exports = {
           [
             ["straw", "соломка"],
             ["sticks", "брусочки"],
-            ["cubes", "кубики"],
+            ["mediumCubes", "средние кубики"],
+            ["largeCubes", "крупные кубики"],
             ["wedges", "дольки"],
             ["slices", "ломтики"],
-            ["rondelle", "кружочки"]
+            ["rondelle", "кружочки"],
+            ["halfRings", "полукольца"],
+            ["shashki", "шашки"],
+            ["shavings", "стружка"],
+            ["balls", "шарики"]
           ],
           [
             [
@@ -589,9 +666,18 @@ module.exports = {
               "salad",
               "салаты, винегреты, начинки",
               {
-                image: "/assets/pm01/cuts/brunoise.png",
-                visualTitle: "Кубики",
-                detail: "Равномерные кубики для салатов, винегретов, начинок и холодных блюд."
+                image: "/assets/pm01/cuts/medium-cubes.png",
+                visualTitle: "Средние кубики",
+                detail: "Равномерные кубики среднего размера для салатов, винегретов, супов и гарниров."
+              }
+            ],
+            [
+              "stewCubes",
+              "тушение и супы с длительной обработкой",
+              {
+                image: "/assets/pm01/cuts/large-cubes.png",
+                visualTitle: "Крупные кубики",
+                detail: "Крупные кубики держат форму при тушении и длительной тепловой обработке."
               }
             ],
             [
@@ -609,7 +695,7 @@ module.exports = {
               {
                 image: "/assets/pm01/cuts/slices.png",
                 visualTitle: "Ломтики",
-                detail: "Плоские ровные пластины для гарниров, салатов и дальнейшей обработки."
+                detail: "Тонкие плоские пластины из половинок или четвертинок овоща, не клиновидные дольки."
               }
             ],
             [
@@ -620,9 +706,57 @@ module.exports = {
                 visualTitle: "Кружочки",
                 detail: "Поперечные круглые ломтики моркови, кабачка, огурца и других овощей."
               }
+            ],
+            [
+              "onion",
+              "пассерование лука и соусы",
+              {
+                image: "/assets/pm01/cuts/half-rings.png",
+                visualTitle: "Полукольца",
+                detail: "Полукольца лука удобны для пассерования, соусов, гарниров и холодных блюд."
+              }
+            ],
+            [
+              "cabbage",
+              "капустные супы и тушение",
+              {
+                image: "/assets/pm01/cuts/shashki.png",
+                visualTitle: "Шашки",
+                detail: "Квадратные кусочки капусты используют для щей, борщей, тушения и гарниров."
+              }
+            ],
+            [
+              "decor",
+              "украшение и тонкая подача",
+              {
+                image: "/assets/pm01/cuts/shavings.png",
+                visualTitle: "Стружка",
+                detail: "Тонкие овощные ленты используют для оформления, салатов и быстрой тепловой обработки."
+              }
+            ],
+            [
+              "ballsDecor",
+              "фигурные гарниры и оформление",
+              {
+                image: "/assets/pm01/cuts/balls.png",
+                visualTitle: "Шарики",
+                detail: "Шарики получают выемкой и используют для фигурных гарниров и оформления."
+              }
             ]
           ],
-          { straw: "fry", sticks: "soup", cubes: "salad", wedges: "bake", slices: "serve", rondelle: "stew" },
+          {
+            straw: "fry",
+            sticks: "soup",
+            mediumCubes: "salad",
+            largeCubes: "stewCubes",
+            wedges: "bake",
+            slices: "serve",
+            rondelle: "stew",
+            halfRings: "onion",
+            shashki: "cabbage",
+            shavings: "decor",
+            balls: "ballsDecor"
+          },
           {
             maxScore: 6,
             visualMode: "cut_shapes",
