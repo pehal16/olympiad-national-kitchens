@@ -29,6 +29,57 @@ test("PM01 fixed variants keep the 100-point module contract", () => {
   });
 });
 
+test("PM01 questions keep valid methodological mappings and competency tags", () => {
+  const exam = getPm01Exam();
+
+  exam.variants.forEach((examVariant) => {
+    const variant = buildPm01Variant(exam, examVariant.id);
+    const variantTags = new Set(examVariant.competencies || []);
+
+    variant.questions.forEach((question) => {
+      assert.equal(question.prompt.trim().length > 12, true, `${question.id} prompt is meaningful`);
+      assert.equal(question.competencyTags.length >= variantTags.size, true, `${question.id} has competency tags`);
+      variantTags.forEach((tag) => {
+        assert.equal(question.competencyTags.includes(tag), true, `${question.id} includes ${tag}`);
+      });
+
+      if (question.moduleId === "test") {
+        assert.equal(/^Что такое\s/i.test(question.prompt), false, `${question.id} is framed as a task`);
+      }
+
+      if (question.type === "single_choice") {
+        assert.equal(question.options.filter((option) => option.isCorrect).length, 1, `${question.id} has one correct option`);
+      }
+
+      if (question.type === "multiple_choice") {
+        assert.equal(question.options.filter((option) => option.isCorrect).length > 1, true, `${question.id} has several correct options`);
+      }
+
+      if (question.type === "sequence_drag") {
+        const itemIds = new Set(question.items.map((item) => item.id));
+        assert.equal(question.correctSequence.length, question.items.length, `${question.id} sequence is complete`);
+        assert.equal(new Set(question.correctSequence).size, question.correctSequence.length, `${question.id} has unique sequence keys`);
+        question.correctSequence.forEach((itemId) => {
+          assert.equal(itemIds.has(itemId), true, `${question.id} sequence item exists: ${itemId}`);
+        });
+      }
+
+      if (question.type === "bucket_sort") {
+        const itemIds = new Set(question.items.map((item) => item.id));
+        const bucketIds = new Set(question.buckets.map((bucket) => bucket.id));
+        assert.deepEqual(Object.keys(question.correctBuckets).sort(), [...itemIds].sort(), `${question.id} maps every item`);
+        Object.entries(question.correctBuckets).forEach(([itemId, bucketId]) => {
+          assert.equal(itemIds.has(itemId), true, `${question.id} item exists: ${itemId}`);
+          assert.equal(bucketIds.has(bucketId), true, `${question.id} bucket exists: ${bucketId}`);
+        });
+        if (question.visualMode === "cut_shapes") {
+          assert.equal(new Set(Object.values(question.correctBuckets)).size, question.buckets.length, `${question.id} cut targets are one-to-one`);
+        }
+      }
+    });
+  });
+});
+
 test("sanitizePm01Question hides private checking data from students", () => {
   const exam = getPm01Exam();
   const variant = buildPm01Variant(exam, "vegetables");
@@ -73,6 +124,9 @@ test("PM01 public data exposes asset registry without visual answer keys", () =>
   assert.equal(publicData.assetRegistry.workshops.vegetables.includes("vegetable-workshop.png"), true);
   assert.equal(publicData.assetRegistry.cutShapes.batonnet.endsWith("batonnet.png"), true);
   assert.equal(publicData.assetRegistry.cutShapes.slices.endsWith("slices.png"), true);
+  assert.equal(publicData.programTitle.includes("ПМ.01"), true);
+  assert.equal(publicData.developer, "Преподаватель Постовит Дмитрий Александрович");
+  assert.equal(publicData.interdisciplinaryCourses.map((course) => course.code).join(","), "МДК 01.01,МДК 01.02");
   assert.equal(requiredCutShapes.every((key) => publicData.assetRegistry.cutShapes[key]), true);
   requiredCutShapes.forEach((key) => {
     const assetPath = path.join(__dirname, "..", "public", publicData.assetRegistry.cutShapes[key].replace(/^\//, ""));
@@ -88,6 +142,36 @@ test("PM01 public data exposes asset registry without visual answer keys", () =>
   assert.equal("correctBuckets" in publicQuestion, false);
   assert.equal("correctAnswer" in publicQuestion, false);
   assert.equal("correctBuckets" in publicSimulation, false);
+});
+
+test("PM01 visual asset registry points to real project files", () => {
+  const publicData = getPm01PublicData(getPm01Exam());
+  const assetPaths = [];
+
+  function collectAssets(value) {
+    if (!value) {
+      return;
+    }
+    if (typeof value === "string" && value.startsWith("/assets/pm01/")) {
+      assetPaths.push(value);
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach(collectAssets);
+      return;
+    }
+    if (typeof value === "object") {
+      Object.values(value).forEach(collectAssets);
+    }
+  }
+
+  collectAssets(publicData.assetRegistry);
+
+  assert.equal(assetPaths.length >= 50, true);
+  assetPaths.forEach((assetPath) => {
+    const fullPath = path.join(__dirname, "..", "public", assetPath.replace(/^\//, ""));
+    assert.equal(fs.existsSync(fullPath), true, `${assetPath} exists`);
+  });
 });
 
 test("PM01 vegetable sequence steps use visual process cards without answer keys", () => {
@@ -120,6 +204,27 @@ test("PM01 product cards and hotspot scenes stay visual but sanitized", () => {
   assert.equal(publicHotspotQuestion.image.endsWith("vegetable.png"), true);
   assert.equal(publicHotspotQuestion.hotspotTargetCount, hotspotQuestion.hotspots.length);
   assert.equal("hotspots" in publicHotspotQuestion, false);
+});
+
+test("PM01 poultry and packaging tasks use visual product cards", () => {
+  const exam = getPm01Exam();
+  const poultryVariant = buildPm01Variant(exam, "poultry");
+  const productQuestion = poultryVariant.questions.find((item) => item.id.startsWith("poultry-t1-products"));
+  const partsQuestion = poultryVariant.questions.find((item) => item.id.startsWith("poultry-sim-parts"));
+  const complexVariant = buildPm01Variant(exam, "complex");
+  const zonesQuestion = complexVariant.questions.find((item) => item.id.startsWith("complex-sim-zones"));
+  const packQuestion = complexVariant.questions.find((item) => item.id.startsWith("complex-sim-pack"));
+
+  [productQuestion, partsQuestion, zonesQuestion, packQuestion].forEach((question) => {
+    const publicQuestion = sanitizePm01Question(question, { answers: {} });
+    assert.equal(question.type, "bucket_sort");
+    assert.equal(question.visualMode, "product_cards");
+    assert.equal(publicQuestion.items.every((item) => item.image && item.detail), true);
+    assert.equal("correctBuckets" in publicQuestion, false);
+  });
+
+  assert.equal(productQuestion.items.some((item) => item.image.includes("/poultry-products/rabbit-portions.png")), true);
+  assert.equal(packQuestion.items.some((item) => item.image.includes("/packaging/newspaper-violation.png")), true);
 });
 
 test("scorePm01Question accepts decimal comma for calculation tasks", () => {

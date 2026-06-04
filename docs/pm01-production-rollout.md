@@ -10,14 +10,14 @@
 
 ## Current production observation
 
-Checked on 2026-06-02:
+Checked on 2026-06-04:
 
 - `https://olympiada.gorlkts.ru/` returns `200`.
 - `https://olympiada.gorlkts.ru/api/health` returns `200` with `storageBackend: "ydb"`.
-- `https://olympiada.gorlkts.ru/pm01.html` returns `404`.
-- `https://olympiada.gorlkts.ru/pm01-admin.html` returns `404`.
+- `https://olympiada.gorlkts.ru/pm01.html` returns `200`.
+- `https://olympiada.gorlkts.ru/pm01-admin.html` returns `200`.
 
-This means the live container is healthy, but the PM01 revision has not been deployed yet.
+This means the live container and PM01 routes are healthy. After any content, asset, or UI change, push to `main`, wait for the GitHub Actions deploy, and rerun the production verification command below.
 
 ## Before deploy
 

@@ -23,6 +23,9 @@
     examTitle: document.getElementById("exam-title"),
     examDescription: document.getElementById("exam-description"),
     modulePreview: document.getElementById("module-preview"),
+    programTitle: document.getElementById("program-title"),
+    courseList: document.getElementById("course-list"),
+    developerName: document.getElementById("developer-name"),
     startForm: document.getElementById("start-form"),
     fullName: document.getElementById("full-name"),
     institution: document.getElementById("institution"),
@@ -188,8 +191,9 @@
 
   function refreshTopbar() {
     const attempt = state.attempt;
+    const courseCodes = (state.exam?.interdisciplinaryCourses || []).map((course) => course.code).join(" · ");
     elements.topTitle.textContent = state.exam ? "ПМ.01" : "ПМ.01";
-    elements.topSubtitle.textContent = state.exam ? state.exam.subtitle : "Интерактивный экзамен";
+    elements.topSubtitle.textContent = courseCodes || (state.exam ? state.exam.subtitle : "Интерактивный экзамен");
     elements.topMode.textContent = state.mode === "training" ? "Тренировка" : "Экзамен";
     elements.topVariant.textContent = attempt?.selectedVariant
       ? attempt.selectedVariant.title
@@ -445,7 +449,8 @@
         const image = document.createElement("img");
         image.src = item.image;
         image.alt = item.text;
-        image.loading = "lazy";
+        image.loading = "eager";
+        image.decoding = "async";
 
         const copy = document.createElement("span");
         copy.className = "visual-sequence-copy";
@@ -1269,7 +1274,18 @@
       state.exam = await api("/api/pm01/public/exam");
       state.selectedVariantId = state.exam.variants?.[0]?.id || "";
       elements.examTitle.textContent = state.exam.title;
+      if (elements.programTitle) {
+        elements.programTitle.textContent = state.exam.programTitle || state.exam.subtitle;
+      }
       elements.examDescription.textContent = state.exam.description;
+      if (elements.courseList) {
+        elements.courseList.textContent = (state.exam.interdisciplinaryCourses || [])
+          .map((course) => `${course.code}: ${course.title}`)
+          .join(" · ");
+      }
+      if (elements.developerName) {
+        elements.developerName.textContent = state.exam.developer || "Преподаватель Постовит Дмитрий Александрович";
+      }
       renderModulePreview();
       renderVariants();
       refreshTopbar();

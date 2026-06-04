@@ -27,6 +27,19 @@
       ]
     },
     {
+      "name": "Экзамен ПМ.01",
+      "short_name": "ПМ.01",
+      "description": "Открыть экзамен по МДК 01.01 и МДК 01.02",
+      "url": "/pm01.html?source=pm01-shortcut",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
       "name": "Панель организатора",
       "short_name": "Админка",
       "description": "Открыть облачную админку олимпиады",

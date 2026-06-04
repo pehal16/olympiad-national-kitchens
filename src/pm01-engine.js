@@ -28,8 +28,12 @@ function getPm01PublicData(exam = pm01Exam) {
     slug: exam.slug,
     title: exam.title,
     subtitle: exam.subtitle,
+    programTitle: exam.programTitle,
     description: exam.description,
     profession: exam.profession,
+    developer: exam.developer,
+    interdisciplinaryCourses: exam.interdisciplinaryCourses || [],
+    methodicalBasis: exam.methodicalBasis || [],
     durationMinutes: exam.durationMinutes,
     scoring: exam.scoring,
     participantFields: exam.participantFields,
@@ -87,6 +91,8 @@ function validatePm01Question(question) {
 
 function addRuntimeQuestionMeta(question, module, sequenceInModule, globalIndex, variant) {
   const prepared = clone(question);
+  const variantCompetencies = Array.isArray(variant.competencies) ? variant.competencies : [];
+  const questionTags = Array.isArray(prepared.competencyTags) ? prepared.competencyTags : [];
   prepared.sourceId = question.id;
   prepared.id = `${question.id}__${globalIndex + 1}`;
   prepared.moduleId = module.id;
@@ -102,6 +108,7 @@ function addRuntimeQuestionMeta(question, module, sequenceInModule, globalIndex,
   prepared.globalIndex = globalIndex + 1;
   prepared.variantId = variant.id;
   prepared.variantTitle = variant.title;
+  prepared.competencyTags = Array.from(new Set([...variantCompetencies, ...questionTags]));
   return prepared;
 }
 
