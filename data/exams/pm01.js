@@ -231,6 +231,16 @@ module.exports = {
       cutlets: "/assets/pm01/fish-products/fish-cutlets.png",
       mince: "/assets/pm01/fish-products/fish-mince.png"
     },
+    fishProcess: {
+      quality: "/assets/pm01/fish-process/fish-quality.png",
+      defrost: "/assets/pm01/fish-process/fish-defrost.png",
+      scale: "/assets/pm01/fish-process/fish-scale.png",
+      gut: "/assets/pm01/fish-process/fish-gut.png",
+      trim: "/assets/pm01/fish-process/fish-trim.png",
+      rinse: "/assets/pm01/fish-process/fish-rinse.png",
+      portion: "/assets/pm01/fish-process/fish-portioning.png",
+      cool: "/assets/pm01/fish-process/fish-cooling.png"
+    },
     meatSemiProducts: {
       entrecote: "/assets/pm01/meat-products/entrecote.png",
       goulash: "/assets/pm01/meat-products/goulash.png",
@@ -238,6 +248,21 @@ module.exports = {
       cutlets: "/assets/pm01/meat-products/cutlets.png",
       largePiece: "/assets/pm01/meat-products/large-piece.png",
       romsteak: "/assets/pm01/meat-products/romsteak.png"
+    },
+    meatTools: {
+      boningKnife: "/assets/pm01/meat-tools/boning-knife.png",
+      cleaver: "/assets/pm01/meat-tools/cleaver.png",
+      musat: "/assets/pm01/meat-tools/musat.png",
+      mallet: "/assets/pm01/meat-tools/mallet.png",
+      scale: "/assets/pm01/meat-tools/scale.png"
+    },
+    meatGrinderParts: {
+      body: "/assets/pm01/meat-grinder/body.png",
+      screw: "/assets/pm01/meat-grinder/screw.png",
+      knife: "/assets/pm01/meat-grinder/knife.png",
+      plate: "/assets/pm01/meat-grinder/plate.png",
+      nut: "/assets/pm01/meat-grinder/nut.png",
+      hopper: "/assets/pm01/meat-grinder/hopper.png"
     },
     poultrySemiProducts: {
       fillet: "/assets/pm01/poultry-products/chicken-fillet.png",
@@ -869,7 +894,78 @@ module.exports = {
       ],
       voice: voice("fish-voice", "Объясните порядок организации рабочего места и обработки чешуйчатой рыбы для приготовления полуфабрикатов.", ["рыбный или мясорыбный цех", "доска РС", "ножи, скребок, лотки, весы", "проверка качества по запаху, глазам, жабрам и мякоти", "очистка от хвоста к голове", "потрошение, промывание, нарезка", "хранение в холодильнике"], { exemplar: commonRubric }),
       simulation: [
-        sequence("fish-sim-chain", "Соберите технологическую цепочку обработки рыбы.", [["quality", "проверка качества"], ["defrost", "размораживание"], ["scale", "очистка"], ["gut", "потрошение"], ["trim", "удаление плавников/головы"], ["rinse", "промывание"], ["portion", "нарезка/формование"], ["cool", "охлаждение"]], ["quality", "defrost", "scale", "gut", "trim", "rinse", "portion", "cool"], { maxScore: 6 }),
+        sequence(
+          "fish-sim-chain",
+          "Соберите технологическую цепочку обработки рыбы.",
+          [
+            [
+              "quality",
+              "проверка качества",
+              {
+                image: "/assets/pm01/fish-process/fish-quality.png",
+                detail: "Оценить внешний вид, глаза, жабры, запах и упругость мякоти до начала обработки."
+              }
+            ],
+            [
+              "defrost",
+              "размораживание",
+              {
+                image: "/assets/pm01/fish-process/fish-defrost.png",
+                detail: "Размораживать в охлаждаемой зоне одним слоем, без горячей воды и загрязнения стола."
+              }
+            ],
+            [
+              "scale",
+              "очистка чешуи",
+              {
+                image: "/assets/pm01/fish-process/fish-scale.png",
+                detail: "Снимать чешую скребком от хвоста к голове, удерживая рыбу на доске РС."
+              }
+            ],
+            [
+              "gut",
+              "потрошение",
+              {
+                image: "/assets/pm01/fish-process/fish-gut.png",
+                detail: "Аккуратно удалить внутренности и направить отходы в отдельную тару."
+              }
+            ],
+            [
+              "trim",
+              "удаление плавников/головы",
+              {
+                image: "/assets/pm01/fish-process/fish-trim.png",
+                detail: "Удалить плавники и лишние части, сохраняя чистоту доски и рабочей зоны."
+              }
+            ],
+            [
+              "rinse",
+              "промывание",
+              {
+                image: "/assets/pm01/fish-process/fish-rinse.png",
+                detail: "Промыть обработанную рыбу холодной водой и дать стечь воде."
+              }
+            ],
+            [
+              "portion",
+              "нарезка/формование",
+              {
+                image: "/assets/pm01/fish-process/fish-portioning.png",
+                detail: "Нарезать филе или тушку на ровные порционные полуфабрикаты заданной массы."
+              }
+            ],
+            [
+              "cool",
+              "охлаждение",
+              {
+                image: "/assets/pm01/fish-process/fish-cooling.png",
+                detail: "Уложить полуфабрикаты в чистую закрытую тару и хранить в охлаждении."
+              }
+            ]
+          ],
+          ["quality", "defrost", "scale", "gut", "trim", "rinse", "portion", "cool"],
+          { maxScore: 6 }
+        ),
         multiple("fish-sim-inventory", "Выберите инвентарь рыбного участка.", [["board", "доска РС"], ["knife", "нож"], ["scaler", "рыбочистка"], ["scraper", "нож-скребок"], ["trays", "лотки"], ["scales", "весы"], ["fridge", "холодильный шкаф"], ["table", "стол"], ["musat", "мусат для мясного цеха"]], ["board", "knife", "scaler", "scraper", "trays", "scales", "fridge", "table"], { maxScore: 6 }),
         hotspot("fish-sim-hotspot", "Найдите нарушения в рыбном цехе.", "/assets/pm01/violations/fish.png", [
           { id: "no-cooling", label: "Рыба находится в теплой зоне без охлаждения", x: 51, y: 48, radius: 12 },
@@ -976,8 +1072,115 @@ module.exports = {
       ],
       voice: voice("meat-voice", "Объясните организацию рабочего места для приготовления полуфабрикатов из котлетной массы и правила безопасной эксплуатации мясорубки.", ["мясной цех", "стол, доска, ножи, лотки, весы, мясорубка, холодильник", "проверка мяса", "зачистка и нарезка", "правильная сборка мясорубки", "запрет проталкивания рукой", "отключение перед разборкой", "мытье, сушка деталей и охлаждение фарша"], { exemplar: commonRubric }),
       simulation: [
-        bucket("meat-sim-tools", "Соотнесите инструмент и назначение.", [["boning", "обвалочный нож"], ["cleaver", "нож-рубак"], ["musat", "мусат"], ["mallet", "тяпка"], ["scale", "весы"]], [["bone", "отделение мяса от костей"], ["cut", "разрубание"], ["straighten", "правка"], ["beat", "отбивание"], ["mass", "контроль массы"]], { boning: "bone", cleaver: "cut", musat: "straighten", mallet: "beat", scale: "mass" }, { maxScore: 6 }),
-        sequence("meat-sim-mincer", "Соберите мясорубку из карточек.", [["body", "корпус"], ["screw", "шнек"], ["knife", "нож"], ["plate", "решетка"], ["nut", "нажимная гайка"], ["hopper", "загрузочное устройство"]], ["body", "screw", "knife", "plate", "nut", "hopper"], { maxScore: 6 }),
+        bucket(
+          "meat-sim-tools",
+          "Соотнесите инструмент и назначение.",
+          [
+            [
+              "boning",
+              "обвалочный нож",
+              {
+                image: "/assets/pm01/meat-tools/boning-knife.png",
+                detail: "Узкий нож для отделения мякоти от костей и зачистки сырья."
+              }
+            ],
+            [
+              "cleaver",
+              "нож-рубак",
+              {
+                image: "/assets/pm01/meat-tools/cleaver.png",
+                detail: "Тяжелый широкий нож для разрубания крупных частей и костного сырья."
+              }
+            ],
+            [
+              "musat",
+              "мусат",
+              {
+                image: "/assets/pm01/meat-tools/musat.png",
+                detail: "Стальной стержень для правки режущей кромки ножа перед работой."
+              }
+            ],
+            [
+              "mallet",
+              "тяпка для отбивания",
+              {
+                image: "/assets/pm01/meat-tools/mallet.png",
+                detail: "Инструмент для аккуратного отбивания порционных кусков через пищевую пленку."
+              }
+            ],
+            [
+              "scale",
+              "весы",
+              {
+                image: "/assets/pm01/meat-tools/scale.png",
+                detail: "Весы используют для контроля массы сырья и готовых полуфабрикатов."
+              }
+            ]
+          ],
+          [["bone", "отделение мяса от костей"], ["cut", "разрубание"], ["straighten", "правка"], ["beat", "отбивание"], ["mass", "контроль массы"]],
+          { boning: "bone", cleaver: "cut", musat: "straighten", mallet: "beat", scale: "mass" },
+          {
+            maxScore: 6,
+            visualMode: "product_cards",
+            interactionHint: "Рассмотрите инструмент и перенесите карточку к его назначению."
+          }
+        ),
+        sequence(
+          "meat-sim-mincer",
+          "Соберите мясорубку из карточек.",
+          [
+            [
+              "body",
+              "корпус",
+              {
+                image: "/assets/pm01/meat-grinder/body.png",
+                detail: "Основной металлический корпус машины устанавливают первым."
+              }
+            ],
+            [
+              "screw",
+              "шнек",
+              {
+                image: "/assets/pm01/meat-grinder/screw.png",
+                detail: "Шнек подает сырье вперед к режущему узлу."
+              }
+            ],
+            [
+              "knife",
+              "нож",
+              {
+                image: "/assets/pm01/meat-grinder/knife.png",
+                detail: "Крестообразный нож ставят после шнека режущей частью к решетке."
+              }
+            ],
+            [
+              "plate",
+              "решетка",
+              {
+                image: "/assets/pm01/meat-grinder/plate.png",
+                detail: "Решетка с отверстиями формирует фракцию измельченного сырья."
+              }
+            ],
+            [
+              "nut",
+              "нажимная гайка",
+              {
+                image: "/assets/pm01/meat-grinder/nut.png",
+                detail: "Гайка фиксирует нож и решетку в передней части мясорубки."
+              }
+            ],
+            [
+              "hopper",
+              "загрузочное устройство",
+              {
+                image: "/assets/pm01/meat-grinder/hopper.png",
+                detail: "Лоток и загрузочная горловина направляют сырье к шнеку."
+              }
+            ]
+          ],
+          ["body", "screw", "knife", "plate", "nut", "hopper"],
+          { maxScore: 6 }
+        ),
         bucket(
           "meat-sim-groups",
           "Распределите мясные полуфабрикаты по группам.",

@@ -135,6 +135,52 @@
     return button;
   }
 
+  function interactionInstruction(question) {
+    if (!question) {
+      return "";
+    }
+    if (question.interactionHint) {
+      return `${question.interactionHint} Можно перетаскивать или работать кликами.`;
+    }
+    if (question.type === "single_choice") {
+      return "Выберите один подходящий вариант ответа.";
+    }
+    if (question.type === "multiple_choice") {
+      return "Отметьте все подходящие варианты. Лишний выбор снижает результат.";
+    }
+    if (question.type === "sequence_drag") {
+      return "Выберите операцию, затем нажмите нужный шаг. Карточки также можно перетаскивать.";
+    }
+    if (question.type === "bucket_sort") {
+      return "Выберите карточку, затем нажмите нужную группу. Уже поставленную карточку можно нажать и вернуть.";
+    }
+    if (question.type === "calculation_task") {
+      return "Введите числа в поля. Можно использовать точку или запятую, единицы уже указаны в названии поля.";
+    }
+    if (question.type === "voice_response") {
+      return "Запишите голосовой ответ или оставьте текстовую заметку, если микрофон недоступен.";
+    }
+    if (question.type === "hotspot_scene") {
+      return "Нажмите на видимые нарушения на сцене. Поставленную метку можно убрать нажатием.";
+    }
+    return "";
+  }
+
+  function appendTaskGuide(question) {
+    const instruction = interactionInstruction(question);
+    if (!instruction) {
+      return;
+    }
+    const guide = document.createElement("div");
+    guide.className = "task-guide";
+    const label = document.createElement("strong");
+    label.textContent = "Коротко";
+    const text = document.createElement("span");
+    text.textContent = instruction;
+    guide.append(label, text);
+    elements.questionBody.appendChild(guide);
+  }
+
   function renderModulePreview() {
     elements.modulePreview.innerHTML = "";
     (state.exam.modules || []).forEach((module) => {
@@ -236,6 +282,12 @@
       (attempt.summary?.moduleScores || []).map((module) => [module.moduleId, module])
     );
     elements.moduleRail.innerHTML = "";
+    if (attempt.mode === "training" && attempt.status === "in_progress") {
+      const hint = document.createElement("div");
+      hint.className = "module-rail-hint";
+      hint.textContent = "Тренировка: можно открыть любой модуль.";
+      elements.moduleRail.appendChild(hint);
+    }
     (attempt.route.modules || []).forEach((module) => {
       const canJump = attempt.mode === "training" && attempt.status === "in_progress";
       const node = canJump
@@ -390,10 +442,20 @@
     let lastDroppedIndex = -1;
     const layout = document.createElement("div");
     layout.className = "sequence-layout";
+    const status = document.createElement("div");
+    status.className = "interaction-status";
     const slots = document.createElement("div");
     slots.className = "option-list";
     const bank = document.createElement("div");
     bank.className = "option-list";
+
+    function updateStatus() {
+      const activeItem = itemMap.get(activeItemId);
+      const filledCount = sequence.filter(Boolean).length;
+      status.textContent = activeItem
+        ? `Выбрано: ${activeItem.text}. Теперь нажмите нужный шаг.`
+        : `Заполнено шагов: ${filledCount} из ${sequence.length}. Сначала выберите операцию.`;
+    }
 
     function moveItemToSlot(itemId, slotIndex) {
       if (!itemMap.has(itemId) || slotIndex < 0 || slotIndex >= sequence.length) {
@@ -442,6 +504,8 @@
           rerender();
         }
       );
+      chip.setAttribute("aria-pressed", item.id === activeItemId ? "true" : "false");
+      chip.title = placed ? "Убрать из шага" : "Выбрать операцию";
       if (isVisualStep) {
         chip.textContent = "";
         chip.setAttribute("aria-label", item.text);
@@ -462,6 +526,10 @@
           detail.textContent = item.detail;
           copy.appendChild(detail);
         }
+        const action = document.createElement("span");
+        action.className = "chip-action";
+        action.textContent = placed ? "Убрать" : item.id === activeItemId ? "Выбрано" : "Выбрать";
+        copy.appendChild(action);
 
         chip.append(image, copy);
       }
@@ -480,6 +548,7 @@
     function rerender() {
       slots.innerHTML = "";
       bank.innerHTML = "";
+      updateStatus();
       sequence.forEach((itemId, index) => {
         const slot = document.createElement("article");
         slot.className = `slot-card${itemId ? " is-filled" : ""}${
@@ -492,10 +561,14 @@
         drop.className = "sequence-slot-drop";
         if (itemId && itemMap.has(itemId)) {
           drop.appendChild(createSequenceChip(itemMap.get(itemId), true));
+        } else if (activeItemId && itemMap.has(activeItemId)) {
+          const place = createButton("inline-drop-button", `Поставить: ${itemMap.get(activeItemId).text}`, (event) => {
+            event.stopPropagation();
+            moveItemToSlot(activeItemId, index);
+          });
+          drop.appendChild(place);
         } else {
-          drop.textContent = activeItemId
-            ? "Нажмите, чтобы поставить выбранную операцию"
-            : "Перетащите операцию сюда";
+          drop.textContent = "Выберите операцию и нажмите этот шаг";
         }
 
         function setOver(over) {
@@ -550,7 +623,7 @@
     }
 
     rerender();
-    layout.append(slots, bank);
+    layout.append(status, slots, bank);
     elements.questionBody.appendChild(layout);
     return {
       isValid: () => sequence.every(Boolean),
@@ -570,19 +643,22 @@
     const wrapper = document.createElement("div");
     wrapper.className = "cut-match";
 
-    if (question.interactionHint) {
-      const hint = document.createElement("p");
-      hint.className = "cut-match-hint";
-      hint.textContent = question.interactionHint;
-      wrapper.appendChild(hint);
-    }
-
+    const status = document.createElement("div");
+    status.className = "interaction-status";
     const tray = document.createElement("div");
     tray.className = "cut-name-tray";
     const grid = document.createElement("div");
     grid.className = "cut-target-grid";
-    wrapper.append(tray, grid);
+    wrapper.append(status, tray, grid);
     elements.questionBody.appendChild(wrapper);
+
+    function updateStatus() {
+      const activeItem = itemMap.get(activeItemId);
+      const placedCount = Object.keys(placements).length;
+      status.textContent = activeItem
+        ? `Выбрано: ${activeItem.text}. Нажмите фото, к которому относится это название.`
+        : `Соотнесено: ${placedCount} из ${(question.items || []).length}. Сначала выберите название.`;
+    }
 
     function bucketItem(bucketId) {
       return (question.items || []).find((item) => placements[item.id] === bucketId) || null;
@@ -626,6 +702,8 @@
           rerender();
         }
       );
+      chip.setAttribute("aria-pressed", item.id === activeItemId ? "true" : "false");
+      chip.title = placed ? "Убрать название с фото" : "Выбрать название";
       chip.draggable = true;
       chip.addEventListener("dragstart", (event) => {
         event.dataTransfer.setData("text/plain", item.id);
@@ -672,8 +750,14 @@
       drop.className = "cut-drop-slot";
       if (placedItem) {
         drop.appendChild(createNameChip(placedItem, true));
+      } else if (activeItemId && itemMap.has(activeItemId)) {
+        const place = createButton("inline-drop-button", "Поставить сюда", (event) => {
+          event.stopPropagation();
+          placeItem(activeItemId, bucket.id);
+        });
+        drop.appendChild(place);
       } else {
-        drop.textContent = activeItemId ? "Нажмите, чтобы поставить выбранное название" : "Перетащите название сюда";
+        drop.textContent = "Выберите название и нажмите фото";
       }
 
       function setOver(over) {
@@ -710,6 +794,7 @@
     function rerender() {
       tray.innerHTML = "";
       grid.innerHTML = "";
+      updateStatus();
 
       const freeItems = (question.items || []).filter((item) => !placements[item.id]);
       if (freeItems.length) {
@@ -749,35 +834,55 @@
     Object.entries(question.savedAnswer?.buckets || {}).forEach(([itemId, bucketId]) => {
       placements[itemId] = bucketId;
     });
-    let activeBucketId = question.buckets?.[0]?.id || "";
+    let activeBucketId = "";
+    let activeItemId = "";
     let lastDroppedBucketId = "";
     const itemMap = new Map((question.items || []).map((item) => [item.id, item]));
 
+    const wrapper = document.createElement("div");
+    wrapper.className = "bucket-workspace";
+    const status = document.createElement("div");
+    status.className = "interaction-status";
     const bank = document.createElement("div");
     bank.className = "option-list";
     const grid = document.createElement("div");
     grid.className = "bucket-grid";
-    elements.questionBody.append(bank, grid);
+    wrapper.append(status, bank, grid);
+    elements.questionBody.appendChild(wrapper);
 
-    function assign(itemId, bucketId = activeBucketId) {
+    function updateStatus() {
+      const activeItem = itemMap.get(activeItemId);
+      const placedCount = Object.keys(placements).length;
+      status.textContent = activeItem
+        ? `Выбрано: ${activeItem.text}. Теперь нажмите подходящую группу.`
+        : `Распределено: ${placedCount} из ${(question.items || []).length}. Сначала выберите карточку.`;
+    }
+
+    function assign(itemId, bucketId) {
       if (!itemMap.has(itemId) || !bucketId) {
         return;
       }
       placements[itemId] = bucketId;
       activeBucketId = bucketId;
+      activeItemId = "";
       lastDroppedBucketId = bucketId;
       rerender();
     }
 
     function remove(itemId) {
       delete placements[itemId];
+      if (activeItemId === itemId) {
+        activeItemId = "";
+      }
       rerender();
     }
 
     function createBucketChip(item, placed = false) {
       const isProductCard = question.visualMode === "product_cards" && item.image;
       const chip = createButton(
-        `bucket-chip${placed ? " is-placed" : ""}${isProductCard ? " product-chip" : ""}`,
+        `bucket-chip${item.id === activeItemId ? " is-selected" : ""}${placed ? " is-placed" : ""}${
+          isProductCard ? " product-chip" : ""
+        }`,
         isProductCard ? "" : item.text,
         (event) => {
           event.stopPropagation();
@@ -785,15 +890,19 @@
             remove(item.id);
             return;
           }
-          assign(item.id);
+          activeItemId = activeItemId === item.id ? "" : item.id;
+          rerender();
         }
       );
+      chip.setAttribute("aria-pressed", item.id === activeItemId ? "true" : "false");
+      chip.title = placed ? "Вернуть карточку" : "Выбрать карточку";
       if (isProductCard) {
         chip.setAttribute("aria-label", item.text);
         const image = document.createElement("img");
         image.src = item.image;
         image.alt = item.text;
-        image.loading = "lazy";
+        image.loading = "eager";
+        image.decoding = "async";
 
         const copy = document.createElement("span");
         copy.className = "product-chip-copy";
@@ -805,6 +914,10 @@
           detail.textContent = item.detail;
           copy.appendChild(detail);
         }
+        const action = document.createElement("span");
+        action.className = "chip-action";
+        action.textContent = placed ? "Убрать" : item.id === activeItemId ? "Выбрано" : "Выбрать";
+        copy.appendChild(action);
         chip.append(image, copy);
       }
       chip.draggable = true;
@@ -822,6 +935,7 @@
     function rerender() {
       bank.innerHTML = "";
       grid.innerHTML = "";
+      updateStatus();
       const freeItems = (question.items || []).filter((item) => !placements[item.id]);
       if (freeItems.length) {
         freeItems.forEach((item) => bank.appendChild(createBucketChip(item)));
@@ -839,14 +953,22 @@
         }`;
         column.tabIndex = 0;
         column.addEventListener("click", () => {
-          activeBucketId = bucket.id;
-          rerender();
+          if (activeItemId) {
+            assign(activeItemId, bucket.id);
+          } else {
+            activeBucketId = bucket.id;
+            rerender();
+          }
         });
         column.addEventListener("keydown", (event) => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            activeBucketId = bucket.id;
-            rerender();
+            if (activeItemId) {
+              assign(activeItemId, bucket.id);
+            } else {
+              activeBucketId = bucket.id;
+              rerender();
+            }
           }
         });
         column.addEventListener("dragover", (event) => {
@@ -874,10 +996,17 @@
         } else {
           const empty = document.createElement("span");
           empty.className = "bucket-empty";
-          empty.textContent = "Перетащите карточки сюда";
+          empty.textContent = activeItemId ? "Нажмите группу, чтобы поставить карточку" : "Выберите карточку выше";
           body.appendChild(empty);
         }
         column.append(title, body);
+        if (activeItemId && itemMap.has(activeItemId)) {
+          const place = createButton("inline-drop-button bucket-column-action", "Поставить выбранную карточку", (event) => {
+            event.stopPropagation();
+            assign(activeItemId, bucket.id);
+          });
+          column.appendChild(place);
+        }
         grid.appendChild(column);
       });
 
@@ -917,9 +1046,9 @@
       const label = document.createElement("strong");
       label.textContent = `${field.label}${field.unit ? `, ${field.unit}` : ""}`;
       const input = document.createElement("input");
-      input.type = "number";
-      input.step = "0.01";
+      input.type = "text";
       input.inputMode = "decimal";
+      input.placeholder = "0,00";
       input.value = values[field.id] || "";
       input.addEventListener("input", () => {
         values[field.id] = input.value;
@@ -1035,8 +1164,20 @@
     const image = document.createElement("img");
     image.src = question.image || state.attempt.selectedVariant.image;
     image.alt = question.prompt;
+    image.loading = "eager";
+    image.decoding = "async";
+    const toolbar = document.createElement("div");
+    toolbar.className = "hotspot-toolbar";
     const summary = document.createElement("div");
     summary.className = "hotspot-summary";
+    const undo = createButton("inline-drop-button", "Убрать последнюю", () => {
+      points.pop();
+      rerender();
+    });
+    const clear = createButton("inline-drop-button secondary-inline", "Очистить метки", () => {
+      points.splice(0, points.length);
+      rerender();
+    });
 
     function addPoint(event) {
       if (event.target.tagName === "BUTTON") {
@@ -1064,11 +1205,14 @@
         stage.appendChild(marker);
       });
       summary.textContent = `Отмечено зон: ${points.length} из ${question.hotspotTargetCount || "?"}`;
+      undo.disabled = points.length === 0;
+      clear.disabled = points.length === 0;
     }
 
     stage.addEventListener("click", addPoint);
     rerender();
-    elements.questionBody.append(stage, summary);
+    toolbar.append(summary, undo, clear);
+    elements.questionBody.append(stage, toolbar);
 
     return {
       isValid: () => points.length > 0,
@@ -1091,6 +1235,7 @@
     elements.questionTitle.textContent = question.prompt;
     elements.questionPoints.textContent = `${question.maxScore || 0} баллов`;
     elements.questionNote.textContent = question.note || "";
+    appendTaskGuide(question);
 
     if (question.type === "situation") {
       state.controller = renderSituation(question);
@@ -1124,6 +1269,13 @@
 
   function resetWorkspaceScroll() {
     window.requestAnimationFrame(() => {
+      if (window.matchMedia("(max-width: 760px)").matches) {
+        const taskPanel = elements.workspaceScreen.querySelector(".task-panel");
+        if (taskPanel) {
+          taskPanel.scrollIntoView({ block: "start", behavior: "auto" });
+          return;
+        }
+      }
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     });
   }

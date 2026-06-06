@@ -32,11 +32,30 @@ function sendJson(res, statusCode, payload, extraHeaders = {}) {
   res.end(JSON.stringify(payload));
 }
 
-function parseBody(req) {
+function parseBody(req, options = {}) {
   return new Promise((resolve, reject) => {
     const chunks = [];
-    req.on("data", (chunk) => chunks.push(chunk));
+    const maxBytes = Number(options.maxBytes || 8 * 1024 * 1024);
+    let totalBytes = 0;
+    let rejected = false;
+
+    req.on("data", (chunk) => {
+      if (rejected) {
+        return;
+      }
+      totalBytes += chunk.length;
+      if (maxBytes > 0 && totalBytes > maxBytes) {
+        rejected = true;
+        reject(new Error("Тело запроса слишком большое."));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
     req.on("end", () => {
+      if (rejected) {
+        return;
+      }
       if (chunks.length === 0) {
         resolve({});
         return;

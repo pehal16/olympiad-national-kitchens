@@ -190,9 +190,15 @@ test("PM01 vegetable sequence steps use visual process cards without answer keys
 test("PM01 product cards and hotspot scenes stay visual but sanitized", () => {
   const exam = getPm01Exam();
   const fishVariant = buildPm01Variant(exam, "fish");
+  const fishSequenceQuestion = fishVariant.questions.find((item) => item.id.startsWith("fish-sim-chain"));
+  const publicFishSequenceQuestion = sanitizePm01Question(fishSequenceQuestion, { answers: {} });
   const productQuestion = fishVariant.questions.find((item) => item.id.startsWith("fish-sim-products"));
   const publicProductQuestion = sanitizePm01Question(productQuestion, { answers: {} });
 
+  assert.equal(publicFishSequenceQuestion.items.length, 8);
+  assert.equal(publicFishSequenceQuestion.items.every((item) => item.image.includes("/assets/pm01/fish-process/")), true);
+  assert.equal(publicFishSequenceQuestion.items.every((item) => item.detail.length > 20), true);
+  assert.equal("correctSequence" in publicFishSequenceQuestion, false);
   assert.equal(productQuestion.visualMode, "product_cards");
   assert.equal(publicProductQuestion.items.every((item) => item.image && item.detail), true);
   assert.equal("correctBuckets" in publicProductQuestion, false);
@@ -204,6 +210,25 @@ test("PM01 product cards and hotspot scenes stay visual but sanitized", () => {
   assert.equal(publicHotspotQuestion.image.endsWith("vegetable.png"), true);
   assert.equal(publicHotspotQuestion.hotspotTargetCount, hotspotQuestion.hotspots.length);
   assert.equal("hotspots" in publicHotspotQuestion, false);
+});
+
+test("PM01 meat tools and meat grinder sequence are visual but sanitized", () => {
+  const exam = getPm01Exam();
+  const meatVariant = buildPm01Variant(exam, "meat");
+  const toolsQuestion = meatVariant.questions.find((item) => item.id.startsWith("meat-sim-tools"));
+  const grinderQuestion = meatVariant.questions.find((item) => item.id.startsWith("meat-sim-mincer"));
+  const publicToolsQuestion = sanitizePm01Question(toolsQuestion, { answers: {} });
+  const publicGrinderQuestion = sanitizePm01Question(grinderQuestion, { answers: {} });
+
+  assert.equal(toolsQuestion.visualMode, "product_cards");
+  assert.equal(publicToolsQuestion.items.length, 5);
+  assert.equal(publicToolsQuestion.items.every((item) => item.image.includes("/assets/pm01/meat-tools/")), true);
+  assert.equal(publicToolsQuestion.items.every((item) => item.detail.length > 20), true);
+  assert.equal("correctBuckets" in publicToolsQuestion, false);
+  assert.equal(publicGrinderQuestion.items.length, 6);
+  assert.equal(publicGrinderQuestion.items.every((item) => item.image.includes("/assets/pm01/meat-grinder/")), true);
+  assert.equal(publicGrinderQuestion.items.every((item) => item.detail.length > 20), true);
+  assert.equal("correctSequence" in publicGrinderQuestion, false);
 });
 
 test("PM01 poultry and packaging tasks use visual product cards", () => {
