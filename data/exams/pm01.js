@@ -114,6 +114,299 @@ function hotspot(id, prompt, image, hotspots, meta = {}) {
 const commonRubric =
   "Оценивается полнота ответа, правильность терминов, последовательность действий, санитария, безопасность и хранение.";
 
+const classicFrenchCutItems = [
+  ["julienne", "Julienne — соломка"],
+  ["fineJulienne", "Fine julienne — тонкая соломка"],
+  ["allumette", "Allumette — спички"],
+  ["batonnet", "Batonnet — брусочки"],
+  ["jardiniere", "Jardiniere — овощные брусочки"],
+  ["brunoise", "Brunoise — мелкие кубики"],
+  ["fineBrunoise", "Fine brunoise — очень мелкие кубики"],
+  ["macedoine", "Macedoine — средние кубики"],
+  ["paysanne", "Paysanne — тонкие пластинки"],
+  ["rondelle", "Rondelle — кружочки"],
+  ["chiffonade", "Chiffonade — ленты зелени"],
+  ["mirepoix", "Mirepoix — крупная ароматическая нарезка"],
+  ["slices", "Ломтики"],
+  ["wedges", "Дольки"]
+];
+
+const classicFrenchCutBuckets = [
+  [
+    "juliennePhoto",
+    "длинные тонкие полоски",
+    {
+      image: "/assets/pm01/cuts/julienne.png",
+      visualTitle: "Julienne",
+      detail: "Ровная соломка для салатов, гарниров и быстрой тепловой обработки."
+    }
+  ],
+  [
+    "fineJuliennePhoto",
+    "очень тонкие полоски",
+    {
+      image: "/assets/pm01/cuts/fine-julienne.png",
+      visualTitle: "Fine julienne",
+      detail: "Более тонкая соломка для аккуратной подачи, тонких гарниров и украшения."
+    }
+  ],
+  [
+    "allumettePhoto",
+    "тонкие спички",
+    {
+      image: "/assets/pm01/cuts/allumette.png",
+      visualTitle: "Allumette",
+      detail: "Нарезка «спичками»: тонкие ровные палочки, часто используется для картофеля и корнеплодов."
+    }
+  ],
+  [
+    "batonnetPhoto",
+    "классические бруски",
+    {
+      image: "/assets/pm01/cuts/batonnet.png",
+      visualTitle: "Batonnet",
+      detail: "Продолговатые бруски одинаковой толщины для картофеля, моркови, супов и гарниров."
+    }
+  ],
+  [
+    "jardinierePhoto",
+    "аккуратные овощные брусочки",
+    {
+      image: "/assets/pm01/cuts/jardiniere.png",
+      visualTitle: "Jardiniere",
+      detail: "Ровные овощные брусочки для гарниров, супов и демонстрации точности ножевой работы."
+    }
+  ],
+  [
+    "brunoisePhoto",
+    "мелкие кубики",
+    {
+      image: "/assets/pm01/cuts/brunoise.png",
+      visualTitle: "Brunoise",
+      detail: "Мелкие равномерные кубики, получаемые из julienne, для соусов, начинок и точной подачи."
+    }
+  ],
+  [
+    "fineBrunoisePhoto",
+    "очень мелкие кубики",
+    {
+      image: "/assets/pm01/cuts/fine-brunoise.png",
+      visualTitle: "Fine brunoise",
+      detail: "Максимально мелкая кубиковая нарезка для деликатной текстуры и оформления."
+    }
+  ],
+  [
+    "macedoinePhoto",
+    "средние ровные кубики",
+    {
+      image: "/assets/pm01/cuts/macedoine.png",
+      visualTitle: "Macedoine",
+      detail: "Средние кубики для салатов, винегретов, гарниров и полуфабрикатов с ровным прогревом."
+    }
+  ],
+  [
+    "paysannePhoto",
+    "тонкие пластинки разной геометрии",
+    {
+      image: "/assets/pm01/cuts/paysanne.png",
+      visualTitle: "Paysanne",
+      detail: "Тонкие пластинки, форма которых повторяет овощ: кружок, квадрат, треугольник или сектор."
+    }
+  ],
+  [
+    "rondellePhoto",
+    "круглые поперечные ломтики",
+    {
+      image: "/assets/pm01/cuts/rondelle.png",
+      visualTitle: "Rondelle",
+      detail: "Поперечные кружочки моркови, кабачка, огурца и других цилиндрических овощей."
+    }
+  ],
+  [
+    "chiffonadePhoto",
+    "тонкие ленты листьев",
+    {
+      image: "/assets/pm01/cuts/chiffonade.png",
+      visualTitle: "Chiffonade",
+      detail: "Ленты из листовой зелени или салатных листьев для холодных блюд, супов и оформления."
+    }
+  ],
+  [
+    "mirepoixPhoto",
+    "крупная ароматическая нарезка",
+    {
+      image: "/assets/pm01/cuts/mirepoix.png",
+      visualTitle: "Mirepoix",
+      detail: "Крупные кусочки овощей для ароматической основы бульонов, соусов и тушения."
+    }
+  ],
+  [
+    "slicesPhoto",
+    "плоские ломтики",
+    {
+      image: "/assets/pm01/cuts/slices.png",
+      visualTitle: "Ломтики",
+      detail: "Плоские овальные или полукруглые пластины, не клиновидные дольки."
+    }
+  ],
+  [
+    "wedgesPhoto",
+    "клиновидные дольки",
+    {
+      image: "/assets/pm01/cuts/wedges.png",
+      visualTitle: "Дольки",
+      detail: "Клиновидные части картофеля, томатов и корнеплодов для запекания и тушения."
+    }
+  ]
+];
+
+const classicFrenchCutCorrect = {
+  julienne: "juliennePhoto",
+  fineJulienne: "fineJuliennePhoto",
+  allumette: "allumettePhoto",
+  batonnet: "batonnetPhoto",
+  jardiniere: "jardinierePhoto",
+  brunoise: "brunoisePhoto",
+  fineBrunoise: "fineBrunoisePhoto",
+  macedoine: "macedoinePhoto",
+  paysanne: "paysannePhoto",
+  rondelle: "rondellePhoto",
+  chiffonade: "chiffonadePhoto",
+  mirepoix: "mirepoixPhoto",
+  slices: "slicesPhoto",
+  wedges: "wedgesPhoto"
+};
+
+const cutApplicationItems = [
+  ["julienne", "Julienne / соломка"],
+  ["allumette", "Allumette / спички"],
+  ["batonnet", "Batonnet / брусочки"],
+  ["brunoise", "Brunoise / мелкие кубики"],
+  ["macedoine", "Macedoine / средние кубики"],
+  ["paysanne", "Paysanne / пластинки"],
+  ["rondelle", "Rondelle / кружочки"],
+  ["chiffonade", "Chiffonade / ленты зелени"],
+  ["mirepoix", "Mirepoix / ароматическая основа"],
+  ["slices", "Ломтики"],
+  ["wedges", "Дольки"]
+];
+
+const cutApplicationBuckets = [
+  [
+    "fastCook",
+    "салаты, гарниры и быстрая тепловая обработка",
+    {
+      image: "/assets/pm01/cuts/julienne.png",
+      visualTitle: "Соломка",
+      detail: "Длинная ровная нарезка быстро прогревается и выглядит аккуратно в гарнире."
+    }
+  ],
+  [
+    "fries",
+    "картофельные заготовки для жарки",
+    {
+      image: "/assets/pm01/cuts/allumette.png",
+      visualTitle: "Спички",
+      detail: "Тонкие палочки подходят для мелкой картофельной заготовки и тренируют равномерность ножевой работы."
+    }
+  ],
+  [
+    "soupsGarnish",
+    "супы и гарниры с заметной формой",
+    {
+      image: "/assets/pm01/cuts/batonnet.png",
+      visualTitle: "Брусочки",
+      detail: "Брусочки держат форму лучше тонкой соломки и удобны для овощных полуфабрикатов."
+    }
+  ],
+  [
+    "sauces",
+    "соусы, начинки и аккуратная подача",
+    {
+      image: "/assets/pm01/cuts/brunoise.png",
+      visualTitle: "Мелкие кубики",
+      detail: "Мелкие кубики дают ровную текстуру и быстро доходят до готовности."
+    }
+  ],
+  [
+    "salads",
+    "салаты, винегреты и смешанные гарниры",
+    {
+      image: "/assets/pm01/cuts/macedoine.png",
+      visualTitle: "Средние кубики",
+      detail: "Средние кубики хорошо считываются в салате и дают одинаковый размер кусочков."
+    }
+  ],
+  [
+    "thinSoup",
+    "быстрые супы и равномерное прогревание",
+    {
+      image: "/assets/pm01/cuts/paysanne.png",
+      visualTitle: "Тонкие пластинки",
+      detail: "Тонкая пластинчатая форма быстро прогревается и может повторять форму овоща."
+    }
+  ],
+  [
+    "roundVeg",
+    "морковь, кабачок, огурец поперек",
+    {
+      image: "/assets/pm01/cuts/rondelle.png",
+      visualTitle: "Кружочки",
+      detail: "Круглая форма получается поперечным срезом цилиндрического овоща."
+    }
+  ],
+  [
+    "leafGarnish",
+    "листовая зелень, холодные блюда и оформление",
+    {
+      image: "/assets/pm01/cuts/chiffonade.png",
+      visualTitle: "Ленты зелени",
+      detail: "Ленты получают из свернутых листьев; форма уместна для зелени, салата и тонкой подачи."
+    }
+  ],
+  [
+    "stockBase",
+    "ароматическая основа бульона или соуса",
+    {
+      image: "/assets/pm01/cuts/mirepoix.png",
+      visualTitle: "Крупная основа",
+      detail: "Крупная нарезка нужна не для подачи, а для вкусовой основы и дальнейшего удаления/протирания."
+    }
+  ],
+  [
+    "coldPlate",
+    "холодные блюда и плоская нарезка",
+    {
+      image: "/assets/pm01/cuts/slices.png",
+      visualTitle: "Ломтики",
+      detail: "Плоские ломтики отличаются от дольки тем, что не имеют клиновидной формы."
+    }
+  ],
+  [
+    "roast",
+    "запекание и тушение крупными частями",
+    {
+      image: "/assets/pm01/cuts/wedges.png",
+      visualTitle: "Дольки",
+      detail: "Клиновидные дольки хорошо подходят для картофеля, томатов и овощей при запекании."
+    }
+  ]
+];
+
+const cutApplicationCorrect = {
+  julienne: "fastCook",
+  allumette: "fries",
+  batonnet: "soupsGarnish",
+  brunoise: "sauces",
+  macedoine: "salads",
+  paysanne: "thinSoup",
+  rondelle: "roundVeg",
+  chiffonade: "leafGarnish",
+  mirepoix: "stockBase",
+  slices: "coldPlate",
+  wedges: "roast"
+};
+
 module.exports = {
   schemaVersion: 1,
   id: "pm01-2026-exam",
@@ -201,7 +494,14 @@ module.exports = {
     },
     cutShapes: {
       julienne: "/assets/pm01/cuts/julienne.png",
+      fineJulienne: "/assets/pm01/cuts/fine-julienne.png",
+      allumette: "/assets/pm01/cuts/allumette.png",
       brunoise: "/assets/pm01/cuts/brunoise.png",
+      fineBrunoise: "/assets/pm01/cuts/fine-brunoise.png",
+      macedoine: "/assets/pm01/cuts/macedoine.png",
+      paysanne: "/assets/pm01/cuts/paysanne.png",
+      jardiniere: "/assets/pm01/cuts/jardiniere.png",
+      chiffonade: "/assets/pm01/cuts/chiffonade.png",
       rondelle: "/assets/pm01/cuts/rondelle.png",
       mirepoix: "/assets/pm01/cuts/mirepoix.png",
       batonnet: "/assets/pm01/cuts/batonnet.png",
@@ -374,170 +674,15 @@ module.exports = {
         ], "a"),
         bucket(
           "veg-t1-cuts",
-          "Для подготовки овощных полуфабрикатов соотнесите форму нарезки с технологическим описанием.",
-          [
-            ["julienne", "соломка"],
-            ["batonnet", "брусочки"],
-            ["brunoise", "мелкие кубики"],
-            ["mediumCubes", "средние кубики"],
-            ["largeCubes", "крупные кубики"],
-            ["rondelle", "кружочки"],
-            ["wedges", "дольки"],
-            ["rings", "кольца"],
-            ["halfRings", "полукольца"],
-            ["slices", "ломтики"],
-            ["mirepoix", "крупная нарезка"],
-            ["shashki", "шашки"],
-            ["shavings", "стружка"],
-            ["balls", "шарики"]
-          ],
-          [
-            [
-              "thin",
-              "тонкая соломка",
-              {
-                image: "/assets/pm01/cuts/julienne.png",
-                visualTitle: "Тонкая соломка",
-                detail: "Длинные ровные полоски для салатов, гарниров и быстрой тепловой обработки."
-              }
-            ],
-            [
-              "batons",
-              "брусочки",
-              {
-                image: "/assets/pm01/cuts/batonnet.png",
-                visualTitle: "Брусочки",
-                detail: "Продолговатые бруски одинаковой толщины для картофеля, корнеплодов, супов и гарниров."
-              }
-            ],
-            [
-              "small",
-              "мелкие кубики",
-              {
-                image: "/assets/pm01/cuts/brunoise.png",
-                visualTitle: "Мелкие кубики",
-                detail: "Очень мелкая равномерная нарезка для соусов, начинок и аккуратной подачи."
-              }
-            ],
-            [
-              "medium",
-              "средние кубики",
-              {
-                image: "/assets/pm01/cuts/medium-cubes.png",
-                visualTitle: "Средние кубики",
-                detail: "Равные кубики среднего размера для салатов, винегретов, супов и гарниров."
-              }
-            ],
-            [
-              "large",
-              "крупные кубики",
-              {
-                image: "/assets/pm01/cuts/large-cubes.png",
-                visualTitle: "Крупные кубики",
-                detail: "Крупные одинаковые кубики для тушения, супов и блюд с длительной тепловой обработкой."
-              }
-            ],
-            [
-              "round",
-              "кружочки",
-              {
-                image: "/assets/pm01/cuts/rondelle.png",
-                visualTitle: "Кружочки",
-                detail: "Поперечные круглые ломтики овощей одинаковой толщины."
-              }
-            ],
-            [
-              "wedges",
-              "дольки",
-              {
-                image: "/assets/pm01/cuts/wedges.png",
-                visualTitle: "Дольки",
-                detail: "Клиновидные части овоща для картофеля, томатов, запекания и тушения."
-              }
-            ],
-            [
-              "rings",
-              "кольца",
-              {
-                image: "/assets/pm01/cuts/rings.png",
-                visualTitle: "Кольца",
-                detail: "Поперечная нарезка лука или овощей с выраженным центральным отверстием."
-              }
-            ],
-            [
-              "halfRings",
-              "полукольца",
-              {
-                image: "/assets/pm01/cuts/half-rings.png",
-                visualTitle: "Полукольца",
-                detail: "Лук разрезают пополам и нарезают поперек на равные полукруглые полосы."
-              }
-            ],
-            [
-              "slices",
-              "ломтики",
-              {
-                image: "/assets/pm01/cuts/slices.png",
-                visualTitle: "Ломтики",
-                detail: "Тонкие плоские пластины из половинок или четвертинок клубня, не клиновидные дольки."
-              }
-            ],
-            [
-              "rough",
-              "крупная грубая нарезка",
-              {
-                image: "/assets/pm01/cuts/mirepoix.png",
-                visualTitle: "Крупная нарезка",
-                detail: "Крупные кусочки овощей для основы бульонов, тушения и ароматизации."
-              }
-            ],
-            [
-              "shashki",
-              "шашки",
-              {
-                image: "/assets/pm01/cuts/shashki.png",
-                visualTitle: "Шашки",
-                detail: "Плоские квадратные или прямоугольные кусочки капусты для супов и тушения."
-              }
-            ],
-            [
-              "shavings",
-              "стружка",
-              {
-                image: "/assets/pm01/cuts/shavings.png",
-                visualTitle: "Стружка",
-                detail: "Очень тонкие гибкие ленты овоща, полученные строганием или овощечисткой."
-              }
-            ],
-            [
-              "balls",
-              "шарики",
-              {
-                image: "/assets/pm01/cuts/balls.png",
-                visualTitle: "Шарики",
-                detail: "Фигурная нарезка круглой формы, выполненная специальной выемкой."
-              }
-            ]
-          ],
-          {
-            julienne: "thin",
-            batonnet: "batons",
-            brunoise: "small",
-            mediumCubes: "medium",
-            largeCubes: "large",
-            rondelle: "round",
-            wedges: "wedges",
-            rings: "rings",
-            halfRings: "halfRings",
-            slices: "slices",
-            mirepoix: "rough",
-            shashki: "shashki",
-            shavings: "shavings",
-            balls: "balls"
-          },
+          "Соотнесите популярные французские формы нарезки и привычные формы СПО с точным изображением.",
+          classicFrenchCutItems,
+          classicFrenchCutBuckets,
+          classicFrenchCutCorrect,
           {
             visualMode: "cut_shapes",
-            interactionHint: "Перенесите название формы нарезки на подходящее фото."
+            interactionHint: "Перенесите название формы нарезки на подходящее фото.",
+            explanation:
+              "Формы подобраны как базовые французские ножевые нарезки, применимые в подготовке овощных полуфабрикатов, гарниров, супов, салатов и демонстрационных практических заданий."
           }
         ),
         single("veg-t1-potato-storage", "После очистки картофеля до нарезки выберите правильный кратковременный способ хранения.", [
@@ -685,138 +830,16 @@ module.exports = {
         ),
         bucket(
           "veg-sim-cuts",
-          "Соотнесите название формы нарезки с фото и типичным применением.",
-          [
-            ["straw", "соломка"],
-            ["sticks", "брусочки"],
-            ["mediumCubes", "средние кубики"],
-            ["largeCubes", "крупные кубики"],
-            ["wedges", "дольки"],
-            ["slices", "ломтики"],
-            ["rondelle", "кружочки"],
-            ["halfRings", "полукольца"],
-            ["shashki", "шашки"],
-            ["shavings", "стружка"],
-            ["balls", "шарики"]
-          ],
-          [
-            [
-              "fry",
-              "жарка картофеля и гарниры",
-              {
-                image: "/assets/pm01/cuts/julienne.png",
-                visualTitle: "Соломка",
-                detail: "Длинная ровная нарезка для жарки, салатов и гарниров."
-              }
-            ],
-            [
-              "soup",
-              "супы и гарниры",
-              {
-                image: "/assets/pm01/cuts/batonnet.png",
-                visualTitle: "Брусочки",
-                detail: "Продолговатые бруски для картофеля, моркови, супов и гарниров."
-              }
-            ],
-            [
-              "salad",
-              "салаты, винегреты, начинки",
-              {
-                image: "/assets/pm01/cuts/medium-cubes.png",
-                visualTitle: "Средние кубики",
-                detail: "Равномерные кубики среднего размера для салатов, винегретов, супов и гарниров."
-              }
-            ],
-            [
-              "stewCubes",
-              "тушение и супы с длительной обработкой",
-              {
-                image: "/assets/pm01/cuts/large-cubes.png",
-                visualTitle: "Крупные кубики",
-                detail: "Крупные кубики держат форму при тушении и длительной тепловой обработке."
-              }
-            ],
-            [
-              "bake",
-              "запекание и тушение",
-              {
-                image: "/assets/pm01/cuts/wedges.png",
-                visualTitle: "Дольки",
-                detail: "Клиновидные части картофеля, томатов и корнеплодов для запекания и тушения."
-              }
-            ],
-            [
-              "serve",
-              "подача и холодные блюда",
-              {
-                image: "/assets/pm01/cuts/slices.png",
-                visualTitle: "Ломтики",
-                detail: "Тонкие плоские пластины из половинок или четвертинок овоща, не клиновидные дольки."
-              }
-            ],
-            [
-              "stew",
-              "гарниры и пассерование",
-              {
-                image: "/assets/pm01/cuts/rondelle.png",
-                visualTitle: "Кружочки",
-                detail: "Поперечные круглые ломтики моркови, кабачка, огурца и других овощей."
-              }
-            ],
-            [
-              "onion",
-              "пассерование лука и соусы",
-              {
-                image: "/assets/pm01/cuts/half-rings.png",
-                visualTitle: "Полукольца",
-                detail: "Полукольца лука удобны для пассерования, соусов, гарниров и холодных блюд."
-              }
-            ],
-            [
-              "cabbage",
-              "капустные супы и тушение",
-              {
-                image: "/assets/pm01/cuts/shashki.png",
-                visualTitle: "Шашки",
-                detail: "Квадратные кусочки капусты используют для щей, борщей, тушения и гарниров."
-              }
-            ],
-            [
-              "decor",
-              "украшение и тонкая подача",
-              {
-                image: "/assets/pm01/cuts/shavings.png",
-                visualTitle: "Стружка",
-                detail: "Тонкие овощные ленты используют для оформления, салатов и быстрой тепловой обработки."
-              }
-            ],
-            [
-              "ballsDecor",
-              "фигурные гарниры и оформление",
-              {
-                image: "/assets/pm01/cuts/balls.png",
-                visualTitle: "Шарики",
-                detail: "Шарики получают выемкой и используют для фигурных гарниров и оформления."
-              }
-            ]
-          ],
-          {
-            straw: "fry",
-            sticks: "soup",
-            mediumCubes: "salad",
-            largeCubes: "stewCubes",
-            wedges: "bake",
-            slices: "serve",
-            rondelle: "stew",
-            halfRings: "onion",
-            shashki: "cabbage",
-            shavings: "decor",
-            balls: "ballsDecor"
-          },
+          "Соотнесите форму нарезки с типичным применением в подготовке овощных полуфабрикатов.",
+          cutApplicationItems,
+          cutApplicationBuckets,
+          cutApplicationCorrect,
           {
             maxScore: 6,
             visualMode: "cut_shapes",
-            interactionHint: "Перенесите название формы на карточку с изображением и применением."
+            interactionHint: "Перенесите название формы на карточку с изображением и применением.",
+            explanation:
+              "Задание проверяет не запоминание иностранного слова, а практический выбор формы под дальнейшее использование полуфабриката."
           }
         ),
         multiple("veg-sim-equipment", "Выберите оборудование овощного участка.", [

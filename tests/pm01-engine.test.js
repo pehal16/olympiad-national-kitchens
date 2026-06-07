@@ -108,7 +108,14 @@ test("PM01 public data exposes asset registry without visual answer keys", () =>
   const publicSimulation = sanitizePm01Question(visualSimulation, { answers: {} });
   const requiredCutShapes = [
     "julienne",
+    "fineJulienne",
+    "allumette",
     "brunoise",
+    "fineBrunoise",
+    "macedoine",
+    "paysanne",
+    "jardiniere",
+    "chiffonade",
     "rondelle",
     "mirepoix",
     "batonnet",
@@ -144,6 +151,54 @@ test("PM01 public data exposes asset registry without visual answer keys", () =>
   assert.equal("correctBuckets" in publicQuestion, false);
   assert.equal("correctAnswer" in publicQuestion, false);
   assert.equal("correctBuckets" in publicSimulation, false);
+});
+
+test("PM01 cut matching covers modern French knife cuts with real PNG cards", () => {
+  const exam = getPm01Exam();
+  const variant = buildPm01Variant(exam, "vegetables");
+  const namingQuestion = variant.questions.find((item) => item.id.startsWith("veg-t1-cuts"));
+  const applicationQuestion = variant.questions.find((item) => item.id.startsWith("veg-sim-cuts"));
+  const expectedClassic = [
+    "julienne",
+    "fineJulienne",
+    "allumette",
+    "batonnet",
+    "jardiniere",
+    "brunoise",
+    "fineBrunoise",
+    "macedoine",
+    "paysanne",
+    "rondelle",
+    "chiffonade",
+    "mirepoix",
+    "slices",
+    "wedges"
+  ];
+  const expectedApplication = [
+    "julienne",
+    "allumette",
+    "batonnet",
+    "brunoise",
+    "macedoine",
+    "paysanne",
+    "rondelle",
+    "chiffonade",
+    "mirepoix",
+    "slices",
+    "wedges"
+  ];
+
+  assert.deepEqual(namingQuestion.items.map((item) => item.id), expectedClassic);
+  assert.deepEqual(applicationQuestion.items.map((item) => item.id), expectedApplication);
+  assert.equal(namingQuestion.items.some((item) => item.text.includes("Fine julienne")), true);
+  assert.equal(namingQuestion.buckets.every((bucket) => bucket.image.startsWith("/assets/pm01/cuts/")), true);
+  assert.equal(namingQuestion.buckets.every((bucket) => bucket.image.endsWith(".png")), true);
+  assert.equal(applicationQuestion.buckets.every((bucket) => bucket.detail.length > 20), true);
+
+  [...namingQuestion.buckets, ...applicationQuestion.buckets].forEach((bucket) => {
+    const fullPath = path.join(__dirname, "..", "public", bucket.image.replace(/^\//, ""));
+    assert.equal(fs.existsSync(fullPath), true, `${bucket.image} exists`);
+  });
 });
 
 test("PM01 exam materials expose 25 comprehensive tickets without invented calculation keys", () => {
