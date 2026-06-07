@@ -82,6 +82,35 @@ test("PM01 questions keep valid methodological mappings and competency tags", ()
   });
 });
 
+test("PM01 safety and exception questions are framed as clear production situations", () => {
+  const exam = getPm01Exam();
+  const questions = new Map(
+    exam.variants.flatMap((examVariant) =>
+      buildPm01Variant(exam, examVariant.id, { seed: `clarity-${examVariant.id}` }).questions.map((question) => [
+        question.sourceId,
+        question
+      ])
+    )
+  );
+  const oldGenericPrompts = [
+    "При эксплуатации оборудования выберите действие, которое запрещено выполнять.",
+    "При размещении полуфабрикатов из птицы выберите действие, которое нельзя выполнять.",
+    "При расчете сырья по сборнику рецептур определите недопустимое действие студента.",
+    "При хранении готовой партии выберите ошибку, которая нарушает безопасность."
+  ];
+  const allPrompts = [...questions.values()].map((question) => question.prompt).join("\n");
+
+  oldGenericPrompts.forEach((prompt) => {
+    assert.equal(allPrompts.includes(prompt), false, `old generic wording removed: ${prompt}`);
+  });
+  assert.match(questions.get("meat-t1-forbidden").prompt, /МИМ-82/);
+  assert.match(questions.get("meat-t1-forbidden").prompt, /пока машина включена/);
+  assert.match(questions.get("fish-t1-danger").prompt, /сырой рыбой и уже подготовленными овощами/);
+  assert.match(questions.get("poultry-t1-storage").prompt, /ожидает тепловой обработки/);
+  assert.match(questions.get("complex-t1-safety").prompt, /В холодильнике размещают/);
+  assert.match(questions.get("veg-t1-recipe-book").prompt, /по одной рецептуре из сборника/);
+});
+
 test("sanitizePm01Question hides private checking data from students", () => {
   const exam = getPm01Exam();
   const variant = buildPm01Variant(exam, "vegetables");
