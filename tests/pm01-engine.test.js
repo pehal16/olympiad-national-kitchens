@@ -364,6 +364,30 @@ test("PM01 sequence cards are presented out of the correct order", () => {
   });
 });
 
+test("PM01 student UI gives clear action steps for interactive tasks", () => {
+  const uiScript = fs.readFileSync(path.join(__dirname, "..", "public", "pm01.js"), "utf8");
+  const uiStyles = fs.readFileSync(path.join(__dirname, "..", "public", "pm01.css"), "utf8");
+  const meat = buildPm01Variant(getPm01Exam(), "meat", { seed: "ui-guides-meat" });
+  const prompts = meat.questions.map((question) => question.prompt).join("\n");
+
+  [
+    "interactionStepGuide",
+    "Шаги ответа",
+    "Карточки операций",
+    "Названия форм",
+    "Фотографии и применение",
+    "Группы",
+    "Выберите карточку",
+    "Нажмите подходящую группу"
+  ].forEach((text) => {
+    assert.equal(uiScript.includes(text), true, `student UI includes ${text}`);
+  });
+  assert.equal(uiStyles.includes(".task-guide-steps"), true);
+  assert.equal(uiStyles.includes(".interaction-panel-title"), true);
+  assert.equal(prompts.includes("Выберите действия после работы."), false);
+  assert.equal(prompts.includes("Расставьте порядок действий после работы с мясорубкой."), true);
+});
+
 test("PM01 readiness audit removes weak production tasks and keeps fish cutlet flow accurate", () => {
   const exam = getPm01Exam();
   const formulas = new Set(exam.formulas.map((formula) => formula.id));

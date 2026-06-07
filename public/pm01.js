@@ -176,6 +176,31 @@
     return "";
   }
 
+  function interactionStepGuide(question) {
+    if (!question) {
+      return [];
+    }
+    if (question.visualMode === "cut_shapes") {
+      return ["Выберите название формы", "Нажмите подходящее фото", "Для исправления нажмите уже поставленное название"];
+    }
+    if (question.type === "sequence_drag") {
+      return ["Выберите карточку операции", "Нажмите нужный шаг", "Поставленную карточку можно нажать и вернуть"];
+    }
+    if (question.type === "bucket_sort") {
+      return ["Выберите карточку", "Нажмите подходящую группу", "Карточку в группе можно нажать и вернуть"];
+    }
+    if (question.type === "hotspot_scene") {
+      return ["Нажмите на видимое нарушение", "Проверьте количество меток", "Ошибочную метку можно убрать"];
+    }
+    if (question.type === "calculation_task") {
+      return ["Посмотрите формулу", "Введите числа в поля", "Проверьте единицы измерения"];
+    }
+    if (question.type === "voice_response") {
+      return ["Запишите ответ", "Прослушайте запись", "Добавьте текстовую заметку при необходимости"];
+    }
+    return [];
+  }
+
   function appendTaskGuide(question) {
     const instruction = interactionInstruction(question);
     if (!instruction) {
@@ -185,10 +210,34 @@
     guide.className = "task-guide";
     const label = document.createElement("strong");
     label.textContent = "Коротко";
+    const copy = document.createElement("div");
+    copy.className = "task-guide-copy";
     const text = document.createElement("span");
     text.textContent = instruction;
-    guide.append(label, text);
+    copy.appendChild(text);
+    const steps = interactionStepGuide(question);
+    if (steps.length) {
+      const list = document.createElement("ol");
+      list.className = "task-guide-steps";
+      steps.forEach((step) => {
+        const item = document.createElement("li");
+        item.textContent = step;
+        list.appendChild(item);
+      });
+      copy.appendChild(list);
+    }
+    guide.append(label, copy);
     elements.questionBody.appendChild(guide);
+  }
+
+  function createInteractionPanel(titleText, contentNode) {
+    const panel = document.createElement("section");
+    panel.className = "interaction-panel";
+    const title = document.createElement("div");
+    title.className = "interaction-panel-title";
+    title.textContent = titleText;
+    panel.append(title, contentNode);
+    return panel;
   }
 
   function renderModulePreview() {
@@ -779,7 +828,11 @@
     }
 
     rerender();
-    layout.append(status, slots, bank);
+    layout.append(
+      status,
+      createInteractionPanel("Шаги ответа", slots),
+      createInteractionPanel("Карточки операций", bank)
+    );
     elements.questionBody.appendChild(layout);
     return {
       isValid: () => sequence.every(Boolean),
@@ -805,7 +858,11 @@
     tray.className = "cut-name-tray";
     const grid = document.createElement("div");
     grid.className = "cut-target-grid";
-    wrapper.append(status, tray, grid);
+    wrapper.append(
+      status,
+      createInteractionPanel("Названия форм", tray),
+      createInteractionPanel("Фотографии и применение", grid)
+    );
     elements.questionBody.appendChild(wrapper);
 
     function updateStatus() {
@@ -1003,7 +1060,11 @@
     bank.className = "option-list";
     const grid = document.createElement("div");
     grid.className = "bucket-grid";
-    wrapper.append(status, bank, grid);
+    wrapper.append(
+      status,
+      createInteractionPanel("Карточки", bank),
+      createInteractionPanel("Группы", grid)
+    );
     elements.questionBody.appendChild(wrapper);
 
     function updateStatus() {

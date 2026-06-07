@@ -1277,7 +1277,7 @@ module.exports = {
           { id: "knives", label: "Ножи оставлены небезопасно в рабочей зоне", x: 24, y: 82, radius: 12 },
           { id: "knife-edge", label: "Нож лежит на краю стола", x: 86, y: 82, radius: 10 }
         ], { maxScore: 6 }),
-        sequence("meat-sim-finish", "Выберите действия после работы.", [["off", "отключить"], ["stop", "дождаться остановки"], ["disassemble", "разобрать"], ["wash", "вымыть"], ["disinfect", "продезинфицировать"], ["dry", "просушить"], ["store", "убрать место"]], ["off", "stop", "disassemble", "wash", "disinfect", "dry", "store"], { maxScore: 6 })
+        sequence("meat-sim-finish", "Расставьте порядок действий после работы с мясорубкой.", [["off", "отключить"], ["stop", "дождаться остановки"], ["disassemble", "разобрать"], ["wash", "вымыть"], ["disinfect", "продезинфицировать"], ["dry", "просушить"], ["store", "убрать место"]], ["off", "stop", "disassemble", "wash", "disinfect", "dry", "store"], { maxScore: 6 })
       ]
     },
     {
