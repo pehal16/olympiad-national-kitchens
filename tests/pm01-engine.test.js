@@ -96,18 +96,34 @@ test("PM01 safety and exception questions are framed as clear production situati
     "При эксплуатации оборудования выберите действие, которое запрещено выполнять.",
     "При размещении полуфабрикатов из птицы выберите действие, которое нельзя выполнять.",
     "При расчете сырья по сборнику рецептур определите недопустимое действие студента.",
-    "При хранении готовой партии выберите ошибку, которая нарушает безопасность."
+    "При хранении готовой партии выберите ошибку, которая нарушает безопасность.",
+    "Для отделения мяса от костей выберите нужный инструмент.",
+    "При загрузке мяса в мясорубку выберите разрешенный способ подачи сырья.",
+    "При приемке тушек выберите признаки, по которым оценивают качество птицы.",
+    "При получении комплексного заказа выберите первое действие студента."
   ];
   const allPrompts = [...questions.values()].map((question) => question.prompt).join("\n");
+  const allOptionText = [...questions.values()]
+    .flatMap((question) => question.options || [])
+    .map((option) => option.text)
+    .join("\n");
 
   oldGenericPrompts.forEach((prompt) => {
     assert.equal(allPrompts.includes(prompt), false, `old generic wording removed: ${prompt}`);
   });
+  assert.equal(allOptionText.includes("цвет посуды"), false);
+  assert.equal(allOptionText.includes("в моечную посуды"), false);
+  assert.equal(allOptionText.includes("в склад готовой продукции"), false);
   assert.match(questions.get("meat-t1-forbidden").prompt, /МИМ-82/);
   assert.match(questions.get("meat-t1-forbidden").prompt, /пока машина включена/);
+  assert.match(questions.get("meat-t1-boning").prompt, /обвалочном столе/);
+  assert.match(questions.get("meat-t1-pusher").prompt, /приемной горловине мясорубки/);
   assert.match(questions.get("fish-t1-danger").prompt, /сырой рыбой и уже подготовленными овощами/);
+  assert.match(questions.get("fish-t1-storage").prompt, /ждут тепловой обработки/);
+  assert.match(questions.get("poultry-t1-quality").prompt, /органолептическую оценку/);
   assert.match(questions.get("poultry-t1-storage").prompt, /ожидает тепловой обработки/);
   assert.match(questions.get("complex-t1-safety").prompt, /В холодильнике размещают/);
+  assert.match(questions.get("complex-t1-start").prompt, /комплексный заказ/);
   assert.match(questions.get("veg-t1-recipe-book").prompt, /по одной рецептуре из сборника/);
 });
 
