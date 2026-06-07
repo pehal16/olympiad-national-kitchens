@@ -547,10 +547,12 @@ test("PM01 poultry and packaging tasks use visual product cards", () => {
   const productQuestion = poultryVariant.questions.find((item) => item.id.startsWith("poultry-t1-products"));
   const partsQuestion = poultryVariant.questions.find((item) => item.id.startsWith("poultry-sim-parts"));
   const complexVariant = buildPm01Variant(exam, "complex");
+  const fishProductsQuestion = complexVariant.questions.find((item) => item.id.startsWith("complex-t1-fish-products"));
+  const meatProductsQuestion = complexVariant.questions.find((item) => item.id.startsWith("complex-t1-meat-products"));
   const zonesQuestion = complexVariant.questions.find((item) => item.id.startsWith("complex-sim-zones"));
   const packQuestion = complexVariant.questions.find((item) => item.id.startsWith("complex-sim-pack"));
 
-  [productQuestion, partsQuestion, zonesQuestion, packQuestion].forEach((question) => {
+  [productQuestion, partsQuestion, fishProductsQuestion, meatProductsQuestion, zonesQuestion, packQuestion].forEach((question) => {
     const publicQuestion = sanitizePm01Question(question, { answers: {} });
     assert.equal(question.type, "bucket_sort");
     assert.equal(question.visualMode, "product_cards");
@@ -559,6 +561,8 @@ test("PM01 poultry and packaging tasks use visual product cards", () => {
   });
 
   assert.equal(productQuestion.items.some((item) => item.image.includes("/poultry-products/rabbit-portions.png")), true);
+  assert.equal(fishProductsQuestion.items.some((item) => item.image.includes("/fish-products/fish-breaded.png")), true);
+  assert.equal(meatProductsQuestion.items.some((item) => item.image.includes("/meat-products/romsteak.png")), true);
   assert.equal(packQuestion.items.some((item) => item.image.includes("/packaging/newspaper-violation.png")), true);
 });
 
