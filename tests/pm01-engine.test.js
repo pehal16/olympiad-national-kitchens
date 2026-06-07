@@ -111,9 +111,45 @@ test("PM01 safety and exception questions are framed as clear production situati
   oldGenericPrompts.forEach((prompt) => {
     assert.equal(allPrompts.includes(prompt), false, `old generic wording removed: ${prompt}`);
   });
-  assert.equal(allOptionText.includes("цвет посуды"), false);
-  assert.equal(allOptionText.includes("в моечную посуды"), false);
-  assert.equal(allOptionText.includes("в склад готовой продукции"), false);
+  [
+    "цвет посуды",
+    "цвет маркировки лотка",
+    "в моечную посуды",
+    "в склад готовой продукции",
+    "на склад готовой продукции",
+    "любимое блюдо повара",
+    "одинаковая цена товаров",
+    "продажа продуктов соседнему цеху",
+    "журнал посещаемости",
+    "расписание занятий",
+    "личный блокнот",
+    "тестораскаточная лента",
+    "любые пищевые отходы",
+    "только жидкие соусы",
+    "только соль и сахар",
+    "увеличить массу продукта",
+    "сладкую, кислую, соленую",
+    "вареную, жареную, тушеную",
+    "чтобы скрыть запах порчи",
+    "чтобы увеличить отходы",
+    "чтобы заменить тепловую обработку",
+    "чтобы овощи были одинакового цвета",
+    "чтобы быстрее оформить заявку",
+    "пищевые отходы после очистки овощей",
+    "цвет разделочной доски",
+    "заменить входной контроль качества сырья",
+    "заменить мойку сырья перед очисткой",
+    "заменить маркировку партии",
+    "номер учебной смены без названия продукта",
+    "номер стеллажа без даты изготовления",
+    "с расчета цены реализации",
+    "мусат для мясного цеха",
+    "для варки мяса",
+    "для хранения фарша",
+    "для мытья досок"
+  ].forEach((phrase) => {
+    assert.equal(allOptionText.includes(phrase), false, `cartoon distractor removed: ${phrase}`);
+  });
   assert.match(questions.get("meat-t1-forbidden").prompt, /МИМ-82/);
   assert.match(questions.get("meat-t1-forbidden").prompt, /пока машина включена/);
   assert.match(questions.get("meat-t1-boning").prompt, /обвалочном столе/);
@@ -124,6 +160,7 @@ test("PM01 safety and exception questions are framed as clear production situati
   assert.match(questions.get("poultry-t1-storage").prompt, /ожидает тепловой обработки/);
   assert.match(questions.get("complex-t1-safety").prompt, /В холодильнике размещают/);
   assert.match(questions.get("complex-t1-start").prompt, /комплексный заказ/);
+  assert.match(questions.get("veg-t1-calibration").prompt, /сортирует клубни по размеру/);
   assert.match(questions.get("veg-t1-recipe-book").prompt, /по одной рецептуре из сборника/);
 });
 
