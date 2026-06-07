@@ -188,8 +188,8 @@ test("PM01 cut matching covers modern French knife cuts with real PNG cards", ()
     "wedges"
   ];
 
-  assert.deepEqual(namingQuestion.items.map((item) => item.id), expectedClassic);
-  assert.deepEqual(applicationQuestion.items.map((item) => item.id), expectedApplication);
+  assert.deepEqual(namingQuestion.items.map((item) => item.id).sort(), expectedClassic.sort());
+  assert.deepEqual(applicationQuestion.items.map((item) => item.id).sort(), expectedApplication.sort());
   assert.equal(namingQuestion.items.some((item) => item.text.includes("Fine julienne")), true);
   assert.equal(namingQuestion.buckets.every((bucket) => bucket.image.startsWith("/assets/pm01/cuts/")), true);
   assert.equal(namingQuestion.buckets.every((bucket) => bucket.image.endsWith(".png")), true);
@@ -199,6 +199,73 @@ test("PM01 cut matching covers modern French knife cuts with real PNG cards", ()
     const fullPath = path.join(__dirname, "..", "public", bucket.image.replace(/^\//, ""));
     assert.equal(fs.existsSync(fullPath), true, `${bucket.image} exists`);
   });
+});
+
+test("PM01 exam can generate a mixed route across all production areas", () => {
+  const exam = getPm01Exam();
+  const mixed = buildPm01Variant(exam, "mixed", { seed: "exam-student-001" });
+  const moduleScores = new Map(
+    mixed.modules.map((module) => [
+      module.id,
+      mixed.questions
+        .filter((question) => question.moduleId === module.id)
+        .reduce((sum, question) => sum + question.maxScore, 0)
+    ])
+  );
+  const testPrefixes = new Set(
+    mixed.questions
+      .filter((question) => question.moduleId === "test")
+      .map((question) => question.sourceId.split("-")[0])
+  );
+  const simulationPrefixes = new Set(
+    mixed.questions
+      .filter((question) => question.moduleId === "simulation")
+      .map((question) => question.sourceId.split("-")[0])
+  );
+
+  assert.equal(mixed.variantId, "mixed");
+  assert.equal(mixed.variantTitle, "Смешанный экзамен");
+  assert.equal(mixed.questions.length, 20);
+  assert.equal(moduleScores.get("test"), 20);
+  assert.equal(moduleScores.get("calculation"), 30);
+  assert.equal(moduleScores.get("voice"), 20);
+  assert.equal(moduleScores.get("simulation"), 30);
+  ["veg", "fish", "meat", "poultry", "complex"].forEach((prefix) => {
+    assert.equal(testPrefixes.has(prefix), true, `M1 includes ${prefix}`);
+    assert.equal(simulationPrefixes.has(prefix), true, `M4 includes ${prefix}`);
+  });
+  assert.equal(mixed.materialTicket, null);
+});
+
+test("PM01 sequence cards are presented out of the correct order", () => {
+  const exam = getPm01Exam();
+  [...exam.variants.map((variant) => variant.id), "mixed"].forEach((variantId) => {
+    const variant = buildPm01Variant(exam, variantId, { seed: `shuffle-${variantId}` });
+    variant.questions
+      .filter((question) => question.type === "sequence_drag")
+      .forEach((question) => {
+        const itemOrder = question.items.map((item) => item.id);
+        assert.notDeepEqual(itemOrder, question.correctSequence, `${question.sourceId} is shuffled`);
+      });
+  });
+});
+
+test("PM01 readiness audit removes weak production tasks and keeps fish cutlet flow accurate", () => {
+  const exam = getPm01Exam();
+  const formulas = new Set(exam.formulas.map((formula) => formula.id));
+  const fish = buildPm01Variant(exam, "fish", { seed: "readiness-fish" });
+  const complex = buildPm01Variant(exam, "complex", { seed: "readiness-complex" });
+  const fishCutlet = fish.questions.find((question) => question.sourceId === "fish-t1-cutlet");
+  const complexQuestionIds = new Set(complex.questions.map((question) => question.sourceId));
+  const complexVoice = complex.questions.find((question) => question.sourceId === "complex-voice");
+
+  assert.equal(formulas.has("price"), false);
+  assert.equal(formulas.has("package"), true);
+  assert.equal(complexQuestionIds.has("complex-calc-price"), false);
+  assert.equal(complexQuestionIds.has("complex-calc-pack"), true);
+  assert.deepEqual(fishCutlet.correctSequence, ["fillet", "bread", "grind", "mix", "spice", "beat"]);
+  assert.equal(complexVoice.prompt.includes("Покупатель приобрел"), false);
+  assert.equal(complexVoice.prompt.includes("упаковку, маркировку, хранение"), true);
 });
 
 test("PM01 exam materials expose 25 comprehensive tickets without invented calculation keys", () => {

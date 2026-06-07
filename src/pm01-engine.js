@@ -160,7 +160,73 @@ function validatePm01Question(question) {
   }
 }
 
-function addRuntimeQuestionMeta(question, module, sequenceInModule, globalIndex, variant) {
+function hashSeed(seed) {
+  const text = String(seed || "pm01");
+  let hash = 2166136261;
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0 || 1;
+}
+
+function createSeededRandom(seed) {
+  let state = hashSeed(seed);
+  return () => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    return state / 0x100000000;
+  };
+}
+
+function shuffledCopy(items, seed) {
+  const result = Array.isArray(items) ? items.map((item) => clone(item)) : [];
+  const random = createSeededRandom(seed);
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+  }
+  return result;
+}
+
+function sameOrder(left, right) {
+  return (
+    Array.isArray(left) &&
+    Array.isArray(right) &&
+    left.length === right.length &&
+    left.every((value, index) => value === right[index])
+  );
+}
+
+function rotateFirstToEnd(items) {
+  if (!Array.isArray(items) || items.length < 2) {
+    return items;
+  }
+  return [...items.slice(1), items[0]];
+}
+
+function shuffleQuestionPresentation(question, routeSeed) {
+  const seed = `${routeSeed || "pm01"}:${question.sourceId || question.id}`;
+
+  if (Array.isArray(question.options) && question.options.length > 2) {
+    question.options = shuffledCopy(question.options, `${seed}:options`);
+  }
+
+  if (Array.isArray(question.items) && question.items.length > 1) {
+    question.items = shuffledCopy(question.items, `${seed}:items`);
+    if (question.type === "sequence_drag") {
+      const itemOrder = question.items.map((item) => item.id);
+      if (sameOrder(itemOrder, question.correctSequence)) {
+        question.items = rotateFirstToEnd(question.items);
+      }
+    }
+  }
+
+  if (Array.isArray(question.buckets) && question.buckets.length > 1) {
+    question.buckets = shuffledCopy(question.buckets, `${seed}:buckets`);
+  }
+}
+
+function addRuntimeQuestionMeta(question, module, sequenceInModule, globalIndex, variant, routeSeed) {
   const prepared = clone(question);
   const variantCompetencies = Array.isArray(variant.competencies) ? variant.competencies : [];
   const questionTags = Array.isArray(prepared.competencyTags) ? prepared.competencyTags : [];
@@ -180,6 +246,7 @@ function addRuntimeQuestionMeta(question, module, sequenceInModule, globalIndex,
   prepared.variantId = variant.id;
   prepared.variantTitle = variant.title;
   prepared.competencyTags = Array.from(new Set([...variantCompetencies, ...questionTags]));
+  shuffleQuestionPresentation(prepared, routeSeed);
   return prepared;
 }
 
@@ -250,10 +317,94 @@ function moduleQuestionsForVariant(variant, moduleId, ticket = null) {
   return [];
 }
 
+function pickQuestions(questions, count, seed) {
+  return shuffledCopy(questions || [], seed).slice(0, count);
+}
+
+function buildMixedVoiceQuestion(exam, sourceVariants) {
+  const complexVariant =
+    sourceVariants.find((variant) => variant.id === "complex") ||
+    sourceVariants[sourceVariants.length - 1] ||
+    {};
+  const baseVoice = clone(complexVariant.voice || {});
+  return {
+    ...baseVoice,
+    id: "mixed-voice",
+    prompt:
+      "Объясните, как организовать безопасную подготовку полуфабрикатов при смешанном заказе: овощи, рыба, мясо, птица. Назовите раздельность рабочих мест, инвентарь, хранение, маркировку и контроль качества.",
+    answerPlan: [
+      "распределить сырье по овощному, рыбному, мясному участку и участку птицы",
+      "назвать маркировку досок, ножей, тары и раздельность потоков",
+      "объяснить входной контроль качества сырья",
+      "указать последовательность обработки и подготовку полуфабрикатов",
+      "подобрать безопасное оборудование и инвентарь",
+      "назвать условия охлаждения, упаковки, маркировки и хранения",
+      "объяснить санитарную обработку рабочего места после смены"
+    ],
+    exemplar: [
+      exam.programTitle,
+      "Оценивается связный ответ по всем участкам: овощи, рыба, мясо, птица, безопасность, хранение и маркировка."
+    ].join("\n")
+  };
+}
+
+function buildPm01MixedVariant(exam, seed) {
+  const sourceVariants = exam.variants || [];
+  const complexVariant =
+    sourceVariants.find((variant) => variant.id === "complex") ||
+    sourceVariants[sourceVariants.length - 1] ||
+    sourceVariants[0] ||
+    {};
+  const nonComplexVariants = sourceVariants.filter((variant) => variant.id !== "complex");
+  const calculationSources = shuffledCopy(nonComplexVariants, `${seed}:mixed:calculation-sources`).slice(0, 2);
+  const complexCalculation =
+    (complexVariant.calculation || []).find((question) => question.id === "complex-calc-net") ||
+    (complexVariant.calculation || [])[0];
+  const calculationQuestions = shuffledCopy([
+    complexCalculation ? clone(complexCalculation) : null,
+    ...calculationSources.flatMap((variant) =>
+      pickQuestions(variant.calculation || [], 1, `${seed}:mixed:calculation:${variant.id}`)
+    )
+  ].filter(Boolean), `${seed}:mixed:calculation-order`);
+  const testQuestions = shuffledCopy(
+    sourceVariants.flatMap((variant) =>
+      pickQuestions(variant.test || [], 2, `${seed}:mixed:test:${variant.id}`)
+    ),
+    `${seed}:mixed:test-order`
+  );
+  const simulationQuestions = shuffledCopy(
+    sourceVariants
+      .flatMap((variant) => pickQuestions(variant.simulation || [], 1, `${seed}:mixed:simulation:${variant.id}`))
+      .slice(0, 5),
+    `${seed}:mixed:simulation-order`
+  );
+
+  return {
+    id: "mixed",
+    number: 0,
+    title: "Смешанный экзамен",
+    shortTitle: "Все цехи",
+    icon: "PM",
+    accent: "#14513f",
+    image: complexVariant.image || "/assets/pm01/complex-workshop.png",
+    scenario:
+      "Экзаменационная смена проходит как смешанный производственный маршрут. Студент получает задания по овощному, рыбному, мясному участку, участку птицы и комплексному заказу. Нужно отвечать по ситуации, выполнять расчеты, выбирать безопасные операции, находить нарушения и объяснять хранение полуфабрикатов.",
+    competencies: Array.from(new Set(sourceVariants.flatMap((variant) => variant.competencies || []))),
+    test: testQuestions,
+    calculation: calculationQuestions,
+    voice: buildMixedVoiceQuestion(exam, sourceVariants),
+    simulation: simulationQuestions
+  };
+}
+
 function buildPm01Variant(exam, variantId, options = {}) {
-  const variant = getPm01Variant(variantId, exam);
+  const routeSeed = String(options.seed || `${variantId || "default"}:static`);
+  const variant =
+    variantId === "mixed"
+      ? buildPm01MixedVariant(exam, routeSeed)
+      : getPm01Variant(variantId, exam);
   const requestedTicket = getPm01MaterialTicket(options.ticketId);
-  const materialTicket = isPm01TicketCompatibleWithVariant(variant.id, requestedTicket)
+  const materialTicket = variant.id !== "mixed" && isPm01TicketCompatibleWithVariant(variant.id, requestedTicket)
     ? requestedTicket
     : null;
   const flatQuestions = [];
@@ -267,7 +418,8 @@ function buildPm01Variant(exam, variantId, options = {}) {
         module,
         index + 1,
         globalIndex,
-        variant
+        variant,
+        routeSeed
       );
       validatePm01Question(prepared);
       flatQuestions.push(prepared);
@@ -290,6 +442,7 @@ function buildPm01Variant(exam, variantId, options = {}) {
   return {
     schemaVersion: exam.schemaVersion,
     generatedAt: nowIso(),
+    routeSeed,
     totalMaxScore: exam.scoring.totalMaxScore,
     variantId: variant.id,
     variantNumber: variant.number,

@@ -32,7 +32,10 @@
     institution: document.getElementById("institution"),
     groupName: document.getElementById("group-name"),
     mentorName: document.getElementById("mentor-name"),
+    examRouteNote: document.getElementById("exam-route-note"),
+    variantField: document.getElementById("variant-field"),
     variantGrid: document.getElementById("variant-grid"),
+    ticketField: document.getElementById("ticket-field"),
     ticketSelect: document.getElementById("ticket-select"),
     ticketPreview: document.getElementById("ticket-preview"),
     entryMessage: document.getElementById("entry-message"),
@@ -144,7 +147,10 @@
       return "";
     }
     if (question.interactionHint) {
-      return `${question.interactionHint} Можно перетаскивать или работать кликами.`;
+      return `${question.interactionHint} Можно не тянуть мышью: нажмите карточку, затем нужное место.`;
+    }
+    if (question.type === "situation") {
+      return "Ознакомьтесь с производственной ситуацией и нажмите «Ответить и далее», чтобы начать задания.";
     }
     if (question.type === "single_choice") {
       return "Выберите один подходящий вариант ответа.";
@@ -153,10 +159,10 @@
       return "Отметьте все подходящие варианты. Лишний выбор снижает результат.";
     }
     if (question.type === "sequence_drag") {
-      return "Выберите операцию, затем нажмите нужный шаг. Карточки также можно перетаскивать.";
+      return "Карточки перемешаны. Выберите операцию, затем нажмите нужный шаг; при желании перетащите карточку мышью.";
     }
     if (question.type === "bucket_sort") {
-      return "Выберите карточку, затем нажмите нужную группу. Уже поставленную карточку можно нажать и вернуть.";
+      return "Выберите карточку, затем нажмите нужную группу. Уже поставленную карточку можно нажать и вернуть обратно.";
     }
     if (question.type === "calculation_task") {
       return "Введите числа в поля. Можно использовать точку или запятую, единицы уже указаны в названии поля.";
@@ -349,6 +355,19 @@
     document.querySelectorAll("[data-mode]").forEach((button) => {
       button.classList.toggle("is-active", button.dataset.mode === state.mode);
     });
+    const training = state.mode === "training";
+    if (elements.examRouteNote) {
+      elements.examRouteNote.textContent = training
+        ? "Тренировка: можно выбрать цех, билет и затем открыть любой модуль слева."
+        : "Экзамен: маршрут формируется автоматически из овощного, рыбного, мясного участка, птицы и комплексного заказа. Цех и билет выбирать не нужно.";
+    }
+    elements.variantField?.classList.toggle("hidden", !training);
+    elements.ticketField?.classList.toggle("hidden", !training);
+    elements.ticketPreview?.classList.toggle("hidden", !training);
+    if (!training) {
+      state.selectedTicketId = "";
+    }
+    renderTickets();
     elements.topMode.textContent = state.mode === "training" ? "Тренировка" : "Экзамен";
   }
 
@@ -866,7 +885,7 @@
       const image = document.createElement("img");
       image.src = bucket.image || state.attempt.selectedVariant.image;
       image.alt = bucket.visualTitle || bucket.label;
-      image.loading = "eager";
+      image.loading = "lazy";
       image.decoding = "async";
       imageWrap.appendChild(image);
 
@@ -1497,8 +1516,8 @@
         method: "POST",
         body: JSON.stringify({
           participant: participantPayload(),
-          variantId: state.selectedVariantId,
-          ticketId: state.selectedTicketId,
+          variantId: state.mode === "training" ? state.selectedVariantId : "",
+          ticketId: state.mode === "training" ? state.selectedTicketId : "",
           mode: state.mode
         })
       });

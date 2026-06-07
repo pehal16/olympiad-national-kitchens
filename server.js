@@ -2044,10 +2044,10 @@ async function handleApi(req, res, url) {
 
     const mode = body.mode === "training" ? "training" : "exam";
     const variantId = String(body.variantId || "").trim();
-    const ticketId = String(body.ticketId || "").trim();
-    const selectedVariantId = variantId || exam.variants[0].id;
+    const selectedVariantId = mode === "exam" ? "mixed" : variantId || exam.variants[0].id;
+    const ticketId = mode === "exam" ? "" : String(body.ticketId || "").trim();
     const materialTicket = ticketId ? getPm01MaterialTicket(ticketId) : null;
-    if (variantId && !exam.variants.some((variant) => variant.id === variantId)) {
+    if (mode === "training" && variantId && !exam.variants.some((variant) => variant.id === variantId)) {
       sendJson(res, 400, { ok: false, message: "Выберите корректный вариант ПМ.01." });
       return;
     }
@@ -2093,7 +2093,8 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    const variant = buildPm01Variant(exam, selectedVariantId, { ticketId });
+    const routeSeed = generateId("pm01_route");
+    const variant = buildPm01Variant(exam, selectedVariantId, { ticketId, seed: routeSeed });
     const startedAt = nowIso();
     const attempt = {
       id: generateId("pm01_attempt"),
@@ -2103,6 +2104,7 @@ async function handleApi(req, res, url) {
       participantSignature,
       selectedVariantId: variant.variantId,
       selectedTicketId: variant.materialTicket?.id || "",
+      routeSeed,
       mode,
       startedAt,
       expiresAt: new Date(Date.now() + exam.durationMinutes * 60 * 1000).toISOString(),
