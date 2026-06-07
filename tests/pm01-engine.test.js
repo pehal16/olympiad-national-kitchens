@@ -566,6 +566,24 @@ test("PM01 poultry and packaging tasks use visual product cards", () => {
   assert.equal(packQuestion.items.some((item) => item.image.includes("/packaging/newspaper-violation.png")), true);
 });
 
+test("PM01 visual product cards do not reuse one image for different answer cards", () => {
+  const exam = getPm01Exam();
+
+  exam.variants.forEach((examVariant) => {
+    const variant = buildPm01Variant(exam, examVariant.id, { seed: `unique-product-images-${examVariant.id}` });
+    variant.questions
+      .filter((question) => question.type === "bucket_sort" && question.visualMode === "product_cards")
+      .forEach((question) => {
+        const imageRefs = (question.items || []).map((item) => item.image).filter(Boolean);
+        assert.deepEqual(
+          [...new Set(imageRefs)].sort(),
+          imageRefs.sort(),
+          `${question.sourceId} uses unique images for product cards`
+        );
+      });
+  });
+});
+
 test("scorePm01Question accepts decimal comma for calculation tasks", () => {
   const exam = getPm01Exam();
   const variant = buildPm01Variant(exam, "vegetables");

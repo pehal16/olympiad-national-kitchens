@@ -568,6 +568,8 @@ module.exports = {
       fillet: "/assets/pm01/poultry-products/chicken-fillet.png",
       legQuarter: "/assets/pm01/poultry-products/chicken-leg-quarter.png",
       thighDrumstick: "/assets/pm01/poultry-products/chicken-thigh-drumstick.png",
+      drumstick: "/assets/pm01/poultry-products/chicken-drumstick.png",
+      thigh: "/assets/pm01/poultry-products/chicken-thigh.png",
       mince: "/assets/pm01/poultry-products/poultry-mince.png",
       rabbitPortions: "/assets/pm01/poultry-products/rabbit-portions.png"
     },
@@ -1386,8 +1388,8 @@ module.exports = {
           [
             ["fillet", "филе", { image: "/assets/pm01/poultry-products/chicken-fillet.png", detail: "Грудная мякоть без кости." }],
             ["leg", "окорочок", { image: "/assets/pm01/poultry-products/chicken-leg-quarter.png", detail: "Бедро и голень вместе." }],
-            ["drumstick", "голень", { image: "/assets/pm01/poultry-products/chicken-thigh-drumstick.png", detail: "Нижняя часть ноги." }],
-            ["thigh", "бедро", { image: "/assets/pm01/poultry-products/chicken-thigh-drumstick.png", detail: "Верхняя мясистая часть ноги." }],
+            ["drumstick", "голень", { image: "/assets/pm01/poultry-products/chicken-drumstick.png", detail: "Нижняя часть ноги." }],
+            ["thigh", "бедро", { image: "/assets/pm01/poultry-products/chicken-thigh.png", detail: "Верхняя мясистая часть ноги." }],
             ["mince", "котлетная масса", { image: "/assets/pm01/poultry-products/poultry-mince.png", detail: "Измельченная мякоть для формования." }]
           ],
           [["breast", "грудная часть"], ["leg-full", "бедро и голень"], ["lower", "нижняя часть ноги"], ["upper", "верхняя часть ноги"], ["flesh", "мякоть"]],
@@ -1509,7 +1511,6 @@ module.exports = {
             ["container", "пищевой контейнер", { image: "/assets/pm01/packaging/sealed-container.png", detail: "Чистый контейнер с крышкой и местом для маркировки." }],
             ["tray", "лоток с пленкой", { image: "/assets/pm01/packaging/film-tray-fish.png", detail: "Пищевой лоток с плотной пленкой для кратковременного хранения." }],
             ["gastronorm", "гастроемкость с крышкой", { image: "/assets/pm01/packaging/gastronorm-lid.png", detail: "Закрытая гастроемкость с маркировочным держателем." }],
-            ["bag", "пакет для пищевых продуктов", { image: "/assets/pm01/packaging/sealed-container.png", detail: "Допустим только пищевой пакет, закрытый и промаркированный." }],
             ["newspaper", "газета", { image: "/assets/pm01/packaging/newspaper-violation.png", detail: "Газета не является пищевой упаковкой и загрязняет продукт." }]
           ],
           [["allowed", "Допустимая упаковка"], ["forbidden", "Недопустимо"]],
@@ -1517,7 +1518,6 @@ module.exports = {
             container: "allowed",
             tray: "allowed",
             gastronorm: "allowed",
-            bag: "allowed",
             newspaper: "forbidden"
           },
           {
