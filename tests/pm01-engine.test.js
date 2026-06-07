@@ -183,7 +183,7 @@ test("PM01 safety and exception questions are framed as clear production situati
     assert.equal(allOptionText.includes(phrase), false, `cartoon distractor removed: ${phrase}`);
   });
   assert.match(questions.get("meat-t1-forbidden").prompt, /МИМ-82/);
-  assert.match(questions.get("meat-t1-forbidden").prompt, /пока машина включена/);
+  assert.match(questions.get("meat-t1-forbidden").prompt, /до полной остановки и отключения машины/);
   assert.match(questions.get("meat-t1-boning").prompt, /обвалочном столе/);
   assert.match(questions.get("meat-t1-pusher").prompt, /приемной горловине мясорубки/);
   assert.match(questions.get("fish-t1-danger").prompt, /сырой рыбой и уже подготовленными овощами/);
@@ -318,6 +318,7 @@ test("PM01 cut matching covers modern French knife cuts with real PNG cards", ()
 test("PM01 exam can generate a mixed route across all production areas", () => {
   const exam = getPm01Exam();
   const mixed = buildPm01Variant(exam, "mixed", { seed: "exam-student-001" });
+  const sourceIds = mixed.questions.map((question) => question.sourceId);
   const moduleScores = new Map(
     mixed.modules.map((module) => [
       module.id,
@@ -340,6 +341,7 @@ test("PM01 exam can generate a mixed route across all production areas", () => {
   assert.equal(mixed.variantId, "mixed");
   assert.equal(mixed.variantTitle, "Смешанный экзамен");
   assert.equal(mixed.questions.length, 20);
+  assert.equal(new Set(sourceIds).size, sourceIds.length, "mixed route has no repeated source tasks");
   assert.equal(moduleScores.get("test"), 20);
   assert.equal(moduleScores.get("calculation"), 30);
   assert.equal(moduleScores.get("voice"), 20);
@@ -367,6 +369,7 @@ test("PM01 sequence cards are presented out of the correct order", () => {
 test("PM01 student UI gives clear action steps for interactive tasks", () => {
   const uiScript = fs.readFileSync(path.join(__dirname, "..", "public", "pm01.js"), "utf8");
   const uiStyles = fs.readFileSync(path.join(__dirname, "..", "public", "pm01.css"), "utf8");
+  const uiHtml = fs.readFileSync(path.join(__dirname, "..", "public", "pm01.html"), "utf8");
   const meat = buildPm01Variant(getPm01Exam(), "meat", { seed: "ui-guides-meat" });
   const prompts = meat.questions.map((question) => question.prompt).join("\n");
 
@@ -378,10 +381,15 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
     "Фотографии и применение",
     "Группы",
     "Выберите карточку",
-    "Нажмите подходящую группу"
+    "Нажмите подходящую группу",
+    "Смешанный маршрут",
+    "Начать смешанный экзамен ПМ.01",
+    "variantField?.classList.toggle(\"hidden\", !training)",
+    "variantId: state.mode === \"training\" ? state.selectedVariantId : \"\""
   ].forEach((text) => {
     assert.equal(uiScript.includes(text), true, `student UI includes ${text}`);
   });
+  assert.equal(uiHtml.includes("id=\"exam-route-note\""), true);
   assert.equal(uiStyles.includes(".task-guide-steps"), true);
   assert.equal(uiStyles.includes(".interaction-panel-title"), true);
   assert.equal(prompts.includes("Выберите действия после работы."), false);
@@ -391,9 +399,17 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
 test("PM01 readiness audit removes weak production tasks and keeps fish cutlet flow accurate", () => {
   const exam = getPm01Exam();
   const formulas = new Set(exam.formulas.map((formula) => formula.id));
+  const vegetables = buildPm01Variant(exam, "vegetables", { seed: "readiness-vegetables" });
   const fish = buildPm01Variant(exam, "fish", { seed: "readiness-fish" });
   const complex = buildPm01Variant(exam, "complex", { seed: "readiness-complex" });
+  const vegRequest = vegetables.questions.find((question) => question.sourceId === "veg-sim-request");
+  const vegGross = vegetables.questions.find((question) => question.sourceId === "veg-t1-gross");
+  const poultry = buildPm01Variant(exam, "poultry", { seed: "readiness-poultry" });
+  const rabbit = poultry.questions.find((question) => question.sourceId === "poultry-t1-rabbit");
+  const poultryChain = poultry.questions.find((question) => question.sourceId === "poultry-sim-chain");
   const fishCutlet = fish.questions.find((question) => question.sourceId === "fish-t1-cutlet");
+  const complexFishPlace = complex.questions.find((question) => question.sourceId === "complex-t1-fish-place");
+  const complexVegPlace = complex.questions.find((question) => question.sourceId === "complex-t1-veg-place");
   const complexQuestionIds = new Set(complex.questions.map((question) => question.sourceId));
   const complexVoice = complex.questions.find((question) => question.sourceId === "complex-voice");
 
@@ -402,6 +418,17 @@ test("PM01 readiness audit removes weak production tasks and keeps fish cutlet f
   assert.equal(complexQuestionIds.has("complex-calc-price"), false);
   assert.equal(complexQuestionIds.has("complex-calc-pack"), true);
   assert.deepEqual(fishCutlet.correctSequence, ["fillet", "bread", "grind", "mix", "spice", "beat"]);
+  assert.match(vegRequest.prompt, /капусты — 4,00 кг/);
+  assert.match(vegRequest.prompt, /25,71 кг картофеля брутто/);
+  assert.equal(vegRequest.formulas.some((formula) => formula.includes("все исходные данные указаны")), true);
+  assert.equal(vegGross.options.find((option) => option.isCorrect).text, "массу сырья до очистки и удаления отходов");
+  assert.match(rabbit.prompt, /кролик/);
+  assert.match(rabbit.options.find((option) => option.isCorrect).text, /отдельной чистой доской/);
+  assert.equal(poultryChain.items.every((item) => item.detail && item.detail.length > 24), true);
+  assert.match(complexFishPlace.prompt, /без риска перекрестного загрязнения/);
+  assert.match(complexFishPlace.options.find((option) => option.isCorrect).text, /промаркированной доской/);
+  assert.match(complexVegPlace.prompt, /немытые корнеплоды и зелень/);
+  assert.match(complexVegPlace.options.find((option) => option.isCorrect).text, /сортировка, мойка, очистка/);
   assert.equal(complexVoice.prompt.includes("Покупатель приобрел"), false);
   assert.equal(complexVoice.prompt.includes("упаковку, маркировку, хранение"), true);
 });

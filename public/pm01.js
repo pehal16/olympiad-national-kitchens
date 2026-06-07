@@ -418,6 +418,8 @@
     }
     renderTickets();
     elements.topMode.textContent = state.mode === "training" ? "Тренировка" : "Экзамен";
+    elements.startButton.textContent = training ? "Начать тренировку ПМ.01" : "Начать смешанный экзамен ПМ.01";
+    refreshTopbar();
   }
 
   function participantPayload() {
@@ -437,7 +439,9 @@
     elements.topMode.textContent = state.mode === "training" ? "Тренировка" : "Экзамен";
     elements.topVariant.textContent = attempt?.selectedVariant
       ? attempt.selectedVariant.title
-      : "Вариант не выбран";
+      : state.mode === "training"
+        ? "Выберите цех"
+        : "Смешанный маршрут";
     elements.topModule.textContent = attempt?.currentModule
       ? `${attempt.currentModule.code} ${attempt.currentModule.title}`
       : "M0";
