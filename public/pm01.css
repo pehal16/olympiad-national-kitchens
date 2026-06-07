@@ -308,6 +308,7 @@ h3 {
 
 .module-chip,
 .variant-card,
+.ticket-card,
 .module-step,
 .result-module,
 .feedback-panel,
@@ -449,6 +450,61 @@ select:focus {
 .variant-card.is-selected {
   border-color: var(--green-700);
   box-shadow: 0 0 0 3px rgba(28, 117, 93, 0.14);
+}
+
+.ticket-preview {
+  min-height: 74px;
+}
+
+.ticket-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.ticket-card > strong {
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.ticket-card p {
+  margin-bottom: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.ticket-card.compact {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.ticket-card.compact > strong {
+  font-size: 17px;
+}
+
+.ticket-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.ticket-tags span {
+  padding: 6px 8px;
+  border-radius: var(--radius);
+  color: var(--green-900);
+  background: #e8f4ef;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ticket-note {
+  padding: 9px 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: #fff;
+  font-size: 12px;
 }
 
 .button,

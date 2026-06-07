@@ -6,6 +6,8 @@ const path = require("node:path");
 const {
   getPm01Exam,
   getPm01PublicData,
+  getPm01MaterialTicket,
+  isPm01TicketCompatibleWithVariant,
   buildPm01Variant,
   sanitizePm01Question,
   scorePm01Question,
@@ -142,6 +144,54 @@ test("PM01 public data exposes asset registry without visual answer keys", () =>
   assert.equal("correctBuckets" in publicQuestion, false);
   assert.equal("correctAnswer" in publicQuestion, false);
   assert.equal("correctBuckets" in publicSimulation, false);
+});
+
+test("PM01 exam materials expose 25 comprehensive tickets without invented calculation keys", () => {
+  const exam = getPm01Exam();
+  const publicData = getPm01PublicData(exam);
+  const tickets = publicData.materials.tickets;
+
+  assert.equal(tickets.length, 25);
+  assert.equal(tickets[0].product, "Котлеты рубленые из говядины");
+  assert.equal(tickets[24].product, "Тефтели из рыбы");
+  assert.equal(tickets.every((ticket) => ticket.recipeNo && ticket.portions > 0), true);
+  assert.equal(tickets.every((ticket) => ticket.calculationPolicy.includes("точных норм")), true);
+  assert.equal(tickets.every((ticket) => ticket.recipeStatus.includes("needs_norms")), true);
+  assert.equal(tickets.some((ticket) => "expected" in ticket), false);
+  assert.equal(tickets.some((ticket) => "verifiedTitle" in ticket), false);
+  assert.equal(tickets.some((ticket) => "referenceTitle" in ticket), false);
+});
+
+test("PM01 selected comprehensive ticket is embedded into M0 and M3 safely", () => {
+  const exam = getPm01Exam();
+  const ticket = getPm01MaterialTicket("pm01-ticket-15");
+  const variant = buildPm01Variant(exam, "fish", { ticketId: ticket.id });
+  const situation = variant.questions.find((question) => question.moduleId === "situation");
+  const voice = variant.questions.find((question) => question.moduleId === "voice");
+  const publicVoice = sanitizePm01Question(voice, { answers: {} });
+
+  assert.equal(variant.materialTicket.product, "Котлеты из рыбы");
+  assert.equal(situation.prompt.includes("Комплексное ситуационное задание № 15"), true);
+  assert.equal(situation.materialTicket.product, "Котлеты из рыбы");
+  assert.equal(voice.prompt.includes("Котлеты из рыбы"), true);
+  assert.equal(voice.answerPlan.some((item) => item.includes("3 порций")), true);
+  assert.equal(publicVoice.materialTicket.product, "Котлеты из рыбы");
+  assert.equal("answerPlan" in publicVoice, false);
+  assert.equal("recipe" in publicVoice.materialTicket, false);
+});
+
+test("PM01 comprehensive tickets stay compatible with selected production variant", () => {
+  const exam = getPm01Exam();
+  const fishTicket = getPm01MaterialTicket("pm01-ticket-15");
+  const meatTicket = getPm01MaterialTicket("pm01-ticket-01");
+
+  assert.equal(isPm01TicketCompatibleWithVariant("fish", fishTicket), true);
+  assert.equal(isPm01TicketCompatibleWithVariant("meat", fishTicket), false);
+  assert.equal(isPm01TicketCompatibleWithVariant("meat", meatTicket), true);
+
+  const mismatchedVariant = buildPm01Variant(exam, "meat", { ticketId: fishTicket.id });
+  assert.equal(mismatchedVariant.materialTicket, null);
+  assert.equal(mismatchedVariant.questions.some((question) => question.materialTicket), false);
 });
 
 test("PM01 visual asset registry points to real project files", () => {

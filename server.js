@@ -39,6 +39,8 @@ const { buildVariant, getCurrentQuestion, getCurrentTour, sanitizeQuestion } = r
 const {
   getPm01Exam,
   getPm01PublicData,
+  getPm01MaterialTicket,
+  isPm01TicketCompatibleWithVariant,
   buildPm01Variant,
   getPm01CurrentQuestion,
   getPm01CurrentModule,
@@ -852,6 +854,7 @@ function buildPm01AdminAttemptDetail(exam, attempt) {
       participant: attempt.participant,
       participantSignature: attempt.participantSignature,
       selectedVariantId: attempt.selectedVariantId,
+      selectedTicketId: attempt.selectedTicketId || attempt.variant?.materialTicket?.id || "",
       mode: attempt.mode || "exam",
       status: attempt.status,
       startedAt: attempt.startedAt,
@@ -860,6 +863,7 @@ function buildPm01AdminAttemptDetail(exam, attempt) {
       variantMeta: {
         variantId: attempt.variant?.variantId,
         variantTitle: attempt.variant?.variantTitle,
+        materialTicket: attempt.variant?.materialTicket || null,
         issuedQuestionIds: attempt.variant?.issuedQuestionIds || []
       }
     },
@@ -886,6 +890,8 @@ async function buildPm01ExportRows(exam) {
       mentorName: attempt.participant?.mentorName || "",
       mode: attempt.mode || "exam",
       variantTitle: attempt.variant?.variantTitle || "",
+      ticketNumber: attempt.variant?.materialTicket?.number || "",
+      ticketProduct: attempt.variant?.materialTicket?.product || "",
       status: attempt.status,
       startedAt: attempt.startedAt || "",
       finishedAt: attempt.finishedAt || "",
@@ -910,6 +916,8 @@ function createPm01AttemptsCsv(rows) {
     "Преподаватель",
     "Режим",
     "Вариант",
+    "Билет",
+    "Полуфабрикат",
     "Статус",
     "Начало",
     "Завершение",
@@ -934,6 +942,8 @@ function createPm01AttemptsCsv(rows) {
         row.mentorName,
         row.mode,
         row.variantTitle,
+        row.ticketNumber,
+        row.ticketProduct,
         row.status,
         row.startedAt,
         row.finishedAt,
@@ -2034,8 +2044,22 @@ async function handleApi(req, res, url) {
 
     const mode = body.mode === "training" ? "training" : "exam";
     const variantId = String(body.variantId || "").trim();
+    const ticketId = String(body.ticketId || "").trim();
+    const selectedVariantId = variantId || exam.variants[0].id;
+    const materialTicket = ticketId ? getPm01MaterialTicket(ticketId) : null;
     if (variantId && !exam.variants.some((variant) => variant.id === variantId)) {
       sendJson(res, 400, { ok: false, message: "Выберите корректный вариант ПМ.01." });
+      return;
+    }
+    if (ticketId && !materialTicket) {
+      sendJson(res, 400, { ok: false, message: "Выберите корректное комплексное задание ПМ.01." });
+      return;
+    }
+    if (materialTicket && !isPm01TicketCompatibleWithVariant(selectedVariantId, materialTicket)) {
+      sendJson(res, 400, {
+        ok: false,
+        message: "Комплексное задание не относится к выбранному варианту ПМ.01."
+      });
       return;
     }
 
@@ -2069,7 +2093,7 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    const variant = buildPm01Variant(exam, variantId || exam.variants[0].id);
+    const variant = buildPm01Variant(exam, selectedVariantId, { ticketId });
     const startedAt = nowIso();
     const attempt = {
       id: generateId("pm01_attempt"),
@@ -2078,6 +2102,7 @@ async function handleApi(req, res, url) {
       participant: validation.profile,
       participantSignature,
       selectedVariantId: variant.variantId,
+      selectedTicketId: variant.materialTicket?.id || "",
       mode,
       startedAt,
       expiresAt: new Date(Date.now() + exam.durationMinutes * 60 * 1000).toISOString(),
@@ -2674,6 +2699,8 @@ async function handleApi(req, res, url) {
             selectedVariantId: attempt.selectedVariantId || attempt.variant?.variantId || "",
             variantNumber: attempt.variant?.variantNumber || null,
             variantTitle: attempt.variant?.variantTitle || "",
+            ticketNumber: attempt.variant?.materialTicket?.number || null,
+            ticketProduct: attempt.variant?.materialTicket?.product || "",
             status: attempt.status,
             startedAt: attempt.startedAt,
             finishedAt: attempt.finishedAt,

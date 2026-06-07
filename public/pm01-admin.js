@@ -255,7 +255,7 @@
     if (!attempts.length) {
       const row = document.createElement("tr");
       const cell = document.createElement("td");
-      cell.colSpan = 11;
+      cell.colSpan = 12;
       cell.textContent = state.attempts.length
         ? "По выбранным фильтрам попыток нет."
         : "Пока нет попыток ПМ.01.";
@@ -275,6 +275,7 @@
       row.append(
         participant,
         createCell(attempt.variantTitle || "—"),
+        createCell(attempt.ticketNumber ? `№ ${attempt.ticketNumber}\n${attempt.ticketProduct}` : "—"),
         createCell(attempt.mode === "training" ? "тренировка" : "экзамен")
       );
       const statusCell = document.createElement("td");
@@ -441,7 +442,10 @@
     title.textContent = detail.attempt.participant.fullName;
     const subtitle = document.createElement("p");
     subtitle.className = "lead";
-    subtitle.textContent = `${detail.attempt.variantMeta.variantTitle} · ${detail.summary.totalFinalScore}/${detail.summary.totalMaxScore} · оценка ${detail.summary.grade}`;
+    const ticket = detail.attempt.variantMeta.materialTicket;
+    subtitle.textContent = `${detail.attempt.variantMeta.variantTitle} · ${
+      ticket ? `билет № ${ticket.number}: ${ticket.product} · ` : ""
+    }${detail.summary.totalFinalScore}/${detail.summary.totalMaxScore} · оценка ${detail.summary.grade}`;
     elements.detailPanel.append(overline, title, subtitle);
 
     (detail.modules || []).forEach((module) => {

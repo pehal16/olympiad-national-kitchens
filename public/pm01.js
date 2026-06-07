@@ -3,6 +3,7 @@
     exam: null,
     attempt: null,
     selectedVariantId: "",
+    selectedTicketId: "",
     mode: "exam",
     controller: null,
     timer: null
@@ -32,6 +33,8 @@
     groupName: document.getElementById("group-name"),
     mentorName: document.getElementById("mentor-name"),
     variantGrid: document.getElementById("variant-grid"),
+    ticketSelect: document.getElementById("ticket-select"),
+    ticketPreview: document.getElementById("ticket-preview"),
     entryMessage: document.getElementById("entry-message"),
     startButton: document.getElementById("start-button"),
     participantName: document.getElementById("participant-name"),
@@ -49,6 +52,7 @@
     variantImage: document.getElementById("variant-image"),
     variantTitle: document.getElementById("variant-title"),
     variantScenario: document.getElementById("variant-scenario"),
+    ticketReference: document.getElementById("ticket-reference"),
     competencyList: document.getElementById("competency-list"),
     progressLabel: document.getElementById("progress-label"),
     progressFill: document.getElementById("progress-fill"),
@@ -200,7 +204,9 @@
     (state.exam.variants || []).forEach((variant) => {
       const card = createButton("variant-card", "", () => {
         state.selectedVariantId = variant.id;
+        ensureCompatibleTicketSelection();
         renderVariants();
+        renderTickets();
       });
       if (variant.id === state.selectedVariantId) {
         card.classList.add("is-selected");
@@ -216,6 +222,126 @@
       card.append(image, number, title);
       elements.variantGrid.appendChild(card);
     });
+  }
+
+  function ticketLabel(ticket) {
+    if (!ticket) {
+      return "";
+    }
+    return `№ ${ticket.number}: ${ticket.product} (${ticket.portions} порц.)`;
+  }
+
+  function selectedVariant() {
+    return (state.exam?.variants || []).find((variant) => variant.id === state.selectedVariantId) || null;
+  }
+
+  function ticketMatchesSelectedVariant(ticket) {
+    return Boolean(ticket && (!state.selectedVariantId || ticket.family === state.selectedVariantId));
+  }
+
+  function ticketsForSelectedVariant() {
+    return (state.exam?.materials?.tickets || []).filter(ticketMatchesSelectedVariant);
+  }
+
+  function selectedTicket() {
+    return ticketsForSelectedVariant().find((item) => item.id === state.selectedTicketId) || null;
+  }
+
+  function ensureCompatibleTicketSelection() {
+    if (state.selectedTicketId && !selectedTicket()) {
+      state.selectedTicketId = "";
+    }
+  }
+
+  function renderTicketCard(ticket, compact = false, emptyText = "") {
+    const card = document.createElement("article");
+    card.className = compact ? "ticket-card compact" : "ticket-card";
+    if (!ticket) {
+      const empty = document.createElement("p");
+      empty.textContent =
+        emptyText ||
+        "Можно выбрать билет из ваших экзаменационных материалов. Если оставить поле пустым, маршрут пройдет по базовому варианту.";
+      card.appendChild(empty);
+      return card;
+    }
+
+    const overline = document.createElement("p");
+    overline.className = "overline";
+    overline.textContent = `Комплексное задание № ${ticket.number}`;
+    const title = document.createElement("strong");
+    title.textContent = ticket.product;
+    const meta = document.createElement("p");
+    meta.textContent = `Расчет сырья: ${ticket.portions} порц. · Рецептура № ${ticket.recipeNo || "требует сверки"}`;
+    card.append(overline, title, meta);
+
+    if (!compact && ticket.focus?.length) {
+      const tags = document.createElement("div");
+      tags.className = "ticket-tags";
+      ticket.focus.slice(0, 6).forEach((item) => {
+        const tag = document.createElement("span");
+        tag.textContent = item;
+        tags.appendChild(tag);
+      });
+      card.appendChild(tags);
+    }
+
+    if (ticket.calculationPolicy) {
+      const note = document.createElement("p");
+      note.className = "ticket-note";
+      note.textContent = ticket.calculationPolicy;
+      card.appendChild(note);
+    }
+    return card;
+  }
+
+  function renderTickets() {
+    ensureCompatibleTicketSelection();
+    const tickets = ticketsForSelectedVariant();
+    const variant = selectedVariant();
+    if (!elements.ticketSelect || !elements.ticketPreview) {
+      return;
+    }
+    elements.ticketSelect.innerHTML = "";
+    const empty = document.createElement("option");
+    empty.value = "";
+    empty.textContent = "Базовый маршрут без билета";
+    elements.ticketSelect.appendChild(empty);
+    if (tickets.length) {
+      const hint = document.createElement("option");
+      hint.disabled = true;
+      hint.textContent = `Доступно для варианта: ${tickets.length}`;
+      elements.ticketSelect.appendChild(hint);
+    }
+    tickets.forEach((ticket) => {
+      const option = document.createElement("option");
+      option.value = ticket.id;
+      option.textContent = ticketLabel(ticket);
+      elements.ticketSelect.appendChild(option);
+    });
+    elements.ticketSelect.value = state.selectedTicketId;
+    elements.ticketSelect.title = variant
+      ? `Показаны только билеты для варианта "${variant.title}"`
+      : "Выберите вариант, затем билет";
+    renderTicketPreview();
+  }
+
+  function renderTicketPreview() {
+    if (!elements.ticketPreview) {
+      return;
+    }
+    const ticket = selectedTicket();
+    const variant = selectedVariant();
+    const count = ticketsForSelectedVariant().length;
+    elements.ticketPreview.innerHTML = "";
+    elements.ticketPreview.appendChild(
+      renderTicketCard(
+        ticket,
+        false,
+        variant
+          ? `Для варианта "${variant.title}" доступно билетов: ${count}. Можно выбрать билет или оставить базовый маршрут.`
+          : "Сначала выберите вариант цеха, затем комплексное задание."
+      )
+    );
   }
 
   function setMode(mode) {
@@ -350,6 +476,14 @@
     elements.variantImage.alt = variant.title;
     elements.variantTitle.textContent = variant.title;
     elements.variantScenario.textContent = variant.scenario;
+    const ticket = state.attempt.materialTicket || variant.materialTicket || null;
+    if (elements.ticketReference) {
+      elements.ticketReference.innerHTML = "";
+      elements.ticketReference.classList.toggle("hidden", !ticket);
+      if (ticket) {
+        elements.ticketReference.appendChild(renderTicketCard(ticket, true));
+      }
+    }
     elements.competencyList.innerHTML = "";
     (variant.competencies || []).forEach((competency) => {
       const tag = document.createElement("span");
@@ -383,6 +517,9 @@
       tags.appendChild(tag);
     });
     card.append(image, text, tags);
+    if (question.materialTicket) {
+      card.appendChild(renderTicketCard(question.materialTicket));
+    }
     elements.questionBody.appendChild(card);
     return {
       isValid: () => true,
@@ -1361,6 +1498,7 @@
         body: JSON.stringify({
           participant: participantPayload(),
           variantId: state.selectedVariantId,
+          ticketId: state.selectedTicketId,
           mode: state.mode
         })
       });
@@ -1425,6 +1563,7 @@
     try {
       state.exam = await api("/api/pm01/public/exam");
       state.selectedVariantId = state.exam.variants?.[0]?.id || "";
+      state.selectedTicketId = "";
       elements.examTitle.textContent = state.exam.title;
       if (elements.programTitle) {
         elements.programTitle.textContent = state.exam.programTitle || state.exam.subtitle;
@@ -1440,6 +1579,7 @@
       }
       renderModulePreview();
       renderVariants();
+      renderTickets();
       refreshTopbar();
     } catch (error) {
       showMessage(elements.entryMessage, error.message, "error");
@@ -1449,6 +1589,12 @@
   document.querySelectorAll("[data-mode]").forEach((button) => {
     button.addEventListener("click", () => setMode(button.dataset.mode));
   });
+  if (elements.ticketSelect) {
+    elements.ticketSelect.addEventListener("change", () => {
+      state.selectedTicketId = elements.ticketSelect.value;
+      renderTicketPreview();
+    });
+  }
   elements.startForm.addEventListener("submit", startAttempt);
   elements.submitAnswer.addEventListener("click", submitAnswer);
   elements.finishAttempt.addEventListener("click", finishAttempt);

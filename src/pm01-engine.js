@@ -1,4 +1,9 @@
 const pm01Exam = require("../data/exams/pm01");
+const {
+  pm01MaterialSources,
+  pm01IntegrationPlan,
+  pm01ComprehensiveTaskBank
+} = require("../data/exams/pm01-materials");
 const { nowIso } = require("./utils");
 
 function clone(value) {
@@ -22,6 +27,71 @@ function getPm01Exam() {
   return clone(pm01Exam);
 }
 
+function normalizeTicketId(ticketId) {
+  return String(ticketId || "").trim();
+}
+
+function getPm01MaterialTicket(ticketId) {
+  const normalizedId = normalizeTicketId(ticketId);
+  if (!normalizedId) {
+    return null;
+  }
+  return pm01ComprehensiveTaskBank.find((ticket) => ticket.id === normalizedId) || null;
+}
+
+function isPm01TicketCompatibleWithVariant(variantId, ticket) {
+  if (!ticket) {
+    return true;
+  }
+  const normalizedVariantId = String(variantId || "").trim();
+  return Boolean(normalizedVariantId && ticket.family === normalizedVariantId);
+}
+
+function summarizePm01MaterialTicket(ticket, options = {}) {
+  if (!ticket) {
+    return null;
+  }
+
+  const includePrivate = Boolean(options.includePrivate);
+  const recipe = ticket.recipe || {};
+  const summary = {
+    id: ticket.id,
+    number: ticket.number,
+    product: ticket.product,
+    family: ticket.family,
+    portions: ticket.portions,
+    recipeNo: recipe.declaredNo || ticket.recipeNo || "",
+    recipeStatus: recipe.status || ticket.recipeStatus || "",
+    focus: ticket.focus || [],
+    simulation: ticket.simulation || [],
+    calculationPolicy:
+      "Автопроверка расчета включается только после внесения точных норм сырья из сборника рецептур или технологической карты.",
+    integration: ticket.integration || pm01IntegrationPlan
+  };
+
+  if (includePrivate) {
+    summary.recipe = Object.keys(recipe).length ? recipe : ticket.recipe || null;
+    summary.sources = ticket.sources || [];
+  }
+
+  return summary;
+}
+
+function getPm01MaterialBankPublicData() {
+  return {
+    sources: (pm01MaterialSources || []).map((source) => ({
+      id: source.id,
+      title: source.title,
+      kind: source.kind,
+      use: source.use
+    })),
+    integrationPlan: pm01IntegrationPlan,
+    tickets: (pm01ComprehensiveTaskBank || []).map((ticket) =>
+      summarizePm01MaterialTicket(ticket)
+    )
+  };
+}
+
 function getPm01PublicData(exam = pm01Exam) {
   return {
     id: exam.id,
@@ -40,6 +110,7 @@ function getPm01PublicData(exam = pm01Exam) {
     modules: exam.modules,
     formulas: exam.formulas,
     assetRegistry: exam.assetRegistry || {},
+    materials: getPm01MaterialBankPublicData(),
     variants: exam.variants.map((variant) => ({
       id: variant.id,
       number: variant.number,
@@ -112,21 +183,57 @@ function addRuntimeQuestionMeta(question, module, sequenceInModule, globalIndex,
   return prepared;
 }
 
-function buildSituationQuestion(variant) {
+function buildTicketPrompt(variant, ticket) {
+  if (!ticket) {
+    return variant.scenario;
+  }
+  return [
+    variant.scenario,
+    `Комплексное ситуационное задание № ${ticket.number}: ${ticket.product}.`,
+    `По материалам задания студент выполняет устную защиту, расчет сырья на ${ticket.portions} порций и практическую работу.`
+  ].join("\n");
+}
+
+function buildSituationQuestion(variant, ticket) {
   return {
     id: `${variant.id}-situation`,
     type: "situation",
-    prompt: variant.scenario,
+    prompt: buildTicketPrompt(variant, ticket),
     maxScore: 0,
     image: variant.image,
     competencies: variant.competencies,
-    variantTitle: variant.title
+    variantTitle: variant.title,
+    materialTicket: summarizePm01MaterialTicket(ticket)
   };
 }
 
-function moduleQuestionsForVariant(variant, moduleId) {
+function buildTicketVoiceQuestion(baseQuestion, ticket) {
+  if (!baseQuestion || !ticket) {
+    return baseQuestion;
+  }
+
+  const question = clone(baseQuestion);
+  const focus = Array.isArray(ticket.focus) ? ticket.focus : [];
+  question.prompt = `Устная защита комплексного задания № ${ticket.number}: ${ticket.product}. Объясните технологический процесс, оборудование, требования безопасности, хранение и органолептическую оценку полуфабриката.`;
+  question.note =
+    "Отвечайте по билету из экзаменационных материалов. Нормы расчета сверяются по сборнику рецептур или технологической карте.";
+  question.answerPlan = [
+    `назвать полуфабрикат: ${ticket.product}`,
+    `указать расчет на ${ticket.portions} порций`,
+    "описать технологическую последовательность",
+    "подобрать оборудование и инвентарь",
+    "объяснить санитарные требования и безопасную работу",
+    "назвать условия хранения",
+    "дать органолептическую оценку качества",
+    ...focus
+  ];
+  question.materialTicket = summarizePm01MaterialTicket(ticket, { includePrivate: true });
+  return question;
+}
+
+function moduleQuestionsForVariant(variant, moduleId, ticket = null) {
   if (moduleId === "situation") {
-    return [buildSituationQuestion(variant)];
+    return [buildSituationQuestion(variant, ticket)];
   }
   if (moduleId === "test") {
     return variant.test || [];
@@ -135,7 +242,7 @@ function moduleQuestionsForVariant(variant, moduleId) {
     return variant.calculation || [];
   }
   if (moduleId === "voice") {
-    return [variant.voice].filter(Boolean);
+    return [buildTicketVoiceQuestion(variant.voice, ticket)].filter(Boolean);
   }
   if (moduleId === "simulation") {
     return variant.simulation || [];
@@ -143,14 +250,18 @@ function moduleQuestionsForVariant(variant, moduleId) {
   return [];
 }
 
-function buildPm01Variant(exam, variantId) {
+function buildPm01Variant(exam, variantId, options = {}) {
   const variant = getPm01Variant(variantId, exam);
+  const requestedTicket = getPm01MaterialTicket(options.ticketId);
+  const materialTicket = isPm01TicketCompatibleWithVariant(variant.id, requestedTicket)
+    ? requestedTicket
+    : null;
   const flatQuestions = [];
   let globalIndex = 0;
 
   const modules = (exam.modules || []).map((module) => {
     const startIndex = globalIndex;
-    const questions = moduleQuestionsForVariant(variant, module.id).map((question, index) => {
+    const questions = moduleQuestionsForVariant(variant, module.id, materialTicket).map((question, index) => {
       const prepared = addRuntimeQuestionMeta(
         question,
         module,
@@ -188,6 +299,7 @@ function buildPm01Variant(exam, variantId) {
     variantImage: variant.image,
     scenario: variant.scenario,
     competencies: variant.competencies,
+    materialTicket: summarizePm01MaterialTicket(materialTicket, { includePrivate: true }),
     modules,
     tours: modules,
     questions: flatQuestions,
@@ -252,6 +364,12 @@ function sanitizePm01Question(question, attempt, options = {}) {
     savedAnswer: answer ? answer.answerPayload : null,
     review: answer ? answer.manualReview || null : null
   };
+
+  if (question.materialTicket) {
+    base.materialTicket = includePrivate
+      ? summarizePm01MaterialTicket(question.materialTicket, { includePrivate: true })
+      : summarizePm01MaterialTicket(question.materialTicket);
+  }
 
   if (includePrivate) {
     base.explanation = question.explanation || "";
@@ -622,8 +740,10 @@ function buildPm01AttemptView(exam, attempt, options = {}) {
       accent: attempt.variant.variantAccent,
       image: attempt.variant.variantImage,
       scenario: attempt.variant.scenario,
-      competencies: attempt.variant.competencies
+      competencies: attempt.variant.competencies,
+      materialTicket: summarizePm01MaterialTicket(attempt.variant.materialTicket)
     },
+    materialTicket: summarizePm01MaterialTicket(attempt.variant.materialTicket, { includePrivate }),
     currentModule,
     currentQuestion: sanitizePm01Question(currentQuestion, attempt, { includePrivate }),
     lastFeedback:
@@ -757,6 +877,10 @@ function formatPm01CorrectAnswer(question) {
 module.exports = {
   getPm01Exam,
   getPm01PublicData,
+  getPm01MaterialBankPublicData,
+  getPm01MaterialTicket,
+  isPm01TicketCompatibleWithVariant,
+  summarizePm01MaterialTicket,
   getPm01Variant,
   buildPm01Variant,
   getPm01CurrentQuestion,

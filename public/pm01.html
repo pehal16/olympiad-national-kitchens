@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#123f35" />
     <title>Экзамен по МДК 01.01 и МДК 01.02</title>
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/pm01.css?v=1.0.4" />
+    <link rel="stylesheet" href="/pm01.css?v=1.0.6" />
   </head>
   <body>
     <header class="pm01-topbar">
@@ -103,6 +103,12 @@
               <div id="variant-grid" class="variant-grid"></div>
             </div>
 
+            <label class="field field-wide">
+              <span>Комплексное задание из экзаменационных материалов</span>
+              <select id="ticket-select"></select>
+            </label>
+            <div id="ticket-preview" class="ticket-preview field-wide"></div>
+
             <div id="entry-message" class="message hidden"></div>
             <button id="start-button" class="button primary field-wide" type="submit">
               Начать ПМ.01
@@ -147,6 +153,7 @@
             <h3 id="variant-title">Вариант</h3>
             <p id="variant-scenario"></p>
           </div>
+          <div id="ticket-reference" class="reference-block hidden"></div>
           <div class="reference-block">
             <p class="overline">Компетенции</p>
             <div id="competency-list" class="tag-list"></div>
@@ -177,6 +184,6 @@
       </section>
     </main>
 
-    <script src="/pm01.js?v=1.0.4"></script>
+    <script src="/pm01.js?v=1.0.6"></script>
   </body>
 </html>
