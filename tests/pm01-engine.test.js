@@ -394,12 +394,16 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(uiHtml.includes("id=\"exam-route-note\""), true);
   assert.equal(uiHtml.includes("id=\"student-select\""), true);
   assert.equal(uiHtml.includes("id=\"free-name-field\""), true);
+  assert.equal(uiHtml.includes("id=\"skip-question\""), true);
+  assert.equal(uiHtml.includes("Завершить весь экзамен"), true);
   assert.equal(uiHtml.includes("<select id=\"group-name\" required>"), true);
   assert.equal(uiHtml.includes("readonly"), true);
   assert.equal(uiScript.includes("PM01_STUDENT_GROUPS"), true);
   assert.equal(uiScript.includes("FREE_STUDENT_VALUE"), true);
   assert.equal(uiScript.includes("renderStudentSelect"), true);
   assert.equal(uiScript.includes("selectedParticipantName"), true);
+  assert.equal(uiScript.includes("skipQuestion"), true);
+  assert.equal(uiScript.includes("Пропустить это задание"), true);
   assert.equal(uiScript.includes("Постовит Дмитрий Александрович"), true);
   assert.equal(uiScript.includes("Свободное имя"), true);
   assert.equal(uiScript.includes("Воропаев Артем Романович"), true);
@@ -424,6 +428,7 @@ test("PM01 readiness audit removes weak production tasks and keeps fish cutlet f
   const formulas = new Set(exam.formulas.map((formula) => formula.id));
   const vegetables = buildPm01Variant(exam, "vegetables", { seed: "readiness-vegetables" });
   const fish = buildPm01Variant(exam, "fish", { seed: "readiness-fish" });
+  const meat = buildPm01Variant(exam, "meat", { seed: "readiness-meat" });
   const complex = buildPm01Variant(exam, "complex", { seed: "readiness-complex" });
   const vegRequest = vegetables.questions.find((question) => question.sourceId === "veg-sim-request");
   const vegGross = vegetables.questions.find((question) => question.sourceId === "veg-t1-gross");
@@ -431,6 +436,8 @@ test("PM01 readiness audit removes weak production tasks and keeps fish cutlet f
   const rabbit = poultry.questions.find((question) => question.sourceId === "poultry-t1-rabbit");
   const poultryChain = poultry.questions.find((question) => question.sourceId === "poultry-sim-chain");
   const fishCutlet = fish.questions.find((question) => question.sourceId === "fish-t1-cutlet");
+  const fishCutletCalculation = fish.questions.find((question) => question.sourceId === "fish-calc-cutlets");
+  const meatCutletCalculation = meat.questions.find((question) => question.sourceId === "meat-calc-cutlets");
   const complexFishPlace = complex.questions.find((question) => question.sourceId === "complex-t1-fish-place");
   const complexVegPlace = complex.questions.find((question) => question.sourceId === "complex-t1-veg-place");
   const complexQuestionIds = new Set(complex.questions.map((question) => question.sourceId));
@@ -441,6 +448,12 @@ test("PM01 readiness audit removes weak production tasks and keeps fish cutlet f
   assert.equal(complexQuestionIds.has("complex-calc-price"), false);
   assert.equal(complexQuestionIds.has("complex-calc-pack"), true);
   assert.deepEqual(fishCutlet.correctSequence, ["fillet", "bread", "grind", "mix", "spice", "beat"]);
+  assert.match(fishCutletCalculation.prompt, /на 1 котлету/);
+  assert.match(meatCutletCalculation.prompt, /на 1 котлету/);
+  assert.doesNotMatch(fishCutletCalculation.prompt, /65 %|18 %|15 %|2 %/);
+  assert.doesNotMatch(meatCutletCalculation.prompt, /70 %|15 %|13 %|2 %/);
+  assert.equal(meatCutletCalculation.fields.find((field) => field.id === "meatKg").expected, 2.65);
+  assert.equal(fishCutletCalculation.fields.find((field) => field.id === "filletKg").expected, 2.94);
   assert.match(vegRequest.prompt, /капусты — 4,00 кг/);
   assert.match(vegRequest.prompt, /25,71 кг картофеля брутто/);
   assert.equal(vegRequest.formulas.some((formula) => formula.includes("все исходные данные указаны")), true);

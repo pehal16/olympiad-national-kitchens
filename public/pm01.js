@@ -106,6 +106,7 @@
     questionBody: document.getElementById("question-body"),
     taskMessage: document.getElementById("task-message"),
     submitAnswer: document.getElementById("submit-answer"),
+    skipQuestion: document.getElementById("skip-question"),
     finishAttempt: document.getElementById("finish-attempt"),
     variantImage: document.getElementById("variant-image"),
     variantTitle: document.getElementById("variant-title"),
@@ -1783,8 +1784,45 @@
     }
   }
 
+  async function skipQuestion() {
+    hideMessage(elements.taskMessage);
+    if (!state.attempt || !state.attempt.currentQuestion) {
+      return;
+    }
+    const currentQuestion = state.attempt.currentQuestion;
+    const confirmed = window.confirm(
+      "Пропустить это задание и перейти дальше? За него будет выставлено 0 баллов."
+    );
+    if (!confirmed) {
+      return;
+    }
+    elements.skipQuestion.disabled = true;
+    setSaveStatus("пропускаю...");
+    try {
+      const attempt = await api(`/api/pm01/public/attempts/${encodeURIComponent(state.attempt.id)}/answer`, {
+        method: "POST",
+        body: JSON.stringify({
+          questionId: currentQuestion.id,
+          answerPayload: { skipped: true }
+        })
+      });
+      renderAttempt(attempt);
+    } catch (error) {
+      setSaveStatus("ошибка");
+      showMessage(elements.taskMessage, error.message, "error");
+    } finally {
+      elements.skipQuestion.disabled = false;
+    }
+  }
+
   async function finishAttempt() {
     if (!state.attempt) {
+      return;
+    }
+    const confirmed = window.confirm(
+      "Завершить весь экзамен сейчас? Вернуться к следующим заданиям после этого будет нельзя."
+    );
+    if (!confirmed) {
       return;
     }
     elements.finishAttempt.disabled = true;
@@ -1849,6 +1887,7 @@
   }
   elements.startForm.addEventListener("submit", startAttempt);
   elements.submitAnswer.addEventListener("click", submitAnswer);
+  elements.skipQuestion.addEventListener("click", skipQuestion);
   elements.finishAttempt.addEventListener("click", finishAttempt);
   setMode("exam");
   init();
