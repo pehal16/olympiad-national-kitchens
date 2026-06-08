@@ -255,7 +255,7 @@
     if (!attempts.length) {
       const row = document.createElement("tr");
       const cell = document.createElement("td");
-      cell.colSpan = 12;
+      cell.colSpan = 13;
       cell.textContent = state.attempts.length
         ? "По выбранным фильтрам попыток нет."
         : "Пока нет попыток ПМ.01.";
@@ -274,6 +274,7 @@
       participant.style.whiteSpace = "pre-line";
       row.append(
         participant,
+        createCell(attempt.clientIp || "—"),
         createCell(attempt.variantTitle || "—"),
         createCell(attempt.ticketNumber ? `№ ${attempt.ticketNumber}\n${attempt.ticketProduct}` : "—"),
         createCell(attempt.mode === "training" ? "тренировка" : "экзамен")
@@ -546,8 +547,15 @@
   elements.filterPending.addEventListener("change", syncFiltersFromInputs);
   elements.filterReset.addEventListener("click", resetFilters);
 
-  loadAdmin().catch(() => {
-    elements.loginPanel.classList.remove("hidden");
-    elements.adminPanel.classList.add("hidden");
-  });
+  async function initAdmin() {
+    try {
+      await adminApi("/api/admin/session");
+      await loadAdmin();
+    } catch (_) {
+      elements.loginPanel.classList.remove("hidden");
+      elements.adminPanel.classList.add("hidden");
+    }
+  }
+
+  initAdmin();
 })();

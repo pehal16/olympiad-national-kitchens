@@ -218,6 +218,43 @@ function makeParticipantSignature(profile) {
   ].join("|");
 }
 
+function makeParticipantNameKey(profile) {
+  return normalizeText(profile.fullName);
+}
+
+function normalizeClientIp(value) {
+  const text = String(value || "").trim();
+  if (!text) {
+    return "unknown";
+  }
+  return text
+    .replace(/^::ffff:/, "")
+    .replace(/^::1$/, "127.0.0.1");
+}
+
+function getClientIp(req) {
+  const forwarded = String(req.headers["x-forwarded-for"] || "")
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)[0];
+  const realIp = String(req.headers["x-real-ip"] || "").trim();
+  return normalizeClientIp(forwarded || realIp || req.socket?.remoteAddress || "");
+}
+
+function makeAttemptAccessKey(clientIp, participantNameKey) {
+  return [normalizeClientIp(clientIp), participantNameKey].join("|");
+}
+
+function attemptMatchesAccess(attempt, accessKey, participantSignature, mode) {
+  if ((attempt.mode || "exam") !== mode) {
+    return false;
+  }
+  if (attempt.accessKey) {
+    return attempt.accessKey === accessKey;
+  }
+  return attempt.participantSignature === participantSignature;
+}
+
 function getOlympiadPublicData(olympiad) {
   return {
     id: olympiad.id,
@@ -853,6 +890,8 @@ function buildPm01AdminAttemptDetail(exam, attempt) {
       olympiadId: attempt.olympiadId,
       participant: attempt.participant,
       participantSignature: attempt.participantSignature,
+      clientIp: attempt.clientIp || "",
+      accessKey: attempt.accessKey || "",
       selectedVariantId: attempt.selectedVariantId,
       selectedTicketId: attempt.selectedTicketId || attempt.variant?.materialTicket?.id || "",
       mode: attempt.mode || "exam",
@@ -888,6 +927,7 @@ async function buildPm01ExportRows(exam) {
       institution: attempt.participant?.institution || "",
       groupName: attempt.participant?.groupName || "",
       mentorName: attempt.participant?.mentorName || "",
+      clientIp: attempt.clientIp || "",
       mode: attempt.mode || "exam",
       variantTitle: attempt.variant?.variantTitle || "",
       ticketNumber: attempt.variant?.materialTicket?.number || "",
@@ -914,6 +954,7 @@ function createPm01AttemptsCsv(rows) {
     "Учреждение",
     "Группа",
     "Преподаватель",
+    "IP",
     "Режим",
     "Вариант",
     "Билет",
@@ -940,6 +981,7 @@ function createPm01AttemptsCsv(rows) {
         row.institution,
         row.groupName,
         row.mentorName,
+        row.clientIp,
         row.mode,
         row.variantTitle,
         row.ticketNumber,
@@ -2012,14 +2054,35 @@ async function handleApi(req, res, url) {
     }
 
     const signature = makeParticipantSignature(validation.profile);
+    const participantNameKey = makeParticipantNameKey(validation.profile);
+    const clientIp = getClientIp(req);
+    const examAccessKey = makeAttemptAccessKey(clientIp, participantNameKey);
+    const trainingAccessKey = makeAttemptAccessKey(clientIp, participantNameKey);
     const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id).filter(
-      (attempt) => attempt.participantSignature === signature
+      (attempt) =>
+        attempt.participantSignature === signature ||
+        attempt.accessKey === examAccessKey ||
+        attempt.accessKey === trainingAccessKey
     );
     const activeExamAttempt = attempts.find(
-      (attempt) => (attempt.mode || "exam") === "exam" && attempt.status === "in_progress"
+      (attempt) =>
+        attemptMatchesAccess(attempt, examAccessKey, signature, "exam") &&
+        attempt.status === "in_progress"
     );
     const completedExamAttempt = attempts.find(
-      (attempt) => (attempt.mode || "exam") === "exam" && attempt.status !== "in_progress"
+      (attempt) =>
+        attemptMatchesAccess(attempt, examAccessKey, signature, "exam") &&
+        attempt.status !== "in_progress"
+    );
+    const activeTrainingAttempt = attempts.find(
+      (attempt) =>
+        attemptMatchesAccess(attempt, trainingAccessKey, signature, "training") &&
+        attempt.status === "in_progress"
+    );
+    const completedTrainingAttempt = attempts.find(
+      (attempt) =>
+        attemptMatchesAccess(attempt, trainingAccessKey, signature, "training") &&
+        attempt.status !== "in_progress"
     );
 
     sendJson(res, 200, {
@@ -2027,7 +2090,10 @@ async function handleApi(req, res, url) {
       data: {
         participant: validation.profile,
         activeAttemptId: activeExamAttempt ? activeExamAttempt.id : null,
-        alreadyCompleted: Boolean(completedExamAttempt && !activeExamAttempt)
+        activeTrainingAttemptId: activeTrainingAttempt ? activeTrainingAttempt.id : null,
+        alreadyCompleted: Boolean(completedExamAttempt && !activeExamAttempt),
+        trainingAlreadyCompleted: Boolean(completedTrainingAttempt && !activeTrainingAttempt),
+        clientIp
       }
     });
     return;
@@ -2064,12 +2130,13 @@ async function handleApi(req, res, url) {
     }
 
     const participantSignature = makeParticipantSignature(validation.profile);
+    const participantNameKey = makeParticipantNameKey(validation.profile);
+    const clientIp = getClientIp(req);
+    const accessKey = makeAttemptAccessKey(clientIp, participantNameKey);
     const allAttempts = await loadAttempts();
     const currentAttempts = currentOlympiadAttempts(allAttempts, exam.id);
     const matchingAttempts = currentAttempts.filter(
-      (attempt) =>
-        attempt.participantSignature === participantSignature &&
-        (attempt.mode || "exam") === mode
+      (attempt) => attemptMatchesAccess(attempt, accessKey, participantSignature, mode)
     );
     const activeAttempt = matchingAttempts.find((attempt) => attempt.status === "in_progress");
 
@@ -2085,10 +2152,11 @@ async function handleApi(req, res, url) {
     }
 
     const completedAttempt = matchingAttempts.find((attempt) => attempt.status !== "in_progress");
-    if (mode === "exam" && completedAttempt) {
+    if (completedAttempt) {
+      const modeLabel = mode === "training" ? "тренировочная" : "экзаменационная";
       sendJson(res, 403, {
         ok: false,
-        message: "Для этого участника экзаменационная попытка ПМ.01 уже завершена."
+        message: `Для этого участника с текущего IP уже завершена ${modeLabel} попытка ПМ.01. Повторный старт заблокирован.`
       });
       return;
     }
@@ -2102,6 +2170,9 @@ async function handleApi(req, res, url) {
       schemaVersion: exam.schemaVersion || 1,
       participant: validation.profile,
       participantSignature,
+      participantNameKey,
+      clientIp,
+      accessKey,
       selectedVariantId: variant.variantId,
       selectedTicketId: variant.materialTicket?.id || "",
       routeSeed,
@@ -2613,6 +2684,13 @@ async function handleApi(req, res, url) {
 
   if (method === "POST" && pathname === "/api/admin/login") {
     const body = await parseBody(req);
+    if (!settings.adminPassword) {
+      sendJson(res, 503, {
+        ok: false,
+        message: "Пароль администратора не настроен. Укажите ADMIN_PASSWORD или adminPassword в config/settings.json."
+      });
+      return;
+    }
     if (body.password !== settings.adminPassword) {
       sendJson(res, 401, {
         ok: false,
@@ -2697,6 +2775,7 @@ async function handleApi(req, res, url) {
             institution: attempt.participant?.institution || "",
             groupName: attempt.participant?.groupName || "",
             mentorName: attempt.participant?.mentorName || "",
+            clientIp: attempt.clientIp || "",
             mode: attempt.mode || "exam",
             selectedVariantId: attempt.selectedVariantId || attempt.variant?.variantId || "",
             variantNumber: attempt.variant?.variantNumber || null,

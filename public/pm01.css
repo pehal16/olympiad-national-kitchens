@@ -605,6 +605,7 @@ select:focus {
 .module-rail,
 .task-panel,
 .reference-panel {
+  min-width: 0;
   padding: 16px;
 }
 
@@ -1748,9 +1749,32 @@ tr[data-attempt-id]:hover {
     padding: 12px 14px;
   }
 
+  .pm01-brand {
+    align-items: flex-start;
+  }
+
+  .pm01-brand span:not(.brand-mark) {
+    line-height: 1.25;
+  }
+
   .top-status,
   .top-actions {
     justify-content: flex-start;
+  }
+
+  .top-status {
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: thin;
+  }
+
+  .top-status span {
+    flex: 0 0 auto;
+  }
+
+  .top-actions {
+    flex-wrap: wrap;
   }
 
   .pm01-shell,
@@ -1777,6 +1801,7 @@ tr[data-attempt-id]:hover {
   .form-grid,
   .exam-identity,
   .admin-filters,
+  .workspace,
   .sequence-layout,
   .bucket-workspace,
   .bucket-grid,
@@ -1793,7 +1818,27 @@ tr[data-attempt-id]:hover {
   }
 
   .module-steps {
-    grid-template-columns: 1fr;
+    display: flex;
+    grid-template-columns: none;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+
+  .module-step {
+    min-width: 164px;
+    min-height: 64px;
+    border-left-width: 0;
+    border-top: 4px solid transparent;
+  }
+
+  .module-step.is-current {
+    border-top-color: var(--green-700);
+  }
+
+  .module-step.is-done {
+    border-top-color: var(--blue);
   }
 
   .task-head,
@@ -1805,6 +1850,45 @@ tr[data-attempt-id]:hover {
 
   .points-pill {
     width: 100%;
+  }
+
+  .task-panel,
+  .module-rail,
+  .reference-panel,
+  .start-panel,
+  .admin-login-panel,
+  .pm01-admin-panel,
+  .admin-detail-panel {
+    padding: 14px;
+  }
+
+  .task-panel {
+    min-height: auto;
+    scroll-margin-top: 12px;
+  }
+
+  .task-actions {
+    margin-top: 10px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    background: #fff;
+  }
+
+  .option-button,
+  .sequence-chip,
+  .bucket-chip,
+  .slot-card,
+  .bucket-column,
+  .calc-card {
+    min-height: 50px;
+  }
+
+  .admin-table-wrap {
+    overflow-x: auto;
+  }
+
+  .admin-table-wrap table {
+    min-width: 1040px;
   }
 
   .cut-target {
@@ -1832,6 +1916,124 @@ tr[data-attempt-id]:hover {
 
   .visual-sequence-copy span {
     font-size: 11px;
+  }
+}
+
+@media (max-width: 520px) {
+  .pm01-topbar {
+    padding: 10px;
+  }
+
+  .pm01-brand {
+    gap: 9px;
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .pm01-brand strong {
+    font-size: 16px;
+  }
+
+  .pm01-brand span:not(.brand-mark) {
+    font-size: 12px;
+  }
+
+  .top-status span,
+  .top-actions .button,
+  .top-actions .icon-button {
+    min-height: 32px;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .pm01-shell,
+  .pm01-admin-shell {
+    width: calc(100% - 12px);
+    margin-top: 8px;
+  }
+
+  .entry-grid,
+  .workspace {
+    gap: 10px;
+  }
+
+  .intro-panel,
+  .start-panel,
+  .module-rail,
+  .task-panel,
+  .reference-panel,
+  .result-screen {
+    border-radius: 6px;
+  }
+
+  .intro-panel {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .concept-frame {
+    min-height: 220px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+
+  h2 {
+    font-size: 21px;
+  }
+
+  .lead,
+  .program-title {
+    font-size: 15px;
+  }
+
+  .participant-card {
+    margin-bottom: 10px;
+  }
+
+  .module-step {
+    min-width: 142px;
+    padding: 10px;
+  }
+
+  .task-guide,
+  .interaction-status,
+  .message {
+    font-size: 13px;
+  }
+
+  .task-guide-steps {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .product-chip,
+  .visual-sequence-chip {
+    grid-template-columns: 1fr;
+  }
+
+  .product-chip img,
+  .visual-sequence-chip img {
+    width: 100%;
+    height: 150px;
+  }
+
+  .hotspot-toolbar,
+  .voice-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reference-panel {
+    gap: 10px;
+  }
+
+  .workshop-frame {
+    aspect-ratio: 16 / 9;
   }
 }
 
