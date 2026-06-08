@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#123f35" />
     <title>Экзамен по МДК 01.01 и МДК 01.02</title>
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/pm01.css?v=1.0.10" />
+    <link rel="stylesheet" href="/pm01.css?v=1.0.11" />
   </head>
   <body>
     <header class="pm01-topbar">
@@ -69,8 +69,22 @@
         <section class="start-panel">
           <form id="start-form" class="form-grid">
             <label class="field">
+              <span>Группа</span>
+              <select id="group-name" required>
+                <option value="">Выберите группу</option>
+                <option value="2-ПК-25">2-ПК-25</option>
+                <option value="1-ПК-25">1-ПК-25</option>
+              </select>
+            </label>
+            <label class="field">
               <span>ФИО студента</span>
-              <input id="full-name" type="text" autocomplete="name" required />
+              <select id="student-select" required disabled>
+                <option value="">Сначала выберите группу</option>
+              </select>
+            </label>
+            <label id="free-name-field" class="field hidden">
+              <span>Свободное имя</span>
+              <input id="full-name" type="text" autocomplete="name" placeholder="Можно оставить пустым или ввести ФИО" />
             </label>
             <label class="field">
               <span>Образовательная организация</span>
@@ -82,12 +96,8 @@
               />
             </label>
             <label class="field">
-              <span>Группа</span>
-              <input id="group-name" type="text" placeholder="№4/П-24" required />
-            </label>
-            <label class="field">
               <span>Преподаватель</span>
-              <input id="mentor-name" type="text" />
+              <input id="mentor-name" type="text" value="Постовит Дмитрий Александрович" readonly />
             </label>
 
             <div class="field field-wide">
@@ -185,6 +195,6 @@
       </section>
     </main>
 
-    <script src="/pm01.js?v=1.0.10"></script>
+    <script src="/pm01.js?v=1.0.11"></script>
   </body>
 </html>

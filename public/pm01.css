@@ -405,6 +405,12 @@ select {
   outline: none;
 }
 
+input[readonly],
+select:disabled {
+  color: var(--muted);
+  background: #f3f7f5;
+}
+
 textarea {
   min-height: 92px;
   resize: vertical;

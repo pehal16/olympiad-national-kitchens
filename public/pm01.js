@@ -1,4 +1,56 @@
 (function () {
+  const TEACHER_NAME = "Постовит Дмитрий Александрович";
+  const FREE_STUDENT_VALUE = "__free_name__";
+  const PM01_STUDENT_GROUPS = [
+    {
+      groupName: "2-ПК-25",
+      students: [
+        "Воропаев Артем Романович",
+        "Дейниченко Анастасия Анатольевна",
+        "Забелина Мария Александровна",
+        "Казлов Данил Алексеевич",
+        "Кириченко Кирилл Вадимович",
+        "Никитенко Денис Сергеевич",
+        "Сайко Михаил Максимович",
+        "Сапожникова Алина Денисовна",
+        "Свешникова Дарья Руслановна",
+        "Тамаш Дарья Викторовна",
+        "Чеботарев Александр Дмитриевич",
+        "Черномеза Диана Ивановна",
+        "Шишкин Данил Евгеньевич",
+        "Макаренко Михаил Андреевич",
+        "Белозерова Ольга Сергеевна",
+        "Филюшина Виктория Александровна",
+        "Касаткина Мария Кирилловна"
+      ]
+    },
+    {
+      groupName: "1-ПК-25",
+      students: [
+        "Барышев Георгий",
+        "Бочарова Юлия",
+        "Жевланова Полина",
+        "Калашникова Полина",
+        "Ларионова Валерия",
+        "Левченко Эдуард",
+        "Меркулова Екатерина",
+        "Мирошниченко Александр",
+        "Рожнов Алексей",
+        "Светлов Богдан",
+        "Слипченко Арсений",
+        "Старостина Маргарита",
+        "Степашко Назар",
+        "Романский Руслан",
+        "Бочарова Анастасия",
+        "Марченко Виктория",
+        "Новикова Маргарита",
+        "Попова Елизавета",
+        "Волобуева Анастасия",
+        "Волохова Яна Алексеевна"
+      ]
+    }
+  ];
+
   const state = {
     exam: null,
     attempt: null,
@@ -32,6 +84,8 @@
     fullName: document.getElementById("full-name"),
     institution: document.getElementById("institution"),
     groupName: document.getElementById("group-name"),
+    studentSelect: document.getElementById("student-select"),
+    freeNameField: document.getElementById("free-name-field"),
     mentorName: document.getElementById("mentor-name"),
     examRouteNote: document.getElementById("exam-route-note"),
     variantField: document.getElementById("variant-field"),
@@ -430,12 +484,68 @@
     refreshTopbar();
   }
 
+  function selectedRosterGroup() {
+    const groupName = elements.groupName?.value || "";
+    return PM01_STUDENT_GROUPS.find((group) => group.groupName === groupName) || null;
+  }
+
+  function setTeacherName() {
+    if (elements.mentorName) {
+      elements.mentorName.value = TEACHER_NAME;
+    }
+  }
+
+  function syncFreeNameField() {
+    const isFreeName = elements.studentSelect?.value === FREE_STUDENT_VALUE;
+    elements.freeNameField?.classList.toggle("hidden", !isFreeName);
+    if (!isFreeName && elements.fullName) {
+      elements.fullName.value = "";
+    }
+  }
+
+  function renderStudentSelect() {
+    if (!elements.studentSelect) {
+      return;
+    }
+    const group = selectedRosterGroup();
+    elements.studentSelect.innerHTML = "";
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = group ? "Выберите свое ФИО" : "Сначала выберите группу";
+    elements.studentSelect.appendChild(placeholder);
+    elements.studentSelect.disabled = !group;
+
+    (group?.students || []).forEach((studentName) => {
+      const option = document.createElement("option");
+      option.value = studentName;
+      option.textContent = studentName;
+      elements.studentSelect.appendChild(option);
+    });
+
+    if (group) {
+      const freeOption = document.createElement("option");
+      freeOption.value = FREE_STUDENT_VALUE;
+      freeOption.textContent = "Свободное имя";
+      elements.studentSelect.appendChild(freeOption);
+    }
+    syncFreeNameField();
+  }
+
+  function selectedParticipantName() {
+    const selectedStudent = elements.studentSelect?.value?.trim() || "";
+    if (selectedStudent === FREE_STUDENT_VALUE) {
+      const freeName = elements.fullName?.value?.trim() || "";
+      return freeName || "Свободное имя";
+    }
+    return selectedStudent;
+  }
+
   function participantPayload() {
     return {
-      fullName: elements.fullName.value.trim(),
+      fullName: selectedParticipantName(),
       institution: elements.institution.value.trim(),
       groupName: elements.groupName.value.trim(),
-      mentorName: elements.mentorName.value.trim()
+      mentorName: TEACHER_NAME
     };
   }
 
@@ -1694,6 +1804,8 @@
   }
 
   async function init() {
+    setTeacherName();
+    renderStudentSelect();
     try {
       state.exam = await api("/api/pm01/public/exam");
       state.selectedVariantId = state.exam.variants?.[0]?.id || "";
@@ -1728,6 +1840,12 @@
       state.selectedTicketId = elements.ticketSelect.value;
       renderTicketPreview();
     });
+  }
+  if (elements.groupName) {
+    elements.groupName.addEventListener("change", renderStudentSelect);
+  }
+  if (elements.studentSelect) {
+    elements.studentSelect.addEventListener("change", syncFreeNameField);
   }
   elements.startForm.addEventListener("submit", startAttempt);
   elements.submitAnswer.addEventListener("click", submitAnswer);
