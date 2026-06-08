@@ -60,6 +60,8 @@ const PORT = Number(process.env.PORT) || 3100;
 const HOST = process.env.HOST || "0.0.0.0";
 const APP_VERSION = packageInfo.version || "0.0.0";
 const PM01_CONTROLS_DRAFT_KEY = "__pm01_controls_v1__";
+const PM01_ADMIN_ATTEMPT_LIMIT_DEFAULT = 250;
+const PM01_ADMIN_ATTEMPT_LIMIT_MAX = 1000;
 const DEFAULT_PM01_CONTROLS = {
   examEnabled: true,
   freeRepeatEnabled: true,
@@ -350,6 +352,30 @@ async function saveAttempt(allAttempts, attempt) {
 
 function currentOlympiadAttempts(allAttempts, olympiadId) {
   return allAttempts.filter((attempt) => attempt.olympiadId === olympiadId);
+}
+
+function parsePm01AdminAttemptLimit(url) {
+  const parsed = Number(url.searchParams.get("limit") || PM01_ADMIN_ATTEMPT_LIMIT_DEFAULT);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return PM01_ADMIN_ATTEMPT_LIMIT_DEFAULT;
+  }
+  return Math.min(PM01_ADMIN_ATTEMPT_LIMIT_MAX, Math.trunc(parsed));
+}
+
+function lightweightAttemptActivityMs(attempt) {
+  return Math.max(
+    safeDateMs(attempt.finishedAt),
+    safeDateMs(attempt.startedAt),
+    safeDateMs(attempt.expiresAt)
+  );
+}
+
+function selectRecentPm01AdminAttempts(attempts, url) {
+  const limit = parsePm01AdminAttemptLimit(url);
+  return attempts
+    .slice()
+    .sort((left, right) => lightweightAttemptActivityMs(right) - lightweightAttemptActivityMs(left))
+    .slice(0, limit);
 }
 
 function findAttemptById(allAttempts, attemptId) {
@@ -2904,7 +2930,10 @@ async function handleApi(req, res, url) {
 
     if (method === "GET" && pathname === "/api/admin/pm01/summary") {
       const exam = getPm01Exam();
-      const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id);
+      const attempts = selectRecentPm01AdminAttempts(
+        currentOlympiadAttempts(await loadAttempts(), exam.id),
+        url
+      );
       const controls = await loadPm01Controls();
       const summary = summarizePm01AttemptsForAdmin(exam, attempts, settings);
       summary.controls = buildPm01ControlsView(controls, attempts);
@@ -2983,7 +3012,10 @@ async function handleApi(req, res, url) {
 
     if (method === "GET" && pathname === "/api/admin/pm01/attempts") {
       const exam = getPm01Exam();
-      const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id)
+      const attempts = selectRecentPm01AdminAttempts(
+        currentOlympiadAttempts(await loadAttempts(), exam.id),
+        url
+      )
         .map((attempt) => normalizePm01AttemptState(exam, attempt))
         .map((attempt) => {
           const summary = summarizePm01Attempt(exam, attempt);

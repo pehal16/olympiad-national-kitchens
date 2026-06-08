@@ -732,6 +732,8 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   const css = fs.readFileSync(path.join(root, "public", "pm01.css"), "utf8");
 
   assert.match(serverSource, /PM01_CONTROLS_DRAFT_KEY/);
+  assert.match(serverSource, /PM01_ADMIN_ATTEMPT_LIMIT_DEFAULT/);
+  assert.match(serverSource, /selectRecentPm01AdminAttempts/);
   assert.match(serverSource, /\/api\/admin\/pm01\/controls/);
   assert.match(serverSource, /\/api\/admin\/pm01\/grants/);
   assert.match(serverSource, /examEnabled/);
@@ -752,6 +754,9 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(adminScript, /questionMatchesDetailFilter/);
   assert.match(adminScript, /setExtraAttempts/);
   assert.match(adminScript, /renderProtocolCard/);
+  assert.match(adminScript, /ADMIN_ATTEMPTS_LIMIT = 250/);
+  assert.match(adminScript, /ADMIN_ATTEMPTS_QUERY/);
+  assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.10/);
   assert.match(css, /\.teacher-workbench/);
   assert.match(css, /\.detail-question-toolbar/);
   assert.match(css, /@media print/);

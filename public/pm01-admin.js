@@ -1,4 +1,7 @@
 (function () {
+  const ADMIN_ATTEMPTS_LIMIT = 250;
+  const ADMIN_ATTEMPTS_QUERY = `?limit=${ADMIN_ATTEMPTS_LIMIT}`;
+
   const state = {
     summary: null,
     controls: null,
@@ -1506,16 +1509,27 @@
   }
 
   async function loadAdmin() {
-    const [summary, attempts, controls] = await Promise.all([
-      adminApi("/api/admin/pm01/summary"),
-      adminApi("/api/admin/pm01/attempts"),
+    hideMessage(elements.adminMessage);
+    const [summary, controls] = await Promise.all([
+      adminApi(`/api/admin/pm01/summary${ADMIN_ATTEMPTS_QUERY}`),
       adminApi("/api/admin/pm01/controls")
     ]);
     state.summary = summary;
-    state.attempts = attempts;
     state.controls = controls;
     state.summary.controls = controls;
+    state.attempts = [];
     renderAdmin();
+
+    try {
+      state.attempts = await adminApi(`/api/admin/pm01/attempts${ADMIN_ATTEMPTS_QUERY}`);
+      renderAdmin();
+    } catch (error) {
+      showMessage(
+        elements.adminMessage,
+        `Кабинет открыт, но список попыток не загрузился. Обновите позже. ${error.message}`,
+        "warning"
+      );
+    }
   }
 
   async function login(event) {
