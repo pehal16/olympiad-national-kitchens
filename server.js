@@ -3304,7 +3304,7 @@ async function handleApi(req, res, url) {
         return;
       }
 
-      const normalized = await normalizePm01AndPersistIfChanged(exam, attempt);
+      const normalized = normalizePm01AttemptState(exam, attempt);
       sendJson(res, 200, {
         ok: true,
         data: buildPm01AdminAttemptDetail(exam, normalized)
