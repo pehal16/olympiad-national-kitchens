@@ -354,7 +354,7 @@ async function bulkUpsert(tableName, keyColumn, items, getKey) {
 }
 
 async function initYdbStorage() {
-  await ensureSchema();
+  ensureConnectionString();
 }
 
 async function loadAttempts() {
