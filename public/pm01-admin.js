@@ -205,6 +205,74 @@
     return sum(completed.map((attempt) => attempt.totalFinalScore)) / completed.length;
   }
 
+  function buildFastAdminSummary(exam, attempts, controls) {
+    const completed = completedAttempts(attempts);
+    const participantKeys = new Set(attempts.map((attempt) => attempt.participantSignature || attempt.fullName || attempt.id));
+    const groups = uniqueValues(attempts.map((attempt) => attempt.groupName || attempt.groupNameOriginal));
+    const institutions = uniqueValues(attempts.map((attempt) => attempt.institution));
+    const mentors = uniqueValues(attempts.map((attempt) => attempt.mentorName));
+    const statuses = uniqueValues(attempts.map((attempt) => attempt.status));
+    const gradeMap = new Map();
+
+    completed.forEach((attempt) => {
+      if (attempt.grade) {
+        gradeMap.set(attempt.grade, (gradeMap.get(attempt.grade) || 0) + 1);
+      }
+    });
+
+    const moduleAnalytics = (exam.modules || []).map((module) => {
+      const scores = completed
+        .map((attempt) => (attempt.moduleScores || []).find((item) => item.moduleId === module.id))
+        .filter(Boolean);
+      const total = sum(scores.map((item) => item.finalScore));
+      const pendingManualReviews = attempts.reduce((accumulator, attempt) => {
+        const moduleScore = (attempt.moduleScores || []).find((item) => item.moduleId === module.id);
+        return accumulator + Number(moduleScore?.pendingManualReviews || 0);
+      }, 0);
+
+      return {
+        moduleId: module.id,
+        code: module.code,
+        title: module.title,
+        maxScore: module.maxScore,
+        attempts: scores.length,
+        averageScore: scores.length ? Number((total / scores.length).toFixed(2)) : 0,
+        pendingManualReviews
+      };
+    });
+
+    return {
+      exam,
+      controls,
+      counts: {
+        participants: participantKeys.size,
+        attempts: attempts.length,
+        activeAttempts: attempts.filter((attempt) => attempt.status === "in_progress").length,
+        completed: completed.length,
+        pendingReview: attempts.filter((attempt) => attempt.status === "pending_review").length,
+        reviewed: attempts.filter((attempt) => attempt.status === "reviewed").length,
+        institutions: institutions.length,
+        groups: groups.length,
+        mentors: mentors.length
+      },
+      catalogs: {
+        groups,
+        statuses,
+        variants: uniqueValues(attempts.map((attempt) => attempt.variantTitle)),
+        modes: uniqueValues(attempts.map((attempt) => attempt.mode))
+      },
+      gradeDistribution: Array.from(gradeMap.entries()).map(([grade, count]) => ({ grade, count })),
+      moduleAnalytics,
+      pendingVoice: [],
+      capabilities: {
+        storageBackend: "fast"
+      },
+      diagnostics: {
+        refreshedAt: new Date().toISOString()
+      }
+    };
+  }
+
   function groupKey(attempt) {
     return attempt.groupKey || String(attempt.groupName || "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
   }
@@ -1510,18 +1578,18 @@
 
   async function loadAdmin() {
     hideMessage(elements.adminMessage);
-    const [summary, controls] = await Promise.all([
-      adminApi(`/api/admin/pm01/summary${ADMIN_ATTEMPTS_QUERY}`),
+    const [exam, controls] = await Promise.all([
+      adminApi("/api/pm01/public/exam"),
       adminApi("/api/admin/pm01/controls")
     ]);
-    state.summary = summary;
     state.controls = controls;
-    state.summary.controls = controls;
     state.attempts = [];
+    state.summary = buildFastAdminSummary(exam, state.attempts, controls);
     renderAdmin();
 
     try {
       state.attempts = await adminApi(`/api/admin/pm01/attempts${ADMIN_ATTEMPTS_QUERY}`);
+      state.summary = buildFastAdminSummary(exam, state.attempts, controls);
       renderAdmin();
     } catch (error) {
       showMessage(
