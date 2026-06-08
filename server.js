@@ -771,6 +771,28 @@ async function normalizePm01AndPersistIfChanged(exam, attempt) {
   return normalized;
 }
 
+function hasCompletePm01AttemptShape(attempt) {
+  const modules = attempt?.variant?.modules || attempt?.variant?.tours || [];
+  return Boolean(
+    attempt &&
+      Array.isArray(modules) &&
+      modules.length &&
+      Array.isArray(attempt.variant?.questions) &&
+      attempt.variant.questions.length
+  );
+}
+
+async function loadPm01AttemptForAdmin(exam, attemptId) {
+  let attempt = await loadAttemptById(attemptId);
+  if (!attempt || attempt.olympiadId !== exam.id || hasCompletePm01AttemptShape(attempt)) {
+    return attempt;
+  }
+
+  const fullAttempt = currentOlympiadAttempts(await loadAttempts(), exam.id)
+    .find((item) => item.id === attemptId);
+  return fullAttempt || attempt;
+}
+
 function buildPm01TrainingFeedback(question, result) {
   return {
     questionId: question.id,
@@ -3353,7 +3375,7 @@ async function handleApi(req, res, url) {
     if (method === "GET" && pathname.match(/^\/api\/admin\/pm01\/attempts\/[^/]+$/)) {
       const exam = getPm01Exam();
       const attemptId = pathname.split("/")[5];
-      const attempt = await loadAttemptById(attemptId);
+      const attempt = await loadPm01AttemptForAdmin(exam, attemptId);
 
       if (!attempt || attempt.olympiadId !== exam.id) {
         sendJson(res, 404, { ok: false, message: "Попытка ПМ.01 не найдена." });
@@ -3372,7 +3394,7 @@ async function handleApi(req, res, url) {
       const exam = getPm01Exam();
       const attemptId = pathname.split("/")[5];
       const questionId = decodeURIComponent(pathname.split("/")[7] || "");
-      const attempt = await loadAttemptById(attemptId);
+      const attempt = await loadPm01AttemptForAdmin(exam, attemptId);
 
       if (!attempt || attempt.olympiadId !== exam.id) {
         sendJson(res, 404, { ok: false, message: "Попытка ПМ.01 не найдена." });
@@ -3418,7 +3440,7 @@ async function handleApi(req, res, url) {
       const attemptId = pathname.split("/")[5];
       const questionId = decodeURIComponent(pathname.split("/")[7] || "");
       const body = await parseBody(req);
-      const attempt = await loadAttemptById(attemptId);
+      const attempt = await loadPm01AttemptForAdmin(exam, attemptId);
 
       if (!attempt || attempt.olympiadId !== exam.id) {
         sendJson(res, 404, { ok: false, message: "Попытка ПМ.01 не найдена." });
