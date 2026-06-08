@@ -84,12 +84,14 @@ const runtimeDiagnostics = {
 
 const CACHE_TTL_MS = 10_000;
 const CONTENT_CACHE_TTL_MS = 20_000;
+const ADMIN_ATTEMPT_CACHE_TTL_MS = 60_000;
 const runtimeCache = {
   settings: { value: null, loadedAt: 0 },
   olympiadBase: { value: null, loadedAt: 0 },
   customQuestionMap: { value: null, loadedAt: 0 },
   olympiadResolved: { value: null, loadedAt: 0 },
   adminAnalytics: { value: null, loadedAt: 0, revision: -1, olympiadId: "" },
+  pm01AdminAttemptMap: { value: null, loadedAt: 0, revision: -1, olympiadId: "" },
   questionCatalog: { value: null, loadedAt: 0, revision: -1, olympiadId: "" },
   questionSummary: { value: null, loadedAt: 0, revision: -1, olympiadId: "" }
 };
@@ -169,6 +171,12 @@ async function getResolvedOlympiad() {
 function invalidateAttemptCaches() {
   attemptsRevision += 1;
   runtimeCache.adminAnalytics = {
+    value: null,
+    loadedAt: 0,
+    revision: -1,
+    olympiadId: ""
+  };
+  runtimeCache.pm01AdminAttemptMap = {
     value: null,
     loadedAt: 0,
     revision: -1,
@@ -782,9 +790,30 @@ function hasCompletePm01AttemptShape(attempt) {
   );
 }
 
+async function getCachedPm01AdminAttemptMap(exam) {
+  const cache = runtimeCache.pm01AdminAttemptMap;
+  if (
+    isCacheFresh(cache, ADMIN_ATTEMPT_CACHE_TTL_MS) &&
+    cache.revision === attemptsRevision &&
+    cache.olympiadId === exam.id
+  ) {
+    return cache.value;
+  }
+
+  const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id);
+  const value = new Map(attempts.map((attempt) => [attempt.id, attempt]));
+  runtimeCache.pm01AdminAttemptMap = {
+    value,
+    loadedAt: Date.now(),
+    revision: attemptsRevision,
+    olympiadId: exam.id
+  };
+  return value;
+}
+
 async function loadPm01AttemptForAdmin(exam, attemptId) {
-  const fullAttempt = currentOlympiadAttempts(await loadAttempts(), exam.id)
-    .find((item) => item.id === attemptId);
+  const attemptMap = await getCachedPm01AdminAttemptMap(exam);
+  const fullAttempt = attemptMap.get(attemptId);
   if (fullAttempt && hasCompletePm01AttemptShape(fullAttempt)) {
     return fullAttempt;
   }
