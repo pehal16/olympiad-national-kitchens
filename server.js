@@ -783,13 +783,16 @@ function hasCompletePm01AttemptShape(attempt) {
 }
 
 async function loadPm01AttemptForAdmin(exam, attemptId) {
-  let attempt = await loadAttemptById(attemptId);
-  if (!attempt || attempt.olympiadId !== exam.id || hasCompletePm01AttemptShape(attempt)) {
-    return attempt;
-  }
-
   const fullAttempt = currentOlympiadAttempts(await loadAttempts(), exam.id)
     .find((item) => item.id === attemptId);
+  if (fullAttempt && hasCompletePm01AttemptShape(fullAttempt)) {
+    return fullAttempt;
+  }
+
+  const attempt = await loadAttemptById(attemptId);
+  if (!attempt || attempt.olympiadId !== exam.id) {
+    return attempt;
+  }
   return fullAttempt || attempt;
 }
 
