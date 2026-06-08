@@ -1671,6 +1671,33 @@ button.module-step:focus-visible {
   gap: 12px;
 }
 
+.admin-collapsible {
+  margin: 12px 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.admin-collapsible > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  color: var(--green-900);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-collapsible[open] {
+  padding: 0 12px 12px;
+}
+
+.admin-collapsible[open] > summary {
+  margin: 0 -12px 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+
 .review-queue,
 .group-overview {
   display: grid;
@@ -1999,7 +2026,7 @@ button.module-step:focus-visible {
 
 .admin-filters {
   display: grid;
-  grid-template-columns: minmax(220px, 1.4fr) repeat(4, minmax(140px, 1fr)) auto auto;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 10px;
   align-items: end;
   padding: 12px;
@@ -2050,7 +2077,7 @@ button.module-step:focus-visible {
 
 .admin-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 440px;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
 }
 
@@ -2224,6 +2251,7 @@ tr[data-attempt-id].is-selected {
 
 .admin-detail-panel {
   min-height: 500px;
+  max-width: none;
 }
 
 .detail-hero {

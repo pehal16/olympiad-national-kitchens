@@ -775,6 +775,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(serverSource, /Лимит экзаменационных попыток исчерпан/);
 
   assert.match(adminHtml, /teacher-controls-form/);
+  assert.match(adminHtml, /admin-collapsible/);
   assert.match(adminHtml, /group-overview/);
   assert.match(adminHtml, /review-queue/);
   assert.match(adminHtml, /control-exam-enabled/);
@@ -797,9 +798,10 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(adminScript, /renderVoiceQueueList/);
   assert.match(adminScript, /voiceAudio/);
   assert.match(adminScript, /audioInfo\.audioUrl/);
-  assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.13/);
+  assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.14/);
   assert.match(css, /\.voice-queue-list/);
   assert.match(css, /\.audio-status/);
+  assert.match(css, /\.admin-collapsible/);
   assert.match(css, /\.teacher-workbench/);
   assert.match(css, /\.detail-question-toolbar/);
   assert.match(css, /@media print/);

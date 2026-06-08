@@ -15,6 +15,9 @@ const CONTENT_QUESTIONS_TABLE =
   process.env.YDB_CONTENT_QUESTIONS_TABLE || "olympiad_content_questions";
 const PM01_VOICE_AUDIO_TABLE =
   process.env.YDB_PM01_VOICE_AUDIO_TABLE || "olympiad_pm01_voice_audio";
+const YDB_AUTO_CREATE_TABLES = ["1", "true", "yes", "on"].includes(
+  String(process.env.YDB_AUTO_CREATE_TABLES || "").trim().toLowerCase()
+);
 
 let sqlPromise = null;
 let schemaReady = null;
@@ -50,6 +53,9 @@ async function getSql() {
 async function ensureSchema() {
   if (!schemaReady) {
     schemaReady = (async () => {
+      if (!YDB_AUTO_CREATE_TABLES) {
+        return;
+      }
       const sql = await getSql();
       await sql`
         CREATE TABLE IF NOT EXISTS ${identifier(ATTEMPTS_TABLE)} (
@@ -109,6 +115,9 @@ async function ensureSchema() {
 async function ensurePm01VoiceAudioSchema() {
   if (!pm01VoiceAudioSchemaReady) {
     pm01VoiceAudioSchemaReady = (async () => {
+      if (!YDB_AUTO_CREATE_TABLES) {
+        return;
+      }
       const sql = await getSql();
       await sql`
         CREATE TABLE IF NOT EXISTS ${identifier(PM01_VOICE_AUDIO_TABLE)} (

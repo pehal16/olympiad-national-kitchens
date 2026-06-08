@@ -932,27 +932,35 @@ async function normalizePm01VoiceAnswerPayload(attempt, question, answerPayload)
     throw error;
   }
 
-  const audioId = generateId("pm01voice");
-  const meta = await savePm01VoiceAudio(
-    {
-      id: audioId,
-      attemptId: attempt.id,
-      questionId: question.id,
-      fileName: `${question.id}.webm`,
-      mimeType: parsed.mimeType || "audio/webm",
-      durationMs: Number(payload.durationMs || 0),
-      byteLength: parsed.buffer.length,
-      createdAt: nowIso()
-    },
-    parsed.buffer
-  );
+  try {
+    const audioId = generateId("pm01voice");
+    const meta = await savePm01VoiceAudio(
+      {
+        id: audioId,
+        attemptId: attempt.id,
+        questionId: question.id,
+        fileName: `${question.id}.webm`,
+        mimeType: parsed.mimeType || "audio/webm",
+        durationMs: Number(payload.durationMs || 0),
+        byteLength: parsed.buffer.length,
+        createdAt: nowIso()
+      },
+      parsed.buffer
+    );
 
-  delete payload.audioDataUrl;
-  payload.audioId = meta.id || audioId;
-  payload.audioName = payload.audioName || meta.fileName || `${question.id}.webm`;
-  payload.mimeType = meta.mimeType || parsed.mimeType || "audio/webm";
-  payload.audioBytes = meta.byteLength || parsed.buffer.length;
-  payload.audioUploadStatus = "stored";
+    delete payload.audioDataUrl;
+    payload.audioId = meta.id || audioId;
+    payload.audioName = payload.audioName || meta.fileName || `${question.id}.webm`;
+    payload.mimeType = meta.mimeType || parsed.mimeType || "audio/webm";
+    payload.audioBytes = meta.byteLength || parsed.buffer.length;
+    payload.audioUploadStatus = "stored";
+  } catch (error) {
+    payload.mimeType = parsed.mimeType || payload.mimeType || "audio/webm";
+    payload.audioBytes = parsed.buffer.length;
+    payload.audioName = payload.audioName || `${question.id}.webm`;
+    payload.audioUploadStatus = "inline_fallback";
+    payload.audioUploadMessage = "Запись сохранена в совместимом режиме.";
+  }
   return payload;
 }
 
