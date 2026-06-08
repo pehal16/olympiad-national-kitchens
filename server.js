@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const http = require("http");
+const crypto = require("crypto");
 const { URL } = require("url");
 const packageInfo = require("./package.json");
 const {
@@ -1418,24 +1419,74 @@ function getAdminRequestTokens(req) {
   );
 }
 
+function adminTokenSecret(settings) {
+  return [
+    String(settings.adminPassword || ""),
+    APP_VERSION,
+    "olympiad-admin-session-v2"
+  ].join("|");
+}
+
+function signAdminTokenPayload(payload, settings) {
+  return crypto
+    .createHmac("sha256", adminTokenSecret(settings))
+    .update(payload)
+    .digest("base64url");
+}
+
+function safeEqualText(left, right) {
+  const leftBuffer = Buffer.from(String(left || ""));
+  const rightBuffer = Buffer.from(String(right || ""));
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function createStatelessAdminSession(settings) {
+  const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
+  const nonce = generateId("nonce");
+  const payload = `${expiresAt}.${nonce}`;
+  const signature = signAdminTokenPayload(payload, settings);
+  return {
+    token: `stateless.${payload}.${signature}`,
+    createdAt: nowIso(),
+    expiresAt
+  };
+}
+
+function verifyStatelessAdminSession(token, settings) {
+  const parts = String(token || "").split(".");
+  if (parts.length !== 4 || parts[0] !== "stateless") {
+    return null;
+  }
+
+  const expiresAt = Number(parts[1]);
+  const nonce = parts[2];
+  const signature = parts[3];
+  if (!Number.isFinite(expiresAt) || expiresAt <= Date.now() || !nonce || !signature) {
+    return null;
+  }
+
+  const expected = signAdminTokenPayload(`${parts[1]}.${nonce}`, settings);
+  if (!safeEqualText(signature, expected)) {
+    return null;
+  }
+
+  return {
+    token,
+    createdAt: null,
+    expiresAt,
+    stateless: true
+  };
+}
+
 async function requireAdmin(req) {
   const tokens = getAdminRequestTokens(req);
   if (!tokens.length) {
     return null;
   }
 
+  const settings = getCachedSettings();
   for (const token of tokens) {
-    const directSession = await loadAdminSessionByToken(token);
-    if (directSession?.expiresAt > Date.now()) {
-      return directSession;
-    }
-  }
-
-  const sessions = await loadAdminSessions();
-  for (const token of tokens) {
-    const session = sessions.find(
-      (entry) => entry.token === token && entry.expiresAt > Date.now()
-    );
+    const session = verifyStatelessAdminSession(token, settings);
     if (session) {
       return session;
     }
@@ -3043,21 +3094,12 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    const sessions = (await loadAdminSessions()).filter(
-      (session) => session.expiresAt > Date.now()
-    );
-    const token = generateId("admin");
-    sessions.push({
-      token,
-      createdAt: nowIso(),
-      expiresAt: Date.now() + 24 * 60 * 60 * 1000
-    });
-    await saveAdminSessions(sessions);
+    const session = createStatelessAdminSession(settings);
     sendJson(
       res,
       200,
-      { ok: true, data: { token } },
-      { "Set-Cookie": buildAdminCookie(token, sessions.at(-1)?.expiresAt) }
+      { ok: true, data: { token: session.token, expiresAt: session.expiresAt } },
+      { "Set-Cookie": buildAdminCookie(session.token, session.expiresAt) }
     );
     return;
   }
