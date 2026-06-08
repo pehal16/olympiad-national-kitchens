@@ -2133,33 +2133,6 @@ async function handleApi(req, res, url) {
     const participantNameKey = makeParticipantNameKey(validation.profile);
     const clientIp = getClientIp(req);
     const accessKey = makeAttemptAccessKey(clientIp, participantNameKey);
-    const allAttempts = await loadAttempts();
-    const currentAttempts = currentOlympiadAttempts(allAttempts, exam.id);
-    const matchingAttempts = currentAttempts.filter(
-      (attempt) => attemptMatchesAccess(attempt, accessKey, participantSignature, mode)
-    );
-    const activeAttempt = matchingAttempts.find((attempt) => attempt.status === "in_progress");
-
-    if (activeAttempt) {
-      const normalized = normalizePm01AttemptState(exam, activeAttempt);
-      await saveAttempt(allAttempts, normalized);
-      invalidateAttemptCaches();
-      sendJson(res, 200, {
-        ok: true,
-        data: buildPm01StudentAttemptView(exam, normalized)
-      });
-      return;
-    }
-
-    const completedAttempt = matchingAttempts.find((attempt) => attempt.status !== "in_progress");
-    if (completedAttempt) {
-      const modeLabel = mode === "training" ? "тренировочная" : "экзаменационная";
-      sendJson(res, 403, {
-        ok: false,
-        message: `Для этого участника с текущего IP уже завершена ${modeLabel} попытка ПМ.01. Повторный старт заблокирован.`
-      });
-      return;
-    }
 
     const routeSeed = generateId("pm01_route");
     const variant = buildPm01Variant(exam, selectedVariantId, { ticketId, seed: routeSeed });
@@ -2191,7 +2164,6 @@ async function handleApi(req, res, url) {
     };
 
     markPm01QuestionPresented(attempt);
-    allAttempts.push(attempt);
     await upsertAttempt(attempt);
     invalidateAttemptCaches();
 
