@@ -595,6 +595,12 @@ select:focus {
   background: #eef8f4;
 }
 
+.message.warning {
+  color: #6e3b00;
+  border-color: rgba(196, 118, 22, 0.32);
+  background: #fff7e8;
+}
+
 .workspace {
   display: grid;
   grid-template-columns: 250px minmax(0, 1fr) 330px;

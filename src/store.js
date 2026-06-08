@@ -99,7 +99,7 @@ function loadSettings() {
   return {
     ...settings,
     storageBackend: STORAGE_BACKEND,
-    adminPassword: process.env.ADMIN_PASSWORD || settings.adminPassword || "",
+    adminPassword: settings.adminPassword || process.env.ADMIN_PASSWORD || "",
     showParticipantScore: parseBoolean(
       process.env.SHOW_PARTICIPANT_SCORE,
       Boolean(settings.showParticipantScore)

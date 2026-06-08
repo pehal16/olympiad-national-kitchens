@@ -729,6 +729,25 @@ function scoreHotspotScene(question, answerPayload) {
 }
 
 function scoreVoiceResponse(question, answerPayload, existingAnswer = null) {
+  const hasAnswer = Boolean(
+    answerPayload?.audioDataUrl ||
+      answerPayload?.audioName ||
+      String(answerPayload?.transcriptNote || "").trim()
+  );
+  if (!hasAnswer || answerPayload?.skipped) {
+    return {
+      autoScore: 0,
+      finalScore: 0,
+      penalty: 0,
+      manualStatus: null,
+      details: {
+        hasAudio: false,
+        durationMs: 0,
+        skipped: Boolean(answerPayload?.skipped)
+      }
+    };
+  }
+
   const review = existingAnswer?.manualReview || null;
   const reviewedScore = review ? Number(review.totalScore || 0) : 0;
   return {

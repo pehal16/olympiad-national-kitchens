@@ -649,6 +649,19 @@ test("scorePm01Question scores hotspot matches and false positives", () => {
   assert.equal(result.finalScore, 1.5);
 });
 
+test("scorePm01Question treats skipped voice answer as zero without manual review", () => {
+  const question = {
+    type: "voice_response",
+    maxScore: 20
+  };
+
+  const result = scorePm01Question(question, { skipped: true });
+
+  assert.equal(result.finalScore, 0);
+  assert.equal(result.manualStatus, null);
+  assert.equal(result.details.skipped, true);
+});
+
 test("applyPm01VoiceReview stores rubric scores and updates final summary", () => {
   const exam = getPm01Exam();
   const variant = buildPm01Variant(exam, "vegetables");

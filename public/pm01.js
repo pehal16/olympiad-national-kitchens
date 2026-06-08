@@ -6,7 +6,8 @@
     selectedTicketId: "",
     mode: "exam",
     controller: null,
-    timer: null
+    timer: null,
+    skipConfirmQuestionId: ""
   };
 
   const elements = {
@@ -1444,6 +1445,7 @@
   function renderQuestion() {
     const question = state.attempt.currentQuestion;
     state.controller = null;
+    state.skipConfirmQuestionId = "";
     elements.questionBody.innerHTML = "";
     hideMessage(elements.taskMessage);
     if (!question) {
@@ -1600,8 +1602,38 @@
     if (!state.attempt || !state.controller) {
       return;
     }
-    if (!state.controller.isValid()) {
-      showMessage(elements.taskMessage, "Заполните ответ перед переходом дальше.", "error");
+    const currentQuestion = state.attempt.currentQuestion;
+    const answerIsValid = state.controller.isValid();
+    if (!answerIsValid) {
+      if ((state.attempt.mode || "exam") === "exam" && currentQuestion) {
+        if (state.skipConfirmQuestionId !== currentQuestion.id) {
+          state.skipConfirmQuestionId = currentQuestion.id;
+          elements.submitAnswer.textContent = "Пропустить с 0 баллов";
+          showMessage(
+            elements.taskMessage,
+            "Ответ не заполнен. Нажмите еще раз, чтобы пропустить это задание с 0 баллов и идти дальше.",
+            "warning"
+          );
+          return;
+        }
+      } else {
+        showMessage(elements.taskMessage, "Заполните ответ перед переходом дальше.", "error");
+        return;
+      }
+    } else {
+      state.skipConfirmQuestionId = "";
+    }
+
+    let answerPayload = {};
+    try {
+      answerPayload = state.controller.getAnswer();
+    } catch (_) {
+      answerPayload = {};
+    }
+    if (!answerIsValid) {
+      answerPayload = { ...answerPayload, skipped: true };
+    }
+    if (!currentQuestion) {
       return;
     }
     elements.submitAnswer.disabled = true;
@@ -1610,8 +1642,8 @@
       const attempt = await api(`/api/pm01/public/attempts/${encodeURIComponent(state.attempt.id)}/answer`, {
         method: "POST",
         body: JSON.stringify({
-          questionId: state.attempt.currentQuestion.id,
-          answerPayload: state.controller.getAnswer()
+          questionId: currentQuestion.id,
+          answerPayload
         })
       });
       renderAttempt(attempt);
