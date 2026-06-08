@@ -20,6 +20,8 @@ const {
   loadContentCustomQuestions,
   upsertContentCustomQuestion,
   deleteContentCustomQuestion,
+  savePm01VoiceAudio,
+  loadPm01VoiceAudio,
   ROOT_DIR
 } = require("./src/store");
 const {
@@ -62,6 +64,7 @@ const APP_VERSION = packageInfo.version || "0.0.0";
 const PM01_CONTROLS_DRAFT_KEY = "__pm01_controls_v1__";
 const PM01_ADMIN_ATTEMPT_LIMIT_DEFAULT = 250;
 const PM01_ADMIN_ATTEMPT_LIMIT_MAX = 1000;
+const PM01_VOICE_AUDIO_MAX_BYTES = Number(process.env.PM01_VOICE_AUDIO_MAX_BYTES || 18 * 1024 * 1024);
 const DEFAULT_PM01_CONTROLS = {
   examEnabled: true,
   freeRepeatEnabled: true,
@@ -791,6 +794,167 @@ function buildPm01StudentAttemptView(exam, attempt) {
   });
 }
 
+function parseDataUrl(value) {
+  const text = String(value || "");
+  const match = text.match(/^data:([^;,]+)?(;base64)?,(.*)$/s);
+  if (!match) {
+    return null;
+  }
+  const mimeType = match[1] || "application/octet-stream";
+  const isBase64 = Boolean(match[2]);
+  try {
+    const buffer = isBase64
+      ? Buffer.from(match[3] || "", "base64")
+      : Buffer.from(decodeURIComponent(match[3] || ""), "utf8");
+    return { mimeType, buffer };
+  } catch (error) {
+    return null;
+  }
+}
+
+function pm01VoiceAudioUrl(attemptId, questionId) {
+  return `/api/admin/pm01/attempts/${encodeURIComponent(attemptId)}/voice/${encodeURIComponent(questionId)}/audio`;
+}
+
+function describePm01VoiceAudio(attempt, question, answer) {
+  const payload = answer?.answerPayload || {};
+  const hasStored = Boolean(payload.audioId);
+  const hasLegacyInline = Boolean(payload.audioDataUrl);
+  const hasFileMarker = Boolean(payload.audioName);
+  const hasNote = Boolean(String(payload.transcriptNote || "").trim());
+  const available = hasStored || hasLegacyInline;
+  let status = "missing";
+  let label = "Аудио не отправлено";
+
+  if (available) {
+    status = hasStored ? "stored" : "legacy_inline";
+    label = hasStored ? "Запись доступна" : "Старая запись доступна";
+  } else if (hasFileMarker) {
+    status = "broken_marker";
+    label = "Есть отметка о записи, но файл не найден";
+  } else if (hasNote) {
+    status = "text_only";
+    label = "Только текстовая заметка";
+  }
+
+  return {
+    status,
+    label,
+    available,
+    hasStored,
+    hasLegacyInline,
+    hasFileMarker,
+    hasNote,
+    audioId: payload.audioId || "",
+    audioName: payload.audioName || "",
+    mimeType: payload.mimeType || "audio/webm",
+    durationMs: Number(payload.durationMs || answer?.details?.durationMs || 0),
+    byteLength: Number(payload.audioBytes || 0),
+    audioUrl: available ? pm01VoiceAudioUrl(attempt.id, question.id) : ""
+  };
+}
+
+function sanitizePm01AnswerForAdmin(attempt, question, answer) {
+  if (!answer) {
+    return null;
+  }
+  const sanitized = {
+    ...answer,
+    answerPayload: { ...(answer.answerPayload || {}) }
+  };
+  if (question?.type === "voice_response") {
+    sanitized.voiceAudio = describePm01VoiceAudio(attempt, question, answer);
+    if (sanitized.answerPayload.audioDataUrl) {
+      sanitized.answerPayload.legacyAudioInline = true;
+      delete sanitized.answerPayload.audioDataUrl;
+    }
+  }
+  return sanitized;
+}
+
+function summarizePm01AttemptVoiceStatus(attempt) {
+  const questions = (attempt.variant?.questions || []).filter((question) => question.type === "voice_response");
+  const result = {
+    total: questions.length,
+    pending: 0,
+    reviewed: 0,
+    available: 0,
+    missing: 0,
+    textOnly: 0,
+    broken: 0
+  };
+
+  questions.forEach((question) => {
+    const answer = attempt.answers?.[question.id] || null;
+    if (!answer) {
+      result.missing += 1;
+      return;
+    }
+    if (answer.manualStatus === "pending_review") {
+      result.pending += 1;
+    }
+    if (answer.manualStatus === "reviewed") {
+      result.reviewed += 1;
+    }
+    const audio = describePm01VoiceAudio(attempt, question, answer);
+    if (audio.available) {
+      result.available += 1;
+    } else if (audio.status === "text_only") {
+      result.textOnly += 1;
+    } else if (audio.status === "broken_marker") {
+      result.broken += 1;
+    } else {
+      result.missing += 1;
+    }
+  });
+
+  return result;
+}
+
+async function normalizePm01VoiceAnswerPayload(attempt, question, answerPayload) {
+  const payload = { ...(answerPayload || {}) };
+  if (!question || question.type !== "voice_response" || !payload.audioDataUrl) {
+    return payload;
+  }
+
+  const parsed = parseDataUrl(payload.audioDataUrl);
+  if (!parsed || !parsed.buffer.length) {
+    delete payload.audioDataUrl;
+    payload.audioUploadStatus = "invalid";
+    payload.audioUploadMessage = "Запись не удалось прочитать на сервере.";
+    return payload;
+  }
+
+  if (PM01_VOICE_AUDIO_MAX_BYTES > 0 && parsed.buffer.length > PM01_VOICE_AUDIO_MAX_BYTES) {
+    const error = new Error("Голосовая запись слишком большая. Запишите ответ короче или оставьте текстовую заметку.");
+    error.statusCode = 413;
+    throw error;
+  }
+
+  const audioId = generateId("pm01voice");
+  const meta = await savePm01VoiceAudio(
+    {
+      id: audioId,
+      attemptId: attempt.id,
+      questionId: question.id,
+      fileName: `${question.id}.webm`,
+      mimeType: parsed.mimeType || "audio/webm",
+      durationMs: Number(payload.durationMs || 0),
+      byteLength: parsed.buffer.length,
+      createdAt: nowIso()
+    },
+    parsed.buffer
+  );
+
+  delete payload.audioDataUrl;
+  payload.audioId = meta.id || audioId;
+  payload.audioName = payload.audioName || meta.fileName || `${question.id}.webm`;
+  payload.mimeType = meta.mimeType || parsed.mimeType || "audio/webm";
+  payload.audioBytes = meta.byteLength || parsed.buffer.length;
+  payload.audioUploadStatus = "stored";
+  return payload;
+}
+
 function normalizePm01Controls(raw = {}) {
   const defaultAttempts = Math.max(1, Math.min(10, Math.trunc(Number(raw.defaultAttempts || 1)) || 1));
   const grants = {};
@@ -1067,7 +1231,7 @@ function buildPm01AdminAttemptDetail(exam, attempt) {
         solutionSteps: question.solutionSteps || [],
         explanation: question.explanation || "",
         correctAnswer: formatPm01CorrectAnswer(question),
-        answer: attempt.answers?.[question.id] || null,
+        answer: sanitizePm01AnswerForAdmin(attempt, question, attempt.answers?.[question.id] || null),
         log: attempt.questionLog ? attempt.questionLog[question.id] || null : null
       }))
   }));
@@ -2493,14 +2657,19 @@ async function handleApi(req, res, url) {
       ? Math.max(0, new Date(savedAt).getTime() - new Date(logEntry.presentedAt).getTime())
       : 0;
     const previousAnswer = attempt.answers[currentQuestion.id] || null;
-    const result = scorePm01Question(currentQuestion, body.answerPayload, previousAnswer);
+    const answerPayload = await normalizePm01VoiceAnswerPayload(
+      attempt,
+      currentQuestion,
+      body.answerPayload || {}
+    );
+    const result = scorePm01Question(currentQuestion, answerPayload, previousAnswer);
 
     attempt.answers[currentQuestion.id] = {
       questionId: currentQuestion.id,
       sourceId: currentQuestion.sourceId,
       moduleId: currentQuestion.moduleId,
       moduleCode: currentQuestion.moduleCode,
-      answerPayload: body.answerPayload || {},
+      answerPayload,
       autoScore: result.autoScore,
       finalScore: result.finalScore,
       penalty: result.penalty || 0,
@@ -3060,7 +3229,8 @@ async function handleApi(req, res, url) {
               questionCount: module.questionCount,
               pendingManualReviews: module.pendingManualReviews
             })),
-            pendingManualReviews: summary.pendingManualReviews
+            pendingManualReviews: summary.pendingManualReviews,
+            voice: summarizePm01AttemptVoiceStatus(attempt)
           };
         })
         .sort((left, right) => {
@@ -3089,6 +3259,52 @@ async function handleApi(req, res, url) {
         ok: true,
         data: buildPm01AdminAttemptDetail(exam, normalized)
       });
+      return;
+    }
+
+    if (method === "GET" && pathname.match(/^\/api\/admin\/pm01\/attempts\/[^/]+\/voice\/[^/]+\/audio$/)) {
+      const exam = getPm01Exam();
+      const attemptId = pathname.split("/")[5];
+      const questionId = decodeURIComponent(pathname.split("/")[7] || "");
+      const attempt = await loadAttemptById(attemptId);
+
+      if (!attempt || attempt.olympiadId !== exam.id) {
+        sendJson(res, 404, { ok: false, message: "Попытка ПМ.01 не найдена." });
+        return;
+      }
+
+      const question = (attempt.variant?.questions || []).find((item) => item.id === questionId);
+      const answer = attempt.answers?.[questionId] || null;
+      const payload = answer?.answerPayload || {};
+      let audio = null;
+
+      if (payload.audioId) {
+        audio = await loadPm01VoiceAudio(payload.audioId);
+      } else if (payload.audioDataUrl) {
+        const parsed = parseDataUrl(payload.audioDataUrl);
+        if (parsed) {
+          audio = {
+            meta: {
+              mimeType: parsed.mimeType || payload.mimeType || "audio/webm",
+              fileName: payload.audioName || `${questionId}.webm`
+            },
+            buffer: parsed.buffer
+          };
+        }
+      }
+
+      if (!question || question.type !== "voice_response" || !audio || !audio.buffer?.length) {
+        sendJson(res, 404, { ok: false, message: "Аудиозапись не найдена или не была отправлена." });
+        return;
+      }
+
+      res.writeHead(200, {
+        "Content-Type": audio.meta?.mimeType || payload.mimeType || "audio/webm",
+        "Content-Length": String(audio.buffer.length),
+        "Cache-Control": "private, no-store",
+        "Content-Disposition": `inline; filename="${String(audio.meta?.fileName || payload.audioName || "pm01-voice.webm").replace(/"/g, "")}"`
+      });
+      res.end(audio.buffer);
       return;
     }
 

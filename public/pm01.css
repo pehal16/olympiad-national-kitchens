@@ -1742,6 +1742,78 @@ button.module-step:focus-visible {
   border-left: 4px solid var(--red);
 }
 
+.voice-queue-list {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.voice-queue-head {
+  display: grid;
+  gap: 3px;
+}
+
+.voice-queue-head strong {
+  color: var(--green-900);
+}
+
+.voice-queue-head span,
+.voice-queue-row small,
+.voice-queue-more,
+.voice-cell-note,
+.audio-status span,
+.audio-empty-note {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.voice-queue-row {
+  width: 100%;
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+  color: var(--ink);
+  text-align: left;
+}
+
+.voice-queue-row:hover {
+  border-color: rgba(28, 117, 93, 0.32);
+  background: #eef8f4;
+}
+
+.voice-queue-row strong,
+.voice-queue-row small {
+  display: block;
+}
+
+.voice-queue-row em {
+  min-width: 94px;
+  padding: 5px 7px;
+  border-radius: var(--radius);
+  background: #fff4e4;
+  color: #8a4b09;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+  text-align: center;
+}
+
+.voice-queue-more {
+  margin: 0;
+  font-weight: 800;
+}
+
 .group-card-head {
   display: grid;
   gap: 3px;
@@ -2423,6 +2495,38 @@ tr[data-attempt-id].is-selected {
   gap: 10px;
   margin-top: 10px;
   padding: 12px;
+}
+
+.audio-status {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f8faf7;
+}
+
+.audio-status strong {
+  color: var(--green-900);
+}
+
+.audio-status.missing,
+.audio-status.broken_marker {
+  border-color: rgba(199, 72, 72, 0.3);
+  background: #fff4f4;
+}
+
+.audio-status.text_only {
+  border-color: rgba(35, 107, 181, 0.24);
+  background: #eef5ff;
+}
+
+.audio-empty-note {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: #fff;
 }
 
 .audio-box audio {

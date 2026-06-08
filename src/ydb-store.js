@@ -13,6 +13,8 @@ const CONTENT_DRAFTS_TABLE =
   process.env.YDB_CONTENT_DRAFTS_TABLE || "olympiad_content_drafts";
 const CONTENT_QUESTIONS_TABLE =
   process.env.YDB_CONTENT_QUESTIONS_TABLE || "olympiad_content_questions";
+const PM01_VOICE_AUDIO_TABLE =
+  process.env.YDB_PM01_VOICE_AUDIO_TABLE || "olympiad_pm01_voice_audio";
 
 let sqlPromise = null;
 let schemaReady = null;
@@ -95,6 +97,15 @@ async function ensureSchema() {
           payload_json Utf8,
           updated_at Utf8,
           PRIMARY KEY (question_id)
+        )
+      `;
+      await sql`
+        CREATE TABLE IF NOT EXISTS ${identifier(PM01_VOICE_AUDIO_TABLE)} (
+          audio_id Utf8,
+          payload_json Utf8,
+          audio_base64 Utf8,
+          updated_at Utf8,
+          PRIMARY KEY (audio_id)
         )
       `;
     })();
@@ -556,6 +567,43 @@ async function deleteContentCustomQuestion(questionId) {
   `;
 }
 
+async function savePm01VoiceAudio(meta, buffer) {
+  await ensureSchema();
+  const sql = await getSql();
+  const normalized = {
+    ...meta,
+    byteLength: Number(meta.byteLength || buffer?.length || 0),
+    createdAt: meta.createdAt || new Date().toISOString()
+  };
+  await sql`
+    UPSERT INTO ${identifier(PM01_VOICE_AUDIO_TABLE)} (audio_id, payload_json, audio_base64, updated_at)
+    VALUES (${String(normalized.id)}, ${JSON.stringify(normalized)}, ${Buffer.from(buffer || []).toString("base64")}, ${new Date().toISOString()})
+  `;
+  return normalized;
+}
+
+async function loadPm01VoiceAudio(audioId) {
+  await ensureSchema();
+  const sql = await getSql();
+  const [rows = []] = await sql`
+    SELECT audio_id, payload_json, audio_base64
+    FROM ${identifier(PM01_VOICE_AUDIO_TABLE)}
+    WHERE audio_id = ${String(audioId || "")}
+  `;
+  const row = rows[0];
+  if (!row) {
+    return null;
+  }
+  try {
+    return {
+      meta: JSON.parse(row.payload_json),
+      buffer: Buffer.from(row.audio_base64 || "", "base64")
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
 module.exports = {
   initYdbStorage,
   loadAttempts,
@@ -572,5 +620,7 @@ module.exports = {
   loadContentCustomQuestions,
   saveContentCustomQuestions,
   upsertContentCustomQuestion,
-  deleteContentCustomQuestion
+  deleteContentCustomQuestion,
+  savePm01VoiceAudio,
+  loadPm01VoiceAudio
 };

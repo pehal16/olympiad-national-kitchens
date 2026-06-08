@@ -25,6 +25,8 @@ const ATTEMPTS_FILE = path.join(STORAGE_DIR, "attempts.json");
 const SESSIONS_FILE = path.join(STORAGE_DIR, "admin-sessions.json");
 const CONTENT_DRAFTS_FILE = path.join(STORAGE_DIR, "content-drafts.json");
 const CONTENT_CUSTOM_FILE = path.join(STORAGE_DIR, "content-custom-questions.json");
+const PM01_VOICE_AUDIO_DIR = path.join(STORAGE_DIR, "pm01-voice-audio");
+const PM01_VOICE_AUDIO_INDEX_FILE = path.join(PM01_VOICE_AUDIO_DIR, "index.json");
 
 const STORAGE_BACKEND = String(
   process.env.STORAGE_BACKEND ||
@@ -62,10 +64,12 @@ function initFileStorage() {
   ensureDir(CONFIG_DIR);
   ensureDir(STORAGE_DIR);
   ensureDir(EXPORTS_DIR);
+  ensureDir(PM01_VOICE_AUDIO_DIR);
   readJson(ATTEMPTS_FILE, []);
   readJson(SESSIONS_FILE, []);
   readJson(CONTENT_DRAFTS_FILE, {});
   readJson(CONTENT_CUSTOM_FILE, {});
+  readJson(PM01_VOICE_AUDIO_INDEX_FILE, {});
 }
 
 async function initStorage() {
@@ -119,7 +123,9 @@ function loadSettings() {
       adminSessionsTable: process.env.YDB_ADMIN_SESSIONS_TABLE || "admin_sessions",
       contentDraftsTable: process.env.YDB_CONTENT_DRAFTS_TABLE || "olympiad_content_drafts",
       contentQuestionsTable:
-        process.env.YDB_CONTENT_QUESTIONS_TABLE || "olympiad_content_questions"
+        process.env.YDB_CONTENT_QUESTIONS_TABLE || "olympiad_content_questions",
+      pm01VoiceAudioTable:
+        process.env.YDB_PM01_VOICE_AUDIO_TABLE || "olympiad_pm01_voice_audio"
     }
   };
 }
@@ -262,6 +268,63 @@ async function deleteContentCustomQuestion(questionId) {
   writeJson(CONTENT_CUSTOM_FILE, questions);
 }
 
+function normalizeAudioMeta(meta) {
+  return {
+    id: String(meta.id || "").trim(),
+    attemptId: String(meta.attemptId || "").trim(),
+    questionId: String(meta.questionId || "").trim(),
+    fileName: String(meta.fileName || "").trim(),
+    mimeType: String(meta.mimeType || "audio/webm").trim(),
+    durationMs: Number(meta.durationMs || 0),
+    byteLength: Number(meta.byteLength || 0),
+    createdAt: String(meta.createdAt || new Date().toISOString())
+  };
+}
+
+async function savePm01VoiceAudio(meta, buffer) {
+  if (STORAGE_BACKEND === "ydb") {
+    return getYdbStore().savePm01VoiceAudio(normalizeAudioMeta(meta), buffer);
+  }
+
+  const normalized = normalizeAudioMeta(meta);
+  if (!normalized.id || !normalized.attemptId || !normalized.questionId) {
+    throw new Error("Некорректные метаданные голосового ответа.");
+  }
+  ensureDir(PM01_VOICE_AUDIO_DIR);
+  const safeName = `${normalized.id}.webm`;
+  const filePath = path.join(PM01_VOICE_AUDIO_DIR, safeName);
+  fs.writeFileSync(filePath, buffer);
+
+  const index = readJson(PM01_VOICE_AUDIO_INDEX_FILE, {});
+  index[normalized.id] = {
+    ...normalized,
+    fileName: safeName,
+    filePath
+  };
+  writeJson(PM01_VOICE_AUDIO_INDEX_FILE, index);
+  return index[normalized.id];
+}
+
+async function loadPm01VoiceAudio(audioId) {
+  if (STORAGE_BACKEND === "ydb") {
+    return getYdbStore().loadPm01VoiceAudio(audioId);
+  }
+
+  const id = String(audioId || "").trim();
+  if (!id) {
+    return null;
+  }
+  const index = readJson(PM01_VOICE_AUDIO_INDEX_FILE, {});
+  const meta = index[id];
+  if (!meta || !meta.filePath || !fs.existsSync(meta.filePath)) {
+    return null;
+  }
+  return {
+    meta,
+    buffer: fs.readFileSync(meta.filePath)
+  };
+}
+
 module.exports = {
   ROOT_DIR,
   DATA_DIR,
@@ -287,5 +350,7 @@ module.exports = {
   loadContentCustomQuestions,
   saveContentCustomQuestions,
   upsertContentCustomQuestion,
-  deleteContentCustomQuestion
+  deleteContentCustomQuestion,
+  savePm01VoiceAudio,
+  loadPm01VoiceAudio
 };

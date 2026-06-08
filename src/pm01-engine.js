@@ -731,6 +731,8 @@ function scoreHotspotScene(question, answerPayload) {
 function scoreVoiceResponse(question, answerPayload, existingAnswer = null) {
   const hasAnswer = Boolean(
     answerPayload?.audioDataUrl ||
+      answerPayload?.audioId ||
+      answerPayload?.audioUrl ||
       answerPayload?.audioName ||
       String(answerPayload?.transcriptNote || "").trim()
   );
@@ -756,7 +758,7 @@ function scoreVoiceResponse(question, answerPayload, existingAnswer = null) {
     penalty: 0,
     manualStatus: review ? "reviewed" : "pending_review",
     details: {
-      hasAudio: Boolean(answerPayload?.audioDataUrl || answerPayload?.audioName),
+      hasAudio: Boolean(answerPayload?.audioDataUrl || answerPayload?.audioId || answerPayload?.audioUrl),
       durationMs: Number(answerPayload?.durationMs || 0)
     }
   };

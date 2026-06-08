@@ -698,6 +698,24 @@ test("scorePm01Question treats skipped voice answer as zero without manual revie
   assert.equal(result.details.skipped, true);
 });
 
+test("scorePm01Question treats stored voice audioId as pending manual review", () => {
+  const question = {
+    type: "voice_response",
+    maxScore: 20
+  };
+
+  const result = scorePm01Question(question, {
+    audioId: "pm01voice_test",
+    audioName: "voice.webm",
+    durationMs: 42000
+  });
+
+  assert.equal(result.finalScore, 0);
+  assert.equal(result.manualStatus, "pending_review");
+  assert.equal(result.details.hasAudio, true);
+  assert.equal(result.details.durationMs, 42000);
+});
+
 test("applyPm01VoiceReview stores rubric scores and updates final summary", () => {
   const exam = getPm01Exam();
   const variant = buildPm01Variant(exam, "vegetables");
@@ -772,7 +790,16 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(adminScript, /buildFastAdminSummary/);
   assert.doesNotMatch(adminScript, /api\/admin\/pm01\/summary/);
   assert.match(adminScript, /api\/admin\/pm01\/controls\$\{ADMIN_ATTEMPTS_QUERY\}/);
-  assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.12/);
+  assert.match(serverSource, /PM01_VOICE_AUDIO_MAX_BYTES/);
+  assert.match(serverSource, /savePm01VoiceAudio/);
+  assert.match(serverSource, /loadPm01VoiceAudio/);
+  assert.equal(serverSource.includes("\\/voice\\/[^/]+\\/audio"), true);
+  assert.match(adminScript, /renderVoiceQueueList/);
+  assert.match(adminScript, /voiceAudio/);
+  assert.match(adminScript, /audioInfo\.audioUrl/);
+  assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.13/);
+  assert.match(css, /\.voice-queue-list/);
+  assert.match(css, /\.audio-status/);
   assert.match(css, /\.teacher-workbench/);
   assert.match(css, /\.detail-question-toolbar/);
   assert.match(css, /@media print/);

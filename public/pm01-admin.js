@@ -508,9 +508,21 @@
 
   function createPendingCell(attempt) {
     const pending = Number(attempt.pendingManualReviews || 0);
+    const voice = attempt.voice || {};
     const cell = createCell("", "pending-cell");
     if (pending) {
       cell.appendChild(createStatusPill("pending_review", `${pending} на проверке`));
+      if (Number(voice.available || 0)) {
+        appendText(cell, "small", "voice-cell-note", `${voice.available} запись доступна`);
+      }
+    } else if (Number(voice.reviewed || 0)) {
+      cell.appendChild(createStatusPill("reviewed", "проверено"));
+    } else if (Number(voice.textOnly || 0)) {
+      cell.appendChild(createStatusPill("is-partial", "только заметка"));
+    } else if (Number(voice.broken || 0)) {
+      cell.appendChild(createStatusPill("expired", "нет файла"));
+    } else if (Number(voice.missing || 0) && Number(voice.total || 0)) {
+      cell.appendChild(createStatusPill("is-empty", "нет аудио"));
     } else {
       cell.textContent = "—";
     }
@@ -803,6 +815,52 @@
     return button;
   }
 
+  function renderVoiceQueueList(pending) {
+    const list = createNode("div", "voice-queue-list");
+    const head = createNode("div", "voice-queue-head");
+    appendText(head, "strong", "", "Очередь голосовой проверки");
+    appendText(
+      head,
+      "span",
+      "",
+      pending.length
+        ? "Нажмите строку, чтобы открыть карточку и прослушать ответ."
+        : "Голосовых ответов на ручной проверке нет."
+    );
+    list.appendChild(head);
+
+    pending.slice(0, 8).forEach((attempt) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "voice-queue-row";
+      const main = createNode("span", "");
+      appendText(main, "strong", "", attempt.fullName || "Без имени");
+      appendText(
+        main,
+        "small",
+        "",
+        [groupLabel(attempt), attempt.variantTitle, statusLabel(attempt.status)].filter(Boolean).join(" · ")
+      );
+      const meta = createNode("em", "");
+      const voice = attempt.voice || {};
+      meta.textContent = Number(voice.available || 0)
+        ? `${voice.available} запись`
+        : Number(voice.textOnly || 0)
+          ? "только заметка"
+          : Number(voice.broken || 0)
+            ? "нет файла"
+            : "проверить";
+      button.append(main, meta);
+      button.addEventListener("click", () => selectAttempt(attempt.id));
+      list.appendChild(button);
+    });
+
+    if (pending.length > 8) {
+      appendText(list, "p", "voice-queue-more", `Еще ${pending.length - 8} в таблице ниже.`);
+    }
+    return list;
+  }
+
   function renderReviewQueue() {
     elements.reviewQueue.innerHTML = "";
     const attempts = state.attempts;
@@ -841,6 +899,7 @@
         weak.length ? "danger" : ""
       )
     );
+    elements.reviewQueue.appendChild(renderVoiceQueueList(pending));
   }
 
   function renderGroupOverview() {
@@ -1027,6 +1086,9 @@
     if (payload.audioDataUrl) {
       payload.audioDataUrl = "audio-data-url";
     }
+    if (answer.voiceAudio?.audioUrl) {
+      payload.audioUrl = answer.voiceAudio.audioUrl;
+    }
     return JSON.stringify(payload, null, 2);
   }
 
@@ -1061,9 +1123,14 @@
     if (Array.isArray(payload.points)) {
       return `Отмечено зон: ${payload.points.length}.`;
     }
-    if (payload.audioDataUrl || payload.audioName || payload.transcriptNote) {
+    if (question.type === "voice_response") {
+      const audio = answer.voiceAudio || {};
       const parts = [];
-      if (payload.audioDataUrl || payload.audioName) {
+      if (audio.available) {
+        parts.push(audio.label || "аудиозапись доступна");
+      } else if (audio.label) {
+        parts.push(audio.label);
+      } else if (payload.audioId || payload.audioDataUrl || payload.audioName) {
         parts.push("аудио прикреплено");
       }
       if (payload.transcriptNote) {
@@ -1114,17 +1181,39 @@
 
   function renderVoiceReview(detail, question, container) {
     const answer = question.answer;
+    const audioInfo = answer?.voiceAudio || {};
     const box = document.createElement("div");
     box.className = "audio-box";
 
-    if (answer?.answerPayload?.audioDataUrl) {
+    const status = createNode("div", `audio-status ${audioInfo.status || "missing"}`.trim());
+    appendText(status, "strong", "", audioInfo.label || "Голосовой ответ");
+    const statusMeta = [
+      audioInfo.durationMs ? `длительность ${formatDuration(audioInfo.durationMs)}` : "",
+      audioInfo.byteLength ? `размер ${(Number(audioInfo.byteLength) / 1024 / 1024).toFixed(1).replace(".", ",")} МБ` : "",
+      audioInfo.audioId ? `id ${audioInfo.audioId}` : ""
+    ].filter(Boolean).join(" · ");
+    appendText(
+      status,
+      "span",
+      "",
+      statusMeta || "Если запись не проигрывается, проверьте статус выше и текстовую заметку ниже."
+    );
+    box.appendChild(status);
+
+    if (audioInfo.audioUrl || answer?.answerPayload?.audioDataUrl) {
       const audio = document.createElement("audio");
       audio.controls = true;
-      audio.src = answer.answerPayload.audioDataUrl;
+      audio.preload = "none";
+      audio.src = audioInfo.audioUrl || answer.answerPayload.audioDataUrl;
       box.appendChild(audio);
     } else {
       const empty = document.createElement("p");
-      empty.textContent = "Аудиозапись не прикреплена.";
+      empty.className = "audio-empty-note";
+      empty.textContent = audioInfo.status === "text_only"
+        ? "Студент оставил только текстовую заметку без записи."
+        : audioInfo.status === "broken_marker"
+          ? "В ответе есть отметка о записи, но сам файл не найден. Можно оценить по заметке или попросить повторную попытку."
+          : "Аудиозапись не была отправлена.";
       box.appendChild(empty);
     }
 

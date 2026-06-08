@@ -1,6 +1,7 @@
 (function () {
   const TEACHER_NAME = "Постовит Дмитрий Александрович";
   const FREE_STUDENT_VALUE = "__free_name__";
+  const MAX_VOICE_AUDIO_BYTES = 14 * 1024 * 1024;
   const PM01_STUDENT_GROUPS = [
     {
       groupName: "2-ПК-25",
@@ -1408,6 +1409,8 @@
     let startedAt = 0;
     let audioDataUrl = question.savedAnswer?.audioDataUrl || "";
     let durationMs = Number(question.savedAnswer?.durationMs || 0);
+    let audioBytes = Number(question.savedAnswer?.audioBytes || 0);
+    let mimeType = question.savedAnswer?.mimeType || "audio/webm";
 
     const wrapper = document.createElement("div");
     wrapper.className = "option-list";
@@ -1426,6 +1429,17 @@
         });
         mediaRecorder.addEventListener("stop", () => {
           const blob = new Blob(chunks, { type: mediaRecorder.mimeType || "audio/webm" });
+          audioBytes = blob.size;
+          mimeType = blob.type || "audio/webm";
+          if (audioBytes > MAX_VOICE_AUDIO_BYTES) {
+            audioDataUrl = "";
+            preview.removeAttribute("src");
+            preview.classList.add("hidden");
+            meter.textContent = "Запись слишком большая. Запишите ответ короче или оставьте текстовую заметку.";
+            showMessage(elements.taskMessage, "Голосовая запись слишком большая для надежной отправки. Запишите ответ короче или оставьте текстовую заметку.", "error");
+            stream.getTracks().forEach((track) => track.stop());
+            return;
+          }
           const reader = new FileReader();
           reader.addEventListener("loadend", () => {
             audioDataUrl = String(reader.result || "");
@@ -1489,6 +1503,8 @@
       getAnswer: () => ({
         audioDataUrl,
         durationMs,
+        audioBytes,
+        mimeType,
         transcriptNote: textarea.value.trim(),
         audioName: audioDataUrl ? `${question.id}.webm` : ""
       })
