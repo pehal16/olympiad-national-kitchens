@@ -2053,46 +2053,16 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    const signature = makeParticipantSignature(validation.profile);
-    const participantNameKey = makeParticipantNameKey(validation.profile);
     const clientIp = getClientIp(req);
-    const examAccessKey = makeAttemptAccessKey(clientIp, participantNameKey);
-    const trainingAccessKey = makeAttemptAccessKey(clientIp, participantNameKey);
-    const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id).filter(
-      (attempt) =>
-        attempt.participantSignature === signature ||
-        attempt.accessKey === examAccessKey ||
-        attempt.accessKey === trainingAccessKey
-    );
-    const activeExamAttempt = attempts.find(
-      (attempt) =>
-        attemptMatchesAccess(attempt, examAccessKey, signature, "exam") &&
-        attempt.status === "in_progress"
-    );
-    const completedExamAttempt = attempts.find(
-      (attempt) =>
-        attemptMatchesAccess(attempt, examAccessKey, signature, "exam") &&
-        attempt.status !== "in_progress"
-    );
-    const activeTrainingAttempt = attempts.find(
-      (attempt) =>
-        attemptMatchesAccess(attempt, trainingAccessKey, signature, "training") &&
-        attempt.status === "in_progress"
-    );
-    const completedTrainingAttempt = attempts.find(
-      (attempt) =>
-        attemptMatchesAccess(attempt, trainingAccessKey, signature, "training") &&
-        attempt.status !== "in_progress"
-    );
 
     sendJson(res, 200, {
       ok: true,
       data: {
         participant: validation.profile,
-        activeAttemptId: activeExamAttempt ? activeExamAttempt.id : null,
-        activeTrainingAttemptId: activeTrainingAttempt ? activeTrainingAttempt.id : null,
-        alreadyCompleted: Boolean(completedExamAttempt && !activeExamAttempt),
-        trainingAlreadyCompleted: Boolean(completedTrainingAttempt && !activeTrainingAttempt),
+        activeAttemptId: null,
+        activeTrainingAttemptId: null,
+        alreadyCompleted: false,
+        trainingAlreadyCompleted: false,
         clientIp
       }
     });
