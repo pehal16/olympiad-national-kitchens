@@ -898,6 +898,67 @@ function sendAudioBuffer(req, res, audio, payload) {
   res.end(chunk);
 }
 
+function sendDataUrlAudioRange(req, res, dataUrl, payload) {
+  const text = String(dataUrl || "");
+  const headerMatch = text.match(/^data:([^;,]+)?(;base64)?,/);
+  const range = String(req.headers.range || "").trim();
+  if (!headerMatch || !headerMatch[2] || !range) {
+    return false;
+  }
+
+  const mimeType = headerMatch[1] || payload.mimeType || "audio/webm";
+  const fileName = String(payload.audioName || "pm01-voice.webm").replace(/"/g, "");
+  const base64Start = headerMatch[0].length;
+  const base64Length = text.length - base64Start;
+  const padding = (text.endsWith("==") ? 2 : text.endsWith("=") ? 1 : 0);
+  const total = Math.max(0, Math.floor((base64Length * 3) / 4) - padding);
+  const baseHeaders = {
+    "Content-Type": mimeType,
+    "Cache-Control": "private, no-store",
+    "Accept-Ranges": "bytes",
+    "Content-Disposition": `inline; filename="${fileName}"`
+  };
+  const match = range.match(/^bytes=(\d*)-(\d*)$/);
+  if (!match || !total) {
+    res.writeHead(416, {
+      ...baseHeaders,
+      "Content-Range": `bytes */${total}`
+    });
+    res.end();
+    return true;
+  }
+
+  const suffixLength = !match[1] && match[2] ? Number(match[2]) : 0;
+  const requestedStart = suffixLength ? total - suffixLength : Number(match[1] || 0);
+  const requestedEnd = suffixLength ? total - 1 : Number(match[2] || total - 1);
+  const start = Math.max(0, Math.min(Number.isFinite(requestedStart) ? requestedStart : 0, total - 1));
+  const end = Math.max(start, Math.min(Number.isFinite(requestedEnd) ? requestedEnd : total - 1, total - 1));
+  if (start >= total) {
+    res.writeHead(416, {
+      ...baseHeaders,
+      "Content-Range": `bytes */${total}`
+    });
+    res.end();
+    return true;
+  }
+
+  const firstGroup = Math.floor(start / 3);
+  const lastGroup = Math.floor(end / 3);
+  const encodedStart = base64Start + firstGroup * 4;
+  const encodedEnd = base64Start + (lastGroup + 1) * 4;
+  const decoded = Buffer.from(text.slice(encodedStart, encodedEnd), "base64");
+  const offset = start - firstGroup * 3;
+  const chunk = decoded.subarray(offset, offset + (end - start + 1));
+
+  res.writeHead(206, {
+    ...baseHeaders,
+    "Content-Length": String(chunk.length),
+    "Content-Range": `bytes ${start}-${end}/${total}`
+  });
+  res.end(chunk);
+  return true;
+}
+
 function describePm01VoiceAudio(attempt, question, answer) {
   const payload = answer?.answerPayload || {};
   const hasStored = Boolean(payload.audioId);
@@ -3417,6 +3478,9 @@ async function handleApi(req, res, url) {
         }
       }
       if (!audio && payload.audioDataUrl) {
+        if (question?.type === "voice_response" && sendDataUrlAudioRange(req, res, payload.audioDataUrl, payload)) {
+          return;
+        }
         const parsed = parseDataUrl(payload.audioDataUrl);
         if (parsed) {
           audio = {
