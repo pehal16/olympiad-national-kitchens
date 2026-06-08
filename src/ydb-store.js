@@ -18,6 +18,7 @@ const PM01_VOICE_AUDIO_TABLE =
 
 let sqlPromise = null;
 let schemaReady = null;
+let pm01VoiceAudioSchemaReady = null;
 
 function ensureConnectionString() {
   if (!YDB_CONNECTION_STRING) {
@@ -99,6 +100,16 @@ async function ensureSchema() {
           PRIMARY KEY (question_id)
         )
       `;
+    })();
+  }
+
+  return schemaReady;
+}
+
+async function ensurePm01VoiceAudioSchema() {
+  if (!pm01VoiceAudioSchemaReady) {
+    pm01VoiceAudioSchemaReady = (async () => {
+      const sql = await getSql();
       await sql`
         CREATE TABLE IF NOT EXISTS ${identifier(PM01_VOICE_AUDIO_TABLE)} (
           audio_id Utf8,
@@ -111,7 +122,7 @@ async function ensureSchema() {
     })();
   }
 
-  return schemaReady;
+  return pm01VoiceAudioSchemaReady;
 }
 
 async function selectRows(tableName, keyColumn) {
@@ -568,7 +579,7 @@ async function deleteContentCustomQuestion(questionId) {
 }
 
 async function savePm01VoiceAudio(meta, buffer) {
-  await ensureSchema();
+  await ensurePm01VoiceAudioSchema();
   const sql = await getSql();
   const normalized = {
     ...meta,
@@ -583,7 +594,7 @@ async function savePm01VoiceAudio(meta, buffer) {
 }
 
 async function loadPm01VoiceAudio(audioId) {
-  await ensureSchema();
+  await ensurePm01VoiceAudioSchema();
   const sql = await getSql();
   const [rows = []] = await sql`
     SELECT audio_id, payload_json, audio_base64
