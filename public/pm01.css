@@ -1659,6 +1659,106 @@ button.module-step:focus-visible {
   font-weight: 900;
 }
 
+.teacher-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 12px;
+}
+
+.review-queue,
+.group-overview {
+  display: grid;
+  gap: 10px;
+}
+
+.review-queue {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.group-overview {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.queue-card,
+.group-card {
+  width: 100%;
+  min-height: 92px;
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+  text-align: left;
+}
+
+.queue-card:hover,
+.group-card:hover {
+  border-color: rgba(28, 117, 93, 0.32);
+  background: #eef8f4;
+}
+
+.queue-card strong {
+  color: var(--green-900);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.queue-card span,
+.group-card-head strong {
+  font-weight: 900;
+}
+
+.queue-card small,
+.group-card span,
+.group-card small,
+.attempt-group-alias {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.queue-card.warning {
+  border-left: 4px solid var(--orange);
+}
+
+.queue-card.success {
+  border-left: 4px solid var(--green-700);
+}
+
+.queue-card.info {
+  border-left: 4px solid var(--blue);
+}
+
+.queue-card.danger {
+  border-left: 4px solid var(--red);
+}
+
+.group-card-head {
+  display: grid;
+  gap: 3px;
+}
+
+.group-card-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.group-card-metrics span {
+  padding: 4px 6px;
+  border-radius: 6px;
+  background: var(--surface-soft);
+  font-weight: 800;
+}
+
+.group-aliases,
+.attempt-group-alias {
+  font-style: normal;
+}
+
 .results-overview {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
@@ -2155,6 +2255,72 @@ tr[data-attempt-id].is-selected {
   margin-top: 12px;
 }
 
+.detail-question-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f8faf7;
+}
+
+.detail-question-toolbar-copy {
+  display: grid;
+  gap: 3px;
+}
+
+.detail-question-toolbar-copy strong {
+  color: var(--green-900);
+}
+
+.detail-question-toolbar-copy span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.detail-question-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.detail-question-filters button {
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--green-900);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.detail-question-filters button.is-active {
+  color: #fff;
+  border-color: var(--green-800);
+  background: var(--green-800);
+}
+
+.detail-empty-filter {
+  display: grid;
+  gap: 5px;
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.detail-empty-filter span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .detail-module-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2358,6 +2524,7 @@ tr[data-attempt-id].is-selected {
   .entry-grid,
   .workspace,
   .results-overview,
+  .teacher-workbench,
   .admin-layout {
     grid-template-columns: 1fr;
   }
@@ -2367,7 +2534,9 @@ tr[data-attempt-id].is-selected {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .module-overview {
+  .module-overview,
+  .review-queue,
+  .group-overview {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -2458,10 +2627,13 @@ tr[data-attempt-id].is-selected {
   .result-modules,
   .admin-stat-grid,
   .grade-overview,
-  .teacher-control-grid,
-  .detail-access-panel,
-  .module-overview,
-  .detail-metrics,
+    .teacher-control-grid,
+    .detail-access-panel,
+    .detail-question-toolbar,
+    .module-overview,
+    .review-queue,
+    .group-overview,
+    .detail-metrics,
   .detail-module-grid,
   .protocol-grid,
   .reference-panel {
@@ -2503,6 +2675,10 @@ tr[data-attempt-id].is-selected {
   .protocol-signatures {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .detail-question-filters {
+    justify-content: flex-start;
   }
 
   .points-pill {

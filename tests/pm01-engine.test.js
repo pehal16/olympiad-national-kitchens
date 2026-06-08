@@ -721,14 +721,24 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(serverSource, /\/api\/admin\/pm01\/grants/);
   assert.match(serverSource, /examEnabled/);
   assert.match(serverSource, /freeRepeatEnabled/);
+  assert.match(serverSource, /normalizeGroupName/);
+  assert.match(serverSource, /normalizeGroupKey/);
+  assert.match(serverSource, /groupNameOriginal/);
   assert.match(serverSource, /Лимит экзаменационных попыток исчерпан/);
 
   assert.match(adminHtml, /teacher-controls-form/);
+  assert.match(adminHtml, /group-overview/);
+  assert.match(adminHtml, /review-queue/);
   assert.match(adminHtml, /control-exam-enabled/);
   assert.match(adminHtml, /control-free-repeat/);
   assert.match(adminScript, /renderTeacherControls/);
+  assert.match(adminScript, /renderWorkbench/);
+  assert.match(adminScript, /renderDetailQuestionToolbar/);
+  assert.match(adminScript, /questionMatchesDetailFilter/);
   assert.match(adminScript, /setExtraAttempts/);
   assert.match(adminScript, /renderProtocolCard/);
+  assert.match(css, /\.teacher-workbench/);
+  assert.match(css, /\.detail-question-toolbar/);
   assert.match(css, /@media print/);
   assert.match(css, /\.protocol-card/);
 });

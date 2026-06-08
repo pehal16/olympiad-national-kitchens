@@ -4,13 +4,16 @@
     controls: null,
     attempts: [],
     selectedAttemptId: "",
+    currentDetail: null,
+    detailQuestionFilter: "all",
     filters: {
       search: "",
       variant: "",
       group: "",
       status: "",
       mode: "",
-      pendingOnly: false
+      pendingOnly: false,
+      riskOnly: false
     }
   };
 
@@ -26,6 +29,8 @@
     adminStats: document.getElementById("admin-stats"),
     gradeOverview: document.getElementById("grade-overview"),
     moduleOverview: document.getElementById("module-overview"),
+    reviewQueue: document.getElementById("review-queue"),
+    groupOverview: document.getElementById("group-overview"),
     teacherControlsForm: document.getElementById("teacher-controls-form"),
     controlExamEnabled: document.getElementById("control-exam-enabled"),
     controlFreeRepeat: document.getElementById("control-free-repeat"),
@@ -197,6 +202,86 @@
     return sum(completed.map((attempt) => attempt.totalFinalScore)) / completed.length;
   }
 
+  function groupKey(attempt) {
+    return attempt.groupKey || String(attempt.groupName || "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+  }
+
+  function groupLabel(attempt) {
+    return attempt.groupName || attempt.groupNameOriginal || "Без группы";
+  }
+
+  function groupOriginalLabel(attempt) {
+    const original = String(attempt.groupNameOriginal || "").trim();
+    const normalized = String(attempt.groupName || "").trim();
+    return original && original !== normalized ? original : "";
+  }
+
+  function groupSummaries(attempts = state.attempts) {
+    const byGroup = new Map();
+    attempts.forEach((attempt) => {
+      const key = groupKey(attempt) || "unknown";
+      if (!byGroup.has(key)) {
+        byGroup.set(key, {
+          key,
+          label: groupLabel(attempt),
+          originals: new Set(),
+          attempts: [],
+          participants: new Set()
+        });
+      }
+      const entry = byGroup.get(key);
+      entry.attempts.push(attempt);
+      entry.participants.add(attempt.participantSignature || attempt.fullName || attempt.id);
+      const original = groupOriginalLabel(attempt);
+      if (original) {
+        entry.originals.add(original);
+      }
+    });
+
+    return Array.from(byGroup.values())
+      .map((entry) => {
+        const completed = completedAttempts(entry.attempts);
+        return {
+          ...entry,
+          participantCount: entry.participants.size,
+          attemptCount: entry.attempts.length,
+          completedCount: completed.length,
+          activeCount: entry.attempts.filter((attempt) => attempt.status === "in_progress").length,
+          pendingCount: entry.attempts.filter((attempt) => Number(attempt.pendingManualReviews || 0)).length,
+          average: completed.length ? averageScore(entry.attempts) : 0,
+          originals: Array.from(entry.originals).sort((left, right) => left.localeCompare(right, "ru"))
+        };
+      })
+      .sort((left, right) => left.label.localeCompare(right.label, "ru"));
+  }
+
+  function setQuickFilters(nextFilters = {}) {
+    if (Object.prototype.hasOwnProperty.call(nextFilters, "search")) {
+      elements.filterSearch.value = nextFilters.search || "";
+    }
+    if (Object.prototype.hasOwnProperty.call(nextFilters, "variant")) {
+      elements.filterVariant.value = nextFilters.variant || "";
+    }
+    if (Object.prototype.hasOwnProperty.call(nextFilters, "group")) {
+      elements.filterGroup.value = nextFilters.group || "";
+    }
+    if (Object.prototype.hasOwnProperty.call(nextFilters, "status")) {
+      elements.filterStatus.value = nextFilters.status || "";
+    }
+    if (Object.prototype.hasOwnProperty.call(nextFilters, "mode")) {
+      elements.filterMode.value = nextFilters.mode || "";
+    }
+    if (Object.prototype.hasOwnProperty.call(nextFilters, "pendingOnly")) {
+      elements.filterPending.checked = Boolean(nextFilters.pendingOnly);
+    }
+    if (Object.prototype.hasOwnProperty.call(nextFilters, "riskOnly")) {
+      state.filters.riskOnly = Boolean(nextFilters.riskOnly);
+    } else {
+      state.filters.riskOnly = false;
+    }
+    syncFiltersFromInputs();
+  }
+
   function getControls() {
     return state.controls || state.summary?.controls || {
       examEnabled: true,
@@ -279,10 +364,14 @@
     const cell = createCell("", "attempt-student-cell");
     appendText(cell, "strong", "", attempt.fullName || "Без имени");
     const meta = createNode("span", "attempt-student-meta");
-    meta.textContent = [attempt.groupName, attempt.institution, attempt.mentorName]
+    meta.textContent = [groupLabel(attempt), attempt.institution, attempt.mentorName]
       .filter(Boolean)
       .join(" · ") || "данные участника не заполнены";
     cell.appendChild(meta);
+    const original = groupOriginalLabel(attempt);
+    if (original) {
+      appendText(cell, "em", "attempt-group-alias", `ввод: ${original}`);
+    }
     return cell;
   }
 
@@ -387,7 +476,13 @@
         ])
       )
     );
-    setSelectOptions(elements.filterGroup, uniqueValues(state.attempts.map((attempt) => attempt.groupName)), "Все группы");
+    const groups = groupSummaries();
+    setSelectOptions(
+      elements.filterGroup,
+      groups.map((group) => group.key),
+      "Все группы",
+      Object.fromEntries(groups.map((group) => [group.key, group.label]))
+    );
     setSelectOptions(
       elements.filterStatus,
       uniqueValues(state.attempts.map((attempt) => attempt.status)),
@@ -410,7 +505,7 @@
       if (state.filters.variant && attempt.selectedVariantId !== state.filters.variant) {
         return false;
       }
-      if (state.filters.group && attempt.groupName !== state.filters.group) {
+      if (state.filters.group && groupKey(attempt) !== state.filters.group) {
         return false;
       }
       if (state.filters.status && attempt.status !== state.filters.status) {
@@ -422,6 +517,9 @@
       if (state.filters.pendingOnly && !Number(attempt.pendingManualReviews || 0)) {
         return false;
       }
+      if (state.filters.riskOnly && (attempt.status === "in_progress" || Number(attempt.grade || 0) > 3)) {
+        return false;
+      }
       if (!search) {
         return true;
       }
@@ -429,6 +527,7 @@
       const haystack = [
         attempt.fullName,
         attempt.groupName,
+        attempt.groupNameOriginal,
         attempt.institution,
         attempt.mentorName,
         attempt.variantTitle,
@@ -622,6 +721,101 @@
     }
   }
 
+  function renderQueueButton(label, value, caption, filters, tone = "") {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `queue-card ${tone}`.trim();
+    appendText(button, "strong", "", String(value));
+    appendText(button, "span", "", label);
+    appendText(button, "small", "", caption);
+    button.addEventListener("click", () => setQuickFilters(filters));
+    return button;
+  }
+
+  function renderReviewQueue() {
+    elements.reviewQueue.innerHTML = "";
+    const attempts = state.attempts;
+    const pending = attempts.filter((attempt) => Number(attempt.pendingManualReviews || 0));
+    const active = attempts.filter((attempt) => attempt.status === "in_progress");
+    const completed = completedAttempts(attempts);
+    const weak = completed.filter((attempt) => Number(attempt.grade || 0) <= 3);
+
+    elements.reviewQueue.append(
+      renderQueueButton(
+        "Голосовая проверка",
+        pending.length,
+        "Открыть ответы, где нужен ручной балл",
+        { status: "", pendingOnly: true },
+        pending.length ? "warning" : ""
+      ),
+      renderQueueButton(
+        "В работе",
+        active.length,
+        "Студенты, которые сейчас проходят экзамен",
+        { status: "in_progress", pendingOnly: false },
+        "info"
+      ),
+      renderQueueButton(
+        "Завершено",
+        completed.length,
+        "Готовые попытки для протокола",
+        { status: "reviewed", pendingOnly: false },
+        "success"
+      ),
+      renderQueueButton(
+        "Риск оценки 3 и ниже",
+        weak.length,
+        "Быстро найти слабые результаты",
+        { status: "", pendingOnly: false, search: "", riskOnly: true },
+        weak.length ? "danger" : ""
+      )
+    );
+  }
+
+  function renderGroupOverview() {
+    elements.groupOverview.innerHTML = "";
+    const groups = groupSummaries();
+    if (!groups.length) {
+      const empty = createNode("article", "group-card");
+      appendText(empty, "strong", "", "Группы появятся после первых попыток");
+      appendText(empty, "span", "", "Разные варианты написания будут объединены автоматически.");
+      elements.groupOverview.appendChild(empty);
+      return;
+    }
+
+    groups.forEach((group) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "group-card";
+      const head = createNode("div", "group-card-head");
+      appendText(head, "strong", "", group.label);
+      appendText(head, "span", "", `${group.participantCount} студ. · ${group.attemptCount} попыток`);
+      button.appendChild(head);
+      const metrics = createNode("div", "group-card-metrics");
+      [
+        [`${group.completedCount}`, "завершено"],
+        [`${group.activeCount}`, "в работе"],
+        [`${group.pendingCount}`, "проверить"],
+        [group.completedCount ? `${formatScoreNumber(group.average)}` : "—", "средний балл"]
+      ].forEach(([value, label]) => {
+        const item = createNode("span", "");
+        item.textContent = `${value} ${label}`;
+        metrics.appendChild(item);
+      });
+      button.appendChild(metrics);
+      if (group.originals.length) {
+        appendText(button, "small", "group-aliases", `варианты ввода: ${group.originals.slice(0, 3).join(", ")}`);
+      }
+      button.addEventListener("click", () => setQuickFilters({ group: group.key, pendingOnly: false }));
+      elements.groupOverview.appendChild(button);
+    });
+  }
+
+  function renderWorkbench() {
+    renderReviewQueue();
+    renderGroupOverview();
+  }
+
   function renderStats() {
     elements.adminStats.innerHTML = "";
     const counts = state.summary?.counts || {};
@@ -682,8 +876,9 @@
           : "—"
       }`,
       `В работе: ${attempts.filter((attempt) => attempt.status === "in_progress").length}`,
-      `На проверке: ${attempts.filter((attempt) => Number(attempt.pendingManualReviews || 0)).length}`
-    ];
+      `На проверке: ${attempts.filter((attempt) => Number(attempt.pendingManualReviews || 0)).length}`,
+      state.filters.riskOnly ? "Показаны оценки 3 и ниже" : ""
+    ].filter(Boolean);
     chips.forEach((text) => appendText(elements.filteredSummary, "span", "", text));
   }
 
@@ -742,6 +937,7 @@
     elements.adminPanel.classList.remove("hidden");
     renderStats();
     renderTeacherControls();
+    renderWorkbench();
     renderFilterOptions();
     renderAttempts();
   }
@@ -967,6 +1163,91 @@
     moduleNode.appendChild(node);
   }
 
+  function questionStatusBucket(question) {
+    const answer = question.answer;
+    if (!answer) {
+      return "empty";
+    }
+    if (answer.manualStatus === "pending_review") {
+      return "pending";
+    }
+    const score = Number(answer.finalScore || 0);
+    const maxScore = Number(question.maxScore || 0);
+    if (maxScore && score >= maxScore) {
+      return "correct";
+    }
+    if (score > 0) {
+      return "partial";
+    }
+    return "zero";
+  }
+
+  function questionMatchesDetailFilter(question) {
+    const bucket = questionStatusBucket(question);
+    if (state.detailQuestionFilter === "all") {
+      return true;
+    }
+    if (state.detailQuestionFilter === "problems") {
+      return ["partial", "zero", "empty", "pending"].includes(bucket);
+    }
+    if (state.detailQuestionFilter === "empty") {
+      return bucket === "empty";
+    }
+    if (state.detailQuestionFilter === "pending") {
+      return bucket === "pending";
+    }
+    return true;
+  }
+
+  function detailQuestionCounts(detail) {
+    return (detail.modules || []).flatMap((module) => module.questions || []).reduce(
+      (counts, question) => {
+        const bucket = questionStatusBucket(question);
+        counts.all += 1;
+        counts[bucket] += 1;
+        if (["partial", "zero", "empty", "pending"].includes(bucket)) {
+          counts.problems += 1;
+        }
+        return counts;
+      },
+      { all: 0, correct: 0, partial: 0, zero: 0, empty: 0, pending: 0, problems: 0 }
+    );
+  }
+
+  function renderDetailQuestionToolbar(detail) {
+    const counts = detailQuestionCounts(detail);
+    const toolbar = createNode("div", "detail-question-toolbar");
+    const title = createNode("div", "detail-question-toolbar-copy");
+    appendText(title, "strong", "", "Проверка ответов");
+    appendText(
+      title,
+      "span",
+      "",
+      `Ошибки/проблемы: ${counts.problems}; без ответа: ${counts.empty}; ручная проверка: ${counts.pending}`
+    );
+    toolbar.appendChild(title);
+
+    const actions = createNode("div", "detail-question-filters");
+    [
+      ["all", `Все ${counts.all}`],
+      ["problems", `Проблемы ${counts.problems}`],
+      ["empty", `Без ответа ${counts.empty}`],
+      ["pending", `Ручная ${counts.pending}`]
+    ].forEach(([value, label]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = value === state.detailQuestionFilter ? "is-active" : "";
+      button.textContent = label;
+      button.addEventListener("click", () => {
+        state.detailQuestionFilter = value;
+        renderDetail(detail);
+      });
+      actions.appendChild(button);
+    });
+    toolbar.appendChild(actions);
+    return toolbar;
+  }
+
   async function setExtraAttempts(participantSignature, extraAttempts, attemptId) {
     hideMessage(elements.adminMessage);
     try {
@@ -1173,15 +1454,21 @@
 
   function renderDetail(detail) {
     state.selectedAttemptId = detail.attempt.id;
+    state.currentDetail = detail;
     elements.detailPanel.innerHTML = "";
     elements.detailPanel.append(
       renderDetailHeader(detail),
       renderCompletionStrip(detail),
       renderDetailModuleSummary(detail.modules || []),
+      renderDetailQuestionToolbar(detail),
       renderProtocolCard(detail)
     );
 
     (detail.modules || []).forEach((module) => {
+      const visibleQuestions = (module.questions || []).filter(questionMatchesDetailFilter);
+      if (!visibleQuestions.length && state.detailQuestionFilter !== "all") {
+        return;
+      }
       const moduleNode = document.createElement("section");
       moduleNode.className = "admin-module";
       const moduleTitle = document.createElement("h3");
@@ -1192,9 +1479,18 @@
         ? `${score.finalScore} из ${module.maxScore}; ответов ${score.answered}/${score.questionCount}`
         : `0 из ${module.maxScore}`;
       moduleNode.append(moduleTitle, moduleMeta);
-      (module.questions || []).forEach((question) => renderQuestionDetail(detail, question, moduleNode));
+      visibleQuestions.forEach((question) => renderQuestionDetail(detail, question, moduleNode));
       elements.detailPanel.appendChild(moduleNode);
     });
+    if (
+      state.detailQuestionFilter !== "all" &&
+      !(detail.modules || []).some((module) => (module.questions || []).some(questionMatchesDetailFilter))
+    ) {
+      const empty = createNode("div", "detail-empty-filter");
+      appendText(empty, "strong", "", "По выбранному фильтру вопросов нет");
+      appendText(empty, "span", "", "Можно вернуться к режиму «Все» или выбрать другой фильтр проверки.");
+      elements.detailPanel.appendChild(empty);
+    }
     renderAttempts();
   }
 
@@ -1202,6 +1498,7 @@
     hideMessage(elements.adminMessage);
     try {
       const detail = await adminApi(`/api/admin/pm01/attempts/${encodeURIComponent(attemptId)}`);
+      state.detailQuestionFilter = "all";
       renderDetail(detail);
     } catch (error) {
       showMessage(elements.adminMessage, error.message, "error");
@@ -1265,6 +1562,7 @@
     elements.filterStatus.value = "";
     elements.filterMode.value = "";
     elements.filterPending.checked = false;
+    state.filters.riskOnly = false;
     syncFiltersFromInputs();
   }
 

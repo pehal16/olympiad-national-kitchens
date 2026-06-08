@@ -202,10 +202,13 @@ function isOlympiadAvailable(olympiad) {
 }
 
 function validateParticipantProfile(payload) {
+  const rawGroupName = String(payload.groupName || "").trim();
+  const groupName = normalizeGroupName(rawGroupName);
   const profile = {
     fullName: String(payload.fullName || "").trim(),
     institution: String(payload.institution || "").trim(),
-    groupName: String(payload.groupName || "").trim(),
+    groupName,
+    groupNameOriginal: rawGroupName && rawGroupName !== groupName ? rawGroupName : "",
     mentorName: String(payload.mentorName || "").trim()
   };
 
@@ -219,11 +222,53 @@ function validateParticipantProfile(payload) {
   return { valid: true, profile };
 }
 
+function normalizeGroupLetters(value) {
+  return String(value || "")
+    .toUpperCase()
+    .replace(/Ё/g, "Е")
+    .replace(/A/g, "А")
+    .replace(/B/g, "В")
+    .replace(/C/g, "С")
+    .replace(/E/g, "Е")
+    .replace(/H/g, "Н")
+    .replace(/K/g, "К")
+    .replace(/M/g, "М")
+    .replace(/O/g, "О")
+    .replace(/P/g, "П")
+    .replace(/T/g, "Т")
+    .replace(/X/g, "Х")
+    .replace(/Y/g, "У");
+}
+
+function normalizeGroupKey(value) {
+  return normalizeGroupLetters(value)
+    .replace(/[^\p{L}\p{N}]+/gu, "")
+    .toLowerCase();
+}
+
+function normalizeGroupName(value) {
+  const raw = String(value || "").trim();
+  if (!raw) {
+    return "";
+  }
+
+  const compact = normalizeGroupLetters(raw).replace(/[^\p{L}\p{N}]+/gu, "");
+  const structured = compact.match(/^(\d{1,2})([\p{L}]{1,8})(\d{2,4})$/u);
+  if (structured) {
+    return `${structured[1]}-${structured[2]}-${structured[3]}`;
+  }
+
+  return normalizeGroupLetters(raw)
+    .replace(/[._–—\s]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 function makeParticipantSignature(profile) {
   return [
     normalizeText(profile.fullName),
     normalizeText(profile.institution),
-    normalizeText(profile.groupName)
+    normalizeGroupKey(profile.groupName)
   ].join("|");
 }
 
@@ -763,15 +808,12 @@ async function savePm01Controls(controls, updatedBy = "admin") {
 
 function pm01AttemptParticipantSignature(attempt) {
   const participant = attempt.participant || {};
-  return (
-    attempt.participantSignature ||
-    makeParticipantSignature({
-      fullName: participant.fullName || "",
-      institution: participant.institution || "",
-      groupName: participant.groupName || "",
-      mentorName: participant.mentorName || ""
-    })
-  );
+  return makeParticipantSignature({
+    fullName: participant.fullName || "",
+    institution: participant.institution || "",
+    groupName: participant.groupName || "",
+    mentorName: participant.mentorName || ""
+  });
 }
 
 function buildPm01ParticipantAccess(controls, attempts, participantSignature) {
@@ -794,7 +836,9 @@ function buildPm01ParticipantAccess(controls, attempts, participantSignature) {
   return {
     participantSignature: signature,
     fullName: latest?.participant?.fullName || "",
-    groupName: latest?.participant?.groupName || "",
+    groupName: normalizeGroupName(latest?.participant?.groupName || ""),
+    groupNameOriginal: latest?.participant?.groupNameOriginal || latest?.participant?.groupName || "",
+    groupKey: normalizeGroupKey(latest?.participant?.groupName || ""),
     institution: latest?.participant?.institution || "",
     completedAttempts,
     activeAttempts,
@@ -852,20 +896,13 @@ function summarizePm01AttemptsForAdmin(exam, attempts, settings) {
 
   scoredAttempts.forEach(({ attempt, summary }) => {
     const participant = attempt.participant || {};
-    participantKeys.add(
-      attempt.participantSignature ||
-        makeParticipantSignature({
-          fullName: participant.fullName || "",
-          institution: participant.institution || "",
-          groupName: participant.groupName || "",
-          mentorName: participant.mentorName || ""
-        })
-    );
+    const normalizedGroup = normalizeGroupName(participant.groupName || "");
+    participantKeys.add(pm01AttemptParticipantSignature(attempt));
     if (participant.institution) {
       institutions.add(participant.institution);
     }
-    if (participant.groupName) {
-      groups.add(participant.groupName);
+    if (normalizedGroup) {
+      groups.add(normalizedGroup);
     }
     if (participant.mentorName) {
       mentors.add(participant.mentorName);
@@ -1013,8 +1050,12 @@ function buildPm01AdminAttemptDetail(exam, attempt) {
     attempt: {
       id: attempt.id,
       olympiadId: attempt.olympiadId,
-      participant: attempt.participant,
-      participantSignature: attempt.participantSignature,
+      participant: {
+        ...(attempt.participant || {}),
+        groupName: normalizeGroupName(attempt.participant?.groupName || ""),
+        groupNameOriginal: attempt.participant?.groupNameOriginal || attempt.participant?.groupName || ""
+      },
+      participantSignature: pm01AttemptParticipantSignature(attempt),
       clientIp: attempt.clientIp || "",
       accessKey: attempt.accessKey || "",
       selectedVariantId: attempt.selectedVariantId,
@@ -1050,7 +1091,8 @@ async function buildPm01ExportRows(exam) {
     return {
       fullName: attempt.participant?.fullName || "",
       institution: attempt.participant?.institution || "",
-      groupName: attempt.participant?.groupName || "",
+      groupName: normalizeGroupName(attempt.participant?.groupName || ""),
+      groupNameOriginal: attempt.participant?.groupNameOriginal || attempt.participant?.groupName || "",
       mentorName: attempt.participant?.mentorName || "",
       clientIp: attempt.clientIp || "",
       mode: attempt.mode || "exam",
@@ -2947,10 +2989,12 @@ async function handleApi(req, res, url) {
           const summary = summarizePm01Attempt(exam, attempt);
           return {
             id: attempt.id,
-            participantSignature: attempt.participantSignature || pm01AttemptParticipantSignature(attempt),
+            participantSignature: pm01AttemptParticipantSignature(attempt),
             fullName: attempt.participant?.fullName || "",
             institution: attempt.participant?.institution || "",
-            groupName: attempt.participant?.groupName || "",
+            groupName: normalizeGroupName(attempt.participant?.groupName || ""),
+            groupNameOriginal: attempt.participant?.groupNameOriginal || attempt.participant?.groupName || "",
+            groupKey: normalizeGroupKey(attempt.participant?.groupName || ""),
             mentorName: attempt.participant?.mentorName || "",
             clientIp: attempt.clientIp || "",
             mode: attempt.mode || "exam",
