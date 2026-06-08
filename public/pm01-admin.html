@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#123f35" />
     <title>ПМ.01 · МДК 01.01/01.02 · Кабинет преподавателя</title>
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/pm01.css?v=1.0.5" />
+    <link rel="stylesheet" href="/pm01.css?v=1.0.10" />
   </head>
   <body>
     <header class="pm01-topbar">
@@ -56,7 +56,13 @@
         </div>
 
         <div id="admin-message" class="message hidden"></div>
-        <div id="admin-stats" class="admin-stat-grid"></div>
+
+        <section class="results-overview" aria-label="Сводка результатов PM01">
+          <div id="admin-stats" class="admin-stat-grid"></div>
+          <div id="grade-overview" class="grade-overview"></div>
+        </section>
+
+        <section id="module-overview" class="module-overview" aria-label="Сводка по модулям PM01"></section>
 
         <section class="admin-filters" aria-label="Фильтры попыток PM01">
           <label class="field">
@@ -96,24 +102,26 @@
           <button id="filter-reset" class="button ghost" type="button">Сбросить</button>
         </section>
 
+        <div id="filtered-summary" class="filtered-summary" aria-live="polite"></div>
+
         <section class="admin-layout">
           <div class="admin-table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>Студент</th>
-                  <th>IP</th>
                   <th>Вариант</th>
                   <th>Билет</th>
                   <th>Режим</th>
                   <th>Статус</th>
+                  <th>Итог</th>
+                  <th>M0</th>
                   <th>M1</th>
                   <th>M2</th>
                   <th>M3</th>
                   <th>M4</th>
-                  <th>Балл</th>
-                  <th>Оценка</th>
                   <th>Голос</th>
+                  <th>IP</th>
                 </tr>
               </thead>
               <tbody id="attempts-body"></tbody>
@@ -129,6 +137,6 @@
       </section>
     </main>
 
-    <script src="/pm01-admin.js?v=1.0.6"></script>
+    <script src="/pm01-admin.js?v=1.0.7"></script>
   </body>
 </html>

@@ -370,6 +370,8 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   const uiScript = fs.readFileSync(path.join(__dirname, "..", "public", "pm01.js"), "utf8");
   const uiStyles = fs.readFileSync(path.join(__dirname, "..", "public", "pm01.css"), "utf8");
   const uiHtml = fs.readFileSync(path.join(__dirname, "..", "public", "pm01.html"), "utf8");
+  const adminScript = fs.readFileSync(path.join(__dirname, "..", "public", "pm01-admin.js"), "utf8");
+  const adminHtml = fs.readFileSync(path.join(__dirname, "..", "public", "pm01-admin.html"), "utf8");
   const meat = buildPm01Variant(getPm01Exam(), "meat", { seed: "ui-guides-meat" });
   const prompts = meat.questions.map((question) => question.prompt).join("\n");
 
@@ -392,6 +394,12 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(uiHtml.includes("id=\"exam-route-note\""), true);
   assert.equal(uiStyles.includes(".task-guide-steps"), true);
   assert.equal(uiStyles.includes(".interaction-panel-title"), true);
+  assert.equal(uiStyles.includes(".results-overview"), true);
+  assert.equal(uiStyles.includes(".score-mini-bar"), true);
+  assert.equal(adminHtml.includes("id=\"filtered-summary\""), true);
+  assert.equal(adminHtml.includes("id=\"module-overview\""), true);
+  assert.equal(adminScript.includes("renderGradeOverview"), true);
+  assert.equal(adminScript.includes("answerBrief"), true);
   assert.equal(prompts.includes("Выберите действия после работы."), false);
   assert.equal(prompts.includes("Расставьте порядок действий после работы с мясорубкой."), true);
 });

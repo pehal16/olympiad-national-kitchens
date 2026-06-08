@@ -1549,7 +1549,18 @@
       title.textContent = `${module.code} ${module.title}`;
       const score = document.createElement("span");
       score.textContent = `${module.finalScore} / ${module.maxScore}`;
-      node.append(title, score);
+      const bar = document.createElement("div");
+      bar.className = "score-mini-bar";
+      const fill = document.createElement("span");
+      fill.style.width = module.maxScore
+        ? `${Math.max(0, Math.min(100, Math.round((Number(module.finalScore || 0) / Number(module.maxScore || 1)) * 100)))}%`
+        : "0%";
+      bar.appendChild(fill);
+      const detail = document.createElement("small");
+      detail.textContent = module.pendingManualReviews
+        ? `${module.pendingManualReviews} ответ ожидает проверки`
+        : `ответов ${module.answered}/${module.questionCount}`;
+      node.append(title, score, bar, detail);
       elements.resultModules.appendChild(node);
     });
     refreshTopbar();

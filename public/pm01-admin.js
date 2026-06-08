@@ -23,6 +23,9 @@
     adminBackend: document.getElementById("admin-backend"),
     adminMessage: document.getElementById("admin-message"),
     adminStats: document.getElementById("admin-stats"),
+    gradeOverview: document.getElementById("grade-overview"),
+    moduleOverview: document.getElementById("module-overview"),
+    filteredSummary: document.getElementById("filtered-summary"),
     attemptsBody: document.getElementById("attempts-body"),
     detailPanel: document.getElementById("detail-panel"),
     filterSearch: document.getElementById("filter-search"),
@@ -47,6 +50,56 @@
     element.className = "message hidden";
   }
 
+  function createNode(tagName, className = "", text = "") {
+    const node = document.createElement(tagName);
+    if (className) {
+      node.className = className;
+    }
+    if (text !== "") {
+      node.textContent = text;
+    }
+    return node;
+  }
+
+  function appendText(parent, tagName, className, text) {
+    const node = createNode(tagName, className, text);
+    parent.appendChild(node);
+    return node;
+  }
+
+  function clampPercent(value) {
+    const number = Number(value || 0);
+    if (!Number.isFinite(number)) {
+      return 0;
+    }
+    return Math.max(0, Math.min(100, number));
+  }
+
+  function percent(value, max) {
+    const numericMax = Number(max || 0);
+    if (!numericMax) {
+      return 0;
+    }
+    return clampPercent((Number(value || 0) / numericMax) * 100);
+  }
+
+  function formatScoreNumber(value) {
+    const number = Number(value || 0);
+    if (!Number.isFinite(number)) {
+      return "0";
+    }
+    const rounded = Math.round(number * 10) / 10;
+    return Number.isInteger(rounded) ? String(rounded) : String(rounded).replace(".", ",");
+  }
+
+  function formatPercent(value) {
+    return `${Math.round(clampPercent(value))}%`;
+  }
+
+  function getTotalMaxScore() {
+    return Number(state.summary?.exam?.scoring?.totalMaxScore || 100);
+  }
+
   function formatDateTime(value) {
     if (!value) {
       return "—";
@@ -69,8 +122,12 @@
     if (!seconds) {
       return "—";
     }
-    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
     const tail = seconds % 60;
+    if (hours) {
+      return `${hours} ч ${minutes} мин`;
+    }
     return minutes ? `${minutes} мин ${tail} с` : `${tail} с`;
   }
 
@@ -84,19 +141,173 @@
     return labels[status] || status || "—";
   }
 
-  function moduleScore(attempt, code) {
-    const module = (attempt.moduleScores || []).find((item) => item.code === code);
-    if (!module) {
-      return "—";
-    }
-    const value = module.finalScore ?? 0;
-    return `${value}/${module.maxScore}`;
+  function statusCaption(status) {
+    const labels = {
+      in_progress: "студент еще проходит экзамен",
+      pending_review: "нужно проверить голосовой ответ",
+      reviewed: "итог можно считать закрытым",
+      expired: "время попытки истекло"
+    };
+    return labels[status] || "статус попытки";
+  }
+
+  function modeLabel(mode) {
+    return mode === "training" ? "тренировка" : "экзамен";
+  }
+
+  function questionTypeLabel(type) {
+    const labels = {
+      single_choice: "один вариант",
+      multiple_choice: "несколько вариантов",
+      sequence_drag: "последовательность",
+      bucket_sort: "распределение",
+      calculation_task: "расчет",
+      voice_response: "голос",
+      hotspot_scene: "симуляция"
+    };
+    return labels[type] || type || "задание";
   }
 
   function uniqueValues(values) {
     return Array.from(new Set(values.filter(Boolean))).sort((left, right) =>
       left.localeCompare(right, "ru")
     );
+  }
+
+  function sum(values) {
+    return values.reduce((total, value) => total + Number(value || 0), 0);
+  }
+
+  function completedAttempts(attempts = state.attempts) {
+    return attempts.filter((attempt) => attempt.status !== "in_progress");
+  }
+
+  function averageScore(attempts = state.attempts) {
+    const completed = completedAttempts(attempts);
+    if (!completed.length) {
+      return 0;
+    }
+    return sum(completed.map((attempt) => attempt.totalFinalScore)) / completed.length;
+  }
+
+  function moduleScoreData(attempt, code) {
+    return (attempt.moduleScores || []).find((item) => item.code === code) || null;
+  }
+
+  function optionText(question, optionId) {
+    const option = (question.options || []).find((item) => item.id === optionId);
+    return option?.text || optionId;
+  }
+
+  function itemText(question, itemId) {
+    const item = (question.items || []).find((entry) => entry.id === itemId);
+    return item?.text || item?.label || item?.title || itemId;
+  }
+
+  function bucketText(question, bucketId) {
+    const bucket = (question.buckets || []).find((entry) => entry.id === bucketId);
+    return bucket?.label || bucket?.title || bucket?.text || bucketId;
+  }
+
+  function createScoreBar(value, max, className = "") {
+    const bar = createNode("div", `score-mini-bar ${className}`.trim());
+    const fill = document.createElement("span");
+    fill.style.width = `${percent(value, max)}%`;
+    bar.appendChild(fill);
+    return bar;
+  }
+
+  function createStatusPill(status, text = "") {
+    const pill = createNode("span", `status-pill ${status || ""}`.trim());
+    pill.textContent = text || statusLabel(status);
+    return pill;
+  }
+
+  function createModePill(mode) {
+    return createStatusPill(`mode-${mode || "exam"}`, modeLabel(mode));
+  }
+
+  function createCell(text = "", className = "") {
+    return createNode("td", className, text);
+  }
+
+  function createParticipantCell(attempt) {
+    const cell = createCell("", "attempt-student-cell");
+    appendText(cell, "strong", "", attempt.fullName || "Без имени");
+    const meta = createNode("span", "attempt-student-meta");
+    meta.textContent = [attempt.groupName, attempt.institution, attempt.mentorName]
+      .filter(Boolean)
+      .join(" · ") || "данные участника не заполнены";
+    cell.appendChild(meta);
+    return cell;
+  }
+
+  function createVariantCell(attempt) {
+    const cell = createCell("", "attempt-variant-cell");
+    appendText(cell, "strong", "", attempt.variantTitle || "—");
+    if (attempt.variantNumber) {
+      appendText(cell, "span", "", `вариант ${attempt.variantNumber}`);
+    }
+    return cell;
+  }
+
+  function createTicketCell(attempt) {
+    const cell = createCell("", "attempt-ticket-cell");
+    if (!attempt.ticketNumber) {
+      cell.textContent = "—";
+      return cell;
+    }
+    appendText(cell, "strong", "", `№ ${attempt.ticketNumber}`);
+    appendText(cell, "span", "", attempt.ticketProduct || "комплексное задание");
+    return cell;
+  }
+
+  function createAttemptScoreCell(attempt) {
+    const maxScore = getTotalMaxScore();
+    const cell = createCell("", "attempt-total-cell");
+    const top = createNode("div", "attempt-total-main");
+    appendText(top, "strong", "", `${formatScoreNumber(attempt.totalFinalScore)} / ${maxScore}`);
+    appendText(top, "span", "", attempt.grade ? `оценка ${attempt.grade}` : "оценка после завершения");
+    cell.append(top, createScoreBar(attempt.totalFinalScore, maxScore, "total"));
+    return cell;
+  }
+
+  function createModuleScoreCell(attempt, code) {
+    const cell = createCell("", "module-score-cell");
+    const module = moduleScoreData(attempt, code);
+    if (!module) {
+      cell.textContent = "—";
+      return cell;
+    }
+
+    const chip = createNode("div", "module-score-chip");
+    const value = Number(module.finalScore || 0);
+    const maxScore = Number(module.maxScore || 0);
+    const answered = Number(module.answered || 0);
+    const count = Number(module.questionCount || 0);
+    const pending = Number(module.pendingManualReviews || 0);
+
+    appendText(chip, "strong", "", maxScore ? `${formatScoreNumber(value)} / ${maxScore}` : "ситуация");
+    appendText(chip, "span", "", count ? `${answered} из ${count} ответов` : "без баллов");
+    if (maxScore) {
+      chip.appendChild(createScoreBar(value, maxScore, "module"));
+    }
+    if (pending) {
+      appendText(chip, "em", "", `${pending} проверить`);
+    }
+    cell.appendChild(chip);
+    return cell;
+  }
+
+  function createPendingCell(attempt) {
+    const pending = Number(attempt.pendingManualReviews || 0);
+    const cell = createCell("", "pending-cell");
+    if (pending) {
+      cell.appendChild(createStatusPill("pending_review", `${pending} на проверке`));
+    } else {
+      cell.textContent = "—";
+    }
+    return cell;
   }
 
   function setSelectOptions(select, values, allLabel, labelMap = {}) {
@@ -174,6 +385,8 @@
         attempt.institution,
         attempt.mentorName,
         attempt.variantTitle,
+        attempt.ticketProduct,
+        attempt.clientIp,
         statusLabel(attempt.status)
       ]
         .join(" ")
@@ -220,52 +433,182 @@
     return payload.data;
   }
 
-  function createCell(text) {
-    const cell = document.createElement("td");
-    cell.textContent = text;
-    return cell;
+  function renderStatCard(label, value, caption, tone = "") {
+    const card = createNode("article", `admin-stat ${tone}`.trim());
+    appendText(card, "span", "", label);
+    appendText(card, "strong", "", value);
+    if (caption) {
+      appendText(card, "small", "", caption);
+    }
+    elements.adminStats.appendChild(card);
   }
 
-  function createStatusPill(status) {
-    const pill = document.createElement("span");
-    pill.className = `status-pill ${status || ""}`;
-    pill.textContent = statusLabel(status);
-    return pill;
+  function renderDistributionCard(title, items, total, emptyText) {
+    const card = createNode("article", "distribution-card");
+    appendText(card, "h3", "", title);
+
+    if (!items.length || !total) {
+      appendText(card, "p", "distribution-empty", emptyText);
+      return card;
+    }
+
+    items.forEach((item) => {
+      const row = createNode("div", "distribution-row");
+      const label = createNode("span", "", item.label);
+      const value = createNode("strong", "", String(item.count));
+      const bar = createScoreBar(item.count, total, item.tone || "");
+      row.append(label, value, bar);
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function renderGradeOverview() {
+    elements.gradeOverview.innerHTML = "";
+
+    const completed = completedAttempts();
+    const gradeItems = (state.summary?.gradeDistribution || [])
+      .map((item) => ({
+        label: `Оценка ${item.grade}`,
+        count: Number(item.count || 0),
+        tone: Number(item.grade) >= 4 ? "success" : Number(item.grade) === 3 ? "warning" : "danger"
+      }))
+      .sort((left, right) => Number(right.label.replace(/\D/g, "")) - Number(left.label.replace(/\D/g, "")));
+
+    const statuses = ["reviewed", "pending_review", "in_progress", "expired"]
+      .map((status) => ({
+        label: statusLabel(status),
+        count: state.attempts.filter((attempt) => attempt.status === status).length,
+        tone: status === "reviewed" ? "success" : status === "pending_review" ? "warning" : ""
+      }))
+      .filter((item) => item.count > 0);
+
+    elements.gradeOverview.append(
+      renderDistributionCard("Оценки", gradeItems, completed.length, "Завершенных попыток пока нет."),
+      renderDistributionCard("Статусы", statuses, state.attempts.length, "Попыток пока нет.")
+    );
+  }
+
+  function renderModuleOverview() {
+    elements.moduleOverview.innerHTML = "";
+    const modules = state.summary?.moduleAnalytics || [];
+
+    if (!modules.length) {
+      const empty = createNode("article", "module-overview-card");
+      appendText(empty, "strong", "", "Модули не загружены");
+      appendText(empty, "span", "", "Обновите кабинет преподавателя.");
+      elements.moduleOverview.appendChild(empty);
+      return;
+    }
+
+    modules.forEach((module) => {
+      const card = createNode("article", "module-overview-card");
+      const head = createNode("div", "module-overview-head");
+      appendText(head, "strong", "", module.code || "Модуль");
+      appendText(head, "span", "", module.title || "");
+      card.appendChild(head);
+
+      const maxScore = Number(module.maxScore || 0);
+      if (maxScore) {
+        appendText(
+          card,
+          "b",
+          "",
+          `${formatScoreNumber(module.averageScore)} / ${maxScore}`
+        );
+        card.appendChild(createScoreBar(module.averageScore, maxScore, "module"));
+        appendText(card, "small", "", `средний балл по ${module.attempts || 0} завершенным попыткам`);
+      } else {
+        appendText(card, "b", "", "без баллов");
+        appendText(card, "small", "", `ситуация выдана в ${module.attempts || 0} завершенных попытках`);
+      }
+
+      if (Number(module.pendingManualReviews || 0)) {
+        const warning = createStatusPill("pending_review", `${module.pendingManualReviews} голосовых ответа`);
+        card.appendChild(warning);
+      }
+      elements.moduleOverview.appendChild(card);
+    });
   }
 
   function renderStats() {
     elements.adminStats.innerHTML = "";
     const counts = state.summary?.counts || {};
-    const stats = [
-      ["Участники", counts.participants || 0],
-      ["Попытки", counts.attempts || 0],
-      ["Ожидает проверки", counts.pendingReview || 0],
-      ["Проверено", counts.reviewed || 0]
-    ];
-    stats.forEach(([label, value]) => {
-      const card = document.createElement("article");
-      card.className = "admin-stat";
-      const span = document.createElement("span");
-      span.textContent = label;
-      const strong = document.createElement("strong");
-      strong.textContent = value;
-      card.append(span, strong);
-      elements.adminStats.appendChild(card);
-    });
+    const totalAttempts = Number(counts.attempts || 0);
+    const completedCount = Number(counts.completed || 0);
+    const reviewedCount = Number(counts.reviewed || 0);
+    const pendingQuestions = Number(state.summary?.pendingVoice?.length || 0);
+    const avg = averageScore();
+    const maxScore = getTotalMaxScore();
+
+    renderStatCard(
+      "Участники",
+      String(counts.participants || 0),
+      `${counts.groups || 0} групп · ${counts.institutions || 0} учреждений`
+    );
+    renderStatCard(
+      "Попытки",
+      String(totalAttempts),
+      `${counts.activeAttempts || 0} сейчас в работе`
+    );
+    renderStatCard(
+      "Завершено",
+      String(completedCount),
+      totalAttempts ? `${formatPercent((completedCount / totalAttempts) * 100)} от всех попыток` : "ждем первые ответы"
+    );
+    renderStatCard(
+      "Средний балл",
+      completedCount ? `${formatScoreNumber(avg)} / ${maxScore}` : "—",
+      completedCount ? `${formatPercent(percent(avg, maxScore))} по завершенным` : "появится после завершения",
+      "accent-blue"
+    );
+    renderStatCard(
+      "Ожидает проверки",
+      String(counts.pendingReview || 0),
+      pendingQuestions ? `${pendingQuestions} голосовых ответов` : "ручных проверок нет",
+      pendingQuestions ? "accent-orange" : ""
+    );
+    renderStatCard(
+      "Проверено",
+      String(reviewedCount),
+      completedCount ? `${formatPercent((reviewedCount / completedCount) * 100)} от завершенных` : "итоги еще не закрыты",
+      "accent-green"
+    );
+
+    renderGradeOverview();
+    renderModuleOverview();
     elements.adminBackend.textContent = state.summary?.capabilities?.storageBackend || "file";
     elements.adminRefreshed.textContent = formatDateTime(state.summary?.diagnostics?.refreshedAt);
+  }
+
+  function renderFilteredSummary(attempts) {
+    elements.filteredSummary.innerHTML = "";
+    const chips = [
+      `Показано: ${attempts.length} из ${state.attempts.length}`,
+      `Средний балл: ${
+        completedAttempts(attempts).length
+          ? `${formatScoreNumber(averageScore(attempts))} / ${getTotalMaxScore()}`
+          : "—"
+      }`,
+      `В работе: ${attempts.filter((attempt) => attempt.status === "in_progress").length}`,
+      `На проверке: ${attempts.filter((attempt) => Number(attempt.pendingManualReviews || 0)).length}`
+    ];
+    chips.forEach((text) => appendText(elements.filteredSummary, "span", "", text));
   }
 
   function renderAttempts() {
     elements.attemptsBody.innerHTML = "";
     const attempts = applyFilters();
+    renderFilteredSummary(attempts);
+
     if (!attempts.length) {
       const row = document.createElement("tr");
       const cell = document.createElement("td");
       cell.colSpan = 13;
+      cell.className = "table-empty";
       cell.textContent = state.attempts.length
-        ? "По выбранным фильтрам попыток нет."
-        : "Пока нет попыток ПМ.01.";
+        ? "По выбранным фильтрам попыток нет. Сбросьте фильтры или измените поиск."
+        : "Пока нет попыток ПМ.01. Когда студенты начнут экзамен, результаты появятся здесь.";
       row.appendChild(cell);
       elements.attemptsBody.appendChild(row);
       return;
@@ -275,28 +618,28 @@
       const row = document.createElement("tr");
       row.dataset.attemptId = attempt.id;
       if (attempt.id === state.selectedAttemptId) {
-        row.style.background = "#eef8f4";
+        row.classList.add("is-selected");
       }
-      const participant = createCell(`${attempt.fullName}\n${attempt.groupName}`);
-      participant.style.whiteSpace = "pre-line";
-      row.append(
-        participant,
-        createCell(attempt.clientIp || "—"),
-        createCell(attempt.variantTitle || "—"),
-        createCell(attempt.ticketNumber ? `№ ${attempt.ticketNumber}\n${attempt.ticketProduct}` : "—"),
-        createCell(attempt.mode === "training" ? "тренировка" : "экзамен")
-      );
-      const statusCell = document.createElement("td");
+
+      const modeCell = createCell("", "mode-cell");
+      modeCell.appendChild(createModePill(attempt.mode));
+      const statusCell = createCell("", "status-cell");
       statusCell.appendChild(createStatusPill(attempt.status));
+
       row.append(
+        createParticipantCell(attempt),
+        createVariantCell(attempt),
+        createTicketCell(attempt),
+        modeCell,
         statusCell,
-        createCell(moduleScore(attempt, "M1")),
-        createCell(moduleScore(attempt, "M2")),
-        createCell(moduleScore(attempt, "M3")),
-        createCell(moduleScore(attempt, "M4")),
-        createCell(String(attempt.totalFinalScore ?? 0)),
-        createCell(String(attempt.grade || "—")),
-        createCell(String(attempt.pendingManualReviews || 0))
+        createAttemptScoreCell(attempt),
+        createModuleScoreCell(attempt, "M0"),
+        createModuleScoreCell(attempt, "M1"),
+        createModuleScoreCell(attempt, "M2"),
+        createModuleScoreCell(attempt, "M3"),
+        createModuleScoreCell(attempt, "M4"),
+        createPendingCell(attempt),
+        createCell(attempt.clientIp || "—", "ip-cell")
       );
       row.addEventListener("click", () => selectAttempt(attempt.id));
       elements.attemptsBody.appendChild(row);
@@ -326,6 +669,88 @@
       payload.audioDataUrl = "audio-data-url";
     }
     return JSON.stringify(payload, null, 2);
+  }
+
+  function answerBrief(question) {
+    const answer = question.answer;
+    const payload = answer?.answerPayload || {};
+    if (!answer) {
+      return "Ответ не отправлен.";
+    }
+    if (payload.skipped) {
+      return "Задание пропущено студентом.";
+    }
+    if (payload.selectedOptionId) {
+      return optionText(question, payload.selectedOptionId);
+    }
+    if (Array.isArray(payload.selectedOptionIds)) {
+      return payload.selectedOptionIds.map((id) => optionText(question, id)).join("; ") || "Варианты не выбраны.";
+    }
+    if (Array.isArray(payload.sequence)) {
+      return payload.sequence.map((id, index) => `${index + 1}. ${itemText(question, id)}`).join("; ");
+    }
+    if (payload.buckets && typeof payload.buckets === "object") {
+      return Object.entries(payload.buckets)
+        .map(([itemId, bucketId]) => `${itemText(question, itemId)} -> ${bucketText(question, bucketId)}`)
+        .join("; ") || "Карточки не распределены.";
+    }
+    if (payload.values && typeof payload.values === "object") {
+      return (question.fields || [])
+        .map((field) => `${field.label}: ${payload.values[field.id] ?? "—"}`)
+        .join("; ") || "Расчетные поля не заполнены.";
+    }
+    if (Array.isArray(payload.points)) {
+      return `Отмечено зон: ${payload.points.length}.`;
+    }
+    if (payload.audioDataUrl || payload.audioName || payload.transcriptNote) {
+      const parts = [];
+      if (payload.audioDataUrl || payload.audioName) {
+        parts.push("аудио прикреплено");
+      }
+      if (payload.transcriptNote) {
+        parts.push(`заметка: ${payload.transcriptNote}`);
+      }
+      return parts.join("; ");
+    }
+    return "Ответ сохранен, подробности раскрываются ниже.";
+  }
+
+  function questionResultClass(question) {
+    const answer = question.answer;
+    if (!answer) {
+      return "is-empty";
+    }
+    if (answer.manualStatus === "pending_review") {
+      return "is-pending";
+    }
+    const score = Number(answer.finalScore || 0);
+    const maxScore = Number(question.maxScore || 0);
+    if (maxScore && score >= maxScore) {
+      return "is-correct";
+    }
+    if (score > 0) {
+      return "is-partial";
+    }
+    return "is-zero";
+  }
+
+  function questionResultLabel(question) {
+    const answer = question.answer;
+    if (!answer) {
+      return "без ответа";
+    }
+    if (answer.manualStatus === "pending_review") {
+      return "ручная проверка";
+    }
+    const score = Number(answer.finalScore || 0);
+    const maxScore = Number(question.maxScore || 0);
+    if (maxScore && score >= maxScore) {
+      return "зачтено";
+    }
+    if (score > 0) {
+      return "частично";
+    }
+    return "0 баллов";
   }
 
   function renderVoiceReview(detail, question, container) {
@@ -414,24 +839,34 @@
 
   function renderQuestionDetail(detail, question, moduleNode) {
     const node = document.createElement("article");
-    node.className = "admin-question";
+    node.className = `admin-question ${questionResultClass(question)}`;
+
+    const head = createNode("div", "admin-question-head");
     const title = document.createElement("h4");
     title.textContent = question.prompt;
+    head.append(title, createStatusPill(questionResultClass(question), questionResultLabel(question)));
+    node.appendChild(head);
+
     const meta = document.createElement("div");
     meta.className = "admin-question-meta";
-    appendMeta(meta, "Тип", question.type);
+    appendMeta(meta, "Тип", questionTypeLabel(question.type));
     appendMeta(meta, "Балл", question.answer ? `${question.answer.finalScore}/${question.maxScore}` : `0/${question.maxScore}`);
     appendMeta(meta, "Время", formatDuration(question.answer?.timeSpentMs || question.log?.timeSpentMs));
     if (question.log?.presentedAt) {
       appendMeta(meta, "Показан", formatDateTime(question.log.presentedAt));
     }
     appendMeta(meta, "Эталон", question.correctAnswer || "—");
-    node.append(title, meta);
+    node.appendChild(meta);
 
+    appendText(node, "p", "answer-brief", answerBrief(question));
+
+    const raw = createNode("details", "answer-raw");
+    const summary = createNode("summary", "", "Технические данные ответа");
     const payload = document.createElement("pre");
     payload.className = "answer-json";
     payload.textContent = answerPayloadText(question.answer);
-    node.appendChild(payload);
+    raw.append(summary, payload);
+    node.appendChild(raw);
 
     if (question.type === "voice_response") {
       renderVoiceReview(detail, question, node);
@@ -440,21 +875,78 @@
     moduleNode.appendChild(node);
   }
 
+  function renderDetailHeader(detail) {
+    const header = createNode("section", "detail-hero");
+    const mode = detail.attempt.mode === "training" ? "Тренировка" : "Экзамен";
+    const ticket = detail.attempt.variantMeta.materialTicket;
+    appendText(header, "p", "overline", mode);
+    appendText(header, "h2", "", detail.attempt.participant.fullName || "Без имени");
+
+    const subtitle = [
+      detail.attempt.participant.groupName,
+      detail.attempt.participant.institution,
+      detail.attempt.participant.mentorName
+    ].filter(Boolean).join(" · ");
+    appendText(header, "p", "lead", subtitle || "Данные участника не заполнены.");
+
+    const metrics = createNode("div", "detail-metrics");
+    [
+      ["Итог", `${detail.summary.totalFinalScore}/${detail.summary.totalMaxScore}`, `оценка ${detail.summary.grade}`],
+      ["Статус", statusLabel(detail.attempt.status), statusCaption(detail.attempt.status)],
+      ["Время", formatDuration(detail.summary.totalDurationMs), formatDateTime(detail.attempt.finishedAt || detail.attempt.startedAt)],
+      ["Вариант", detail.attempt.variantMeta.variantTitle || "—", ticket ? `билет № ${ticket.number}: ${ticket.product}` : "билет не выбран"]
+    ].forEach(([label, value, caption]) => {
+      const item = createNode("div", "detail-metric");
+      appendText(item, "span", "", label);
+      appendText(item, "strong", "", value);
+      appendText(item, "small", "", caption);
+      metrics.appendChild(item);
+    });
+    header.appendChild(metrics);
+
+    if (Number(detail.summary.pendingManualReviews || 0)) {
+      const warning = createNode("div", "detail-warning");
+      warning.appendChild(createStatusPill("pending_review", `${detail.summary.pendingManualReviews} голосовых ответа ждут проверки`));
+      appendText(warning, "span", "", "После сохранения ручной проверки итоговый балл обновится автоматически.");
+      header.appendChild(warning);
+    }
+
+    return header;
+  }
+
+  function renderDetailModuleSummary(modules) {
+    const grid = createNode("div", "detail-module-grid");
+    modules.forEach((module) => {
+      const score = module.score;
+      const maxScore = Number(module.maxScore || score?.maxScore || 0);
+      const value = Number(score?.finalScore || 0);
+      const card = createNode("article", "detail-module-card");
+      appendText(card, "strong", "", `${module.code} ${module.title}`);
+      appendText(card, "span", "", maxScore ? `${formatScoreNumber(value)} / ${maxScore}` : "без баллов");
+      appendText(
+        card,
+        "small",
+        "",
+        score ? `ответов ${score.answered}/${score.questionCount}` : "ответов нет"
+      );
+      if (maxScore) {
+        card.appendChild(createScoreBar(value, maxScore, "module"));
+      }
+      if (Number(score?.pendingManualReviews || 0)) {
+        card.appendChild(createStatusPill("pending_review", `${score.pendingManualReviews} проверить`));
+      }
+      grid.appendChild(card);
+    });
+    return grid;
+  }
+
   function renderDetail(detail) {
     state.selectedAttemptId = detail.attempt.id;
     elements.detailPanel.innerHTML = "";
-    const overline = document.createElement("p");
-    overline.className = "overline";
-    overline.textContent = detail.attempt.mode === "training" ? "Тренировка" : "Экзамен";
-    const title = document.createElement("h2");
-    title.textContent = detail.attempt.participant.fullName;
-    const subtitle = document.createElement("p");
-    subtitle.className = "lead";
-    const ticket = detail.attempt.variantMeta.materialTicket;
-    subtitle.textContent = `${detail.attempt.variantMeta.variantTitle} · ${
-      ticket ? `билет № ${ticket.number}: ${ticket.product} · ` : ""
-    }${detail.summary.totalFinalScore}/${detail.summary.totalMaxScore} · оценка ${detail.summary.grade}`;
-    elements.detailPanel.append(overline, title, subtitle);
+    elements.detailPanel.append(
+      renderDetailHeader(detail),
+      renderDetailModuleSummary(detail.modules || [])
+    );
 
     (detail.modules || []).forEach((module) => {
       const moduleNode = document.createElement("section");
