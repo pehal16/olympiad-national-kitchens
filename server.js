@@ -817,6 +817,62 @@ function pm01VoiceAudioUrl(attemptId, questionId) {
   return `/api/admin/pm01/attempts/${encodeURIComponent(attemptId)}/voice/${encodeURIComponent(questionId)}/audio`;
 }
 
+function sendAudioBuffer(req, res, audio, payload) {
+  const buffer = audio.buffer || Buffer.alloc(0);
+  const total = buffer.length;
+  const mimeType = audio.meta?.mimeType || payload.mimeType || "audio/webm";
+  const fileName = String(audio.meta?.fileName || payload.audioName || "pm01-voice.webm").replace(/"/g, "");
+  const baseHeaders = {
+    "Content-Type": mimeType,
+    "Cache-Control": "private, no-store",
+    "Accept-Ranges": "bytes",
+    "Content-Disposition": `inline; filename="${fileName}"`
+  };
+  const range = String(req.headers.range || "").trim();
+
+  if (!range) {
+    res.writeHead(200, {
+      ...baseHeaders,
+      "Content-Length": String(total)
+    });
+    res.end(buffer);
+    return;
+  }
+
+  const match = range.match(/^bytes=(\d*)-(\d*)$/);
+  if (!match) {
+    res.writeHead(416, {
+      ...baseHeaders,
+      "Content-Range": `bytes */${total}`
+    });
+    res.end();
+    return;
+  }
+
+  const suffixLength = !match[1] && match[2] ? Number(match[2]) : 0;
+  const requestedStart = suffixLength ? total - suffixLength : Number(match[1] || 0);
+  const requestedEnd = suffixLength ? total - 1 : Number(match[2] || total - 1);
+  const start = Math.max(0, Math.min(Number.isFinite(requestedStart) ? requestedStart : 0, Math.max(total - 1, 0)));
+  const end = Math.max(start, Math.min(Number.isFinite(requestedEnd) ? requestedEnd : total - 1, total - 1));
+
+  if (!total || start >= total) {
+    res.writeHead(416, {
+      ...baseHeaders,
+      "Content-Range": `bytes */${total}`
+    });
+    res.end();
+    return;
+  }
+
+  const chunk = buffer.subarray(start, end + 1);
+  res.writeHead(206, {
+    ...baseHeaders,
+    "Content-Length": String(chunk.length),
+    "Content-Range": `bytes ${start}-${end}/${total}`
+  });
+  res.end(chunk);
+}
+
 function describePm01VoiceAudio(attempt, question, answer) {
   const payload = answer?.answerPayload || {};
   const hasStored = Boolean(payload.audioId);
@@ -3329,8 +3385,13 @@ async function handleApi(req, res, url) {
       let audio = null;
 
       if (payload.audioId) {
-        audio = await loadPm01VoiceAudio(payload.audioId);
-      } else if (payload.audioDataUrl) {
+        try {
+          audio = await loadPm01VoiceAudio(payload.audioId);
+        } catch (error) {
+          audio = null;
+        }
+      }
+      if (!audio && payload.audioDataUrl) {
         const parsed = parseDataUrl(payload.audioDataUrl);
         if (parsed) {
           audio = {
@@ -3348,13 +3409,7 @@ async function handleApi(req, res, url) {
         return;
       }
 
-      res.writeHead(200, {
-        "Content-Type": audio.meta?.mimeType || payload.mimeType || "audio/webm",
-        "Content-Length": String(audio.buffer.length),
-        "Cache-Control": "private, no-store",
-        "Content-Disposition": `inline; filename="${String(audio.meta?.fileName || payload.audioName || "pm01-voice.webm").replace(/"/g, "")}"`
-      });
-      res.end(audio.buffer);
+      sendAudioBuffer(req, res, audio, payload);
       return;
     }
 
