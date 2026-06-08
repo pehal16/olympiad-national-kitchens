@@ -2946,7 +2946,10 @@ async function handleApi(req, res, url) {
 
     if (method === "GET" && pathname === "/api/admin/pm01/controls") {
       const exam = getPm01Exam();
-      const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id)
+      const attempts = selectRecentPm01AdminAttempts(
+        currentOlympiadAttempts(await loadAttempts(), exam.id),
+        url
+      )
         .map((attempt) => normalizePm01AttemptState(exam, attempt));
       const controls = await loadPm01Controls();
       sendJson(res, 200, {
@@ -2966,7 +2969,10 @@ async function handleApi(req, res, url) {
         freeRepeatEnabled: body.freeRepeatEnabled === true,
         defaultAttempts: body.defaultAttempts
       });
-      const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id)
+      const attempts = selectRecentPm01AdminAttempts(
+        currentOlympiadAttempts(await loadAttempts(), exam.id),
+        url
+      )
         .map((attempt) => normalizePm01AttemptState(exam, attempt));
       sendJson(res, 200, {
         ok: true,
@@ -3001,7 +3007,10 @@ async function handleApi(req, res, url) {
           }
         }
       });
-      const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id)
+      const attempts = selectRecentPm01AdminAttempts(
+        currentOlympiadAttempts(await loadAttempts(), exam.id),
+        url
+      )
         .map((attempt) => normalizePm01AttemptState(exam, attempt));
       sendJson(res, 200, {
         ok: true,

@@ -1578,26 +1578,39 @@
 
   async function loadAdmin() {
     hideMessage(elements.adminMessage);
-    const [exam, controls] = await Promise.all([
-      adminApi("/api/pm01/public/exam"),
-      adminApi("/api/admin/pm01/controls")
-    ]);
-    state.controls = controls;
+    const exam = await adminApi("/api/pm01/public/exam");
+    state.controls = null;
     state.attempts = [];
-    state.summary = buildFastAdminSummary(exam, state.attempts, controls);
+    state.summary = buildFastAdminSummary(exam, state.attempts, state.controls);
     renderAdmin();
 
-    try {
-      state.attempts = await adminApi(`/api/admin/pm01/attempts${ADMIN_ATTEMPTS_QUERY}`);
-      state.summary = buildFastAdminSummary(exam, state.attempts, controls);
-      renderAdmin();
-    } catch (error) {
-      showMessage(
-        elements.adminMessage,
-        `Кабинет открыт, но список попыток не загрузился. Обновите позже. ${error.message}`,
-        "warning"
-      );
-    }
+    adminApi(`/api/admin/pm01/controls${ADMIN_ATTEMPTS_QUERY}`)
+      .then((controls) => {
+        state.controls = controls;
+        state.summary = buildFastAdminSummary(exam, state.attempts, state.controls);
+        renderAdmin();
+      })
+      .catch((error) => {
+        showMessage(
+          elements.adminMessage,
+          `Кабинет открыт, но управление допусками еще не загрузилось. Обновите позже. ${error.message}`,
+          "warning"
+        );
+      });
+
+    adminApi(`/api/admin/pm01/attempts${ADMIN_ATTEMPTS_QUERY}`)
+      .then((attempts) => {
+        state.attempts = attempts;
+        state.summary = buildFastAdminSummary(exam, state.attempts, state.controls);
+        renderAdmin();
+      })
+      .catch((error) => {
+        showMessage(
+          elements.adminMessage,
+          `Кабинет открыт, но список попыток не загрузился. Обновите позже. ${error.message}`,
+          "warning"
+        );
+      });
   }
 
   async function login(event) {

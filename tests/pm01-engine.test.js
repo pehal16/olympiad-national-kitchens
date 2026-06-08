@@ -758,7 +758,8 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(adminScript, /ADMIN_ATTEMPTS_QUERY/);
   assert.match(adminScript, /buildFastAdminSummary/);
   assert.doesNotMatch(adminScript, /api\/admin\/pm01\/summary/);
-  assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.11/);
+  assert.match(adminScript, /api\/admin\/pm01\/controls\$\{ADMIN_ATTEMPTS_QUERY\}/);
+  assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.12/);
   assert.match(css, /\.teacher-workbench/);
   assert.match(css, /\.detail-question-toolbar/);
   assert.match(css, /@media print/);
