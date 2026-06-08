@@ -46,7 +46,9 @@ function parseBody(req, options = {}) {
       totalBytes += chunk.length;
       if (maxBytes > 0 && totalBytes > maxBytes) {
         rejected = true;
-        reject(new Error("Тело запроса слишком большое."));
+        const error = new Error("Тело запроса слишком большое.");
+        error.statusCode = 413;
+        reject(error);
         req.destroy();
         return;
       }
@@ -65,7 +67,9 @@ function parseBody(req, options = {}) {
         const data = JSON.parse(Buffer.concat(chunks).toString("utf8"));
         resolve(data);
       } catch (error) {
-        reject(new Error("Некорректный JSON в теле запроса."));
+        const parseError = new Error("Некорректный JSON в теле запроса.");
+        parseError.statusCode = 400;
+        reject(parseError);
       }
     });
     req.on("error", reject);

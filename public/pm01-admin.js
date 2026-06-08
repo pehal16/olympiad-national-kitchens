@@ -202,10 +202,17 @@
     const raw = await response.text();
     let payload = {};
     if (raw) {
-      payload = JSON.parse(raw);
+      try {
+        payload = JSON.parse(raw);
+      } catch (_) {
+        payload = {
+          ok: false,
+          message: raw.slice(0, 180) || `Сервер вернул ответ без JSON (${response.status}).`
+        };
+      }
     }
     if (!response.ok || payload.ok === false) {
-      const requestError = new Error(payload.message || "Сервер вернул ошибку.");
+      const requestError = new Error(payload.message || `Сервер вернул ошибку (${response.status}).`);
       requestError.status = response.status;
       requestError.payload = payload;
       throw requestError;

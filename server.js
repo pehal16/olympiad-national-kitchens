@@ -2273,7 +2273,7 @@ async function handleApi(req, res, url) {
   if (method === "POST" && pathname.match(/^\/api\/pm01\/public\/attempts\/[^/]+\/answer$/)) {
     const exam = getPm01Exam();
     const attemptId = pathname.split("/")[5];
-    const body = await parseBody(req);
+    const body = await parseBody(req, { maxBytes: 64 * 1024 * 1024 });
     let attempt = await loadAttemptById(attemptId);
 
     if (!attempt || attempt.olympiadId !== exam.id) {
@@ -2684,6 +2684,7 @@ async function handleApi(req, res, url) {
 
   if (method === "POST" && pathname === "/api/admin/login") {
     const body = await parseBody(req);
+    const password = String(body.password || "").trim();
     if (!settings.adminPassword) {
       sendJson(res, 503, {
         ok: false,
@@ -2691,7 +2692,7 @@ async function handleApi(req, res, url) {
       });
       return;
     }
-    if (body.password !== settings.adminPassword) {
+    if (password !== String(settings.adminPassword || "").trim()) {
       sendJson(res, 401, {
         ok: false,
         message: "Неверный пароль администратора."
@@ -3130,7 +3131,11 @@ const server = http.createServer(async (req, res) => {
     serveStatic(req, res, url.pathname);
   } catch (error) {
     noteApiError(url.pathname, error);
-    sendJson(res, 500, {
+    if (res.headersSent || res.destroyed) {
+      return;
+    }
+    const statusCode = Number(error.statusCode || error.status || 500);
+    sendJson(res, statusCode >= 400 && statusCode < 600 ? statusCode : 500, {
       ok: false,
       message: error.message || "Внутренняя ошибка сервера."
     });
