@@ -2,6 +2,15 @@ name: Deploy to Yandex Cloud
 
 on:
   workflow_dispatch:
+    inputs:
+      reset_pm01_attempts:
+        description: "Delete all PM01 production attempts from all IP addresses before deploy"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
   push:
     branches:
       - main
@@ -45,6 +54,24 @@ jobs:
           yc config set service-account-key key.json
           yc config set cloud-id "$YC_CLOUD_ID"
           yc config set folder-id "$YC_FOLDER_ID"
+
+      - name: Install Node dependencies for PM01 reset
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.reset_pm01_attempts == 'true'
+        shell: bash
+        run: npm ci
+
+      - name: Reset PM01 production attempts in YDB
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.reset_pm01_attempts == 'true'
+        shell: bash
+        run: |
+          TOKEN="$(yc iam create-token)"
+          if [ -z "$TOKEN" ]; then
+            echo "Unable to create Yandex IAM token for YDB reset." >&2
+            exit 1
+          fi
+          YDB_ACCESS_TOKEN_CREDENTIALS="$TOKEN" \
+          CONFIRM_PM01_RESET=true \
+          node scripts/reset-pm01-production-attempts.js pm01-2026-exam
 
       - name: Authorize Docker in Yandex Container Registry
         shell: bash

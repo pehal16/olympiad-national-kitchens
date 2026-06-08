@@ -45,6 +45,9 @@ The repository already contains GitHub Actions workflow:
 ```
 
 The workflow deploys on push to `main` and also supports manual `workflow_dispatch`.
+Manual workflow runs have a `reset_pm01_attempts` switch. Set it to `true` only when
+you intentionally need to delete all PM01 production attempts from every IP address
+before the new revision is deployed. Normal pushes keep production attempts intact.
 
 Required secrets:
 
