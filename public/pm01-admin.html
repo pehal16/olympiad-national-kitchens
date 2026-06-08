@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#123f35" />
     <title>ПМ.01 · МДК 01.01/01.02 · Кабинет преподавателя</title>
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/pm01.css?v=1.0.10" />
+    <link rel="stylesheet" href="/pm01.css?v=1.0.11" />
   </head>
   <body>
     <header class="pm01-topbar">
@@ -30,6 +30,7 @@
     <main class="pm01-admin-shell">
       <section id="login-panel" class="admin-login-panel">
         <form id="login-form" class="form-grid">
+          <input class="visually-hidden" type="text" name="username" autocomplete="username" value="pm01-admin" tabindex="-1" aria-hidden="true" />
           <label class="field">
             <span>Пароль администратора</span>
             <input id="admin-password" type="password" autocomplete="current-password" required />
@@ -56,6 +57,39 @@
         </div>
 
         <div id="admin-message" class="message hidden"></div>
+
+        <section class="teacher-controls" aria-label="Управление доступом PM01">
+          <form id="teacher-controls-form" class="teacher-controls-card">
+            <div class="teacher-controls-head">
+              <div>
+                <p class="overline">Допуск</p>
+                <h2>Управление экзаменом</h2>
+              </div>
+              <button id="save-teacher-controls" class="button primary" type="submit">Сохранить</button>
+            </div>
+            <div class="teacher-control-grid">
+              <label class="control-switch">
+                <input id="control-exam-enabled" type="checkbox" />
+                <span>
+                  <strong>Экзамен открыт</strong>
+                  <small>Если выключить, новые экзаменационные попытки не начнутся.</small>
+                </span>
+              </label>
+              <label class="control-switch">
+                <input id="control-free-repeat" type="checkbox" />
+                <span>
+                  <strong>Свободные повторы</strong>
+                  <small>Сейчас включено для срочного допуска всех студентов.</small>
+                </span>
+              </label>
+              <label class="field compact">
+                <span>Базовый лимит попыток</span>
+                <input id="control-default-attempts" type="number" min="1" max="10" step="1" />
+              </label>
+            </div>
+            <div id="teacher-controls-status" class="teacher-controls-status"></div>
+          </form>
+        </section>
 
         <section class="results-overview" aria-label="Сводка результатов PM01">
           <div id="admin-stats" class="admin-stat-grid"></div>
@@ -137,6 +171,6 @@
       </section>
     </main>
 
-    <script src="/pm01-admin.js?v=1.0.7"></script>
+    <script src="/pm01-admin.js?v=1.0.8"></script>
   </body>
 </html>

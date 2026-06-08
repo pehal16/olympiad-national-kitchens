@@ -59,6 +59,15 @@ const PUBLIC_DIR = path.join(ROOT_DIR, "public");
 const PORT = Number(process.env.PORT) || 3100;
 const HOST = process.env.HOST || "0.0.0.0";
 const APP_VERSION = packageInfo.version || "0.0.0";
+const PM01_CONTROLS_DRAFT_KEY = "__pm01_controls_v1__";
+const DEFAULT_PM01_CONTROLS = {
+  examEnabled: true,
+  freeRepeatEnabled: true,
+  defaultAttempts: 1,
+  grants: {},
+  updatedAt: null,
+  updatedBy: "system"
+};
 
 const runtimeDiagnostics = {
   apiErrors: 0,
@@ -709,6 +718,122 @@ function buildPm01StudentAttemptView(exam, attempt) {
   return buildPm01AttemptView(exam, attempt, {
     hideScores: attempt.status === "in_progress" && (attempt.mode || "exam") === "exam"
   });
+}
+
+function normalizePm01Controls(raw = {}) {
+  const defaultAttempts = Math.max(1, Math.min(10, Math.trunc(Number(raw.defaultAttempts || 1)) || 1));
+  const grants = {};
+  Object.entries(raw.grants || {}).forEach(([signature, grant]) => {
+    const key = String(signature || "").trim();
+    if (!key) {
+      return;
+    }
+    const extraAttempts = Math.max(0, Math.min(20, Math.trunc(Number(grant?.extraAttempts || 0)) || 0));
+    grants[key] = {
+      extraAttempts,
+      note: String(grant?.note || "").slice(0, 240),
+      updatedAt: grant?.updatedAt || null
+    };
+  });
+
+  return {
+    ...DEFAULT_PM01_CONTROLS,
+    ...raw,
+    examEnabled: raw.examEnabled !== false,
+    freeRepeatEnabled: raw.freeRepeatEnabled !== false,
+    defaultAttempts,
+    grants
+  };
+}
+
+async function loadPm01Controls() {
+  const drafts = await loadContentDrafts();
+  return normalizePm01Controls(drafts[PM01_CONTROLS_DRAFT_KEY] || {});
+}
+
+async function savePm01Controls(controls, updatedBy = "admin") {
+  const normalized = normalizePm01Controls({
+    ...controls,
+    updatedAt: nowIso(),
+    updatedBy
+  });
+  await upsertContentDraft(PM01_CONTROLS_DRAFT_KEY, normalized);
+  return normalized;
+}
+
+function pm01AttemptParticipantSignature(attempt) {
+  const participant = attempt.participant || {};
+  return (
+    attempt.participantSignature ||
+    makeParticipantSignature({
+      fullName: participant.fullName || "",
+      institution: participant.institution || "",
+      groupName: participant.groupName || "",
+      mentorName: participant.mentorName || ""
+    })
+  );
+}
+
+function buildPm01ParticipantAccess(controls, attempts, participantSignature) {
+  const signature = String(participantSignature || "").trim();
+  const examAttempts = attempts
+    .filter((attempt) => (attempt.mode || "exam") === "exam")
+    .filter((attempt) => pm01AttemptParticipantSignature(attempt) === signature)
+    .map((attempt) => ({
+      ...attempt,
+      participantSignature: pm01AttemptParticipantSignature(attempt)
+    }));
+  const completedAttempts = examAttempts.filter((attempt) => attempt.status !== "in_progress").length;
+  const activeAttempts = examAttempts.filter((attempt) => attempt.status === "in_progress").length;
+  const grant = controls.grants?.[signature] || { extraAttempts: 0, note: "", updatedAt: null };
+  const allowedAttempts = controls.freeRepeatEnabled
+    ? null
+    : Number(controls.defaultAttempts || 1) + Number(grant.extraAttempts || 0);
+  const latest = [...examAttempts].sort((left, right) => safeDateMs(right.startedAt) - safeDateMs(left.startedAt))[0] || null;
+
+  return {
+    participantSignature: signature,
+    fullName: latest?.participant?.fullName || "",
+    groupName: latest?.participant?.groupName || "",
+    institution: latest?.participant?.institution || "",
+    completedAttempts,
+    activeAttempts,
+    totalAttempts: examAttempts.length,
+    extraAttempts: Number(grant.extraAttempts || 0),
+    allowedAttempts,
+    remainingAttempts: controls.freeRepeatEnabled ? null : Math.max(0, Number(allowedAttempts || 0) - completedAttempts),
+    note: grant.note || "",
+    updatedAt: grant.updatedAt || null
+  };
+}
+
+function buildPm01ControlsView(controls, attempts) {
+  const normalized = normalizePm01Controls(controls);
+  const signatures = new Set([
+    ...attempts
+      .filter((attempt) => (attempt.mode || "exam") === "exam")
+      .map((attempt) => pm01AttemptParticipantSignature(attempt)),
+    ...Object.keys(normalized.grants || {})
+  ]);
+
+  const participants = Array.from(signatures)
+    .filter(Boolean)
+    .map((signature) => buildPm01ParticipantAccess(normalized, attempts, signature))
+    .sort((left, right) => {
+      const byGroup = (left.groupName || "").localeCompare(right.groupName || "", "ru");
+      if (byGroup) {
+        return byGroup;
+      }
+      return (left.fullName || left.participantSignature).localeCompare(
+        right.fullName || right.participantSignature,
+        "ru"
+      );
+    });
+
+  return {
+    ...normalized,
+    participants
+  };
 }
 
 function summarizePm01AttemptsForAdmin(exam, attempts, settings) {
@@ -2104,6 +2229,45 @@ async function handleApi(req, res, url) {
     const clientIp = getClientIp(req);
     const accessKey = makeAttemptAccessKey(clientIp, participantNameKey);
 
+    if (mode === "exam") {
+      const controls = await loadPm01Controls();
+      if (!controls.examEnabled) {
+        sendJson(res, 403, {
+          ok: false,
+          message: "Экзамен временно закрыт преподавателем. Дождитесь команды на начало."
+        });
+        return;
+      }
+
+      if (!controls.freeRepeatEnabled) {
+        const existingAttempts = currentOlympiadAttempts(await loadAttempts(), exam.id)
+          .map((attempt) => normalizePm01AttemptState(exam, attempt));
+        const participantAccess = buildPm01ParticipantAccess(controls, existingAttempts, participantSignature);
+        const activeAttempt = existingAttempts.find(
+          (attempt) =>
+            (attempt.mode || "exam") === "exam" &&
+            pm01AttemptParticipantSignature(attempt) === participantSignature &&
+            attempt.status === "in_progress"
+        );
+
+        if (activeAttempt) {
+          sendJson(res, 200, {
+            ok: true,
+            data: buildPm01StudentAttemptView(exam, activeAttempt)
+          });
+          return;
+        }
+
+        if (participantAccess.remainingAttempts <= 0) {
+          sendJson(res, 403, {
+            ok: false,
+            message: "Лимит экзаменационных попыток исчерпан. Обратитесь к преподавателю, чтобы он выдал дополнительную попытку."
+          });
+          return;
+        }
+      }
+    }
+
     const routeSeed = generateId("pm01_route");
     const variant = buildPm01Variant(exam, selectedVariantId, { ticketId, seed: routeSeed });
     const startedAt = nowIso();
@@ -2699,9 +2863,78 @@ async function handleApi(req, res, url) {
     if (method === "GET" && pathname === "/api/admin/pm01/summary") {
       const exam = getPm01Exam();
       const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id);
+      const controls = await loadPm01Controls();
+      const summary = summarizePm01AttemptsForAdmin(exam, attempts, settings);
+      summary.controls = buildPm01ControlsView(controls, attempts);
       sendJson(res, 200, {
         ok: true,
-        data: summarizePm01AttemptsForAdmin(exam, attempts, settings)
+        data: summary
+      });
+      return;
+    }
+
+    if (method === "GET" && pathname === "/api/admin/pm01/controls") {
+      const exam = getPm01Exam();
+      const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id)
+        .map((attempt) => normalizePm01AttemptState(exam, attempt));
+      const controls = await loadPm01Controls();
+      sendJson(res, 200, {
+        ok: true,
+        data: buildPm01ControlsView(controls, attempts)
+      });
+      return;
+    }
+
+    if (method === "POST" && pathname === "/api/admin/pm01/controls") {
+      const exam = getPm01Exam();
+      const body = await parseBody(req);
+      const current = await loadPm01Controls();
+      const controls = await savePm01Controls({
+        ...current,
+        examEnabled: body.examEnabled !== false,
+        freeRepeatEnabled: body.freeRepeatEnabled === true,
+        defaultAttempts: body.defaultAttempts
+      });
+      const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id)
+        .map((attempt) => normalizePm01AttemptState(exam, attempt));
+      sendJson(res, 200, {
+        ok: true,
+        data: buildPm01ControlsView(controls, attempts)
+      });
+      return;
+    }
+
+    if (method === "POST" && pathname === "/api/admin/pm01/grants") {
+      const exam = getPm01Exam();
+      const body = await parseBody(req);
+      const participantSignature = String(body.participantSignature || "").trim();
+      if (!participantSignature) {
+        sendJson(res, 400, { ok: false, message: "Не найден участник для выдачи попытки." });
+        return;
+      }
+
+      const current = await loadPm01Controls();
+      const currentGrant = current.grants?.[participantSignature] || { extraAttempts: 0, note: "", updatedAt: null };
+      const nextExtra = Object.prototype.hasOwnProperty.call(body, "extraAttempts")
+        ? Number(body.extraAttempts)
+        : Number(currentGrant.extraAttempts || 0) + Number(body.delta || 1);
+      const extraAttempts = Math.max(0, Math.min(20, Math.trunc(nextExtra) || 0));
+      const controls = await savePm01Controls({
+        ...current,
+        grants: {
+          ...(current.grants || {}),
+          [participantSignature]: {
+            extraAttempts,
+            note: String(body.note || currentGrant.note || "").slice(0, 240),
+            updatedAt: nowIso()
+          }
+        }
+      });
+      const attempts = currentOlympiadAttempts(await loadAttempts(), exam.id)
+        .map((attempt) => normalizePm01AttemptState(exam, attempt));
+      sendJson(res, 200, {
+        ok: true,
+        data: buildPm01ControlsView(controls, attempts)
       });
       return;
     }
@@ -2714,6 +2947,7 @@ async function handleApi(req, res, url) {
           const summary = summarizePm01Attempt(exam, attempt);
           return {
             id: attempt.id,
+            participantSignature: attempt.participantSignature || pm01AttemptParticipantSignature(attempt),
             fullName: attempt.participant?.fullName || "",
             institution: attempt.participant?.institution || "",
             groupName: attempt.participant?.groupName || "",
@@ -2728,6 +2962,7 @@ async function handleApi(req, res, url) {
             status: attempt.status,
             startedAt: attempt.startedAt,
             finishedAt: attempt.finishedAt,
+            totalDurationMs: summary.totalDurationMs,
             totalFinalScore: summary.totalFinalScore,
             grade: summary.grade,
             moduleScores: summary.moduleScores.map((module) => ({
@@ -2910,9 +3145,11 @@ async function handleApi(req, res, url) {
     }
 
     if (method === "GET" && pathname === "/api/admin/content/drafts") {
+      const drafts = await loadContentDrafts();
+      delete drafts[PM01_CONTROLS_DRAFT_KEY];
       sendJson(res, 200, {
         ok: true,
-        data: await loadContentDrafts()
+        data: drafts
       });
       return;
     }

@@ -56,6 +56,18 @@ img {
   display: none !important;
 }
 
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 .pm01-topbar {
   position: sticky;
   top: 0;
@@ -1553,6 +1565,100 @@ button.module-step:focus-visible {
   flex-wrap: wrap;
 }
 
+.teacher-controls {
+  margin: 14px 0;
+}
+
+.teacher-controls-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f8faf7;
+}
+
+.teacher-controls-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.teacher-controls-head h2 {
+  margin-bottom: 0;
+  font-size: 22px;
+}
+
+.teacher-control-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr) minmax(150px, 0.45fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.control-switch {
+  min-height: 82px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.control-switch input {
+  width: 22px;
+  min-height: 22px;
+  accent-color: var(--green-800);
+}
+
+.control-switch strong,
+.control-switch small,
+.teacher-controls-status span {
+  display: block;
+}
+
+.control-switch strong {
+  margin-bottom: 4px;
+}
+
+.control-switch small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.field.compact {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.teacher-controls-status,
+.detail-progress-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.teacher-controls-status span,
+.detail-progress-strip span {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 9px;
+  border-radius: var(--radius);
+  color: var(--green-900);
+  background: #eaf7f1;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .results-overview {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
@@ -2001,6 +2107,54 @@ tr[data-attempt-id].is-selected {
   font-size: 13px;
 }
 
+.detail-access-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.detail-access-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.detail-access-copy strong {
+  color: #fff;
+}
+
+.detail-access-copy span,
+.detail-access-copy small {
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.detail-access-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.detail-access-actions .button.ghost {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.detail-access-actions .button.secondary {
+  background: #eaf7f1;
+}
+
+.detail-progress-strip {
+  margin-top: 12px;
+}
+
 .detail-module-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2131,6 +2285,75 @@ tr[data-attempt-id].is-selected {
   min-height: 38px;
 }
 
+.protocol-card {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.protocol-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.protocol-head strong,
+.protocol-head span {
+  display: block;
+}
+
+.protocol-head span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.protocol-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+  margin-top: 10px;
+}
+
+.protocol-item span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.protocol-item strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.protocol-module-table {
+  min-width: 0;
+  margin-top: 10px;
+}
+
+.protocol-module-table th,
+.protocol-module-table td {
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.protocol-signatures {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 @media (max-width: 1180px) {
   .entry-grid,
   .workspace,
@@ -2139,7 +2362,8 @@ tr[data-attempt-id].is-selected {
     grid-template-columns: 1fr;
   }
 
-  .admin-filters {
+  .admin-filters,
+  .teacher-control-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -2234,9 +2458,12 @@ tr[data-attempt-id].is-selected {
   .result-modules,
   .admin-stat-grid,
   .grade-overview,
+  .teacher-control-grid,
+  .detail-access-panel,
   .module-overview,
   .detail-metrics,
   .detail-module-grid,
+  .protocol-grid,
   .reference-panel {
     grid-template-columns: 1fr;
   }
@@ -2271,7 +2498,9 @@ tr[data-attempt-id].is-selected {
 
   .task-head,
   .task-actions,
-  .result-actions {
+  .result-actions,
+  .protocol-head,
+  .protocol-signatures {
     align-items: stretch;
     flex-direction: column;
   }
@@ -2462,6 +2691,53 @@ tr[data-attempt-id].is-selected {
 
   .workshop-frame {
     aspect-ratio: 16 / 9;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .protocol-card,
+  .protocol-card * {
+    visibility: visible !important;
+  }
+
+  .protocol-card {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 190mm;
+    min-height: 128mm;
+    max-height: 136mm;
+    margin: 0;
+    padding: 7mm;
+    overflow: hidden;
+    box-shadow: none;
+    border: 1px solid #111;
+    border-radius: 0;
+    color: #000;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  .protocol-card table {
+    border-collapse: collapse;
+  }
+
+  .protocol-card th,
+  .protocol-card td {
+    border: 1px solid #777;
   }
 }
 

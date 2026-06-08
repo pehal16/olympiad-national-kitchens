@@ -708,3 +708,27 @@ test("applyPm01VoiceReview stores rubric scores and updates final summary", () =
   assert.equal(summary.pendingManualReviews, 0);
   assert.equal(summary.moduleScores.find((module) => module.moduleId === "voice").finalScore, 20);
 });
+
+test("PM01 teacher cabinet exposes exam controls and printable protocol", () => {
+  const root = path.join(__dirname, "..");
+  const serverSource = fs.readFileSync(path.join(root, "server.js"), "utf8");
+  const adminHtml = fs.readFileSync(path.join(root, "public", "pm01-admin.html"), "utf8");
+  const adminScript = fs.readFileSync(path.join(root, "public", "pm01-admin.js"), "utf8");
+  const css = fs.readFileSync(path.join(root, "public", "pm01.css"), "utf8");
+
+  assert.match(serverSource, /PM01_CONTROLS_DRAFT_KEY/);
+  assert.match(serverSource, /\/api\/admin\/pm01\/controls/);
+  assert.match(serverSource, /\/api\/admin\/pm01\/grants/);
+  assert.match(serverSource, /examEnabled/);
+  assert.match(serverSource, /freeRepeatEnabled/);
+  assert.match(serverSource, /Лимит экзаменационных попыток исчерпан/);
+
+  assert.match(adminHtml, /teacher-controls-form/);
+  assert.match(adminHtml, /control-exam-enabled/);
+  assert.match(adminHtml, /control-free-repeat/);
+  assert.match(adminScript, /renderTeacherControls/);
+  assert.match(adminScript, /setExtraAttempts/);
+  assert.match(adminScript, /renderProtocolCard/);
+  assert.match(css, /@media print/);
+  assert.match(css, /\.protocol-card/);
+});

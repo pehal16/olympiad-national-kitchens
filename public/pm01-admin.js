@@ -1,6 +1,7 @@
 (function () {
   const state = {
     summary: null,
+    controls: null,
     attempts: [],
     selectedAttemptId: "",
     filters: {
@@ -25,6 +26,12 @@
     adminStats: document.getElementById("admin-stats"),
     gradeOverview: document.getElementById("grade-overview"),
     moduleOverview: document.getElementById("module-overview"),
+    teacherControlsForm: document.getElementById("teacher-controls-form"),
+    controlExamEnabled: document.getElementById("control-exam-enabled"),
+    controlFreeRepeat: document.getElementById("control-free-repeat"),
+    controlDefaultAttempts: document.getElementById("control-default-attempts"),
+    saveTeacherControls: document.getElementById("save-teacher-controls"),
+    teacherControlsStatus: document.getElementById("teacher-controls-status"),
     filteredSummary: document.getElementById("filtered-summary"),
     attemptsBody: document.getElementById("attempts-body"),
     detailPanel: document.getElementById("detail-panel"),
@@ -190,6 +197,43 @@
     return sum(completed.map((attempt) => attempt.totalFinalScore)) / completed.length;
   }
 
+  function getControls() {
+    return state.controls || state.summary?.controls || {
+      examEnabled: true,
+      freeRepeatEnabled: true,
+      defaultAttempts: 1,
+      grants: {},
+      participants: []
+    };
+  }
+
+  function participantAccess(signature) {
+    const controls = getControls();
+    const key = String(signature || "").trim();
+    return (controls.participants || []).find((item) => item.participantSignature === key) || {
+      participantSignature: key,
+      completedAttempts: 0,
+      activeAttempts: 0,
+      totalAttempts: 0,
+      extraAttempts: Number(controls.grants?.[key]?.extraAttempts || 0),
+      allowedAttempts: controls.freeRepeatEnabled ? null : Number(controls.defaultAttempts || 1),
+      remainingAttempts: controls.freeRepeatEnabled ? null : Number(controls.defaultAttempts || 1)
+    };
+  }
+
+  function answeredTotals(detail) {
+    return (detail.modules || []).reduce(
+      (totals, module) => {
+        const score = module.score || {};
+        totals.answered += Number(score.answered || 0);
+        totals.questions += Number(score.questionCount || module.questionCount || 0);
+        totals.pending += Number(score.pendingManualReviews || 0);
+        return totals;
+      },
+      { answered: 0, questions: 0, pending: 0 }
+    );
+  }
+
   function moduleScoreData(attempt, code) {
     return (attempt.moduleScores || []).find((item) => item.code === code) || null;
   }
@@ -267,7 +311,10 @@
     const cell = createCell("", "attempt-total-cell");
     const top = createNode("div", "attempt-total-main");
     appendText(top, "strong", "", `${formatScoreNumber(attempt.totalFinalScore)} / ${maxScore}`);
-    appendText(top, "span", "", attempt.grade ? `оценка ${attempt.grade}` : "оценка после завершения");
+    const gradeText = attempt.grade
+      ? `${attempt.status === "in_progress" ? "примерно" : "оценка"} ${attempt.grade}`
+      : "оценка после завершения";
+    appendText(top, "span", "", gradeText);
     cell.append(top, createScoreBar(attempt.totalFinalScore, maxScore, "total"));
     return cell;
   }
@@ -531,6 +578,50 @@
     });
   }
 
+  function renderTeacherControls() {
+    const controls = getControls();
+    elements.controlExamEnabled.checked = controls.examEnabled !== false;
+    elements.controlFreeRepeat.checked = controls.freeRepeatEnabled !== false;
+    elements.controlDefaultAttempts.value = String(controls.defaultAttempts || 1);
+
+    elements.teacherControlsStatus.innerHTML = "";
+    const status = [
+      controls.examEnabled !== false ? "Экзамен открыт" : "Экзамен закрыт",
+      controls.freeRepeatEnabled !== false
+        ? "повторы разрешены всем"
+        : `лимит ${controls.defaultAttempts || 1} + допуски преподавателя`,
+      `допусков выдано: ${Object.values(controls.grants || {}).filter((grant) => Number(grant.extraAttempts || 0) > 0).length}`
+    ];
+    status.forEach((text) => appendText(elements.teacherControlsStatus, "span", "", text));
+  }
+
+  async function saveTeacherControls(event) {
+    event.preventDefault();
+    hideMessage(elements.adminMessage);
+    elements.saveTeacherControls.disabled = true;
+    try {
+      const controls = await adminApi("/api/admin/pm01/controls", {
+        method: "POST",
+        body: JSON.stringify({
+          examEnabled: elements.controlExamEnabled.checked,
+          freeRepeatEnabled: elements.controlFreeRepeat.checked,
+          defaultAttempts: Number(elements.controlDefaultAttempts.value || 1)
+        })
+      });
+      state.controls = controls;
+      if (state.summary) {
+        state.summary.controls = controls;
+      }
+      renderTeacherControls();
+      renderAttempts();
+      showMessage(elements.adminMessage, "Настройки допуска сохранены.", "success");
+    } catch (error) {
+      showMessage(elements.adminMessage, error.message, "error");
+    } finally {
+      elements.saveTeacherControls.disabled = false;
+    }
+  }
+
   function renderStats() {
     elements.adminStats.innerHTML = "";
     const counts = state.summary?.counts || {};
@@ -650,6 +741,7 @@
     elements.loginPanel.classList.add("hidden");
     elements.adminPanel.classList.remove("hidden");
     renderStats();
+    renderTeacherControls();
     renderFilterOptions();
     renderAttempts();
   }
@@ -875,6 +967,143 @@
     moduleNode.appendChild(node);
   }
 
+  async function setExtraAttempts(participantSignature, extraAttempts, attemptId) {
+    hideMessage(elements.adminMessage);
+    try {
+      const controls = await adminApi("/api/admin/pm01/grants", {
+        method: "POST",
+        body: JSON.stringify({
+          participantSignature,
+          extraAttempts
+        })
+      });
+      state.controls = controls;
+      if (state.summary) {
+        state.summary.controls = controls;
+      }
+      renderTeacherControls();
+      renderAttempts();
+      if (attemptId) {
+        const detail = await adminApi(`/api/admin/pm01/attempts/${encodeURIComponent(attemptId)}`);
+        renderDetail(detail);
+      }
+      showMessage(elements.adminMessage, "Допуск по попыткам обновлен.", "success");
+    } catch (error) {
+      showMessage(elements.adminMessage, error.message, "error");
+    }
+  }
+
+  function renderAccessPanel(detail) {
+    const signature = detail.attempt.participantSignature || "";
+    const controls = getControls();
+    const access = participantAccess(signature);
+    const panel = createNode("div", "detail-access-panel");
+    const copy = createNode("div", "detail-access-copy");
+    appendText(copy, "strong", "", "Попытки студента");
+    const accessText = controls.freeRepeatEnabled
+      ? `Свободные повторы включены. Уже создано попыток: ${access.totalAttempts || 0}.`
+      : `Лимит: ${access.allowedAttempts || 0}; завершено: ${access.completedAttempts || 0}; доступно: ${access.remainingAttempts || 0}.`;
+    appendText(copy, "span", "", accessText);
+    if (Number(access.extraAttempts || 0)) {
+      appendText(copy, "small", "", `Дополнительно выдано: ${access.extraAttempts}`);
+    }
+
+    const actions = createNode("div", "detail-access-actions");
+    const grant = document.createElement("button");
+    grant.type = "button";
+    grant.className = "button secondary";
+    grant.textContent = "+1 попытка";
+    grant.addEventListener("click", () =>
+      setExtraAttempts(signature, Number(access.extraAttempts || 0) + 1, detail.attempt.id)
+    );
+    actions.appendChild(grant);
+
+    if (Number(access.extraAttempts || 0) > 0) {
+      const reset = document.createElement("button");
+      reset.type = "button";
+      reset.className = "button ghost";
+      reset.textContent = "Сбросить допуск";
+      reset.addEventListener("click", () => setExtraAttempts(signature, 0, detail.attempt.id));
+      actions.appendChild(reset);
+    }
+
+    const print = document.createElement("button");
+    print.type = "button";
+    print.className = "button primary";
+    print.textContent = "Печать протокола";
+    print.addEventListener("click", () => window.print());
+    actions.appendChild(print);
+
+    panel.append(copy, actions);
+    return panel;
+  }
+
+  function renderCompletionStrip(detail) {
+    const totals = answeredTotals(detail);
+    const strip = createNode("div", "detail-progress-strip");
+    [
+      `Выполнено заданий: ${totals.answered} из ${totals.questions}`,
+      `Примерная оценка: ${detail.summary.grade}`,
+      totals.pending ? `На ручной проверке: ${totals.pending}` : "Ручная проверка не требуется"
+    ].forEach((text) => appendText(strip, "span", "", text));
+    return strip;
+  }
+
+  function renderProtocolCard(detail) {
+    const card = createNode("section", "protocol-card");
+    const participant = detail.attempt.participant || {};
+    const ticket = detail.attempt.variantMeta.materialTicket;
+    const totals = answeredTotals(detail);
+    const head = createNode("div", "protocol-head");
+    appendText(head, "strong", "", "Протокол выполнения экзаменационного задания");
+    appendText(head, "span", "", "ПМ.01 · МДК 01.01/01.02");
+    card.appendChild(head);
+
+    const grid = createNode("div", "protocol-grid");
+    [
+      ["Студент", participant.fullName || "—"],
+      ["Группа", participant.groupName || "—"],
+      ["Учреждение", participant.institution || "—"],
+      ["Дата", formatDateTime(detail.attempt.finishedAt || detail.attempt.startedAt)],
+      ["Вариант", detail.attempt.variantMeta.variantTitle || "—"],
+      ["Билет", ticket ? `№ ${ticket.number}: ${ticket.product}` : "—"],
+      ["Баллы", `${formatScoreNumber(detail.summary.totalFinalScore)} из ${detail.summary.totalMaxScore}`],
+      ["Оценка", `${detail.attempt.status === "in_progress" ? "примерно " : ""}${detail.summary.grade}`],
+      ["Выполнено", `${totals.answered} из ${totals.questions}`],
+      ["Статус", statusLabel(detail.attempt.status)]
+    ].forEach(([label, value]) => {
+      const item = createNode("div", "protocol-item");
+      appendText(item, "span", "", label);
+      appendText(item, "strong", "", value);
+      grid.appendChild(item);
+    });
+    card.appendChild(grid);
+
+    const table = document.createElement("table");
+    table.className = "protocol-module-table";
+    table.innerHTML = "<thead><tr><th>Модуль</th><th>Балл</th><th>Ответы</th></tr></thead>";
+    const body = document.createElement("tbody");
+    (detail.modules || []).forEach((module) => {
+      const row = document.createElement("tr");
+      const score = module.score || {};
+      [module.code || "—", `${formatScoreNumber(score.finalScore || 0)} / ${module.maxScore || score.maxScore || 0}`, `${score.answered || 0} / ${score.questionCount || module.questionCount || 0}`]
+        .forEach((text) => {
+          const cell = document.createElement("td");
+          cell.textContent = text;
+          row.appendChild(cell);
+        });
+      body.appendChild(row);
+    });
+    table.appendChild(body);
+    card.appendChild(table);
+
+    const signatures = createNode("div", "protocol-signatures");
+    appendText(signatures, "span", "", "Преподаватель: __________________");
+    appendText(signatures, "span", "", "Подпись студента: _______________");
+    card.appendChild(signatures);
+    return card;
+  }
+
   function renderDetailHeader(detail) {
     const header = createNode("section", "detail-hero");
     const mode = detail.attempt.mode === "training" ? "Тренировка" : "Экзамен";
@@ -890,8 +1119,9 @@
     appendText(header, "p", "lead", subtitle || "Данные участника не заполнены.");
 
     const metrics = createNode("div", "detail-metrics");
+    const gradeCaption = `${detail.attempt.status === "in_progress" ? "примерная оценка" : "оценка"} ${detail.summary.grade}`;
     [
-      ["Итог", `${detail.summary.totalFinalScore}/${detail.summary.totalMaxScore}`, `оценка ${detail.summary.grade}`],
+      ["Итог", `${detail.summary.totalFinalScore}/${detail.summary.totalMaxScore}`, gradeCaption],
       ["Статус", statusLabel(detail.attempt.status), statusCaption(detail.attempt.status)],
       ["Время", formatDuration(detail.summary.totalDurationMs), formatDateTime(detail.attempt.finishedAt || detail.attempt.startedAt)],
       ["Вариант", detail.attempt.variantMeta.variantTitle || "—", ticket ? `билет № ${ticket.number}: ${ticket.product}` : "билет не выбран"]
@@ -911,6 +1141,7 @@
       header.appendChild(warning);
     }
 
+    header.appendChild(renderAccessPanel(detail));
     return header;
   }
 
@@ -945,7 +1176,9 @@
     elements.detailPanel.innerHTML = "";
     elements.detailPanel.append(
       renderDetailHeader(detail),
-      renderDetailModuleSummary(detail.modules || [])
+      renderCompletionStrip(detail),
+      renderDetailModuleSummary(detail.modules || []),
+      renderProtocolCard(detail)
     );
 
     (detail.modules || []).forEach((module) => {
@@ -976,12 +1209,15 @@
   }
 
   async function loadAdmin() {
-    const [summary, attempts] = await Promise.all([
+    const [summary, attempts, controls] = await Promise.all([
       adminApi("/api/admin/pm01/summary"),
-      adminApi("/api/admin/pm01/attempts")
+      adminApi("/api/admin/pm01/attempts"),
+      adminApi("/api/admin/pm01/controls")
     ]);
     state.summary = summary;
     state.attempts = attempts;
+    state.controls = controls;
+    state.summary.controls = controls;
     renderAdmin();
   }
 
@@ -1033,6 +1269,7 @@
   }
 
   elements.loginForm.addEventListener("submit", login);
+  elements.teacherControlsForm.addEventListener("submit", saveTeacherControls);
   elements.refreshAdmin.addEventListener("click", () => {
     loadAdmin().catch((error) => showMessage(elements.adminMessage, error.message, "error"));
   });
