@@ -479,6 +479,18 @@ function getPm01CurrentModule(attempt) {
   return getPm01ModuleById(attempt.variant, question.moduleId || question.tourId);
 }
 
+function sanitizePm01SavedAnswer(question, answer) {
+  if (!answer) {
+    return null;
+  }
+  const payload = { ...(answer.answerPayload || {}) };
+  if (question?.type === "voice_response" && payload.audioDataUrl) {
+    payload.legacyAudioInline = true;
+    delete payload.audioDataUrl;
+  }
+  return payload;
+}
+
 function sanitizePm01Question(question, attempt, options = {}) {
   if (!question) {
     return null;
@@ -514,7 +526,7 @@ function sanitizePm01Question(question, attempt, options = {}) {
     hotspotTargetCount: Array.isArray(question.hotspots) ? question.hotspots.length : 0,
     competencies: question.competencies || [],
     competencyTags: question.competencyTags || [],
-    savedAnswer: answer ? answer.answerPayload : null,
+    savedAnswer: sanitizePm01SavedAnswer(question, answer),
     review: answer ? answer.manualReview || null : null
   };
 

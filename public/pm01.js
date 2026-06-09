@@ -1408,17 +1408,77 @@
     let mediaRecorder = null;
     let startedAt = 0;
     let audioDataUrl = question.savedAnswer?.audioDataUrl || "";
+    let audioId = question.savedAnswer?.audioId || "";
+    let audioUploadStatus = question.savedAnswer?.audioUploadStatus || (audioId ? "stored" : "");
+    let audioUploadMessage = question.savedAnswer?.audioUploadMessage || "";
     let durationMs = Number(question.savedAnswer?.durationMs || 0);
     let audioBytes = Number(question.savedAnswer?.audioBytes || 0);
     let mimeType = question.savedAnswer?.mimeType || "audio/webm";
+    let previewUrl = "";
+    let uploadPending = false;
 
     const wrapper = document.createElement("div");
     wrapper.className = "option-list";
     const controls = document.createElement("div");
     controls.className = "voice-controls";
+
+    async function uploadVoiceBlob(blob) {
+      uploadPending = true;
+      elements.submitAnswer.disabled = true;
+      audioId = "";
+      audioUploadStatus = "uploading";
+      audioUploadMessage = "Загружаем запись...";
+      meter.textContent = audioUploadMessage;
+      try {
+        const response = await fetch(
+          `/api/pm01/public/attempts/${encodeURIComponent(state.attempt.id)}/voice/${encodeURIComponent(question.id)}/audio?durationMs=${encodeURIComponent(String(durationMs))}`,
+          {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+              "Content-Type": blob.type || "audio/webm",
+              "X-PM01-Duration-Ms": String(durationMs)
+            },
+            body: blob
+          }
+        );
+        const raw = await response.text();
+        let payload = {};
+        if (raw) {
+          try {
+            payload = JSON.parse(raw);
+          } catch (_) {
+            payload = { ok: false, message: raw.slice(0, 180) };
+          }
+        }
+        if (!response.ok || payload.ok === false) {
+          throw new Error(payload.message || `Сервер вернул ошибку (${response.status}).`);
+        }
+        const data = payload.data || {};
+        audioId = data.audioId || "";
+        audioUploadStatus = data.audioUploadStatus || "stored";
+        audioUploadMessage = data.audioUploadMessage || "Запись загружена.";
+        audioBytes = Number(data.audioBytes || audioBytes || 0);
+        mimeType = data.mimeType || mimeType;
+        meter.textContent = `${audioUploadMessage} · ${Math.round(durationMs / 1000)} сек.`;
+      } catch (error) {
+        audioId = "";
+        audioUploadStatus = "failed";
+        audioUploadMessage = error.message || "Запись не удалось загрузить.";
+        meter.textContent = audioUploadMessage;
+        showMessage(elements.taskMessage, `${audioUploadMessage} Попробуйте записать короче или оставьте текстовую заметку.`, "error");
+      } finally {
+        uploadPending = false;
+        elements.submitAnswer.disabled = false;
+      }
+    }
+
     const start = createButton("button secondary", "Запись", async () => {
       hideMessage(elements.taskMessage);
       try {
+        if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+          throw new Error("Микрофон недоступен в этом браузере.");
+        }
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const chunks = [];
         mediaRecorder = new MediaRecorder(stream);
@@ -1427,10 +1487,12 @@
             chunks.push(event.data);
           }
         });
-        mediaRecorder.addEventListener("stop", () => {
+        mediaRecorder.addEventListener("stop", async () => {
           const blob = new Blob(chunks, { type: mediaRecorder.mimeType || "audio/webm" });
           audioBytes = blob.size;
           mimeType = blob.type || "audio/webm";
+          audioDataUrl = "";
+          audioId = "";
           if (audioBytes > MAX_VOICE_AUDIO_BYTES) {
             audioDataUrl = "";
             preview.removeAttribute("src");
@@ -1440,15 +1502,14 @@
             stream.getTracks().forEach((track) => track.stop());
             return;
           }
-          const reader = new FileReader();
-          reader.addEventListener("loadend", () => {
-            audioDataUrl = String(reader.result || "");
-            preview.src = audioDataUrl;
-            preview.classList.remove("hidden");
-            meter.textContent = `Запись готова · ${Math.round(durationMs / 1000)} сек.`;
-          });
-          reader.readAsDataURL(blob);
+          if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+          }
+          previewUrl = URL.createObjectURL(blob);
+          preview.src = previewUrl;
+          preview.classList.remove("hidden");
           stream.getTracks().forEach((track) => track.stop());
+          await uploadVoiceBlob(blob);
         });
         startedAt = Date.now();
         mediaRecorder.start();
@@ -1470,7 +1531,11 @@
     stop.disabled = true;
     const meter = document.createElement("span");
     meter.className = "voice-meter";
-    meter.textContent = audioDataUrl ? "Запись сохранена" : "Запись не начата";
+    meter.textContent = audioId
+      ? (audioUploadMessage || "Запись уже загружена")
+      : audioDataUrl
+        ? "Запись сохранена"
+        : "Запись не начата";
     controls.append(start, stop, meter);
 
     const preview = document.createElement("audio");
@@ -1499,14 +1564,17 @@
     elements.questionBody.appendChild(wrapper);
 
     return {
-      isValid: () => Boolean(audioDataUrl || textarea.value.trim()),
+      isValid: () => !uploadPending && Boolean(audioId || audioDataUrl || textarea.value.trim()),
       getAnswer: () => ({
+        audioId,
         audioDataUrl,
         durationMs,
         audioBytes,
         mimeType,
+        audioUploadStatus,
+        audioUploadMessage,
         transcriptNote: textarea.value.trim(),
-        audioName: audioDataUrl ? `${question.id}.webm` : ""
+        audioName: (audioId || audioDataUrl) ? `${question.id}.webm` : ""
       })
     };
   }

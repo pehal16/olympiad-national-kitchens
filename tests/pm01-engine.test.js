@@ -503,6 +503,29 @@ test("PM01 selected comprehensive ticket is embedded into M0 and M3 safely", () 
   assert.equal("recipe" in publicVoice.materialTicket, false);
 });
 
+test("PM01 public voice answers expose metadata without inline audio", () => {
+  const exam = getPm01Exam();
+  const variant = buildPm01Variant(exam, "fish");
+  const voice = variant.questions.find((question) => question.type === "voice_response");
+  const publicVoice = sanitizePm01Question(voice, {
+    answers: {
+      [voice.id]: {
+        answerPayload: {
+          audioId: "pm01voice_test",
+          audioDataUrl: "data:audio/webm;base64,AAAA",
+          audioName: "voice.webm",
+          durationMs: 12000,
+          audioUploadStatus: "inline_fallback"
+        }
+      }
+    }
+  });
+
+  assert.equal(publicVoice.savedAnswer.audioId, "pm01voice_test");
+  assert.equal(publicVoice.savedAnswer.legacyAudioInline, true);
+  assert.equal("audioDataUrl" in publicVoice.savedAnswer, false);
+});
+
 test("PM01 comprehensive tickets stay compatible with selected production variant", () => {
   const exam = getPm01Exam();
   const fishTicket = getPm01MaterialTicket("pm01-ticket-15");
@@ -758,6 +781,8 @@ test("applyPm01VoiceReview stores rubric scores and updates final summary", () =
 test("PM01 teacher cabinet exposes exam controls and printable protocol", () => {
   const root = path.join(__dirname, "..");
   const serverSource = fs.readFileSync(path.join(root, "server.js"), "utf8");
+  const studentHtml = fs.readFileSync(path.join(root, "public", "pm01.html"), "utf8");
+  const studentScript = fs.readFileSync(path.join(root, "public", "pm01.js"), "utf8");
   const adminHtml = fs.readFileSync(path.join(root, "public", "pm01-admin.html"), "utf8");
   const adminScript = fs.readFileSync(path.join(root, "public", "pm01-admin.js"), "utf8");
   const css = fs.readFileSync(path.join(root, "public", "pm01.css"), "utf8");
@@ -795,6 +820,12 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(serverSource, /savePm01VoiceAudio/);
   assert.match(serverSource, /loadPm01VoiceAudio/);
   assert.equal(serverSource.includes("\\/voice\\/[^/]+\\/audio"), true);
+  assert.match(serverSource, /readRequestBuffer/);
+  assert.match(serverSource, /inline_fallback/);
+  assert.match(studentScript, /uploadVoiceBlob/);
+  assert.match(studentScript, /X-PM01-Duration-Ms/);
+  assert.doesNotMatch(studentScript, /readAsDataURL\(blob\)/);
+  assert.match(studentHtml, /pm01\.js\?v=1\.0\.15/);
   assert.match(adminScript, /renderVoiceQueueList/);
   assert.match(adminScript, /voiceAudio/);
   assert.match(adminScript, /audioInfo\.audioUrl/);

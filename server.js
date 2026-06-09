@@ -867,6 +867,51 @@ function parseDataUrl(value) {
   }
 }
 
+function readRequestBuffer(req, options = {}) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    const maxBytes = Number(options.maxBytes || 8 * 1024 * 1024);
+    let totalBytes = 0;
+    let rejected = false;
+
+    req.on("data", (chunk) => {
+      if (rejected) {
+        return;
+      }
+      totalBytes += chunk.length;
+      if (maxBytes > 0 && totalBytes > maxBytes) {
+        rejected = true;
+        const error = new Error("Голосовая запись слишком большая. Запишите ответ короче или оставьте текстовую заметку.");
+        error.statusCode = 413;
+        reject(error);
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on("end", () => {
+      if (!rejected) {
+        resolve(Buffer.concat(chunks));
+      }
+    });
+    req.on("error", reject);
+  });
+}
+
+function withTimeout(promise, ms, message) {
+  let timer = null;
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(message || "Операция заняла слишком много времени.")), ms);
+    })
+  ]).finally(() => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+  });
+}
+
 function pm01VoiceAudioUrl(attemptId, questionId) {
   return `/api/admin/pm01/attempts/${encodeURIComponent(attemptId)}/voice/${encodeURIComponent(questionId)}/audio`;
 }
@@ -1083,8 +1128,24 @@ function summarizePm01AttemptVoiceStatus(attempt) {
   return result;
 }
 
-async function normalizePm01VoiceAnswerPayload(attempt, question, answerPayload) {
+async function normalizePm01VoiceAnswerPayload(attempt, question, answerPayload, existingAnswer = null) {
   const payload = { ...(answerPayload || {}) };
+  const previousPayload = existingAnswer?.answerPayload || {};
+  if (
+    question?.type === "voice_response" &&
+    payload.audioId &&
+    !payload.audioDataUrl &&
+    previousPayload.audioDataUrl &&
+    previousPayload.audioId === payload.audioId
+  ) {
+    payload.audioDataUrl = previousPayload.audioDataUrl;
+    payload.audioUploadStatus = previousPayload.audioUploadStatus || "inline_fallback";
+    payload.audioUploadMessage = previousPayload.audioUploadMessage || "Запись сохранена в совместимом режиме.";
+    payload.audioBytes = payload.audioBytes || previousPayload.audioBytes || 0;
+    payload.mimeType = payload.mimeType || previousPayload.mimeType || "audio/webm";
+    payload.audioName = payload.audioName || previousPayload.audioName || `${question.id}.webm`;
+    return payload;
+  }
   if (!question || question.type !== "voice_response" || !payload.audioDataUrl) {
     return payload;
   }
@@ -2838,6 +2899,136 @@ async function handleApi(req, res, url) {
     return;
   }
 
+  if (method === "POST" && pathname.match(/^\/api\/pm01\/public\/attempts\/[^/]+\/voice\/[^/]+\/audio$/)) {
+    const exam = getPm01Exam();
+    const attemptId = pathname.split("/")[5];
+    const questionId = decodeURIComponent(pathname.split("/")[7] || "");
+    let attempt = await loadAttemptById(attemptId);
+
+    if (!attempt || attempt.olympiadId !== exam.id) {
+      sendJson(res, 404, { ok: false, message: "Попытка ПМ.01 не найдена." });
+      return;
+    }
+
+    attempt = normalizePm01AttemptState(exam, attempt);
+    if (attempt.status !== "in_progress") {
+      sendJson(res, 409, {
+        ok: false,
+        message: "Попытка ПМ.01 уже завершена."
+      });
+      return;
+    }
+
+    const currentQuestion = getPm01CurrentQuestion(attempt);
+    const question = (attempt.variant?.questions || []).find((item) => item.id === questionId);
+    if (!question || question.type !== "voice_response" || currentQuestion?.id !== question.id) {
+      sendJson(res, 400, {
+        ok: false,
+        message: "Голосовую запись можно прикрепить только к текущему голосовому заданию."
+      });
+      return;
+    }
+
+    let buffer;
+    try {
+      buffer = await readRequestBuffer(req, { maxBytes: PM01_VOICE_AUDIO_MAX_BYTES });
+    } catch (error) {
+      sendJson(res, error.statusCode || 400, {
+        ok: false,
+        message: error.message || "Не удалось прочитать голосовую запись."
+      });
+      return;
+    }
+
+    if (!buffer.length) {
+      sendJson(res, 400, { ok: false, message: "Голосовая запись пустая. Запишите ответ еще раз." });
+      return;
+    }
+
+    const mimeType = String(req.headers["content-type"] || "audio/webm").split(";")[0] || "audio/webm";
+    const durationMs = Number(req.headers["x-pm01-duration-ms"] || url.searchParams.get("durationMs") || 0);
+    const audioId = generateId("pm01voice");
+    const audioName = `${question.id}.webm`;
+    const meta = {
+      id: audioId,
+      attemptId: attempt.id,
+      questionId: question.id,
+      fileName: audioName,
+      mimeType,
+      durationMs,
+      byteLength: buffer.length,
+      createdAt: nowIso()
+    };
+
+    try {
+      const stored = await withTimeout(
+        savePm01VoiceAudio(meta, buffer),
+        3500,
+        "Отдельное хранилище аудио временно недоступно."
+      );
+      sendJson(res, 201, {
+        ok: true,
+        data: {
+          audioId: stored.id || audioId,
+          durationMs,
+          audioBytes: buffer.length,
+          mimeType,
+          audioName: stored.fileName || audioName,
+          audioUploadStatus: "stored",
+          audioUploadMessage: "Запись загружена."
+        }
+      });
+      return;
+    } catch (error) {
+      const savedAt = nowIso();
+      const previousAnswer = attempt.answers?.[question.id] || null;
+      const answerPayload = {
+        audioId,
+        audioDataUrl: `data:${mimeType};base64,${buffer.toString("base64")}`,
+        durationMs,
+        audioBytes: buffer.length,
+        mimeType,
+        transcriptNote: previousAnswer?.answerPayload?.transcriptNote || "",
+        audioName,
+        audioUploadStatus: "inline_fallback",
+        audioUploadMessage: "Запись загружена в совместимом режиме."
+      };
+      const result = scorePm01Question(question, answerPayload, previousAnswer);
+      attempt.answers = attempt.answers || {};
+      attempt.answers[question.id] = {
+        questionId: question.id,
+        sourceId: question.sourceId,
+        moduleId: question.moduleId,
+        moduleCode: question.moduleCode,
+        answerPayload,
+        autoScore: result.autoScore,
+        finalScore: result.finalScore,
+        penalty: result.penalty || 0,
+        details: result.details || {},
+        manualStatus: result.manualStatus || null,
+        manualReview: previousAnswer ? previousAnswer.manualReview || null : null,
+        savedAt,
+        timeSpentMs: previousAnswer?.timeSpentMs || 0
+      };
+      attempt._lastChangedQuestionId = question.id;
+      await upsertAttempt(attempt);
+      invalidateAttemptCaches();
+      sendJson(res, 201, {
+        ok: true,
+        data: {
+          audioId,
+          durationMs,
+          audioBytes: buffer.length,
+          mimeType,
+          audioName,
+          audioUploadStatus: "inline_fallback",
+          audioUploadMessage: "Запись загружена. Можно нажать «Ответить и далее»."
+        }
+      });
+      return;
+    }
+  }
+
   if (method === "POST" && pathname.match(/^\/api\/pm01\/public\/attempts\/[^/]+\/answer$/)) {
     const exam = getPm01Exam();
     const attemptId = pathname.split("/")[5];
@@ -2890,7 +3081,8 @@ async function handleApi(req, res, url) {
     const answerPayload = await normalizePm01VoiceAnswerPayload(
       attempt,
       currentQuestion,
-      body.answerPayload || {}
+      body.answerPayload || {},
+      previousAnswer
     );
     const result = scorePm01Question(currentQuestion, answerPayload, previousAnswer);
 
