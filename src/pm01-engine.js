@@ -985,6 +985,31 @@ function applyPm01VoiceReview(exam, attempt, questionId, reviewPayload) {
     throw new Error("Студент еще не отправил голосовой ответ.");
   }
 
+  const decision = String(reviewPayload.decision || "").trim();
+  if (decision === "done" || decision === "not_done") {
+    const totalScore = decision === "done" ? Number(question.maxScore || 0) : 0;
+    answer.manualReview = {
+      reviewedAt: nowIso(),
+      decision,
+      scores: {},
+      totalScore,
+      comment: String(reviewPayload.comment || "").trim()
+    };
+    answer.manualStatus = "reviewed";
+    answer.finalScore = totalScore;
+    answer.autoScore = 0;
+    attempt._lastChangedQuestionId = questionId;
+
+    if (attempt.status === "pending_review" && !hasPendingPm01Review(attempt)) {
+      attempt.status = "reviewed";
+      attempt.finishedAt = attempt.finishedAt || nowIso();
+    }
+
+    attempt.finalSummary = summarizePm01Attempt(exam, attempt);
+    attempt.totalFinalScore = attempt.finalSummary.totalFinalScore;
+    return attempt;
+  }
+
   const rubric = Array.isArray(question.rubric) ? question.rubric : [];
   const scores = {};
   let totalScore = 0;

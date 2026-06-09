@@ -51,6 +51,7 @@
     filterPending: document.getElementById("filter-pending"),
     filterReset: document.getElementById("filter-reset"),
     refreshAdmin: document.getElementById("refresh-admin"),
+    exportGroupCsv: document.getElementById("export-group-csv"),
     exportCsv: document.getElementById("export-csv"),
     exportJson: document.getElementById("export-json")
   };
@@ -287,6 +288,54 @@
     return original && original !== normalized ? original : "";
   }
 
+  function participantKey(attempt) {
+    return attempt.participantSignature || `${attempt.fullName || ""}|${groupKey(attempt)}` || attempt.id;
+  }
+
+  function participantStats(attempts = state.attempts) {
+    return Array.from(participantStatsMap(attempts).values());
+  }
+
+  function participantStatsMap(attempts = state.attempts) {
+    const byStudent = new Map();
+    attempts.forEach((attempt) => {
+      const key = participantKey(attempt);
+      if (!byStudent.has(key)) {
+        byStudent.set(key, []);
+      }
+      byStudent.get(key).push(attempt);
+    });
+
+    const stats = new Map();
+    byStudent.forEach((items, key) => {
+      const examAttempts = items.filter((attempt) => (attempt.mode || "exam") !== "training");
+      const trainingAttempts = items.filter((attempt) => (attempt.mode || "exam") === "training");
+      const completedExamAttempts = examAttempts.filter((attempt) => attempt.status !== "in_progress");
+      const best = [...completedExamAttempts].sort((left, right) => {
+        const scoreDelta = Number(right.totalFinalScore || 0) - Number(left.totalFinalScore || 0);
+        if (scoreDelta) {
+          return scoreDelta;
+        }
+        return new Date(right.finishedAt || right.startedAt || 0) - new Date(left.finishedAt || left.startedAt || 0);
+      })[0] || null;
+      stats.set(key, {
+        attempts: items.length,
+        examAttempts: examAttempts.length,
+        trainingAttempts: trainingAttempts.length,
+        hadTraining: trainingAttempts.length > 0,
+        best,
+        passed: best ? Number(best.grade || 0) >= 3 : false,
+        notPassed: best ? Number(best.grade || 0) < 3 : completedExamAttempts.length === 0 && examAttempts.length > 0
+      });
+    });
+    return stats;
+  }
+
+  function statsForAttempt(attempt, statsMap = participantStatsMap(state.attempts)) {
+    return statsMap.get(participantKey(attempt)) ||
+      { attempts: 1, examAttempts: 0, trainingAttempts: 0, hadTraining: false };
+  }
+
   function groupSummaries(attempts = state.attempts) {
     const byGroup = new Map();
     attempts.forEach((attempt) => {
@@ -431,7 +480,7 @@
     return createNode("td", className, text);
   }
 
-  function createParticipantCell(attempt) {
+  function createParticipantCell(attempt, statsMap) {
     const cell = createCell("", "attempt-student-cell");
     appendText(cell, "strong", "", attempt.fullName || "Без имени");
     const meta = createNode("span", "attempt-student-meta");
@@ -443,6 +492,13 @@
     if (original) {
       appendText(cell, "em", "attempt-group-alias", `ввод: ${original}`);
     }
+    const stats = statsForAttempt(attempt, statsMap);
+    appendText(
+      cell,
+      "small",
+      "attempt-compact-meta",
+      `попыток: ${stats.attempts || 0} · экзамен: ${stats.examAttempts || 0} · трен.: ${stats.trainingAttempts || 0}`
+    );
     return cell;
   }
 
@@ -998,13 +1054,17 @@
 
   function renderFilteredSummary(attempts) {
     elements.filteredSummary.innerHTML = "";
+    const studentStats = participantStats(attempts);
     const chips = [
       `Показано: ${attempts.length} из ${state.attempts.length}`,
+      `Студентов: ${studentStats.length}`,
       `Средний балл: ${
         completedAttempts(attempts).length
           ? `${formatScoreNumber(averageScore(attempts))} / ${getTotalMaxScore()}`
           : "—"
       }`,
+      `Не прошли: ${studentStats.filter((item) => item.notPassed).length}`,
+      `С тренировкой: ${studentStats.filter((item) => item.hadTraining).length}`,
       `В работе: ${attempts.filter((attempt) => attempt.status === "in_progress").length}`,
       `На проверке: ${attempts.filter((attempt) => Number(attempt.pendingManualReviews || 0)).length}`,
       state.filters.riskOnly ? "Показаны оценки 3 и ниже" : ""
@@ -1030,6 +1090,7 @@
       return;
     }
 
+    const statsMap = participantStatsMap(state.attempts);
     attempts.forEach((attempt) => {
       const row = document.createElement("tr");
       row.dataset.attemptId = attempt.id;
@@ -1043,7 +1104,7 @@
       statusCell.appendChild(createStatusPill(attempt.status));
 
       row.append(
-        createParticipantCell(attempt),
+        createParticipantCell(attempt, statsMap),
         createVariantCell(attempt),
         createTicketCell(attempt),
         modeCell,
@@ -1223,6 +1284,49 @@
       box.appendChild(note);
     }
 
+    const quick = createNode("div", "voice-quick-review");
+    const approve = createNode("button", "button primary", "Сделано");
+    approve.type = "button";
+    const reject = createNode("button", "button secondary", "Не сделано");
+    reject.type = "button";
+    const quickNote = createNode("small", "", "Быстрая проверка: полный балл или 0 без рубрики.");
+    quick.append(approve, reject, quickNote);
+    box.appendChild(quick);
+
+    async function saveQuickDecision(decision) {
+      approve.disabled = true;
+      reject.disabled = true;
+      try {
+        const updated = await adminApi(
+          `/api/admin/pm01/attempts/${encodeURIComponent(detail.attempt.id)}/voice/${encodeURIComponent(question.id)}/review`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              decision,
+              comment: decision === "done" ? "Быстрая проверка: сделано." : "Быстрая проверка: не сделано."
+            })
+          }
+        );
+        await loadAdmin();
+        renderDetail(updated);
+        showMessage(elements.adminMessage, decision === "done" ? "Голос отмечен как выполненный." : "Голос отмечен как невыполненный.", "success");
+      } catch (error) {
+        showMessage(elements.adminMessage, error.message, "error");
+      } finally {
+        approve.disabled = false;
+        reject.disabled = false;
+      }
+    }
+
+    approve.addEventListener("click", () => saveQuickDecision("done"));
+    reject.addEventListener("click", () => saveQuickDecision("not_done"));
+
+    const detailed = document.createElement("details");
+    detailed.className = "voice-detailed-review";
+    const detailedSummary = document.createElement("summary");
+    detailedSummary.textContent = "Детальная проверка по критериям";
+    detailed.appendChild(detailedSummary);
+
     const form = document.createElement("form");
     form.className = "voice-review-form";
     const scores = answer?.manualReview?.scores || {};
@@ -1281,7 +1385,8 @@
       }
     });
 
-    box.appendChild(form);
+    detailed.appendChild(form);
+    box.appendChild(detailed);
     container.appendChild(box);
   }
 
@@ -1729,6 +1834,23 @@
     }
   }
 
+  async function exportGroupReport() {
+    hideMessage(elements.adminMessage);
+    try {
+      const groupKey = elements.filterGroup.value || "";
+      const result = await adminApi("/api/admin/pm01/exports/group-csv", {
+        method: "POST",
+        body: JSON.stringify({ groupKey })
+      });
+      const scope = groupKey
+        ? `по группе ${elements.filterGroup.options[elements.filterGroup.selectedIndex]?.text || groupKey}`
+        : "по всем группам";
+      showMessage(elements.adminMessage, `Лист ${scope} создан: ${result.fileName} · строк: ${result.rows}`, "success");
+    } catch (error) {
+      showMessage(elements.adminMessage, error.message, "error");
+    }
+  }
+
   function syncFiltersFromInputs() {
     state.filters.search = elements.filterSearch.value;
     state.filters.variant = elements.filterVariant.value;
@@ -1755,6 +1877,7 @@
   elements.refreshAdmin.addEventListener("click", () => {
     loadAdmin().catch((error) => showMessage(elements.adminMessage, error.message, "error"));
   });
+  elements.exportGroupCsv.addEventListener("click", exportGroupReport);
   elements.exportCsv.addEventListener("click", () => exportFile("csv"));
   elements.exportJson.addEventListener("click", () => exportFile("json"));
   elements.filterSearch.addEventListener("input", syncFiltersFromInputs);

@@ -1604,6 +1604,150 @@ function createPm01AttemptsCsv(rows) {
   return `\ufeff${lines.join("\n")}`;
 }
 
+function participantReportKey(attempt) {
+  return attempt.participantSignature || pm01AttemptParticipantSignature(attempt) || attempt.participant?.fullName || attempt.id;
+}
+
+function comparePm01BestAttempt(left, right) {
+  const leftScore = Number(left.summary?.totalFinalScore || 0);
+  const rightScore = Number(right.summary?.totalFinalScore || 0);
+  if (rightScore !== leftScore) {
+    return rightScore - leftScore;
+  }
+  return safeDateMs(right.finishedAt || right.startedAt) - safeDateMs(left.finishedAt || left.startedAt);
+}
+
+function buildPm01GroupReportRows(exam, attempts, options = {}) {
+  const filterGroupKey = String(options.groupKey || "").trim();
+  const normalizedFilterGroupKey = normalizeGroupKey(filterGroupKey);
+  const filtered = attempts
+    .filter((attempt) => attempt && attempt.olympiadId === exam.id)
+    .filter((attempt) => {
+      if (!filterGroupKey) {
+        return true;
+      }
+      const keys = [
+        normalizeGroupKey(attempt.participant?.groupName || ""),
+        normalizeGroupKey(attempt.participant?.groupNameOriginal || "")
+      ].filter(Boolean);
+      return keys.includes(filterGroupKey) || keys.includes(normalizedFilterGroupKey);
+    })
+    .map((attempt) => ({
+      ...attempt,
+      summary: summarizePm01Attempt(exam, attempt)
+    }));
+  const byStudent = new Map();
+
+  filtered.forEach((attempt) => {
+    const key = participantReportKey(attempt);
+    if (!byStudent.has(key)) {
+      byStudent.set(key, []);
+    }
+    byStudent.get(key).push(attempt);
+  });
+
+  return Array.from(byStudent.values())
+    .map((items) => {
+      const latest = [...items].sort((left, right) => safeDateMs(right.startedAt) - safeDateMs(left.startedAt))[0] || {};
+      const examAttempts = items.filter((attempt) => (attempt.mode || "exam") !== "training");
+      const trainingAttempts = items.filter((attempt) => (attempt.mode || "exam") === "training");
+      const completedExamAttempts = examAttempts.filter((attempt) => attempt.status !== "in_progress");
+      const best = [...completedExamAttempts].sort(comparePm01BestAttempt)[0] || null;
+      const bestGrade = best?.summary?.grade || "";
+      const bestScore = best ? best.summary.totalFinalScore : "";
+      const passed = best ? Number(bestGrade || 0) >= 3 : false;
+      const result = best ? (passed ? "прошел" : "не прошел") : "нет завершенного экзамена";
+      const pending = best ? Number(best.summary.pendingManualReviews || 0) : 0;
+      return {
+        fullName: latest.participant?.fullName || "",
+        groupName: normalizeGroupName(latest.participant?.groupName || ""),
+        groupNameOriginal: latest.participant?.groupNameOriginal || latest.participant?.groupName || "",
+        institution: latest.participant?.institution || "",
+        mentorName: latest.participant?.mentorName || "",
+        result,
+        bestScore,
+        bestGrade,
+        bestStatus: best?.status || "",
+        pendingManualReviews: pending,
+        examAttempts: examAttempts.length,
+        trainingAttempts: trainingAttempts.length,
+        hadTraining: trainingAttempts.length ? "да" : "нет",
+        totalAttempts: items.length,
+        lastStartedAt: latest.startedAt || "",
+        lastFinishedAt: latest.finishedAt || "",
+        bestAttemptId: best?.id || ""
+      };
+    })
+    .sort((left, right) => {
+      const groupCompare = String(left.groupName || "").localeCompare(String(right.groupName || ""), "ru");
+      if (groupCompare) {
+        return groupCompare;
+      }
+      return String(left.fullName || "").localeCompare(String(right.fullName || ""), "ru");
+    });
+}
+
+function createPm01GroupReportCsv(rows) {
+  const headers = [
+    "ФИО",
+    "Группа",
+    "Группа введена",
+    "Учреждение",
+    "Преподаватель",
+    "Результат",
+    "Лучший балл",
+    "Оценка",
+    "Статус лучшей попытки",
+    "Голос на проверке",
+    "Попыток экзамена",
+    "Тренировок",
+    "Была тренировка",
+    "Всего попыток",
+    "Последний старт",
+    "Последнее завершение",
+    "ID лучшей попытки"
+  ];
+
+  const lines = [headers.map(csvEscape).join(";")];
+  rows.forEach((row) => {
+    lines.push(
+      [
+        row.fullName,
+        row.groupName,
+        row.groupNameOriginal,
+        row.institution,
+        row.mentorName,
+        row.result,
+        row.bestScore,
+        row.bestGrade,
+        row.bestStatus,
+        row.pendingManualReviews,
+        row.examAttempts,
+        row.trainingAttempts,
+        row.hadTraining,
+        row.totalAttempts,
+        row.lastStartedAt,
+        row.lastFinishedAt,
+        row.bestAttemptId
+      ]
+        .map(csvEscape)
+        .join(";")
+    );
+  });
+  return `\ufeff${lines.join("\n")}`;
+}
+
+function safeExportNamePart(value, fallback = "group") {
+  const text = String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/п/g, "p")
+    .replace(/к/g, "k")
+    .replace(/[^a-z0-9_-]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return text || fallback;
+}
+
 function cloneValue(value) {
   return global.structuredClone
     ? global.structuredClone(value)
@@ -3768,6 +3912,30 @@ async function handleApi(req, res, url) {
         JSON.stringify(currentOlympiadAttempts(await loadAttempts(), exam.id), null, 2)
       );
       sendJson(res, 200, { ok: true, data: { fileName, filePath } });
+      return;
+    }
+
+    if (method === "POST" && pathname === "/api/admin/pm01/exports/group-csv") {
+      const exam = getPm01Exam();
+      const body = await parseBody(req);
+      const groupKey = String(body.groupKey || "").trim();
+      const groupSuffix = groupKey ? `_${safeExportNamePart(groupKey)}` : "_all_groups";
+      const fileName = `pm01_group_report${groupSuffix}_${Date.now()}.csv`;
+      const rows = buildPm01GroupReportRows(
+        exam,
+        currentOlympiadAttempts(await loadAttempts(), exam.id),
+        { groupKey }
+      );
+      const filePath = saveExportFile(fileName, createPm01GroupReportCsv(rows));
+      sendJson(res, 200, {
+        ok: true,
+        data: {
+          fileName,
+          filePath,
+          rows: rows.length,
+          groupKey: groupKey || ""
+        }
+      });
       return;
     }
 

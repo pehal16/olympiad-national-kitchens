@@ -314,6 +314,35 @@ h3 {
   gap: 10px;
 }
 
+.voice-quick-review {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(18, 63, 53, 0.16);
+  border-radius: 8px;
+  background: #f7fbf9;
+}
+
+.voice-quick-review small,
+.attempt-compact-meta {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.voice-detailed-review {
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+
+.voice-detailed-review summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
 .module-preview {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }

@@ -778,6 +778,41 @@ test("applyPm01VoiceReview stores rubric scores and updates final summary", () =
   assert.equal(summary.moduleScores.find((module) => module.moduleId === "voice").finalScore, 20);
 });
 
+test("applyPm01VoiceReview supports quick done and not done decisions", () => {
+  const exam = getPm01Exam();
+  const variant = buildPm01Variant(exam, "fish");
+  const question = variant.questions.find((item) => item.type === "voice_response");
+  const attempt = {
+    id: "pm01_attempt_quick_voice",
+    olympiadId: exam.id,
+    status: "pending_review",
+    startedAt: "2026-06-02T10:00:00.000Z",
+    finishedAt: "2026-06-02T10:20:00.000Z",
+    variant,
+    answers: {
+      [question.id]: {
+        questionId: question.id,
+        moduleId: question.moduleId,
+        answerPayload: { audioId: "pm01voice_test", audioName: "voice.webm" },
+        autoScore: 0,
+        finalScore: 0,
+        manualStatus: "pending_review"
+      }
+    }
+  };
+
+  applyPm01VoiceReview(exam, attempt, question.id, { decision: "done" });
+  assert.equal(attempt.answers[question.id].finalScore, question.maxScore);
+  assert.equal(attempt.answers[question.id].manualReview.decision, "done");
+  assert.equal(attempt.status, "reviewed");
+
+  attempt.status = "pending_review";
+  attempt.answers[question.id].manualStatus = "pending_review";
+  applyPm01VoiceReview(exam, attempt, question.id, { decision: "not_done" });
+  assert.equal(attempt.answers[question.id].finalScore, 0);
+  assert.equal(attempt.answers[question.id].manualReview.decision, "not_done");
+});
+
 test("PM01 teacher cabinet exposes exam controls and printable protocol", () => {
   const root = path.join(__dirname, "..");
   const serverSource = fs.readFileSync(path.join(root, "server.js"), "utf8");
@@ -820,17 +855,24 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(serverSource, /savePm01VoiceAudio/);
   assert.match(serverSource, /loadPm01VoiceAudio/);
   assert.equal(serverSource.includes("\\/voice\\/[^/]+\\/audio"), true);
+  assert.match(serverSource, /exports\/group-csv/);
+  assert.match(serverSource, /buildPm01GroupReportRows/);
   assert.match(serverSource, /readRequestBuffer/);
   assert.match(serverSource, /inline_fallback/);
   assert.match(studentScript, /uploadVoiceBlob/);
   assert.match(studentScript, /X-PM01-Duration-Ms/);
   assert.doesNotMatch(studentScript, /readAsDataURL\(blob\)/);
+  assert.match(studentHtml, /pm01\.css\?v=1\.0\.16/);
   assert.match(studentHtml, /pm01\.js\?v=1\.0\.15/);
+  assert.match(adminHtml, /export-group-csv/);
   assert.match(adminScript, /renderVoiceQueueList/);
+  assert.match(adminScript, /saveQuickDecision/);
+  assert.match(adminScript, /exportGroupReport/);
   assert.match(adminScript, /voiceAudio/);
   assert.match(adminScript, /audioInfo\.audioUrl/);
-  assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.14/);
+  assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.16/);
   assert.match(css, /\.voice-queue-list/);
+  assert.match(css, /\.voice-quick-review/);
   assert.match(css, /\.audio-status/);
   assert.match(css, /\.admin-collapsible/);
   assert.match(css, /\.teacher-workbench/);
