@@ -1,6 +1,7 @@
 (function () {
   const ADMIN_ATTEMPTS_LIMIT = 250;
   const ADMIN_ATTEMPTS_QUERY = `?limit=${ADMIN_ATTEMPTS_LIMIT}`;
+  const KNOWN_PM01_GROUPS = ["2-ПК-25", "1-ПК-25", "1-ПКД-25"];
 
   const state = {
     summary: null,
@@ -363,6 +364,16 @@
 
   function groupSummaries(attempts = state.attempts) {
     const byGroup = new Map();
+    KNOWN_PM01_GROUPS.forEach((label) => {
+      const key = groupKey({ groupName: label });
+      byGroup.set(key, {
+        key,
+        label,
+        originals: new Set(),
+        attempts: [],
+        participants: new Set()
+      });
+    });
     attempts.forEach((attempt) => {
       const key = groupKey(attempt) || "unknown";
       if (!byGroup.has(key)) {
