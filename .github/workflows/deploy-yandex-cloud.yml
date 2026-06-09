@@ -84,7 +84,16 @@ jobs:
           REGISTRY_ID_CLEAN="$(printf '%s' "$YC_REGISTRY_ID" | tr -d '\r\n\t ')"
           IMAGE="cr.yandex/${REGISTRY_ID_CLEAN}/olympiad-national-kitchens:${GITHUB_SHA}"
           docker build -t "$IMAGE" .
-          docker push "$IMAGE"
+          for attempt in 1 2 3 4; do
+            if docker push "$IMAGE"; then
+              break
+            fi
+            if [ "$attempt" -eq 4 ]; then
+              echo "Docker push failed after $attempt attempts." >&2
+              exit 1
+            fi
+            sleep $((attempt * 10))
+          done
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
       - name: Ensure serverless container exists
