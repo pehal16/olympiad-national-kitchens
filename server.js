@@ -3939,6 +3939,29 @@ async function handleApi(req, res, url) {
       return;
     }
 
+    if (method === "POST" && pathname === "/api/admin/pm01/exports/group-csv/download") {
+      const exam = getPm01Exam();
+      const body = await parseBody(req);
+      const groupKey = String(body.groupKey || "").trim();
+      const groupSuffix = groupKey ? `_${safeExportNamePart(groupKey)}` : "_all_groups";
+      const fileName = `pm01_group_report${groupSuffix}_${Date.now()}.csv`;
+      const rows = buildPm01GroupReportRows(
+        exam,
+        currentOlympiadAttempts(await loadAttempts(), exam.id),
+        { groupKey }
+      );
+      const csv = createPm01GroupReportCsv(rows);
+      res.writeHead(200, {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${fileName.replace(/"/g, "")}"`,
+        "Cache-Control": "private, no-store",
+        "Content-Length": String(Buffer.byteLength(csv)),
+        "X-PM01-Report-Rows": String(rows.length)
+      });
+      res.end(csv);
+      return;
+    }
+
     if (method === "GET" && pathname === "/api/admin/summary") {
       const olympiadData = await ensureOlympiad();
       const { rawAttempts, ranked } = await getCachedAdminAnalytics(olympiadData, settings);

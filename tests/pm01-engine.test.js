@@ -856,7 +856,10 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(serverSource, /loadPm01VoiceAudio/);
   assert.equal(serverSource.includes("\\/voice\\/[^/]+\\/audio"), true);
   assert.match(serverSource, /exports\/group-csv/);
+  assert.match(serverSource, /exports\/group-csv\/download/);
   assert.match(serverSource, /buildPm01GroupReportRows/);
+  assert.match(serverSource, /Content-Disposition/);
+  assert.match(serverSource, /X-PM01-Report-Rows/);
   assert.match(serverSource, /readRequestBuffer/);
   assert.match(serverSource, /inline_fallback/);
   assert.match(studentScript, /uploadVoiceBlob/);
@@ -868,9 +871,12 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(adminScript, /renderVoiceQueueList/);
   assert.match(adminScript, /saveQuickDecision/);
   assert.match(adminScript, /exportGroupReport/);
+  assert.match(adminScript, /downloadBlob/);
+  assert.match(adminScript, /URL\.createObjectURL/);
+  assert.match(adminScript, /api\/admin\/pm01\/exports\/group-csv\/download/);
   assert.match(adminScript, /voiceAudio/);
   assert.match(adminScript, /audioInfo\.audioUrl/);
-  assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.16/);
+  assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.17/);
   assert.match(css, /\.voice-queue-list/);
   assert.match(css, /\.voice-quick-review/);
   assert.match(css, /\.audio-status/);

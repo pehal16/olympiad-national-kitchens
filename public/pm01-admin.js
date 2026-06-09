@@ -66,6 +66,31 @@
     element.className = "message hidden";
   }
 
+  function getDownloadFileName(disposition, fallback) {
+    const header = String(disposition || "");
+    const encodedMatch = header.match(/filename\*=UTF-8''([^;]+)/i);
+    if (encodedMatch) {
+      try {
+        return decodeURIComponent(encodedMatch[1]);
+      } catch (_) {
+        return fallback;
+      }
+    }
+    const match = header.match(/filename="?([^";]+)"?/i);
+    return match ? match[1] : fallback;
+  }
+
+  function downloadBlob(blob, fileName) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName || "pm01_group_report.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
   function createNode(tagName, className = "", text = "") {
     const node = document.createElement(tagName);
     if (className) {
@@ -1836,18 +1861,34 @@
 
   async function exportGroupReport() {
     hideMessage(elements.adminMessage);
+    elements.exportGroupCsv.disabled = true;
     try {
       const groupKey = elements.filterGroup.value || "";
-      const result = await adminApi("/api/admin/pm01/exports/group-csv", {
+      const response = await fetch("/api/admin/pm01/exports/group-csv/download", {
         method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ groupKey })
       });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.message || payload?.error || "Не удалось скачать лист группы.");
+      }
+      const blob = await response.blob();
+      const fileName = getDownloadFileName(
+        response.headers.get("Content-Disposition"),
+        "pm01_group_report.csv"
+      );
+      downloadBlob(blob, fileName);
       const scope = groupKey
         ? `по группе ${elements.filterGroup.options[elements.filterGroup.selectedIndex]?.text || groupKey}`
         : "по всем группам";
-      showMessage(elements.adminMessage, `Лист ${scope} создан: ${result.fileName} · строк: ${result.rows}`, "success");
+      const rows = response.headers.get("X-PM01-Report-Rows") || "0";
+      showMessage(elements.adminMessage, `Лист ${scope} скачан: ${fileName} · строк: ${rows}`, "success");
     } catch (error) {
       showMessage(elements.adminMessage, error.message, "error");
+    } finally {
+      elements.exportGroupCsv.disabled = false;
     }
   }
 
