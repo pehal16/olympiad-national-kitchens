@@ -68,6 +68,10 @@ jobs:
           yc config set cloud-id "$YC_CLOUD_ID"
           yc config set folder-id "$YC_FOLDER_ID"
 
+      - name: Install Node dependencies for YDB deploy check
+        shell: bash
+        run: npm ci --omit=dev
+
       - name: Resolve active YDB connection string
         shell: bash
         run: |
@@ -93,23 +97,36 @@ jobs:
 
           DB_INFO="$(yc ydb database get --id "$DB_ID" --format json)"
           ENDPOINT="$(printf '%s' "$DB_INFO" | jq -r '.endpoint // .Endpoint // empty')"
-          DB_PATH="$(printf '%s' "$DB_INFO" | jq -r '
-            .database_path // .databasePath // .path // .Path // .database //
-            (if (.location_id and env.YC_CLOUD_ID and .id) then "/" + .location_id + "/" + env.YC_CLOUD_ID + "/" + .id else empty end)
-          ')"
-          if [ -z "$ENDPOINT" ] || [ -z "$DB_PATH" ]; then
+          LOCATION_ID="$(printf '%s' "$DB_INFO" | jq -r '.location_id // .locationId // empty')"
+          FOLDER_ID="$(printf '%s' "$DB_INFO" | jq -r '.folder_id // .folderId // empty')"
+          DB_NAME="$(printf '%s' "$DB_INFO" | jq -r '.name // .Name // empty')"
+          DB_PATH="$(printf '%s' "$DB_INFO" | jq -r '.database_path // .databasePath // .path // .Path // .database // empty')"
+          if [ -z "$ENDPOINT" ]; then
             ENDPOINT="$(printf '%s' "$DB_LIST" | jq -r --arg id "$DB_ID" '
               map(select((.id // .Id // .database_id // .databaseId) == $id))[0] |
               .endpoint // .Endpoint // empty
             ')"
-            DB_PATH="$(printf '%s' "$DB_LIST" | jq -r --arg id "$DB_ID" '
+          fi
+          if [ -z "$LOCATION_ID" ]; then
+            LOCATION_ID="$(printf '%s' "$DB_LIST" | jq -r --arg id "$DB_ID" '
               map(select((.id // .Id // .database_id // .databaseId) == $id))[0] |
-              .database_path // .databasePath // .path // .Path // .database //
-              (if (.location_id and env.YC_CLOUD_ID and .id) then "/" + .location_id + "/" + env.YC_CLOUD_ID + "/" + .id else empty end)
+              .location_id // .locationId // empty
             ')"
           fi
-          if [ -z "$ENDPOINT" ] || [ -z "$DB_PATH" ]; then
-            echo "Unable to resolve YDB endpoint or database path." >&2
+          if [ -z "$FOLDER_ID" ]; then
+            FOLDER_ID="$(printf '%s' "$DB_LIST" | jq -r --arg id "$DB_ID" '
+              map(select((.id // .Id // .database_id // .databaseId) == $id))[0] |
+              .folder_id // .folderId // empty
+            ')"
+          fi
+          if [ -z "$DB_NAME" ]; then
+            DB_NAME="$(printf '%s' "$DB_LIST" | jq -r --arg id "$DB_ID" '
+              map(select((.id // .Id // .database_id // .databaseId) == $id))[0] |
+              .name // .Name // empty
+            ')"
+          fi
+          if [ -z "$ENDPOINT" ]; then
+            echo "Unable to resolve YDB endpoint." >&2
             printf '%s\n' "$DB_INFO" | jq 'keys'
             exit 1
           fi
@@ -119,8 +136,76 @@ jobs:
             *) ENDPOINT="grpcs://$ENDPOINT" ;;
           esac
 
-          RESOLVED_YDB_CONNECTION_STRING="${ENDPOINT}/?database=${DB_PATH}"
-          echo "::add-mask::$RESOLVED_YDB_CONNECTION_STRING"
+          YDB_TOKEN="$(yc iam create-token)"
+          if [ -z "$YDB_TOKEN" ]; then
+            echo "Unable to create IAM token for YDB connection check." >&2
+            exit 1
+          fi
+
+          test_ydb_connection() {
+            local candidate="$1"
+            YDB_CONNECTION_STRING="$candidate" YDB_ACCESS_TOKEN_CREDENTIALS="$YDB_TOKEN" node <<'NODE'
+          const { Driver } = require("@ydbjs/core");
+          const { EnvironCredentialsProvider } = require("@ydbjs/auth/environ");
+
+          (async () => {
+            const connectionString = process.env.YDB_CONNECTION_STRING;
+            const credentialsProvider = new EnvironCredentialsProvider(connectionString);
+            const driver = new Driver(connectionString, {
+              credentialsProvider,
+              secureOptions: credentialsProvider.secureOptions
+            });
+            await driver.ready();
+            if (typeof driver.destroy === "function") {
+              await driver.destroy();
+            }
+          })().catch((error) => {
+            console.error(error && error.message ? error.message : error);
+            process.exit(1);
+          });
+NODE
+          }
+
+          declare -a CANDIDATE_LABELS=()
+          declare -a CANDIDATES=()
+
+          add_candidate() {
+            local label="$1"
+            local path_value="$2"
+            if [ -n "$path_value" ]; then
+              CANDIDATE_LABELS+=("$label")
+              CANDIDATES+=("${ENDPOINT}/?database=${path_value}")
+            fi
+          }
+
+          if [ -n "${YDB_CONNECTION_STRING:-}" ]; then
+            CANDIDATE_LABELS+=("secret")
+            CANDIDATES+=("$YDB_CONNECTION_STRING")
+          fi
+          add_candidate "metadata-path" "$DB_PATH"
+          add_candidate "location-cloud-id-database-id" "/${LOCATION_ID}/${YC_CLOUD_ID}/${DB_ID}"
+          add_candidate "location-folder-id-database-id" "/${LOCATION_ID}/${FOLDER_ID}/${DB_ID}"
+          add_candidate "location-cloud-id-database-name" "/${LOCATION_ID}/${YC_CLOUD_ID}/${DB_NAME}"
+          add_candidate "location-folder-id-database-name" "/${LOCATION_ID}/${FOLDER_ID}/${DB_NAME}"
+
+          RESOLVED_YDB_CONNECTION_STRING=""
+          for index in "${!CANDIDATES[@]}"; do
+            candidate="${CANDIDATES[$index]}"
+            label="${CANDIDATE_LABELS[$index]}"
+            echo "::add-mask::$candidate"
+            echo "Checking YDB candidate: $label"
+            if test_ydb_connection "$candidate"; then
+              RESOLVED_YDB_CONNECTION_STRING="$candidate"
+              echo "Selected YDB candidate: $label"
+              break
+            fi
+          done
+
+          if [ -z "$RESOLVED_YDB_CONNECTION_STRING" ]; then
+            echo "No YDB connection candidate works for database id: $DB_ID" >&2
+            exit 1
+          fi
+
           echo "YDB_CONNECTION_STRING=$RESOLVED_YDB_CONNECTION_STRING" >> "$GITHUB_ENV"
           echo "Resolved active YDB database id: $DB_ID"
 
