@@ -298,12 +298,68 @@ function buildTicketVoiceQuestion(baseQuestion, ticket) {
   return question;
 }
 
+function testChoiceFromSequence(question) {
+  const firstStepId = Array.isArray(question.correctSequence)
+    ? question.correctSequence[0]
+    : "";
+  return {
+    ...clone(question),
+    type: "single_choice",
+    prompt: `${question.prompt} Выберите первый правильный шаг.`,
+    note: "Выберите один подходящий вариант ответа.",
+    options: (question.items || []).map((item) => ({
+      id: item.id,
+      text: item.text,
+      isCorrect: item.id === firstStepId
+    })),
+    correctSequence: undefined,
+    items: undefined,
+    slots: undefined
+  };
+}
+
+function testChoiceFromBucket(question) {
+  const firstItem = (question.items || []).find((item) => question.correctBuckets?.[item.id]);
+  const correctBucketId = firstItem ? question.correctBuckets[firstItem.id] : "";
+  return {
+    ...clone(question),
+    type: "single_choice",
+    prompt: firstItem
+      ? `${question.prompt} Выберите правильную группу для позиции: ${firstItem.text}.`
+      : question.prompt,
+    note: "Выберите один подходящий вариант ответа.",
+    options: (question.buckets || []).map((bucket) => ({
+      id: bucket.id,
+      text: bucket.label,
+      isCorrect: bucket.id === correctBucketId
+    })),
+    correctBuckets: undefined,
+    items: undefined,
+    buckets: undefined,
+    visualMode: "",
+    interactionHint: ""
+  };
+}
+
+function normalizeTestQuestion(question) {
+  if (!question) {
+    return question;
+  }
+  if (question.type === "sequence_drag") {
+    return testChoiceFromSequence(question);
+  }
+  if (question.type === "bucket_sort") {
+    return testChoiceFromBucket(question);
+  }
+  return question;
+}
+
 function moduleQuestionsForVariant(variant, moduleId, ticket = null) {
   if (moduleId === "situation") {
     return [buildSituationQuestion(variant, ticket)];
   }
   if (moduleId === "test") {
-    return variant.test || [];
+    return (variant.test || []).map(normalizeTestQuestion);
   }
   if (moduleId === "calculation") {
     return variant.calculation || [];

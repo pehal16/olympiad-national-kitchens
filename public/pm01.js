@@ -235,6 +235,7 @@
 
   const RETRYABLE_API_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
   const API_RETRY_DELAYS_MS = [1200, 2500, 4500, 7500, 11000, 16000, 23000, 32000];
+  const PM01_API_REQUEST_TIMEOUT_MS = 18000;
 
   function wait(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -247,8 +248,18 @@
   async function fetchWithRetry(path, options = {}) {
     let lastError = null;
     for (let attemptIndex = 0; attemptIndex <= API_RETRY_DELAYS_MS.length; attemptIndex += 1) {
+      const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+      const timeout = controller
+        ? window.setTimeout(() => controller.abort(), PM01_API_REQUEST_TIMEOUT_MS)
+        : 0;
       try {
-        const response = await fetch(path, options);
+        const response = await fetch(path, {
+          ...options,
+          signal: options.signal || controller?.signal
+        });
+        if (timeout) {
+          window.clearTimeout(timeout);
+        }
         if (
           RETRYABLE_API_STATUSES.has(response.status) &&
           attemptIndex < API_RETRY_DELAYS_MS.length
@@ -259,6 +270,9 @@
         }
         return response;
       } catch (error) {
+        if (timeout) {
+          window.clearTimeout(timeout);
+        }
         lastError = error;
         if (attemptIndex < API_RETRY_DELAYS_MS.length) {
           setSaveStatus(`Сеть нестабильна, повторяю запрос ${attemptIndex + 1}...`);

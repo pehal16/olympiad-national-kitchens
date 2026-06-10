@@ -82,6 +82,27 @@ test("PM01 questions keep valid methodological mappings and competency tags", ()
   });
 });
 
+test("PM01 M1 test contains only test-style choice questions", () => {
+  const exam = getPm01Exam();
+  const variantIds = ["mixed", ...exam.variants.map((variant) => variant.id)];
+
+  variantIds.forEach((variantId) => {
+    const variant = buildPm01Variant(exam, variantId, { seed: `m1-audit-${variantId}` });
+    const testQuestions = variant.questions.filter((question) => question.moduleId === "test");
+    assert.equal(testQuestions.length, 10, `${variantId} M1 keeps 10 questions`);
+    assert.equal(
+      testQuestions.every((question) => ["single_choice", "multiple_choice"].includes(question.type)),
+      true,
+      `${variantId} M1 uses only choice questions`
+    );
+    assert.equal(
+      testQuestions.some((question) => String(question.sourceId || "").includes("-sim-")),
+      false,
+      `${variantId} M1 does not include simulation-bank questions`
+    );
+  });
+});
+
 test("PM01 safety and exception questions are framed as clear production situations", () => {
   const exam = getPm01Exam();
   const questions = new Map(
@@ -216,8 +237,6 @@ test("PM01 public data exposes asset registry without visual answer keys", () =>
   const exam = getPm01Exam();
   const publicData = getPm01PublicData(exam);
   const variant = buildPm01Variant(exam, "vegetables");
-  const visualBucket = variant.questions.find((item) => item.visualMode === "cut_shapes");
-  const publicQuestion = sanitizePm01Question(visualBucket, { answers: {} });
   const visualSimulation = variant.questions.find((item) => item.id.startsWith("veg-sim-cuts"));
   const publicSimulation = sanitizePm01Question(visualSimulation, { answers: {} });
   const requiredCutShapes = [
@@ -256,15 +275,12 @@ test("PM01 public data exposes asset registry without visual answer keys", () =>
     assert.equal(fs.existsSync(assetPath), true, `${key} asset exists`);
   });
   assert.equal(publicData.assetRegistry.violationScenes.vegetables.endsWith("vegetable.png"), true);
-  assert.equal(publicQuestion.items.length, 14);
-  assert.equal(publicQuestion.buckets.length, 14);
-  assert.equal(publicQuestion.buckets.every((bucket) => bucket.image), true);
-  assert.equal(publicQuestion.buckets.some((bucket) => bucket.image.endsWith(".svg")), false);
   assert.equal(publicSimulation.items.length, 11);
   assert.equal(publicSimulation.buckets.length, 11);
-  assert.equal("correctBuckets" in publicQuestion, false);
-  assert.equal("correctAnswer" in publicQuestion, false);
+  assert.equal(publicSimulation.buckets.every((bucket) => bucket.image), true);
+  assert.equal(publicSimulation.buckets.some((bucket) => bucket.image.endsWith(".svg")), false);
   assert.equal("correctBuckets" in publicSimulation, false);
+  assert.equal("correctAnswer" in publicSimulation, false);
 });
 
 test("PM01 cut matching covers modern French knife cuts with real PNG cards", () => {
@@ -302,14 +318,13 @@ test("PM01 cut matching covers modern French knife cuts with real PNG cards", ()
     "wedges"
   ];
 
-  assert.deepEqual(namingQuestion.items.map((item) => item.id).sort(), expectedClassic.sort());
+  assert.equal(namingQuestion.type, "single_choice");
+  assert.deepEqual(namingQuestion.options.map((item) => item.id).sort(), expectedClassic.map((id) => `${id}Photo`).sort());
   assert.deepEqual(applicationQuestion.items.map((item) => item.id).sort(), expectedApplication.sort());
-  assert.equal(namingQuestion.items.some((item) => item.text.includes("Fine julienne")), true);
-  assert.equal(namingQuestion.buckets.every((bucket) => bucket.image.startsWith("/assets/pm01/cuts/")), true);
-  assert.equal(namingQuestion.buckets.every((bucket) => bucket.image.endsWith(".png")), true);
+  assert.equal(namingQuestion.options.length, expectedClassic.length);
   assert.equal(applicationQuestion.buckets.every((bucket) => bucket.detail.length > 20), true);
 
-  [...namingQuestion.buckets, ...applicationQuestion.buckets].forEach((bucket) => {
+  applicationQuestion.buckets.forEach((bucket) => {
     const fullPath = path.join(__dirname, "..", "public", bucket.image.replace(/^\//, ""));
     assert.equal(fs.existsSync(fullPath), true, `${bucket.image} exists`);
   });
@@ -453,7 +468,8 @@ test("PM01 readiness audit removes weak production tasks and keeps fish cutlet f
   assert.equal(formulas.has("package"), true);
   assert.equal(complexQuestionIds.has("complex-calc-price"), false);
   assert.equal(complexQuestionIds.has("complex-calc-pack"), true);
-  assert.deepEqual(fishCutlet.correctSequence, ["fillet", "bread", "grind", "mix", "spice", "beat"]);
+  assert.equal(fishCutlet.type, "single_choice");
+  assert.equal(fishCutlet.options.find((option) => option.isCorrect).id, "fillet");
   assert.match(fishCutletCalculation.prompt, /на 1 котлету/);
   assert.match(meatCutletCalculation.prompt, /на 1 котлету/);
   assert.doesNotMatch(fishCutletCalculation.prompt, /65 %|18 %|15 %|2 %/);
@@ -579,10 +595,10 @@ test("PM01 visual asset registry points to real project files", () => {
 test("PM01 vegetable sequence steps use visual process cards without answer keys", () => {
   const exam = getPm01Exam();
   const variant = buildPm01Variant(exam, "vegetables");
-  const sequenceQuestion = variant.questions.find((item) => item.id.startsWith("veg-t1-seq-potato"));
+  const sequenceQuestion = variant.questions.find((item) => item.id.startsWith("veg-sim-chain"));
   const publicQuestion = sanitizePm01Question(sequenceQuestion, { answers: {} });
 
-  assert.equal(publicQuestion.items.length, 6);
+  assert.equal(publicQuestion.items.length, 7);
   assert.equal(publicQuestion.items.every((item) => item.image && item.detail), true);
   assert.equal(publicQuestion.items.every((item) => item.image.includes("/assets/pm01/process/")), true);
   assert.equal("correctSequence" in publicQuestion, false);
@@ -644,7 +660,12 @@ test("PM01 poultry and packaging tasks use visual product cards", () => {
   const zonesQuestion = complexVariant.questions.find((item) => item.id.startsWith("complex-sim-zones"));
   const packQuestion = complexVariant.questions.find((item) => item.id.startsWith("complex-sim-pack"));
 
-  [productQuestion, partsQuestion, fishProductsQuestion, meatProductsQuestion, zonesQuestion, packQuestion].forEach((question) => {
+  [productQuestion, fishProductsQuestion, meatProductsQuestion].forEach((question) => {
+    assert.equal(question.type, "single_choice");
+    assert.equal(question.options.some((option) => option.isCorrect), true);
+  });
+
+  [partsQuestion, zonesQuestion, packQuestion].forEach((question) => {
     const publicQuestion = sanitizePm01Question(question, { answers: {} });
     assert.equal(question.type, "bucket_sort");
     assert.equal(question.visualMode, "product_cards");
@@ -652,9 +673,7 @@ test("PM01 poultry and packaging tasks use visual product cards", () => {
     assert.equal("correctBuckets" in publicQuestion, false);
   });
 
-  assert.equal(productQuestion.items.some((item) => item.image.includes("/poultry-products/rabbit-portions.png")), true);
-  assert.equal(fishProductsQuestion.items.some((item) => item.image.includes("/fish-products/fish-breaded.png")), true);
-  assert.equal(meatProductsQuestion.items.some((item) => item.image.includes("/meat-products/romsteak.png")), true);
+  assert.equal(partsQuestion.items.some((item) => item.image.includes("/poultry-products/chicken-fillet.png")), true);
   assert.equal(packQuestion.items.some((item) => item.image.includes("/packaging/newspaper-violation.png")), true);
 });
 
@@ -873,12 +892,14 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(studentScript, /uploadVoiceBlob/);
   assert.match(studentScript, /fetchWithRetry/);
   assert.match(studentScript, /RETRYABLE_API_STATUSES/);
+  assert.match(studentScript, /PM01_API_REQUEST_TIMEOUT_MS/);
+  assert.match(studentScript, /AbortController/);
   assert.match(studentScript, /retryDelay/);
   assert.match(studentScript, /X-PM01-Duration-Ms/);
   assert.doesNotMatch(studentScript, /readAsDataURL\(blob\)/);
   assert.match(studentHtml, /pm01\.css\?v=1\.0\.16/);
   assert.match(studentHtml, /loadPm01Script/);
-  assert.match(studentHtml, /pm01\.js\?v=1\.0\.20/);
+  assert.match(studentHtml, /pm01\.js\?v=1\.0\.21/);
   assert.match(adminHtml, /export-group-csv/);
   assert.match(adminScript, /renderVoiceQueueList/);
   assert.match(adminScript, /saveQuickDecision/);
