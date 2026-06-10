@@ -95,7 +95,7 @@ jobs:
           ENDPOINT="$(printf '%s' "$DB_INFO" | jq -r '.endpoint // .Endpoint // empty')"
           DB_PATH="$(printf '%s' "$DB_INFO" | jq -r '
             .database_path // .databasePath // .path // .Path // .database //
-            (if (.location_id and .folder_id and .id) then "/" + .location_id + "/" + .folder_id + "/" + .id else empty end)
+            (if (.location_id and env.YC_CLOUD_ID and .id) then "/" + .location_id + "/" + env.YC_CLOUD_ID + "/" + .id else empty end)
           ')"
           if [ -z "$ENDPOINT" ] || [ -z "$DB_PATH" ]; then
             ENDPOINT="$(printf '%s' "$DB_LIST" | jq -r --arg id "$DB_ID" '
@@ -105,7 +105,7 @@ jobs:
             DB_PATH="$(printf '%s' "$DB_LIST" | jq -r --arg id "$DB_ID" '
               map(select((.id // .Id // .database_id // .databaseId) == $id))[0] |
               .database_path // .databasePath // .path // .Path // .database //
-              (if (.location_id and .folder_id and .id) then "/" + .location_id + "/" + .folder_id + "/" + .id else empty end)
+              (if (.location_id and env.YC_CLOUD_ID and .id) then "/" + .location_id + "/" + env.YC_CLOUD_ID + "/" + .id else empty end)
             ')"
           fi
           if [ -z "$ENDPOINT" ] || [ -z "$DB_PATH" ]; then
