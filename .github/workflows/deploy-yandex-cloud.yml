@@ -95,6 +95,16 @@ jobs:
             exit 1
           fi
 
+          yc ydb database start "$DB_ID" || true
+          for attempt in 1 2 3 4 5 6; do
+            DB_STATUS="$(yc ydb database get --id "$DB_ID" --format json | jq -r '.status // .Status // empty')"
+            echo "YDB database status: ${DB_STATUS:-unknown}"
+            if [ "$DB_STATUS" = "RUNNING" ]; then
+              break
+            fi
+            sleep 5
+          done
+
           DB_INFO="$(yc ydb database get --id "$DB_ID" --format json)"
           ENDPOINT="$(printf '%s' "$DB_INFO" | jq -r '.endpoint // .Endpoint // empty')"
           LOCATION_ID="$(printf '%s' "$DB_INFO" | jq -r '.location_id // .locationId // empty')"
