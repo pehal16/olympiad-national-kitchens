@@ -398,6 +398,13 @@ async function loadAttempts() {
     );
 }
 
+async function loadAttemptSummaries() {
+  const rows = await selectRows(ATTEMPTS_TABLE, "id");
+  return parsePayloadRows(rows).sort((left, right) =>
+    String(left.startedAt || left.id).localeCompare(String(right.startedAt || right.id))
+  );
+}
+
 async function saveAttempts(attempts) {
   const items = attempts || [];
   for (const attempt of items) {
@@ -627,6 +634,7 @@ async function loadPm01VoiceAudio(audioId) {
 module.exports = {
   initYdbStorage,
   loadAttempts,
+  loadAttemptSummaries,
   saveAttempts,
   upsertAttempt,
   loadAttemptById,

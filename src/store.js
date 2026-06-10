@@ -137,6 +137,13 @@ async function loadAttempts() {
   return readJson(ATTEMPTS_FILE, []);
 }
 
+async function loadAttemptSummaries() {
+  if (STORAGE_BACKEND === "ydb") {
+    return getYdbStore().loadAttemptSummaries();
+  }
+  return readJson(ATTEMPTS_FILE, []);
+}
+
 async function saveAttempts(attempts) {
   if (STORAGE_BACKEND === "ydb") {
     await getYdbStore().saveAttempts(attempts);
@@ -337,6 +344,7 @@ module.exports = {
   loadParticipants,
   loadSettings,
   loadAttempts,
+  loadAttemptSummaries,
   saveAttempts,
   upsertAttempt,
   loadAttemptById,

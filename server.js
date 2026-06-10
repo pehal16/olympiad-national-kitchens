@@ -9,6 +9,7 @@ const {
   loadOlympiad,
   loadSettings,
   loadAttempts,
+  loadAttemptSummaries,
   saveAttempts,
   upsertAttempt,
   loadAdminSessions,
@@ -2919,11 +2920,15 @@ async function handleApi(req, res, url) {
     const participantNameKey = makeParticipantNameKey(validation.profile);
     const clientIp = getClientIp(req);
     const accessKey = makeAttemptAccessKey(clientIp, participantNameKey);
-    const existingAttempts = currentOlympiadAttempts(await loadAttempts(), exam.id)
+    const existingAttempts = currentOlympiadAttempts(await loadAttemptSummaries(), exam.id)
       .map((attempt) => normalizePm01AttemptState(exam, attempt));
-    const activeAttempt = findActivePm01Attempt(exam, existingAttempts, participantSignature, mode);
+    const activeAttemptSummary = findActivePm01Attempt(exam, existingAttempts, participantSignature, mode);
 
-    if (activeAttempt) {
+    if (activeAttemptSummary) {
+      const activeAttempt = normalizePm01AttemptState(
+        exam,
+        (await loadAttemptById(activeAttemptSummary.id)) || activeAttemptSummary
+      );
       await upsertAttempt(activeAttempt);
       invalidateAttemptCaches();
       sendJson(res, 200, {
