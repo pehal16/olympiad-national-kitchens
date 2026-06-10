@@ -68,6 +68,58 @@ jobs:
           yc config set cloud-id "$YC_CLOUD_ID"
           yc config set folder-id "$YC_FOLDER_ID"
 
+      - name: Resolve active YDB connection string
+        shell: bash
+        run: |
+          DB_LIST="$(yc ydb database list --format json)"
+          DB_COUNT="$(printf '%s' "$DB_LIST" | jq 'length')"
+          if [ "$DB_COUNT" -lt 1 ]; then
+            echo "No YDB databases found in the configured folder." >&2
+            exit 1
+          fi
+
+          DB_ID="$(printf '%s' "$DB_LIST" | jq -r '
+            map(select((.status // .Status // "") != "STOPPED")) |
+            .[0].id // .[0].Id // .[0].database_id // .[0].databaseId // empty
+          ')"
+          if [ -z "$DB_ID" ]; then
+            DB_ID="$(printf '%s' "$DB_LIST" | jq -r '.[0].id // .[0].Id // .[0].database_id // .[0].databaseId // empty')"
+          fi
+          if [ -z "$DB_ID" ]; then
+            echo "Unable to resolve YDB database id." >&2
+            printf '%s\n' "$DB_LIST" | jq '.[0] | keys'
+            exit 1
+          fi
+
+          DB_INFO="$(yc ydb database get --id "$DB_ID" --format json)"
+          ENDPOINT="$(printf '%s' "$DB_INFO" | jq -r '.endpoint // .Endpoint // empty')"
+          DB_PATH="$(printf '%s' "$DB_INFO" | jq -r '.database_path // .databasePath // .path // .Path // .database // empty')"
+          if [ -z "$ENDPOINT" ] || [ -z "$DB_PATH" ]; then
+            ENDPOINT="$(printf '%s' "$DB_LIST" | jq -r --arg id "$DB_ID" '
+              map(select((.id // .Id // .database_id // .databaseId) == $id))[0] |
+              .endpoint // .Endpoint // empty
+            ')"
+            DB_PATH="$(printf '%s' "$DB_LIST" | jq -r --arg id "$DB_ID" '
+              map(select((.id // .Id // .database_id // .databaseId) == $id))[0] |
+              .database_path // .databasePath // .path // .Path // .database // empty
+            ')"
+          fi
+          if [ -z "$ENDPOINT" ] || [ -z "$DB_PATH" ]; then
+            echo "Unable to resolve YDB endpoint or database path." >&2
+            printf '%s\n' "$DB_INFO" | jq 'keys'
+            exit 1
+          fi
+
+          case "$ENDPOINT" in
+            grpc://*|grpcs://*) ;;
+            *) ENDPOINT="grpcs://$ENDPOINT" ;;
+          esac
+
+          RESOLVED_YDB_CONNECTION_STRING="${ENDPOINT}/?database=${DB_PATH}"
+          echo "::add-mask::$RESOLVED_YDB_CONNECTION_STRING"
+          echo "YDB_CONNECTION_STRING=$RESOLVED_YDB_CONNECTION_STRING" >> "$GITHUB_ENV"
+          echo "Resolved active YDB database id: $DB_ID"
+
       - name: Install Node dependencies for PM01 reset
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.reset_pm01_attempts == 'true'
         shell: bash
@@ -139,7 +191,7 @@ jobs:
             --concurrency 8 \
             --execution-timeout 60s \
             --service-account-id "$YC_RUNTIME_SERVICE_ACCOUNT_ID" \
-            --environment "HOST=0.0.0.0,STORAGE_BACKEND=ydb,YDB_CONNECTION_STRING=${YDB_CONNECTION_STRING},YDB_METADATA_CREDENTIALS=1,YDB_ATTEMPTS_TABLE=olympiad_attempts,YDB_ADMIN_SESSIONS_TABLE=admin_sessions,YDB_CONTENT_DRAFTS_TABLE=${YDB_CONTENT_DRAFTS_TABLE:-olympiad_content_drafts},YDB_CONTENT_QUESTIONS_TABLE=${YDB_CONTENT_QUESTIONS_TABLE:-olympiad_content_questions},ADMIN_PASSWORD=${ADMIN_PASSWORD},YANDEX_DISK_ENABLED=${YANDEX_DISK_ENABLED},YANDEX_DISK_OAUTH_TOKEN=${YANDEX_DISK_OAUTH_TOKEN},YANDEX_DISK_FOLDER=${YANDEX_DISK_FOLDER}"
+            --environment "HOST=0.0.0.0,STORAGE_BACKEND=ydb,YDB_CONNECTION_STRING=${YDB_CONNECTION_STRING},YDB_METADATA_CREDENTIALS=1,YDB_ATTEMPTS_TABLE=olympiad_attempts,YDB_ATTEMPT_VARIANTS_TABLE=olympiad_attempt_variants,YDB_ATTEMPT_ANSWERS_TABLE=olympiad_attempt_answers,YDB_ADMIN_SESSIONS_TABLE=admin_sessions,YDB_CONTENT_DRAFTS_TABLE=${YDB_CONTENT_DRAFTS_TABLE:-olympiad_content_drafts},YDB_CONTENT_QUESTIONS_TABLE=${YDB_CONTENT_QUESTIONS_TABLE:-olympiad_content_questions},YDB_PM01_VOICE_AUDIO_TABLE=olympiad_pm01_voice_audio,YDB_AUTO_CREATE_TABLES=true,ADMIN_PASSWORD=${ADMIN_PASSWORD},YANDEX_DISK_ENABLED=${YANDEX_DISK_ENABLED},YANDEX_DISK_OAUTH_TOKEN=${YANDEX_DISK_OAUTH_TOKEN},YANDEX_DISK_FOLDER=${YANDEX_DISK_FOLDER}"
 
       - name: Allow public access
         shell: bash
