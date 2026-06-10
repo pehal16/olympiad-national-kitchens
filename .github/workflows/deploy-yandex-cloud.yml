@@ -11,6 +11,11 @@ on:
         options:
           - "false"
           - "true"
+      repair_api_gateway_id:
+        description: "API Gateway id to resume when repair_public_only is true"
+        required: true
+        default: "d5df080lte300mnijq9s"
+        type: string
       reset_pm01_attempts:
         description: "Delete all PM01 production attempts from all IP addresses before deploy"
         required: true
@@ -113,6 +118,13 @@ jobs:
           yc serverless container get --name "$CONTAINER_NAME_CLEAN" >/dev/null 2>&1 || \
           yc serverless container create --name "$CONTAINER_NAME_CLEAN"
           echo "CONTAINER_NAME_CLEAN=$CONTAINER_NAME_CLEAN" >> "$GITHUB_ENV"
+
+      - name: Resume API Gateway in emergency repair mode
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.repair_public_only == 'true'
+        shell: bash
+        run: |
+          GATEWAY_ID="$(printf '%s' '${{ github.event.inputs.repair_api_gateway_id }}' | tr -d '\r\n\t ')"
+          yc serverless api-gateway resume --id "$GATEWAY_ID"
 
       - name: Deploy new revision
         if: github.event_name != 'workflow_dispatch' || github.event.inputs.repair_public_only != 'true'
