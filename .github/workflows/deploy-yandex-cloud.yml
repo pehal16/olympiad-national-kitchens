@@ -163,7 +163,7 @@ jobs:
             console.error(error && error.message ? error.message : error);
             process.exit(1);
           });
-NODE
+          NODE
           }
 
           declare -a CANDIDATE_LABELS=()
