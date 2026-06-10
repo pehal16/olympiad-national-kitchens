@@ -14,7 +14,7 @@ on:
       repair_api_gateway_id:
         description: "API Gateway id to resume when repair_public_only is true"
         required: true
-        default: "d5df080lte300mnijq9s"
+        default: "d5df08olte300mnijq9s"
         type: string
       reset_pm01_attempts:
         description: "Delete all PM01 production attempts from all IP addresses before deploy"
