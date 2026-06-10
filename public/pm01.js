@@ -2,6 +2,8 @@
   const TEACHER_NAME = "Постовит Дмитрий Александрович";
   const FREE_STUDENT_VALUE = "__free_name__";
   const MAX_VOICE_AUDIO_BYTES = 14 * 1024 * 1024;
+  const RESUME_STORAGE_KEY = "pm01.resumeAttempt.v1";
+  const RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000;
   const PM01_STUDENT_GROUPS = [
     {
       groupName: "2-ПК-25",
@@ -138,6 +140,62 @@
     resultSubtitle: document.getElementById("result-subtitle"),
     resultModules: document.getElementById("result-modules")
   };
+
+  function readResumeRecord() {
+    try {
+      const raw = window.localStorage.getItem(RESUME_STORAGE_KEY);
+      if (!raw) {
+        return null;
+      }
+      const record = JSON.parse(raw);
+      if (!record?.attemptId || Date.now() - Number(record.updatedAt || 0) > RESUME_MAX_AGE_MS) {
+        window.localStorage.removeItem(RESUME_STORAGE_KEY);
+        return null;
+      }
+      return record;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function clearResumeRecord(attemptId = "") {
+    try {
+      if (!attemptId) {
+        window.localStorage.removeItem(RESUME_STORAGE_KEY);
+        return;
+      }
+      const record = readResumeRecord();
+      if (record?.attemptId === attemptId) {
+        window.localStorage.removeItem(RESUME_STORAGE_KEY);
+      }
+    } catch (_) {
+      // localStorage can be blocked in private browser modes.
+    }
+  }
+
+  function rememberResumeAttempt(attempt) {
+    if (!attempt?.id) {
+      return;
+    }
+    if (attempt.status !== "in_progress") {
+      clearResumeRecord(attempt.id);
+      return;
+    }
+    try {
+      window.localStorage.setItem(
+        RESUME_STORAGE_KEY,
+        JSON.stringify({
+          attemptId: attempt.id,
+          mode: attempt.mode || "exam",
+          participantName: attempt.participant?.fullName || "",
+          groupName: attempt.participant?.groupName || "",
+          updatedAt: Date.now()
+        })
+      );
+    } catch (_) {
+      // The server-side resume still works even if browser storage is unavailable.
+    }
+  }
 
   function formatTime(ms) {
     const totalSeconds = Math.max(0, Math.ceil(Number(ms || 0) / 1000));
@@ -1726,6 +1784,7 @@
   function renderAttempt(attempt) {
     state.attempt = attempt;
     state.mode = attempt.mode || "exam";
+    rememberResumeAttempt(attempt);
     refreshTopbar();
 
     if (attempt.status !== "in_progress") {
@@ -1782,6 +1841,38 @@
   async function loadAttempt(attemptId) {
     const attempt = await api(`/api/pm01/public/attempts/${encodeURIComponent(attemptId)}`);
     renderAttempt(attempt);
+  }
+
+  async function resumeStoredAttemptIfConfirmed() {
+    const record = readResumeRecord();
+    if (!record?.attemptId) {
+      return;
+    }
+
+    const label = [record.participantName, record.groupName].filter(Boolean).join(", ");
+    const shouldResume = window.confirm(
+      label
+        ? `Найдена незавершенная попытка: ${label}. Продолжить с места остановки?`
+        : "Найдена незавершенная попытка. Продолжить с места остановки?"
+    );
+    if (!shouldResume) {
+      clearResumeRecord(record.attemptId);
+      return;
+    }
+
+    setSaveStatus("восстановление...");
+    try {
+      const attempt = await api(`/api/pm01/public/attempts/${encodeURIComponent(record.attemptId)}`);
+      if (attempt.status === "in_progress") {
+        renderAttempt(attempt);
+        setSaveStatus("продолжено");
+      } else {
+        clearResumeRecord(record.attemptId);
+      }
+    } catch (_) {
+      clearResumeRecord(record.attemptId);
+      setSaveStatus("ожидание");
+    }
   }
 
   async function jumpToModule(moduleId) {
@@ -1967,6 +2058,7 @@
       renderVariants();
       renderTickets();
       refreshTopbar();
+      await resumeStoredAttemptIfConfirmed();
     } catch (error) {
       showMessage(elements.entryMessage, error.message, "error");
     }

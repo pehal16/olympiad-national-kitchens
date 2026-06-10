@@ -1311,6 +1311,20 @@ function buildPm01ControlsView(controls, attempts) {
   };
 }
 
+function findActivePm01Attempt(exam, attempts, participantSignature, mode) {
+  const normalizedMode = mode === "training" ? "training" : "exam";
+  const signature = String(participantSignature || "").trim();
+  return attempts
+    .map((attempt) => normalizePm01AttemptState(exam, attempt))
+    .find(
+      (attempt) =>
+        attempt &&
+        (attempt.mode || "exam") === normalizedMode &&
+        pm01AttemptParticipantSignature(attempt) === signature &&
+        attempt.status === "in_progress"
+    ) || null;
+}
+
 function summarizePm01AttemptsForAdmin(exam, attempts, settings) {
   const normalizedAttempts = attempts.map((attempt) => normalizePm01AttemptState(exam, attempt));
   const participantKeys = new Set();
@@ -2895,6 +2909,19 @@ async function handleApi(req, res, url) {
     const participantNameKey = makeParticipantNameKey(validation.profile);
     const clientIp = getClientIp(req);
     const accessKey = makeAttemptAccessKey(clientIp, participantNameKey);
+    const existingAttempts = currentOlympiadAttempts(await loadAttempts(), exam.id)
+      .map((attempt) => normalizePm01AttemptState(exam, attempt));
+    const activeAttempt = findActivePm01Attempt(exam, existingAttempts, participantSignature, mode);
+
+    if (activeAttempt) {
+      await upsertAttempt(activeAttempt);
+      invalidateAttemptCaches();
+      sendJson(res, 200, {
+        ok: true,
+        data: buildPm01StudentAttemptView(exam, activeAttempt)
+      });
+      return;
+    }
 
     if (mode === "exam") {
       const controls = await loadPm01Controls();
@@ -2907,23 +2934,7 @@ async function handleApi(req, res, url) {
       }
 
       if (!controls.freeRepeatEnabled) {
-        const existingAttempts = currentOlympiadAttempts(await loadAttempts(), exam.id)
-          .map((attempt) => normalizePm01AttemptState(exam, attempt));
         const participantAccess = buildPm01ParticipantAccess(controls, existingAttempts, participantSignature);
-        const activeAttempt = existingAttempts.find(
-          (attempt) =>
-            (attempt.mode || "exam") === "exam" &&
-            pm01AttemptParticipantSignature(attempt) === participantSignature &&
-            attempt.status === "in_progress"
-        );
-
-        if (activeAttempt) {
-          sendJson(res, 200, {
-            ok: true,
-            data: buildPm01StudentAttemptView(exam, activeAttempt)
-          });
-          return;
-        }
 
         if (participantAccess.remainingAttempts <= 0) {
           sendJson(res, 403, {
