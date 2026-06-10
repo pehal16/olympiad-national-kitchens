@@ -873,11 +873,12 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(studentScript, /uploadVoiceBlob/);
   assert.match(studentScript, /fetchWithRetry/);
   assert.match(studentScript, /RETRYABLE_API_STATUSES/);
+  assert.match(studentScript, /retryDelay/);
   assert.match(studentScript, /X-PM01-Duration-Ms/);
   assert.doesNotMatch(studentScript, /readAsDataURL\(blob\)/);
   assert.match(studentHtml, /pm01\.css\?v=1\.0\.16/);
   assert.match(studentHtml, /loadPm01Script/);
-  assert.match(studentHtml, /pm01\.js\?v=1\.0\.19/);
+  assert.match(studentHtml, /pm01\.js\?v=1\.0\.20/);
   assert.match(adminHtml, /export-group-csv/);
   assert.match(adminScript, /renderVoiceQueueList/);
   assert.match(adminScript, /saveQuickDecision/);

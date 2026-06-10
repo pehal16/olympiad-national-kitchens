@@ -234,10 +234,14 @@
   }
 
   const RETRYABLE_API_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
-  const API_RETRY_DELAYS_MS = [700, 1300, 2200, 3500, 5000];
+  const API_RETRY_DELAYS_MS = [1200, 2500, 4500, 7500, 11000, 16000, 23000, 32000];
 
   function wait(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  function retryDelay(baseMs) {
+    return Math.round(baseMs * (0.7 + Math.random() * 0.8));
   }
 
   async function fetchWithRetry(path, options = {}) {
@@ -250,7 +254,7 @@
           attemptIndex < API_RETRY_DELAYS_MS.length
         ) {
           setSaveStatus(`Сервер занят, повторяю запрос ${attemptIndex + 1}...`);
-          await wait(API_RETRY_DELAYS_MS[attemptIndex]);
+          await wait(retryDelay(API_RETRY_DELAYS_MS[attemptIndex]));
           continue;
         }
         return response;
@@ -258,7 +262,7 @@
         lastError = error;
         if (attemptIndex < API_RETRY_DELAYS_MS.length) {
           setSaveStatus(`Сеть нестабильна, повторяю запрос ${attemptIndex + 1}...`);
-          await wait(API_RETRY_DELAYS_MS[attemptIndex]);
+          await wait(retryDelay(API_RETRY_DELAYS_MS[attemptIndex]));
           continue;
         }
         throw error;
