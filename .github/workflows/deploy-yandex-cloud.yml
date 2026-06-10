@@ -3,6 +3,14 @@ name: Deploy to Yandex Cloud
 on:
   workflow_dispatch:
     inputs:
+      repair_public_only:
+        description: "Only restore unauthenticated public access to the current container"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
       reset_pm01_attempts:
         description: "Delete all PM01 production attempts from all IP addresses before deploy"
         required: true
@@ -74,11 +82,13 @@ jobs:
           node scripts/reset-pm01-production-attempts.js pm01-2026-exam
 
       - name: Authorize Docker in Yandex Container Registry
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.repair_public_only != 'true'
         shell: bash
         run: |
           yc iam create-token | docker login --username iam --password-stdin cr.yandex
 
       - name: Build and push image
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.repair_public_only != 'true'
         shell: bash
         run: |
           REGISTRY_ID_CLEAN="$(printf '%s' "$YC_REGISTRY_ID" | tr -d '\r\n\t ')"
@@ -105,6 +115,7 @@ jobs:
           echo "CONTAINER_NAME_CLEAN=$CONTAINER_NAME_CLEAN" >> "$GITHUB_ENV"
 
       - name: Deploy new revision
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.repair_public_only != 'true'
         shell: bash
         run: |
           yc serverless container revision deploy \
