@@ -233,10 +233,44 @@
     }
   }
 
+  const RETRYABLE_API_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
+  const API_RETRY_DELAYS_MS = [700, 1300, 2200, 3500, 5000];
+
+  function wait(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function fetchWithRetry(path, options = {}) {
+    let lastError = null;
+    for (let attemptIndex = 0; attemptIndex <= API_RETRY_DELAYS_MS.length; attemptIndex += 1) {
+      try {
+        const response = await fetch(path, options);
+        if (
+          RETRYABLE_API_STATUSES.has(response.status) &&
+          attemptIndex < API_RETRY_DELAYS_MS.length
+        ) {
+          setSaveStatus(`Сервер занят, повторяю запрос ${attemptIndex + 1}...`);
+          await wait(API_RETRY_DELAYS_MS[attemptIndex]);
+          continue;
+        }
+        return response;
+      } catch (error) {
+        lastError = error;
+        if (attemptIndex < API_RETRY_DELAYS_MS.length) {
+          setSaveStatus(`Сеть нестабильна, повторяю запрос ${attemptIndex + 1}...`);
+          await wait(API_RETRY_DELAYS_MS[attemptIndex]);
+          continue;
+        }
+        throw error;
+      }
+    }
+    throw lastError || new Error("Сервер временно перегружен.");
+  }
+
   async function api(path, options = {}) {
     let response;
     try {
-      response = await fetch(path, {
+      response = await fetchWithRetry(path, {
         credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
@@ -1506,7 +1540,7 @@
       audioUploadMessage = "Загружаем запись...";
       meter.textContent = audioUploadMessage;
       try {
-        const response = await fetch(
+        const response = await fetchWithRetry(
           `/api/pm01/public/attempts/${encodeURIComponent(state.attempt.id)}/voice/${encodeURIComponent(question.id)}/audio?durationMs=${encodeURIComponent(String(durationMs))}`,
           {
             method: "POST",

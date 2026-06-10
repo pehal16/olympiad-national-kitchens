@@ -2773,12 +2773,22 @@ function serveStatic(req, res, pathname) {
     ".jpeg": "image/jpeg",
     ".svg": "image/svg+xml"
   };
+  const isHtml = ext === ".html" || pathname === "/";
+  const isServiceWorker = path.basename(filePath) === "sw.js";
+  const cacheHeaders =
+    isHtml || isServiceWorker
+      ? {
+          "Cache-Control": "no-cache, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0"
+        }
+      : {
+          "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800"
+        };
 
   res.writeHead(200, {
     "Content-Type": contentTypes[ext] || "application/octet-stream",
-    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-    Pragma: "no-cache",
-    Expires: "0"
+    ...cacheHeaders
   });
   fs.createReadStream(filePath).pipe(res);
 }

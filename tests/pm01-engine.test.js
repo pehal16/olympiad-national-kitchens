@@ -836,6 +836,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(serverSource, /examEnabled/);
   assert.match(serverSource, /freeRepeatEnabled/);
   assert.match(serverSource, /findActivePm01Attempt/);
+  assert.match(serverSource, /stale-while-revalidate=604800/);
   assert.match(serverSource, /normalizeGroupName/);
   assert.match(serverSource, /normalizeGroupKey/);
   assert.match(serverSource, /groupNameOriginal/);
@@ -870,10 +871,12 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(serverSource, /readRequestBuffer/);
   assert.match(serverSource, /inline_fallback/);
   assert.match(studentScript, /uploadVoiceBlob/);
+  assert.match(studentScript, /fetchWithRetry/);
+  assert.match(studentScript, /RETRYABLE_API_STATUSES/);
   assert.match(studentScript, /X-PM01-Duration-Ms/);
   assert.doesNotMatch(studentScript, /readAsDataURL\(blob\)/);
   assert.match(studentHtml, /pm01\.css\?v=1\.0\.16/);
-  assert.match(studentHtml, /pm01\.js\?v=1\.0\.17/);
+  assert.match(studentHtml, /pm01\.js\?v=1\.0\.18/);
   assert.match(adminHtml, /export-group-csv/);
   assert.match(adminScript, /renderVoiceQueueList/);
   assert.match(adminScript, /saveQuickDecision/);
