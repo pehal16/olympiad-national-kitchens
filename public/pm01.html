@@ -197,6 +197,28 @@
       </section>
     </main>
 
-    <script src="/pm01.js?v=1.0.18"></script>
+    <script>
+      (function loadPm01Script(attempt) {
+        var status = document.getElementById("top-save-status");
+        var script = document.createElement("script");
+        script.src = "/pm01.js?v=1.0.19" + (attempt ? "&retry=" + attempt : "");
+        script.async = false;
+        script.onerror = function () {
+          if (attempt >= 6) {
+            if (status) {
+              status.textContent = "сервер занят, обновите страницу";
+            }
+            return;
+          }
+          if (status) {
+            status.textContent = "сервер занят, повторяю загрузку...";
+          }
+          setTimeout(function () {
+            loadPm01Script(attempt + 1);
+          }, 900 + attempt * 900);
+        };
+        document.body.appendChild(script);
+      })(0);
+    </script>
   </body>
 </html>
