@@ -183,8 +183,10 @@ jobs:
             local label="$1"
             local path_value="$2"
             if [ -n "$path_value" ]; then
-              CANDIDATE_LABELS+=("$label")
+              CANDIDATE_LABELS+=("${label}-query")
               CANDIDATES+=("${ENDPOINT}/?database=${path_value}")
+              CANDIDATE_LABELS+=("${label}-path")
+              CANDIDATES+=("${ENDPOINT}${path_value}")
             fi
           }
 
@@ -195,8 +197,12 @@ jobs:
           add_candidate "metadata-path" "$DB_PATH"
           add_candidate "location-cloud-id-database-id" "/${LOCATION_ID}/${YC_CLOUD_ID}/${DB_ID}"
           add_candidate "location-folder-id-database-id" "/${LOCATION_ID}/${FOLDER_ID}/${DB_ID}"
+          add_candidate "location-database-id" "/${LOCATION_ID}/${DB_ID}"
+          add_candidate "database-id" "/${DB_ID}"
           add_candidate "location-cloud-id-database-name" "/${LOCATION_ID}/${YC_CLOUD_ID}/${DB_NAME}"
           add_candidate "location-folder-id-database-name" "/${LOCATION_ID}/${FOLDER_ID}/${DB_NAME}"
+          add_candidate "location-folder-id-database-id-slash" "/${LOCATION_ID}/${FOLDER_ID}/${DB_ID}/"
+          add_candidate "location-cloud-id-database-id-slash" "/${LOCATION_ID}/${YC_CLOUD_ID}/${DB_ID}/"
 
           RESOLVED_YDB_CONNECTION_STRING=""
           for index in "${!CANDIDATES[@]}"; do
