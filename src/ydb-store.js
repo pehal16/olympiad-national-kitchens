@@ -134,6 +134,10 @@ async function ensurePm01VoiceAudioSchema() {
   return pm01VoiceAudioSchemaReady;
 }
 
+async function ensurePm01VoiceAudioStorage() {
+  await ensurePm01VoiceAudioSchema();
+}
+
 async function selectRows(tableName, keyColumn) {
   await ensureSchema();
   const sql = await getSql();
@@ -649,6 +653,7 @@ module.exports = {
   saveContentCustomQuestions,
   upsertContentCustomQuestion,
   deleteContentCustomQuestion,
+  ensurePm01VoiceAudioStorage,
   savePm01VoiceAudio,
   loadPm01VoiceAudio
 };

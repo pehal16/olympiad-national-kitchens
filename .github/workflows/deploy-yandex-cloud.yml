@@ -225,6 +225,18 @@ jobs:
           echo "YDB_CONNECTION_STRING=$RESOLVED_YDB_CONNECTION_STRING" >> "$GITHUB_ENV"
           echo "Resolved active YDB database id: $DB_ID"
 
+      - name: Ensure PM01 voice audio table
+        shell: bash
+        run: |
+          TOKEN="$(yc iam create-token)"
+          if [ -z "$TOKEN" ]; then
+            echo "Unable to create Yandex IAM token for PM01 voice audio migration." >&2
+            exit 1
+          fi
+          YDB_ACCESS_TOKEN_CREDENTIALS="$TOKEN" \
+          YDB_AUTO_CREATE_TABLES=true \
+          node scripts/ensure-pm01-voice-audio-table.js
+
       - name: Install Node dependencies for PM01 reset
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.reset_pm01_attempts == 'true'
         shell: bash
