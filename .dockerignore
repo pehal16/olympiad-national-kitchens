@@ -1,0 +1,16 @@
+.git
+.github
+node_modules
+storage
+exports
+dist
+tmp_docx_extract
+.codex_backup_*
+*.log
+*.zip
+.env
+.env.*
+server.err.log
+server.out.log
+tmp-pm01-server.err.log
+tmp-pm01-server.out.log

@@ -1,0 +1,98 @@
+name: Deploy to VPS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_PORT: ${{ secrets.VPS_PORT || '22' }}
+      VPS_APP_DIR: ${{ secrets.VPS_APP_DIR || '/opt/olympiad' }}
+      VPS_SITE_DOMAIN: ${{ secrets.VPS_SITE_DOMAIN || 'olympiada.gorlkts.ru' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate secrets
+        shell: bash
+        run: |
+          test -n "$VPS_HOST"
+          test -n "$VPS_USER"
+          test -n "${{ secrets.VPS_SSH_KEY }}"
+          test -n "${{ secrets.YDB_CONNECTION_STRING }}"
+          test -n "${{ secrets.ADMIN_PASSWORD }}"
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' '${{ secrets.VPS_SSH_KEY }}' > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$VPS_PORT" "$VPS_HOST" >> ~/.ssh/known_hosts
+
+      - name: Prepare remote directory
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" \
+            "mkdir -p '$VPS_APP_DIR'"
+
+      - name: Upload application
+        shell: bash
+        run: |
+          rsync -az --delete \
+            --exclude '.git' \
+            --exclude 'node_modules' \
+            --exclude 'storage' \
+            --exclude 'exports' \
+            --exclude 'dist' \
+            -e "ssh -i ~/.ssh/deploy_key -p $VPS_PORT" \
+            ./ "$VPS_USER@$VPS_HOST:$VPS_APP_DIR/"
+
+      - name: Write production env
+        shell: bash
+        run: |
+          cat > .env.vps.deploy <<'EOF'
+          SITE_DOMAIN=${{ env.VPS_SITE_DOMAIN }}
+          HOST=0.0.0.0
+          PORT=8080
+          NODE_ENV=production
+          STORAGE_BACKEND=ydb
+          YDB_CONNECTION_STRING=${{ secrets.YDB_CONNECTION_STRING }}
+          YDB_METADATA_CREDENTIALS=${{ secrets.YDB_METADATA_CREDENTIALS || '1' }}
+          YDB_STATIC_CREDENTIALS_USER=${{ secrets.YDB_STATIC_CREDENTIALS_USER }}
+          YDB_STATIC_CREDENTIALS_PASSWORD=${{ secrets.YDB_STATIC_CREDENTIALS_PASSWORD }}
+          YDB_ATTEMPTS_TABLE=olympiad_attempts
+          YDB_ATTEMPT_VARIANTS_TABLE=olympiad_attempt_variants
+          YDB_ATTEMPT_ANSWERS_TABLE=olympiad_attempt_answers
+          YDB_ADMIN_SESSIONS_TABLE=admin_sessions
+          YDB_CONTENT_DRAFTS_TABLE=${{ secrets.YDB_CONTENT_DRAFTS_TABLE || 'olympiad_content_drafts' }}
+          YDB_CONTENT_QUESTIONS_TABLE=${{ secrets.YDB_CONTENT_QUESTIONS_TABLE || 'olympiad_content_questions' }}
+          YDB_PM01_VOICE_AUDIO_TABLE=${{ secrets.YDB_PM01_VOICE_AUDIO_TABLE || 'olympiad_pm01_voice_audio' }}
+          YDB_AUTO_CREATE_TABLES=true
+          ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+          YANDEX_DISK_ENABLED=${{ secrets.YANDEX_DISK_ENABLED || 'true' }}
+          YANDEX_DISK_OAUTH_TOKEN=${{ secrets.YANDEX_DISK_OAUTH_TOKEN }}
+          YANDEX_DISK_FOLDER=${{ secrets.YANDEX_DISK_FOLDER }}
+          EOF
+          sed -i 's/^[[:space:]]*//' .env.vps.deploy
+          scp -i ~/.ssh/deploy_key -P "$VPS_PORT" \
+            .env.vps.deploy "$VPS_USER@$VPS_HOST:$VPS_APP_DIR/deploy/vps/.env"
+
+      - name: Deploy containers
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" \
+            "cd '$VPS_APP_DIR' && docker compose -f deploy/vps/compose.yaml up -d --build && docker compose -f deploy/vps/compose.yaml ps"
+
+      - name: Verify health
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" \
+            "curl -fsS http://127.0.0.1:8080/api/health"
