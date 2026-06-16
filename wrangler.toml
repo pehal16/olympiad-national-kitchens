@@ -6,7 +6,8 @@ pages_build_output_dir = "dist-cloudflare"
 [[d1_databases]]
 binding = "DB"
 database_name = "olympiad-gkts-db"
-database_id = "local"
+database_id = "4c30c9ab-0c53-4b8a-865a-7c9078d48c2f"
+migrations_dir = "migrations"
 
 [vars]
 STORAGE_BACKEND = "cloudflare"

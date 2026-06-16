@@ -410,8 +410,8 @@ async function savePm01VoiceAudio(meta, buffer) {
        audio_base64 = excluded.audio_base64,
        updated_at = excluded.updated_at`,
     String(normalized.id),
-    JSON.stringify({ ...normalized, objectKey: PM01_VOICE ? key : null, storage: PM01_VOICE ? "r2" : "d1" }),
-    PM01_VOICE ? key : null,
+    JSON.stringify({ ...normalized, objectKey: key, storage: PM01_VOICE ? "r2" : "d1" }),
+    key,
     audioBase64,
     nowIso()
   );

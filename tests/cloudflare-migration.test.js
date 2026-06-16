@@ -15,6 +15,7 @@ test("Cloudflare deployment contract exposes Pages, D1, and voice storage pieces
 
   assert.match(wrangler, /pages_build_output_dir = "dist-cloudflare"/);
   assert.match(wrangler, /binding = "DB"/);
+  assert.match(wrangler, /migrations_dir = "migrations"/);
   assert.match(schema, /CREATE TABLE IF NOT EXISTS attempts/);
   assert.match(schema, /CREATE TABLE IF NOT EXISTS attempt_answers/);
   assert.match(schema, /CREATE TABLE IF NOT EXISTS pm01_voice_index/);
