@@ -8,9 +8,5 @@ binding = "DB"
 database_name = "olympiad-gkts-db"
 database_id = "local"
 
-[[r2_buckets]]
-binding = "PM01_VOICE"
-bucket_name = "olympiad-gkts-voice"
-
 [vars]
 STORAGE_BACKEND = "cloudflare"

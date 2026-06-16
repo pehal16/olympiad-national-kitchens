@@ -380,32 +380,39 @@ function voiceObjectKey(meta) {
 
 async function savePm01VoiceAudio(meta, buffer) {
   const { PM01_VOICE } = requireEnv();
-  if (!PM01_VOICE) {
-    throw new Error("Cloudflare R2 binding PM01_VOICE is not configured.");
-  }
   const normalized = {
     ...meta,
     byteLength: Number(meta.byteLength || buffer?.length || 0),
     createdAt: meta.createdAt || nowIso()
   };
   const key = voiceObjectKey(normalized);
-  await PM01_VOICE.put(key, buffer, {
-    httpMetadata: {
-      contentType: normalized.mimeType || "audio/webm"
-    },
-    customMetadata: {
-      audioId: normalized.id,
-      attemptId: normalized.attemptId,
-      questionId: normalized.questionId
-    }
-  });
+
+  if (PM01_VOICE) {
+    await PM01_VOICE.put(key, buffer, {
+      httpMetadata: {
+        contentType: normalized.mimeType || "audio/webm"
+      },
+      customMetadata: {
+        audioId: normalized.id,
+        attemptId: normalized.attemptId,
+        questionId: normalized.questionId
+      }
+    });
+  }
+
+  const audioBase64 = PM01_VOICE ? null : Buffer.from(buffer || "").toString("base64");
   await run(
-    `INSERT INTO pm01_voice_index (audio_id, payload_json, object_key, updated_at)
-     VALUES (?1, ?2, ?3, ?4)
-     ON CONFLICT(audio_id) DO UPDATE SET payload_json = excluded.payload_json, object_key = excluded.object_key, updated_at = excluded.updated_at`,
+    `INSERT INTO pm01_voice_index (audio_id, payload_json, object_key, audio_base64, updated_at)
+     VALUES (?1, ?2, ?3, ?4, ?5)
+     ON CONFLICT(audio_id) DO UPDATE SET
+       payload_json = excluded.payload_json,
+       object_key = excluded.object_key,
+       audio_base64 = excluded.audio_base64,
+       updated_at = excluded.updated_at`,
     String(normalized.id),
-    JSON.stringify({ ...normalized, objectKey: key }),
-    key,
+    JSON.stringify({ ...normalized, objectKey: PM01_VOICE ? key : null, storage: PM01_VOICE ? "r2" : "d1" }),
+    PM01_VOICE ? key : null,
+    audioBase64,
     nowIso()
   );
   return normalized;
@@ -417,15 +424,27 @@ async function loadPm01VoiceAudio(audioId) {
     return null;
   }
   const row = await first(
-    "SELECT audio_id, payload_json, object_key FROM pm01_voice_index WHERE audio_id = ?1",
+    "SELECT audio_id, payload_json, object_key, audio_base64 FROM pm01_voice_index WHERE audio_id = ?1",
     String(audioId)
   );
   if (!row) {
     return null;
   }
   const meta = parseJson(row.payload_json);
+  if (!meta) {
+    return null;
+  }
+  if (row.audio_base64) {
+    return {
+      meta,
+      buffer: Buffer.from(row.audio_base64, "base64")
+    };
+  }
+  if (!PM01_VOICE || !row.object_key) {
+    return null;
+  }
   const object = await PM01_VOICE.get(row.object_key);
-  if (!meta || !object) {
+  if (!object) {
     return null;
   }
   const arrayBuffer = await object.arrayBuffer();

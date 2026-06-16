@@ -5,7 +5,7 @@ const assert = require("node:assert/strict");
 
 const root = path.resolve(__dirname, "..");
 
-test("Cloudflare deployment contract exposes Pages, D1, and R2 migration pieces", () => {
+test("Cloudflare deployment contract exposes Pages, D1, and voice storage pieces", () => {
   const wrangler = fs.readFileSync(path.join(root, "wrangler.toml"), "utf8");
   const schema = fs.readFileSync(path.join(root, "migrations", "0001_cloudflare_initial.sql"), "utf8");
   const worker = fs.readFileSync(path.join(root, "src", "cloudflare", "worker.js"), "utf8");
@@ -15,13 +15,13 @@ test("Cloudflare deployment contract exposes Pages, D1, and R2 migration pieces"
 
   assert.match(wrangler, /pages_build_output_dir = "dist-cloudflare"/);
   assert.match(wrangler, /binding = "DB"/);
-  assert.match(wrangler, /binding = "PM01_VOICE"/);
   assert.match(schema, /CREATE TABLE IF NOT EXISTS attempts/);
   assert.match(schema, /CREATE TABLE IF NOT EXISTS attempt_answers/);
   assert.match(schema, /CREATE TABLE IF NOT EXISTS pm01_voice_index/);
   assert.match(worker, /env\.ASSETS\.fetch/);
   assert.match(worker, /configureCloudflareStorage/);
   assert.match(store, /PM01_VOICE\.put/);
+  assert.match(store, /audio_base64/);
   assert.match(store, /pm01-voice\/\$\{encodeURIComponent\(meta\.attemptId\)\}/);
   assert.match(workflow, /wrangler pages deploy dist-cloudflare/);
   assert.equal(packageJson.scripts["build:cloudflare"], "node scripts/build-cloudflare-pages.js");

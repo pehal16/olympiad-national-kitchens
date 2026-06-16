@@ -30,7 +30,6 @@ jobs:
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
       CF_PAGES_PROJECT: olympiad-gkts
       CF_D1_DATABASE: olympiad-gkts-db
-      CF_R2_BUCKET: olympiad-gkts-voice
 
     steps:
       - name: Checkout
@@ -52,7 +51,6 @@ jobs:
           fi
 
           npx wrangler pages project create "$CF_PAGES_PROJECT" --production-branch main || true
-          npx wrangler r2 bucket create "$CF_R2_BUCKET" || true
 
           DB_ID="$(npx wrangler d1 list --json | jq -r --arg name "$CF_D1_DATABASE" '.[] | select(.name == $name) | .uuid' | head -n 1)"
           if [ -z "$DB_ID" ]; then
