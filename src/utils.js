@@ -1,26 +1,42 @@
-const fs = require("fs");
-const path = require("path");
+let fsModule = null;
+let pathModule = null;
+
+function getFs() {
+  if (!fsModule) {
+    fsModule = require("fs");
+  }
+  return fsModule;
+}
+
+function getPath() {
+  if (!pathModule) {
+    pathModule = require("path");
+  }
+  return pathModule;
+}
 
 function ensureDir(dirPath) {
-  fs.mkdirSync(dirPath, { recursive: true });
+  getFs().mkdirSync(dirPath, { recursive: true });
 }
 
 function ensureJsonFile(filePath, fallbackData) {
-  ensureDir(path.dirname(filePath));
+  const fs = getFs();
+  ensureDir(getPath().dirname(filePath));
   if (!fs.existsSync(filePath)) {
     fs.writeFileSync(filePath, JSON.stringify(fallbackData, null, 2), "utf8");
   }
 }
 
 function readJson(filePath, fallbackData) {
+  const fs = getFs();
   ensureJsonFile(filePath, fallbackData);
   const raw = fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, "");
   return JSON.parse(raw);
 }
 
 function writeJson(filePath, data) {
-  ensureDir(path.dirname(filePath));
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+  ensureDir(getPath().dirname(filePath));
+  getFs().writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
 }
 
 function sendJson(res, statusCode, payload, extraHeaders = {}) {

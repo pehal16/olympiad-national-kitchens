@@ -1,6 +1,3 @@
-const fs = require("fs");
-const path = require("path");
-const http = require("http");
 const crypto = require("crypto");
 const { URL } = require("url");
 const packageInfo = require("./package.json");
@@ -59,7 +56,35 @@ const { buildQuestionCatalog, buildQuestionBankSummary } = require("./src/questi
 const { createAttemptsCsv, saveExportFile } = require("./src/exporter");
 const { ensureFolder, uploadBuffer } = require("./src/yandex-disk");
 
-const PUBLIC_DIR = path.join(ROOT_DIR, "public");
+let fsModule = null;
+let pathModule = null;
+let httpModule = null;
+
+function getFs() {
+  if (!fsModule) {
+    fsModule = require("fs");
+  }
+  return fsModule;
+}
+
+function getPath() {
+  if (!pathModule) {
+    pathModule = require("path");
+  }
+  return pathModule;
+}
+
+function getHttp() {
+  if (!httpModule) {
+    httpModule = require("http");
+  }
+  return httpModule;
+}
+
+function getPublicDir() {
+  return getPath().join(ROOT_DIR, "public");
+}
+
 const PORT = Number(process.env.PORT) || 3100;
 const HOST = process.env.HOST || "0.0.0.0";
 const APP_VERSION = packageInfo.version || "0.0.0";
@@ -2746,12 +2771,15 @@ async function uploadExportsToYandexDisk(olympiad, settings) {
 }
 
 function serveStatic(req, res, pathname) {
+  const fs = getFs();
+  const path = getPath();
+  const publicDir = getPublicDir();
   const filePath = path.join(
-    PUBLIC_DIR,
+    publicDir,
     pathname === "/" ? "index.html" : pathname.slice(1)
   );
 
-  if (!filePath.startsWith(PUBLIC_DIR)) {
+  if (!filePath.startsWith(publicDir)) {
     sendJson(res, 403, { ok: false, message: "Доступ запрещён." });
     return;
   }
@@ -4231,29 +4259,41 @@ async function handleApi(req, res, url) {
   sendJson(res, 404, { ok: false, message: "Маршрут не найден." });
 }
 
-const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, `http://${req.headers.host}`);
+function createNodeServer() {
+  return getHttp().createServer(async (req, res) => {
+    const url = new URL(req.url, `http://${req.headers.host}`);
 
-  try {
-    if (url.pathname.startsWith("/api/")) {
-      await handleApi(req, res, url);
-      return;
+    try {
+      if (url.pathname.startsWith("/api/")) {
+        await handleApi(req, res, url);
+        return;
+      }
+
+      serveStatic(req, res, url.pathname);
+    } catch (error) {
+      noteApiError(url.pathname, error);
+      if (res.headersSent || res.destroyed) {
+        return;
+      }
+      const statusCode = Number(error.statusCode || error.status || 500);
+      sendJson(res, statusCode >= 400 && statusCode < 600 ? statusCode : 500, {
+        ok: false,
+        message: error.message || "Internal server error."
+      });
     }
+  });
+}
 
-    serveStatic(req, res, url.pathname);
-  } catch (error) {
-    noteApiError(url.pathname, error);
-    if (res.headersSent || res.destroyed) {
-      return;
-    }
-    const statusCode = Number(error.statusCode || error.status || 500);
-    sendJson(res, statusCode >= 400 && statusCode < 600 ? statusCode : 500, {
-      ok: false,
-      message: error.message || "Внутренняя ошибка сервера."
-    });
-  }
-});
+if (require.main === module) {
+  const server = createNodeServer();
+  server.listen(PORT, HOST, () => {
+    console.log(`Olympiad server started on http://${HOST}:${PORT}`);
+  });
+}
 
-server.listen(PORT, HOST, () => {
-  console.log(`Olympiad server started on http://${HOST}:${PORT}`);
-});
+module.exports = {
+  createNodeServer,
+  handleApi,
+  serveStatic,
+  runtimeDiagnostics
+};

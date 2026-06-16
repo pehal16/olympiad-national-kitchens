@@ -1,0 +1,16 @@
+name = "olympiad-gkts"
+compatibility_date = "2026-06-16"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "dist-cloudflare"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "olympiad-gkts-db"
+database_id = "local"
+
+[[r2_buckets]]
+binding = "PM01_VOICE"
+bucket_name = "olympiad-gkts-voice"
+
+[vars]
+STORAGE_BACKEND = "cloudflare"

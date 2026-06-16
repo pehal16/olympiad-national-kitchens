@@ -10,6 +10,9 @@ storage/
 exports/
 tmp_docx_extract/
 dist/
+dist-cloudflare/
+.cloudflare-migration/
+.wrangler/
 *.log
 *.zip
 .codex_backup_*/

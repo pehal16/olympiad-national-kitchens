@@ -11,7 +11,11 @@
     "test": "node --test",
     "export:bank": "node scripts/export-question-bank.js",
     "export:content": "node scripts/export-content-catalog.js",
-    "verify:pm01": "node scripts/verify-pm01-production.js"
+    "verify:pm01": "node scripts/verify-pm01-production.js",
+    "build:cloudflare": "node scripts/build-cloudflare-pages.js",
+    "verify:cloudflare": "node scripts/verify-pm01-production.js",
+    "cloudflare:export": "node scripts/export-cloudflare-migration.js",
+    "cloudflare:import": "node scripts/import-cloudflare-migration.js"
   },
   "dependencies": {
     "@ydbjs/auth": "^6.2.1",
@@ -24,7 +28,9 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "^41.1.1",
-    "electron-builder": "^26.8.1"
+    "electron-builder": "^26.8.1",
+    "esbuild": "^0.25.5",
+    "wrangler": "^4.20.0"
   },
   "build": {
     "appId": "ru.gktis.national-kitchens-olympiad",

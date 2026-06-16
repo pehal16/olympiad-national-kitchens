@@ -1,7 +1,21 @@
-const fs = require("fs");
-const path = require("path");
-const { EXPORTS_DIR } = require("./store");
 const { ensureDir } = require("./utils");
+
+let fsModule = null;
+let pathModule = null;
+
+function getFs() {
+  if (!fsModule) {
+    fsModule = require("fs");
+  }
+  return fsModule;
+}
+
+function getPath() {
+  if (!pathModule) {
+    pathModule = require("path");
+  }
+  return pathModule;
+}
 
 function csvEscape(value) {
   const text = String(value ?? "");
@@ -57,9 +71,10 @@ function createAttemptsCsv(rows) {
 }
 
 function saveExportFile(fileName, content) {
+  const { EXPORTS_DIR } = require("./store");
   ensureDir(EXPORTS_DIR);
-  const filePath = path.join(EXPORTS_DIR, fileName);
-  fs.writeFileSync(filePath, content, "utf8");
+  const filePath = getPath().join(EXPORTS_DIR, fileName);
+  getFs().writeFileSync(filePath, content, "utf8");
   return filePath;
 }
 
