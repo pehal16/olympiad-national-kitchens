@@ -420,7 +420,7 @@ async function savePm01VoiceAudio(meta, buffer) {
 
 async function loadPm01VoiceAudio(audioId) {
   const { PM01_VOICE } = requireEnv();
-  if (!PM01_VOICE || !audioId) {
+  if (!audioId) {
     return null;
   }
   const row = await first(
