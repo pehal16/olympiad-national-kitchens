@@ -1,0 +1,120 @@
+name: Migrate Yandex results to Cloudflare
+
+on:
+  workflow_dispatch:
+    inputs:
+      import_to_cloudflare:
+        description: "Import exported Yandex results into Cloudflare D1"
+        required: true
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      YC_CLOUD_ID: ${{ secrets.YC_CLOUD_ID }}
+      YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
+      YDB_CONNECTION_STRING: ${{ secrets.YDB_CONNECTION_STRING }}
+      YDB_ATTEMPTS_TABLE: olympiad_attempts
+      YDB_ATTEMPT_VARIANTS_TABLE: olympiad_attempt_variants
+      YDB_ATTEMPT_ANSWERS_TABLE: olympiad_attempt_answers
+      YDB_ADMIN_SESSIONS_TABLE: admin_sessions
+      YDB_CONTENT_DRAFTS_TABLE: ${{ secrets.YDB_CONTENT_DRAFTS_TABLE || 'olympiad_content_drafts' }}
+      YDB_CONTENT_QUESTIONS_TABLE: ${{ secrets.YDB_CONTENT_QUESTIONS_TABLE || 'olympiad_content_questions' }}
+      YDB_PM01_VOICE_AUDIO_TABLE: ${{ secrets.YDB_PM01_VOICE_AUDIO_TABLE || 'olympiad_pm01_voice_audio' }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_D1_DATABASE: olympiad-gkts-db
+      CLOUDFLARE_IMPORT_VOICE_TO_R2: "false"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Yandex Cloud CLI
+        shell: bash
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -a
+          echo "$HOME/yandex-cloud/bin" >> "$GITHUB_PATH"
+
+      - name: Configure Yandex Cloud CLI
+        shell: bash
+        run: |
+          printf '%s' '${{ secrets.YC_SERVICE_ACCOUNT_KEY_JSON }}' > key.json
+          yc config profile create ci || true
+          yc config profile activate ci
+          yc config set service-account-key key.json
+          yc config set cloud-id "$YC_CLOUD_ID"
+          yc config set folder-id "$YC_FOLDER_ID"
+
+      - name: Export Yandex YDB results
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOKEN="$(yc iam create-token)"
+          if [ -z "$TOKEN" ]; then
+            echo "Unable to create Yandex IAM token for YDB export." >&2
+            exit 1
+          fi
+          if [ -z "${YDB_CONNECTION_STRING:-}" ]; then
+            echo "YDB_CONNECTION_STRING secret is empty." >&2
+            exit 1
+          fi
+          mkdir -p .cloudflare-migration/yandex-export
+          STORAGE_BACKEND=ydb \
+          YDB_ACCESS_TOKEN_CREDENTIALS="$TOKEN" \
+          YDB_AUTO_CREATE_TABLES=false \
+          node scripts/export-cloudflare-migration.js .cloudflare-migration/yandex-export
+
+      - name: Summarize export
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("fs");
+          const manifest = JSON.parse(fs.readFileSync(".cloudflare-migration/yandex-export/manifest.json", "utf8"));
+          const attempts = manifest.attempts || [];
+          const pm01 = attempts.filter((attempt) => attempt.olympiadId === "pm01-2026-exam");
+          const old = attempts.length - pm01.length;
+          const groups = Array.from(new Set(attempts.map((attempt) => attempt.participant && attempt.participant.groupName).filter(Boolean))).sort();
+          const dates = attempts.map((attempt) => attempt.startedAt || attempt.finishedAt).filter(Boolean).sort();
+          console.log(JSON.stringify({
+            attempts: attempts.length,
+            pm01: pm01.length,
+            old,
+            voices: (manifest.voices || []).length,
+            adminSessions: (manifest.adminSessions || []).length,
+            contentDrafts: Object.keys(manifest.contentDrafts || {}).length,
+            contentQuestions: Object.keys(manifest.contentQuestions || {}).length,
+            first: dates[0] || "",
+            last: dates[dates.length - 1] || "",
+            groups
+          }, null, 2));
+          NODE
+
+      - name: Upload migration artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: yandex-cloudflare-migration-export
+          path: .cloudflare-migration/yandex-export
+          retention-days: 7
+
+      - name: Import into Cloudflare D1
+        if: github.event.inputs.import_to_cloudflare == 'true'
+        run: node scripts/import-cloudflare-migration.js .cloudflare-migration/yandex-export
+
+      - name: Verify Cloudflare D1 counts
+        if: github.event.inputs.import_to_cloudflare == 'true'
+        shell: bash
+        run: |
+          npx wrangler d1 info "$CLOUDFLARE_D1_DATABASE" --json
+          npx wrangler d1 execute "$CLOUDFLARE_D1_DATABASE" --remote --command "SELECT (SELECT COUNT(*) FROM attempts) AS attempts, (SELECT COUNT(*) FROM attempt_answers) AS attempt_answers, (SELECT COUNT(*) FROM attempt_variants) AS attempt_variants, (SELECT COUNT(*) FROM pm01_voice_index) AS voice_records;"

@@ -7,6 +7,9 @@ const { spawnSync } = require("child_process");
 const inputDir = path.resolve(process.argv[2] || path.join(".cloudflare-migration", "export"));
 const databaseName = process.env.CLOUDFLARE_D1_DATABASE || "olympiad-gkts-db";
 const bucketName = process.env.CLOUDFLARE_R2_BUCKET || "olympiad-gkts-voice";
+const importVoiceToR2 = ["1", "true", "yes", "on"].includes(
+  String(process.env.CLOUDFLARE_IMPORT_VOICE_TO_R2 || "").trim().toLowerCase()
+);
 const manifestPath = path.join(inputDir, "manifest.json");
 
 function sqlString(value) {
@@ -88,9 +91,21 @@ ON CONFLICT(attempt_id, question_id) DO UPDATE SET payload_json = excluded.paylo
   }
 
   for (const voice of manifest.voices || []) {
-    lines.push(`INSERT INTO pm01_voice_index (audio_id, payload_json, object_key, updated_at)
-VALUES (${sqlString(voice.id)}, ${jsonSql(voice)}, ${sqlString(voice.objectKey)}, datetime('now'))
-ON CONFLICT(audio_id) DO UPDATE SET payload_json = excluded.payload_json, object_key = excluded.object_key, updated_at = excluded.updated_at;`);
+    const filePath = path.join(inputDir, voice.file || "");
+    const audioBase64 = !importVoiceToR2 && fs.existsSync(filePath)
+      ? fs.readFileSync(filePath).toString("base64")
+      : "";
+    const payload = {
+      ...voice,
+      storage: importVoiceToR2 ? "r2" : "d1"
+    };
+    lines.push(`INSERT INTO pm01_voice_index (audio_id, payload_json, object_key, audio_base64, updated_at)
+VALUES (${sqlString(voice.id)}, ${jsonSql(payload)}, ${sqlString(voice.objectKey)}, ${sqlString(audioBase64)}, datetime('now'))
+ON CONFLICT(audio_id) DO UPDATE SET
+  payload_json = excluded.payload_json,
+  object_key = excluded.object_key,
+  audio_base64 = excluded.audio_base64,
+  updated_at = excluded.updated_at;`);
   }
 
   lines.push("COMMIT;");
@@ -109,7 +124,7 @@ function main() {
   run("npx", ["wrangler", "d1", "migrations", "apply", databaseName, "--remote"]);
   run("npx", ["wrangler", "d1", "execute", databaseName, "--remote", "--file", sqlPath]);
 
-  for (const voice of manifest.voices || []) {
+  for (const voice of importVoiceToR2 ? manifest.voices || [] : []) {
     const filePath = path.join(inputDir, voice.file || "");
     if (!fs.existsSync(filePath)) {
       throw new Error(`Voice file not found: ${filePath}`);
@@ -122,7 +137,7 @@ function main() {
       {
         ok: true,
         databaseName,
-        bucketName,
+        voiceStorage: importVoiceToR2 ? `r2:${bucketName}` : "d1",
         attempts: (manifest.attempts || []).length,
         voices: (manifest.voices || []).length
       },
