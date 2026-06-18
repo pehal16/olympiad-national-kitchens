@@ -13,6 +13,7 @@
     "export:content": "node scripts/export-content-catalog.js",
     "verify:pm01": "node scripts/verify-pm01-production.js",
     "generate:pm01-visuals": "node scripts/generate-pm01-extended-assets.js",
+    "generate:pm01-vegetable-photos": "python scripts/generate-pm01-vegetable-photo-assets.py",
     "build:cloudflare": "node scripts/build-cloudflare-pages.js",
     "verify:cloudflare": "node scripts/verify-pm01-production.js",
     "cloudflare:export": "node scripts/export-cloudflare-migration.js",

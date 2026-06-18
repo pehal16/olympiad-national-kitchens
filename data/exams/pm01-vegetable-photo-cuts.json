@@ -1,0 +1,502 @@
+[
+  {
+    "id": "carrotJulienne",
+    "slug": "carrot-julienne",
+    "category": "sticks",
+    "title": "Морковь julienne",
+    "detail": "Соломка: длинные ровные полоски примерно 2-3 мм, для салатов, гарниров и быстрой тепловой обработки.",
+    "image": "/assets/pm01/vegetables-photo/sticks/carrot-julienne.png",
+    "source": "/assets/pm01/cuts/julienne.png",
+    "crop": [0.02, 0.02, 0.55, 0.98]
+  },
+  {
+    "id": "zucchiniJulienne",
+    "slug": "zucchini-julienne",
+    "category": "sticks",
+    "title": "Кабачок julienne",
+    "detail": "Соломка из кабачка: тонкие длинные полоски одинаковой толщины, форма относится к базовой julienne.",
+    "image": "/assets/pm01/vegetables-photo/sticks/zucchini-julienne.png",
+    "source": "/assets/pm01/cuts/julienne.png",
+    "crop": [0.45, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "mixedJulienne",
+    "slug": "mixed-julienne",
+    "category": "sticks",
+    "title": "Смешанная julienne",
+    "detail": "Две партии овощной соломки: удобно сравнивать одинаковую форму на разных овощах.",
+    "image": "/assets/pm01/vegetables-photo/sticks/mixed-julienne.png",
+    "source": "/assets/pm01/cuts/julienne.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "carrotFineJulienne",
+    "slug": "carrot-fine-julienne",
+    "category": "sticks",
+    "title": "Морковь fine julienne",
+    "detail": "Тонкая соломка: более мелкая версия julienne для аккуратной подачи и холодных блюд.",
+    "image": "/assets/pm01/vegetables-photo/sticks/carrot-fine-julienne.png",
+    "source": "/assets/pm01/cuts/fine-julienne.png",
+    "crop": [0.02, 0.03, 0.55, 0.97]
+  },
+  {
+    "id": "zucchiniFineJulienne",
+    "slug": "zucchini-fine-julienne",
+    "category": "sticks",
+    "title": "Кабачок fine julienne",
+    "detail": "Тонкие полоски кабачка: форма должна быть ровной, без широких ломтиков и разной толщины.",
+    "image": "/assets/pm01/vegetables-photo/sticks/zucchini-fine-julienne.png",
+    "source": "/assets/pm01/cuts/fine-julienne.png",
+    "crop": [0.43, 0.03, 0.98, 0.97]
+  },
+  {
+    "id": "potatoAllumette",
+    "slug": "potato-allumette",
+    "category": "sticks",
+    "title": "Картофель allumette",
+    "detail": "Нарезка «спичками»: тонкие ровные палочки картофеля для жарки.",
+    "image": "/assets/pm01/vegetables-photo/sticks/potato-allumette.png",
+    "source": "/assets/pm01/cuts/allumette.png",
+    "crop": [0.20, 0.05, 0.90, 0.95]
+  },
+  {
+    "id": "potatoBatonnet",
+    "slug": "potato-batonnet",
+    "category": "sticks",
+    "title": "Картофель batonnet",
+    "detail": "Брусочки: более крупные ровные палочки, применяются для картофеля и овощных гарниров.",
+    "image": "/assets/pm01/vegetables-photo/sticks/potato-batonnet.png",
+    "source": "/assets/pm01/cuts/batonnet.png",
+    "crop": [0.18, 0.10, 0.95, 0.92]
+  },
+  {
+    "id": "carrotJardiniere",
+    "slug": "carrot-jardiniere",
+    "category": "sticks",
+    "title": "Морковь jardiniere",
+    "detail": "Овощные брусочки jardiniere: ровная длина и толщина для супов и гарниров.",
+    "image": "/assets/pm01/vegetables-photo/sticks/carrot-jardiniere.png",
+    "source": "/assets/pm01/cuts/jardiniere.png",
+    "crop": [0.02, 0.10, 0.38, 0.92]
+  },
+  {
+    "id": "potatoJardiniere",
+    "slug": "potato-jardiniere",
+    "category": "sticks",
+    "title": "Картофель jardiniere",
+    "detail": "Ровные картофельные брусочки учебного размера, без клиновидных концов.",
+    "image": "/assets/pm01/vegetables-photo/sticks/potato-jardiniere.png",
+    "source": "/assets/pm01/cuts/jardiniere.png",
+    "crop": [0.30, 0.10, 0.68, 0.92]
+  },
+  {
+    "id": "zucchiniJardiniere",
+    "slug": "zucchini-jardiniere",
+    "category": "sticks",
+    "title": "Кабачок jardiniere",
+    "detail": "Овощные брусочки из кабачка: пример той же формы на мягком овоще.",
+    "image": "/assets/pm01/vegetables-photo/sticks/zucchini-jardiniere.png",
+    "source": "/assets/pm01/cuts/jardiniere.png",
+    "crop": [0.60, 0.10, 0.98, 0.92]
+  },
+  {
+    "id": "carrotBrunoise",
+    "slug": "carrot-brunoise",
+    "category": "cubes",
+    "title": "Морковь brunoise",
+    "detail": "Мелкие кубики brunoise: обычно получают из ровной соломки julienne.",
+    "image": "/assets/pm01/vegetables-photo/cubes/carrot-brunoise.png",
+    "source": "/assets/pm01/cuts/brunoise.png",
+    "crop": [0.00, 0.02, 0.30, 0.98]
+  },
+  {
+    "id": "celeryBrunoise",
+    "slug": "celery-brunoise",
+    "category": "cubes",
+    "title": "Сельдерей brunoise",
+    "detail": "Мелкие кубики сельдерея: форма должна быть одинаковой, без длинных брусков.",
+    "image": "/assets/pm01/vegetables-photo/cubes/celery-brunoise.png",
+    "source": "/assets/pm01/cuts/brunoise.png",
+    "crop": [0.25, 0.02, 0.55, 0.98]
+  },
+  {
+    "id": "onionBrunoise",
+    "slug": "onion-brunoise",
+    "category": "cubes",
+    "title": "Лук brunoise",
+    "detail": "Мелкие кубики лука для соусов, фаршей и начинок.",
+    "image": "/assets/pm01/vegetables-photo/cubes/onion-brunoise.png",
+    "source": "/assets/pm01/cuts/brunoise.png",
+    "crop": [0.48, 0.02, 0.78, 0.98]
+  },
+  {
+    "id": "zucchiniBrunoise",
+    "slug": "zucchini-brunoise",
+    "category": "cubes",
+    "title": "Кабачок brunoise",
+    "detail": "Мелкие кубики кабачка: учебный пример brunoise на зеленом овоще.",
+    "image": "/assets/pm01/vegetables-photo/cubes/zucchini-brunoise.png",
+    "source": "/assets/pm01/cuts/brunoise.png",
+    "crop": [0.72, 0.02, 1.00, 0.98]
+  },
+  {
+    "id": "mixedBrunoise",
+    "slug": "mixed-brunoise",
+    "category": "cubes",
+    "title": "Смешанная brunoise",
+    "detail": "Сравнение brunoise из разных овощей: одинаковый мелкий кубик при разном цвете сырья.",
+    "image": "/assets/pm01/vegetables-photo/cubes/mixed-brunoise.png",
+    "source": "/assets/pm01/cuts/brunoise.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "carrotFineBrunoise",
+    "slug": "carrot-fine-brunoise",
+    "category": "cubes",
+    "title": "Морковь fine brunoise",
+    "detail": "Очень мелкие кубики: более тонкая версия brunoise для деликатной подачи.",
+    "image": "/assets/pm01/vegetables-photo/cubes/carrot-fine-brunoise.png",
+    "source": "/assets/pm01/cuts/fine-brunoise.png",
+    "crop": [0.00, 0.02, 0.30, 0.98]
+  },
+  {
+    "id": "celeryFineBrunoise",
+    "slug": "celery-fine-brunoise",
+    "category": "cubes",
+    "title": "Сельдерей fine brunoise",
+    "detail": "Очень мелкий кубик сельдерея: важно сохранить равномерность, а не получить крошку.",
+    "image": "/assets/pm01/vegetables-photo/cubes/celery-fine-brunoise.png",
+    "source": "/assets/pm01/cuts/fine-brunoise.png",
+    "crop": [0.25, 0.02, 0.55, 0.98]
+  },
+  {
+    "id": "onionFineBrunoise",
+    "slug": "onion-fine-brunoise",
+    "category": "cubes",
+    "title": "Лук fine brunoise",
+    "detail": "Очень мелкие кубики лука для соусов, начинок и холодных закусок.",
+    "image": "/assets/pm01/vegetables-photo/cubes/onion-fine-brunoise.png",
+    "source": "/assets/pm01/cuts/fine-brunoise.png",
+    "crop": [0.48, 0.02, 0.78, 0.98]
+  },
+  {
+    "id": "zucchiniFineBrunoise",
+    "slug": "zucchini-fine-brunoise",
+    "category": "cubes",
+    "title": "Кабачок fine brunoise",
+    "detail": "Очень мелкие кубики кабачка: учебное сравнение с обычной brunoise.",
+    "image": "/assets/pm01/vegetables-photo/cubes/zucchini-fine-brunoise.png",
+    "source": "/assets/pm01/cuts/fine-brunoise.png",
+    "crop": [0.72, 0.02, 1.00, 0.98]
+  },
+  {
+    "id": "mixedFineBrunoise",
+    "slug": "mixed-fine-brunoise",
+    "category": "cubes",
+    "title": "Смешанная fine brunoise",
+    "detail": "Набор очень мелких кубиков: помогает отличить fine brunoise от обычной brunoise.",
+    "image": "/assets/pm01/vegetables-photo/cubes/mixed-fine-brunoise.png",
+    "source": "/assets/pm01/cuts/fine-brunoise.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "carrotMacedoine",
+    "slug": "carrot-macedoine",
+    "category": "cubes",
+    "title": "Морковь macedoine",
+    "detail": "Средние кубики macedoine: крупнее brunoise, подходят для салатов и гарниров.",
+    "image": "/assets/pm01/vegetables-photo/cubes/carrot-macedoine.png",
+    "source": "/assets/pm01/cuts/macedoine.png",
+    "crop": [0.00, 0.05, 0.32, 0.95]
+  },
+  {
+    "id": "potatoMacedoine",
+    "slug": "potato-macedoine",
+    "category": "cubes",
+    "title": "Картофель macedoine",
+    "detail": "Средний картофельный кубик для салатов, винегретов и смешанных гарниров.",
+    "image": "/assets/pm01/vegetables-photo/cubes/potato-macedoine.png",
+    "source": "/assets/pm01/cuts/macedoine.png",
+    "crop": [0.24, 0.05, 0.56, 0.95]
+  },
+  {
+    "id": "celeryMacedoine",
+    "slug": "celery-macedoine",
+    "category": "cubes",
+    "title": "Сельдерей macedoine",
+    "detail": "Средний кубик сельдерея: пример macedoine на светло-зеленом овоще.",
+    "image": "/assets/pm01/vegetables-photo/cubes/celery-macedoine.png",
+    "source": "/assets/pm01/cuts/macedoine.png",
+    "crop": [0.44, 0.05, 0.76, 0.95]
+  },
+  {
+    "id": "zucchiniMacedoine",
+    "slug": "zucchini-macedoine",
+    "category": "cubes",
+    "title": "Кабачок macedoine",
+    "detail": "Средние кубики кабачка с кожицей: форма видна по цветному краю.",
+    "image": "/assets/pm01/vegetables-photo/cubes/zucchini-macedoine.png",
+    "source": "/assets/pm01/cuts/macedoine.png",
+    "crop": [0.68, 0.05, 1.00, 0.95]
+  },
+  {
+    "id": "mixedMacedoine",
+    "slug": "mixed-macedoine",
+    "category": "cubes",
+    "title": "Смешанная macedoine",
+    "detail": "Сравнение средних кубиков разных овощей: ровный размер важнее цвета продукта.",
+    "image": "/assets/pm01/vegetables-photo/cubes/mixed-macedoine.png",
+    "source": "/assets/pm01/cuts/macedoine.png",
+    "crop": [0.02, 0.05, 0.98, 0.95]
+  },
+  {
+    "id": "potatoParmentier",
+    "slug": "potato-parmentier-photo",
+    "category": "cubes",
+    "title": "Картофель parmentier",
+    "detail": "Картофель средним кубиком: учебная форма для равномерного прогрева.",
+    "image": "/assets/pm01/vegetables-photo/cubes/potato-parmentier-photo.png",
+    "source": "/assets/pm01/cuts/medium-cubes.png",
+    "crop": [0.18, 0.05, 0.92, 0.95]
+  },
+  {
+    "id": "potatoLargeCubes",
+    "slug": "potato-large-cubes",
+    "category": "cubes",
+    "title": "Картофель крупным кубиком",
+    "detail": "Крупные ровные кубики: используют для тушения, супов и гарниров.",
+    "image": "/assets/pm01/vegetables-photo/cubes/potato-large-cubes.png",
+    "source": "/assets/pm01/cuts/large-cubes.png",
+    "crop": [0.20, 0.05, 0.92, 0.95]
+  },
+  {
+    "id": "carrotMirepoix",
+    "slug": "carrot-mirepoix",
+    "category": "cubes",
+    "title": "Морковь mirepoix",
+    "detail": "Крупная ароматическая нарезка: не для точной подачи, а для бульонов и соусов.",
+    "image": "/assets/pm01/vegetables-photo/cubes/carrot-mirepoix.png",
+    "source": "/assets/pm01/cuts/mirepoix.png",
+    "crop": [0.00, 0.02, 0.34, 0.98]
+  },
+  {
+    "id": "onionMirepoix",
+    "slug": "onion-mirepoix",
+    "category": "cubes",
+    "title": "Лук mirepoix",
+    "detail": "Крупная нарезка лука для ароматической основы бульонов и тушения.",
+    "image": "/assets/pm01/vegetables-photo/cubes/onion-mirepoix.png",
+    "source": "/assets/pm01/cuts/mirepoix.png",
+    "crop": [0.29, 0.02, 0.66, 0.98]
+  },
+  {
+    "id": "celeryMirepoix",
+    "slug": "celery-mirepoix",
+    "category": "cubes",
+    "title": "Сельдерей mirepoix",
+    "detail": "Крупная нарезка сельдерея: часть классической ароматической овощной основы.",
+    "image": "/assets/pm01/vegetables-photo/cubes/celery-mirepoix.png",
+    "source": "/assets/pm01/cuts/mirepoix.png",
+    "crop": [0.58, 0.02, 1.00, 0.98]
+  },
+  {
+    "id": "mixedMirepoix",
+    "slug": "mixed-mirepoix",
+    "category": "cubes",
+    "title": "Овощная основа mirepoix",
+    "detail": "Смесь моркови, лука и сельдерея крупной нарезкой для бульона или соуса.",
+    "image": "/assets/pm01/vegetables-photo/cubes/mixed-mirepoix.png",
+    "source": "/assets/pm01/cuts/mirepoix.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "carrotRondelle",
+    "slug": "carrot-rondelle",
+    "category": "slices",
+    "title": "Морковь rondelle",
+    "detail": "Кружочки: поперечная нарезка цилиндрического овоща.",
+    "image": "/assets/pm01/vegetables-photo/slices/carrot-rondelle.png",
+    "source": "/assets/pm01/cuts/rondelle.png",
+    "crop": [0.00, 0.02, 0.38, 0.98]
+  },
+  {
+    "id": "cucumberRondelle",
+    "slug": "cucumber-rondelle",
+    "category": "slices",
+    "title": "Огурец rondelle",
+    "detail": "Кружочки огурца: форма получается поперечным резом.",
+    "image": "/assets/pm01/vegetables-photo/slices/cucumber-rondelle.png",
+    "source": "/assets/pm01/cuts/rondelle.png",
+    "crop": [0.32, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "mixedRondelle",
+    "slug": "mixed-rondelle",
+    "category": "slices",
+    "title": "Смешанные rondelle",
+    "detail": "Кружочки разных овощей: одинаковый принцип поперечной нарезки.",
+    "image": "/assets/pm01/vegetables-photo/slices/mixed-rondelle.png",
+    "source": "/assets/pm01/cuts/rondelle.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "onionRings",
+    "slug": "onion-rings",
+    "category": "slices",
+    "title": "Лук кольцами",
+    "detail": "Кольца лука: поперечная нарезка целой луковицы.",
+    "image": "/assets/pm01/vegetables-photo/slices/onion-rings.png",
+    "source": "/assets/pm01/cuts/rings.png",
+    "crop": [0.05, 0.05, 0.95, 0.95]
+  },
+  {
+    "id": "onionHalfRings",
+    "slug": "onion-half-rings",
+    "category": "slices",
+    "title": "Лук полукольцами",
+    "detail": "Полукольца: луковицу разрезают пополам и нарезают поперек.",
+    "image": "/assets/pm01/vegetables-photo/slices/onion-half-rings.png",
+    "source": "/assets/pm01/cuts/half-rings.png",
+    "crop": [0.10, 0.05, 0.96, 0.95]
+  },
+  {
+    "id": "carrotPaysanne",
+    "slug": "carrot-paysanne",
+    "category": "slices",
+    "title": "Морковь paysanne",
+    "detail": "Paysanne: тонкие пластинки, форма повторяет сечение овоща.",
+    "image": "/assets/pm01/vegetables-photo/slices/carrot-paysanne.png",
+    "source": "/assets/pm01/cuts/paysanne.png",
+    "crop": [0.00, 0.05, 0.35, 0.95]
+  },
+  {
+    "id": "potatoPaysanne",
+    "slug": "potato-paysanne",
+    "category": "slices",
+    "title": "Картофель paysanne",
+    "detail": "Тонкие картофельные пластинки для быстрого прогрева.",
+    "image": "/assets/pm01/vegetables-photo/slices/potato-paysanne.png",
+    "source": "/assets/pm01/cuts/paysanne.png",
+    "crop": [0.30, 0.05, 0.68, 0.95]
+  },
+  {
+    "id": "zucchiniPaysanne",
+    "slug": "zucchini-paysanne",
+    "category": "slices",
+    "title": "Кабачок paysanne",
+    "detail": "Тонкие пластинки кабачка: учебный пример paysanne на зеленом овоще.",
+    "image": "/assets/pm01/vegetables-photo/slices/zucchini-paysanne.png",
+    "source": "/assets/pm01/cuts/paysanne.png",
+    "crop": [0.58, 0.05, 1.00, 0.95]
+  },
+  {
+    "id": "mixedPaysanne",
+    "slug": "mixed-paysanne",
+    "category": "slices",
+    "title": "Смешанная paysanne",
+    "detail": "Набор тонких пластинок: видно, что форма меняется вместе с формой овоща.",
+    "image": "/assets/pm01/vegetables-photo/slices/mixed-paysanne.png",
+    "source": "/assets/pm01/cuts/paysanne.png",
+    "crop": [0.02, 0.05, 0.98, 0.95]
+  },
+  {
+    "id": "potatoThinSlices",
+    "slug": "potato-thin-slices",
+    "category": "slices",
+    "title": "Картофель ломтиками",
+    "detail": "Ломтики: плоская нарезка без клиновидной формы дольки.",
+    "image": "/assets/pm01/vegetables-photo/slices/potato-thin-slices.png",
+    "source": "/assets/pm01/cuts/paysanne.png",
+    "crop": [0.31, 0.10, 0.69, 0.90]
+  },
+  {
+    "id": "carrotThinSlices",
+    "slug": "carrot-thin-slices",
+    "category": "slices",
+    "title": "Морковь ломтиками",
+    "detail": "Тонкие пластинки моркови: базовая форма нарезки для супов и гарниров.",
+    "image": "/assets/pm01/vegetables-photo/slices/carrot-thin-slices.png",
+    "source": "/assets/pm01/cuts/paysanne.png",
+    "crop": [0.00, 0.10, 0.36, 0.90]
+  },
+  {
+    "id": "cabbageCheckers",
+    "slug": "cabbage-checkers-photo",
+    "category": "leafy",
+    "title": "Капуста шашками",
+    "detail": "Шашки: крупные квадратные куски капусты для тепловой обработки.",
+    "image": "/assets/pm01/vegetables-photo/leafy/cabbage-checkers-photo.png",
+    "source": "/assets/pm01/cuts/shashki.png",
+    "crop": [0.30, 0.05, 0.98, 0.95]
+  },
+  {
+    "id": "cabbageLargeCheckers",
+    "slug": "cabbage-large-checkers",
+    "category": "leafy",
+    "title": "Крупные шашки капусты",
+    "detail": "Крупные квадраты капусты: важно отличать от шинковки и мелкой крошки.",
+    "image": "/assets/pm01/vegetables-photo/leafy/cabbage-large-checkers.png",
+    "source": "/assets/pm01/cuts/shashki.png",
+    "crop": [0.44, 0.08, 0.98, 0.92]
+  },
+  {
+    "id": "greensChiffonade",
+    "slug": "greens-chiffonade-photo",
+    "category": "leafy",
+    "title": "Зелень chiffonade",
+    "detail": "Ленты листовой зелени: тонкая шинковка свернутых листьев.",
+    "image": "/assets/pm01/vegetables-photo/leafy/greens-chiffonade-photo.png",
+    "source": "/assets/pm01/cuts/chiffonade.png",
+    "crop": [0.20, 0.08, 0.92, 0.92]
+  },
+  {
+    "id": "herbChiffonade",
+    "slug": "herb-chiffonade",
+    "category": "leafy",
+    "title": "Травы chiffonade",
+    "detail": "Тонкие ленты зелени для оформления, салатов и холодных блюд.",
+    "image": "/assets/pm01/vegetables-photo/leafy/herb-chiffonade.png",
+    "source": "/assets/pm01/cuts/chiffonade.png",
+    "crop": [0.30, 0.12, 0.88, 0.88]
+  },
+  {
+    "id": "carrotShavings",
+    "slug": "carrot-shavings",
+    "category": "basic",
+    "title": "Морковь стружкой",
+    "detail": "Стружка: тонкие длинные срезы овоща, не кубик и не соломка.",
+    "image": "/assets/pm01/vegetables-photo/basic/carrot-shavings.png",
+    "source": "/assets/pm01/cuts/shavings.png",
+    "crop": [0.18, 0.05, 0.96, 0.95]
+  },
+  {
+    "id": "carrotThinShavings",
+    "slug": "carrot-thin-shavings",
+    "category": "basic",
+    "title": "Тонкая морковная стружка",
+    "detail": "Тонкие срезы моркови: учебное отличие от ровной julienne.",
+    "image": "/assets/pm01/vegetables-photo/basic/carrot-thin-shavings.png",
+    "source": "/assets/pm01/cuts/shavings.png",
+    "crop": [0.30, 0.08, 0.98, 0.92]
+  },
+  {
+    "id": "potatoBalls",
+    "slug": "potato-balls",
+    "category": "basic",
+    "title": "Картофель шариками",
+    "detail": "Шарики картофеля: простая фигурная форма, встречается в учебных таблицах гарниров.",
+    "image": "/assets/pm01/vegetables-photo/basic/potato-balls.png",
+    "source": "/assets/pm01/cuts/balls.png",
+    "crop": [0.10, 0.05, 0.92, 0.95]
+  },
+  {
+    "id": "potatoWedges",
+    "slug": "potato-wedges-photo",
+    "category": "basic",
+    "title": "Картофель дольками",
+    "detail": "Дольки: клиновидные части картофеля для запекания, тушения или жарки.",
+    "image": "/assets/pm01/vegetables-photo/basic/potato-wedges-photo.png",
+    "source": "/assets/pm01/cuts/wedges.png",
+    "crop": [0.10, 0.05, 0.98, 0.95]
+  }
+]

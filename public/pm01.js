@@ -454,7 +454,7 @@
     const image = document.createElement("img");
     image.src = item.image;
     image.alt = item.title;
-    image.loading = "lazy";
+    image.loading = compact ? "lazy" : "eager";
     image.decoding = "async";
     const copy = document.createElement("span");
     const title = document.createElement("strong");
@@ -497,7 +497,8 @@
       groupTitle.textContent = category.title;
       const grid = document.createElement("div");
       grid.className = "visual-atlas-thumbs";
-      (category.items || []).slice(0, 5).forEach((item) => {
+      const displayLimit = Number.isFinite(category.displayLimit) ? category.displayLimit : 5;
+      (category.items || []).slice(0, displayLimit).forEach((item) => {
         grid.appendChild(createVisualAtlasThumb(item));
       });
       group.append(groupTitle, grid);
@@ -509,7 +510,7 @@
 
   function visualAtlasCategoryIdForVariant(variantId) {
     const map = {
-      vegetables: "extended-cuts",
+      vegetables: "vegetable-photo-cuts",
       fish: "extended-fish",
       meat: "extended-meat",
       poultry: "extended-poultry",

@@ -419,7 +419,7 @@ h3 {
 }
 
 .visual-atlas-group {
-  min-width: min(520px, 88vw);
+  min-width: min(660px, 88vw);
   display: grid;
   gap: 8px;
   scroll-snap-align: start;
@@ -2952,6 +2952,38 @@ tr[data-attempt-id].is-selected {
 
   .module-step.is-done {
     border-top-color: var(--blue);
+  }
+
+  .visual-atlas-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .visual-atlas-group {
+    min-width: 100%;
+  }
+
+  .visual-atlas-thumbs {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+
+  .visual-atlas-card {
+    flex: 0 0 132px;
+    scroll-snap-align: start;
+  }
+
+  .visual-atlas-card strong {
+    font-size: 12px;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .visual-atlas-card small {
+    font-size: 10px;
   }
 
   .task-head,

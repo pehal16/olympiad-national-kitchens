@@ -1,3 +1,10 @@
+const vegetablePhotoCutSourceItems = require("./pm01-vegetable-photo-cuts.json");
+
+const vegetablePhotoCutItems = vegetablePhotoCutSourceItems.map(({ source, crop, ...item }) => item);
+const vegetablePhotoCutAssets = Object.fromEntries(
+  vegetablePhotoCutItems.map((item) => [item.id, item.image])
+);
+
 function option(id, text, isCorrect = false) {
   return { id, text, isCorrect };
 }
@@ -136,7 +143,7 @@ const classicFrenchCutBuckets = [
     "juliennePhoto",
     "длинные тонкие полоски",
     {
-      image: "/assets/pm01/cuts/julienne.png",
+      image: vegetablePhotoCutAssets.carrotJulienne,
       visualTitle: "Julienne",
       detail: "Ровная соломка для салатов, гарниров и быстрой тепловой обработки."
     }
@@ -145,7 +152,7 @@ const classicFrenchCutBuckets = [
     "fineJuliennePhoto",
     "очень тонкие полоски",
     {
-      image: "/assets/pm01/cuts/fine-julienne.png",
+      image: vegetablePhotoCutAssets.carrotFineJulienne,
       visualTitle: "Fine julienne",
       detail: "Более тонкая соломка для аккуратной подачи, тонких гарниров и украшения."
     }
@@ -154,7 +161,7 @@ const classicFrenchCutBuckets = [
     "allumettePhoto",
     "тонкие спички",
     {
-      image: "/assets/pm01/cuts/allumette.png",
+      image: vegetablePhotoCutAssets.potatoAllumette,
       visualTitle: "Allumette",
       detail: "Нарезка «спичками»: тонкие ровные палочки, часто используется для картофеля и корнеплодов."
     }
@@ -163,7 +170,7 @@ const classicFrenchCutBuckets = [
     "batonnetPhoto",
     "классические бруски",
     {
-      image: "/assets/pm01/cuts/batonnet.png",
+      image: vegetablePhotoCutAssets.potatoBatonnet,
       visualTitle: "Batonnet",
       detail: "Продолговатые бруски одинаковой толщины для картофеля, моркови, супов и гарниров."
     }
@@ -172,7 +179,7 @@ const classicFrenchCutBuckets = [
     "jardinierePhoto",
     "аккуратные овощные брусочки",
     {
-      image: "/assets/pm01/cuts/jardiniere.png",
+      image: vegetablePhotoCutAssets.carrotJardiniere,
       visualTitle: "Jardiniere",
       detail: "Ровные овощные брусочки для гарниров, супов и демонстрации точности ножевой работы."
     }
@@ -181,7 +188,7 @@ const classicFrenchCutBuckets = [
     "brunoisePhoto",
     "мелкие кубики",
     {
-      image: "/assets/pm01/cuts/brunoise.png",
+      image: vegetablePhotoCutAssets.carrotBrunoise,
       visualTitle: "Brunoise",
       detail: "Мелкие равномерные кубики, получаемые из julienne, для соусов, начинок и точной подачи."
     }
@@ -190,7 +197,7 @@ const classicFrenchCutBuckets = [
     "fineBrunoisePhoto",
     "очень мелкие кубики",
     {
-      image: "/assets/pm01/cuts/fine-brunoise.png",
+      image: vegetablePhotoCutAssets.carrotFineBrunoise,
       visualTitle: "Fine brunoise",
       detail: "Максимально мелкая кубиковая нарезка для деликатной текстуры и оформления."
     }
@@ -199,7 +206,7 @@ const classicFrenchCutBuckets = [
     "macedoinePhoto",
     "средние ровные кубики",
     {
-      image: "/assets/pm01/cuts/macedoine.png",
+      image: vegetablePhotoCutAssets.mixedMacedoine,
       visualTitle: "Macedoine",
       detail: "Средние кубики для салатов, винегретов, гарниров и полуфабрикатов с ровным прогревом."
     }
@@ -208,7 +215,7 @@ const classicFrenchCutBuckets = [
     "paysannePhoto",
     "тонкие пластинки разной геометрии",
     {
-      image: "/assets/pm01/cuts/paysanne.png",
+      image: vegetablePhotoCutAssets.mixedPaysanne,
       visualTitle: "Paysanne",
       detail: "Тонкие пластинки, форма которых повторяет овощ: кружок, квадрат, треугольник или сектор."
     }
@@ -217,7 +224,7 @@ const classicFrenchCutBuckets = [
     "rondellePhoto",
     "круглые поперечные ломтики",
     {
-      image: "/assets/pm01/cuts/rondelle.png",
+      image: vegetablePhotoCutAssets.mixedRondelle,
       visualTitle: "Rondelle",
       detail: "Поперечные кружочки моркови, кабачка, огурца и других цилиндрических овощей."
     }
@@ -226,7 +233,7 @@ const classicFrenchCutBuckets = [
     "chiffonadePhoto",
     "тонкие ленты листьев",
     {
-      image: "/assets/pm01/cuts/chiffonade.png",
+      image: vegetablePhotoCutAssets.greensChiffonade,
       visualTitle: "Chiffonade",
       detail: "Ленты из листовой зелени или салатных листьев для холодных блюд, супов и оформления."
     }
@@ -235,7 +242,7 @@ const classicFrenchCutBuckets = [
     "mirepoixPhoto",
     "крупная ароматическая нарезка",
     {
-      image: "/assets/pm01/cuts/mirepoix.png",
+      image: vegetablePhotoCutAssets.mixedMirepoix,
       visualTitle: "Mirepoix",
       detail: "Крупные кусочки овощей для ароматической основы бульонов, соусов и тушения."
     }
@@ -244,7 +251,7 @@ const classicFrenchCutBuckets = [
     "slicesPhoto",
     "плоские ломтики",
     {
-      image: "/assets/pm01/cuts/slices.png",
+      image: vegetablePhotoCutAssets.potatoThinSlices,
       visualTitle: "Ломтики",
       detail: "Плоские овальные или полукруглые пластины, не клиновидные дольки."
     }
@@ -253,7 +260,7 @@ const classicFrenchCutBuckets = [
     "wedgesPhoto",
     "клиновидные дольки",
     {
-      image: "/assets/pm01/cuts/wedges.png",
+      image: vegetablePhotoCutAssets.potatoWedges,
       visualTitle: "Дольки",
       detail: "Клиновидные части картофеля, томатов и корнеплодов для запекания и тушения."
     }
@@ -296,7 +303,7 @@ const cutApplicationBuckets = [
     "fastCook",
     "салаты, гарниры и быстрая тепловая обработка",
     {
-      image: "/assets/pm01/cuts/julienne.png",
+      image: vegetablePhotoCutAssets.carrotJulienne,
       visualTitle: "Соломка",
       detail: "Длинная ровная нарезка быстро прогревается и выглядит аккуратно в гарнире."
     }
@@ -305,7 +312,7 @@ const cutApplicationBuckets = [
     "fries",
     "картофельные заготовки для жарки",
     {
-      image: "/assets/pm01/cuts/allumette.png",
+      image: vegetablePhotoCutAssets.potatoAllumette,
       visualTitle: "Спички",
       detail: "Тонкие палочки подходят для мелкой картофельной заготовки и тренируют равномерность ножевой работы."
     }
@@ -314,7 +321,7 @@ const cutApplicationBuckets = [
     "soupsGarnish",
     "супы и гарниры с заметной формой",
     {
-      image: "/assets/pm01/cuts/batonnet.png",
+      image: vegetablePhotoCutAssets.potatoBatonnet,
       visualTitle: "Брусочки",
       detail: "Брусочки держат форму лучше тонкой соломки и удобны для овощных полуфабрикатов."
     }
@@ -323,7 +330,7 @@ const cutApplicationBuckets = [
     "sauces",
     "соусы, начинки и аккуратная подача",
     {
-      image: "/assets/pm01/cuts/brunoise.png",
+      image: vegetablePhotoCutAssets.carrotBrunoise,
       visualTitle: "Мелкие кубики",
       detail: "Мелкие кубики дают ровную текстуру и быстро доходят до готовности."
     }
@@ -332,7 +339,7 @@ const cutApplicationBuckets = [
     "salads",
     "салаты, винегреты и смешанные гарниры",
     {
-      image: "/assets/pm01/cuts/macedoine.png",
+      image: vegetablePhotoCutAssets.mixedMacedoine,
       visualTitle: "Средние кубики",
       detail: "Средние кубики хорошо считываются в салате и дают одинаковый размер кусочков."
     }
@@ -341,7 +348,7 @@ const cutApplicationBuckets = [
     "thinSoup",
     "быстрые супы и равномерное прогревание",
     {
-      image: "/assets/pm01/cuts/paysanne.png",
+      image: vegetablePhotoCutAssets.mixedPaysanne,
       visualTitle: "Тонкие пластинки",
       detail: "Тонкая пластинчатая форма быстро прогревается и может повторять форму овоща."
     }
@@ -350,7 +357,7 @@ const cutApplicationBuckets = [
     "roundVeg",
     "морковь, кабачок, огурец поперек",
     {
-      image: "/assets/pm01/cuts/rondelle.png",
+      image: vegetablePhotoCutAssets.mixedRondelle,
       visualTitle: "Кружочки",
       detail: "Круглая форма получается поперечным срезом цилиндрического овоща."
     }
@@ -359,7 +366,7 @@ const cutApplicationBuckets = [
     "leafGarnish",
     "листовая зелень, холодные блюда и оформление",
     {
-      image: "/assets/pm01/cuts/chiffonade.png",
+      image: vegetablePhotoCutAssets.greensChiffonade,
       visualTitle: "Ленты зелени",
       detail: "Ленты получают из свернутых листьев; форма уместна для зелени, салата и тонкой подачи."
     }
@@ -368,7 +375,7 @@ const cutApplicationBuckets = [
     "stockBase",
     "ароматическая основа бульона или соуса",
     {
-      image: "/assets/pm01/cuts/mirepoix.png",
+      image: vegetablePhotoCutAssets.mixedMirepoix,
       visualTitle: "Крупная основа",
       detail: "Крупная нарезка нужна не для подачи, а для вкусовой основы и дальнейшего удаления/протирания."
     }
@@ -377,7 +384,7 @@ const cutApplicationBuckets = [
     "coldPlate",
     "холодные блюда и плоская нарезка",
     {
-      image: "/assets/pm01/cuts/slices.png",
+      image: vegetablePhotoCutAssets.potatoThinSlices,
       visualTitle: "Ломтики",
       detail: "Плоские ломтики отличаются от дольки тем, что не имеют клиновидной формы."
     }
@@ -386,7 +393,7 @@ const cutApplicationBuckets = [
     "roast",
     "запекание и тушение крупными частями",
     {
-      image: "/assets/pm01/cuts/wedges.png",
+      image: vegetablePhotoCutAssets.potatoWedges,
       visualTitle: "Дольки",
       detail: "Клиновидные дольки хорошо подходят для картофеля, томатов и овощей при запекании."
     }
@@ -472,11 +479,16 @@ const extendedVisualAssets = {
 
 const visualAtlas = [
   {
+    id: "vegetable-photo-cuts",
+    title: "Овощные нарезки",
+    displayLimit: 10,
+    items: vegetablePhotoCutItems
+  },
+  {
     id: "extended-cuts",
     title: "Нарезки",
     items: [
       { title: "Картофель пай", image: extendedVisualAssets.cuts.potatoShoestring, detail: "Тонкая соломка для жарки и гарниров." },
-      { title: "Бочонки", image: extendedVisualAssets.cuts.potatoTourne, detail: "Обточенная форма картофеля для гарнира." },
       { title: "Конкассе", image: extendedVisualAssets.cuts.tomatoConcasse, detail: "Кубики томата без грубой кожицы и семян." },
       { title: "Шашки капусты", image: extendedVisualAssets.cuts.cabbageCheckers, detail: "Крупная овощная нарезка для тепловой обработки." },
       { title: "Полукружья", image: extendedVisualAssets.cuts.cucumberHalfMoons, detail: "Поперечная нарезка половины овоща." }
@@ -707,6 +719,7 @@ module.exports = {
       poultry: "/assets/pm01/violations/poultry.png",
       complex: "/assets/pm01/violations/complex.png"
     },
+    vegetablePhotoCuts: vegetablePhotoCutAssets,
     extendedVisuals: extendedVisualAssets
   },
   visualAtlas,

@@ -616,11 +616,38 @@ test("PM01 extended visual atlas exposes 50 generated cards safely", () => {
   collectExtended(publicData.assetRegistry.extendedVisuals);
 
   assert.equal(extendedPaths.length, 50);
-  assert.equal(publicData.visualAtlas.length, 5);
-  assert.equal(publicData.visualAtlas.every((category) => category.items.length === 5), true);
+  assert.equal(publicData.visualAtlas.length, 6);
+  assert.equal(publicData.visualAtlas.some((category) => category.id === "vegetable-photo-cuts"), true);
   assert.equal(publicData.visualAtlas.some((category) => category.id === "extended-safety"), true);
 
   extendedPaths.forEach((assetPath) => {
+    const fullPath = path.join(__dirname, "..", "public", assetPath.replace(/^\//, ""));
+    assert.equal(fs.existsSync(fullPath), true, `${assetPath} exists`);
+  });
+});
+
+test("PM01 vegetable photo cuts expose 50 textbook-safe vegetable cards", () => {
+  const publicData = getPm01PublicData();
+  const photoCuts = publicData.assetRegistry.vegetablePhotoCuts;
+  const photoPaths = Object.values(photoCuts);
+  const photoAtlas = publicData.visualAtlas.find((category) => category.id === "vegetable-photo-cuts");
+  const bannedAdvanced = /(gaufrette|spiral|star|chateau|cocotte|tourne)/i;
+
+  assert.equal(photoPaths.length, 50);
+  assert.equal(photoAtlas.items.length, 50);
+  assert.equal(photoAtlas.displayLimit, 10);
+  assert.equal(photoAtlas.items.every((item) => item.image.startsWith("/assets/pm01/vegetables-photo/")), true);
+  assert.equal(photoAtlas.items.some((item) => item.title.toLowerCase().includes("julienne")), true);
+  assert.equal(photoAtlas.items.some((item) => item.title.toLowerCase().includes("brunoise")), true);
+  assert.equal(photoAtlas.items.some((item) => item.title.toLowerCase().includes("macedoine")), true);
+  assert.equal(photoAtlas.items.some((item) => item.title.toLowerCase().includes("paysanne")), true);
+  assert.equal(photoAtlas.items.some((item) => item.title.toLowerCase().includes("mirepoix")), true);
+  assert.equal(photoAtlas.items.some((item) => item.title.toLowerCase().includes("rondelle")), true);
+  assert.equal(photoAtlas.items.some((item) => item.title.toLowerCase().includes("шаш")), true);
+  assert.equal(photoAtlas.items.some((item) => item.title.toLowerCase().includes("доль")), true);
+  assert.equal(photoAtlas.items.every((item) => !bannedAdvanced.test(`${item.id} ${item.slug || ""} ${item.title}`)), true);
+
+  photoPaths.forEach((assetPath) => {
     const fullPath = path.join(__dirname, "..", "public", assetPath.replace(/^\//, ""));
     assert.equal(fs.existsSync(fullPath), true, `${assetPath} exists`);
   });
