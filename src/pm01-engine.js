@@ -110,6 +110,7 @@ function getPm01PublicData(exam = pm01Exam) {
     modules: exam.modules,
     formulas: exam.formulas,
     assetRegistry: exam.assetRegistry || {},
+    visualAtlas: exam.visualAtlas || [],
     materials: getPm01MaterialBankPublicData(),
     variants: exam.variants.map((variant) => ({
       id: variant.id,

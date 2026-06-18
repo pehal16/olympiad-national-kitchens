@@ -592,6 +592,40 @@ test("PM01 visual asset registry points to real project files", () => {
   });
 });
 
+test("PM01 extended visual atlas exposes 50 generated cards safely", () => {
+  const publicData = getPm01PublicData(getPm01Exam());
+  const extendedPaths = [];
+
+  function collectExtended(value) {
+    if (!value) {
+      return;
+    }
+    if (typeof value === "string" && value.startsWith("/assets/pm01/extended/")) {
+      extendedPaths.push(value);
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach(collectExtended);
+      return;
+    }
+    if (typeof value === "object") {
+      Object.values(value).forEach(collectExtended);
+    }
+  }
+
+  collectExtended(publicData.assetRegistry.extendedVisuals);
+
+  assert.equal(extendedPaths.length, 50);
+  assert.equal(publicData.visualAtlas.length, 5);
+  assert.equal(publicData.visualAtlas.every((category) => category.items.length === 5), true);
+  assert.equal(publicData.visualAtlas.some((category) => category.id === "extended-safety"), true);
+
+  extendedPaths.forEach((assetPath) => {
+    const fullPath = path.join(__dirname, "..", "public", assetPath.replace(/^\//, ""));
+    assert.equal(fs.existsSync(fullPath), true, `${assetPath} exists`);
+  });
+});
+
 test("PM01 vegetable sequence steps use visual process cards without answer keys", () => {
   const exam = getPm01Exam();
   const variant = buildPm01Variant(exam, "vegetables");
@@ -654,6 +688,7 @@ test("PM01 poultry and packaging tasks use visual product cards", () => {
   const poultryVariant = buildPm01Variant(exam, "poultry");
   const productQuestion = poultryVariant.questions.find((item) => item.id.startsWith("poultry-t1-products"));
   const partsQuestion = poultryVariant.questions.find((item) => item.id.startsWith("poultry-sim-parts"));
+  const poultrySequenceQuestion = poultryVariant.questions.find((item) => item.id.startsWith("poultry-sim-chain"));
   const complexVariant = buildPm01Variant(exam, "complex");
   const fishProductsQuestion = complexVariant.questions.find((item) => item.id.startsWith("complex-t1-fish-products"));
   const meatProductsQuestion = complexVariant.questions.find((item) => item.id.startsWith("complex-t1-meat-products"));
@@ -675,6 +710,8 @@ test("PM01 poultry and packaging tasks use visual product cards", () => {
 
   assert.equal(partsQuestion.items.some((item) => item.image.includes("/poultry-products/chicken-fillet.png")), true);
   assert.equal(packQuestion.items.some((item) => item.image.includes("/packaging/newspaper-violation.png")), true);
+  assert.equal(poultrySequenceQuestion.items.every((item) => item.image && item.image.includes("/assets/pm01/extended/")), true);
+  assert.equal(zonesQuestion.items.every((item) => item.image.includes("/assets/pm01/extended/")), true);
 });
 
 test("PM01 visual product cards do not reuse one image for different answer cards", () => {

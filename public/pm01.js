@@ -98,6 +98,7 @@
     examTitle: document.getElementById("exam-title"),
     examDescription: document.getElementById("exam-description"),
     modulePreview: document.getElementById("module-preview"),
+    visualAtlas: document.getElementById("visual-atlas"),
     programTitle: document.getElementById("program-title"),
     courseList: document.getElementById("course-list"),
     developerName: document.getElementById("developer-name"),
@@ -133,6 +134,7 @@
     variantTitle: document.getElementById("variant-title"),
     variantScenario: document.getElementById("variant-scenario"),
     ticketReference: document.getElementById("ticket-reference"),
+    referenceVisualAtlas: document.getElementById("reference-visual-atlas"),
     competencyList: document.getElementById("competency-list"),
     progressLabel: document.getElementById("progress-label"),
     progressFill: document.getElementById("progress-fill"),
@@ -444,6 +446,102 @@
       node.append(title, meta);
       elements.modulePreview.appendChild(node);
     });
+  }
+
+  function createVisualAtlasThumb(item, compact = false) {
+    const card = document.createElement("article");
+    card.className = compact ? "visual-atlas-card compact" : "visual-atlas-card";
+    const image = document.createElement("img");
+    image.src = item.image;
+    image.alt = item.title;
+    image.loading = "lazy";
+    image.decoding = "async";
+    const copy = document.createElement("span");
+    const title = document.createElement("strong");
+    title.textContent = item.title;
+    copy.appendChild(title);
+    if (!compact && item.detail) {
+      const detail = document.createElement("small");
+      detail.textContent = item.detail;
+      copy.appendChild(detail);
+    }
+    card.append(image, copy);
+    return card;
+  }
+
+  function renderVisualAtlas() {
+    if (!elements.visualAtlas) {
+      return;
+    }
+    const atlas = state.exam?.visualAtlas || [];
+    elements.visualAtlas.innerHTML = "";
+    elements.visualAtlas.classList.toggle("hidden", !atlas.length);
+    if (!atlas.length) {
+      return;
+    }
+    const head = document.createElement("div");
+    head.className = "visual-atlas-head";
+    const overline = document.createElement("p");
+    overline.className = "overline";
+    overline.textContent = "Визуальный атлас";
+    const title = document.createElement("strong");
+    title.textContent = "Нарезки, полуфабрикаты и санитария";
+    head.append(overline, title);
+
+    const rail = document.createElement("div");
+    rail.className = "visual-atlas-rail";
+    atlas.forEach((category) => {
+      const group = document.createElement("section");
+      group.className = "visual-atlas-group";
+      const groupTitle = document.createElement("h3");
+      groupTitle.textContent = category.title;
+      const grid = document.createElement("div");
+      grid.className = "visual-atlas-thumbs";
+      (category.items || []).slice(0, 5).forEach((item) => {
+        grid.appendChild(createVisualAtlasThumb(item));
+      });
+      group.append(groupTitle, grid);
+      rail.appendChild(group);
+    });
+
+    elements.visualAtlas.append(head, rail);
+  }
+
+  function visualAtlasCategoryIdForVariant(variantId) {
+    const map = {
+      vegetables: "extended-cuts",
+      fish: "extended-fish",
+      meat: "extended-meat",
+      poultry: "extended-poultry",
+      complex: "extended-safety",
+      mixed: "extended-safety"
+    };
+    return map[variantId] || "extended-cuts";
+  }
+
+  function renderReferenceVisualAtlas(variant) {
+    if (!elements.referenceVisualAtlas) {
+      return;
+    }
+    const atlas = state.exam?.visualAtlas || [];
+    const categoryId = visualAtlasCategoryIdForVariant(variant?.id || state.attempt?.selectedVariantId);
+    const category = atlas.find((item) => item.id === categoryId) || atlas[0];
+    elements.referenceVisualAtlas.innerHTML = "";
+    elements.referenceVisualAtlas.classList.toggle("hidden", !category);
+    if (!category) {
+      return;
+    }
+    const overline = document.createElement("p");
+    overline.className = "overline";
+    overline.textContent = "Визуально";
+    const title = document.createElement("h3");
+    title.textContent = category.title;
+    const grid = document.createElement("div");
+    grid.className = "visual-reference-grid";
+    (category.items || []).slice(0, 4).forEach((item) => {
+      grid.appendChild(createVisualAtlasThumb(item, true));
+    });
+    elements.referenceVisualAtlas.append(overline, title, grid);
   }
 
   function renderVariants() {
@@ -804,6 +902,7 @@
         elements.ticketReference.appendChild(renderTicketCard(ticket, true));
       }
     }
+    renderReferenceVisualAtlas(variant);
     elements.competencyList.innerHTML = "";
     (variant.competencies || []).forEach((competency) => {
       const tag = document.createElement("span");
@@ -2107,6 +2206,7 @@
         elements.developerName.textContent = state.exam.developer || "Преподаватель Постовит Дмитрий Александрович";
       }
       renderModulePreview();
+      renderVisualAtlas();
       renderVariants();
       renderTickets();
       refreshTopbar();
