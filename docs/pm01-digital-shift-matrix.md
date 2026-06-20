@@ -57,8 +57,10 @@ Working programs, calendar-thematic plans, and local assessment materials are ex
 - The digital-shift package exposes four `normativeAnchors`: ФГОС 43.01.09, ФГОС 43.02.15, FIRPO POP 43.01.09, and the pending local RP/KTP gate.
 - Teacher-facing approval packages are available in `docs/pm01-digital-shift-approval-packages.md` and on `/pm01-approval.html`.
 - Each package exposes two planned `previewAssets` with `targetPath`, `negativePrompt`, `status: awaiting_preview`, and `finalAsset: false`.
+- Each planned preview asset also carries style references, visual purpose, aspect ratio, inspection checklist, `inspectionGate: visual_inspection_before_connection`, and preview-only output status.
 - Each package exposes five `methodicalMatrix` rows: RP topic placeholder, ПК/ОК, PX module, current task wording, new format, planned asset target, check criterion, and approval gate.
 - The digital-shift package exposes five `interactionBlueprints`: visual mode, layout, student flow, animation behavior, implementation path, uniqueness, assessment focus, and teacher approval question.
+- The digital-shift package exposes `visualAssetRubric` so preview/final image approval is checked against the same acceptance and rejection criteria before any asset is connected to a task.
 - New generated final assets should be added only after teacher review of the per-shop prompt package.
 
 ## Approval Workflow

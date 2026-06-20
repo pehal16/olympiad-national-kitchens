@@ -39,11 +39,30 @@
 - `prompt`: основной промпт;
 - `negativePrompt`: запреты для генерации;
 - `targetPath`: будущий путь в `public/assets/pm01/generated/digital-shift/...`;
+- `styleReferences`: текущие PM01-картинки, с которыми должен совпадать стиль;
+- `visualPurpose`: зачем нужен asset в согласовании;
+- `aspectRatio`: ожидаемая пропорция preview;
+- `inspectionChecklist`: обязательные пункты визуального осмотра;
+- `inspectionGate: visual_inspection_before_connection`;
+- `outputUse: preview_only_until_teacher_approval`;
 - `status: awaiting_preview`;
 - `finalAsset: false`;
 - `inspectionRequired: true`.
 
 Это означает, что изображение еще не считается финальным и не подключается к экзамену до утверждения.
+
+## Visual QA rubric
+
+В публичных данных PM01 есть `digitalShift.visualAssetRubric`.
+
+Rubric фиксирует:
+
+- style principles: реалистичный учебный цех, сырье и полуфабрикаты, отсутствие ресторанной подачи;
+- `acceptIf`: признаки, по которым preview можно оставить для обсуждения;
+- `rejectIf`: причины отклонения картинки;
+- `inspectionSteps`: порядок визуального осмотра перед подключением.
+
+Каждый preview asset обязан пройти этот фильтр. Если картинка выглядит готовым блюдом, декоративной постановкой, содержит логотипы/текст, странную анатомию птицы/кролика/рыбы или раскрывает ответ, она не подключается.
 
 ## Интерфейс согласования
 

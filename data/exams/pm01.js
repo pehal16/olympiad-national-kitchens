@@ -2344,6 +2344,122 @@ const pm01DigitalShiftVariantPackages = {
 const pm01DigitalShiftNegativePrompt =
   "Не показывать готовые блюда, ресторанную подачу, декоративные тарелки, логотипы, водяные знаки, случайный текст, грязный цех, анатомически странные части птицы или кролика, cooked-looking продукты, кровь, лица людей крупным планом.";
 
+const pm01DigitalShiftVisualAssetRubric = {
+  id: "pm01-digital-shift-visual-rubric",
+  title: "Visual QA rubric для PM01 Цифровая смена",
+  status: "approval_required_before_final_asset",
+  stylePrinciples: [
+    "фотореалистичный учебный цех, близкий к текущим PM01-картинкам",
+    "сырье, полуфабрикаты, тара, оборудование и контрольные признаки вместо готовых блюд",
+    "чистая производственная среда без ресторанной подачи и декоративной стилизации",
+    "визуал помогает принять производственное решение, но не подсказывает ответ напрямую"
+  ],
+  acceptIf: [
+    "объект методически узнаваем как сырье или полуфабрикат",
+    "нет логотипов, водяных знаков, случайного текста и лишних лиц",
+    "форма продукта реалистична и не спорит с учебной терминологией",
+    "условия тары, маркировки, холода или рабочей зоны различимы без увеличения",
+    "картинка стилистически совместима с уже принятыми PM01 assets"
+  ],
+  rejectIf: [
+    "продукт выглядит приготовленным, сервированным или ресторанным",
+    "птица, кролик, рыба или мясо имеют анатомически странную форму",
+    "визуал декоративный, грязный, пугающий или методически спорный",
+    "есть текст, логотип, водяной знак или крупный план лица",
+    "картинка раскрывает правильный ответ вместо нейтрального производственного признака"
+  ],
+  inspectionSteps: [
+    "сравнить с style references текущего PM01",
+    "проверить сырое/полуфабрикатное состояние продукта",
+    "проверить отсутствие запрещенных объектов из negativePrompt",
+    "оценить методическую ясность признаков для задания",
+    "сохранить только после teacher approval и визуального осмотра"
+  ]
+};
+
+const pm01DigitalShiftStyleReferences = {
+  vegetables: {
+    scene: [
+      { label: "текущий овощной цех", path: "/assets/pm01/vegetable-workshop.png" },
+      { label: "принятый generated batonnet", path: "/assets/pm01/generated/semi-finished/vegetables/generated-potato-batonnet.png" }
+    ],
+    "control-detail": [
+      { label: "овощные полуфабрикаты", path: "/assets/pm01/semi-finished/vegetables/veg-mixed-mirepoix-ready.png" },
+      { label: "принятый generated mirepoix", path: "/assets/pm01/generated/semi-finished/vegetables/generated-mixed-mirepoix.png" }
+    ]
+  },
+  fish: {
+    scene: [
+      { label: "текущий рыбный цех", path: "/assets/pm01/fish-workshop.png" },
+      { label: "процесс охлаждения рыбы", path: "/assets/pm01/fish-process/fish-cooling.png" }
+    ],
+    "control-detail": [
+      { label: "принятое fish fillet portions", path: "/assets/pm01/generated/semi-finished/fish/generated-fish-fillet-portions.png" },
+      { label: "рыбные палочки в сырой панировке", path: "/assets/pm01/generated/semi-finished/fish/generated-fish-sticks-breaded.png" }
+    ]
+  },
+  meat: {
+    scene: [
+      { label: "текущий мясной цех", path: "/assets/pm01/meat-workshop.png" },
+      { label: "инструменты мясного цеха", path: "/assets/pm01/meat-tools/boning-knife.png" }
+    ],
+    "control-detail": [
+      { label: "принятый generated goulash", path: "/assets/pm01/generated/semi-finished/meat/generated-meat-goulash-cubes.png" },
+      { label: "принятый beef stroganoff", path: "/assets/pm01/generated/semi-finished/meat/generated-meat-beef-stroganoff-strips.png" }
+    ]
+  },
+  poultry: {
+    scene: [
+      { label: "текущий цех птицы", path: "/assets/pm01/poultry-workshop.png" },
+      { label: "цветовое разделение инвентаря", path: "/assets/pm01/extended/safety/color-coded-boards.png" }
+    ],
+    "control-detail": [
+      { label: "принятые chicken drumsticks", path: "/assets/pm01/generated/semi-finished/poultry/generated-chicken-drumsticks.png" },
+      { label: "принятые rabbit portions", path: "/assets/pm01/generated/semi-finished/poultry/generated-rabbit-portions.png" }
+    ]
+  },
+  complex: {
+    scene: [
+      { label: "текущий комплексный цех", path: "/assets/pm01/complex-workshop.png" },
+      { label: "раздельное холодильное хранение", path: "/assets/pm01/extended/safety/fridge-separate-storage.png" }
+    ],
+    "control-detail": [
+      { label: "закрытая гастроемкость", path: "/assets/pm01/packaging/gastronorm-lid.png" },
+      { label: "маркированный контейнер", path: "/assets/pm01/extended/safety/labelled-container.png" }
+    ]
+  }
+};
+
+const pm01DigitalShiftBaseInspectionChecklist = [
+  "сырье или полуфабрикат, не готовое блюдо",
+  "нет логотипов, водяных знаков и случайного текста",
+  "нет крупного плана лица или персональных данных",
+  "форма продукта реалистична и методически понятна",
+  "визуал совпадает по стилю с указанными PM01 references"
+];
+
+function getDigitalShiftStyleReferences(variantId, kind) {
+  return (
+    pm01DigitalShiftStyleReferences[variantId]?.[kind] ||
+    pm01DigitalShiftStyleReferences[variantId]?.scene ||
+    pm01DigitalShiftStyleReferences.complex.scene
+  );
+}
+
+function getDigitalShiftInspectionChecklist(kind) {
+  const kindSpecific =
+    kind === "scene"
+      ? [
+          "видно учебный цех, рабочую поверхность, тару или оборудование",
+          "сцена не превращается в постановочную ресторанную фотографию"
+        ]
+      : [
+          "контрольные признаки партии различимы без увеличения",
+          "картинка не содержит прямой подсказки правильного решения"
+        ];
+  return [...pm01DigitalShiftBaseInspectionChecklist, ...kindSpecific];
+}
+
 function buildDigitalShiftPreviewAssets(variantId, config) {
   return (config.visualPrompts || []).map((prompt, index) => {
     const kind = index === 0 ? "scene" : "control-detail";
@@ -2355,6 +2471,12 @@ function buildDigitalShiftPreviewAssets(variantId, config) {
       prompt,
       negativePrompt: pm01DigitalShiftNegativePrompt,
       targetPath: `/assets/pm01/generated/digital-shift/${variantId}/${variantId}-${kind}.png`,
+      aspectRatio: kind === "scene" ? "16:9" : "4:3",
+      visualPurpose: kind === "scene" ? "preview-сцена цеха для согласования общего визуального направления" : "preview-карточка контрольной партии для проверки методической читаемости",
+      styleReferences: getDigitalShiftStyleReferences(variantId, kind),
+      inspectionChecklist: getDigitalShiftInspectionChecklist(kind),
+      inspectionGate: "visual_inspection_before_connection",
+      outputUse: "preview_only_until_teacher_approval",
       finalAsset: false,
       inspectionRequired: true
     };
@@ -2599,6 +2721,7 @@ module.exports.digitalShift = {
   rpStatus: "Рабочие программы будут подключены после предоставления преподавателем; сейчас матрица подготовлена под сверку.",
   conceptReference: "approved-preview-2026-06-20",
   normativeAnchors: pm01DigitalShiftNormativeAnchors,
+  visualAssetRubric: pm01DigitalShiftVisualAssetRubric,
   families: pm01DigitalShiftFamilies,
   interactionBlueprints: pm01DigitalShiftInteractionBlueprints,
   packages: Object.entries(pm01DigitalShiftVariantPackages).map(([variantId, config]) => {

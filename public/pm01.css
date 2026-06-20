@@ -1112,6 +1112,77 @@ select:focus {
   line-height: 1.3;
 }
 
+.approval-visual-rubric-panel {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.approval-visual-rubric-head {
+  display: grid;
+  gap: 4px;
+}
+
+.approval-visual-rubric-head h3 {
+  margin-bottom: 0;
+}
+
+.approval-visual-rubric-head span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.approval-visual-rubric-card {
+  display: grid;
+  gap: 8px;
+  padding: 11px;
+  border: 1px solid rgba(28, 117, 93, 0.18);
+  border-left: 4px solid rgba(28, 117, 93, 0.45);
+  border-radius: var(--radius);
+  background: #f8fbf9;
+}
+
+.approval-visual-rubric-card.is-reject {
+  border-left-color: rgba(199, 72, 72, 0.48);
+  background: #fff8f8;
+}
+
+.approval-visual-rubric-card strong {
+  color: var(--green-900);
+  font-size: 13px;
+}
+
+.approval-visual-rubric-list,
+.approval-asset-reference-list,
+.approval-asset-checklist {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.approval-visual-rubric-list li,
+.approval-asset-reference-list li,
+.approval-asset-checklist li {
+  overflow-wrap: anywhere;
+  padding: 7px 8px;
+  border-radius: 6px;
+  color: var(--muted);
+  background: #fff;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.approval-visual-rubric-card.is-reject .approval-visual-rubric-list li {
+  color: #7e3030;
+  background: #fff;
+}
+
 .approval-family-stack,
 .approval-packages-list,
 .approval-task-list {
@@ -1418,11 +1489,30 @@ select:focus {
   text-transform: uppercase;
 }
 
+.approval-asset-purpose {
+  margin: 0;
+  color: var(--green-800);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
 .approval-asset-card p {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.42;
+}
+
+.approval-asset-reference-list li {
+  color: #174a82;
+  background: #eef5ff;
+}
+
+.approval-asset-checklist li {
+  color: var(--green-800);
+  background: #eef8f4;
 }
 
 .approval-decision-panel {

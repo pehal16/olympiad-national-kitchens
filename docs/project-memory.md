@@ -35,7 +35,7 @@ The PM01 exam is an interactive production exam for:
 
 Current PM01 total score contract: 100 points.
 
-Current PM01 implementation version: `1.6.50`.
+Current PM01 implementation version: `1.6.51`.
 
 Methodical baseline for PM01 should stay aligned with the current FГОС СПО 43.01.09 and 43.02.15, especially ПК 1.1-ПК 1.4 and ОК 01, ОК 02, ОК 07, ОК 09, ОК 10. New tasks should remain production-situation tasks: workplace organization, safe equipment use, raw material preparation, semi-finished product processing, quality control, storage conditions, and practical decision-making.
 
@@ -53,6 +53,7 @@ Important current PM01 content change:
 - Version `1.6.48` exposes a per-shop methodical matrix for PM01 digital-shift packages: RP topic placeholder, ПК/ОК, PX module, new task format, planned asset, criterion, and approval gate.
 - Version `1.6.49` adds teacher-facing interaction storyboards for the five PX task families: visual layout, student flow, animation behavior, implementation path, uniqueness, assessment focus, and approval question.
 - Version `1.6.50` adds verified normative anchors for PX approval: ФГОС 43.01.09, ФГОС 43.02.15, ФИРПО/ИРПО ПОП 43.01.09, and the pending local RP/KTP gate.
+- Version `1.6.51` adds the PM01 digital-shift visual QA rubric plus style references and inspection checklists on every planned preview asset.
 - Official exam routes must stay 100 points and 20 questions; training may include practice-only simulators that do not affect protocols or ведомости.
 
 The active student route is mixed across production areas. Students should not manually choose a favorable shop/section for the exam route.
@@ -95,6 +96,7 @@ Important current visual change:
 - Current accepted chicken generated card is `generated-chicken-drumsticks.png`.
 - Version `1.6.42` reuses accepted existing PM01 visual assets for the new quality-control tasks; it does not add a new generated asset batch.
 - Digital-shift practice tasks currently reuse accepted PM01 assets. New generated final assets should only be connected after teacher approval of the per-shop prompt package and visual inspection.
+- Digital-shift preview assets now carry style references, inspection checklists, `inspectionGate: "visual_inspection_before_connection"`, and `outputUse: "preview_only_until_teacher_approval"`.
 
 When adding PM01 images:
 

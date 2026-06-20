@@ -464,9 +464,10 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(adminHtml.includes("/pm01-approval.html"), true);
   assert.equal(approvalHtml.includes("id=\"approval-packages-list\""), true);
   assert.equal(approvalHtml.includes("Согласование PX"), true);
-  assert.equal(approvalHtml.includes("/pm01-approval.js?v=1.0.5"), true);
+  assert.equal(approvalHtml.includes("/pm01-approval.js?v=1.0.6"), true);
   assert.equal(approvalScript.includes("/api/pm01/public/exam"), true);
   assert.equal(approvalScript.includes("copyPromptPackage"), true);
+  assert.equal(approvalScript.includes("copyVisualAssetRubric"), true);
   assert.equal(approvalScript.includes("copyNormativeAnchors"), true);
   assert.equal(approvalScript.includes("copyInteractionBlueprints"), true);
   assert.equal(approvalScript.includes("PM01_APPROVAL_STORAGE_KEY"), true);
@@ -474,6 +475,7 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(approvalScript.includes("copyApprovalDecision"), true);
   assert.equal(approvalScript.includes("copyRpIntake"), true);
   assert.equal(approvalScript.includes("copyMethodicalMatrix"), true);
+  assert.equal(approvalScript.includes("renderVisualAssetRubric"), true);
   assert.equal(approvalScript.includes("renderNormativeAnchors"), true);
   assert.equal(approvalScript.includes("renderRpIntake"), true);
   assert.equal(approvalScript.includes("renderInteractionBlueprints"), true);
@@ -485,6 +487,9 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(approvalScript.includes("previewAssets"), true);
   assert.equal(approvalScript.includes("approval-asset-grid"), true);
   assert.equal(uiStyles.includes(".approval-asset-card"), true);
+  assert.equal(uiStyles.includes(".approval-asset-checklist"), true);
+  assert.equal(uiStyles.includes(".approval-visual-rubric-panel"), true);
+  assert.equal(uiStyles.includes(".approval-visual-rubric-card"), true);
   assert.equal(uiStyles.includes(".approval-decision-panel"), true);
   assert.equal(uiStyles.includes(".approval-decision-button"), true);
   assert.equal(uiStyles.includes(".approval-note"), true);
@@ -863,6 +868,11 @@ test("PM01 digital shift extension is training-only and keeps official scoring s
 
   assert.equal(publicData.digitalShift.mode, "training_extension");
   assert.equal(publicData.digitalShift.families.length, 5);
+  assert.equal(publicData.digitalShift.visualAssetRubric.status, "approval_required_before_final_asset");
+  assert.equal(publicData.digitalShift.visualAssetRubric.stylePrinciples.length >= 4, true);
+  assert.equal(publicData.digitalShift.visualAssetRubric.acceptIf.length >= 5, true);
+  assert.equal(publicData.digitalShift.visualAssetRubric.rejectIf.length >= 5, true);
+  assert.equal(publicData.digitalShift.visualAssetRubric.inspectionSteps.length >= 5, true);
   assert.equal(publicData.digitalShift.normativeAnchors.length, 4);
   assert.equal(
     publicData.digitalShift.normativeAnchors.every(
@@ -951,7 +961,16 @@ test("PM01 digital shift extension is training-only and keeps official scoring s
           asset.finalAsset === false &&
           asset.inspectionRequired === true &&
           asset.targetPath.startsWith("/assets/pm01/generated/digital-shift/") &&
-          asset.negativePrompt.length > 40
+          asset.negativePrompt.length > 40 &&
+          ["16:9", "4:3"].includes(asset.aspectRatio) &&
+          asset.visualPurpose &&
+          Array.isArray(asset.styleReferences) &&
+          asset.styleReferences.length >= 2 &&
+          asset.styleReferences.every((reference) => reference.label && reference.path?.startsWith("/assets/pm01/")) &&
+          Array.isArray(asset.inspectionChecklist) &&
+          asset.inspectionChecklist.length >= 7 &&
+          asset.inspectionGate === "visual_inspection_before_connection" &&
+          asset.outputUse === "preview_only_until_teacher_approval"
       ),
       true,
       packageData.variantId
@@ -1259,7 +1278,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(studentScript, /retryDelay/);
   assert.match(studentScript, /X-PM01-Duration-Ms/);
   assert.doesNotMatch(studentScript, /readAsDataURL\(blob\)/);
-  assert.match(studentHtml, /pm01\.css\?v=1\.0\.27/);
+  assert.match(studentHtml, /pm01\.css\?v=1\.0\.28/);
   assert.match(studentHtml, /loadPm01Script/);
   assert.match(studentHtml, /pm01\.js\?v=1\.0\.23/);
   assert.match(adminHtml, /export-group-csv/);
@@ -1273,7 +1292,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(adminScript, /api\/admin\/pm01\/exports\/group-csv\/download/);
   assert.match(adminScript, /voiceAudio/);
   assert.match(adminScript, /audioInfo\.audioUrl/);
-  assert.match(adminHtml, /pm01\.css\?v=1\.0\.27/);
+  assert.match(adminHtml, /pm01\.css\?v=1\.0\.28/);
   assert.match(adminHtml, /pm01-approval\.html/);
   assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.18/);
   assert.match(css, /\.voice-queue-list/);

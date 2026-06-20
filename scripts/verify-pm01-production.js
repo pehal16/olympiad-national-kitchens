@@ -62,6 +62,10 @@ async function main() {
     exam.payload?.data?.digitalShift?.interactionBlueprints?.length === 5,
     "PM01 digital shift must expose 5 interaction blueprints"
   );
+  assert(
+    exam.payload?.data?.digitalShift?.visualAssetRubric?.status === "approval_required_before_final_asset",
+    "PM01 digital shift must expose visual asset rubric"
+  );
   const previewAssets = exam.payload.data.digitalShift.packages.flatMap((packageData) => packageData.previewAssets || []);
   const matrixRows = exam.payload.data.digitalShift.packages.flatMap((packageData) => packageData.methodicalMatrix || []);
   assert(previewAssets.length === 10, "PM01 digital shift must expose 10 planned preview assets");
@@ -71,9 +75,15 @@ async function main() {
       (asset) =>
         asset.status === "awaiting_preview" &&
         asset.finalAsset === false &&
-        asset.targetPath?.startsWith("/assets/pm01/generated/digital-shift/")
+        asset.targetPath?.startsWith("/assets/pm01/generated/digital-shift/") &&
+        Array.isArray(asset.styleReferences) &&
+        asset.styleReferences.length >= 2 &&
+        Array.isArray(asset.inspectionChecklist) &&
+        asset.inspectionChecklist.length >= 7 &&
+        asset.inspectionGate === "visual_inspection_before_connection" &&
+        asset.outputUse === "preview_only_until_teacher_approval"
     ),
-    "PM01 preview assets must stay planned and unconnected"
+    "PM01 preview assets must stay planned and carry style/inspection metadata"
   );
   checks.push({
     route: "/api/pm01/public/exam",
@@ -82,6 +92,7 @@ async function main() {
     modules: exam.payload.data.modules.length,
     digitalShiftNormativeAnchors: exam.payload.data.digitalShift.normativeAnchors.length,
     digitalShiftInteractionBlueprints: exam.payload.data.digitalShift.interactionBlueprints.length,
+    digitalShiftVisualRubric: exam.payload.data.digitalShift.visualAssetRubric.status,
     digitalShiftPackages: exam.payload.data.digitalShift.packages.length,
     digitalShiftPreviewAssets: previewAssets.length,
     digitalShiftMatrixRows: matrixRows.length
@@ -99,8 +110,8 @@ async function main() {
 
   const approval = await getText("/pm01-approval.html");
   assert(approval.response.ok, `/pm01-approval.html returned ${approval.response.status}`);
-  assert(approval.text.includes("/pm01.css?v=1.0.27"), "/pm01-approval.html does not include current CSS");
-  assert(approval.text.includes("/pm01-approval.js?v=1.0.5"), "/pm01-approval.html does not include current approval JS");
+  assert(approval.text.includes("/pm01.css?v=1.0.28"), "/pm01-approval.html does not include current CSS");
+  assert(approval.text.includes("/pm01-approval.js?v=1.0.6"), "/pm01-approval.html does not include current approval JS");
   assert(approval.text.includes("Согласование PX"), "/pm01-approval.html does not include approval title");
   checks.push({ route: "/pm01-approval.html", status: approval.response.status, bytes: approval.text.length });
 

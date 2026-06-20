@@ -196,6 +196,33 @@
     return section;
   }
 
+  function renderVisualAssetRubric(rubric) {
+    const section = createNode("section", "approval-visual-rubric-panel");
+    const heading = createNode("div", "approval-visual-rubric-head");
+    heading.append(
+      createNode("h3", "", rubric.title || "Visual QA rubric"),
+      createNode("span", "", "Что принимать, что отклонять и как осматривать preview-assets")
+    );
+
+    const accepted = createNode("article", "approval-visual-rubric-card");
+    accepted.append(
+      createNode("strong", "", "Принять, если"),
+      renderList(rubric.acceptIf || [], "approval-visual-rubric-list")
+    );
+
+    const rejected = createNode("article", "approval-visual-rubric-card is-reject");
+    rejected.append(
+      createNode("strong", "", "Отклонить, если"),
+      renderList(rubric.rejectIf || [], "approval-visual-rubric-list")
+    );
+
+    const copyButton = createNode("button", "button secondary", "Копировать visual rubric");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyVisualAssetRubric(rubric, copyButton));
+    section.append(heading, accepted, rejected, copyButton);
+    return section;
+  }
+
   function renderInteractionBlueprints(blueprints) {
     const section = createNode("section", "approval-blueprint-panel");
     const heading = createNode("div", "approval-blueprint-head");
@@ -223,10 +250,13 @@
     return section;
   }
 
-  function renderFamilies(families, blueprints = [], anchors = []) {
+  function renderFamilies(families, blueprints = [], anchors = [], visualRubric = null) {
     elements.families.innerHTML = "";
     if (anchors.length) {
       elements.families.appendChild(renderNormativeAnchors(anchors));
+    }
+    if (visualRubric) {
+      elements.families.appendChild(renderVisualAssetRubric(visualRubric));
     }
     const heading = createNode("h3", "", "Семейства заданий");
     const list = createNode("div", "approval-family-stack");
@@ -249,6 +279,37 @@
     const list = createNode("ul", className);
     items.forEach((item) => list.appendChild(createNode("li", "", item)));
     return list;
+  }
+
+  async function copyVisualAssetRubric(rubric, button) {
+    const text = [
+      rubric.title || "Visual QA rubric",
+      `status: ${rubric.status || "-"}`,
+      "",
+      "stylePrinciples:",
+      ...(rubric.stylePrinciples || []).map((item) => `- ${item}`),
+      "",
+      "acceptIf:",
+      ...(rubric.acceptIf || []).map((item) => `- ${item}`),
+      "",
+      "rejectIf:",
+      ...(rubric.rejectIf || []).map((item) => `- ${item}`),
+      "",
+      "inspectionSteps:",
+      ...(rubric.inspectionSteps || []).map((item) => `- ${item}`)
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = "Visual rubric скопирован";
+      window.setTimeout(() => {
+        button.textContent = "Копировать visual rubric";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Копировать visual rubric";
+      }, 1600);
+    }
   }
 
   async function copyNormativeAnchors(anchors, button) {
@@ -612,7 +673,13 @@
         createNode("strong", "", asset.kind === "scene" ? "Общий вид цеха" : "Контрольная партия"),
         createNode("span", "approval-asset-path", asset.targetPath),
         createNode("small", "", asset.status === "awaiting_preview" ? "Ожидает preview" : asset.status),
-        createNode("p", "", asset.negativePrompt || "")
+        createNode("em", "approval-asset-purpose", asset.visualPurpose || ""),
+        createNode("p", "", asset.negativePrompt || ""),
+        renderList(
+          (asset.styleReferences || []).map((reference) => `${reference.label}: ${reference.path}`),
+          "approval-asset-reference-list"
+        ),
+        renderList(asset.inspectionChecklist || [], "approval-asset-checklist")
       );
       assetGrid.appendChild(assetCard);
     });
@@ -666,7 +733,8 @@
       renderFamilies(
         digitalShift.families || [],
         digitalShift.interactionBlueprints || [],
-        digitalShift.normativeAnchors || []
+        digitalShift.normativeAnchors || [],
+        digitalShift.visualAssetRubric || null
       );
       renderPackages(digitalShift);
     } catch (error) {
