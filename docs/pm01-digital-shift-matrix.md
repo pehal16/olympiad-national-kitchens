@@ -61,6 +61,7 @@ Working programs, calendar-thematic plans, and local assessment materials are ex
 - Each package exposes five `methodicalMatrix` rows: RP topic placeholder, ПК/ОК, PX module, current task wording, new format, planned asset target, check criterion, and approval gate.
 - The digital-shift package exposes five `interactionBlueprints`: visual mode, layout, student flow, animation behavior, implementation path, uniqueness, assessment focus, and teacher approval question.
 - The digital-shift package exposes `visualAssetRubric` so preview/final image approval is checked against the same acceptance and rejection criteria before any asset is connected to a task.
+- Each package exposes `shiftCockpit`: a training-only cockpit plan with top status, module map, central interaction, production journal, right reference panel, five-step operation timeline, journal signals, and `approvalGate: requires_rp_preview_and_ui_approval`.
 - New generated final assets should be added only after teacher review of the per-shop prompt package.
 
 ## Approval Workflow

@@ -68,8 +68,27 @@ async function main() {
   );
   const previewAssets = exam.payload.data.digitalShift.packages.flatMap((packageData) => packageData.previewAssets || []);
   const matrixRows = exam.payload.data.digitalShift.packages.flatMap((packageData) => packageData.methodicalMatrix || []);
+  const cockpitPlans = exam.payload.data.digitalShift.packages.map((packageData) => packageData.shiftCockpit || null);
   assert(previewAssets.length === 10, "PM01 digital shift must expose 10 planned preview assets");
   assert(matrixRows.length === 25, "PM01 digital shift must expose 25 methodical matrix rows");
+  assert(
+    cockpitPlans.length === 5 &&
+      cockpitPlans.every(
+        (cockpit) =>
+          cockpit &&
+          cockpit.status === "training_only_cockpit" &&
+          cockpit.approvalGate === "requires_rp_preview_and_ui_approval" &&
+          Array.isArray(cockpit.layout) &&
+          cockpit.layout.length >= 5 &&
+          Array.isArray(cockpit.operationTimeline) &&
+          cockpit.operationTimeline.length === 5 &&
+          Array.isArray(cockpit.journalSignals) &&
+          cockpit.journalSignals.length >= 4 &&
+          Array.isArray(cockpit.rightPanel?.competencies) &&
+          cockpit.rightPanel.competencies.length >= 4
+      ),
+    "PM01 digital shift must expose training-only cockpit plans for all packages"
+  );
   assert(
     previewAssets.every(
       (asset) =>
@@ -95,12 +114,14 @@ async function main() {
     digitalShiftVisualRubric: exam.payload.data.digitalShift.visualAssetRubric.status,
     digitalShiftPackages: exam.payload.data.digitalShift.packages.length,
     digitalShiftPreviewAssets: previewAssets.length,
+    digitalShiftCockpits: cockpitPlans.length,
     digitalShiftMatrixRows: matrixRows.length
   });
 
   const student = await getText("/pm01.html");
   assert(student.response.ok, `/pm01.html returned ${student.response.status}`);
-  assert(student.text.includes("/pm01.js"), "/pm01.html does not include student JS");
+  assert(student.text.includes("/pm01.js?v=1.0.24"), "/pm01.html does not include current student JS");
+  assert(student.text.includes("/pm01.css?v=1.0.29"), "/pm01.html does not include current CSS");
   checks.push({ route: "/pm01.html", status: student.response.status, bytes: student.text.length });
 
   const admin = await getText("/pm01-admin.html");
@@ -110,8 +131,8 @@ async function main() {
 
   const approval = await getText("/pm01-approval.html");
   assert(approval.response.ok, `/pm01-approval.html returned ${approval.response.status}`);
-  assert(approval.text.includes("/pm01.css?v=1.0.28"), "/pm01-approval.html does not include current CSS");
-  assert(approval.text.includes("/pm01-approval.js?v=1.0.6"), "/pm01-approval.html does not include current approval JS");
+  assert(approval.text.includes("/pm01.css?v=1.0.29"), "/pm01-approval.html does not include current CSS");
+  assert(approval.text.includes("/pm01-approval.js?v=1.0.7"), "/pm01-approval.html does not include current approval JS");
   assert(approval.text.includes("Согласование PX"), "/pm01-approval.html does not include approval title");
   checks.push({ route: "/pm01-approval.html", status: approval.response.status, bytes: approval.text.length });
 

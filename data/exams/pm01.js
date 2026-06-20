@@ -2511,6 +2511,114 @@ const pm01DigitalShiftMethodicalMeta = {
   }
 };
 
+const pm01DigitalShiftCockpitLayout = [
+  {
+    zone: "top_status",
+    title: "Верхний статус смены",
+    purpose: "режим, цех, прогресс и нулевой тренировочный балл видны без поиска по экрану"
+  },
+  {
+    zone: "left_module_map",
+    title: "Карта модулей",
+    purpose: "официальные M0-M4 отделены от PX-тренажера, студент понимает где практика"
+  },
+  {
+    zone: "central_interaction",
+    title: "Центральная сцена",
+    purpose: "здесь выполняется контроль партии, расследование, таймлайн или сборка заказа"
+  },
+  {
+    zone: "production_journal",
+    title: "Производственный журнал",
+    purpose: "события смены дают контекст для решения, а не декоративный текст"
+  },
+  {
+    zone: "right_reference",
+    title: "Визуальный ориентир и компетенции",
+    purpose: "справа остаются цех, комплексный билет, журнал, семейства задач и ПК/ОК"
+  }
+];
+
+const pm01DigitalShiftCockpitPhaseMeta = {
+  quality_control: {
+    cockpitZone: "central_interaction",
+    studentAction: "оценить визуальные признаки партии и принять производственное решение",
+    controlSignal: "качество сырья или полуфабриката",
+    animation: "карточки партии подсвечивают статус допуска, исправления или брака"
+  },
+  shift_investigation: {
+    cockpitZone: "central_interaction",
+    studentAction: "отметить источник нарушения на сцене цеха",
+    controlSignal: "санитарный риск, поток сырья или небезопасное действие",
+    animation: "hotspot-сцена работает как аудит смены с точками риска"
+  },
+  production_timeline: {
+    cockpitZone: "operation_timeline",
+    studentAction: "собрать технологический маршрут от сырья до контрольной точки",
+    controlSignal: "последовательность операций",
+    animation: "шаги перемещаются в таймлайн без раскрытия правильного порядка в public API"
+  },
+  storage_marking: {
+    cockpitZone: "production_journal",
+    studentAction: "выбрать решение по маркировке, таре, холоду и товарному соседству",
+    controlSignal: "условия хранения и прослеживаемость партии",
+    animation: "карточки партий группируются по допустимому производственному решению"
+  },
+  order_assembly: {
+    cockpitZone: "operation_timeline",
+    studentAction: "собрать комплексный заказ как цельную производственную смену",
+    controlSignal: "полный маршрут заказа до передачи партии",
+    animation: "операции собираются в маршрут с визуальными checkpoint-карточками"
+  }
+};
+
+function buildDigitalShiftCockpit(variantId, config) {
+  const familyMap = new Map(pm01DigitalShiftFamilies.map((family) => [family.id, family]));
+  const operationTimeline = (config.tasks || []).map(([familyId, title], index) => {
+    const family = familyMap.get(familyId) || {};
+    const phase = pm01DigitalShiftCockpitPhaseMeta[familyId] || {};
+    return {
+      id: `${variantId}-cockpit-${familyId}`,
+      step: index + 1,
+      familyId,
+      title,
+      familyTitle: family.title || familyId,
+      cockpitZone: phase.cockpitZone || "central_interaction",
+      studentAction: phase.studentAction || family.interaction || "",
+      controlSignal: phase.controlSignal || "",
+      animation: phase.animation || "",
+      status: "training_only"
+    };
+  });
+  const competencies = Array.from(
+    new Set(
+      (config.tasks || []).flatMap(([familyId]) => pm01DigitalShiftMethodicalMeta[familyId]?.competencies || [])
+    )
+  );
+  const journalSignals = (config.productionLog || []).map((entry, index) => {
+    const match = String(entry).match(/^(\d{2}:\d{2})\s+(.+)$/);
+    return {
+      id: `${variantId}-journal-${index + 1}`,
+      time: match ? match[1] : "",
+      event: match ? match[2] : entry,
+      linkedStep: Math.min(index + 1, operationTimeline.length || 1),
+      use: "context_for_training_decision"
+    };
+  });
+  return {
+    status: "training_only_cockpit",
+    layout: pm01DigitalShiftCockpitLayout,
+    operationTimeline,
+    journalSignals,
+    rightPanel: {
+      visualReference: "цех, комплексный билет, журнал смены, семейства PX и компетенции",
+      competencies,
+      approvalFocus: "согласовать, что cockpit не подсказывает ответы и помогает видеть производственную смену целиком"
+    },
+    approvalGate: "requires_rp_preview_and_ui_approval"
+  };
+}
+
 function buildDigitalShiftMethodicalMatrix(variantId, config, previewAssets) {
   const familyMap = new Map(pm01DigitalShiftFamilies.map((family) => [family.id, family]));
   const assetsByKind = new Map((previewAssets || []).map((asset) => [asset.kind, asset]));
@@ -2733,6 +2841,7 @@ module.exports.digitalShift = {
       productionLog: config.productionLog,
       visualPrompts: config.visualPrompts,
       previewAssets,
+      shiftCockpit: buildDigitalShiftCockpit(variantId, config),
       methodicalMatrix: buildDigitalShiftMethodicalMatrix(variantId, config, previewAssets),
       tasks: config.tasks.map(([familyId, title]) => ({
         familyId,

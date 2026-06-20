@@ -526,6 +526,45 @@
     return panel;
   }
 
+  function renderShiftCockpit(packageData) {
+    const cockpit = packageData.shiftCockpit || {};
+    const panel = createNode("section", "approval-package-block approval-cockpit-panel");
+    const head = createNode("div", "approval-cockpit-head");
+    head.append(
+      createNode("h3", "", "Student cockpit"),
+      createNode("span", "", cockpit.status || "training_only_cockpit")
+    );
+
+    const zones = createNode("div", "approval-cockpit-zones");
+    (cockpit.layout || []).forEach((zone) => {
+      const card = createNode("article", "approval-cockpit-zone");
+      card.dataset.zone = zone.zone || "";
+      card.append(createNode("strong", "", zone.title || zone.zone || ""), createNode("p", "", zone.purpose || ""));
+      zones.appendChild(card);
+    });
+
+    const timeline = createNode("ol", "approval-cockpit-timeline");
+    (cockpit.operationTimeline || []).forEach((step) => {
+      const item = createNode("li");
+      item.dataset.family = step.familyId || "";
+      item.append(
+        createNode("span", "approval-cockpit-step", String(step.step || "").padStart(2, "0")),
+        createNode("strong", "", step.familyTitle || step.title || ""),
+        createNode("small", "", step.controlSignal || step.studentAction || ""),
+        createNode("em", "", step.animation || "")
+      );
+      timeline.appendChild(item);
+    });
+
+    const signals = renderList(
+      (cockpit.journalSignals || []).map((signal) => (signal.time ? `${signal.time} · ${signal.event}` : signal.event)),
+      "approval-cockpit-signals"
+    );
+    const focus = createNode("p", "approval-cockpit-focus", cockpit.rightPanel?.approvalFocus || "");
+    panel.append(head, zones, timeline, signals, focus);
+    return panel;
+  }
+
   function renderRpIntake(packageData) {
     const intake = getPackageRpIntake(packageData.variantId);
     const panel = createNode("section", "approval-package-block approval-rp-intake");
@@ -699,7 +738,7 @@
       )
     );
 
-    section.append(head, topics, renderRpIntake(packageData), renderMethodicalMatrix(packageData), tasks, log, prompts, assetPlan, renderDecisionControls(packageData), criteria);
+    section.append(head, topics, renderRpIntake(packageData), renderMethodicalMatrix(packageData), renderShiftCockpit(packageData), tasks, log, prompts, assetPlan, renderDecisionControls(packageData), criteria);
     return section;
   }
 

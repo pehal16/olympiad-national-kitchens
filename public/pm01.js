@@ -654,6 +654,63 @@
     return list;
   }
 
+  function renderDigitalShiftCockpit(packageData, compact = false) {
+    const cockpit = packageData?.shiftCockpit;
+    const panel = document.createElement("section");
+    panel.className = compact ? "digital-shift-cockpit is-compact" : "digital-shift-cockpit";
+    if (!cockpit) {
+      return panel;
+    }
+
+    const head = document.createElement("div");
+    head.className = "digital-shift-cockpit-head";
+    const title = document.createElement("strong");
+    title.textContent = "Cockpit смены";
+    const status = document.createElement("span");
+    status.textContent = "training-only · 0 баллов";
+    head.append(title, status);
+
+    const zones = document.createElement("div");
+    zones.className = "digital-shift-cockpit-zones";
+    (cockpit.layout || []).forEach((zone) => {
+      const chip = document.createElement("span");
+      chip.dataset.zone = zone.zone || "";
+      chip.textContent = zone.title || zone.zone || "";
+      zones.appendChild(chip);
+    });
+
+    const timeline = document.createElement("ol");
+    timeline.className = "digital-shift-cockpit-timeline";
+    (cockpit.operationTimeline || []).forEach((step) => {
+      const item = document.createElement("li");
+      item.dataset.family = step.familyId || "";
+      const number = document.createElement("span");
+      number.textContent = String(step.step || "").padStart(2, "0");
+      const copy = document.createElement("div");
+      const name = document.createElement("strong");
+      name.textContent = step.familyTitle || step.title || "";
+      const signal = document.createElement("small");
+      signal.textContent = step.controlSignal || step.studentAction || "";
+      copy.append(name, signal);
+      item.append(number, copy);
+      timeline.appendChild(item);
+    });
+
+    panel.append(head, zones);
+    if (!compact) {
+      const signals = document.createElement("div");
+      signals.className = "digital-shift-cockpit-signals";
+      (cockpit.journalSignals || []).slice(0, 4).forEach((signal) => {
+        const item = document.createElement("span");
+        item.textContent = signal.time ? `${signal.time} · ${signal.event}` : signal.event;
+        signals.appendChild(item);
+      });
+      panel.appendChild(signals);
+    }
+    panel.appendChild(timeline);
+    return panel;
+  }
+
   function renderTrainingLab() {
     if (!elements.trainingLab) {
       return;
@@ -707,7 +764,7 @@
       promptPanel.appendChild(prompt);
     });
 
-    elements.trainingLab.append(head, topics, renderDigitalShiftTasks(packageData), logPanel, promptPanel);
+    elements.trainingLab.append(head, topics, renderDigitalShiftCockpit(packageData), renderDigitalShiftTasks(packageData), logPanel, promptPanel);
   }
 
   function ticketMatchesSelectedVariant(ticket) {
@@ -1059,7 +1116,7 @@
           chip.textContent = digitalShiftFamily(task.familyId)?.title || task.familyTitle || task.familyId;
           families.appendChild(chip);
         });
-        elements.trainingShiftReference.append(overline, title, log, families);
+        elements.trainingShiftReference.append(overline, title, renderDigitalShiftCockpit(packageData, true), log, families);
       }
     }
     renderReferenceVisualAtlas(variant);
