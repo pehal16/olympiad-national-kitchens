@@ -399,6 +399,12 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
     "Группы",
     "Выберите карточку",
     "Нажмите подходящую группу",
+    "Оцените фото и карту контроля",
+    "renderTrainingLab",
+    "Цифровая смена",
+    "production_timeline",
+    "storage_marking",
+    "тренажёр · 0 баллов",
     "Смешанный маршрут",
     "Начать смешанный экзамен ПМ.01",
     "variantField?.classList.toggle(\"hidden\", !training)",
@@ -410,6 +416,8 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(uiHtml.includes("id=\"student-select\""), true);
   assert.equal(uiHtml.includes("id=\"free-name-field\""), true);
   assert.equal(uiHtml.includes("id=\"skip-question\""), true);
+  assert.equal(uiHtml.includes("id=\"training-lab\""), true);
+  assert.equal(uiHtml.includes("id=\"training-shift-reference\""), true);
   assert.equal(uiHtml.includes("Завершить весь экзамен"), true);
   assert.equal(uiHtml.includes("<select id=\"group-name\" required>"), true);
   assert.equal(uiHtml.includes("readonly"), true);
@@ -436,6 +444,14 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(uiStyles.includes(".interaction-panel-title"), true);
   assert.equal(uiStyles.includes(".results-overview"), true);
   assert.equal(uiStyles.includes(".score-mini-bar"), true);
+  assert.equal(uiStyles.includes(".bucket-mode-quality-control"), true);
+  assert.equal(uiStyles.includes(".digital-shift-preview"), true);
+  assert.equal(uiStyles.includes(".digital-shift-task-grid"), true);
+  assert.equal(uiStyles.includes(".module-step.is-practice"), true);
+  assert.equal(uiStyles.includes(".bucket-mode-storage-marking"), true);
+  assert.equal(uiStyles.includes(".sequence-mode-production-timeline"), true);
+  assert.equal(uiStyles.includes(".quality-card"), true);
+  assert.equal(uiStyles.includes("@keyframes qualityScan"), true);
   assert.equal(adminHtml.includes("id=\"filtered-summary\""), true);
   assert.equal(adminHtml.includes("id=\"module-overview\""), true);
   assert.equal(adminScript.includes("renderGradeOverview"), true);
@@ -743,6 +759,81 @@ test("PM01 product cards and hotspot scenes stay visual but sanitized", () => {
   assert.equal("hotspots" in publicHotspotQuestion, false);
 });
 
+test("PM01 quality control simulations use visual inspection cards safely", () => {
+  const exam = getPm01Exam();
+  const expectedByVariant = {
+    vegetables: "veg-sim-quality",
+    fish: "fish-sim-quality",
+    meat: "meat-sim-quality",
+    poultry: "poultry-sim-quality",
+    complex: "complex-sim-quality"
+  };
+
+  Object.entries(expectedByVariant).forEach(([variantId, sourceId]) => {
+    const variant = buildPm01Variant(exam, variantId, { seed: `quality-control-${variantId}` });
+    const question = variant.questions.find((item) => item.sourceId === sourceId);
+    const publicQuestion = sanitizePm01Question(question, { answers: {} });
+    const score = scorePm01Question(question, { buckets: question.correctBuckets });
+
+    assert.equal(question.type, "bucket_sort");
+    assert.equal(question.moduleId, "simulation");
+    assert.equal(question.visualMode, "quality_control");
+    assert.equal(question.maxScore, 6);
+    assert.deepEqual(question.buckets.map((bucket) => bucket.id).sort(), ["accept", "correct", "reject"]);
+    assert.equal(question.items.length, 4);
+    assert.equal(question.items.every((item) => item.image && item.status && item.risk), true);
+    assert.equal(question.items.every((item) => Array.isArray(item.signals) && item.signals.length >= 3), true);
+    assert.equal(publicQuestion.items.every((item) => item.image && item.status && item.risk), true);
+    assert.equal(publicQuestion.items.every((item) => Array.isArray(item.signals) && item.signals.length >= 3), true);
+    assert.equal(publicQuestion.buckets.every((bucket) => bucket.detail.length > 20), true);
+    assert.equal("correctBuckets" in publicQuestion, false);
+    assert.equal(score.finalScore, question.maxScore);
+  });
+});
+
+test("PM01 digital shift extension is training-only and keeps official scoring stable", () => {
+  const exam = getPm01Exam();
+  const publicData = getPm01PublicData(exam);
+  const families = new Set(["quality_control", "shift_investigation", "production_timeline", "storage_marking", "order_assembly"]);
+
+  assert.equal(publicData.digitalShift.mode, "training_extension");
+  assert.equal(publicData.digitalShift.families.length, 5);
+  assert.equal(publicData.digitalShift.packages.length, 5);
+  publicData.digitalShift.packages.forEach((packageData) => {
+    assert.equal(packageData.tasks.length, 5, packageData.variantId);
+    assert.equal(packageData.tasks.every((task) => families.has(task.familyId)), true, packageData.variantId);
+    assert.equal(packageData.visualPrompts.length >= 2, true, packageData.variantId);
+    assert.equal(JSON.stringify(packageData).includes("correctBuckets"), false);
+    assert.equal(JSON.stringify(packageData).includes("correctSequence"), false);
+    assert.equal(JSON.stringify(packageData).includes("hotspots"), false);
+  });
+
+  exam.variants.forEach((examVariant) => {
+    const officialVariant = buildPm01Variant(exam, examVariant.id, { seed: `official-${examVariant.id}` });
+    const trainingVariant = buildPm01Variant(exam, examVariant.id, {
+      seed: `practice-${examVariant.id}`,
+      includePractice: true
+    });
+    const practiceModule = trainingVariant.modules.find((module) => module.id === "digital_shift");
+    const practiceQuestions = trainingVariant.questions.filter((question) => question.practiceOnly);
+    const publicPracticeQuestion = sanitizePm01Question(practiceQuestions[0], { answers: {} });
+
+    assert.equal(officialVariant.questions.length, 20, `${examVariant.id} official count`);
+    assert.equal(officialVariant.modules.some((module) => module.practiceOnly), false, `${examVariant.id} official modules`);
+    assert.equal(trainingVariant.totalMaxScore, 100, `${examVariant.id} training score contract`);
+    assert.equal(trainingVariant.questions.length, 25, `${examVariant.id} training count`);
+    assert.equal(practiceModule.code, "PX");
+    assert.equal(practiceModule.maxScore, 0);
+    assert.equal(practiceQuestions.length, 5);
+    assert.equal(practiceQuestions.every((question) => question.maxScore === 0), true);
+    assert.deepEqual(new Set(practiceQuestions.map((question) => question.practiceFamily)), families);
+    assert.equal(publicPracticeQuestion.practiceOnly, true);
+    assert.equal(publicPracticeQuestion.maxScore, 0);
+    assert.equal("correctBuckets" in publicPracticeQuestion, false);
+    assert.equal("correctSequence" in publicPracticeQuestion, false);
+  });
+});
+
 test("PM01 meat tools and meat grinder sequence are visual but sanitized", () => {
   const exam = getPm01Exam();
   const meatVariant = buildPm01Variant(exam, "meat");
@@ -1015,9 +1106,9 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(studentScript, /retryDelay/);
   assert.match(studentScript, /X-PM01-Duration-Ms/);
   assert.doesNotMatch(studentScript, /readAsDataURL\(blob\)/);
-  assert.match(studentHtml, /pm01\.css\?v=1\.0\.16/);
+  assert.match(studentHtml, /pm01\.css\?v=1\.0\.20/);
   assert.match(studentHtml, /loadPm01Script/);
-  assert.match(studentHtml, /pm01\.js\?v=1\.0\.21/);
+  assert.match(studentHtml, /pm01\.js\?v=1\.0\.23/);
   assert.match(adminHtml, /export-group-csv/);
   assert.match(adminScript, /renderVoiceQueueList/);
   assert.match(adminScript, /saveQuickDecision/);
@@ -1029,6 +1120,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(adminScript, /api\/admin\/pm01\/exports\/group-csv\/download/);
   assert.match(adminScript, /voiceAudio/);
   assert.match(adminScript, /audioInfo\.audioUrl/);
+  assert.match(adminHtml, /pm01\.css\?v=1\.0\.20/);
   assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.18/);
   assert.match(css, /\.voice-queue-list/);
   assert.match(css, /\.voice-quick-review/);

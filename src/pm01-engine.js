@@ -111,6 +111,7 @@ function getPm01PublicData(exam = pm01Exam) {
     formulas: exam.formulas,
     assetRegistry: exam.assetRegistry || {},
     visualAtlas: exam.visualAtlas || [],
+    digitalShift: exam.digitalShift || null,
     materials: getPm01MaterialBankPublicData(),
     variants: exam.variants.map((variant) => ({
       id: variant.id,
@@ -496,6 +497,47 @@ function buildPm01Variant(exam, variantId, options = {}) {
     };
   });
 
+  if (options.includePractice && Array.isArray(variant.practiceOnly) && variant.practiceOnly.length) {
+    const practiceModule = {
+      id: "digital_shift",
+      code: "PX",
+      order: modules.length,
+      title: "Цифровая смена",
+      maxScore: 0,
+      practiceOnly: true
+    };
+    const startIndex = globalIndex;
+    const practiceQuestions = variant.practiceOnly.map((question, index) => {
+      const prepared = addRuntimeQuestionMeta(
+        {
+          ...question,
+          maxScore: 0,
+          practiceOnly: true
+        },
+        practiceModule,
+        index + 1,
+        globalIndex,
+        variant,
+        routeSeed
+      );
+      validatePm01Question(prepared);
+      flatQuestions.push(prepared);
+      globalIndex += 1;
+      return prepared;
+    });
+    modules.push({
+      id: practiceModule.id,
+      code: practiceModule.code,
+      order: practiceModule.order,
+      title: practiceModule.title,
+      maxScore: 0,
+      questionCount: practiceQuestions.length,
+      stepStart: startIndex,
+      stepEnd: globalIndex - 1,
+      practiceOnly: true
+    });
+  }
+
   return {
     schemaVersion: exam.schemaVersion,
     generatedAt: nowIso(),
@@ -581,6 +623,8 @@ function sanitizePm01Question(question, attempt, options = {}) {
     rubric: question.rubric || [],
     maxDurationSeconds: question.maxDurationSeconds || null,
     hotspotTargetCount: Array.isArray(question.hotspots) ? question.hotspots.length : 0,
+    practiceOnly: Boolean(question.practiceOnly),
+    practiceFamily: question.practiceFamily || "",
     competencies: question.competencies || [],
     competencyTags: question.competencyTags || [],
     savedAnswer: sanitizePm01SavedAnswer(question, answer),
@@ -620,7 +664,10 @@ function sanitizePm01Question(question, attempt, options = {}) {
       text: item.text,
       image: item.image || "",
       visualTitle: item.visualTitle || "",
-      detail: item.detail || ""
+      detail: item.detail || "",
+      status: item.status || "",
+      risk: item.risk || "",
+      signals: Array.isArray(item.signals) ? [...item.signals] : []
     }));
   }
 

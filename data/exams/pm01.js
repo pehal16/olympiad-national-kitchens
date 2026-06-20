@@ -24,7 +24,7 @@ function single(id, prompt, options, correctId, meta = {}) {
     id,
     type: "single_choice",
     prompt,
-    maxScore: meta.maxScore || 2,
+    maxScore: meta.maxScore ?? 2,
     options: options.map(([key, text]) => option(key, text, key === correctId)),
     explanation: meta.explanation || "",
     competencyTags: meta.competencyTags || []
@@ -38,7 +38,7 @@ function multiple(id, prompt, options, correctIds, meta = {}) {
     type: "multiple_choice",
     prompt,
     note: "Можно выбрать несколько ответов.",
-    maxScore: meta.maxScore || 2,
+    maxScore: meta.maxScore ?? 2,
     options: options.map(([key, text]) => option(key, text, correct.has(key))),
     explanation: meta.explanation || "",
     competencyTags: meta.competencyTags || []
@@ -50,8 +50,12 @@ function sequence(id, prompt, items, correctSequence, meta = {}) {
     id,
     type: "sequence_drag",
     prompt,
-    note: "Соберите правильный технологический порядок операций.",
-    maxScore: meta.maxScore || 2,
+    note: meta.note || "Соберите правильный технологический порядок операций.",
+    maxScore: meta.maxScore ?? 2,
+    visualMode: meta.visualMode || "",
+    interactionHint: meta.interactionHint || "",
+    practiceOnly: Boolean(meta.practiceOnly),
+    practiceFamily: meta.practiceFamily || "",
     items: items.map(([key, text, itemMeta = {}]) => ({ id: key, text, ...itemMeta })),
     slots: correctSequence.map((_, index) => ({
       id: `${id}-step-${index + 1}`,
@@ -69,15 +73,60 @@ function bucket(id, prompt, items, buckets, correctBuckets, meta = {}) {
     type: "bucket_sort",
     prompt,
     note: meta.note || "Распределите карточки по правильным зонам.",
-    maxScore: meta.maxScore || 2,
+    maxScore: meta.maxScore ?? 2,
     visualMode: meta.visualMode || "",
     interactionHint: meta.interactionHint || "",
+    practiceOnly: Boolean(meta.practiceOnly),
+    practiceFamily: meta.practiceFamily || "",
     items: items.map(([key, text, itemMeta = {}]) => ({ id: key, text, ...itemMeta })),
     buckets: buckets.map(([key, label, bucketMeta = {}]) => ({ id: key, label, ...bucketMeta })),
     correctBuckets,
     explanation: meta.explanation || "",
     competencyTags: meta.competencyTags || []
   };
+}
+
+function qualityControl(id, prompt, items, correctBuckets, meta = {}) {
+  return bucket(
+    id,
+    prompt,
+    items,
+    [
+      [
+        "accept",
+        "Допустить к работе",
+        {
+          detail: "Партия безопасна, промаркирована и соответствует заданию."
+        }
+      ],
+      [
+        "correct",
+        "Исправить условия",
+        {
+          detail: "Продукт можно использовать после устранения нарушения: тара, маркировка, охлаждение или разделение потоков."
+        }
+      ],
+      [
+        "reject",
+        "Забраковать",
+        {
+          detail: "Есть признаки недоброкачественности или загрязнения, продукт нельзя направлять в производство."
+        }
+      ]
+    ],
+    correctBuckets,
+    {
+      maxScore: 6,
+      visualMode: "quality_control",
+      note: "Оцените фото и карту контроля партии. Выберите производственное решение.",
+      interactionHint:
+        "Сначала нажмите карту партии, затем решение: допустить, исправить условия или забраковать.",
+      explanation:
+        "Задание проверяет визуальный контроль полуфабриката, санитарные риски, маркировку и готовность партии к дальнейшей работе.",
+      competencyTags: ["ПК 1.1", "ПК 1.2", "ОК 01", "ОК 02", "ОК 07"],
+      ...meta
+    }
+  );
 }
 
 function calculation(id, prompt, formulas, fields, solutionSteps, meta = {}) {
@@ -88,7 +137,7 @@ function calculation(id, prompt, formulas, fields, solutionSteps, meta = {}) {
     formulas,
     fields,
     solutionSteps,
-    maxScore: meta.maxScore || 10,
+    maxScore: meta.maxScore ?? 10,
     explanation: meta.explanation || "",
     competencyTags: meta.competencyTags || ["ОК 02", "ПК 1.2"]
   };
@@ -121,7 +170,10 @@ function hotspot(id, prompt, image, hotspots, meta = {}) {
     prompt,
     image,
     note: "Нажмите на все нарушения или важные зоны на производственной сцене.",
-    maxScore: meta.maxScore || 6,
+    maxScore: meta.maxScore ?? 6,
+    visualMode: meta.visualMode || "",
+    practiceOnly: Boolean(meta.practiceOnly),
+    practiceFamily: meta.practiceFamily || "",
     hotspots,
     explanation: meta.explanation || "",
     competencyTags: meta.competencyTags || ["ПК 1.1", "ОК 07"]
@@ -990,14 +1042,62 @@ module.exports = {
               "Задание проверяет не запоминание иностранного слова, а практический выбор формы под дальнейшее использование полуфабриката."
           }
         ),
-        multiple("veg-sim-equipment", "Выберите оборудование овощного участка.", [
-          ["table", "производственный стол"],
-          ["bath", "моечная ванна"],
-          ["peeler", "картофелечистка"],
-          ["cutter", "овощерезка"],
-          ["board", "доска и ножи"],
-          ["mixer", "планетарный миксер"]
-        ], ["table", "bath", "peeler", "cutter", "board"], { maxScore: 6 }),
+        qualityControl(
+          "veg-sim-quality",
+          "Проведите контроль качества овощных полуфабрикатов перед передачей в производство.",
+          [
+            [
+              "potato-batonnet-ready",
+              "Картофель брусочками",
+              {
+                image: generatedSemiFinishedProductAssets.generatedPotatoBatonnet,
+                status: "карта контроля: чистая тара, холодная вода, маркировка есть",
+                detail: "Форма ровная, потемнения нет, партия готова к кратковременному хранению и дальнейшей тепловой обработке.",
+                signals: ["ровная нарезка", "чистая вода", "маркировка партии"],
+                risk: "низкий"
+              }
+            ],
+            [
+              "mirepoix-no-label",
+              "Смесь mirepoix без маркировки",
+              {
+                image: generatedSemiFinishedProductAssets.generatedMixedMirepoix,
+                status: "карта контроля: чистая тара, но нет даты и времени приготовления",
+                detail: "Внешний вид безопасный, однако партию нельзя передавать без полной маркировки.",
+                signals: ["нет даты", "нет времени", "нужно указать условия хранения"],
+                risk: "средний"
+              }
+            ],
+            [
+              "greens-slime",
+              "Шинкованная зелень с признаками порчи",
+              {
+                image: semiFinishedProductAssets.vegGreensChiffonadeReady,
+                status: "карта контроля: влажная масса, посторонний запах, слизистая поверхность",
+                detail: "При таких признаках зелень не исправляют промыванием и не смешивают с качественной партией.",
+                signals: ["посторонний запах", "слизистая поверхность", "повышенный риск загрязнения"],
+                risk: "высокий"
+              }
+            ],
+            [
+              "potato-open-tray",
+              "Картофель соломкой в открытом лотке",
+              {
+                image: vegetablePhotoCutAssets.potatoAllumette,
+                status: "карта контроля: лоток открыт, тара без крышки, партия стоит вне охлаждаемой зоны",
+                detail: "Продукт не бракуется по внешнему виду, но условия хранения нужно немедленно исправить.",
+                signals: ["открытая тара", "нет охлаждения", "нужна защита от загрязнения"],
+                risk: "средний"
+              }
+            ]
+          ],
+          {
+            "potato-batonnet-ready": "accept",
+            "mirepoix-no-label": "correct",
+            "greens-slime": "reject",
+            "potato-open-tray": "correct"
+          }
+        ),
         hotspot("veg-sim-hotspot", "Найдите нарушения на овощном участке.", "/assets/pm01/violations/vegetable.png", [
           { id: "dry-potato", label: "Очищенный картофель хранится без воды", x: 22, y: 72, radius: 12 },
           { id: "knife", label: "Нож лежит на краю стола и выступает за край", x: 86, y: 76, radius: 10 },
@@ -1202,7 +1302,65 @@ module.exports = {
             interactionHint: "Рассмотрите изображение полуфабриката и перенесите карточку в правильную группу."
           }
         ),
-        multiple("fish-sim-storage", "Выберите правильное хранение рыбных полуфабрикатов.", [["cold", "охлажденный вид"], ["clean", "чистая тара"], ["separate", "раздельное хранение"], ["terms", "соблюдение сроков"], ["open", "лоток без крышки в общей рабочей зоне"]], ["cold", "clean", "separate", "terms"], { maxScore: 6 })
+        qualityControl(
+          "fish-sim-quality",
+          "Проведите контроль качества рыбных полуфабрикатов перед охлаждением и передачей на тепловую обработку.",
+          [
+            [
+              "fillet-chilled",
+              "Филе рыбы порционное",
+              {
+                image: generatedSemiFinishedProductAssets.generatedFishFilletPortions,
+                status: "карта контроля: упругая мякоть, чистый запах, тара закрыта, температура хранения соблюдена",
+                detail: "Партия соответствует натуральному рыбному полуфабрикату и может быть направлена дальше по заданию.",
+                signals: ["упругая мякоть", "чистый запах", "закрытая тара"],
+                risk: "низкий"
+              }
+            ],
+            [
+              "mince-open-warm",
+              "Рыбная котлетная масса",
+              {
+                image: semiFinishedProductAssets.fishMinceMass,
+                status: "карта контроля: тара открыта, масса стоит вне холодильника, маркировка частичная",
+                detail: "Если нет признаков порчи, нужно немедленно закрыть, промаркировать и вернуть в холод.",
+                signals: ["открытая тара", "нет полного ярлыка", "нарушен режим охлаждения"],
+                risk: "средний"
+              }
+            ],
+            [
+              "steak-sour",
+              "Стейки рыбы с сомнительным запахом",
+              {
+                image: semiFinishedProductAssets.fishSteakCrosscut,
+                status: "карта контроля: кислый запах, рыхлая мякоть, жидкость мутная",
+                detail: "Органолептические признаки недоброкачественности требуют браковки и сообщения ответственному лицу.",
+                signals: ["кислый запах", "рыхлая мякоть", "мутная жидкость"],
+                risk: "высокий"
+              }
+            ],
+            [
+              "breaded-mixed",
+              "Панированные рыбные полуфабрикаты",
+              {
+                image: generatedSemiFinishedProductAssets.generatedFishSticksBreaded,
+                status: "карта контроля: внешний вид нормальный, но лоток стоит рядом с сырой рыбой без разделения потоков",
+                detail: "Панированный полуфабрикат нужно изолировать от сырой рыбы и перенести в чистую закрытую тару.",
+                signals: ["риск перекрестного загрязнения", "нужно раздельное хранение", "закрыть тару"],
+                risk: "средний"
+              }
+            ]
+          ],
+          {
+            "fillet-chilled": "accept",
+            "mince-open-warm": "correct",
+            "steak-sour": "reject",
+            "breaded-mixed": "correct"
+          },
+          {
+            competencyTags: ["ПК 1.1", "ПК 1.2", "ПК 1.3", "ОК 01", "ОК 02", "ОК 07"]
+          }
+        )
       ]
     },
     {
@@ -1352,71 +1510,63 @@ module.exports = {
           ["body", "screw", "knife", "plate", "nut", "hopper"],
           { maxScore: 6 }
         ),
-        bucket(
-          "meat-sim-groups",
-          "Распределите мясные полуфабрикаты по группам.",
+        qualityControl(
+          "meat-sim-quality",
+          "Проведите контроль качества мясных полуфабрикатов после формования и перед передачей в холод.",
           [
             [
-              "entrecote",
-              "антрекот",
-              {
-                image: semiFinishedProductAssets.meatEntrecotePortion,
-                detail: "Порционный натуральный полуфабрикат из говядины."
-              }
-            ],
-            [
-              "goulash",
-              "гуляш",
+              "goulash-ready",
+              "Гуляш из говядины",
               {
                 image: generatedSemiFinishedProductAssets.generatedMeatGoulashCubes,
-                detail: "Мелкокусковой полуфабрикат кубиками для тушения."
+                status: "карта контроля: куски одинакового размера, запах свойственный, тара закрыта и промаркирована",
+                detail: "Мелкокусковой полуфабрикат подготовлен аккуратно и может быть передан на хранение или тепловую обработку.",
+                signals: ["ровная нарезка", "чистая тара", "есть маркировка"],
+                risk: "низкий"
               }
             ],
             [
-              "azu",
-              "азу",
+              "cutlet-mass-warm",
+              "Порции котлетной массы",
               {
-                image: semiFinishedProductAssets.meatAzuStrips,
-                detail: "Мелкокусковой полуфабрикат продолговатыми брусочками."
+                image: semiFinishedProductAssets.meatCutletMassPortions,
+                status: "карта контроля: масса стоит открыто, температура выше допустимой, этикетка неполная",
+                detail: "Партия требует немедленного охлаждения, закрытой тары и полной маркировки, если нет признаков порчи.",
+                signals: ["открытая тара", "нарушен холод", "неполная маркировка"],
+                risk: "средний"
               }
             ],
             [
-              "cutlets",
-              "котлеты",
+              "bones-spoilage",
+              "Кости для бульона с признаками порчи",
               {
-                image: semiFinishedProductAssets.meatCutletsFormed,
-                detail: "Рубленые изделия из котлетной массы."
+                image: semiFinishedProductAssets.meatBonesForBroth,
+                status: "карта контроля: липкая поверхность, кислый запах, потемнение на срезах",
+                detail: "Такое сырье нельзя использовать даже для бульона; партия подлежит браковке.",
+                signals: ["кислый запах", "липкая поверхность", "потемнение"],
+                risk: "высокий"
               }
             ],
             [
-              "large",
-              "крупный кусок",
+              "schnitzel-no-date",
+              "Панированный шницель",
               {
-                image: semiFinishedProductAssets.meatLargePiece,
-                detail: "Крупнокусковой полуфабрикат для дальнейшей тепловой обработки."
-              }
-            ],
-            [
-              "romsteak",
-              "ромштекс",
-              {
-                image: semiFinishedProductAssets.meatRomsteakBreaded,
-                detail: "Панированный порционный полуфабрикат."
+                image: generatedSemiFinishedProductAssets.generatedMeatBreadedSchnitzel,
+                status: "карта контроля: внешний вид ровный, но на таре нет даты и времени изготовления",
+                detail: "Перед передачей в холодильник нужно оформить маркировку и проверить срок дальнейшего хранения.",
+                signals: ["нет даты", "нет времени", "нужно указать срок"],
+                risk: "средний"
               }
             ]
           ],
-          [
-            ["portion", "порционные натуральные"],
-            ["small", "мелкокусковые"],
-            ["minced", "рубленые"],
-            ["large", "крупнокусковые"],
-            ["breaded", "панированные порционные"]
-          ],
-          { entrecote: "portion", goulash: "small", azu: "small", cutlets: "minced", large: "large", romsteak: "breaded" },
           {
-            maxScore: 6,
-            visualMode: "product_cards",
-            interactionHint: "Перенесите карточку полуфабриката в группу по способу подготовки."
+            "goulash-ready": "accept",
+            "cutlet-mass-warm": "correct",
+            "bones-spoilage": "reject",
+            "schnitzel-no-date": "correct"
+          },
+          {
+            competencyTags: ["ПК 1.1", "ПК 1.2", "ПК 1.4", "ОК 01", "ОК 02", "ОК 07"]
           }
         ),
         hotspot("meat-sim-hotspot", "Найдите нарушения в мясном цехе.", "/assets/pm01/violations/meat.png", [
@@ -1543,7 +1693,65 @@ module.exports = {
           ["quality", "defrost", "flame", "pins", "gut", "rinse", "cut", "shape", "cool"],
           { maxScore: 6 }
         ),
-        multiple("poultry-sim-bad", "Выберите признаки недоброкачественной птицы.", [["smell", "неприятный запах"], ["slime", "слизь"], ["mold", "плесень"], ["green", "позеленение"], ["dark", "потемнение"], ["loose", "дряблая консистенция"], ["dry", "чистая сухая поверхность"]], ["smell", "slime", "mold", "green", "dark", "loose"], { maxScore: 6 }),
+        qualityControl(
+          "poultry-sim-quality",
+          "Проведите контроль качества полуфабрикатов из птицы и кролика после разделки.",
+          [
+            [
+              "fillet-ready",
+              "Филе курицы",
+              {
+                image: generatedSemiFinishedProductAssets.generatedChickenFillet,
+                status: "карта контроля: чистая грудная мякоть, свойственный запах, тара закрыта и промаркирована",
+                detail: "Натуральный полуфабрикат подготовлен без видимых дефектов и может быть передан в охлаждение.",
+                signals: ["чистая поверхность", "свойственный запах", "маркировка есть"],
+                risk: "низкий"
+              }
+            ],
+            [
+              "drumsticks-open",
+              "Голени курицы в открытой таре",
+              {
+                image: generatedSemiFinishedProductAssets.generatedChickenDrumsticks,
+                status: "карта контроля: тара открыта, части соприкасаются с внешней упаковкой, дата указана не полностью",
+                detail: "Внешний вид допустимый, но перед передачей нужно заменить тару, закрыть и уточнить маркировку.",
+                signals: ["открытая тара", "контакт с упаковкой", "неполная дата"],
+                risk: "средний"
+              }
+            ],
+            [
+              "rabbit-spoilage",
+              "Порции кролика с признаками порчи",
+              {
+                image: generatedSemiFinishedProductAssets.generatedRabbitPortions,
+                status: "карта контроля: липкая поверхность, посторонний запах, сероватые участки",
+                detail: "Партия не допускается к производству и должна быть изолирована от качественного сырья.",
+                signals: ["посторонний запах", "липкость", "изменение цвета"],
+                risk: "высокий"
+              }
+            ],
+            [
+              "poultry-mince-no-label",
+              "Котлетная масса из птицы",
+              {
+                image: semiFinishedProductAssets.poultryMinceMass,
+                status: "карта контроля: масса охлаждена, но нет наименования и времени изготовления",
+                detail: "До передачи нужно оформить маркировку и подтвердить срок безопасного хранения.",
+                signals: ["нет наименования", "нет времени", "нужен срок хранения"],
+                risk: "средний"
+              }
+            ]
+          ],
+          {
+            "fillet-ready": "accept",
+            "drumsticks-open": "correct",
+            "rabbit-spoilage": "reject",
+            "poultry-mince-no-label": "correct"
+          },
+          {
+            competencyTags: ["ПК 1.1", "ПК 1.2", "ПК 1.4", "ОК 01", "ОК 02", "ОК 07"]
+          }
+        ),
         bucket(
           "poultry-sim-parts",
           "Соотнесите полуфабрикат и часть птицы.",
@@ -1694,8 +1902,514 @@ module.exports = {
           { id: "no-label", label: "Тара без маркировки", x: 84, y: 72, radius: 10 },
           { id: "bad-pack", label: "Упаковка повреждена", x: 81, y: 40, radius: 11 }
         ], { maxScore: 6 }),
-        multiple("complex-sim-consult", "Выберите правильную консультацию потребителю.", [["fridge", "хранить в холодильнике"], ["term", "соблюдать срок"], ["closed", "не вскрывать заранее"], ["separate", "не хранить рыбу/мясо с готовыми блюдами"], ["check", "проверять вид и запах"], ["warm", "хранить у плиты"]], ["fridge", "term", "closed", "separate", "check"], { maxScore: 6 })
+        qualityControl(
+          "complex-sim-quality",
+          "Проведите финальный контроль комплексного заказа перед хранением и передачей.",
+          [
+            [
+              "labelled-container-ready",
+              "Промаркированный пищевой контейнер",
+              {
+                image: extendedVisualAssets.safety.labelledContainer,
+                status: "карта контроля: наименование, дата/время, количество и условия хранения указаны",
+                detail: "Партия оформлена корректно и может быть передана в холодильное хранение.",
+                signals: ["полная маркировка", "закрытая тара", "условия хранения указаны"],
+                risk: "низкий"
+              }
+            ],
+            [
+              "vacuum-no-label",
+              "Вакуумная упаковка без этикетки",
+              {
+                image: extendedVisualAssets.safety.vacuumPackaging,
+                status: "карта контроля: упаковка целая, но отсутствуют дата, время и наименование продукта",
+                detail: "Перед передачей нужно нанести маркировку, иначе невозможно контролировать срок реализации.",
+                signals: ["нет наименования", "нет даты", "нет срока"],
+                risk: "средний"
+              }
+            ],
+            [
+              "newspaper-pack",
+              "Упаковка в газету",
+              {
+                image: "/assets/pm01/packaging/newspaper-violation.png",
+                status: "карта контроля: продукт контактирует с непищевой бумагой и типографской краской",
+                detail: "Такую упаковку нельзя исправить как готовую партию; продукт нужно изолировать и не передавать потребителю.",
+                signals: ["непищевая упаковка", "риск загрязнения", "контакт с краской"],
+                risk: "высокий"
+              }
+            ],
+            [
+              "separate-storage-ready",
+              "Раздельное холодильное хранение",
+              {
+                image: extendedVisualAssets.safety.fridgeSeparateStorage,
+                status: "карта контроля: рыба, мясо, птица и овощные полуфабрикаты разделены по таре и полкам",
+                detail: "Товарное соседство и раздельные потоки соблюдены, партия готова к дальнейшей передаче.",
+                signals: ["раздельные потоки", "закрытые контейнеры", "охлаждение соблюдено"],
+                risk: "низкий"
+              }
+            ]
+          ],
+          {
+            "labelled-container-ready": "accept",
+            "vacuum-no-label": "correct",
+            "newspaper-pack": "reject",
+            "separate-storage-ready": "accept"
+          },
+          {
+            competencyTags: ["ПК 1.1", "ПК 1.2", "ПК 1.3", "ПК 1.4", "ОК 01", "ОК 02", "ОК 07"]
+          }
+        )
       ]
     }
   ]
 };
+
+const pm01DigitalShiftFamilies = [
+  {
+    id: "quality_control",
+    title: "Контроль качества партии",
+    interaction: "Фото партии, карта контроля, признаки риска и решение: допустить, исправить условия или забраковать.",
+    modernity: "Студент читает визуальные доказательства как на реальной смене, а не выбирает термин по памяти."
+  },
+  {
+    id: "shift_investigation",
+    title: "Расследование нарушения",
+    interaction: "На сцене цеха нужно отметить источники риска и восстановить причину нарушения.",
+    modernity: "Hotspot превращается в производственный аудит с визуальным поиском ошибок."
+  },
+  {
+    id: "production_timeline",
+    title: "Технологический таймлайн",
+    interaction: "Операции собираются в линию смены с логикой времени, потоков и санитарных переходов.",
+    modernity: "Проверяется процессное мышление: что раньше, что позже, где контрольная точка."
+  },
+  {
+    id: "storage_marking",
+    title: "Маркировка и хранение",
+    interaction: "Карточки тары, маркировки и условий хранения распределяются по допустимым решениям.",
+    modernity: "Фокус смещается с теории на управляемое решение по срокам, таре, холоду и соседству."
+  },
+  {
+    id: "order_assembly",
+    title: "Сборка заказа",
+    interaction: "Студент собирает маршрут заказа от заявки и сырья до упаковки и передачи.",
+    modernity: "Экзамен показывает целую производственную смену, а не отдельные несвязанные вопросы."
+  }
+];
+
+const pm01DigitalShiftVariantPackages = {
+  vegetables: {
+    title: "Овощной цех: цифровая смена нарезки и контроля",
+    rpTopics: [
+      "организация рабочего места овощного цеха",
+      "механическая кулинарная обработка овощей и грибов",
+      "формы нарезки и подготовка овощных полуфабрикатов",
+      "хранение очищенных и нарезанных овощей"
+    ],
+    productionLog: [
+      "08:45 поступили корнеплоды и зелень",
+      "08:55 выполнена мойка и очистка",
+      "09:05 подготовлены партии нарезки",
+      "09:20 проводится контроль качества"
+    ],
+    visualPrompts: [
+      "Фотореалистичный овощной учебный цех, гастроемкости с картофелем брусочками, зеленью chiffonade, морковью rondelle, кабачком кубиком; чистая нержавеющая поверхность; без готовых блюд и лишнего декора.",
+      "Крупный план контрольной партии овощных полуфабрикатов в пищевой таре с визуальными признаками: маркировка, крышка, вода для картофеля, отсутствие потемнения."
+    ],
+    tasks: [
+      ["quality_control", "Проверить партии нарезки перед передачей в производство."],
+      ["shift_investigation", "Найти нарушения на овощном участке."],
+      ["production_timeline", "Восстановить последовательность обработки овощей."],
+      ["storage_marking", "Разложить партии по условиям хранения и маркировки."],
+      ["order_assembly", "Собрать мини-заказ овощных полуфабрикатов."]
+    ],
+    storageCards: [
+      ["peeled-potato-water", "Очищенный картофель в холодной воде", { image: semiFinishedProductAssets.vegPeeledPotatoTubers, detail: "Есть защита от потемнения и кратковременное хранение." }, "allowed"],
+      ["open-greens", "Зелень открыта без крышки", { image: semiFinishedProductAssets.vegGreensChiffonadeReady, detail: "Нужна закрытая чистая тара и маркировка." }, "correct"],
+      ["mixed-roots-labelled", "Промаркированные корнеплоды", { image: semiFinishedProductAssets.vegWashedRootVegetables, detail: "Сырье разделено и подготовлено к обработке." }, "allowed"],
+      ["no-label-cubes", "Кубики овощей без времени изготовления", { image: semiFinishedProductAssets.vegMixedMacedoineReady, detail: "Использовать можно только после внесения полного ярлыка." }, "correct"]
+    ],
+    orderSteps: [
+      ["accept", "принять сырье"],
+      ["sort", "отсортировать"],
+      ["wash", "промыть"],
+      ["peel", "очистить"],
+      ["cut", "нарезать"],
+      ["quality", "проверить качество"],
+      ["mark", "промаркировать"],
+      ["store", "передать в холод"]
+    ]
+  },
+  fish: {
+    title: "Рыбный цех: контроль свежести и потоков",
+    rpTopics: [
+      "обработка рыбы с костным скелетом",
+      "приготовление рыбных полуфабрикатов",
+      "котлетная масса из рыбы",
+      "условия охлаждения и предупреждение перекрестного загрязнения"
+    ],
+    productionLog: [
+      "08:40 принята охлажденная рыба",
+      "08:50 проведена органолептическая оценка",
+      "09:10 подготовлены филе и котлетная масса",
+      "09:25 партии направляются в охлаждение"
+    ],
+    visualPrompts: [
+      "Фотореалистичный рыбный учебный цех с чистой доской, филе рыбы, закрытыми лотками, весами и охлаждаемой зоной; без готовой жареной рыбы.",
+      "Крупный план рыбных полуфабрикатов: порционное филе, котлетная масса, панированные заготовки, разные условия маркировки и охлаждения."
+    ],
+    tasks: [
+      ["quality_control", "Оценить рыбные полуфабрикаты перед охлаждением."],
+      ["shift_investigation", "Найти нарушения рыбного потока."],
+      ["production_timeline", "Собрать обработку рыбы в технологический порядок."],
+      ["storage_marking", "Разнести рыбные партии по условиям хранения."],
+      ["order_assembly", "Собрать заказ из рыбных полуфабрикатов."]
+    ],
+    storageCards: [
+      ["fillet-closed", "Филе в закрытом лотке", { image: generatedSemiFinishedProductAssets.generatedFishFilletPortions, detail: "Чистая закрытая тара и холод." }, "allowed"],
+      ["mince-open", "Котлетная масса открыта", { image: semiFinishedProductAssets.fishMinceMass, detail: "Нужно закрыть, промаркировать и вернуть в холод." }, "correct"],
+      ["breaded-near-raw", "Панированные полуфабрикаты рядом с сырой рыбой", { image: generatedSemiFinishedProductAssets.generatedFishSticksBreaded, detail: "Нарушено разделение потоков." }, "correct"],
+      ["trim-stock", "Обрезки для бульона без маркировки", { image: semiFinishedProductAssets.fishTrimForStock, detail: "Нужны назначение, дата и условия хранения." }, "correct"]
+    ],
+    orderSteps: [
+      ["quality", "проверить свежесть"],
+      ["scale", "очистить от чешуи"],
+      ["gut", "выпотрошить"],
+      ["rinse", "промыть"],
+      ["fillet", "разделать на филе"],
+      ["portion", "порционировать"],
+      ["mark", "промаркировать"],
+      ["cool", "охладить"]
+    ]
+  },
+  meat: {
+    title: "Мясной цех: безопасность оборудования и рубленая масса",
+    rpTopics: [
+      "обработка мясного сырья",
+      "порционные и мелкокусковые полуфабрикаты",
+      "приготовление рубленой и котлетной массы",
+      "безопасная эксплуатация мясорубки"
+    ],
+    productionLog: [
+      "08:35 подготовлено рабочее место",
+      "08:50 мясо зачищено и нарезано",
+      "09:05 собрана мясорубка",
+      "09:20 сформованы партии полуфабрикатов"
+    ],
+    visualPrompts: [
+      "Фотореалистичный мясной учебный цех: ножи, мусат, весы, мясорубка, чистые лотки, сырое мясо и полуфабрикаты без приготовленного вида.",
+      "Крупный план мясных полуфабрикатов: гуляш, котлетная масса, шницель, кости для бульона; с признаками правильной и неправильной тары."
+    ],
+    tasks: [
+      ["quality_control", "Оценить мясные полуфабрикаты после формования."],
+      ["shift_investigation", "Найти нарушения мясного участка."],
+      ["production_timeline", "Собрать безопасный порядок работы с мясорубкой."],
+      ["storage_marking", "Распределить мясные партии по условиям хранения."],
+      ["order_assembly", "Собрать заказ мясных полуфабрикатов."]
+    ],
+    storageCards: [
+      ["goulash-labelled", "Гуляш в закрытом промаркированном лотке", { image: generatedSemiFinishedProductAssets.generatedMeatGoulashCubes, detail: "Партия готова к охлаждению." }, "allowed"],
+      ["cutlet-warm", "Котлетная масса стоит вне холода", { image: semiFinishedProductAssets.meatCutletMassPortions, detail: "Нужно немедленно охладить и закрыть." }, "correct"],
+      ["bones-open", "Кости для бульона в открытой таре", { image: semiFinishedProductAssets.meatBonesForBroth, detail: "Нужна закрытая тара и ярлык назначения." }, "correct"],
+      ["schnitzel-labelled", "Панированный шницель с маркировкой", { image: generatedSemiFinishedProductAssets.generatedMeatBreadedSchnitzel, detail: "Указаны дата, время и условия хранения." }, "allowed"]
+    ],
+    orderSteps: [
+      ["workplace", "подготовить место"],
+      ["quality", "проверить мясо"],
+      ["trim", "зачистить"],
+      ["cut", "нарезать"],
+      ["grinder", "собрать мясорубку"],
+      ["mince", "измельчить"],
+      ["form", "сформовать"],
+      ["cool", "охладить"]
+    ]
+  },
+  poultry: {
+    title: "Птица, дичь, кролик: разделка и санитарные потоки",
+    rpTopics: [
+      "обработка домашней птицы, дичи и кролика",
+      "полуфабрикаты из птицы и кролика",
+      "размораживание и потрошение",
+      "раздельность инвентаря и хранение"
+    ],
+    productionLog: [
+      "08:30 приняты тушки птицы и кролика",
+      "08:45 проверены запах, цвет и консистенция",
+      "09:00 проведена разделка",
+      "09:18 подготовлены партии для охлаждения"
+    ],
+    visualPrompts: [
+      "Фотореалистичный учебный участок обработки птицы и кролика: чистые доски, лотки, отдельная линия, сырые полуфабрикаты; без жареного или готового продукта.",
+      "Крупный план полуфабрикатов из птицы и кролика: филе, голени, кролик порциями, котлетная масса; контроль маркировки и тары."
+    ],
+    tasks: [
+      ["quality_control", "Оценить полуфабрикаты из птицы и кролика."],
+      ["shift_investigation", "Найти нарушения работы с птицей."],
+      ["production_timeline", "Собрать технологический порядок обработки птицы."],
+      ["storage_marking", "Распределить партии по безопасному хранению."],
+      ["order_assembly", "Собрать заказ полуфабрикатов из птицы и кролика."]
+    ],
+    storageCards: [
+      ["fillet-labelled", "Филе птицы в закрытом лотке", { image: generatedSemiFinishedProductAssets.generatedChickenFillet, detail: "Есть маркировка и охлаждение." }, "allowed"],
+      ["rabbit-no-label", "Кролик порциями без ярлыка", { image: generatedSemiFinishedProductAssets.generatedRabbitPortions, detail: "Нужно указать наименование, дату и условия." }, "correct"],
+      ["mince-open", "Птичья котлетная масса открыта", { image: semiFinishedProductAssets.poultryMinceMass, detail: "Нужна закрытая тара и холод." }, "correct"],
+      ["drumsticks-ready", "Голени птицы промаркированы", { image: generatedSemiFinishedProductAssets.generatedChickenDrumsticks, detail: "Партия готова к хранению." }, "allowed"]
+    ],
+    orderSteps: [
+      ["quality", "проверить тушку"],
+      ["defrost", "разморозить безопасно"],
+      ["clean", "удалить пеньки"],
+      ["gut", "выпотрошить"],
+      ["rinse", "промыть"],
+      ["cut", "разделать"],
+      ["form", "сформовать"],
+      ["store", "охладить"]
+    ]
+  },
+  complex: {
+    title: "Комплексный заказ: управление сменой и передачей партии",
+    rpTopics: [
+      "комплексная подготовка полуфабрикатов",
+      "распределение сырья по участкам",
+      "расчет партии и упаковка",
+      "маркировка, хранение и подготовка к реализации"
+    ],
+    productionLog: [
+      "08:20 получен комплексный заказ",
+      "08:35 сырье распределено по участкам",
+      "09:10 рассчитана масса партий",
+      "09:35 проводится упаковка и финальная маркировка"
+    ],
+    visualPrompts: [
+      "Фотореалистичная комплексная учебная зона: несколько закрытых лотков с овощными, рыбными, мясными полуфабрикатами и птицей, весы, маркировочные этикетки, холодильная полка.",
+      "Крупный план финальной выдачи партии: пищевая тара, маркировка, раздельное хранение, без готовых блюд и ресторанной подачи."
+    ],
+    tasks: [
+      ["quality_control", "Провести финальный контроль комплексного заказа."],
+      ["shift_investigation", "Найти нарушения хранения и товарного соседства."],
+      ["production_timeline", "Собрать общий маршрут комплексной смены."],
+      ["storage_marking", "Распределить упаковку и тару по допустимости."],
+      ["order_assembly", "Собрать заказ от заявки до передачи."]
+    ],
+    storageCards: [
+      ["labelled-container", "Промаркированный контейнер", { image: extendedVisualAssets.safety.labelledContainer, detail: "Полная маркировка и закрытая тара." }, "allowed"],
+      ["vacuum-no-label", "Вакуумная упаковка без этикетки", { image: extendedVisualAssets.safety.vacuumPackaging, detail: "Нужно добавить ярлык до передачи." }, "correct"],
+      ["newspaper", "Газета как упаковка", { image: "/assets/pm01/packaging/newspaper-violation.png", detail: "Непищевая упаковка недопустима." }, "reject"],
+      ["separate-fridge", "Раздельное хранение в холодильнике", { image: extendedVisualAssets.safety.fridgeSeparateStorage, detail: "Потоки сырья разделены." }, "allowed"]
+    ],
+    orderSteps: [
+      ["order", "принять заказ"],
+      ["check", "проверить сырье"],
+      ["zones", "распределить участки"],
+      ["calc", "рассчитать массу"],
+      ["prepare", "подготовить полуфабрикаты"],
+      ["quality", "проверить качество"],
+      ["pack", "упаковать"],
+      ["transfer", "передать на хранение"]
+    ]
+  }
+};
+
+function clonePm01Config(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function digitalShiftStepImage(stepId) {
+  const stepImages = {
+    order: extendedVisualAssets.safety.labelledContainer,
+    check: extendedVisualAssets.safety.thermometerCheck,
+    calc: extendedVisualAssets.safety.labelledContainer,
+    places: extendedVisualAssets.safety.colorCodedBoards,
+    process: "/assets/pm01/complex-workshop.png",
+    semi: generatedSemiFinishedProductAssets.generatedMixedMirepoix,
+    quality: extendedVisualAssets.safety.thermometerCheck,
+    pack: "/assets/pm01/packaging/gastronorm-lid.png",
+    mark: extendedVisualAssets.safety.labelledContainer,
+    store: extendedVisualAssets.safety.fridgeSeparateStorage
+  };
+  return stepImages[stepId] || "/assets/pm01/complex-workshop.png";
+}
+
+function markPracticeQuestion(question, familyId, meta = {}) {
+  const prepared = clonePm01Config(question);
+  prepared.id = meta.id || `${prepared.id}-practice`;
+  prepared.prompt = meta.prompt || prepared.prompt;
+  prepared.note = meta.note || prepared.note || "Тренировочное расширение цифровой смены.";
+  prepared.maxScore = 0;
+  prepared.practiceOnly = true;
+  prepared.practiceFamily = familyId;
+  prepared.visualMode = meta.visualMode || prepared.visualMode || "";
+  prepared.interactionHint = meta.interactionHint || prepared.interactionHint || "";
+  prepared.explanation = meta.explanation || prepared.explanation || "";
+  prepared.competencyTags = meta.competencyTags || prepared.competencyTags || [];
+  if (prepared.visualMode === "production_timeline" && Array.isArray(prepared.items)) {
+    prepared.items = prepared.items.map((item) => ({
+      ...item,
+      image: item.image || digitalShiftStepImage(item.id),
+      detail: item.detail || "Контрольная операция цифровой производственной смены."
+    }));
+  }
+  return prepared;
+}
+
+function findFirstQuestion(variant, predicate) {
+  return [...(variant.simulation || []), ...(variant.test || []), ...(variant.calculation || [])].find(predicate) || null;
+}
+
+function buildStoragePracticeQuestion(variantId, config) {
+  return bucket(
+    `${variantId}-practice-storage`,
+    "Распределите партии по решению хранения и маркировки.",
+    config.storageCards.map(([id, title, meta]) => [id, title, meta]),
+    [
+      ["allowed", "Готово к хранению"],
+      ["correct", "Исправить условия"],
+      ["reject", "Не передавать"]
+    ],
+    Object.fromEntries(config.storageCards.map(([id, , , bucketId]) => [id, bucketId])),
+    {
+      maxScore: 0,
+      visualMode: "storage_marking",
+      note: "Тренажер: проверьте тару, маркировку, холод и товарное соседство.",
+      interactionHint: "Выберите партию, затем решение по хранению или маркировке.",
+      explanation:
+        "Современный формат проверяет не один термин, а производственное решение по безопасности партии.",
+      competencyTags: ["ПК 1.1", "ПК 1.2", "ОК 01", "ОК 02", "ОК 07"],
+      practiceOnly: true,
+      practiceFamily: "storage_marking"
+    }
+  );
+}
+
+function buildOrderPracticeQuestion(variantId, config) {
+  const stepImages = {
+    accept: "/assets/pm01/process/veg-sort.png",
+    sort: "/assets/pm01/process/veg-sort.png",
+    wash: "/assets/pm01/process/veg-wash.png",
+    peel: "/assets/pm01/process/veg-peel.png",
+    cut: "/assets/pm01/process/veg-cut.png",
+    quality: extendedVisualAssets.safety.thermometerCheck,
+    mark: extendedVisualAssets.safety.labelledContainer,
+    store: extendedVisualAssets.safety.fridgeSeparateStorage,
+    cool: "/assets/pm01/fish-process/fish-cooling.png",
+    scale: "/assets/pm01/fish-process/fish-scale.png",
+    gut: "/assets/pm01/fish-process/fish-gut.png",
+    rinse: "/assets/pm01/fish-process/fish-rinse.png",
+    fillet: "/assets/pm01/fish-process/fish-portioning.png",
+    portion: generatedSemiFinishedProductAssets.generatedFishFilletPortions,
+    workplace: extendedVisualAssets.safety.colorCodedBoards,
+    trim: semiFinishedProductAssets.meatLargePiece,
+    grinder: "/assets/pm01/meat-grinder/body.png",
+    mince: semiFinishedProductAssets.meatCutletMassPortions,
+    form: semiFinishedProductAssets.meatCutletsFormed,
+    defrost: extendedVisualAssets.safety.fridgeSeparateStorage,
+    clean: semiFinishedProductAssets.chickenPreparedCarcass,
+    order: extendedVisualAssets.safety.labelledContainer,
+    check: extendedVisualAssets.safety.thermometerCheck,
+    zones: extendedVisualAssets.safety.colorCodedBoards,
+    calc: extendedVisualAssets.safety.labelledContainer,
+    prepare: "/assets/pm01/complex-workshop.png",
+    pack: "/assets/pm01/packaging/gastronorm-lid.png",
+    transfer: extendedVisualAssets.safety.fridgeSeparateStorage
+  };
+  const items = config.orderSteps.map(([id, text]) => [
+    id,
+    text,
+    {
+      image: stepImages[id] || "/assets/pm01/complex-workshop.png",
+      detail: "Шаг цифровой производственной смены."
+    }
+  ]);
+  const ids = config.orderSteps.map(([id]) => id);
+  return sequence(
+    `${variantId}-practice-order`,
+    "Соберите маршрут заказа в цифровой производственной смене.",
+    items,
+    ids,
+    {
+      maxScore: 0,
+      visualMode: "order_assembly",
+      note: "Тренажер: восстановите смену от приемки до передачи партии.",
+      interactionHint: "Выберите операцию смены, затем поставьте ее в правильный шаг.",
+      explanation:
+        "Задание связывает отдельные операции в целостный производственный процесс и готовит к комплексному заказу.",
+      competencyTags: ["ПК 1.1", "ПК 1.2", "ПК 1.3", "ПК 1.4", "ОК 01", "ОК 02"],
+      practiceOnly: true,
+      practiceFamily: "order_assembly"
+    }
+  );
+}
+
+function buildPm01DigitalShiftPracticeQuestions(variant) {
+  const config = pm01DigitalShiftVariantPackages[variant.id];
+  if (!config) {
+    return [];
+  }
+  const quality = findFirstQuestion(variant, (question) => question.visualMode === "quality_control");
+  const investigation = findFirstQuestion(variant, (question) => question.type === "hotspot_scene");
+  const timeline = findFirstQuestion(variant, (question) => question.type === "sequence_drag");
+
+  return [
+    quality
+      ? markPracticeQuestion(quality, "quality_control", {
+          id: `${variant.id}-practice-quality`,
+          prompt: config.tasks.find(([family]) => family === "quality_control")?.[1] || quality.prompt,
+          note: "Тренажер: оцените визуальные признаки, карту контроля и риск партии.",
+          explanation: pm01DigitalShiftFamilies.find((family) => family.id === "quality_control").modernity
+        })
+      : null,
+    investigation
+      ? markPracticeQuestion(investigation, "shift_investigation", {
+          id: `${variant.id}-practice-investigation`,
+          prompt: config.tasks.find(([family]) => family === "shift_investigation")?.[1] || investigation.prompt,
+          visualMode: "shift_investigation",
+          note: "Тренажер: найдите видимые причины риска на производственной сцене.",
+          explanation: pm01DigitalShiftFamilies.find((family) => family.id === "shift_investigation").modernity
+        })
+      : null,
+    timeline
+      ? markPracticeQuestion(timeline, "production_timeline", {
+          id: `${variant.id}-practice-timeline`,
+          prompt: config.tasks.find(([family]) => family === "production_timeline")?.[1] || timeline.prompt,
+          visualMode: "production_timeline",
+          note: "Тренажер: соберите операции как производственный таймлайн.",
+          explanation: pm01DigitalShiftFamilies.find((family) => family.id === "production_timeline").modernity
+        })
+      : null,
+    buildStoragePracticeQuestion(variant.id, config),
+    buildOrderPracticeQuestion(variant.id, config)
+  ].filter(Boolean);
+}
+
+module.exports.digitalShift = {
+  mode: "training_extension",
+  title: "Цифровая производственная смена",
+  contract:
+    "Официальный экзамен остается 100 баллов и 20 заданий. Расширение доступно только в тренировке и не влияет на итоговую ведомость.",
+  rpStatus: "Рабочие программы будут подключены после предоставления преподавателем; сейчас матрица подготовлена под сверку.",
+  conceptReference: "approved-preview-2026-06-20",
+  families: pm01DigitalShiftFamilies,
+  packages: Object.entries(pm01DigitalShiftVariantPackages).map(([variantId, config]) => ({
+    variantId,
+    title: config.title,
+    rpTopics: config.rpTopics,
+    productionLog: config.productionLog,
+    visualPrompts: config.visualPrompts,
+    tasks: config.tasks.map(([familyId, title]) => ({
+      familyId,
+      title,
+      familyTitle: pm01DigitalShiftFamilies.find((family) => family.id === familyId)?.title || familyId
+    }))
+  }))
+};
+
+module.exports.variants.forEach((variant) => {
+  const config = pm01DigitalShiftVariantPackages[variant.id];
+  if (!config) {
+    return;
+  }
+  variant.digitalShift = module.exports.digitalShift.packages.find((item) => item.variantId === variant.id) || null;
+  variant.practiceOnly = buildPm01DigitalShiftPracticeQuestions(variant);
+});

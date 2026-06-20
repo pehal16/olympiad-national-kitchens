@@ -2990,7 +2990,11 @@ async function handleApi(req, res, url) {
     }
 
     const routeSeed = generateId("pm01_route");
-    const variant = buildPm01Variant(exam, selectedVariantId, { ticketId, seed: routeSeed });
+    const variant = buildPm01Variant(exam, selectedVariantId, {
+      ticketId,
+      seed: routeSeed,
+      includePractice: mode === "training"
+    });
     const startedAt = nowIso();
     const attempt = {
       id: generateId("pm01_attempt"),

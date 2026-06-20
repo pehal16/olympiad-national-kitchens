@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#123f35" />
     <title>Экзамен по МДК 01.01 и МДК 01.02</title>
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/pm01.css?v=1.0.16" />
+    <link rel="stylesheet" href="/pm01.css?v=1.0.20" />
   </head>
   <body>
     <header class="pm01-topbar">
@@ -121,6 +121,7 @@
               <select id="ticket-select"></select>
             </label>
             <div id="ticket-preview" class="ticket-preview field-wide"></div>
+            <section id="training-lab" class="digital-shift-preview field-wide hidden" aria-label="Цифровая производственная смена"></section>
 
             <div id="entry-message" class="message hidden"></div>
             <button id="start-button" class="button primary field-wide" type="submit">
@@ -168,6 +169,7 @@
             <p id="variant-scenario"></p>
           </div>
           <div id="ticket-reference" class="reference-block hidden"></div>
+          <div id="training-shift-reference" class="reference-block digital-shift-reference hidden"></div>
           <div id="reference-visual-atlas" class="reference-block visual-reference-block"></div>
           <div class="reference-block">
             <p class="overline">Компетенции</p>
@@ -203,7 +205,7 @@
       (function loadPm01Script(attempt) {
         var status = document.getElementById("top-save-status");
         var script = document.createElement("script");
-        script.src = "/pm01.js?v=1.0.21" + (attempt ? "&retry=" + attempt : "");
+        script.src = "/pm01.js?v=1.0.23" + (attempt ? "&retry=" + attempt : "");
         script.async = false;
         script.onerror = function () {
           if (attempt >= 6) {

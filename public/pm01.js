@@ -115,6 +115,7 @@
     ticketField: document.getElementById("ticket-field"),
     ticketSelect: document.getElementById("ticket-select"),
     ticketPreview: document.getElementById("ticket-preview"),
+    trainingLab: document.getElementById("training-lab"),
     entryMessage: document.getElementById("entry-message"),
     startButton: document.getElementById("start-button"),
     participantName: document.getElementById("participant-name"),
@@ -134,6 +135,7 @@
     variantTitle: document.getElementById("variant-title"),
     variantScenario: document.getElementById("variant-scenario"),
     ticketReference: document.getElementById("ticket-reference"),
+    trainingShiftReference: document.getElementById("training-shift-reference"),
     referenceVisualAtlas: document.getElementById("reference-visual-atlas"),
     competencyList: document.getElementById("competency-list"),
     progressLabel: document.getElementById("progress-label"),
@@ -353,9 +355,18 @@
       return "Отметьте все подходящие варианты. Лишний выбор снижает результат.";
     }
     if (question.type === "sequence_drag") {
+      if (question.visualMode === "production_timeline" || question.visualMode === "order_assembly") {
+        return "Соберите цифровую смену как производственный таймлайн: выберите операцию, затем нужный шаг.";
+      }
       return "Карточки перемешаны. Выберите операцию, затем нажмите нужный шаг; при желании перетащите карточку мышью.";
     }
     if (question.type === "bucket_sort") {
+      if (question.visualMode === "quality_control") {
+        return "Оцените фото, карту контроля и признаки риска. Выберите партию, затем решение: допустить, исправить условия или забраковать.";
+      }
+      if (question.visualMode === "storage_marking") {
+        return "Проверьте тару, маркировку, холод и товарное соседство. Выберите партию, затем производственное решение.";
+      }
       return "Выберите карточку, затем нажмите нужную группу. Уже поставленную карточку можно нажать и вернуть обратно.";
     }
     if (question.type === "calculation_task") {
@@ -365,6 +376,9 @@
       return "Запишите голосовой ответ или оставьте текстовую заметку, если микрофон недоступен.";
     }
     if (question.type === "hotspot_scene") {
+      if (question.visualMode === "shift_investigation") {
+        return "Проведите аудит сцены: отметьте видимые причины риска и нарушения смены.";
+      }
       return "Нажмите на видимые нарушения на сцене. Поставленную метку можно убрать нажатием.";
     }
     return "";
@@ -378,12 +392,24 @@
       return ["Выберите название формы", "Нажмите подходящее фото", "Для исправления нажмите уже поставленное название"];
     }
     if (question.type === "sequence_drag") {
+      if (question.visualMode === "production_timeline" || question.visualMode === "order_assembly") {
+        return ["Прочитайте журнал смены", "Выберите операцию", "Поставьте ее на правильный шаг"];
+      }
       return ["Выберите карточку операции", "Нажмите нужный шаг", "Поставленную карточку можно нажать и вернуть"];
     }
     if (question.type === "bucket_sort") {
+      if (question.visualMode === "quality_control") {
+        return ["Оцените фото и карту контроля", "Выберите партию", "Поместите в производственное решение"];
+      }
+      if (question.visualMode === "storage_marking") {
+        return ["Проверьте маркировку и тару", "Выберите партию", "Определите решение хранения"];
+      }
       return ["Выберите карточку", "Нажмите подходящую группу", "Карточку в группе можно нажать и вернуть"];
     }
     if (question.type === "hotspot_scene") {
+      if (question.visualMode === "shift_investigation") {
+        return ["Осмотрите сцену", "Отметьте причины риска", "Уберите лишнюю метку при ошибке"];
+      }
       return ["Нажмите на видимое нарушение", "Проверьте количество меток", "Ошибочную метку можно убрать"];
     }
     if (question.type === "calculation_task") {
@@ -568,6 +594,7 @@
       card.append(image, number, title);
       elements.variantGrid.appendChild(card);
     });
+    renderTrainingLab();
   }
 
   function ticketLabel(ticket) {
@@ -579,6 +606,108 @@
 
   function selectedVariant() {
     return (state.exam?.variants || []).find((variant) => variant.id === state.selectedVariantId) || null;
+  }
+
+  function selectedDigitalShiftPackage() {
+    const variantId = state.attempt?.selectedVariantId || state.selectedVariantId;
+    return (state.exam?.digitalShift?.packages || []).find((item) => item.variantId === variantId) || null;
+  }
+
+  function digitalShiftFamily(familyId) {
+    return (state.exam?.digitalShift?.families || []).find((family) => family.id === familyId) || null;
+  }
+
+  function renderDigitalShiftTasks(packageData) {
+    const grid = document.createElement("div");
+    grid.className = "digital-shift-task-grid";
+    (packageData?.tasks || []).forEach((task, index) => {
+      const family = digitalShiftFamily(task.familyId);
+      const card = document.createElement("article");
+      card.className = "digital-shift-task";
+      card.dataset.family = task.familyId;
+      const number = document.createElement("span");
+      number.className = "digital-shift-index";
+      number.textContent = String(index + 1).padStart(2, "0");
+      const title = document.createElement("strong");
+      title.textContent = task.title;
+      const label = document.createElement("small");
+      label.textContent = family?.title || task.familyTitle || task.familyId;
+      const modern = document.createElement("p");
+      modern.textContent = family?.modernity || "";
+      card.append(number, title, label);
+      if (modern.textContent) {
+        card.appendChild(modern);
+      }
+      grid.appendChild(card);
+    });
+    return grid;
+  }
+
+  function renderProductionLog(packageData) {
+    const list = document.createElement("ol");
+    list.className = "production-log-list";
+    (packageData?.productionLog || []).forEach((entry) => {
+      const item = document.createElement("li");
+      item.textContent = entry;
+      list.appendChild(item);
+    });
+    return list;
+  }
+
+  function renderTrainingLab() {
+    if (!elements.trainingLab) {
+      return;
+    }
+    const training = state.mode === "training";
+    const packageData = selectedDigitalShiftPackage();
+    elements.trainingLab.classList.toggle("hidden", !training || !packageData);
+    elements.trainingLab.innerHTML = "";
+    if (!training || !packageData) {
+      return;
+    }
+
+    const head = document.createElement("div");
+    head.className = "digital-shift-head";
+    const copy = document.createElement("div");
+    const overline = document.createElement("p");
+    overline.className = "overline";
+    overline.textContent = "Тренировка · PX";
+    const title = document.createElement("h3");
+    title.textContent = packageData.title;
+    const note = document.createElement("p");
+    note.textContent = state.exam?.digitalShift?.contract || "Расширение доступно только в тренировке.";
+    copy.append(overline, title, note);
+    const badge = document.createElement("strong");
+    badge.className = "digital-shift-badge";
+    badge.textContent = "5 тренажёров · 0 баллов";
+    head.append(copy, badge);
+
+    const topics = document.createElement("div");
+    topics.className = "digital-shift-topics";
+    (packageData.rpTopics || []).forEach((topic) => {
+      const chip = document.createElement("span");
+      chip.textContent = topic;
+      topics.appendChild(chip);
+    });
+
+    const logPanel = document.createElement("section");
+    logPanel.className = "digital-shift-log";
+    const logTitle = document.createElement("strong");
+    logTitle.textContent = "Производственный журнал";
+    logPanel.append(logTitle, renderProductionLog(packageData));
+
+    const promptPanel = document.createElement("section");
+    promptPanel.className = "digital-shift-prompts";
+    const promptTitle = document.createElement("strong");
+    promptTitle.textContent = "Промпты будущих картинок";
+    promptPanel.appendChild(promptTitle);
+    (packageData.visualPrompts || []).slice(0, 2).forEach((promptText) => {
+      const prompt = document.createElement("p");
+      prompt.textContent = promptText;
+      promptPanel.appendChild(prompt);
+    });
+
+    elements.trainingLab.append(head, topics, renderDigitalShiftTasks(packageData), logPanel, promptPanel);
   }
 
   function ticketMatchesSelectedVariant(ticket) {
@@ -688,6 +817,7 @@
           : "Сначала выберите вариант цеха, затем комплексное задание."
       )
     );
+    renderTrainingLab();
   }
 
   function setMode(mode) {
@@ -708,6 +838,7 @@
       state.selectedTicketId = "";
     }
     renderTickets();
+    renderTrainingLab();
     elements.topMode.textContent = state.mode === "training" ? "Тренировка" : "Экзамен";
     elements.startButton.textContent = training ? "Начать тренировку ПМ.01" : "Начать смешанный экзамен ПМ.01";
     refreshTopbar();
@@ -849,6 +980,7 @@
           : module.stepEnd < attempt.currentStepIndex;
       node.classList.toggle("is-current", current);
       node.classList.toggle("is-done", done);
+      node.classList.toggle("is-practice", Boolean(module.practiceOnly));
       if (canJump) {
         node.setAttribute("aria-label", `Открыть ${module.code} ${module.title}`);
         node.title = "Открыть модуль в тренировке";
@@ -857,6 +989,9 @@
       title.textContent = `${module.code} ${module.title}`;
       const meta = document.createElement("span");
       meta.textContent =
+        module.practiceOnly
+          ? `${module.questionCount} тренажёров · без баллов`
+          :
         canJump
           ? `${module.questionCount} заданий · ${module.maxScore} баллов · выбрать`
           : `${module.questionCount} заданий · ${module.maxScore} баллов`;
@@ -875,7 +1010,10 @@
     elements.feedback.classList.remove("hidden");
     elements.feedback.innerHTML = "";
     const title = document.createElement("strong");
-    title.textContent = `Тренировка: ${feedback.score} из ${feedback.maxScore}`;
+    title.textContent =
+      Number(feedback.maxScore || 0) === 0
+        ? "Тренировка: решение сохранено"
+        : `Тренировка: ${feedback.score} из ${feedback.maxScore}`;
     const answer = document.createElement("p");
     answer.textContent = feedback.correctAnswer ? `Эталон: ${feedback.correctAnswer}` : "";
     const explanation = document.createElement("p");
@@ -901,6 +1039,27 @@
       elements.ticketReference.classList.toggle("hidden", !ticket);
       if (ticket) {
         elements.ticketReference.appendChild(renderTicketCard(ticket, true));
+      }
+    }
+    if (elements.trainingShiftReference) {
+      const packageData = state.attempt.mode === "training" ? selectedDigitalShiftPackage() : null;
+      elements.trainingShiftReference.innerHTML = "";
+      elements.trainingShiftReference.classList.toggle("hidden", !packageData);
+      if (packageData) {
+        const overline = document.createElement("p");
+        overline.className = "overline";
+        overline.textContent = "Цифровая смена";
+        const title = document.createElement("h3");
+        title.textContent = "Журнал и контрольные точки";
+        const log = renderProductionLog(packageData);
+        const families = document.createElement("div");
+        families.className = "digital-shift-mini-families";
+        (packageData.tasks || []).forEach((task) => {
+          const chip = document.createElement("span");
+          chip.textContent = digitalShiftFamily(task.familyId)?.title || task.familyTitle || task.familyId;
+          families.appendChild(chip);
+        });
+        elements.trainingShiftReference.append(overline, title, log, families);
       }
     }
     renderReferenceVisualAtlas(variant);
@@ -999,6 +1158,9 @@
     let lastDroppedIndex = -1;
     const layout = document.createElement("div");
     layout.className = "sequence-layout";
+    if (question.visualMode) {
+      layout.classList.add(`sequence-mode-${question.visualMode.replace(/_/g, "-")}`);
+    }
     const status = document.createElement("div");
     status.className = "interaction-status";
     const slots = document.createElement("div");
@@ -1406,6 +1568,9 @@
 
     const wrapper = document.createElement("div");
     wrapper.className = "bucket-workspace";
+    if (question.visualMode) {
+      wrapper.classList.add(`bucket-mode-${question.visualMode.replace(/_/g, "-")}`);
+    }
     const status = document.createElement("div");
     status.className = "interaction-status";
     const bank = document.createElement("div");
@@ -1447,10 +1612,16 @@
     }
 
     function createBucketChip(item, placed = false) {
-      const isProductCard = question.visualMode === "product_cards" && item.image;
+      const isQualityCard = question.visualMode === "quality_control" && item.image;
+      const isStorageCard = question.visualMode === "storage_marking" && item.image;
+      const isProductCard = (question.visualMode === "product_cards" || isQualityCard || isStorageCard) && item.image;
       const chip = createButton(
         `bucket-chip${item.id === activeItemId ? " is-selected" : ""}${placed ? " is-placed" : ""}${
           isProductCard ? " product-chip" : ""
+        }${
+          isQualityCard ? " quality-card" : ""
+        }${
+          isStorageCard ? " storage-card" : ""
         }`,
         isProductCard ? "" : item.text,
         (event) => {
@@ -1465,6 +1636,9 @@
       );
       chip.setAttribute("aria-pressed", item.id === activeItemId ? "true" : "false");
       chip.title = placed ? "Вернуть карточку" : "Выбрать карточку";
+      if (isQualityCard && item.risk) {
+        chip.dataset.risk = item.risk;
+      }
       if (isProductCard) {
         chip.setAttribute("aria-label", item.text);
         const image = document.createElement("img");
@@ -1478,10 +1652,33 @@
         const title = document.createElement("strong");
         title.textContent = item.text;
         copy.appendChild(title);
+        if (isQualityCard && item.status) {
+          const status = document.createElement("span");
+          status.className = "quality-status";
+          status.textContent = item.status;
+          copy.appendChild(status);
+        }
         if (item.detail) {
           const detail = document.createElement("span");
           detail.textContent = item.detail;
           copy.appendChild(detail);
+        }
+        if (isQualityCard && Array.isArray(item.signals) && item.signals.length) {
+          const signals = document.createElement("ul");
+          signals.className = "quality-signals";
+          item.signals.forEach((signal) => {
+            const node = document.createElement("li");
+            node.textContent = signal;
+            signals.appendChild(node);
+          });
+          copy.appendChild(signals);
+        }
+        if (isQualityCard && item.risk) {
+          const risk = document.createElement("span");
+          risk.className = "quality-risk";
+          risk.textContent = `Риск: ${item.risk}`;
+          risk.dataset.risk = item.risk;
+          copy.appendChild(risk);
         }
         const action = document.createElement("span");
         action.className = "chip-action";
@@ -1555,6 +1752,9 @@
         });
         const title = document.createElement("strong");
         title.textContent = bucket.label;
+        const detail = document.createElement("p");
+        detail.className = "bucket-detail";
+        detail.textContent = bucket.detail || "";
         const body = document.createElement("div");
         body.className = "bucket-items";
         const placedItems = (question.items || []).filter((item) => placements[item.id] === bucket.id);
@@ -1568,7 +1768,11 @@
           empty.textContent = activeItemId ? "Нажмите группу, чтобы поставить карточку" : "Выберите карточку выше";
           body.appendChild(empty);
         }
-        column.append(title, body);
+        column.append(title);
+        if (detail.textContent) {
+          column.appendChild(detail);
+        }
+        column.appendChild(body);
         if (activeItemId && itemMap.has(activeItemId)) {
           const place = createButton("inline-drop-button bucket-column-action", "Поставить выбранную карточку", (event) => {
             event.stopPropagation();
@@ -1886,8 +2090,9 @@
 
     elements.moduleCode.textContent = question.moduleCode || question.tourCode || "";
     elements.questionTitle.textContent = question.prompt;
-    elements.questionPoints.textContent = `${question.maxScore || 0} баллов`;
+    elements.questionPoints.textContent = question.practiceOnly ? "тренажёр · 0 баллов" : `${question.maxScore || 0} баллов`;
     elements.questionNote.textContent = question.note || "";
+    elements.questionPoints.classList.toggle("is-practice", Boolean(question.practiceOnly));
     appendTaskGuide(question);
 
     if (question.type === "situation") {

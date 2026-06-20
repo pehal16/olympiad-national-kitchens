@@ -35,6 +35,19 @@ The PM01 exam is an interactive production exam for:
 
 Current PM01 total score contract: 100 points.
 
+Current PM01 implementation version: `1.6.43`.
+
+Methodical baseline for PM01 should stay aligned with the current FГОС СПО 43.01.09 and 43.02.15, especially ПК 1.1-ПК 1.4 and ОК 01, ОК 02, ОК 07, ОК 09, ОК 10. New tasks should remain production-situation tasks: workplace organization, safe equipment use, raw material preparation, semi-finished product processing, quality control, storage conditions, and practical decision-making.
+
+Important current PM01 content change:
+
+- Version `1.6.42` adds one visual quality-control simulation to M4 in each of the five PM01 variants.
+- The new task mode is `visualMode: "quality_control"` on `bucket_sort` questions.
+- Students inspect photo cards with status, defect/risk signals, and a short control-card note, then sort each party into: admit to work, correct conditions, or reject.
+- The 100-point contract is unchanged. Each variant still has 20 questions, with M4 remaining 30 points.
+- Version `1.6.43` documents and wires the next PM01 layer in `docs/pm01-digital-shift-matrix.md`: `PX Цифровая смена` is a training-only extension with five modern interactive families and `maxScore: 0` practice tasks.
+- Official exam routes must stay 100 points and 20 questions; training may include practice-only simulators that do not affect protocols or ведомости.
+
 The active student route is mixed across production areas. Students should not manually choose a favorable shop/section for the exam route.
 
 Groups currently supported in the student flow include:
@@ -73,6 +86,8 @@ Important current visual change:
 - These are intentionally separate from cropped/derived older photo cards.
 - The rejected strange chicken split-card must not be reintroduced.
 - Current accepted chicken generated card is `generated-chicken-drumsticks.png`.
+- Version `1.6.42` reuses accepted existing PM01 visual assets for the new quality-control tasks; it does not add a new generated asset batch.
+- Digital-shift practice tasks currently reuse accepted PM01 assets. New generated final assets should only be connected after teacher approval of the per-shop prompt package and visual inspection.
 
 When adding PM01 images:
 
