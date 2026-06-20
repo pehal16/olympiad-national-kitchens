@@ -78,6 +78,7 @@
     selectedVariantId: "",
     selectedTicketId: "",
     mode: "exam",
+    activeCockpitFamilyId: "",
     controller: null,
     timer: null,
     skipConfirmQuestionId: ""
@@ -617,7 +618,51 @@
     return (state.exam?.digitalShift?.families || []).find((family) => family.id === familyId) || null;
   }
 
+  function cockpitFamilyIds(packageData) {
+    const fromTimeline = (packageData?.shiftCockpit?.operationTimeline || []).map((step) => step.familyId).filter(Boolean);
+    return fromTimeline.length ? fromTimeline : (packageData?.tasks || []).map((task) => task.familyId).filter(Boolean);
+  }
+
+  function ensureActiveCockpitFamily(packageData) {
+    const familyIds = cockpitFamilyIds(packageData);
+    if (!familyIds.length) {
+      state.activeCockpitFamilyId = "";
+      return "";
+    }
+    if (!state.activeCockpitFamilyId || !familyIds.includes(state.activeCockpitFamilyId)) {
+      state.activeCockpitFamilyId = familyIds[0];
+    }
+    return state.activeCockpitFamilyId;
+  }
+
+  function findTrainingTaskCard(familyId) {
+    return Array.from(elements.trainingLab?.querySelectorAll(".digital-shift-task") || []).find(
+      (card) => card.dataset.family === familyId
+    );
+  }
+
+  function selectCockpitFamily(familyId, options = {}) {
+    if (!familyId) {
+      return;
+    }
+    state.activeCockpitFamilyId = familyId;
+    renderTrainingLab();
+    if (state.attempt) {
+      renderReferencePanel();
+    }
+    if (options.scrollToTask) {
+      window.setTimeout(() => {
+        const card = findTrainingTaskCard(familyId);
+        if (card) {
+          card.scrollIntoView({ block: "nearest", behavior: "smooth" });
+          card.focus({ preventScroll: true });
+        }
+      }, 0);
+    }
+  }
+
   function renderDigitalShiftTasks(packageData) {
+    const activeFamilyId = ensureActiveCockpitFamily(packageData);
     const grid = document.createElement("div");
     grid.className = "digital-shift-task-grid";
     (packageData?.tasks || []).forEach((task, index) => {
@@ -625,6 +670,8 @@
       const card = document.createElement("article");
       card.className = "digital-shift-task";
       card.dataset.family = task.familyId;
+      card.tabIndex = -1;
+      card.classList.toggle("is-active", task.familyId === activeFamilyId);
       const number = document.createElement("span");
       number.className = "digital-shift-index";
       number.textContent = String(index + 1).padStart(2, "0");
@@ -656,6 +703,7 @@
 
   function renderDigitalShiftCockpit(packageData, compact = false) {
     const cockpit = packageData?.shiftCockpit;
+    const activeFamilyId = ensureActiveCockpitFamily(packageData);
     const panel = document.createElement("section");
     panel.className = compact ? "digital-shift-cockpit is-compact" : "digital-shift-cockpit";
     if (!cockpit) {
@@ -684,6 +732,7 @@
     (cockpit.operationTimeline || []).forEach((step) => {
       const item = document.createElement("li");
       item.dataset.family = step.familyId || "";
+      item.classList.toggle("is-active", step.familyId === activeFamilyId);
       const number = document.createElement("span");
       number.textContent = String(step.step || "").padStart(2, "0");
       const copy = document.createElement("div");
@@ -691,8 +740,13 @@
       name.textContent = step.familyTitle || step.title || "";
       const signal = document.createElement("small");
       signal.textContent = step.controlSignal || step.studentAction || "";
+      const action = createButton("digital-shift-cockpit-action", "Выбрать", () =>
+        selectCockpitFamily(step.familyId, { scrollToTask: !compact })
+      );
+      action.setAttribute("aria-pressed", step.familyId === activeFamilyId ? "true" : "false");
+      action.textContent = step.familyId === activeFamilyId ? "В фокусе" : "Выбрать";
       copy.append(name, signal);
-      item.append(number, copy);
+      item.append(number, copy, action);
       timeline.appendChild(item);
     });
 

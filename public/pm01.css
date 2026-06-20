@@ -768,6 +768,17 @@ select:focus {
   background: rgba(255, 255, 255, 0.82);
 }
 
+.digital-shift-task.is-active {
+  border-color: rgba(35, 107, 181, 0.5);
+  box-shadow: 0 0 0 3px rgba(35, 107, 181, 0.1);
+  background: #fff;
+}
+
+.digital-shift-task:focus-visible {
+  outline: 3px solid rgba(35, 107, 181, 0.25);
+  outline-offset: 2px;
+}
+
 .digital-shift-task[data-family="shift_investigation"] {
   border-left-color: var(--orange);
 }
@@ -908,6 +919,12 @@ select:focus {
   background: #fff;
 }
 
+.digital-shift-cockpit-timeline li.is-active {
+  border-color: rgba(35, 107, 181, 0.45);
+  background: #f8fbff;
+  box-shadow: inset 0 0 0 2px rgba(35, 107, 181, 0.08);
+}
+
 .digital-shift-cockpit-timeline li > span {
   width: 26px;
   height: 26px;
@@ -935,6 +952,32 @@ select:focus {
   margin-top: 3px;
   color: var(--muted);
   font-size: 11px;
+}
+
+.digital-shift-cockpit-action {
+  grid-column: 2;
+  justify-self: start;
+  min-height: 30px;
+  align-self: start;
+  padding: 5px 8px;
+  border: 1px solid rgba(35, 107, 181, 0.28);
+  border-radius: var(--radius);
+  color: var(--blue);
+  background: #eef5ff;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.digital-shift-cockpit-action[aria-pressed="true"] {
+  color: #fff;
+  background: var(--blue);
+}
+
+.digital-shift-cockpit-action:focus-visible {
+  outline: 3px solid rgba(35, 107, 181, 0.28);
+  outline-offset: 2px;
 }
 
 .digital-shift-log,
