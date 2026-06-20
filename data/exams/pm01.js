@@ -1,9 +1,15 @@
 const vegetablePhotoCutSourceItems = require("./pm01-vegetable-photo-cuts.json");
+const semiFinishedProductSourceItems = require("./pm01-semi-finished-products.json");
 
 const vegetablePhotoCutItems = vegetablePhotoCutSourceItems.map(({ source, crop, ...item }) => item);
 const vegetablePhotoCutAssets = Object.fromEntries(
   vegetablePhotoCutItems.map((item) => [item.id, item.image])
 );
+const semiFinishedProductItems = semiFinishedProductSourceItems.map(({ source, crop, ...item }) => item);
+const semiFinishedProductAssets = Object.fromEntries(
+  semiFinishedProductItems.map((item) => [item.id, item.image])
+);
+const semiFinishedByGroup = (group) => semiFinishedProductItems.filter((item) => item.group === group);
 
 function option(id, text, isCorrect = false) {
   return { id, text, isCorrect };
@@ -498,35 +504,20 @@ const visualAtlas = [
   {
     id: "extended-meat",
     title: "Мясо",
-    items: [
-      { title: "Медальоны", image: extendedVisualAssets.meat.beefMedallions, detail: "Порционные натуральные куски." },
-      { title: "Бефстроганов", image: extendedVisualAssets.meat.beefStroganoffStrips, detail: "Нарезка тонкими брусочками." },
-      { title: "Шницель", image: extendedVisualAssets.meat.porkSchnitzelBreaded, detail: "Порционный панированный полуфабрикат." },
-      { title: "Рагу", image: extendedVisualAssets.meat.lambRagoutBoneIn, detail: "Кусочки мяса с костью для тушения." },
-      { title: "Котлетная масса", image: extendedVisualAssets.meat.meatMincePortions, detail: "Порции рубленой массы для формования." }
-    ]
+    displayLimit: 10,
+    items: semiFinishedByGroup("meat")
   },
   {
     id: "extended-fish",
     title: "Рыба",
-    items: [
-      { title: "Порционные куски", image: extendedVisualAssets.fish.fishSteakCrosscut, detail: "Ровные куски рыбного филе одинакового размера для дальнейшей обработки." },
-      { title: "Филе с кожей", image: extendedVisualAssets.fish.fishFilletSkinOn, detail: "Пласт филе с кожным покровом." },
-      { title: "Филе без кожи", image: extendedVisualAssets.fish.fishFilletSkinless, detail: "Зачищенный натуральный полуфабрикат." },
-      { title: "Рыбные тефтели", image: extendedVisualAssets.fish.fishBalls, detail: "Формованные изделия из рыбной массы." },
-      { title: "Кнели", image: extendedVisualAssets.fish.fishQuenelles, detail: "Нежные формованные полуфабрикаты." }
-    ]
+    displayLimit: 10,
+    items: semiFinishedByGroup("fish")
   },
   {
     id: "extended-poultry",
     title: "Птица и кролик",
-    items: [
-      { title: "Тушка птицы", image: extendedVisualAssets.poultry.wholeChickenPrepared, detail: "Подготовленная тушка перед разделкой." },
-      { title: "Филе бабочкой", image: extendedVisualAssets.poultry.chickenBreastButterfly, detail: "Распластанная грудная мякоть." },
-      { title: "Бедро и голень", image: extendedVisualAssets.poultry.chickenWingSegments, detail: "Порционные части птицы после разделки тушки." },
-      { title: "Седло кролика", image: extendedVisualAssets.poultry.rabbitSaddle, detail: "Порционная часть тушки кролика." },
-      { title: "Кнели из птицы", image: extendedVisualAssets.poultry.poultryQuenelles, detail: "Формованные изделия из нежной массы." }
-    ]
+    displayLimit: 10,
+    items: semiFinishedByGroup("poultry")
   },
   {
     id: "extended-safety",
@@ -721,6 +712,7 @@ module.exports = {
       complex: "/assets/pm01/violations/complex.png"
     },
     vegetablePhotoCuts: vegetablePhotoCutAssets,
+    semiFinishedProducts: semiFinishedProductAssets,
     extendedVisuals: extendedVisualAssets
   },
   visualAtlas,
@@ -1143,7 +1135,7 @@ module.exports = {
               "fillet",
               "филе рыбы",
               {
-                image: "/assets/pm01/fish-products/fish-fillet.png",
+                image: semiFinishedProductAssets.fishFilletNatural,
                 detail: "Пласт мякоти без костей; используется как натуральный полуфабрикат."
               }
             ],
@@ -1151,7 +1143,7 @@ module.exports = {
               "portion",
               "порционный кусок",
               {
-                image: "/assets/pm01/fish-products/fish-portion.png",
+                image: semiFinishedProductAssets.fishPortionPieces,
                 detail: "Ровные куски заданной массы для жарки, припускания или запекания."
               }
             ],
@@ -1159,7 +1151,7 @@ module.exports = {
               "breaded",
               "рыба панированная",
               {
-                image: "/assets/pm01/fish-products/fish-breaded.png",
+                image: semiFinishedProductAssets.fishBreadedPortions,
                 detail: "Порционные куски, подготовленные с панировкой перед жаркой."
               }
             ],
@@ -1167,7 +1159,7 @@ module.exports = {
               "cutlets",
               "рыбные котлеты",
               {
-                image: "/assets/pm01/fish-products/fish-cutlets.png",
+                image: semiFinishedProductAssets.fishCutletsFormed,
                 detail: "Изделия из рыбной котлетной массы, сформованные порционно."
               }
             ],
@@ -1175,7 +1167,7 @@ module.exports = {
               "mince",
               "рыбная котлетная масса",
               {
-                image: "/assets/pm01/fish-products/fish-mince.png",
+                image: semiFinishedProductAssets.fishMinceMass,
                 detail: "Измельченная рыбная мякоть с хлебом, жидкостью, солью и специями."
               }
             ]
@@ -1351,7 +1343,7 @@ module.exports = {
               "entrecote",
               "антрекот",
               {
-                image: "/assets/pm01/extended/meat/beef-steak-natural.png",
+                image: semiFinishedProductAssets.meatEntrecotePortion,
                 detail: "Порционный натуральный полуфабрикат из говядины."
               }
             ],
@@ -1359,7 +1351,7 @@ module.exports = {
               "goulash",
               "гуляш",
               {
-                image: "/assets/pm01/extended/meat/beef-shashlik-cubes.png",
+                image: semiFinishedProductAssets.meatGoulashCubes,
                 detail: "Мелкокусковой полуфабрикат кубиками для тушения."
               }
             ],
@@ -1367,7 +1359,7 @@ module.exports = {
               "azu",
               "азу",
               {
-                image: "/assets/pm01/extended/meat/beef-stroganoff-strips.png",
+                image: semiFinishedProductAssets.meatAzuStrips,
                 detail: "Мелкокусковой полуфабрикат продолговатыми брусочками."
               }
             ],
@@ -1375,7 +1367,7 @@ module.exports = {
               "cutlets",
               "котлеты",
               {
-                image: "/assets/pm01/meat-products/cutlets.png",
+                image: semiFinishedProductAssets.meatCutletsFormed,
                 detail: "Рубленые изделия из котлетной массы."
               }
             ],
@@ -1383,7 +1375,7 @@ module.exports = {
               "large",
               "крупный кусок",
               {
-                image: "/assets/pm01/meat-products/large-piece.png",
+                image: semiFinishedProductAssets.meatLargePiece,
                 detail: "Крупнокусковой полуфабрикат для дальнейшей тепловой обработки."
               }
             ],
@@ -1391,7 +1383,7 @@ module.exports = {
               "romsteak",
               "ромштекс",
               {
-                image: "/assets/pm01/meat-products/romsteak.png",
+                image: semiFinishedProductAssets.meatRomsteakBreaded,
                 detail: "Панированный порционный полуфабрикат."
               }
             ]
@@ -1443,7 +1435,7 @@ module.exports = {
               "fillet",
               "филе натуральное",
               {
-                image: "/assets/pm01/poultry-products/chicken-fillet.png",
+                image: semiFinishedProductAssets.chickenFilletNatural,
                 detail: "Зачищенная грудная мякоть без кости и кожи."
               }
             ],
@@ -1451,7 +1443,7 @@ module.exports = {
               "leg",
               "окорочок",
               {
-                image: "/assets/pm01/poultry-products/chicken-leg-quarter.png",
+                image: semiFinishedProductAssets.chickenLegQuarter,
                 detail: "Бедро и голень вместе, полуфабрикат из птицы."
               }
             ],
@@ -1459,7 +1451,7 @@ module.exports = {
               "thigh-drumstick",
               "бедро и голень",
               {
-                image: "/assets/pm01/poultry-products/chicken-thigh-drumstick.png",
+                image: semiFinishedProductAssets.chickenThighDrumstick,
                 detail: "Отдельные части тушки для порционирования."
               }
             ],
@@ -1467,7 +1459,7 @@ module.exports = {
               "rabbit",
               "порционные куски кролика",
               {
-                image: "/assets/pm01/poultry-products/rabbit-portions.png",
+                image: semiFinishedProductAssets.rabbitPortions,
                 detail: "Кролик относится к сырью ПМ.01 вместе с птицей и дичью."
               }
             ],
@@ -1475,7 +1467,7 @@ module.exports = {
               "fish-cutlet",
               "рыбные котлеты",
               {
-                image: "/assets/pm01/fish-products/fish-cutlets.png",
+                image: semiFinishedProductAssets.fishCutletsFormed,
                 detail: "Контрольный лишний вариант: рыбный полуфабрикат."
               }
             ]
@@ -1539,11 +1531,11 @@ module.exports = {
           "poultry-sim-parts",
           "Соотнесите полуфабрикат и часть птицы.",
           [
-            ["fillet", "филе", { image: "/assets/pm01/poultry-products/chicken-fillet.png", detail: "Грудная мякоть без кости." }],
-            ["leg", "окорочок", { image: "/assets/pm01/poultry-products/chicken-leg-quarter.png", detail: "Бедро и голень вместе." }],
-            ["drumstick", "голень", { image: "/assets/pm01/poultry-products/chicken-drumstick.png", detail: "Нижняя часть ноги." }],
-            ["thigh", "бедро", { image: "/assets/pm01/poultry-products/chicken-thigh.png", detail: "Верхняя мясистая часть ноги." }],
-            ["mince", "котлетная масса", { image: "/assets/pm01/poultry-products/poultry-mince.png", detail: "Измельченная мякоть для формования." }]
+            ["fillet", "филе", { image: semiFinishedProductAssets.chickenFilletNatural, detail: "Грудная мякоть без кости." }],
+            ["leg", "окорочок", { image: semiFinishedProductAssets.chickenLegQuarter, detail: "Бедро и голень вместе." }],
+            ["drumstick", "голень", { image: semiFinishedProductAssets.chickenDrumstick, detail: "Нижняя часть ноги." }],
+            ["thigh", "бедро", { image: semiFinishedProductAssets.chickenThigh, detail: "Верхняя мясистая часть ноги." }],
+            ["mince", "котлетная масса", { image: semiFinishedProductAssets.poultryMinceMass, detail: "Измельченная мякоть для формования." }]
           ],
           [["breast", "грудная часть"], ["leg-full", "бедро и голень"], ["lower", "нижняя часть ноги"], ["upper", "верхняя часть ноги"], ["flesh", "мякоть"]],
           { fillet: "breast", leg: "leg-full", drumstick: "lower", thigh: "upper", mince: "flesh" },
@@ -1585,11 +1577,11 @@ module.exports = {
           "complex-t1-fish-products",
           "Рассмотрите фото и распределите позиции комплексного заказа: рыбные полуфабрикаты или другой участок.",
           [
-            ["fish-portion", "порционные куски рыбы", { image: "/assets/pm01/extended/fish/fish-steak-crosscut.png", detail: "Куски рыбы одинаковой массы для дальнейшей тепловой обработки." }],
-            ["fish-mince", "рыбная котлетная масса", { image: "/assets/pm01/fish-products/fish-mince.png", detail: "Измельченная рыбная масса для формования котлет и биточков." }],
-            ["fish-cutlets", "рыбные котлеты", { image: "/assets/pm01/fish-products/fish-cutlets.png", detail: "Сформованные полуфабрикаты из рыбной котлетной массы." }],
-            ["fish-breaded", "панированный рыбный полуфабрикат", { image: "/assets/pm01/extended/fish/fish-sticks-breaded.png", detail: "Порционный рыбный полуфабрикат, подготовленный к жарке." }],
-            ["meat-goulash", "гуляш из говядины", { image: "/assets/pm01/extended/meat/beef-shashlik-cubes.png", detail: "Мелкокусковой мясной полуфабрикат, не относится к рыбному участку." }]
+            ["fish-portion", "порционные куски рыбы", { image: semiFinishedProductAssets.fishPortionPieces, detail: "Куски рыбы одинаковой массы для дальнейшей тепловой обработки." }],
+            ["fish-mince", "рыбная котлетная масса", { image: semiFinishedProductAssets.fishMinceMass, detail: "Измельченная рыбная масса для формования котлет и биточков." }],
+            ["fish-cutlets", "рыбные котлеты", { image: semiFinishedProductAssets.fishCutletsFormed, detail: "Сформованные полуфабрикаты из рыбной котлетной массы." }],
+            ["fish-breaded", "панированный рыбный полуфабрикат", { image: semiFinishedProductAssets.fishBreadedPortions, detail: "Порционный рыбный полуфабрикат, подготовленный к жарке." }],
+            ["meat-goulash", "гуляш из говядины", { image: semiFinishedProductAssets.meatGoulashCubes, detail: "Мелкокусковой мясной полуфабрикат, не относится к рыбному участку." }]
           ],
           [["fish", "рыбные полуфабрикаты"], ["other", "другой участок"]],
           { "fish-portion": "fish", "fish-mince": "fish", "fish-cutlets": "fish", "fish-breaded": "fish", "meat-goulash": "other" },
@@ -1603,10 +1595,10 @@ module.exports = {
           "complex-t1-meat-products",
           "Рассмотрите фото и распределите позиции комплексного заказа: мясные полуфабрикаты или другой участок.",
           [
-            ["goulash", "гуляш", { image: "/assets/pm01/extended/meat/beef-shashlik-cubes.png", detail: "Мелкокусковой мясной полуфабрикат для тушения." }],
-            ["azu", "азу", { image: "/assets/pm01/extended/meat/beef-stroganoff-strips.png", detail: "Мелкокусковой мясной полуфабрикат из нарезанных брусочков." }],
-            ["romsteak", "ромштекс", { image: "/assets/pm01/extended/meat/pork-schnitzel-breaded.png", detail: "Порционный панированный полуфабрикат из мяса." }],
-            ["cutlets", "рубленые котлеты", { image: "/assets/pm01/extended/meat/meat-mince-portions.png", detail: "Сформованные полуфабрикаты из мясной котлетной массы." }],
+            ["goulash", "гуляш", { image: semiFinishedProductAssets.meatGoulashCubes, detail: "Мелкокусковой мясной полуфабрикат для тушения." }],
+            ["azu", "азу", { image: semiFinishedProductAssets.meatAzuStrips, detail: "Мелкокусковой мясной полуфабрикат из нарезанных брусочков." }],
+            ["romsteak", "ромштекс", { image: semiFinishedProductAssets.meatRomsteakBreaded, detail: "Порционный панированный полуфабрикат из мяса." }],
+            ["cutlets", "рубленые котлеты", { image: semiFinishedProductAssets.meatCutletsFormed, detail: "Сформованные полуфабрикаты из мясной котлетной массы." }],
             ["potato-julienne", "соломка картофеля", { image: "/assets/pm01/extended/cuts/potato-shoestring.png", detail: "Овощная форма нарезки, не относится к мясным полуфабрикатам." }]
           ],
           [["meat", "мясные полуфабрикаты"], ["other", "другой участок"]],

@@ -654,6 +654,32 @@ test("PM01 vegetable photo cuts expose 50 textbook-safe vegetable cards", () => 
   });
 });
 
+test("PM01 semi-finished product atlas exposes 30 photo cards", () => {
+  const publicData = getPm01PublicData();
+  const productAssets = publicData.assetRegistry.semiFinishedProducts;
+  const productPaths = Object.values(productAssets);
+  const groups = [
+    { id: "extended-meat", prefix: "/assets/pm01/semi-finished/meat/" },
+    { id: "extended-fish", prefix: "/assets/pm01/semi-finished/fish/" },
+    { id: "extended-poultry", prefix: "/assets/pm01/semi-finished/poultry/" }
+  ];
+
+  assert.equal(productPaths.length, 30);
+
+  groups.forEach(({ id, prefix }) => {
+    const atlas = publicData.visualAtlas.find((category) => category.id === id);
+    assert.equal(atlas.displayLimit, 10);
+    assert.equal(atlas.items.length, 10);
+    assert.equal(atlas.items.every((item) => item.image.startsWith(prefix)), true);
+  });
+
+  productPaths.forEach((assetPath) => {
+    const fullPath = path.join(__dirname, "..", "public", assetPath.replace(/^\//, ""));
+    assert.equal(fs.existsSync(fullPath), true, `${assetPath} exists`);
+    assert.equal(fs.statSync(fullPath).size > 250_000, true, `${assetPath} is a photo card`);
+  });
+});
+
 test("PM01 vegetable sequence steps use visual process cards without answer keys", () => {
   const exam = getPm01Exam();
   const variant = buildPm01Variant(exam, "vegetables");
@@ -736,7 +762,7 @@ test("PM01 poultry and packaging tasks use visual product cards", () => {
     assert.equal("correctBuckets" in publicQuestion, false);
   });
 
-  assert.equal(partsQuestion.items.some((item) => item.image.includes("/poultry-products/chicken-fillet.png")), true);
+  assert.equal(partsQuestion.items.some((item) => item.image.includes("/semi-finished/poultry/chicken-fillet-natural.png")), true);
   assert.equal(packQuestion.items.some((item) => item.image.includes("/packaging/newspaper-violation.png")), true);
   assert.equal(poultrySequenceQuestion.items.every((item) => item.image && item.image.includes("/assets/pm01/extended/")), true);
   assert.equal(zonesQuestion.items.every((item) => item.image.includes("/assets/pm01/extended/")), true);

@@ -14,6 +14,7 @@
     "verify:pm01": "node scripts/verify-pm01-production.js",
     "generate:pm01-visuals": "python scripts/generate-pm01-extended-photo-assets.py",
     "generate:pm01-vegetable-photos": "python scripts/generate-pm01-vegetable-photo-assets.py",
+    "generate:pm01-semi-finished": "python scripts/generate-pm01-semi-finished-assets.py",
     "build:cloudflare": "node scripts/build-cloudflare-pages.js",
     "verify:cloudflare": "node scripts/verify-pm01-production.js",
     "cloudflare:export": "node scripts/export-cloudflare-migration.js",

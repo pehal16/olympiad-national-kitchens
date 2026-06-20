@@ -1,0 +1,272 @@
+[
+  {
+    "id": "meatLargePiece",
+    "group": "meat",
+    "title": "Крупнокусковой полуфабрикат",
+    "detail": "Зачищенный крупный кусок мяса для дальнейшей нарезки или тепловой обработки.",
+    "image": "/assets/pm01/semi-finished/meat/meat-large-piece.png",
+    "source": "/assets/pm01/meat-products/large-piece.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "meatEntrecotePortion",
+    "group": "meat",
+    "title": "Антрекот",
+    "detail": "Порционный натуральный мясной полуфабрикат одинаковой толщины.",
+    "image": "/assets/pm01/semi-finished/meat/meat-entrecote-portion.png",
+    "source": "/assets/pm01/meat-products/entrecote.png",
+    "crop": [0.04, 0.08, 0.78, 0.92]
+  },
+  {
+    "id": "meatNaturalPortion",
+    "group": "meat",
+    "title": "Натуральный порционный кусок",
+    "detail": "Порционный натуральный полуфабрикат из мяса без панировки.",
+    "image": "/assets/pm01/semi-finished/meat/meat-natural-portion.png",
+    "source": "/assets/pm01/extended/meat/beef-steak-natural.png",
+    "crop": [0.08, 0.08, 0.92, 0.92]
+  },
+  {
+    "id": "meatGoulashCubes",
+    "group": "meat",
+    "title": "Гуляш",
+    "detail": "Мелкокусковой полуфабрикат кубиками для тушения.",
+    "image": "/assets/pm01/semi-finished/meat/meat-goulash-cubes.png",
+    "source": "/assets/pm01/meat-products/goulash.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "meatAzuStrips",
+    "group": "meat",
+    "title": "Азу",
+    "detail": "Мелкокусковой полуфабрикат, нарезанный продолговатыми брусочками.",
+    "image": "/assets/pm01/semi-finished/meat/meat-azu-strips.png",
+    "source": "/assets/pm01/meat-products/azu.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "meatRomsteakBreaded",
+    "group": "meat",
+    "title": "Ромштекс",
+    "detail": "Порционный панированный мясной полуфабрикат для жарки.",
+    "image": "/assets/pm01/semi-finished/meat/meat-romsteak-breaded.png",
+    "source": "/assets/pm01/meat-products/romsteak.png",
+    "crop": [0.04, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "meatCutletsFormed",
+    "group": "meat",
+    "title": "Рубленые котлеты",
+    "detail": "Сформованные изделия из мясной котлетной массы.",
+    "image": "/assets/pm01/semi-finished/meat/meat-cutlets-formed.png",
+    "source": "/assets/pm01/meat-products/cutlets.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "meatCutletMassPortions",
+    "group": "meat",
+    "title": "Котлетная масса порциями",
+    "detail": "Подготовленная мясная масса для последующего формования полуфабрикатов.",
+    "image": "/assets/pm01/semi-finished/meat/meat-cutlet-mass-portions.png",
+    "source": "/assets/pm01/extended/meat/meat-mince-portions.png",
+    "crop": [0.08, 0.08, 0.92, 0.92]
+  },
+  {
+    "id": "meatStewSmallPieces",
+    "group": "meat",
+    "title": "Мясо для тушения",
+    "detail": "Мелкокусковой полуфабрикат, близкий по назначению к гуляшу и рагу.",
+    "image": "/assets/pm01/semi-finished/meat/meat-stew-small-pieces.png",
+    "source": "/assets/pm01/extended/meat/lamb-ragout-bone-in.png",
+    "crop": [0.08, 0.08, 0.92, 0.92]
+  },
+  {
+    "id": "meatPortionChop",
+    "group": "meat",
+    "title": "Порционный полуфабрикат",
+    "detail": "Натуральный порционный кусок мяса для жарки или запекания.",
+    "image": "/assets/pm01/semi-finished/meat/meat-portion-chop.png",
+    "source": "/assets/pm01/extended/meat/pork-chop-bone-in.png",
+    "crop": [0.08, 0.08, 0.92, 0.92]
+  },
+  {
+    "id": "fishFilletNatural",
+    "group": "fish",
+    "title": "Филе рыбы",
+    "detail": "Натуральный рыбный полуфабрикат из мякоти без костей.",
+    "image": "/assets/pm01/semi-finished/fish/fish-fillet-natural.png",
+    "source": "/assets/pm01/fish-products/fish-fillet.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "fishPortionPieces",
+    "group": "fish",
+    "title": "Порционные куски рыбы",
+    "detail": "Ровные куски рыбного филе одинаковой массы для тепловой обработки.",
+    "image": "/assets/pm01/semi-finished/fish/fish-portion-pieces.png",
+    "source": "/assets/pm01/fish-products/fish-portion.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "fishPortionBlocks",
+    "group": "fish",
+    "title": "Порционные блоки филе",
+    "detail": "Натуральные порционные полуфабрикаты из филе рыбы.",
+    "image": "/assets/pm01/semi-finished/fish/fish-portion-blocks.png",
+    "source": "/assets/pm01/extended/fish/fish-steak-crosscut.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "fishBreadedPortions",
+    "group": "fish",
+    "title": "Панированный рыбный полуфабрикат",
+    "detail": "Порционные куски рыбы в панировке, подготовленные к жарке.",
+    "image": "/assets/pm01/semi-finished/fish/fish-breaded-portions.png",
+    "source": "/assets/pm01/fish-products/fish-breaded.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "fishCutletsFormed",
+    "group": "fish",
+    "title": "Рыбные котлеты",
+    "detail": "Сформованные полуфабрикаты из рыбной котлетной массы.",
+    "image": "/assets/pm01/semi-finished/fish/fish-cutlets-formed.png",
+    "source": "/assets/pm01/fish-products/fish-cutlets.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "fishMinceMass",
+    "group": "fish",
+    "title": "Рыбная котлетная масса",
+    "detail": "Измельченная рыбная масса для котлет, биточков и других формованных изделий.",
+    "image": "/assets/pm01/semi-finished/fish/fish-mince-mass.png",
+    "source": "/assets/pm01/fish-products/fish-mince.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "fishQuenelleMass",
+    "group": "fish",
+    "title": "Рыбная масса для кнелей",
+    "detail": "Нежная измельченная масса для формования кнелей и других изделий.",
+    "image": "/assets/pm01/semi-finished/fish/fish-quenelle-mass.png",
+    "source": "/assets/pm01/extended/fish/fish-quenelles.png",
+    "crop": [0.08, 0.08, 0.92, 0.92]
+  },
+  {
+    "id": "fishTrimForStock",
+    "group": "fish",
+    "title": "Рыбная обрезь для бульона",
+    "detail": "Голова, кости и обрезь, используемые как сырье для бульона.",
+    "image": "/assets/pm01/semi-finished/fish/fish-trim-for-stock.png",
+    "source": "/assets/pm01/fish-process/fish-trim.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "fishProcessedCarcass",
+    "group": "fish",
+    "title": "Обработанная рыба",
+    "detail": "Подготовленная тушка рыбы после проверки качества и первичной обработки.",
+    "image": "/assets/pm01/semi-finished/fish/fish-processed-carcass.png",
+    "source": "/assets/pm01/fish-process/fish-quality.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "fishCoolingTray",
+    "group": "fish",
+    "title": "Охлажденные рыбные полуфабрикаты",
+    "detail": "Рыбные полуфабрикаты в чистом лотке для кратковременного хранения в холоде.",
+    "image": "/assets/pm01/semi-finished/fish/fish-cooling-tray.png",
+    "source": "/assets/pm01/fish-process/fish-cooling.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "chickenFilletNatural",
+    "group": "poultry",
+    "title": "Куриное филе",
+    "detail": "Грудная мякоть птицы без кости, натуральный полуфабрикат.",
+    "image": "/assets/pm01/semi-finished/poultry/chicken-fillet-natural.png",
+    "source": "/assets/pm01/poultry-products/chicken-fillet.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "chickenFilletTray",
+    "group": "poultry",
+    "title": "Филе в лотке",
+    "detail": "Подготовленное филе птицы, уложенное в чистую производственную тару.",
+    "image": "/assets/pm01/semi-finished/poultry/chicken-fillet-tray.png",
+    "source": "/assets/pm01/extended/poultry/chicken-breast-butterfly.png",
+    "crop": [0.08, 0.08, 0.92, 0.92]
+  },
+  {
+    "id": "chickenLegQuarter",
+    "group": "poultry",
+    "title": "Окорочок",
+    "detail": "Полуфабрикат из птицы: бедро и голень вместе.",
+    "image": "/assets/pm01/semi-finished/poultry/chicken-leg-quarter.png",
+    "source": "/assets/pm01/poultry-products/chicken-leg-quarter.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "chickenThighDrumstick",
+    "group": "poultry",
+    "title": "Бедро и голень",
+    "detail": "Порционные части птицы после разделки тушки.",
+    "image": "/assets/pm01/semi-finished/poultry/chicken-thigh-drumstick.png",
+    "source": "/assets/pm01/poultry-products/chicken-thigh-drumstick.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "chickenDrumstick",
+    "group": "poultry",
+    "title": "Голень",
+    "detail": "Нижняя часть ноги птицы, порционный полуфабрикат.",
+    "image": "/assets/pm01/semi-finished/poultry/chicken-drumstick.png",
+    "source": "/assets/pm01/poultry-products/chicken-drumstick.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "chickenThigh",
+    "group": "poultry",
+    "title": "Бедро",
+    "detail": "Верхняя мясистая часть ноги птицы для дальнейшей тепловой обработки.",
+    "image": "/assets/pm01/semi-finished/poultry/chicken-thigh.png",
+    "source": "/assets/pm01/poultry-products/chicken-thigh.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "poultryMinceMass",
+    "group": "poultry",
+    "title": "Котлетная масса из птицы",
+    "detail": "Измельченная мякоть птицы для формованных полуфабрикатов.",
+    "image": "/assets/pm01/semi-finished/poultry/poultry-mince-mass.png",
+    "source": "/assets/pm01/poultry-products/poultry-mince.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "poultryCutletMassPortions",
+    "group": "poultry",
+    "title": "Формованные изделия из птицы",
+    "detail": "Порции котлетной массы из птицы перед тепловой обработкой.",
+    "image": "/assets/pm01/semi-finished/poultry/poultry-cutlet-mass-portions.png",
+    "source": "/assets/pm01/extended/poultry/poultry-cutlets.png",
+    "crop": [0.08, 0.08, 0.92, 0.92]
+  },
+  {
+    "id": "rabbitPortions",
+    "group": "poultry",
+    "title": "Порционные куски кролика",
+    "detail": "Куски кролика, подготовленные для дальнейшей тепловой обработки.",
+    "image": "/assets/pm01/semi-finished/poultry/rabbit-portions.png",
+    "source": "/assets/pm01/poultry-products/rabbit-portions.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "rabbitLegPortions",
+    "group": "poultry",
+    "title": "Части кролика",
+    "detail": "Порционные части тушки кролика для тушения или жарки.",
+    "image": "/assets/pm01/semi-finished/poultry/rabbit-leg-portions.png",
+    "source": "/assets/pm01/extended/poultry/rabbit-hind-leg.png",
+    "crop": [0.08, 0.08, 0.92, 0.92]
+  }
+]
