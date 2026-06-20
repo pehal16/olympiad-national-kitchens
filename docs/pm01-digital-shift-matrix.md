@@ -57,6 +57,7 @@ Working programs, calendar-thematic plans, and local assessment materials are ex
 - Teacher-facing approval packages are available in `docs/pm01-digital-shift-approval-packages.md` and on `/pm01-approval.html`.
 - Each package exposes two planned `previewAssets` with `targetPath`, `negativePrompt`, `status: awaiting_preview`, and `finalAsset: false`.
 - Each package exposes five `methodicalMatrix` rows: RP topic placeholder, ПК/ОК, PX module, current task wording, new format, planned asset target, check criterion, and approval gate.
+- The digital-shift package exposes five `interactionBlueprints`: visual mode, layout, student flow, animation behavior, implementation path, uniqueness, assessment focus, and teacher approval question.
 - New generated final assets should be added only after teacher review of the per-shop prompt package.
 
 ## Approval Workflow

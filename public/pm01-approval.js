@@ -162,7 +162,34 @@
     });
   }
 
-  function renderFamilies(families) {
+  function renderInteractionBlueprints(blueprints) {
+    const section = createNode("section", "approval-blueprint-panel");
+    const heading = createNode("div", "approval-blueprint-head");
+    heading.append(
+      createNode("h3", "", "Интерактивные новшества"),
+      createNode("span", "", "Сценарий, анимация, реализация и вопрос для согласования")
+    );
+    const list = createNode("div", "approval-blueprint-list");
+    blueprints.forEach((blueprint) => {
+      const card = createNode("article", "approval-blueprint-card");
+      card.dataset.family = blueprint.familyId;
+      card.append(
+        createNode("strong", "", blueprint.visualMode || blueprint.familyId),
+        createNode("p", "", blueprint.layout || ""),
+        createNode("small", "", blueprint.animation || ""),
+        createNode("em", "", blueprint.uniqueness || ""),
+        createNode("span", "", blueprint.approvalQuestion || "")
+      );
+      list.appendChild(card);
+    });
+    const copyButton = createNode("button", "button secondary", "Копировать storyboard");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyInteractionBlueprints(blueprints, copyButton));
+    section.append(heading, list, copyButton);
+    return section;
+  }
+
+  function renderFamilies(families, blueprints = []) {
     elements.families.innerHTML = "";
     const heading = createNode("h3", "", "Семейства заданий");
     const list = createNode("div", "approval-family-stack");
@@ -176,12 +203,47 @@
       list.appendChild(item);
     });
     elements.families.append(heading, list);
+    if (blueprints.length) {
+      elements.families.appendChild(renderInteractionBlueprints(blueprints));
+    }
   }
 
   function renderList(items, className) {
     const list = createNode("ul", className);
     items.forEach((item) => list.appendChild(createNode("li", "", item)));
     return list;
+  }
+
+  async function copyInteractionBlueprints(blueprints, button) {
+    const text = [
+      "PM01 PX interactionBlueprints:",
+      ...blueprints.map((blueprint, index) =>
+        [
+          `- row: ${index + 1}`,
+          `  family: ${blueprint.familyId}`,
+          `  visualMode: ${blueprint.visualMode}`,
+          `  layout: ${blueprint.layout}`,
+          `  studentFlow: ${(blueprint.studentFlow || []).join(" -> ")}`,
+          `  animation: ${blueprint.animation}`,
+          `  implementation: ${blueprint.implementation}`,
+          `  uniqueness: ${blueprint.uniqueness}`,
+          `  assessment: ${blueprint.assessment}`,
+          `  approvalQuestion: ${blueprint.approvalQuestion}`
+        ].join("\n")
+      )
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = "Storyboard скопирован";
+      window.setTimeout(() => {
+        button.textContent = "Копировать storyboard";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Копировать storyboard";
+      }, 1600);
+    }
   }
 
   async function copyPromptPackage(packageData, button) {
@@ -532,7 +594,7 @@
       elements.packages.textContent = `${digitalShift.packages.length} цехов`;
       elements.status.textContent = "готово";
       renderSummary(exam, digitalShift);
-      renderFamilies(digitalShift.families || []);
+      renderFamilies(digitalShift.families || [], digitalShift.interactionBlueprints || []);
       renderPackages(digitalShift);
     } catch (error) {
       elements.status.textContent = "ошибка";

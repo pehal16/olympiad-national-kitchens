@@ -54,6 +54,10 @@ async function main() {
   assert(exam.payload?.data?.assetRegistry?.workshops?.vegetables, "PM01 asset registry is missing workshop images");
   assert(exam.payload?.data?.digitalShift?.mode === "training_extension", "PM01 digital shift package is missing");
   assert(exam.payload?.data?.digitalShift?.packages?.length === 5, "PM01 digital shift must expose 5 shop packages");
+  assert(
+    exam.payload?.data?.digitalShift?.interactionBlueprints?.length === 5,
+    "PM01 digital shift must expose 5 interaction blueprints"
+  );
   const previewAssets = exam.payload.data.digitalShift.packages.flatMap((packageData) => packageData.previewAssets || []);
   const matrixRows = exam.payload.data.digitalShift.packages.flatMap((packageData) => packageData.methodicalMatrix || []);
   assert(previewAssets.length === 10, "PM01 digital shift must expose 10 planned preview assets");
@@ -72,6 +76,7 @@ async function main() {
     status: exam.response.status,
     variants: exam.payload.data.variants.length,
     modules: exam.payload.data.modules.length,
+    digitalShiftInteractionBlueprints: exam.payload.data.digitalShift.interactionBlueprints.length,
     digitalShiftPackages: exam.payload.data.digitalShift.packages.length,
     digitalShiftPreviewAssets: previewAssets.length,
     digitalShiftMatrixRows: matrixRows.length
@@ -89,8 +94,8 @@ async function main() {
 
   const approval = await getText("/pm01-approval.html");
   assert(approval.response.ok, `/pm01-approval.html returned ${approval.response.status}`);
-  assert(approval.text.includes("/pm01.css?v=1.0.25"), "/pm01-approval.html does not include current CSS");
-  assert(approval.text.includes("/pm01-approval.js?v=1.0.3"), "/pm01-approval.html does not include current approval JS");
+  assert(approval.text.includes("/pm01.css?v=1.0.26"), "/pm01-approval.html does not include current CSS");
+  assert(approval.text.includes("/pm01-approval.js?v=1.0.4"), "/pm01-approval.html does not include current approval JS");
   assert(approval.text.includes("Согласование PX"), "/pm01-approval.html does not include approval title");
   checks.push({ route: "/pm01-approval.html", status: approval.response.status, bytes: approval.text.length });
 

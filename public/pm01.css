@@ -1044,6 +1044,104 @@ select:focus {
   font-weight: 800;
 }
 
+.approval-blueprint-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.approval-blueprint-head {
+  display: grid;
+  gap: 4px;
+}
+
+.approval-blueprint-head h3 {
+  margin-bottom: 0;
+}
+
+.approval-blueprint-head span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.approval-blueprint-list {
+  display: grid;
+  gap: 10px;
+}
+
+.approval-blueprint-card {
+  display: grid;
+  gap: 7px;
+  padding: 11px;
+  border: 1px solid rgba(35, 107, 181, 0.18);
+  border-left: 4px solid rgba(28, 117, 93, 0.42);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.approval-blueprint-card[data-family="shift_investigation"] {
+  border-left-color: rgba(199, 72, 72, 0.46);
+}
+
+.approval-blueprint-card[data-family="production_timeline"] {
+  border-left-color: rgba(35, 107, 181, 0.5);
+}
+
+.approval-blueprint-card[data-family="storage_marking"] {
+  border-left-color: rgba(213, 121, 36, 0.52);
+}
+
+.approval-blueprint-card[data-family="order_assembly"] {
+  border-left-color: rgba(18, 63, 53, 0.62);
+}
+
+.approval-blueprint-card strong,
+.approval-blueprint-card p,
+.approval-blueprint-card small,
+.approval-blueprint-card em,
+.approval-blueprint-card span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.approval-blueprint-card strong {
+  color: var(--green-900);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.approval-blueprint-card p,
+.approval-blueprint-card small,
+.approval-blueprint-card em,
+.approval-blueprint-card span {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.38;
+}
+
+.approval-blueprint-card small {
+  color: #174a82;
+  font-weight: 800;
+}
+
+.approval-blueprint-card em {
+  color: var(--green-800);
+  font-style: normal;
+  font-weight: 800;
+}
+
+.approval-blueprint-card span {
+  padding: 7px 8px;
+  border-radius: 6px;
+  background: #f7fbf9;
+  color: var(--ink);
+}
+
 .approval-package {
   display: grid;
   gap: 16px;
