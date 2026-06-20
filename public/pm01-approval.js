@@ -139,11 +139,117 @@
     return counts;
   }
 
+  function getGateStatusMeta(status) {
+    const metas = {
+      done: { label: "Готово", detail: "Можно использовать как основание для следующего шага." },
+      pending: { label: "Ждёт", detail: "Нужны данные, решение или визуальная проверка." },
+      blocked: { label: "Блок", detail: "Нельзя переводить в финальный контент." },
+      locked: { label: "Зафиксировано", detail: "Официальный экзаменационный контракт не меняется." }
+    };
+    return metas[status] || metas.pending;
+  }
+
+  function getPackageGateRows(packageData) {
+    const decision = getPackageDecision(packageData.variantId).decision;
+    const hasRp = hasRpIntake(packageData.variantId);
+    const previewAssets = packageData.previewAssets || [];
+    const matrixRows = packageData.methodicalMatrix || [];
+    const previewPlanReady =
+      previewAssets.length >= 2 &&
+      previewAssets.every(
+        (asset) =>
+          asset.finalAsset === false &&
+          asset.targetPath?.startsWith("/assets/pm01/generated/digital-shift/") &&
+          asset.inspectionRequired === true &&
+          asset.inspectionGate === "visual_inspection_before_connection" &&
+          asset.outputUse === "preview_only_until_teacher_approval"
+      );
+    const matrixReady =
+      matrixRows.length === 5 &&
+      matrixRows.every(
+        (row) =>
+          row.rpTopic &&
+          row.newFormat &&
+          row.checkCriterion &&
+          row.visualAsset?.targetPath?.startsWith("/assets/pm01/generated/digital-shift/") &&
+          row.approvalGate === "requires_rp_and_preview_approval"
+      );
+    const previewApproved = decision === "approved_preview";
+    const needsRevision = decision === "needs_revision";
+    const waitingRp = decision === "waiting_rp";
+
+    return [
+      {
+        id: "official_lock",
+        status: "locked",
+        title: "Официальный экзамен",
+        detail: "Контракт 100 баллов / 20 заданий / 5 вариантов сохраняется; PX остаётся training-only."
+      },
+      {
+        id: "methodical_matrix",
+        status: matrixReady ? "done" : "blocked",
+        title: "Методическая матрица",
+        detail: matrixReady
+          ? "Есть 5 строк: тема РП, ПК/ОК, формат, planned asset и критерий."
+          : "Нужно восстановить полный набор строк матрицы перед согласованием."
+      },
+      {
+        id: "rp_ktp",
+        status: hasRp ? "done" : "pending",
+        title: "РП/КТП",
+        detail: hasRp
+          ? "Фрагмент РП или уточнённые темы добавлены локально."
+          : "Финальные темы и официальные формулировки ждут фрагмент РП/КТП."
+      },
+      {
+        id: "preview_plan",
+        status: previewPlanReady ? "done" : "blocked",
+        title: "Preview-assets",
+        detail: previewPlanReady
+          ? "Есть planned paths, negative prompts и чек-лист визуального осмотра."
+          : "Нужны planned slots, inspection gate и запрет на finalAsset до согласования."
+      },
+      {
+        id: "teacher_preview_decision",
+        status: previewApproved ? "done" : needsRevision ? "blocked" : "pending",
+        title: "Решение по preview",
+        detail: previewApproved
+          ? "Preview можно генерировать как предварительный визуал."
+          : needsRevision
+            ? "Сначала внести правки в темы, задания или visual prompt."
+            : waitingRp
+              ? "Решение отложено до получения РП."
+              : "Нужно выбрать статус: на preview, правки или ждём РП."
+      },
+      {
+        id: "final_assets",
+        status: hasRp && previewApproved ? "pending" : "blocked",
+        title: "Финальные assets",
+        detail: hasRp && previewApproved
+          ? "Следующий gate: сгенерировать preview, визуально осмотреть и только потом подключать final files."
+          : "Финальные картинки нельзя подключать без РП/КТП и утверждённого preview."
+      }
+    ];
+  }
+
+  function getPackageGateSummary(packageData) {
+    const gates = getPackageGateRows(packageData);
+    return {
+      gates,
+      done: gates.filter((gate) => gate.status === "done" || gate.status === "locked").length,
+      blocked: gates.filter((gate) => gate.status === "blocked").length,
+      pending: gates.filter((gate) => gate.status === "pending").length
+    };
+  }
+
   function renderSummary(exam, digitalShift) {
     elements.summary.innerHTML = "";
     const packages = digitalShift.packages || [];
     const decisionCounts = getDecisionCounts(packages);
     const rpIntakeCount = getRpIntakeCount(packages);
+    const gateSummaries = packages.map(getPackageGateSummary);
+    const blockedGateCount = gateSummaries.reduce((sum, item) => sum + item.blocked, 0);
+    const pendingGateCount = gateSummaries.reduce((sum, item) => sum + item.pending, 0);
     [
       ["Режим", "training-only", "PX не влияет на ведомость и официальный протокол."],
       ["Контракт", digitalShift.contract || "100 баллов / 20 заданий / 5 вариантов", "Официальный маршрут не расширяется."],
@@ -154,12 +260,28 @@
         `${decisionCounts.approved_preview}/${packages.length} на preview`,
         `${decisionCounts.needs_revision} правок · ${decisionCounts.waiting_rp} ждут РП.`
       ],
+      [
+        "Gate-чеклист",
+        `${blockedGateCount} блоков · ${pendingGateCount} ожиданий`,
+        "Пока блоки не сняты, final assets не подключаются."
+      ],
       ["Версия", exam.version || exam.appVersion || "PM01", "Текущий опубликованный пакет."]
     ].forEach(([label, value, detail]) => {
       const card = createNode("article", "approval-summary-card");
       card.append(createNode("span", "", label), createNode("strong", "", value), createNode("p", "", detail));
       elements.summary.appendChild(card);
     });
+    const exportCard = createNode("article", "approval-summary-card approval-summary-action");
+    const exportButton = createNode("button", "button secondary", "Скопировать общий gate-отчёт");
+    exportButton.type = "button";
+    exportButton.addEventListener("click", () => copyAllGateReports(digitalShift, exportButton));
+    exportCard.append(
+      createNode("span", "", "Экспорт"),
+      createNode("strong", "", "Gate report"),
+      createNode("p", "", "Сводка по РП, preview, visual inspection и финальным asset-блокерам."),
+      exportButton
+    );
+    elements.summary.appendChild(exportCard);
   }
 
   function renderNormativeAnchors(anchors) {
@@ -496,6 +618,102 @@
     }
   }
 
+  function buildGateReportText(packageData) {
+    const decision = getPackageDecision(packageData.variantId);
+    const intake = getPackageRpIntake(packageData.variantId);
+    const summary = getPackageGateSummary(packageData);
+    return [
+      packageData.title,
+      `variantId: ${packageData.variantId}`,
+      `decision: ${decision.decision}`,
+      `rpIntake: ${hasRpIntake(packageData.variantId) ? "present" : "missing"}`,
+      `rpUpdatedAt: ${intake.updatedAt || "not_saved"}`,
+      `gatesDone: ${summary.done}/${summary.gates.length}`,
+      `gatesBlocked: ${summary.blocked}`,
+      `gatesPending: ${summary.pending}`,
+      "gates:",
+      ...summary.gates.map((gate) => {
+        const meta = getGateStatusMeta(gate.status);
+        return `- ${gate.id}: ${meta.label}\n  title: ${gate.title}\n  detail: ${gate.detail}`;
+      })
+    ].join("\n");
+  }
+
+  async function copyGateReport(packageData, button) {
+    try {
+      await navigator.clipboard.writeText(buildGateReportText(packageData));
+      button.textContent = "Gate-отчёт скопирован";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать gate-отчёт";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать gate-отчёт";
+      }, 1600);
+    }
+  }
+
+  async function copyAllGateReports(digitalShift, button) {
+    const text = [
+      "PM01 PX gate report",
+      `generatedAt: ${new Date().toISOString()}`,
+      "",
+      ...((digitalShift.packages || []).map(buildGateReportText).map((report) => `${report}\n---`))
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = "Общий отчёт скопирован";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать общий gate-отчёт";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать общий gate-отчёт";
+      }, 1600);
+    }
+  }
+
+  function renderApprovalGates(packageData) {
+    const summary = getPackageGateSummary(packageData);
+    const panel = createNode("section", "approval-package-block approval-gate-panel");
+    const head = createNode("div", "approval-gate-head");
+    head.append(
+      createNode("h3", "", "Gate-чеклист финализации"),
+      createNode("span", "", `${summary.done}/${summary.gates.length} закрыто · ${summary.blocked} блоков · ${summary.pending} ожиданий`)
+    );
+
+    const grid = createNode("div", "approval-gate-grid");
+    summary.gates.forEach((gate) => {
+      const meta = getGateStatusMeta(gate.status);
+      const card = createNode("article", "approval-gate-card");
+      card.dataset.gate = gate.id;
+      card.dataset.status = gate.status;
+      card.append(
+        createNode("span", "approval-gate-status", meta.label),
+        createNode("strong", "", gate.title),
+        createNode("p", "", gate.detail),
+        createNode("small", "", meta.detail)
+      );
+      grid.appendChild(card);
+    });
+
+    const copyButton = createNode("button", "button secondary", "Скопировать gate-отчёт");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyGateReport(packageData, copyButton));
+    panel.append(head, grid, copyButton);
+    return panel;
+  }
+
+  function refreshPackageGates(packageData) {
+    const section = document.getElementById(`package-${packageData.variantId}`);
+    const panel = section?.querySelector(".approval-gate-panel");
+    if (panel) {
+      panel.replaceWith(renderApprovalGates(packageData));
+    }
+  }
+
   function renderMethodicalMatrix(packageData) {
     const rows = packageData.methodicalMatrix || [];
     const panel = createNode("section", "approval-package-block approval-methodical-matrix");
@@ -581,6 +799,7 @@
     excerpt.addEventListener("input", () => {
       setPackageRpIntake(packageData.variantId, { excerpt: excerpt.value });
       renderSummary(currentExam, currentDigitalShift);
+      refreshPackageGates(packageData);
     });
     excerptField.append(createNode("span", "", "Фрагмент РП"), excerpt);
 
@@ -591,6 +810,7 @@
     confirmedTopics.addEventListener("input", () => {
       setPackageRpIntake(packageData.variantId, { confirmedTopics: confirmedTopics.value });
       renderSummary(currentExam, currentDigitalShift);
+      refreshPackageGates(packageData);
     });
     confirmedField.append(createNode("span", "", "Уточнённые темы"), confirmedTopics);
 
@@ -738,7 +958,20 @@
       )
     );
 
-    section.append(head, topics, renderRpIntake(packageData), renderMethodicalMatrix(packageData), renderShiftCockpit(packageData), tasks, log, prompts, assetPlan, renderDecisionControls(packageData), criteria);
+    section.append(
+      head,
+      renderApprovalGates(packageData),
+      topics,
+      renderRpIntake(packageData),
+      renderMethodicalMatrix(packageData),
+      renderShiftCockpit(packageData),
+      tasks,
+      log,
+      prompts,
+      assetPlan,
+      renderDecisionControls(packageData),
+      criteria
+    );
     return section;
   }
 

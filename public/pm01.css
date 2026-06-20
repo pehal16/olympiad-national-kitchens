@@ -1674,6 +1674,123 @@ select:focus {
   font-size: 18px;
 }
 
+.approval-summary-action {
+  align-content: start;
+}
+
+.approval-summary-action .button {
+  width: max-content;
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: 12px;
+}
+
+.approval-gate-panel {
+  padding: 12px;
+  border: 1px solid rgba(35, 107, 181, 0.2);
+  border-radius: var(--radius);
+  background: #f7fbff;
+}
+
+.approval-gate-head {
+  display: grid;
+  gap: 4px;
+}
+
+.approval-gate-head span {
+  color: #174a82;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.approval-gate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.approval-gate-card {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  align-content: start;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-left: 4px solid rgba(213, 121, 36, 0.56);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.approval-gate-card[data-status="done"] {
+  border-left-color: rgba(28, 117, 93, 0.62);
+  background: #f7fbf9;
+}
+
+.approval-gate-card[data-status="blocked"] {
+  border-left-color: rgba(199, 72, 72, 0.62);
+  background: #fff8f8;
+}
+
+.approval-gate-card[data-status="locked"] {
+  border-left-color: rgba(35, 107, 181, 0.58);
+  background: #f7fbff;
+}
+
+.approval-gate-status {
+  width: max-content;
+  max-width: 100%;
+  padding: 3px 6px;
+  border-radius: 6px;
+  color: #8a4a07;
+  background: #fff2df;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.approval-gate-card[data-status="done"] .approval-gate-status {
+  color: var(--green-900);
+  background: #eaf7f1;
+}
+
+.approval-gate-card[data-status="blocked"] .approval-gate-status {
+  color: #922b2b;
+  background: #ffecec;
+}
+
+.approval-gate-card[data-status="locked"] .approval-gate-status {
+  color: #174a82;
+  background: #eaf2ff;
+}
+
+.approval-gate-card strong,
+.approval-gate-card p,
+.approval-gate-card small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.approval-gate-card strong {
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.28;
+}
+
+.approval-gate-card p,
+.approval-gate-card small {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.approval-gate-card small {
+  color: #335c87;
+  font-weight: 800;
+}
+
 .approval-task-row {
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr);
