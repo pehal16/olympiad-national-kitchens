@@ -268,5 +268,401 @@
     "image": "/assets/pm01/semi-finished/poultry/rabbit-leg-portions.png",
     "source": "/assets/pm01/extended/poultry/rabbit-hind-leg.png",
     "crop": [0.08, 0.08, 0.92, 0.92]
+  },
+  {
+    "id": "vegPeeledPotatoTubers",
+    "group": "vegetables",
+    "title": "Очищенный картофель",
+    "detail": "Клубни после очистки, подготовленные к нарезке или дальнейшей обработке.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-peeled-potato-tubers.png",
+    "source": "/assets/pm01/process/veg-peel.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "vegWashedRootVegetables",
+    "group": "vegetables",
+    "title": "Промытые корнеплоды",
+    "detail": "Овощи после мойки, без видимых загрязнений, перед очисткой или нарезкой.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-washed-root-vegetables.png",
+    "source": "/assets/pm01/process/veg-wash.png",
+    "crop": [0.06, 0.08, 0.96, 0.92]
+  },
+  {
+    "id": "vegPotatoJulienneReady",
+    "group": "vegetables",
+    "title": "Картофель соломкой",
+    "detail": "Овощной полуфабрикат для жарки и гарниров, нарезанный ровной соломкой.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-potato-julienne-ready.png",
+    "source": "/assets/pm01/vegetables-photo/sticks/potato-allumette.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegPotatoBatonnetReady",
+    "group": "vegetables",
+    "title": "Картофель брусочками",
+    "detail": "Полуфабрикат из картофеля, нарезанный брусочками одинаковой толщины.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-potato-batonnet-ready.png",
+    "source": "/assets/pm01/vegetables-photo/sticks/potato-batonnet.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegPotatoWedgesReady",
+    "group": "vegetables",
+    "title": "Картофель дольками",
+    "detail": "Дольки картофеля для запекания, жарки или последующей тепловой обработки.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-potato-wedges-ready.png",
+    "source": "/assets/pm01/vegetables-photo/basic/potato-wedges-photo.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegPotatoParmentierReady",
+    "group": "vegetables",
+    "title": "Картофель кубиком",
+    "detail": "Кубики картофеля одинакового размера для супов, гарниров и припускания.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-potato-parmentier-ready.png",
+    "source": "/assets/pm01/vegetables-photo/cubes/potato-parmentier-photo.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegCarrotJulienneReady",
+    "group": "vegetables",
+    "title": "Морковь соломкой",
+    "detail": "Ровная соломка из моркови для пассерования, гарниров и суповых наборов.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-carrot-julienne-ready.png",
+    "source": "/assets/pm01/vegetables-photo/sticks/carrot-julienne.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegCarrotBrunoiseReady",
+    "group": "vegetables",
+    "title": "Морковь мелким кубиком",
+    "detail": "Мелкие кубики моркови для начинок, супов, соусов и аккуратной подачи.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-carrot-brunoise-ready.png",
+    "source": "/assets/pm01/vegetables-photo/cubes/carrot-brunoise.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegCarrotRondelleReady",
+    "group": "vegetables",
+    "title": "Морковь кружочками",
+    "detail": "Поперечная нарезка моркови для гарниров, супов и припускания.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-carrot-rondelle-ready.png",
+    "source": "/assets/pm01/vegetables-photo/slices/carrot-rondelle.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegOnionHalfRingsReady",
+    "group": "vegetables",
+    "title": "Лук полукольцами",
+    "detail": "Подготовленный лук для пассерования, маринадов и дальнейшей тепловой обработки.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-onion-half-rings-ready.png",
+    "source": "/assets/pm01/vegetables-photo/slices/onion-half-rings.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegOnionBrunoiseReady",
+    "group": "vegetables",
+    "title": "Лук мелким кубиком",
+    "detail": "Мелко нарезанный лук для фаршей, начинок, соусов и суповых заправок.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-onion-brunoise-ready.png",
+    "source": "/assets/pm01/vegetables-photo/cubes/onion-brunoise.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegCabbageCheckersReady",
+    "group": "vegetables",
+    "title": "Капуста шашками",
+    "detail": "Капуста, нарезанная шашками для тушения, супов и гарниров.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-cabbage-checkers-ready.png",
+    "source": "/assets/pm01/vegetables-photo/leafy/cabbage-checkers-photo.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegGreensChiffonadeReady",
+    "group": "vegetables",
+    "title": "Шинкованная зелень",
+    "detail": "Тонко нарезанная зелень для доведения блюд, салатов и холодных закусок.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-greens-chiffonade-ready.png",
+    "source": "/assets/pm01/vegetables-photo/leafy/greens-chiffonade-photo.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegMushroomSlicesReady",
+    "group": "vegetables",
+    "title": "Грибы ломтиками",
+    "detail": "Подготовленные ломтики грибов для жарки, соусов и гарниров.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-mushroom-slices-ready.png",
+    "source": "/assets/pm01/extended/cuts/mushroom-slices.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegMixedMirepoixReady",
+    "group": "vegetables",
+    "title": "Овощная смесь мирпуа",
+    "detail": "Крупная ароматическая овощная смесь для бульонов, тушения и припускания.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-mixed-mirepoix-ready.png",
+    "source": "/assets/pm01/vegetables-photo/cubes/mixed-mirepoix.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegMixedBrunoiseReady",
+    "group": "vegetables",
+    "title": "Овощная смесь брюнуаз",
+    "detail": "Мелкие кубики овощей для супов, соусов, начинок и декоративной подачи.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-mixed-brunoise-ready.png",
+    "source": "/assets/pm01/vegetables-photo/cubes/mixed-brunoise.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegMixedMacedoineReady",
+    "group": "vegetables",
+    "title": "Овощная смесь македуан",
+    "detail": "Средний кубик из овощей для салатов, гарниров и припускания.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-mixed-macedoine-ready.png",
+    "source": "/assets/pm01/vegetables-photo/cubes/mixed-macedoine.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegTomatoConcasseReady",
+    "group": "vegetables",
+    "title": "Томат конкассе",
+    "detail": "Подготовленный томат без лишней влаги для соусов, салатов и холодных блюд.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-tomato-concasse-ready.png",
+    "source": "/assets/pm01/extended/cuts/tomato-concasse.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegPepperStripsReady",
+    "group": "vegetables",
+    "title": "Перец полосками",
+    "detail": "Подготовленный сладкий перец для салатов, гарниров, тушения и пассерования.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-pepper-strips-ready.png",
+    "source": "/assets/pm01/extended/cuts/pepper-strips.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "vegBeetCubesReady",
+    "group": "vegetables",
+    "title": "Свекла кубиком",
+    "detail": "Кубики свеклы для салатов, гарниров и дальнейшей тепловой обработки.",
+    "image": "/assets/pm01/semi-finished/vegetables/veg-beet-cubes-ready.png",
+    "source": "/assets/pm01/extended/cuts/beet-cubes.png",
+    "crop": [0.02, 0.02, 0.98, 0.98]
+  },
+  {
+    "id": "meatEscalopeNatural",
+    "group": "meat",
+    "title": "Натуральный порционный кусок",
+    "detail": "Зачищенный порционный полуфабрикат из мяса без панировки.",
+    "image": "/assets/pm01/semi-finished/meat/meat-escalope-natural.png",
+    "source": "/assets/pm01/extended/meat/beef-escalope.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "meatMedallions",
+    "group": "meat",
+    "title": "Порционные куски мяса",
+    "detail": "Куски одинаковой формы и толщины для жарки основным способом.",
+    "image": "/assets/pm01/semi-finished/meat/meat-medallions.png",
+    "source": "/assets/pm01/extended/meat/beef-medallions.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "meatBeefStroganoffStrips",
+    "group": "meat",
+    "title": "Бефстроганов",
+    "detail": "Мелкокусковой полуфабрикат, нарезанный тонкими брусочками поперек волокон.",
+    "image": "/assets/pm01/semi-finished/meat/meat-beef-stroganoff-strips.png",
+    "source": "/assets/pm01/extended/meat/beef-stroganoff-strips.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "meatShashlikCubes",
+    "group": "meat",
+    "title": "Шашлык",
+    "detail": "Кусочки мяса одинаковой величины, подготовленные для маринования и жарки.",
+    "image": "/assets/pm01/semi-finished/meat/meat-shashlik-cubes.png",
+    "source": "/assets/pm01/extended/meat/beef-shashlik-cubes.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "meatPorkSchnitzelBreaded",
+    "group": "meat",
+    "title": "Шницель панированный",
+    "detail": "Порционный панированный полуфабрикат из мяса, подготовленный к жарке.",
+    "image": "/assets/pm01/semi-finished/meat/meat-pork-schnitzel-breaded.png",
+    "source": "/assets/pm01/extended/meat/pork-schnitzel-breaded.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "meatPorkChopBoneIn",
+    "group": "meat",
+    "title": "Натуральный порционный полуфабрикат",
+    "detail": "Порционный кусок мяса, подготовленный для жарки.",
+    "image": "/assets/pm01/semi-finished/meat/meat-pork-chop-bone-in.png",
+    "source": "/assets/pm01/extended/meat/pork-chop-bone-in.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "meatLambRagoutBoneIn",
+    "group": "meat",
+    "title": "Мясо кубиками для рагу",
+    "detail": "Мелкокусковой мясной полуфабрикат для тушения.",
+    "image": "/assets/pm01/semi-finished/meat/meat-lamb-ragout-bone-in.png",
+    "source": "/assets/pm01/extended/meat/lamb-ragout-bone-in.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "meatBonesForBroth",
+    "group": "meat",
+    "title": "Крупный кусок мяса",
+    "detail": "Крупнокусковой мясной полуфабрикат для дальнейшей разделки или тепловой обработки.",
+    "image": "/assets/pm01/semi-finished/meat/meat-bones-for-broth.png",
+    "source": "/assets/pm01/extended/meat/meat-bones-broth.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "fishWholeCleaned",
+    "group": "fish",
+    "title": "Обработанная тушка рыбы",
+    "detail": "Тушка после первичной обработки, пригодная для дальнейшей разделки.",
+    "image": "/assets/pm01/semi-finished/fish/fish-whole-cleaned.png",
+    "source": "/assets/pm01/extended/fish/whole-fish-cleaned.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "fishSteakCrosscut",
+    "group": "fish",
+    "title": "Порционные куски филе рыбы",
+    "detail": "Куски филе одинаковой массы для дальнейшей тепловой обработки.",
+    "image": "/assets/pm01/semi-finished/fish/fish-steak-crosscut.png",
+    "source": "/assets/pm01/extended/fish/fish-steak-crosscut.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "fishFilletSkinOn",
+    "group": "fish",
+    "title": "Филе рыбы",
+    "detail": "Пласт филе, подготовленный к порционированию или жарке.",
+    "image": "/assets/pm01/semi-finished/fish/fish-fillet-skin-on.png",
+    "source": "/assets/pm01/extended/fish/fish-fillet-skin-on.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "fishButterflyFillet",
+    "group": "fish",
+    "title": "Филе пластом",
+    "detail": "Раскрытый пласт филе для фарширования, рулета или порционирования.",
+    "image": "/assets/pm01/semi-finished/fish/fish-butterfly-fillet.png",
+    "source": "/assets/pm01/extended/fish/fish-butterfly-fillet.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "fishTrimHeadTail",
+    "group": "fish",
+    "title": "Обработанная рыба",
+    "detail": "Подготовленная рыба для дальнейшего порционирования или тепловой обработки.",
+    "image": "/assets/pm01/semi-finished/fish/fish-trim-head-tail.png",
+    "source": "/assets/pm01/extended/fish/fish-trim-head-tail.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "fishRollPrepared",
+    "group": "fish",
+    "title": "Рыбный полуфабрикат порционный",
+    "detail": "Порционные куски рыбы, подготовленные к тепловой обработке.",
+    "image": "/assets/pm01/semi-finished/fish/fish-roll-prepared.png",
+    "source": "/assets/pm01/extended/fish/fish-roll.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "fishBallsFormed",
+    "group": "fish",
+    "title": "Рыбные тефтели",
+    "detail": "Сформованные шарики из рыбной котлетной массы.",
+    "image": "/assets/pm01/semi-finished/fish/fish-balls-formed.png",
+    "source": "/assets/pm01/extended/fish/fish-balls.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "fishSticksBreaded",
+    "group": "fish",
+    "title": "Рыбные палочки в панировке",
+    "detail": "Формованный панированный рыбный полуфабрикат для жарки.",
+    "image": "/assets/pm01/semi-finished/fish/fish-sticks-breaded.png",
+    "source": "/assets/pm01/extended/fish/fish-sticks-breaded.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "chickenPreparedCarcass",
+    "group": "poultry",
+    "title": "Подготовленная тушка птицы",
+    "detail": "Тушка после первичной обработки перед разделкой или формованием.",
+    "image": "/assets/pm01/semi-finished/poultry/chicken-prepared-carcass.png",
+    "source": "/assets/pm01/extended/poultry/whole-chicken-prepared.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "chickenBreastButterfly",
+    "group": "poultry",
+    "title": "Филе птицы пластом",
+    "detail": "Распластанное филе для фарширования, панирования или порционирования.",
+    "image": "/assets/pm01/semi-finished/poultry/chicken-breast-butterfly.png",
+    "source": "/assets/pm01/extended/poultry/chicken-breast-butterfly.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "chickenWingSegments",
+    "group": "poultry",
+    "title": "Порционные части птицы",
+    "detail": "Части птицы после разделки тушки.",
+    "image": "/assets/pm01/semi-finished/poultry/chicken-wing-segments.png",
+    "source": "/assets/pm01/extended/poultry/chicken-wing-segments.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "chickenSupremePortion",
+    "group": "poultry",
+    "title": "Порционное филе птицы",
+    "detail": "Филе птицы, подготовленное для жарки, панирования или фарширования.",
+    "image": "/assets/pm01/semi-finished/poultry/chicken-supreme-portion.png",
+    "source": "/assets/pm01/extended/poultry/chicken-supreme.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "chickenBackForBroth",
+    "group": "poultry",
+    "title": "Части птицы для бульона",
+    "detail": "Костные и мясокостные части птицы для приготовления бульона.",
+    "image": "/assets/pm01/semi-finished/poultry/chicken-back-for-broth.png",
+    "source": "/assets/pm01/extended/poultry/chicken-back-broth.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "rabbitSaddlePortion",
+    "group": "poultry",
+    "title": "Седло кролика",
+    "detail": "Часть тушки кролика, подготовленная для жарки или тушения.",
+    "image": "/assets/pm01/semi-finished/poultry/rabbit-saddle-portion.png",
+    "source": "/assets/pm01/extended/poultry/rabbit-saddle.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "poultryCutletsFormed",
+    "group": "poultry",
+    "title": "Котлетная масса из птицы",
+    "detail": "Подготовленная масса из птицы для последующего формования полуфабрикатов.",
+    "image": "/assets/pm01/semi-finished/poultry/poultry-cutlets-formed.png",
+    "source": "/assets/pm01/extended/poultry/poultry-cutlets.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
+  },
+  {
+    "id": "poultryQuenellesFormed",
+    "group": "poultry",
+    "title": "Кнельная масса из птицы",
+    "detail": "Нежная измельченная масса для формования кнелей.",
+    "image": "/assets/pm01/semi-finished/poultry/poultry-quenelles-formed.png",
+    "source": "/assets/pm01/extended/poultry/poultry-quenelles.png",
+    "crop": [0.06, 0.08, 0.94, 0.92]
   }
 ]

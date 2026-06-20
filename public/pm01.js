@@ -510,7 +510,7 @@
 
   function visualAtlasCategoryIdForVariant(variantId) {
     const map = {
-      vegetables: "vegetable-photo-cuts",
+      vegetables: "vegetable-semi-products",
       fish: "extended-fish",
       meat: "extended-meat",
       poultry: "extended-poultry",

@@ -616,8 +616,9 @@ test("PM01 extended visual atlas exposes 50 generated cards safely", () => {
   collectExtended(publicData.assetRegistry.extendedVisuals);
 
   assert.equal(extendedPaths.length, 50);
-  assert.equal(publicData.visualAtlas.length, 6);
+  assert.equal(publicData.visualAtlas.length, 7);
   assert.equal(publicData.visualAtlas.some((category) => category.id === "vegetable-photo-cuts"), true);
+  assert.equal(publicData.visualAtlas.some((category) => category.id === "vegetable-semi-products"), true);
   assert.equal(publicData.visualAtlas.some((category) => category.id === "extended-safety"), true);
 
   extendedPaths.forEach((assetPath) => {
@@ -654,22 +655,23 @@ test("PM01 vegetable photo cuts expose 50 textbook-safe vegetable cards", () => 
   });
 });
 
-test("PM01 semi-finished product atlas exposes 30 photo cards", () => {
+test("PM01 semi-finished product atlas exposes 74 photo cards", () => {
   const publicData = getPm01PublicData();
   const productAssets = publicData.assetRegistry.semiFinishedProducts;
   const productPaths = Object.values(productAssets);
   const groups = [
-    { id: "extended-meat", prefix: "/assets/pm01/semi-finished/meat/" },
-    { id: "extended-fish", prefix: "/assets/pm01/semi-finished/fish/" },
-    { id: "extended-poultry", prefix: "/assets/pm01/semi-finished/poultry/" }
+    { id: "vegetable-semi-products", prefix: "/assets/pm01/semi-finished/vegetables/", displayLimit: 10, length: 20 },
+    { id: "extended-meat", prefix: "/assets/pm01/semi-finished/meat/", displayLimit: 12, length: 18 },
+    { id: "extended-fish", prefix: "/assets/pm01/semi-finished/fish/", displayLimit: 12, length: 18 },
+    { id: "extended-poultry", prefix: "/assets/pm01/semi-finished/poultry/", displayLimit: 12, length: 18 }
   ];
 
-  assert.equal(productPaths.length, 30);
+  assert.equal(productPaths.length, 74);
 
-  groups.forEach(({ id, prefix }) => {
+  groups.forEach(({ id, prefix, displayLimit, length }) => {
     const atlas = publicData.visualAtlas.find((category) => category.id === id);
-    assert.equal(atlas.displayLimit, 10);
-    assert.equal(atlas.items.length, 10);
+    assert.equal(atlas.displayLimit, displayLimit);
+    assert.equal(atlas.items.length, length);
     assert.equal(atlas.items.every((item) => item.image.startsWith(prefix)), true);
   });
 

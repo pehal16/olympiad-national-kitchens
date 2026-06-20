@@ -491,6 +491,12 @@ const visualAtlas = [
     items: vegetablePhotoCutItems
   },
   {
+    id: "vegetable-semi-products",
+    title: "Овощные полуфабрикаты",
+    displayLimit: 10,
+    items: semiFinishedByGroup("vegetables")
+  },
+  {
     id: "extended-cuts",
     title: "Нарезки",
     items: [
@@ -504,19 +510,19 @@ const visualAtlas = [
   {
     id: "extended-meat",
     title: "Мясо",
-    displayLimit: 10,
+    displayLimit: 12,
     items: semiFinishedByGroup("meat")
   },
   {
     id: "extended-fish",
     title: "Рыба",
-    displayLimit: 10,
+    displayLimit: 12,
     items: semiFinishedByGroup("fish")
   },
   {
     id: "extended-poultry",
     title: "Птица и кролик",
-    displayLimit: 10,
+    displayLimit: 12,
     items: semiFinishedByGroup("poultry")
   },
   {
