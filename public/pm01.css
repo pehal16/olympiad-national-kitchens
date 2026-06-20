@@ -1286,6 +1286,43 @@ select:focus {
   font-size: 13px;
 }
 
+.approval-rp-intake {
+  padding: 12px;
+  border: 1px solid rgba(35, 107, 181, 0.18);
+  border-radius: var(--radius);
+  background: #f4f8fd;
+}
+
+.approval-rp-head,
+.approval-rp-field {
+  display: grid;
+  gap: 6px;
+}
+
+.approval-rp-head span,
+.approval-rp-field span {
+  color: #335c87;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.approval-rp-text {
+  min-height: 82px;
+  border-color: rgba(35, 107, 181, 0.24);
+  font-size: 13px;
+}
+
+.approval-rp-topics {
+  min-height: 64px;
+}
+
+.approval-rp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .approval-empty {
   padding: 18px;
   border: 1px dashed var(--line-strong);
@@ -3739,6 +3776,10 @@ tr[data-attempt-id].is-selected {
   }
 
   .approval-decision-actions .button {
+    flex: 1 1 160px;
+  }
+
+  .approval-rp-actions .button {
     flex: 1 1 160px;
   }
 

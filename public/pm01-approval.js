@@ -9,6 +9,7 @@
   };
 
   const PM01_APPROVAL_STORAGE_KEY = "pm01ApprovalDecisionsV1";
+  const PM01_RP_INTAKE_STORAGE_KEY = "pm01RpIntakeV1";
   const DECISION_OPTIONS = [
     { id: "pending", label: "Черновик", status: "Черновик до РП", detail: "Ожидает рабочую программу или правку формулировок." },
     { id: "approved_preview", label: "На preview", status: "Preview согласован", detail: "Можно генерировать 1-2 предварительных изображения." },
@@ -17,6 +18,7 @@
   ];
   const decisionOptionsById = new Map(DECISION_OPTIONS.map((option) => [option.id, option]));
   let approvalState = loadApprovalState();
+  let rpIntakeState = loadRpIntakeState();
   let currentExam = null;
   let currentDigitalShift = null;
 
@@ -44,11 +46,28 @@
     }
   }
 
+  function loadRpIntakeState() {
+    try {
+      const stored = window.localStorage.getItem(PM01_RP_INTAKE_STORAGE_KEY);
+      return stored ? JSON.parse(stored) || {} : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
   function persistApprovalState() {
     try {
       window.localStorage.setItem(PM01_APPROVAL_STORAGE_KEY, JSON.stringify(approvalState));
     } catch (_) {
       // The board still works in-memory if browser storage is unavailable.
+    }
+  }
+
+  function persistRpIntakeState() {
+    try {
+      window.localStorage.setItem(PM01_RP_INTAKE_STORAGE_KEY, JSON.stringify(rpIntakeState));
+    } catch (_) {
+      // The RP intake remains usable for the current browser session if storage is blocked.
     }
   }
 
@@ -74,6 +93,38 @@
     persistApprovalState();
   }
 
+  function getPackageRpIntake(variantId) {
+    const stored = rpIntakeState[variantId] || {};
+    return {
+      excerpt: stored.excerpt || "",
+      confirmedTopics: stored.confirmedTopics || "",
+      updatedAt: stored.updatedAt || null
+    };
+  }
+
+  function setPackageRpIntake(variantId, patch) {
+    rpIntakeState[variantId] = {
+      ...getPackageRpIntake(variantId),
+      ...patch,
+      updatedAt: new Date().toISOString()
+    };
+    persistRpIntakeState();
+  }
+
+  function resetPackageRpIntake(variantId) {
+    delete rpIntakeState[variantId];
+    persistRpIntakeState();
+  }
+
+  function hasRpIntake(variantId) {
+    const intake = getPackageRpIntake(variantId);
+    return Boolean(intake.excerpt.trim() || intake.confirmedTopics.trim());
+  }
+
+  function getRpIntakeCount(packages) {
+    return packages.filter((packageData) => hasRpIntake(packageData.variantId)).length;
+  }
+
   function resetPackageDecision(variantId) {
     delete approvalState[variantId];
     persistApprovalState();
@@ -92,10 +143,12 @@
     elements.summary.innerHTML = "";
     const packages = digitalShift.packages || [];
     const decisionCounts = getDecisionCounts(packages);
+    const rpIntakeCount = getRpIntakeCount(packages);
     [
       ["Режим", "training-only", "PX не влияет на ведомость и официальный протокол."],
       ["Контракт", digitalShift.contract || "100 баллов / 20 заданий / 5 вариантов", "Официальный маршрут не расширяется."],
       ["Статус РП", digitalShift.rpStatus || "ожидаются РП", "Темы не переписываются вслепую."],
+      ["РП-сверка", `${rpIntakeCount}/${packages.length} заполнено`, "Фрагменты РП хранятся локально до методической правки."],
       [
         "Согласование",
         `${decisionCounts.approved_preview}/${packages.length} на preview`,
@@ -164,6 +217,10 @@
       `updatedAt: ${decision.updatedAt || "not_saved"}`,
       `note: ${decision.note || "-"}`,
       "",
+      "rpIntake:",
+      `  excerpt: ${getPackageRpIntake(packageData.variantId).excerpt || "-"}`,
+      `  confirmedTopics: ${getPackageRpIntake(packageData.variantId).confirmedTopics || "-"}`,
+      "",
       "previewAssets:",
       ...(packageData.previewAssets || []).map(
         (asset) => `- ${asset.id}\n  targetPath: ${asset.targetPath}\n  status: ${asset.status}\n  finalAsset: ${asset.finalAsset}`
@@ -181,6 +238,81 @@
         button.textContent = "Скопировать решение";
       }, 1600);
     }
+  }
+
+  async function copyRpIntake(packageData, button) {
+    const intake = getPackageRpIntake(packageData.variantId);
+    const text = [
+      packageData.title,
+      "rpIntake:",
+      `updatedAt: ${intake.updatedAt || "not_saved"}`,
+      "",
+      "currentTopics:",
+      ...(packageData.rpTopics || []).map((topic) => `- ${topic}`),
+      "",
+      "rpExcerpt:",
+      intake.excerpt || "-",
+      "",
+      "confirmedTopics:",
+      intake.confirmedTopics || "-"
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = "РП-сверка скопирована";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать РП-сверку";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать РП-сверку";
+      }, 1600);
+    }
+  }
+
+  function renderRpIntake(packageData) {
+    const intake = getPackageRpIntake(packageData.variantId);
+    const panel = createNode("section", "approval-package-block approval-rp-intake");
+    const head = createNode("div", "approval-rp-head");
+    head.append(
+      createNode("h3", "", "РП-intake"),
+      createNode("span", "", hasRpIntake(packageData.variantId) ? "Фрагмент РП добавлен локально" : "Вставьте фрагмент РП перед финальной правкой тем")
+    );
+
+    const excerptField = createNode("label", "approval-rp-field");
+    const excerpt = createNode("textarea", "approval-rp-text");
+    excerpt.value = intake.excerpt;
+    excerpt.placeholder = "Фрагмент РП, КТП или рабочей программы по этому цеху";
+    excerpt.addEventListener("input", () => {
+      setPackageRpIntake(packageData.variantId, { excerpt: excerpt.value });
+      renderSummary(currentExam, currentDigitalShift);
+    });
+    excerptField.append(createNode("span", "", "Фрагмент РП"), excerpt);
+
+    const confirmedField = createNode("label", "approval-rp-field");
+    const confirmedTopics = createNode("textarea", "approval-rp-text approval-rp-topics");
+    confirmedTopics.value = intake.confirmedTopics;
+    confirmedTopics.placeholder = "Уточнённые темы после сверки с РП";
+    confirmedTopics.addEventListener("input", () => {
+      setPackageRpIntake(packageData.variantId, { confirmedTopics: confirmedTopics.value });
+      renderSummary(currentExam, currentDigitalShift);
+    });
+    confirmedField.append(createNode("span", "", "Уточнённые темы"), confirmedTopics);
+
+    const actions = createNode("div", "approval-rp-actions");
+    const copyButton = createNode("button", "button secondary", "Скопировать РП-сверку");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyRpIntake(packageData, copyButton));
+    const resetButton = createNode("button", "button ghost", "Очистить РП");
+    resetButton.type = "button";
+    resetButton.addEventListener("click", () => {
+      resetPackageRpIntake(packageData.variantId);
+      renderSummary(currentExam, currentDigitalShift);
+      renderPackages(currentDigitalShift);
+    });
+    actions.append(copyButton, resetButton);
+    panel.append(head, excerptField, confirmedField, actions);
+    return panel;
   }
 
   function renderDecisionControls(packageData) {
@@ -305,7 +437,7 @@
       )
     );
 
-    section.append(head, topics, tasks, log, prompts, assetPlan, renderDecisionControls(packageData), criteria);
+    section.append(head, topics, renderRpIntake(packageData), tasks, log, prompts, assetPlan, renderDecisionControls(packageData), criteria);
     return section;
   }
 
