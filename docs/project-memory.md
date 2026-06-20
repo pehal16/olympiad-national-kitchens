@@ -6,7 +6,7 @@ Last updated: 2026-06-20
 
 - Repository: `pehal16/olympiad-national-kitchens`
 - Branch: `main`
-- Current baseline commit at the time of this note: `29738dc Add generated PM01 semi-finished cards`
+- Latest functional baseline before this memory note: `29738dc Add generated PM01 semi-finished cards`
 - Production URL: `https://olympiad-gkts.pages.dev`
 - Hosting/runtime: Cloudflare Pages + Pages Functions
 - Storage: Cloudflare D1 via binding `DB`, R2/Cloudflare bindings for larger assets and voice storage where configured
