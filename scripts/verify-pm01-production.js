@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+const packageInfo = require("../package.json");
+
 const baseUrl = normalizeBaseUrl(process.argv[2] || "http://127.0.0.1:3100");
 
 function normalizeBaseUrl(value) {
@@ -70,12 +72,17 @@ async function main() {
   const health = await getJson("/api/health");
   assert(health.response.ok, `/api/health returned ${health.response.status}`);
   assert(health.payload?.ok === true, "/api/health did not return ok=true");
+  assert(
+    health.payload?.appVersion === packageInfo.version,
+    `/api/health appVersion must be ${packageInfo.version}, got ${health.payload?.appVersion || "missing"}`
+  );
   assert(health.payload?.storageBackend, "/api/health does not expose storageBackend");
   assert(health.payload?.pm01?.id === "pm01-2026-exam", "/api/health does not expose PM01 module");
   assert(health.payload?.pm01?.variants === 5, "/api/health PM01 variants count must be 5");
   checks.push({
     route: "/api/health",
     status: health.response.status,
+    appVersion: health.payload.appVersion,
     storageBackend: health.payload.storageBackend,
     pm01: health.payload.pm01
   });
@@ -160,8 +167,8 @@ async function main() {
 
   const student = await getText("/pm01.html");
   assert(student.response.ok, `/pm01.html returned ${student.response.status}`);
-  assert(student.text.includes("/pm01.js?v=1.0.25"), "/pm01.html does not include current student JS");
-  assert(student.text.includes("/pm01.css?v=1.0.30"), "/pm01.html does not include current CSS");
+  assert(student.text.includes("/pm01.js?v=1.0.26"), "/pm01.html does not include current student JS");
+  assert(student.text.includes("/pm01.css?v=1.0.31"), "/pm01.html does not include current CSS");
   checks.push({ route: "/pm01.html", status: student.response.status, bytes: student.text.length });
 
   const admin = await getText("/pm01-admin.html");
@@ -171,7 +178,7 @@ async function main() {
 
   const approval = await getText("/pm01-approval.html");
   assert(approval.response.ok, `/pm01-approval.html returned ${approval.response.status}`);
-  assert(approval.text.includes("/pm01.css?v=1.0.30"), "/pm01-approval.html does not include current CSS");
+  assert(approval.text.includes("/pm01.css?v=1.0.31"), "/pm01-approval.html does not include current CSS");
   assert(approval.text.includes("/pm01-approval.js?v=1.0.7"), "/pm01-approval.html does not include current approval JS");
   assert(approval.text.includes("Согласование PX"), "/pm01-approval.html does not include approval title");
   checks.push({ route: "/pm01-approval.html", status: approval.response.status, bytes: approval.text.length });

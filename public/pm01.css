@@ -879,6 +879,13 @@ select:focus {
   line-height: 1.2;
 }
 
+.digital-shift-cockpit-zones span.is-active {
+  border-color: rgba(35, 107, 181, 0.42);
+  color: #174a82;
+  background: #eef5ff;
+  box-shadow: inset 0 0 0 2px rgba(35, 107, 181, 0.08);
+}
+
 .digital-shift-cockpit-signals {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -980,6 +987,105 @@ select:focus {
   outline-offset: 2px;
 }
 
+.digital-shift-cockpit-focus {
+  display: grid;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid rgba(35, 107, 181, 0.22);
+  border-left: 4px solid var(--blue);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(17, 61, 51, 0.06);
+}
+
+.digital-shift-cockpit-focus.is-compact {
+  gap: 7px;
+  padding: 9px;
+  box-shadow: none;
+}
+
+.digital-shift-cockpit-focus-head {
+  display: grid;
+  gap: 3px;
+}
+
+.digital-shift-cockpit-focus-head span {
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.digital-shift-cockpit-focus-head strong {
+  color: var(--green-900);
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.digital-shift-cockpit-focus-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 7px;
+}
+
+.digital-shift-cockpit-focus-grid div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 8px;
+  border-radius: var(--radius);
+  background: #f7faf9;
+}
+
+.digital-shift-cockpit-focus-grid span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.digital-shift-cockpit-focus-grid strong {
+  min-width: 0;
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.digital-shift-cockpit-focus-journal,
+.digital-shift-cockpit-competencies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.digital-shift-cockpit-focus-journal span {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: var(--radius);
+  color: #174a82;
+  background: #eef5ff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.digital-shift-cockpit-competencies span {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 7px;
+  border: 1px solid rgba(28, 117, 93, 0.16);
+  border-radius: 6px;
+  color: var(--green-800);
+  background: #f6fbf8;
+  font-size: 10px;
+  font-weight: 900;
+}
+
 .digital-shift-log,
 .digital-shift-prompts {
   display: grid;
@@ -1010,9 +1116,16 @@ select:focus {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 4px 6px;
+  border-radius: var(--radius);
   color: var(--muted);
   font-size: 12px;
   line-height: 1.35;
+}
+
+.production-log-list li.is-active {
+  color: #174a82;
+  background: #eef5ff;
 }
 
 .production-log-list li::before {
@@ -1028,6 +1141,22 @@ select:focus {
   background: var(--green-700);
   font-size: 11px;
   font-weight: 900;
+}
+
+.production-log-list li.is-active::before {
+  background: var(--blue);
+}
+
+.production-log-time {
+  flex: 0 0 auto;
+  color: var(--green-900);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.production-log-event {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .digital-shift-prompts p {

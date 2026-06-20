@@ -635,6 +635,39 @@
     return state.activeCockpitFamilyId;
   }
 
+  function activeCockpitStep(packageData) {
+    const activeFamilyId = ensureActiveCockpitFamily(packageData);
+    return (packageData?.shiftCockpit?.operationTimeline || []).find((step) => step.familyId === activeFamilyId) || null;
+  }
+
+  function activeCockpitMatrixRow(packageData) {
+    const activeFamilyId = ensureActiveCockpitFamily(packageData);
+    return (packageData?.methodicalMatrix || []).find((row) => row.familyId === activeFamilyId) || null;
+  }
+
+  function cockpitJournalEntries(packageData) {
+    const signals = packageData?.shiftCockpit?.journalSignals || [];
+    if (signals.length) {
+      return signals;
+    }
+    return (packageData?.productionLog || []).map((entry, index) => {
+      const match = String(entry).match(/^(\d{2}:\d{2})\s+(.+)$/);
+      return {
+        id: `production-log-${index + 1}`,
+        time: match ? match[1] : "",
+        event: match ? match[2] : entry,
+        linkedStep: index + 1
+      };
+    });
+  }
+
+  function activeCockpitJournalEntries(packageData) {
+    const step = activeCockpitStep(packageData);
+    const entries = cockpitJournalEntries(packageData);
+    const linked = entries.filter((entry) => Number(entry.linkedStep) === Number(step?.step));
+    return linked.length ? linked : entries.slice(0, 2);
+  }
+
   function findTrainingTaskCard(familyId) {
     return Array.from(elements.trainingLab?.querySelectorAll(".digital-shift-task") || []).find(
       (card) => card.dataset.family === familyId
@@ -691,19 +724,96 @@
   }
 
   function renderProductionLog(packageData) {
+    const activeStep = activeCockpitStep(packageData);
+    const entries = cockpitJournalEntries(packageData);
     const list = document.createElement("ol");
     list.className = "production-log-list";
-    (packageData?.productionLog || []).forEach((entry) => {
+    entries.forEach((entry) => {
       const item = document.createElement("li");
-      item.textContent = entry;
+      item.classList.toggle("is-active", Number(entry.linkedStep) === Number(activeStep?.step));
+      if (entry.time) {
+        const time = document.createElement("span");
+        time.className = "production-log-time";
+        time.textContent = entry.time;
+        item.appendChild(time);
+      }
+      const event = document.createElement("span");
+      event.className = "production-log-event";
+      event.textContent = entry.event || "";
+      item.appendChild(event);
       list.appendChild(item);
     });
     return list;
   }
 
+  function appendCockpitFocusRow(container, label, value) {
+    if (!value) {
+      return;
+    }
+    const row = document.createElement("div");
+    const term = document.createElement("span");
+    term.textContent = label;
+    const description = document.createElement("strong");
+    description.textContent = value;
+    row.append(term, description);
+    container.appendChild(row);
+  }
+
+  function renderCockpitFocus(packageData, compact = false) {
+    const step = activeCockpitStep(packageData);
+    const matrixRow = activeCockpitMatrixRow(packageData);
+    const panel = document.createElement("section");
+    panel.className = compact ? "digital-shift-cockpit-focus is-compact" : "digital-shift-cockpit-focus";
+    if (!step) {
+      return panel;
+    }
+
+    const head = document.createElement("div");
+    head.className = "digital-shift-cockpit-focus-head";
+    const label = document.createElement("span");
+    label.textContent = "Активный этап PX";
+    const title = document.createElement("strong");
+    title.textContent = step.familyTitle || step.title || "";
+    head.append(label, title);
+
+    const details = document.createElement("div");
+    details.className = "digital-shift-cockpit-focus-grid";
+    appendCockpitFocusRow(details, "Действие", step.studentAction);
+    appendCockpitFocusRow(details, "Контроль", step.controlSignal);
+    appendCockpitFocusRow(details, "Реакция интерфейса", step.animation);
+    appendCockpitFocusRow(details, "Критерий", matrixRow?.checkCriterion || "");
+
+    const journal = document.createElement("div");
+    journal.className = "digital-shift-cockpit-focus-journal";
+    activeCockpitJournalEntries(packageData).forEach((entry) => {
+      const item = document.createElement("span");
+      item.textContent = entry.time ? `${entry.time} · ${entry.event}` : entry.event;
+      journal.appendChild(item);
+    });
+
+    const competencies = document.createElement("div");
+    competencies.className = "digital-shift-cockpit-competencies";
+    const competencyList = matrixRow?.competencies || packageData?.shiftCockpit?.rightPanel?.competencies || [];
+    competencyList.slice(0, compact ? 4 : 7).forEach((competency) => {
+      const chip = document.createElement("span");
+      chip.textContent = competency;
+      competencies.appendChild(chip);
+    });
+
+    panel.append(head, details);
+    if (journal.children.length) {
+      panel.appendChild(journal);
+    }
+    if (competencies.children.length) {
+      panel.appendChild(competencies);
+    }
+    return panel;
+  }
+
   function renderDigitalShiftCockpit(packageData, compact = false) {
     const cockpit = packageData?.shiftCockpit;
     const activeFamilyId = ensureActiveCockpitFamily(packageData);
+    const activeStep = activeCockpitStep(packageData);
     const panel = document.createElement("section");
     panel.className = compact ? "digital-shift-cockpit is-compact" : "digital-shift-cockpit";
     if (!cockpit) {
@@ -724,6 +834,7 @@
       const chip = document.createElement("span");
       chip.dataset.zone = zone.zone || "";
       chip.textContent = zone.title || zone.zone || "";
+      chip.classList.toggle("is-active", zone.zone === activeStep?.cockpitZone);
       zones.appendChild(chip);
     });
 
@@ -733,6 +844,9 @@
       const item = document.createElement("li");
       item.dataset.family = step.familyId || "";
       item.classList.toggle("is-active", step.familyId === activeFamilyId);
+      if (step.familyId === activeFamilyId) {
+        item.setAttribute("aria-current", "step");
+      }
       const number = document.createElement("span");
       number.textContent = String(step.step || "").padStart(2, "0");
       const copy = document.createElement("div");
@@ -761,6 +875,7 @@
       });
       panel.appendChild(signals);
     }
+    panel.appendChild(renderCockpitFocus(packageData, compact));
     panel.appendChild(timeline);
     return panel;
   }
