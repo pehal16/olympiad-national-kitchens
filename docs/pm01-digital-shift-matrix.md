@@ -54,6 +54,7 @@ Working programs, calendar-thematic plans, and local assessment materials are ex
 - The official score remains `100`.
 - The new training module is `PX Цифровая смена`.
 - Current implementation reuses already accepted PM01 visual assets.
+- Teacher-facing approval packages are available in `docs/pm01-digital-shift-approval-packages.md` and on `/pm01-approval.html`.
 - New generated final assets should be added only after teacher review of the per-shop prompt package.
 
 ## Approval Workflow

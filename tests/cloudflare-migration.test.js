@@ -11,6 +11,7 @@ test("Cloudflare deployment contract exposes Pages, D1, and voice storage pieces
   const worker = fs.readFileSync(path.join(root, "src", "cloudflare", "worker.js"), "utf8");
   const store = fs.readFileSync(path.join(root, "src", "cloudflare-store.js"), "utf8");
   const workflow = fs.readFileSync(path.join(root, ".github", "workflows", "deploy-cloudflare.yml"), "utf8");
+  const verifier = fs.readFileSync(path.join(root, "scripts", "verify-pm01-production.js"), "utf8");
   const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 
   assert.match(wrangler, /pages_build_output_dir = "dist-cloudflare"/);
@@ -25,6 +26,9 @@ test("Cloudflare deployment contract exposes Pages, D1, and voice storage pieces
   assert.match(store, /audio_base64/);
   assert.match(store, /pm01-voice\/\$\{encodeURIComponent\(meta\.attemptId\)\}/);
   assert.match(workflow, /wrangler pages deploy dist-cloudflare/);
+  assert.match(verifier, /digitalShift/);
+  assert.match(verifier, /\/pm01-approval\.html/);
+  assert.match(verifier, /\/pm01-approval\.js/);
   assert.equal(packageJson.scripts["build:cloudflare"], "node scripts/build-cloudflare-pages.js");
   assert.equal(packageJson.scripts["cloudflare:export"], "node scripts/export-cloudflare-migration.js");
   assert.equal(packageJson.scripts["cloudflare:import"], "node scripts/import-cloudflare-migration.js");

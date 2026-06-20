@@ -387,6 +387,12 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   const uiHtml = fs.readFileSync(path.join(__dirname, "..", "public", "pm01.html"), "utf8");
   const adminScript = fs.readFileSync(path.join(__dirname, "..", "public", "pm01-admin.js"), "utf8");
   const adminHtml = fs.readFileSync(path.join(__dirname, "..", "public", "pm01-admin.html"), "utf8");
+  const approvalHtml = fs.readFileSync(path.join(__dirname, "..", "public", "pm01-approval.html"), "utf8");
+  const approvalScript = fs.readFileSync(path.join(__dirname, "..", "public", "pm01-approval.js"), "utf8");
+  const approvalDoc = fs.readFileSync(
+    path.join(__dirname, "..", "docs", "pm01-digital-shift-approval-packages.md"),
+    "utf8"
+  );
   const meat = buildPm01Variant(getPm01Exam(), "meat", { seed: "ui-guides-meat" });
   const prompts = meat.questions.map((question) => question.prompt).join("\n");
 
@@ -450,8 +456,24 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(uiStyles.includes(".module-step.is-practice"), true);
   assert.equal(uiStyles.includes(".bucket-mode-storage-marking"), true);
   assert.equal(uiStyles.includes(".sequence-mode-production-timeline"), true);
+  assert.equal(uiStyles.includes(".approval-shell"), true);
+  assert.equal(uiStyles.includes(".approval-package"), true);
+  assert.equal(uiStyles.includes(".approval-task-row"), true);
   assert.equal(uiStyles.includes(".quality-card"), true);
   assert.equal(uiStyles.includes("@keyframes qualityScan"), true);
+  assert.equal(adminHtml.includes("/pm01-approval.html"), true);
+  assert.equal(approvalHtml.includes("id=\"approval-packages-list\""), true);
+  assert.equal(approvalHtml.includes("Согласование PX"), true);
+  assert.equal(approvalHtml.includes("/pm01-approval.js?v=1.0.0"), true);
+  assert.equal(approvalScript.includes("/api/pm01/public/exam"), true);
+  assert.equal(approvalScript.includes("copyPromptPackage"), true);
+  assert.equal(approvalScript.includes("Черновик до РП"), true);
+  ["Овощной цех", "Рыбный цех", "Мясной цех", "Птица, дичь, кролик", "Комплексный заказ"].forEach((text) => {
+    assert.equal(approvalDoc.includes(text), true, `approval doc includes ${text}`);
+  });
+  ["Контроль качества партии", "Расследование нарушения", "Технологический таймлайн", "Маркировка и хранение", "Сборка заказа"].forEach((text) => {
+    assert.equal(approvalDoc.includes(text), true, `approval doc includes ${text}`);
+  });
   assert.equal(adminHtml.includes("id=\"filtered-summary\""), true);
   assert.equal(adminHtml.includes("id=\"module-overview\""), true);
   assert.equal(adminScript.includes("renderGradeOverview"), true);
@@ -1106,7 +1128,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(studentScript, /retryDelay/);
   assert.match(studentScript, /X-PM01-Duration-Ms/);
   assert.doesNotMatch(studentScript, /readAsDataURL\(blob\)/);
-  assert.match(studentHtml, /pm01\.css\?v=1\.0\.20/);
+  assert.match(studentHtml, /pm01\.css\?v=1\.0\.21/);
   assert.match(studentHtml, /loadPm01Script/);
   assert.match(studentHtml, /pm01\.js\?v=1\.0\.23/);
   assert.match(adminHtml, /export-group-csv/);
@@ -1120,7 +1142,8 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(adminScript, /api\/admin\/pm01\/exports\/group-csv\/download/);
   assert.match(adminScript, /voiceAudio/);
   assert.match(adminScript, /audioInfo\.audioUrl/);
-  assert.match(adminHtml, /pm01\.css\?v=1\.0\.20/);
+  assert.match(adminHtml, /pm01\.css\?v=1\.0\.21/);
+  assert.match(adminHtml, /pm01-approval\.html/);
   assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.18/);
   assert.match(css, /\.voice-queue-list/);
   assert.match(css, /\.voice-quick-review/);

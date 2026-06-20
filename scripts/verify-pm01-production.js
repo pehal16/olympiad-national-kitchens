@@ -52,11 +52,14 @@ async function main() {
   assert(exam.payload?.data?.variants?.length === 5, "PM01 public exam must expose 5 variants");
   assert(exam.payload?.data?.modules?.length === 5, "PM01 public exam must expose 5 modules");
   assert(exam.payload?.data?.assetRegistry?.workshops?.vegetables, "PM01 asset registry is missing workshop images");
+  assert(exam.payload?.data?.digitalShift?.mode === "training_extension", "PM01 digital shift package is missing");
+  assert(exam.payload?.data?.digitalShift?.packages?.length === 5, "PM01 digital shift must expose 5 shop packages");
   checks.push({
     route: "/api/pm01/public/exam",
     status: exam.response.status,
     variants: exam.payload.data.variants.length,
-    modules: exam.payload.data.modules.length
+    modules: exam.payload.data.modules.length,
+    digitalShiftPackages: exam.payload.data.digitalShift.packages.length
   });
 
   const student = await getText("/pm01.html");
@@ -68,6 +71,12 @@ async function main() {
   assert(admin.response.ok, `/pm01-admin.html returned ${admin.response.status}`);
   assert(admin.text.includes("/pm01-admin.js"), "/pm01-admin.html does not include admin JS");
   checks.push({ route: "/pm01-admin.html", status: admin.response.status, bytes: admin.text.length });
+
+  const approval = await getText("/pm01-approval.html");
+  assert(approval.response.ok, `/pm01-approval.html returned ${approval.response.status}`);
+  assert(approval.text.includes("/pm01-approval.js"), "/pm01-approval.html does not include approval JS");
+  assert(approval.text.includes("Согласование PX"), "/pm01-approval.html does not include approval title");
+  checks.push({ route: "/pm01-approval.html", status: approval.response.status, bytes: approval.text.length });
 
   console.log(
     JSON.stringify(

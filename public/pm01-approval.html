@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#123f35" />
+    <title>ПМ.01 · Согласование цифровой смены</title>
+    <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
+    <link rel="stylesheet" href="/pm01.css?v=1.0.21" />
+  </head>
+  <body>
+    <header class="pm01-topbar">
+      <div class="pm01-brand">
+        <span class="brand-mark" aria-hidden="true">ПМ</span>
+        <div>
+          <strong>Согласование PX</strong>
+          <span>Цифровая производственная смена</span>
+        </div>
+      </div>
+      <div class="top-status" aria-live="polite">
+        <span id="approval-version">PM01</span>
+        <span id="approval-packages">5 цехов</span>
+        <span id="approval-status">загрузка</span>
+      </div>
+      <nav class="top-actions" aria-label="PM01 approval">
+        <a href="/pm01.html" class="button ghost">Студент</a>
+        <a href="/pm01-admin.html" class="button ghost">Кабинет</a>
+      </nav>
+    </header>
+
+    <main class="approval-shell">
+      <section class="approval-hero">
+        <div>
+          <p class="overline">Перед генерацией финальных assets</p>
+          <h1>Пакеты согласования PM01</h1>
+          <p class="lead">
+            Этот экран фиксирует темы, задания, промпты изображений, критерии и объяснение современности по каждому
+            цеху. Официальный экзамен остается 100 баллов и 20 заданий; PX включается только в тренировке.
+          </p>
+        </div>
+        <div class="approval-contract" aria-label="Контракт">
+          <strong>Официальный контур</strong>
+          <span>20 заданий</span>
+          <span>100 баллов</span>
+          <span>5 вариантов</span>
+          <span>PX: 0 баллов</span>
+        </div>
+      </section>
+
+      <section id="approval-summary" class="approval-summary-grid" aria-label="Сводка согласования"></section>
+
+      <section class="approval-layout">
+        <aside class="approval-panel">
+          <p class="overline">Нормативная рамка</p>
+          <h2>Что подтверждаем</h2>
+          <ul class="approval-source-list">
+            <li>ФГОС 43.01.09: ПК 1.1-ПК 1.4, ОК 01, ОК 02, ОК 07, ОК 09, ОК 10.</li>
+            <li>ФГОС 43.02.15 используется как расширенная методическая опора для сложного ассортимента.</li>
+            <li>ИРПО/ФИРПО и РП уточняют локальную формулировку тем перед финальной заменой официальных вопросов.</li>
+          </ul>
+          <div id="approval-families" class="approval-family-list"></div>
+        </aside>
+
+        <section id="approval-packages-list" class="approval-packages-list" aria-label="Пакеты по цехам">
+          <div class="approval-empty">Загружаю пакеты цифровой смены...</div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/pm01-approval.js?v=1.0.0"></script>
+  </body>
+</html>
