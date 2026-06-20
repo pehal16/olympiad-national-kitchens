@@ -145,7 +145,8 @@
     progressFill: document.getElementById("progress-fill"),
     resultTitle: document.getElementById("result-title"),
     resultSubtitle: document.getElementById("result-subtitle"),
-    resultModules: document.getElementById("result-modules")
+    resultModules: document.getElementById("result-modules"),
+    resultDigitalShift: document.getElementById("result-digital-shift")
   };
 
   function readResumeRecord() {
@@ -632,9 +633,13 @@
     return (state.exam?.variants || []).find((variant) => variant.id === state.selectedVariantId) || null;
   }
 
+  function digitalShiftPackageForVariant(variantId) {
+    return (state.exam?.digitalShift?.packages || []).find((item) => item.variantId === variantId) || null;
+  }
+
   function selectedDigitalShiftPackage() {
     const variantId = state.attempt?.selectedVariantId || state.selectedVariantId;
-    return (state.exam?.digitalShift?.packages || []).find((item) => item.variantId === variantId) || null;
+    return digitalShiftPackageForVariant(variantId);
   }
 
   function digitalShiftFamily(familyId) {
@@ -695,11 +700,29 @@
     saveDigitalShiftProgress();
   }
 
+  function completeAnsweredPracticeFamily(question) {
+    if ((state.attempt?.mode || "exam") !== "training" || !question?.practiceOnly || !question.practiceFamily) {
+      return;
+    }
+    const packageData = digitalShiftPackageForVariant(question.variantId || state.attempt?.selectedVariantId || state.selectedVariantId);
+    setCockpitFamilyComplete(packageData, question.practiceFamily, true);
+  }
+
   function refreshDigitalShiftViews() {
     renderTrainingLab();
     if (state.attempt) {
       renderReferencePanel();
     }
+  }
+
+  function answeredPracticeFamiliesForAttempt() {
+    const answered = new Set();
+    (state.attempt?.route?.questions || []).forEach((question) => {
+      if (question.practiceOnly && question.practiceFamily && question.savedAnswer && !question.savedAnswer.skipped) {
+        answered.add(question.practiceFamily);
+      }
+    });
+    return answered;
   }
 
   function ensureActiveCockpitFamily(packageData) {
@@ -2542,6 +2565,85 @@
     refreshTimer();
   }
 
+  function renderDigitalShiftResultSummary() {
+    if (!elements.resultDigitalShift) {
+      return;
+    }
+    const packageData = state.attempt?.mode === "training" ? selectedDigitalShiftPackage() : null;
+    elements.resultDigitalShift.innerHTML = "";
+    elements.resultDigitalShift.classList.toggle("hidden", !packageData);
+    if (!packageData) {
+      return;
+    }
+
+    const progress = digitalShiftProgressFor(packageData);
+    const answeredFamilies = answeredPracticeFamiliesForAttempt();
+    const familyIds = cockpitFamilyIds(packageData);
+
+    const head = document.createElement("div");
+    head.className = "result-digital-shift-head";
+    const copy = document.createElement("div");
+    const overline = document.createElement("p");
+    overline.className = "overline";
+    overline.textContent = "PX · цифровая смена";
+    const title = document.createElement("h3");
+    title.textContent = packageData.title;
+    const note = document.createElement("p");
+    note.textContent = "Тренировочный журнал: не входит в официальный балл, ведомость и протокол.";
+    copy.append(overline, title, note);
+
+    const badge = document.createElement("strong");
+    badge.textContent = `${progress.done}/${progress.total || 0} этапов · ${answeredFamilies.size}/${familyIds.length || 0} тренажёров`;
+    head.append(copy, badge);
+
+    const meters = document.createElement("div");
+    meters.className = "result-digital-shift-meters";
+    [
+      ["Практика", answeredFamilies.size, familyIds.length || 0],
+      ["Cockpit", progress.done, progress.total || 0],
+      ["Баллы", 0, 0]
+    ].forEach(([labelText, done, total]) => {
+      const item = document.createElement("article");
+      const label = document.createElement("span");
+      label.textContent = labelText;
+      const value = document.createElement("strong");
+      value.textContent = total ? `${done}/${total}` : "0 баллов";
+      const bar = document.createElement("div");
+      bar.className = "score-mini-bar accent-blue";
+      const fill = document.createElement("span");
+      fill.style.width = total ? `${Math.round((done / total) * 100)}%` : "0%";
+      bar.appendChild(fill);
+      item.append(label, value, bar);
+      meters.appendChild(item);
+    });
+
+    const list = document.createElement("div");
+    list.className = "result-digital-shift-list";
+    (packageData.tasks || []).forEach((task, index) => {
+      const family = digitalShiftFamily(task.familyId);
+      const reviewed = isCockpitFamilyComplete(packageData, task.familyId);
+      const answered = answeredFamilies.has(task.familyId);
+      const row = document.createElement("article");
+      row.dataset.status = reviewed ? "reviewed" : answered ? "answered" : "pending";
+      const number = document.createElement("span");
+      number.textContent = String(index + 1).padStart(2, "0");
+      const text = document.createElement("div");
+      const titleText = document.createElement("strong");
+      titleText.textContent = family?.title || task.familyTitle || task.title;
+      const detail = document.createElement("small");
+      detail.textContent = answered
+        ? "тренажёр выполнен; этап закрыт в учебном журнале"
+        : reviewed
+          ? "этап разобран вручную в cockpit"
+          : "можно вернуться в тренировке";
+      text.append(titleText, detail);
+      row.append(number, text);
+      list.appendChild(row);
+    });
+
+    elements.resultDigitalShift.append(head, meters, list);
+  }
+
   function renderResult() {
     setScreens("result");
     const summary = state.attempt.summary;
@@ -2574,6 +2676,7 @@
       node.append(title, score, bar, detail);
       elements.resultModules.appendChild(node);
     });
+    renderDigitalShiftResultSummary();
     refreshTopbar();
   }
 
@@ -2707,6 +2810,9 @@
           answerPayload
         })
       });
+      if (answerIsValid && !answerPayload.skipped) {
+        completeAnsweredPracticeFamily(currentQuestion);
+      }
       renderAttempt(attempt);
     } catch (error) {
       setSaveStatus("ошибка");

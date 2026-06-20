@@ -3653,6 +3653,145 @@ button.module-step:focus-visible {
   line-height: 1.35;
 }
 
+.result-digital-shift {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  scroll-margin-top: 104px;
+  padding: 16px;
+  border: 1px solid rgba(35, 107, 181, 0.24);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(35, 107, 181, 0.08), rgba(28, 117, 93, 0.06)),
+    #fff;
+}
+
+.result-digital-shift.hidden {
+  display: none;
+}
+
+.result-digital-shift-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.result-digital-shift-head h3,
+.result-digital-shift-head p {
+  margin-bottom: 0;
+}
+
+.result-digital-shift-head h3 {
+  color: var(--green-900);
+  font-size: 20px;
+}
+
+.result-digital-shift-head p {
+  color: var(--muted);
+  line-height: 1.42;
+}
+
+.result-digital-shift-head > strong {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  color: #174a82;
+  background: #eef5ff;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.result-digital-shift-meters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.result-digital-shift-meters article {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.result-digital-shift-meters span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.result-digital-shift-meters strong {
+  color: var(--green-900);
+  font-size: 16px;
+}
+
+.result-digital-shift-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.result-digital-shift-list article {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.result-digital-shift-list article[data-status="reviewed"] {
+  border-color: rgba(28, 117, 93, 0.28);
+  background: #f7fbf9;
+}
+
+.result-digital-shift-list article[data-status="answered"] {
+  border-color: rgba(35, 107, 181, 0.28);
+  background: #f8fbff;
+}
+
+.result-digital-shift-list article > span {
+  width: 26px;
+  height: 26px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #fff;
+  background: var(--green-900);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.result-digital-shift-list strong,
+.result-digital-shift-list small {
+  display: block;
+  min-width: 0;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.result-digital-shift-list strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.result-digital-shift-list small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
 .result-actions {
   justify-content: flex-end;
   gap: 10px;
@@ -4872,6 +5011,9 @@ tr[data-attempt-id].is-selected {
   .cut-target-grid,
   .calc-grid,
   .result-modules,
+  .result-digital-shift-head,
+  .result-digital-shift-meters,
+  .result-digital-shift-list,
   .admin-stat-grid,
   .grade-overview,
     .teacher-control-grid,
@@ -4896,6 +5038,10 @@ tr[data-attempt-id].is-selected {
 
   .digital-shift-head {
     grid-template-columns: 1fr;
+  }
+
+  .result-digital-shift {
+    scroll-margin-top: 380px;
   }
 
   .digital-shift-badge {
