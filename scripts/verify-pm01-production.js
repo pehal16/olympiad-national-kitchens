@@ -55,6 +55,10 @@ async function main() {
   assert(exam.payload?.data?.digitalShift?.mode === "training_extension", "PM01 digital shift package is missing");
   assert(exam.payload?.data?.digitalShift?.packages?.length === 5, "PM01 digital shift must expose 5 shop packages");
   assert(
+    exam.payload?.data?.digitalShift?.normativeAnchors?.length === 4,
+    "PM01 digital shift must expose 4 normative anchors"
+  );
+  assert(
     exam.payload?.data?.digitalShift?.interactionBlueprints?.length === 5,
     "PM01 digital shift must expose 5 interaction blueprints"
   );
@@ -76,6 +80,7 @@ async function main() {
     status: exam.response.status,
     variants: exam.payload.data.variants.length,
     modules: exam.payload.data.modules.length,
+    digitalShiftNormativeAnchors: exam.payload.data.digitalShift.normativeAnchors.length,
     digitalShiftInteractionBlueprints: exam.payload.data.digitalShift.interactionBlueprints.length,
     digitalShiftPackages: exam.payload.data.digitalShift.packages.length,
     digitalShiftPreviewAssets: previewAssets.length,
@@ -94,8 +99,8 @@ async function main() {
 
   const approval = await getText("/pm01-approval.html");
   assert(approval.response.ok, `/pm01-approval.html returned ${approval.response.status}`);
-  assert(approval.text.includes("/pm01.css?v=1.0.26"), "/pm01-approval.html does not include current CSS");
-  assert(approval.text.includes("/pm01-approval.js?v=1.0.4"), "/pm01-approval.html does not include current approval JS");
+  assert(approval.text.includes("/pm01.css?v=1.0.27"), "/pm01-approval.html does not include current CSS");
+  assert(approval.text.includes("/pm01-approval.js?v=1.0.5"), "/pm01-approval.html does not include current approval JS");
   assert(approval.text.includes("Согласование PX"), "/pm01-approval.html does not include approval title");
   checks.push({ route: "/pm01-approval.html", status: approval.response.status, bytes: approval.text.length });
 

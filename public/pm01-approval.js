@@ -162,6 +162,40 @@
     });
   }
 
+  function renderNormativeAnchors(anchors) {
+    const section = createNode("section", "approval-normative-panel");
+    const heading = createNode("div", "approval-normative-head");
+    heading.append(
+      createNode("h3", "", "Нормативная опора"),
+      createNode("span", "", "Проверенные источники, роль в PM01 и gate перед финальными правками")
+    );
+    const list = createNode("div", "approval-normative-list");
+    anchors.forEach((anchor) => {
+      const card = createNode("article", "approval-normative-card");
+      card.dataset.sourceStatus = anchor.sourceStatus || "source";
+      const title = createNode(anchor.sourceUrl ? "a" : "strong", "", anchor.title);
+      if (anchor.sourceUrl) {
+        title.href = anchor.sourceUrl;
+        title.target = "_blank";
+        title.rel = "noreferrer";
+      }
+      card.append(
+        title,
+        createNode("small", "", anchor.documentStatus || ""),
+        createNode("p", "", anchor.relevance || ""),
+        createNode("em", "", (anchor.focus || []).join(" · ")),
+        createNode("span", "", anchor.approvalUse || ""),
+        createNode("code", "", `${anchor.sourceStatus || "source"} · checked ${anchor.verifiedAt || "n/a"}`)
+      );
+      list.appendChild(card);
+    });
+    const copyButton = createNode("button", "button secondary", "Копировать источники");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyNormativeAnchors(anchors, copyButton));
+    section.append(heading, list, copyButton);
+    return section;
+  }
+
   function renderInteractionBlueprints(blueprints) {
     const section = createNode("section", "approval-blueprint-panel");
     const heading = createNode("div", "approval-blueprint-head");
@@ -189,8 +223,11 @@
     return section;
   }
 
-  function renderFamilies(families, blueprints = []) {
+  function renderFamilies(families, blueprints = [], anchors = []) {
     elements.families.innerHTML = "";
+    if (anchors.length) {
+      elements.families.appendChild(renderNormativeAnchors(anchors));
+    }
     const heading = createNode("h3", "", "Семейства заданий");
     const list = createNode("div", "approval-family-stack");
     families.forEach((family) => {
@@ -212,6 +249,38 @@
     const list = createNode("ul", className);
     items.forEach((item) => list.appendChild(createNode("li", "", item)));
     return list;
+  }
+
+  async function copyNormativeAnchors(anchors, button) {
+    const text = [
+      "PM01 PX normativeAnchors:",
+      ...anchors.map((anchor, index) =>
+        [
+          `- row: ${index + 1}`,
+          `  id: ${anchor.id}`,
+          `  title: ${anchor.title}`,
+          `  sourceUrl: ${anchor.sourceUrl || "-"}`,
+          `  sourceStatus: ${anchor.sourceStatus}`,
+          `  documentStatus: ${anchor.documentStatus}`,
+          `  verifiedAt: ${anchor.verifiedAt}`,
+          `  focus: ${(anchor.focus || []).join(", ")}`,
+          `  relevance: ${anchor.relevance}`,
+          `  approvalUse: ${anchor.approvalUse}`
+        ].join("\n")
+      )
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = "Источники скопированы";
+      window.setTimeout(() => {
+        button.textContent = "Копировать источники";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Копировать источники";
+      }, 1600);
+    }
   }
 
   async function copyInteractionBlueprints(blueprints, button) {
@@ -594,7 +663,11 @@
       elements.packages.textContent = `${digitalShift.packages.length} цехов`;
       elements.status.textContent = "готово";
       renderSummary(exam, digitalShift);
-      renderFamilies(digitalShift.families || [], digitalShift.interactionBlueprints || []);
+      renderFamilies(
+        digitalShift.families || [],
+        digitalShift.interactionBlueprints || [],
+        digitalShift.normativeAnchors || []
+      );
       renderPackages(digitalShift);
     } catch (error) {
       elements.status.textContent = "ошибка";

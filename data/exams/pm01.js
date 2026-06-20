@@ -2077,6 +2077,57 @@ const pm01DigitalShiftInteractionBlueprints = [
   }
 ];
 
+const pm01DigitalShiftNormativeAnchors = [
+  {
+    id: "fgos-43-01-09",
+    title: "ФГОС СПО 43.01.09 Повар, кондитер",
+    sourceUrl: "https://fgos.ru/fgos/fgos-43-01-09-povar-konditer-1569/",
+    sourceStatus: "primary_standard",
+    documentStatus: "Приказ Минобрнауки России от 09.12.2016 N 1569, редакция от 17.12.2020",
+    verifiedAt: "2026-06-21",
+    relevance:
+      "Основная нормативная опора PM01: приготовление и подготовка к реализации полуфабрикатов для блюд и кулинарных изделий разнообразного ассортимента.",
+    focus: ["ПК 1.1-1.4", "ОК 01", "ОК 02", "ОК 07", "ОК 09", "ОК 10"],
+    approvalUse: "Проверять, что задания остаются производственными: сырье, полуфабрикаты, рабочее место, безопасность, качество и хранение."
+  },
+  {
+    id: "fgos-43-02-15",
+    title: "ФГОС СПО 43.02.15 Поварское и кондитерское дело",
+    sourceUrl: "https://fgos.ru/fgos/fgos-43-02-15-povarskoe-i-konditerskoe-delo-1565/",
+    sourceStatus: "advanced_methodical_reference",
+    documentStatus: "Приказ Минобрнауки России от 09.12.2016 N 1565, редакция от 17.12.2020",
+    verifiedAt: "2026-06-21",
+    relevance:
+      "Расширенная методическая рамка для сложного ассортимента, организации процессов, анализа информации и профессиональной документации.",
+    focus: ["ОК 01", "ОК 02", "ОК 07", "ОК 09", "ОК 10"],
+    approvalUse: "Использовать как ориентир для комплексного заказа, производственного журнала, цифрового cockpit и межцеховой логики."
+  },
+  {
+    id: "firpo-pop-43-01-09",
+    title: "ИРПО/ФИРПО: реестр ПОП СПО 43.01.09",
+    sourceUrl: "https://firpo.ru/2245",
+    sourceStatus: "approved_example_program_registry",
+    documentStatus: "ПОП СПО 43.01.09 Повар, кондитер; статус в реестре: утверждено",
+    verifiedAt: "2026-06-21",
+    relevance:
+      "Ориентир для сверки примерной программы и локальной рабочей программы перед финальным переписыванием тем.",
+    focus: ["ПООП/ПОП СПО", "РП", "КТП", "оценочные материалы"],
+    approvalUse: "После получения РП сверять формулировки тем и не подменять локальную программу общими словами."
+  },
+  {
+    id: "local-rp-pending",
+    title: "Рабочие программы, КТП и локальные оценочные материалы",
+    sourceUrl: "",
+    sourceStatus: "awaiting_teacher_files",
+    documentStatus: "Ожидаются от преподавателя до финального переписывания тем и официальных вопросов",
+    verifiedAt: "2026-06-21",
+    relevance:
+      "Решающая локальная опора для точных тем, формулировок, критериев и допустимого уровня сложности по каждому цеху.",
+    focus: ["темы РП", "формулировки заданий", "критерии проверки", "preview approval"],
+    approvalUse: "До получения РП сохранять текущие темы как черновые alignment targets и не менять официальный банк вслепую."
+  }
+];
+
 const pm01DigitalShiftVariantPackages = {
   vegetables: {
     title: "Овощной цех: цифровая смена нарезки и контроля",
@@ -2547,6 +2598,7 @@ module.exports.digitalShift = {
     "Официальный экзамен остается 100 баллов и 20 заданий. Расширение доступно только в тренировке и не влияет на итоговую ведомость.",
   rpStatus: "Рабочие программы будут подключены после предоставления преподавателем; сейчас матрица подготовлена под сверку.",
   conceptReference: "approved-preview-2026-06-20",
+  normativeAnchors: pm01DigitalShiftNormativeAnchors,
   families: pm01DigitalShiftFamilies,
   interactionBlueprints: pm01DigitalShiftInteractionBlueprints,
   packages: Object.entries(pm01DigitalShiftVariantPackages).map(([variantId, config]) => {

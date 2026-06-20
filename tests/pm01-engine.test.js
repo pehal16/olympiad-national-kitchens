@@ -464,15 +464,17 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(adminHtml.includes("/pm01-approval.html"), true);
   assert.equal(approvalHtml.includes("id=\"approval-packages-list\""), true);
   assert.equal(approvalHtml.includes("Согласование PX"), true);
-  assert.equal(approvalHtml.includes("/pm01-approval.js?v=1.0.4"), true);
+  assert.equal(approvalHtml.includes("/pm01-approval.js?v=1.0.5"), true);
   assert.equal(approvalScript.includes("/api/pm01/public/exam"), true);
   assert.equal(approvalScript.includes("copyPromptPackage"), true);
+  assert.equal(approvalScript.includes("copyNormativeAnchors"), true);
   assert.equal(approvalScript.includes("copyInteractionBlueprints"), true);
   assert.equal(approvalScript.includes("PM01_APPROVAL_STORAGE_KEY"), true);
   assert.equal(approvalScript.includes("PM01_RP_INTAKE_STORAGE_KEY"), true);
   assert.equal(approvalScript.includes("copyApprovalDecision"), true);
   assert.equal(approvalScript.includes("copyRpIntake"), true);
   assert.equal(approvalScript.includes("copyMethodicalMatrix"), true);
+  assert.equal(approvalScript.includes("renderNormativeAnchors"), true);
   assert.equal(approvalScript.includes("renderRpIntake"), true);
   assert.equal(approvalScript.includes("renderInteractionBlueprints"), true);
   assert.equal(approvalScript.includes("renderMethodicalMatrix"), true);
@@ -491,11 +493,14 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(uiStyles.includes(".approval-rp-actions"), true);
   assert.equal(uiStyles.includes(".approval-methodical-matrix"), true);
   assert.equal(uiStyles.includes(".approval-matrix-card"), true);
+  assert.equal(uiStyles.includes(".approval-normative-panel"), true);
+  assert.equal(uiStyles.includes(".approval-normative-card"), true);
   assert.equal(uiStyles.includes(".approval-blueprint-panel"), true);
   assert.equal(uiStyles.includes(".approval-blueprint-card"), true);
   assert.equal(approvalDoc.includes("Asset-пайплайн"), true);
   assert.equal(approvalDoc.includes("Интерфейс согласования"), true);
   assert.equal(approvalDoc.includes("RP-intake"), true);
+  assert.equal(approvalDoc.includes("Нормативные anchors"), true);
   assert.equal(approvalDoc.includes("Методическая матрица"), true);
   assert.equal(approvalDoc.includes("Интерактивный storyboard"), true);
   assert.equal(approvalScript.includes("Черновик до РП"), true);
@@ -858,6 +863,44 @@ test("PM01 digital shift extension is training-only and keeps official scoring s
 
   assert.equal(publicData.digitalShift.mode, "training_extension");
   assert.equal(publicData.digitalShift.families.length, 5);
+  assert.equal(publicData.digitalShift.normativeAnchors.length, 4);
+  assert.equal(
+    publicData.digitalShift.normativeAnchors.every(
+      (anchor) =>
+        anchor.id &&
+        anchor.title &&
+        anchor.sourceStatus &&
+        anchor.documentStatus &&
+        anchor.verifiedAt === "2026-06-21" &&
+        anchor.relevance &&
+        Array.isArray(anchor.focus) &&
+        anchor.focus.length >= 2 &&
+        anchor.approvalUse
+    ),
+    true
+  );
+  assert.equal(
+    publicData.digitalShift.normativeAnchors.some(
+      (anchor) => anchor.id === "fgos-43-01-09" && anchor.sourceUrl === "https://fgos.ru/fgos/fgos-43-01-09-povar-konditer-1569/"
+    ),
+    true
+  );
+  assert.equal(
+    publicData.digitalShift.normativeAnchors.some(
+      (anchor) =>
+        anchor.id === "fgos-43-02-15" &&
+        anchor.sourceUrl === "https://fgos.ru/fgos/fgos-43-02-15-povarskoe-i-konditerskoe-delo-1565/"
+    ),
+    true
+  );
+  assert.equal(
+    publicData.digitalShift.normativeAnchors.some((anchor) => anchor.id === "firpo-pop-43-01-09" && anchor.sourceUrl === "https://firpo.ru/2245"),
+    true
+  );
+  assert.equal(
+    publicData.digitalShift.normativeAnchors.some((anchor) => anchor.id === "local-rp-pending" && anchor.sourceStatus === "awaiting_teacher_files"),
+    true
+  );
   assert.equal(publicData.digitalShift.interactionBlueprints.length, 5);
   assert.equal(
     publicData.digitalShift.interactionBlueprints.every(
@@ -1216,7 +1259,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(studentScript, /retryDelay/);
   assert.match(studentScript, /X-PM01-Duration-Ms/);
   assert.doesNotMatch(studentScript, /readAsDataURL\(blob\)/);
-  assert.match(studentHtml, /pm01\.css\?v=1\.0\.26/);
+  assert.match(studentHtml, /pm01\.css\?v=1\.0\.27/);
   assert.match(studentHtml, /loadPm01Script/);
   assert.match(studentHtml, /pm01\.js\?v=1\.0\.23/);
   assert.match(adminHtml, /export-group-csv/);
@@ -1230,7 +1273,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(adminScript, /api\/admin\/pm01\/exports\/group-csv\/download/);
   assert.match(adminScript, /voiceAudio/);
   assert.match(adminScript, /audioInfo\.audioUrl/);
-  assert.match(adminHtml, /pm01\.css\?v=1\.0\.26/);
+  assert.match(adminHtml, /pm01\.css\?v=1\.0\.27/);
   assert.match(adminHtml, /pm01-approval\.html/);
   assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.18/);
   assert.match(css, /\.voice-queue-list/);

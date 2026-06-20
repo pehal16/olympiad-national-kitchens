@@ -54,6 +54,7 @@ Working programs, calendar-thematic plans, and local assessment materials are ex
 - The official score remains `100`.
 - The new training module is `PX Цифровая смена`.
 - Current implementation reuses already accepted PM01 visual assets.
+- The digital-shift package exposes four `normativeAnchors`: ФГОС 43.01.09, ФГОС 43.02.15, FIRPO POP 43.01.09, and the pending local RP/KTP gate.
 - Teacher-facing approval packages are available in `docs/pm01-digital-shift-approval-packages.md` and on `/pm01-approval.html`.
 - Each package exposes two planned `previewAssets` with `targetPath`, `negativePrompt`, `status: awaiting_preview`, and `finalAsset: false`.
 - Each package exposes five `methodicalMatrix` rows: RP topic placeholder, ПК/ОК, PX module, current task wording, new format, planned asset target, check criterion, and approval gate.
