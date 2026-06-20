@@ -55,7 +55,9 @@ async function main() {
   assert(exam.payload?.data?.digitalShift?.mode === "training_extension", "PM01 digital shift package is missing");
   assert(exam.payload?.data?.digitalShift?.packages?.length === 5, "PM01 digital shift must expose 5 shop packages");
   const previewAssets = exam.payload.data.digitalShift.packages.flatMap((packageData) => packageData.previewAssets || []);
+  const matrixRows = exam.payload.data.digitalShift.packages.flatMap((packageData) => packageData.methodicalMatrix || []);
   assert(previewAssets.length === 10, "PM01 digital shift must expose 10 planned preview assets");
+  assert(matrixRows.length === 25, "PM01 digital shift must expose 25 methodical matrix rows");
   assert(
     previewAssets.every(
       (asset) =>
@@ -71,7 +73,8 @@ async function main() {
     variants: exam.payload.data.variants.length,
     modules: exam.payload.data.modules.length,
     digitalShiftPackages: exam.payload.data.digitalShift.packages.length,
-    digitalShiftPreviewAssets: previewAssets.length
+    digitalShiftPreviewAssets: previewAssets.length,
+    digitalShiftMatrixRows: matrixRows.length
   });
 
   const student = await getText("/pm01.html");
@@ -86,8 +89,8 @@ async function main() {
 
   const approval = await getText("/pm01-approval.html");
   assert(approval.response.ok, `/pm01-approval.html returned ${approval.response.status}`);
-  assert(approval.text.includes("/pm01.css?v=1.0.24"), "/pm01-approval.html does not include current CSS");
-  assert(approval.text.includes("/pm01-approval.js?v=1.0.2"), "/pm01-approval.html does not include current approval JS");
+  assert(approval.text.includes("/pm01.css?v=1.0.25"), "/pm01-approval.html does not include current CSS");
+  assert(approval.text.includes("/pm01-approval.js?v=1.0.3"), "/pm01-approval.html does not include current approval JS");
   assert(approval.text.includes("Согласование PX"), "/pm01-approval.html does not include approval title");
   checks.push({ route: "/pm01-approval.html", status: approval.response.status, bytes: approval.text.length });
 

@@ -2232,6 +2232,65 @@ function buildDigitalShiftPreviewAssets(variantId, config) {
   });
 }
 
+const pm01DigitalShiftMethodicalMeta = {
+  quality_control: {
+    competencies: ["ПК 1.1", "ПК 1.2", "ОК 01", "ОК 02", "ОК 07"],
+    checkCriterion: "Решение по партии обосновано визуальными признаками качества, условиями допуска и риском для смены.",
+    visualKind: "control-detail"
+  },
+  shift_investigation: {
+    competencies: ["ПК 1.1", "ПК 1.2", "ОК 01", "ОК 02", "ОК 07"],
+    checkCriterion: "Студент находит источник нарушения и объясняет безопасное корректирующее действие.",
+    visualKind: "scene"
+  },
+  production_timeline: {
+    competencies: ["ПК 1.1", "ПК 1.3", "ОК 01", "ОК 02"],
+    checkCriterion: "Операции собраны в технологически допустимую последовательность с контрольными точками.",
+    visualKind: "scene"
+  },
+  storage_marking: {
+    competencies: ["ПК 1.1", "ПК 1.4", "ОК 01", "ОК 02", "ОК 07"],
+    checkCriterion: "Выбрано допустимое решение по таре, маркировке, температуре и товарному соседству.",
+    visualKind: "control-detail"
+  },
+  order_assembly: {
+    competencies: ["ПК 1.1", "ПК 1.2", "ПК 1.3", "ПК 1.4", "ОК 01", "ОК 02"],
+    checkCriterion: "Комплексный заказ собран как целостный маршрут от заявки до передачи партии.",
+    visualKind: "control-detail"
+  }
+};
+
+function buildDigitalShiftMethodicalMatrix(variantId, config, previewAssets) {
+  const familyMap = new Map(pm01DigitalShiftFamilies.map((family) => [family.id, family]));
+  const assetsByKind = new Map((previewAssets || []).map((asset) => [asset.kind, asset]));
+  return (config.tasks || []).map(([familyId, title], index) => {
+    const family = familyMap.get(familyId) || {};
+    const meta = pm01DigitalShiftMethodicalMeta[familyId] || {};
+    const visualAsset = assetsByKind.get(meta.visualKind) || previewAssets?.[0] || null;
+    return {
+      id: `${variantId}-${familyId}-matrix`,
+      familyId,
+      rpTopic: config.rpTopics[index % config.rpTopics.length],
+      competencies: meta.competencies || ["ПК 1.1", "ОК 01", "ОК 02"],
+      examModule: "PX Цифровая смена (training-only, 0 баллов)",
+      currentQuestion: title,
+      newFormat: family.title || familyId,
+      interaction: family.interaction || "",
+      visualAsset: visualAsset
+        ? {
+            id: visualAsset.id,
+            kind: visualAsset.kind,
+            targetPath: visualAsset.targetPath,
+            status: visualAsset.status,
+            finalAsset: visualAsset.finalAsset
+          }
+        : null,
+      checkCriterion: meta.checkCriterion || "Критерий уточняется после сверки с РП.",
+      approvalGate: "requires_rp_and_preview_approval"
+    };
+  });
+}
+
 function clonePm01Config(value) {
   return JSON.parse(JSON.stringify(value));
 }
@@ -2411,19 +2470,23 @@ module.exports.digitalShift = {
   rpStatus: "Рабочие программы будут подключены после предоставления преподавателем; сейчас матрица подготовлена под сверку.",
   conceptReference: "approved-preview-2026-06-20",
   families: pm01DigitalShiftFamilies,
-  packages: Object.entries(pm01DigitalShiftVariantPackages).map(([variantId, config]) => ({
-    variantId,
-    title: config.title,
-    rpTopics: config.rpTopics,
-    productionLog: config.productionLog,
-    visualPrompts: config.visualPrompts,
-    previewAssets: buildDigitalShiftPreviewAssets(variantId, config),
-    tasks: config.tasks.map(([familyId, title]) => ({
-      familyId,
-      title,
-      familyTitle: pm01DigitalShiftFamilies.find((family) => family.id === familyId)?.title || familyId
-    }))
-  }))
+  packages: Object.entries(pm01DigitalShiftVariantPackages).map(([variantId, config]) => {
+    const previewAssets = buildDigitalShiftPreviewAssets(variantId, config);
+    return {
+      variantId,
+      title: config.title,
+      rpTopics: config.rpTopics,
+      productionLog: config.productionLog,
+      visualPrompts: config.visualPrompts,
+      previewAssets,
+      methodicalMatrix: buildDigitalShiftMethodicalMatrix(variantId, config, previewAssets),
+      tasks: config.tasks.map(([familyId, title]) => ({
+        familyId,
+        title,
+        familyTitle: pm01DigitalShiftFamilies.find((family) => family.id === familyId)?.title || familyId
+      }))
+    };
+  })
 };
 
 module.exports.variants.forEach((variant) => {

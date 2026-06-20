@@ -270,6 +270,70 @@
     }
   }
 
+  async function copyMethodicalMatrix(packageData, button) {
+    const rows = packageData.methodicalMatrix || [];
+    const text = [
+      packageData.title,
+      "methodicalMatrix:",
+      ...rows.map((row, index) =>
+        [
+          `- row: ${index + 1}`,
+          `  family: ${row.familyId}`,
+          `  rpTopic: ${row.rpTopic}`,
+          `  competencies: ${(row.competencies || []).join(", ")}`,
+          `  examModule: ${row.examModule}`,
+          `  currentQuestion: ${row.currentQuestion}`,
+          `  newFormat: ${row.newFormat}`,
+          `  visualAsset: ${row.visualAsset?.targetPath || "-"}`,
+          `  checkCriterion: ${row.checkCriterion}`,
+          `  approvalGate: ${row.approvalGate}`
+        ].join("\n")
+      )
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = "Матрица скопирована";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать матрицу";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать матрицу";
+      }, 1600);
+    }
+  }
+
+  function renderMethodicalMatrix(packageData) {
+    const rows = packageData.methodicalMatrix || [];
+    const panel = createNode("section", "approval-package-block approval-methodical-matrix");
+    const head = createNode("div", "approval-matrix-head");
+    head.append(
+      createNode("h3", "", "Методическая матрица"),
+      createNode("span", "", "Тема РП, ПК/ОК, формат задания, planned asset и критерий проверки")
+    );
+    const grid = createNode("div", "approval-matrix-grid");
+    rows.forEach((row, index) => {
+      const card = createNode("article", "approval-matrix-card");
+      card.dataset.family = row.familyId;
+      card.append(
+        createNode("span", "approval-matrix-index", String(index + 1).padStart(2, "0")),
+        createNode("strong", "", row.newFormat || row.familyId),
+        createNode("small", "", row.rpTopic || "Тема РП уточняется"),
+        createNode("p", "", row.currentQuestion || ""),
+        createNode("em", "", (row.competencies || []).join(" · ")),
+        createNode("code", "", row.visualAsset?.targetPath || "asset после preview"),
+        createNode("p", "approval-matrix-criterion", row.checkCriterion || "")
+      );
+      grid.appendChild(card);
+    });
+    const copyButton = createNode("button", "button secondary", "Скопировать матрицу");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyMethodicalMatrix(packageData, copyButton));
+    panel.append(head, grid, copyButton);
+    return panel;
+  }
+
   function renderRpIntake(packageData) {
     const intake = getPackageRpIntake(packageData.variantId);
     const panel = createNode("section", "approval-package-block approval-rp-intake");
@@ -437,7 +501,7 @@
       )
     );
 
-    section.append(head, topics, renderRpIntake(packageData), tasks, log, prompts, assetPlan, renderDecisionControls(packageData), criteria);
+    section.append(head, topics, renderRpIntake(packageData), renderMethodicalMatrix(packageData), tasks, log, prompts, assetPlan, renderDecisionControls(packageData), criteria);
     return section;
   }
 
