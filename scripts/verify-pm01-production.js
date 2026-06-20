@@ -30,6 +30,40 @@ function assert(condition, message) {
   }
 }
 
+function findSensitivePublicKeys(value, path = "$", hits = []) {
+  const sensitiveKeys = new Set([
+    "acceptedRange",
+    "correctAnswer",
+    "correctBuckets",
+    "correctHotspots",
+    "correctIngredientIds",
+    "correctSequence",
+    "expected",
+    "hotspots",
+    "isCorrect",
+    "solutionSteps"
+  ]);
+
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => findSensitivePublicKeys(item, `${path}[${index}]`, hits));
+    return hits;
+  }
+
+  if (!value || typeof value !== "object") {
+    return hits;
+  }
+
+  Object.entries(value).forEach(([key, child]) => {
+    const childPath = `${path}.${key}`;
+    if (sensitiveKeys.has(key)) {
+      hits.push(childPath);
+    }
+    findSensitivePublicKeys(child, childPath, hits);
+  });
+
+  return hits;
+}
+
 async function main() {
   const checks = [];
 
@@ -49,6 +83,11 @@ async function main() {
   const exam = await getJson("/api/pm01/public/exam");
   assert(exam.response.ok, `/api/pm01/public/exam returned ${exam.response.status}`);
   assert(exam.payload?.ok === true, "/api/pm01/public/exam did not return ok=true");
+  const sensitiveKeyHits = findSensitivePublicKeys(exam.payload.data);
+  assert(
+    sensitiveKeyHits.length === 0,
+    `PM01 public exam exposes private answer keys: ${sensitiveKeyHits.join(", ")}`
+  );
   assert(exam.payload?.data?.variants?.length === 5, "PM01 public exam must expose 5 variants");
   assert(exam.payload?.data?.modules?.length === 5, "PM01 public exam must expose 5 modules");
   assert(exam.payload?.data?.assetRegistry?.workshops?.vegetables, "PM01 asset registry is missing workshop images");
@@ -115,7 +154,8 @@ async function main() {
     digitalShiftPackages: exam.payload.data.digitalShift.packages.length,
     digitalShiftPreviewAssets: previewAssets.length,
     digitalShiftCockpits: cockpitPlans.length,
-    digitalShiftMatrixRows: matrixRows.length
+    digitalShiftMatrixRows: matrixRows.length,
+    privateAnswerKeyFields: sensitiveKeyHits.length
   });
 
   const student = await getText("/pm01.html");

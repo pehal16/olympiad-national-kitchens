@@ -15,6 +15,40 @@ const {
   applyPm01VoiceReview
 } = require("../src/pm01-engine");
 
+function findSensitivePublicKeys(value, pathLabel = "$", hits = []) {
+  const sensitiveKeys = new Set([
+    "acceptedRange",
+    "correctAnswer",
+    "correctBuckets",
+    "correctHotspots",
+    "correctIngredientIds",
+    "correctSequence",
+    "expected",
+    "hotspots",
+    "isCorrect",
+    "solutionSteps"
+  ]);
+
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => findSensitivePublicKeys(item, `${pathLabel}[${index}]`, hits));
+    return hits;
+  }
+
+  if (!value || typeof value !== "object") {
+    return hits;
+  }
+
+  Object.entries(value).forEach(([key, child]) => {
+    const childPath = `${pathLabel}.${key}`;
+    if (sensitiveKeys.has(key)) {
+      hits.push(childPath);
+    }
+    findSensitivePublicKeys(child, childPath, hits);
+  });
+
+  return hits;
+}
+
 test("PM01 fixed variants keep the 100-point module contract", () => {
   const exam = getPm01Exam();
 
@@ -264,6 +298,7 @@ test("PM01 public data exposes asset registry without visual answer keys", () =>
   ];
 
   assert.equal(publicData.assetRegistry.workshops.vegetables.includes("vegetable-workshop.png"), true);
+  assert.deepEqual(findSensitivePublicKeys(publicData), []);
   assert.equal(publicData.assetRegistry.cutShapes.batonnet.endsWith("batonnet.png"), true);
   assert.equal(publicData.assetRegistry.cutShapes.slices.endsWith("slices.png"), true);
   assert.equal(publicData.programTitle.includes("ПМ.01"), true);
