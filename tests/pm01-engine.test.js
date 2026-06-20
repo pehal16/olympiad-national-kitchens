@@ -623,6 +623,7 @@ test("PM01 extended visual atlas exposes 50 generated cards safely", () => {
   extendedPaths.forEach((assetPath) => {
     const fullPath = path.join(__dirname, "..", "public", assetPath.replace(/^\//, ""));
     assert.equal(fs.existsSync(fullPath), true, `${assetPath} exists`);
+    assert.equal(fs.statSync(fullPath).size > 250_000, true, `${assetPath} is rebuilt as a photo card`);
   });
 });
 

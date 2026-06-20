@@ -488,10 +488,11 @@ const visualAtlas = [
     id: "extended-cuts",
     title: "Нарезки",
     items: [
-      { title: "Картофель пай", image: extendedVisualAssets.cuts.potatoShoestring, detail: "Тонкая соломка для жарки и гарниров." },
-      { title: "Конкассе", image: extendedVisualAssets.cuts.tomatoConcasse, detail: "Кубики томата без грубой кожицы и семян." },
-      { title: "Шашки капусты", image: extendedVisualAssets.cuts.cabbageCheckers, detail: "Крупная овощная нарезка для тепловой обработки." },
-      { title: "Полукружья", image: extendedVisualAssets.cuts.cucumberHalfMoons, detail: "Поперечная нарезка половины овоща." }
+      { title: "Allumette", image: vegetablePhotoCutAssets.potatoAllumette, detail: "Тонкие ровные палочки картофеля, близкие к учебной форме «соломка»." },
+      { title: "Brunoise", image: vegetablePhotoCutAssets.carrotBrunoise, detail: "Мелкие ровные кубики для соусов, начинок и аккуратной подачи." },
+      { title: "Macedoine", image: vegetablePhotoCutAssets.mixedMacedoine, detail: "Средние кубики одинаковой формы для салатов и гарниров." },
+      { title: "Paysanne", image: vegetablePhotoCutAssets.mixedPaysanne, detail: "Тонкие пластинки, повторяющие форму овоща." },
+      { title: "Rondelle", image: vegetablePhotoCutAssets.mixedRondelle, detail: "Поперечные кружочки цилиндрических овощей." }
     ]
   },
   {
@@ -509,7 +510,7 @@ const visualAtlas = [
     id: "extended-fish",
     title: "Рыба",
     items: [
-      { title: "Стейк", image: extendedVisualAssets.fish.fishSteakCrosscut, detail: "Поперечный порционный кусок рыбы." },
+      { title: "Порционные куски", image: extendedVisualAssets.fish.fishSteakCrosscut, detail: "Ровные куски рыбного филе одинакового размера для дальнейшей обработки." },
       { title: "Филе с кожей", image: extendedVisualAssets.fish.fishFilletSkinOn, detail: "Пласт филе с кожным покровом." },
       { title: "Филе без кожи", image: extendedVisualAssets.fish.fishFilletSkinless, detail: "Зачищенный натуральный полуфабрикат." },
       { title: "Рыбные тефтели", image: extendedVisualAssets.fish.fishBalls, detail: "Формованные изделия из рыбной массы." },
@@ -522,7 +523,7 @@ const visualAtlas = [
     items: [
       { title: "Тушка птицы", image: extendedVisualAssets.poultry.wholeChickenPrepared, detail: "Подготовленная тушка перед разделкой." },
       { title: "Филе бабочкой", image: extendedVisualAssets.poultry.chickenBreastButterfly, detail: "Распластанная грудная мякоть." },
-      { title: "Части крыла", image: extendedVisualAssets.poultry.chickenWingSegments, detail: "Порционирование крыла по суставам." },
+      { title: "Бедро и голень", image: extendedVisualAssets.poultry.chickenWingSegments, detail: "Порционные части птицы после разделки тушки." },
       { title: "Седло кролика", image: extendedVisualAssets.poultry.rabbitSaddle, detail: "Порционная часть тушки кролика." },
       { title: "Кнели из птицы", image: extendedVisualAssets.poultry.poultryQuenelles, detail: "Формованные изделия из нежной массы." }
     ]
