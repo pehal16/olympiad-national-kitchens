@@ -30,6 +30,21 @@
 4. Preview-изображения: после утверждения промптов генерируются 1-2 предварительных изображения на цех.
 5. Финальные assets: подключаются только после визуального осмотра и сохраняются в `public/assets/pm01/generated/...`.
 
+## Asset-пайплайн
+
+В публичных данных PM01 есть `digitalShift.packages[].previewAssets[]`.
+
+Каждый preview-slot содержит:
+
+- `prompt`: основной промпт;
+- `negativePrompt`: запреты для генерации;
+- `targetPath`: будущий путь в `public/assets/pm01/generated/digital-shift/...`;
+- `status: awaiting_preview`;
+- `finalAsset: false`;
+- `inspectionRequired: true`.
+
+Это означает, что изображение еще не считается финальным и не подключается к экзамену до утверждения.
+
 ## Семейства заданий
 
 | Семейство | Что делает студент | Современность |

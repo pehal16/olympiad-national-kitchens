@@ -2212,6 +2212,26 @@ const pm01DigitalShiftVariantPackages = {
   }
 };
 
+const pm01DigitalShiftNegativePrompt =
+  "Не показывать готовые блюда, ресторанную подачу, декоративные тарелки, логотипы, водяные знаки, случайный текст, грязный цех, анатомически странные части птицы или кролика, cooked-looking продукты, кровь, лица людей крупным планом.";
+
+function buildDigitalShiftPreviewAssets(variantId, config) {
+  return (config.visualPrompts || []).map((prompt, index) => {
+    const kind = index === 0 ? "scene" : "control-detail";
+    return {
+      id: `${variantId}-${kind}-preview`,
+      kind,
+      status: "awaiting_preview",
+      approval: "pending_teacher_review",
+      prompt,
+      negativePrompt: pm01DigitalShiftNegativePrompt,
+      targetPath: `/assets/pm01/generated/digital-shift/${variantId}/${variantId}-${kind}.png`,
+      finalAsset: false,
+      inspectionRequired: true
+    };
+  });
+}
+
 function clonePm01Config(value) {
   return JSON.parse(JSON.stringify(value));
 }
@@ -2397,6 +2417,7 @@ module.exports.digitalShift = {
     rpTopics: config.rpTopics,
     productionLog: config.productionLog,
     visualPrompts: config.visualPrompts,
+    previewAssets: buildDigitalShiftPreviewAssets(variantId, config),
     tasks: config.tasks.map(([familyId, title]) => ({
       familyId,
       title,

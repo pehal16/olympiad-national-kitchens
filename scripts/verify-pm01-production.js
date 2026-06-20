@@ -54,12 +54,24 @@ async function main() {
   assert(exam.payload?.data?.assetRegistry?.workshops?.vegetables, "PM01 asset registry is missing workshop images");
   assert(exam.payload?.data?.digitalShift?.mode === "training_extension", "PM01 digital shift package is missing");
   assert(exam.payload?.data?.digitalShift?.packages?.length === 5, "PM01 digital shift must expose 5 shop packages");
+  const previewAssets = exam.payload.data.digitalShift.packages.flatMap((packageData) => packageData.previewAssets || []);
+  assert(previewAssets.length === 10, "PM01 digital shift must expose 10 planned preview assets");
+  assert(
+    previewAssets.every(
+      (asset) =>
+        asset.status === "awaiting_preview" &&
+        asset.finalAsset === false &&
+        asset.targetPath?.startsWith("/assets/pm01/generated/digital-shift/")
+    ),
+    "PM01 preview assets must stay planned and unconnected"
+  );
   checks.push({
     route: "/api/pm01/public/exam",
     status: exam.response.status,
     variants: exam.payload.data.variants.length,
     modules: exam.payload.data.modules.length,
-    digitalShiftPackages: exam.payload.data.digitalShift.packages.length
+    digitalShiftPackages: exam.payload.data.digitalShift.packages.length,
+    digitalShiftPreviewAssets: previewAssets.length
   });
 
   const student = await getText("/pm01.html");

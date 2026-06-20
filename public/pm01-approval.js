@@ -67,7 +67,7 @@
       ...packageData.rpTopics.map((topic) => `- ${topic}`),
       "",
       "Промпты:",
-      ...packageData.visualPrompts.map((prompt) => `- ${prompt}`)
+      ...(packageData.previewAssets || []).map((asset) => `- ${asset.prompt}\n  path: ${asset.targetPath}\n  negative: ${asset.negativePrompt}`)
     ].join("\n");
     try {
       await navigator.clipboard.writeText(text);
@@ -124,6 +124,22 @@
     copyButton.addEventListener("click", () => copyPromptPackage(packageData, copyButton));
     prompts.append(promptList, copyButton);
 
+    const assetPlan = createNode("section", "approval-package-block");
+    assetPlan.appendChild(createNode("h3", "", "Слоты preview-assets"));
+    const assetGrid = createNode("div", "approval-asset-grid");
+    (packageData.previewAssets || []).forEach((asset) => {
+      const assetCard = createNode("article", "approval-asset-card");
+      assetCard.dataset.status = asset.status || "awaiting_preview";
+      assetCard.append(
+        createNode("strong", "", asset.kind === "scene" ? "Общий вид цеха" : "Контрольная партия"),
+        createNode("span", "approval-asset-path", asset.targetPath),
+        createNode("small", "", asset.status === "awaiting_preview" ? "Ожидает preview" : asset.status),
+        createNode("p", "", asset.negativePrompt || "")
+      );
+      assetGrid.appendChild(assetCard);
+    });
+    assetPlan.appendChild(assetGrid);
+
     const criteria = createNode("section", "approval-package-block approval-criteria");
     criteria.append(
       createNode("h3", "", "Критерии согласования"),
@@ -138,7 +154,7 @@
       )
     );
 
-    section.append(head, topics, tasks, log, prompts, criteria);
+    section.append(head, topics, tasks, log, prompts, assetPlan, criteria);
     return section;
   }
 
