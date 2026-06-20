@@ -750,6 +750,12 @@ select:focus {
   font-weight: 800;
 }
 
+.digital-shift-mini-families span.is-complete {
+  border-color: rgba(28, 117, 93, 0.32);
+  color: var(--green-900);
+  background: #dcefe8;
+}
+
 .digital-shift-task-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -772,6 +778,15 @@ select:focus {
   border-color: rgba(35, 107, 181, 0.5);
   box-shadow: 0 0 0 3px rgba(35, 107, 181, 0.1);
   background: #fff;
+}
+
+.digital-shift-task.is-complete {
+  border-left-color: var(--green-900);
+  background: #f7fbf9;
+}
+
+.digital-shift-task[role="button"] {
+  cursor: pointer;
 }
 
 .digital-shift-task:focus-visible {
@@ -824,6 +839,20 @@ select:focus {
   line-height: 1.35;
 }
 
+.digital-shift-task-done {
+  width: max-content;
+  max-width: 100%;
+  padding: 4px 6px;
+  border-radius: 6px;
+  color: var(--green-900);
+  background: #dcefe8;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
 .digital-shift-cockpit {
   display: grid;
   gap: 10px;
@@ -857,6 +886,73 @@ select:focus {
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+.digital-shift-progress {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(140px, 0.55fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 9px;
+  border: 1px solid rgba(28, 117, 93, 0.18);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.digital-shift-progress.is-compact {
+  grid-template-columns: 1fr;
+}
+
+.digital-shift-progress[data-complete="true"] {
+  border-color: rgba(28, 117, 93, 0.34);
+  background: #f3fbf7;
+}
+
+.digital-shift-progress div:first-child {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.digital-shift-progress span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.digital-shift-progress strong {
+  color: var(--green-900);
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.digital-shift-progress-track {
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5ece9;
+}
+
+.digital-shift-progress-track span {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--green-700), var(--blue));
+  transition: width 180ms ease;
+}
+
+.digital-shift-progress-reset {
+  min-height: 30px;
+  padding: 5px 8px;
+  border: 1px solid rgba(28, 117, 93, 0.22);
+  border-radius: var(--radius);
+  color: var(--green-800);
+  background: #f6fbf8;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .digital-shift-cockpit-zones {
@@ -932,6 +1028,11 @@ select:focus {
   box-shadow: inset 0 0 0 2px rgba(35, 107, 181, 0.08);
 }
 
+.digital-shift-cockpit-timeline li.is-complete {
+  border-color: rgba(28, 117, 93, 0.34);
+  background: #f7fbf9;
+}
+
 .digital-shift-cockpit-timeline li > span {
   width: 26px;
   height: 26px;
@@ -959,6 +1060,26 @@ select:focus {
   margin-top: 3px;
   color: var(--muted);
   font-size: 11px;
+}
+
+.digital-shift-cockpit-done {
+  width: max-content;
+  max-width: 100%;
+  display: inline-flex;
+  margin-top: 5px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  color: #57615d;
+  background: #eef3f1;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.digital-shift-cockpit-timeline li.is-complete .digital-shift-cockpit-done {
+  color: var(--green-900);
+  background: #dcefe8;
 }
 
 .digital-shift-cockpit-action {
@@ -996,6 +1117,11 @@ select:focus {
   border-radius: var(--radius);
   background: #fff;
   box-shadow: 0 10px 24px rgba(17, 61, 51, 0.06);
+}
+
+.digital-shift-cockpit-focus.is-complete {
+  border-left-color: var(--green-700);
+  background: #fdfefe;
 }
 
 .digital-shift-cockpit-focus.is-compact {
@@ -1086,6 +1212,40 @@ select:focus {
   font-weight: 900;
 }
 
+.digital-shift-cockpit-focus-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+}
+
+.digital-shift-complete-action {
+  min-height: 32px;
+  padding: 6px 9px;
+  border: 1px solid rgba(28, 117, 93, 0.24);
+  border-radius: var(--radius);
+  color: var(--green-900);
+  background: #e8f4ef;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.digital-shift-complete-action[aria-pressed="true"] {
+  color: #fff;
+  background: var(--green-700);
+}
+
+.digital-shift-cockpit-focus-actions > span {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
 .digital-shift-log,
 .digital-shift-prompts {
   display: grid;
@@ -1128,6 +1288,11 @@ select:focus {
   background: #eef5ff;
 }
 
+.production-log-list li.is-complete {
+  color: var(--green-900);
+  background: #f3fbf7;
+}
+
 .production-log-list li::before {
   counter-increment: log;
   content: counter(log);
@@ -1145,6 +1310,10 @@ select:focus {
 
 .production-log-list li.is-active::before {
   background: var(--blue);
+}
+
+.production-log-list li.is-complete::before {
+  background: var(--green-900);
 }
 
 .production-log-time {
@@ -4734,6 +4903,10 @@ tr[data-attempt-id].is-selected {
   }
 
   .digital-shift-task-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .digital-shift-progress {
     grid-template-columns: 1fr;
   }
 

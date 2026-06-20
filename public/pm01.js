@@ -3,6 +3,7 @@
   const FREE_STUDENT_VALUE = "__free_name__";
   const MAX_VOICE_AUDIO_BYTES = 14 * 1024 * 1024;
   const RESUME_STORAGE_KEY = "pm01.resumeAttempt.v1";
+  const DIGITAL_SHIFT_PROGRESS_STORAGE_KEY = "pm01.digitalShiftProgress.v1";
   const RESUME_MAX_AGE_MS = 24 * 60 * 60 * 1000;
   const PM01_STUDENT_GROUPS = [
     {
@@ -79,6 +80,7 @@
     selectedTicketId: "",
     mode: "exam",
     activeCockpitFamilyId: "",
+    digitalShiftProgress: {},
     controller: null,
     timer: null,
     skipConfirmQuestionId: ""
@@ -199,6 +201,27 @@
       );
     } catch (_) {
       // The server-side resume still works even if browser storage is unavailable.
+    }
+  }
+
+  function readDigitalShiftProgress() {
+    try {
+      const raw = window.localStorage.getItem(DIGITAL_SHIFT_PROGRESS_STORAGE_KEY);
+      if (!raw) {
+        return {};
+      }
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function saveDigitalShiftProgress() {
+    try {
+      window.localStorage.setItem(DIGITAL_SHIFT_PROGRESS_STORAGE_KEY, JSON.stringify(state.digitalShiftProgress || {}));
+    } catch (_) {
+      // Training progress is browser-local and optional.
     }
   }
 
@@ -623,6 +646,62 @@
     return fromTimeline.length ? fromTimeline : (packageData?.tasks || []).map((task) => task.familyId).filter(Boolean);
   }
 
+  function digitalShiftProgressFor(packageData) {
+    const familyIds = cockpitFamilyIds(packageData);
+    const completed = state.digitalShiftProgress?.[packageData?.variantId]?.completed || {};
+    const completedIds = familyIds.filter((familyId) => Boolean(completed[familyId]));
+    const total = familyIds.length;
+    return {
+      completed,
+      completedIds,
+      total,
+      done: completedIds.length,
+      percent: total ? Math.round((completedIds.length / total) * 100) : 0
+    };
+  }
+
+  function isCockpitFamilyComplete(packageData, familyId) {
+    return Boolean(digitalShiftProgressFor(packageData).completed[familyId]);
+  }
+
+  function setCockpitFamilyComplete(packageData, familyId, complete) {
+    if (!packageData?.variantId || !familyId) {
+      return;
+    }
+    const current = state.digitalShiftProgress?.[packageData.variantId] || {};
+    const completed = { ...(current.completed || {}) };
+    if (complete) {
+      completed[familyId] = true;
+    } else {
+      delete completed[familyId];
+    }
+    state.digitalShiftProgress = {
+      ...(state.digitalShiftProgress || {}),
+      [packageData.variantId]: {
+        completed,
+        updatedAt: new Date().toISOString()
+      }
+    };
+    saveDigitalShiftProgress();
+  }
+
+  function resetDigitalShiftProgress(packageData) {
+    if (!packageData?.variantId) {
+      return;
+    }
+    const nextProgress = { ...(state.digitalShiftProgress || {}) };
+    delete nextProgress[packageData.variantId];
+    state.digitalShiftProgress = nextProgress;
+    saveDigitalShiftProgress();
+  }
+
+  function refreshDigitalShiftViews() {
+    renderTrainingLab();
+    if (state.attempt) {
+      renderReferencePanel();
+    }
+  }
+
   function ensureActiveCockpitFamily(packageData) {
     const familyIds = cockpitFamilyIds(packageData);
     if (!familyIds.length) {
@@ -700,11 +779,22 @@
     grid.className = "digital-shift-task-grid";
     (packageData?.tasks || []).forEach((task, index) => {
       const family = digitalShiftFamily(task.familyId);
+      const complete = isCockpitFamilyComplete(packageData, task.familyId);
       const card = document.createElement("article");
       card.className = "digital-shift-task";
       card.dataset.family = task.familyId;
-      card.tabIndex = -1;
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-pressed", task.familyId === activeFamilyId ? "true" : "false");
       card.classList.toggle("is-active", task.familyId === activeFamilyId);
+      card.classList.toggle("is-complete", complete);
+      card.addEventListener("click", () => selectCockpitFamily(task.familyId, { scrollToTask: false }));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          selectCockpitFamily(task.familyId, { scrollToTask: false });
+        }
+      });
       const number = document.createElement("span");
       number.className = "digital-shift-index";
       number.textContent = String(index + 1).padStart(2, "0");
@@ -718,6 +808,12 @@
       if (modern.textContent) {
         card.appendChild(modern);
       }
+      if (complete) {
+        const done = document.createElement("em");
+        done.className = "digital-shift-task-done";
+        done.textContent = "Этап разобран";
+        card.appendChild(done);
+      }
       grid.appendChild(card);
     });
     return grid;
@@ -725,12 +821,15 @@
 
   function renderProductionLog(packageData) {
     const activeStep = activeCockpitStep(packageData);
+    const timeline = packageData?.shiftCockpit?.operationTimeline || [];
     const entries = cockpitJournalEntries(packageData);
     const list = document.createElement("ol");
     list.className = "production-log-list";
     entries.forEach((entry) => {
+      const linkedStep = timeline.find((step) => Number(step.step) === Number(entry.linkedStep));
       const item = document.createElement("li");
       item.classList.toggle("is-active", Number(entry.linkedStep) === Number(activeStep?.step));
+      item.classList.toggle("is-complete", Boolean(linkedStep && isCockpitFamilyComplete(packageData, linkedStep.familyId)));
       if (entry.time) {
         const time = document.createElement("span");
         time.className = "production-log-time";
@@ -759,11 +858,44 @@
     container.appendChild(row);
   }
 
+  function renderDigitalShiftProgressMeter(packageData, compact = false) {
+    const progress = digitalShiftProgressFor(packageData);
+    const panel = document.createElement("div");
+    panel.className = compact ? "digital-shift-progress is-compact" : "digital-shift-progress";
+    panel.dataset.complete = progress.done === progress.total && progress.total > 0 ? "true" : "false";
+
+    const copy = document.createElement("div");
+    const label = document.createElement("span");
+    label.textContent = "Прогресс смены";
+    const value = document.createElement("strong");
+    value.textContent = `${progress.done}/${progress.total || 0} этапов`;
+    copy.append(label, value);
+
+    const track = document.createElement("div");
+    track.className = "digital-shift-progress-track";
+    const fill = document.createElement("span");
+    fill.style.width = `${progress.percent}%`;
+    track.appendChild(fill);
+
+    panel.append(copy, track);
+    if (!compact && progress.done > 0) {
+      const reset = createButton("digital-shift-progress-reset", "Сбросить", () => {
+        resetDigitalShiftProgress(packageData);
+        refreshDigitalShiftViews();
+      });
+      reset.type = "button";
+      panel.appendChild(reset);
+    }
+    return panel;
+  }
+
   function renderCockpitFocus(packageData, compact = false) {
     const step = activeCockpitStep(packageData);
     const matrixRow = activeCockpitMatrixRow(packageData);
+    const activeComplete = isCockpitFamilyComplete(packageData, step?.familyId);
     const panel = document.createElement("section");
     panel.className = compact ? "digital-shift-cockpit-focus is-compact" : "digital-shift-cockpit-focus";
+    panel.classList.toggle("is-complete", activeComplete);
     if (!step) {
       return panel;
     }
@@ -807,6 +939,22 @@
     if (competencies.children.length) {
       panel.appendChild(competencies);
     }
+    const actions = document.createElement("div");
+    actions.className = "digital-shift-cockpit-focus-actions";
+    const doneButton = createButton(
+      "digital-shift-complete-action",
+      activeComplete ? "Снять отметку" : compact ? "Этап разобран" : "Отметить этап разобранным",
+      () => {
+        setCockpitFamilyComplete(packageData, step.familyId, !activeComplete);
+        refreshDigitalShiftViews();
+      }
+    );
+    doneButton.type = "button";
+    doneButton.setAttribute("aria-pressed", activeComplete ? "true" : "false");
+    const hint = document.createElement("span");
+    hint.textContent = "Локально, без баллов и протокола";
+    actions.append(doneButton, hint);
+    panel.appendChild(actions);
     return panel;
   }
 
@@ -814,6 +962,7 @@
     const cockpit = packageData?.shiftCockpit;
     const activeFamilyId = ensureActiveCockpitFamily(packageData);
     const activeStep = activeCockpitStep(packageData);
+    const progress = digitalShiftProgressFor(packageData);
     const panel = document.createElement("section");
     panel.className = compact ? "digital-shift-cockpit is-compact" : "digital-shift-cockpit";
     if (!cockpit) {
@@ -825,7 +974,7 @@
     const title = document.createElement("strong");
     title.textContent = "Cockpit смены";
     const status = document.createElement("span");
-    status.textContent = "training-only · 0 баллов";
+    status.textContent = `training-only · 0 баллов · ${progress.done}/${progress.total || 0}`;
     head.append(title, status);
 
     const zones = document.createElement("div");
@@ -841,9 +990,11 @@
     const timeline = document.createElement("ol");
     timeline.className = "digital-shift-cockpit-timeline";
     (cockpit.operationTimeline || []).forEach((step) => {
+      const complete = isCockpitFamilyComplete(packageData, step.familyId);
       const item = document.createElement("li");
       item.dataset.family = step.familyId || "";
       item.classList.toggle("is-active", step.familyId === activeFamilyId);
+      item.classList.toggle("is-complete", complete);
       if (step.familyId === activeFamilyId) {
         item.setAttribute("aria-current", "step");
       }
@@ -854,17 +1005,21 @@
       name.textContent = step.familyTitle || step.title || "";
       const signal = document.createElement("small");
       signal.textContent = step.controlSignal || step.studentAction || "";
+      const done = document.createElement("em");
+      done.className = "digital-shift-cockpit-done";
+      done.textContent = complete ? "Разобрано" : "В работе";
       const action = createButton("digital-shift-cockpit-action", "Выбрать", () =>
         selectCockpitFamily(step.familyId, { scrollToTask: !compact })
       );
       action.setAttribute("aria-pressed", step.familyId === activeFamilyId ? "true" : "false");
       action.textContent = step.familyId === activeFamilyId ? "В фокусе" : "Выбрать";
-      copy.append(name, signal);
+      copy.append(name, signal, done);
       item.append(number, copy, action);
       timeline.appendChild(item);
     });
 
     panel.append(head, zones);
+    panel.appendChild(renderDigitalShiftProgressMeter(packageData, compact));
     if (!compact) {
       const signals = document.createElement("div");
       signals.className = "digital-shift-cockpit-signals";
@@ -1283,6 +1438,7 @@
         (packageData.tasks || []).forEach((task) => {
           const chip = document.createElement("span");
           chip.textContent = digitalShiftFamily(task.familyId)?.title || task.familyTitle || task.familyId;
+          chip.classList.toggle("is-complete", isCockpitFamilyComplete(packageData, task.familyId));
           families.appendChild(chip);
         });
         elements.trainingShiftReference.append(overline, title, renderDigitalShiftCockpit(packageData, true), log, families);
@@ -2622,6 +2778,7 @@
     renderStudentSelect();
     try {
       state.exam = await api("/api/pm01/public/exam");
+      state.digitalShiftProgress = readDigitalShiftProgress();
       state.selectedVariantId = state.exam.variants?.[0]?.id || "";
       state.selectedTicketId = "";
       elements.examTitle.textContent = state.exam.title;
