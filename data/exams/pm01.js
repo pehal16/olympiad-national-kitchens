@@ -1,5 +1,6 @@
 const vegetablePhotoCutSourceItems = require("./pm01-vegetable-photo-cuts.json");
 const semiFinishedProductSourceItems = require("./pm01-semi-finished-products.json");
+const generatedSemiFinishedProductItems = require("./pm01-generated-semi-finished-products.json");
 
 const vegetablePhotoCutItems = vegetablePhotoCutSourceItems.map(({ source, crop, ...item }) => item);
 const vegetablePhotoCutAssets = Object.fromEntries(
@@ -8,6 +9,9 @@ const vegetablePhotoCutAssets = Object.fromEntries(
 const semiFinishedProductItems = semiFinishedProductSourceItems.map(({ source, crop, ...item }) => item);
 const semiFinishedProductAssets = Object.fromEntries(
   semiFinishedProductItems.map((item) => [item.id, item.image])
+);
+const generatedSemiFinishedProductAssets = Object.fromEntries(
+  generatedSemiFinishedProductItems.map((item) => [item.id, item.image])
 );
 const semiFinishedByGroup = (group) => semiFinishedProductItems.filter((item) => item.group === group);
 
@@ -497,6 +501,12 @@ const visualAtlas = [
     items: semiFinishedByGroup("vegetables")
   },
   {
+    id: "generated-semi-products",
+    title: "Новые полуфабрикаты",
+    displayLimit: 12,
+    items: generatedSemiFinishedProductItems
+  },
+  {
     id: "extended-cuts",
     title: "Нарезки",
     items: [
@@ -719,6 +729,7 @@ module.exports = {
     },
     vegetablePhotoCuts: vegetablePhotoCutAssets,
     semiFinishedProducts: semiFinishedProductAssets,
+    generatedSemiFinishedProducts: generatedSemiFinishedProductAssets,
     extendedVisuals: extendedVisualAssets
   },
   visualAtlas,
@@ -1141,7 +1152,7 @@ module.exports = {
               "fillet",
               "филе рыбы",
               {
-                image: semiFinishedProductAssets.fishFilletNatural,
+                image: generatedSemiFinishedProductAssets.generatedFishFilletPortions,
                 detail: "Пласт мякоти без костей; используется как натуральный полуфабрикат."
               }
             ],
@@ -1157,7 +1168,7 @@ module.exports = {
               "breaded",
               "рыба панированная",
               {
-                image: semiFinishedProductAssets.fishBreadedPortions,
+                image: generatedSemiFinishedProductAssets.generatedFishSticksBreaded,
                 detail: "Порционные куски, подготовленные с панировкой перед жаркой."
               }
             ],
@@ -1165,7 +1176,7 @@ module.exports = {
               "cutlets",
               "рыбные котлеты",
               {
-                image: semiFinishedProductAssets.fishCutletsFormed,
+                image: generatedSemiFinishedProductAssets.generatedFishCutlets,
                 detail: "Изделия из рыбной котлетной массы, сформованные порционно."
               }
             ],
@@ -1357,7 +1368,7 @@ module.exports = {
               "goulash",
               "гуляш",
               {
-                image: semiFinishedProductAssets.meatGoulashCubes,
+                image: generatedSemiFinishedProductAssets.generatedMeatGoulashCubes,
                 detail: "Мелкокусковой полуфабрикат кубиками для тушения."
               }
             ],
@@ -1441,7 +1452,7 @@ module.exports = {
               "fillet",
               "филе натуральное",
               {
-                image: semiFinishedProductAssets.chickenFilletNatural,
+                image: generatedSemiFinishedProductAssets.generatedChickenFillet,
                 detail: "Зачищенная грудная мякоть без кости и кожи."
               }
             ],
@@ -1465,7 +1476,7 @@ module.exports = {
               "rabbit",
               "порционные куски кролика",
               {
-                image: semiFinishedProductAssets.rabbitPortions,
+                image: generatedSemiFinishedProductAssets.generatedRabbitPortions,
                 detail: "Кролик относится к сырью ПМ.01 вместе с птицей и дичью."
               }
             ],
@@ -1537,9 +1548,9 @@ module.exports = {
           "poultry-sim-parts",
           "Соотнесите полуфабрикат и часть птицы.",
           [
-            ["fillet", "филе", { image: semiFinishedProductAssets.chickenFilletNatural, detail: "Грудная мякоть без кости." }],
+            ["fillet", "филе", { image: generatedSemiFinishedProductAssets.generatedChickenFillet, detail: "Грудная мякоть без кости." }],
             ["leg", "окорочок", { image: semiFinishedProductAssets.chickenLegQuarter, detail: "Бедро и голень вместе." }],
-            ["drumstick", "голень", { image: semiFinishedProductAssets.chickenDrumstick, detail: "Нижняя часть ноги." }],
+            ["drumstick", "голень", { image: generatedSemiFinishedProductAssets.generatedChickenDrumsticks, detail: "Нижняя часть ноги." }],
             ["thigh", "бедро", { image: semiFinishedProductAssets.chickenThigh, detail: "Верхняя мясистая часть ноги." }],
             ["mince", "котлетная масса", { image: semiFinishedProductAssets.poultryMinceMass, detail: "Измельченная мякоть для формования." }]
           ],
@@ -1583,11 +1594,11 @@ module.exports = {
           "complex-t1-fish-products",
           "Рассмотрите фото и распределите позиции комплексного заказа: рыбные полуфабрикаты или другой участок.",
           [
-            ["fish-portion", "порционные куски рыбы", { image: semiFinishedProductAssets.fishPortionPieces, detail: "Куски рыбы одинаковой массы для дальнейшей тепловой обработки." }],
+            ["fish-portion", "порционные куски рыбы", { image: generatedSemiFinishedProductAssets.generatedFishFilletPortions, detail: "Куски рыбы одинаковой массы для дальнейшей тепловой обработки." }],
             ["fish-mince", "рыбная котлетная масса", { image: semiFinishedProductAssets.fishMinceMass, detail: "Измельченная рыбная масса для формования котлет и биточков." }],
-            ["fish-cutlets", "рыбные котлеты", { image: semiFinishedProductAssets.fishCutletsFormed, detail: "Сформованные полуфабрикаты из рыбной котлетной массы." }],
-            ["fish-breaded", "панированный рыбный полуфабрикат", { image: semiFinishedProductAssets.fishBreadedPortions, detail: "Порционный рыбный полуфабрикат, подготовленный к жарке." }],
-            ["meat-goulash", "гуляш из говядины", { image: semiFinishedProductAssets.meatGoulashCubes, detail: "Мелкокусковой мясной полуфабрикат, не относится к рыбному участку." }]
+            ["fish-cutlets", "рыбные котлеты", { image: generatedSemiFinishedProductAssets.generatedFishCutlets, detail: "Сформованные полуфабрикаты из рыбной котлетной массы." }],
+            ["fish-breaded", "панированный рыбный полуфабрикат", { image: generatedSemiFinishedProductAssets.generatedFishSticksBreaded, detail: "Порционный рыбный полуфабрикат, подготовленный к жарке." }],
+            ["meat-goulash", "гуляш из говядины", { image: generatedSemiFinishedProductAssets.generatedMeatGoulashCubes, detail: "Мелкокусковой мясной полуфабрикат, не относится к рыбному участку." }]
           ],
           [["fish", "рыбные полуфабрикаты"], ["other", "другой участок"]],
           { "fish-portion": "fish", "fish-mince": "fish", "fish-cutlets": "fish", "fish-breaded": "fish", "meat-goulash": "other" },
@@ -1601,7 +1612,7 @@ module.exports = {
           "complex-t1-meat-products",
           "Рассмотрите фото и распределите позиции комплексного заказа: мясные полуфабрикаты или другой участок.",
           [
-            ["goulash", "гуляш", { image: semiFinishedProductAssets.meatGoulashCubes, detail: "Мелкокусковой мясной полуфабрикат для тушения." }],
+            ["goulash", "гуляш", { image: generatedSemiFinishedProductAssets.generatedMeatGoulashCubes, detail: "Мелкокусковой мясной полуфабрикат для тушения." }],
             ["azu", "азу", { image: semiFinishedProductAssets.meatAzuStrips, detail: "Мелкокусковой мясной полуфабрикат из нарезанных брусочков." }],
             ["romsteak", "ромштекс", { image: semiFinishedProductAssets.meatRomsteakBreaded, detail: "Порционный панированный полуфабрикат из мяса." }],
             ["cutlets", "рубленые котлеты", { image: semiFinishedProductAssets.meatCutletsFormed, detail: "Сформованные полуфабрикаты из мясной котлетной массы." }],

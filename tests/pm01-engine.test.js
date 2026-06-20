@@ -616,9 +616,10 @@ test("PM01 extended visual atlas exposes 50 generated cards safely", () => {
   collectExtended(publicData.assetRegistry.extendedVisuals);
 
   assert.equal(extendedPaths.length, 50);
-  assert.equal(publicData.visualAtlas.length, 7);
+  assert.equal(publicData.visualAtlas.length, 8);
   assert.equal(publicData.visualAtlas.some((category) => category.id === "vegetable-photo-cuts"), true);
   assert.equal(publicData.visualAtlas.some((category) => category.id === "vegetable-semi-products"), true);
+  assert.equal(publicData.visualAtlas.some((category) => category.id === "generated-semi-products"), true);
   assert.equal(publicData.visualAtlas.some((category) => category.id === "extended-safety"), true);
 
   extendedPaths.forEach((assetPath) => {
@@ -679,6 +680,28 @@ test("PM01 semi-finished product atlas exposes 74 photo cards", () => {
     const fullPath = path.join(__dirname, "..", "public", assetPath.replace(/^\//, ""));
     assert.equal(fs.existsSync(fullPath), true, `${assetPath} exists`);
     assert.equal(fs.statSync(fullPath).size > 250_000, true, `${assetPath} is a photo card`);
+  });
+});
+
+test("PM01 generated semi-finished product cards are separate new assets", () => {
+  const publicData = getPm01PublicData();
+  const generatedAssets = publicData.assetRegistry.generatedSemiFinishedProducts;
+  const generatedPaths = Object.values(generatedAssets);
+  const atlas = publicData.visualAtlas.find((category) => category.id === "generated-semi-products");
+
+  assert.equal(generatedPaths.length, 12);
+  assert.equal(atlas.displayLimit, 12);
+  assert.equal(atlas.items.length, 12);
+  assert.equal(atlas.items.every((item) => item.generated === true), true);
+  assert.equal(atlas.items.every((item) => !("source" in item) && !("crop" in item)), true);
+  assert.equal(generatedPaths.every((assetPath) => assetPath.startsWith("/assets/pm01/generated/semi-finished/")), true);
+  assert.equal(generatedPaths.some((assetPath) => assetPath.includes("generated-chicken-thigh-drumstick")), false);
+  assert.equal(generatedPaths.some((assetPath) => assetPath.includes("generated-chicken-drumsticks")), true);
+
+  generatedPaths.forEach((assetPath) => {
+    const fullPath = path.join(__dirname, "..", "public", assetPath.replace(/^\//, ""));
+    assert.equal(fs.existsSync(fullPath), true, `${assetPath} exists`);
+    assert.equal(fs.statSync(fullPath).size > 250_000, true, `${assetPath} is a generated photo card`);
   });
 });
 
@@ -764,7 +787,9 @@ test("PM01 poultry and packaging tasks use visual product cards", () => {
     assert.equal("correctBuckets" in publicQuestion, false);
   });
 
-  assert.equal(partsQuestion.items.some((item) => item.image.includes("/semi-finished/poultry/chicken-fillet-natural.png")), true);
+  assert.equal(partsQuestion.items.some((item) => item.image.includes("/generated/semi-finished/poultry/generated-chicken-fillet.png")), true);
+  assert.equal(partsQuestion.items.some((item) => item.image.includes("/generated/semi-finished/poultry/generated-chicken-drumsticks.png")), true);
+  assert.equal(partsQuestion.items.some((item) => item.image.includes("generated-chicken-thigh-drumstick")), false);
   assert.equal(packQuestion.items.some((item) => item.image.includes("/packaging/newspaper-violation.png")), true);
   assert.equal(poultrySequenceQuestion.items.every((item) => item.image && item.image.includes("/assets/pm01/extended/")), true);
   assert.equal(zonesQuestion.items.every((item) => item.image.includes("/assets/pm01/extended/")), true);

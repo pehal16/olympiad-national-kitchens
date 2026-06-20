@@ -1,0 +1,98 @@
+[
+  {
+    "id": "generatedMeatGoulashCubes",
+    "group": "meat",
+    "title": "Гуляш",
+    "detail": "Мелкокусковой мясной полуфабрикат кубиками для тушения.",
+    "image": "/assets/pm01/generated/semi-finished/meat/generated-meat-goulash-cubes.png",
+    "generated": true
+  },
+  {
+    "id": "generatedMeatBeefStroganoffStrips",
+    "group": "meat",
+    "title": "Бефстроганов",
+    "detail": "Тонкие продолговатые кусочки мяса для быстрого приготовления.",
+    "image": "/assets/pm01/generated/semi-finished/meat/generated-meat-beef-stroganoff-strips.png",
+    "generated": true
+  },
+  {
+    "id": "generatedMeatBreadedSchnitzel",
+    "group": "meat",
+    "title": "Шницель панированный",
+    "detail": "Порционный панированный полуфабрикат, подготовленный к жарке.",
+    "image": "/assets/pm01/generated/semi-finished/meat/generated-meat-breaded-schnitzel.png",
+    "generated": true
+  },
+  {
+    "id": "generatedFishFilletPortions",
+    "group": "fish",
+    "title": "Порции рыбного филе",
+    "detail": "Порционные куски филе одинаковой массы для дальнейшей тепловой обработки.",
+    "image": "/assets/pm01/generated/semi-finished/fish/generated-fish-fillet-portions.png",
+    "generated": true
+  },
+  {
+    "id": "generatedFishCutlets",
+    "group": "fish",
+    "title": "Рыбные котлеты",
+    "detail": "Сформованные изделия из рыбной котлетной массы.",
+    "image": "/assets/pm01/generated/semi-finished/fish/generated-fish-cutlets.png",
+    "generated": true
+  },
+  {
+    "id": "generatedFishSticksBreaded",
+    "group": "fish",
+    "title": "Рыбные палочки в панировке",
+    "detail": "Панированный рыбный полуфабрикат прямоугольной формы.",
+    "image": "/assets/pm01/generated/semi-finished/fish/generated-fish-sticks-breaded.png",
+    "generated": true
+  },
+  {
+    "id": "generatedChickenFillet",
+    "group": "poultry",
+    "title": "Филе птицы",
+    "detail": "Филе без кости и кожи, подготовленное к порционированию.",
+    "image": "/assets/pm01/generated/semi-finished/poultry/generated-chicken-fillet.png",
+    "generated": true
+  },
+  {
+    "id": "generatedChickenDrumsticks",
+    "group": "poultry",
+    "title": "Голени птицы",
+    "detail": "Целые голени птицы, отделенные по суставу и подготовленные к тепловой обработке.",
+    "image": "/assets/pm01/generated/semi-finished/poultry/generated-chicken-drumsticks.png",
+    "generated": true
+  },
+  {
+    "id": "generatedRabbitPortions",
+    "group": "poultry",
+    "title": "Порционные части кролика",
+    "detail": "Части кролика для тушения или жарки, без спорного указания конкретного отруба.",
+    "image": "/assets/pm01/generated/semi-finished/poultry/generated-rabbit-portions.png",
+    "generated": true
+  },
+  {
+    "id": "generatedPotatoBatonnet",
+    "group": "vegetables",
+    "title": "Картофель брусочками",
+    "detail": "Ровные картофельные брусочки для жарки, бланширования или гарнира.",
+    "image": "/assets/pm01/generated/semi-finished/vegetables/generated-potato-batonnet.png",
+    "generated": true
+  },
+  {
+    "id": "generatedCarrotBrunoise",
+    "group": "vegetables",
+    "title": "Морковь брюнуаз",
+    "detail": "Мелкие ровные кубики моркови для супов, соусов и начинок.",
+    "image": "/assets/pm01/generated/semi-finished/vegetables/generated-carrot-brunoise.png",
+    "generated": true
+  },
+  {
+    "id": "generatedMixedMirepoix",
+    "group": "vegetables",
+    "title": "Овощная смесь мирпуа",
+    "detail": "Смесь моркови, лука и сельдерея средним кубиком.",
+    "image": "/assets/pm01/generated/semi-finished/vegetables/generated-mixed-mirepoix.png",
+    "generated": true
+  }
+]
