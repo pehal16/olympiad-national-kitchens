@@ -8,6 +8,18 @@
     packagesList: document.getElementById("approval-packages-list")
   };
 
+  const PM01_APPROVAL_STORAGE_KEY = "pm01ApprovalDecisionsV1";
+  const DECISION_OPTIONS = [
+    { id: "pending", label: "Черновик", status: "Черновик до РП", detail: "Ожидает рабочую программу или правку формулировок." },
+    { id: "approved_preview", label: "На preview", status: "Preview согласован", detail: "Можно генерировать 1-2 предварительных изображения." },
+    { id: "needs_revision", label: "Нужны правки", status: "Нужны правки", detail: "Темы, задания или промпты требуют уточнения." },
+    { id: "waiting_rp", label: "Ждём РП", status: "Ждём РП", detail: "Финальная методическая привязка откладывается до РП." }
+  ];
+  const decisionOptionsById = new Map(DECISION_OPTIONS.map((option) => [option.id, option]));
+  let approvalState = loadApprovalState();
+  let currentExam = null;
+  let currentDigitalShift = null;
+
   function unwrapExam(payload) {
     return payload?.data || payload?.exam || payload || {};
   }
@@ -23,12 +35,72 @@
     return node;
   }
 
+  function loadApprovalState() {
+    try {
+      const stored = window.localStorage.getItem(PM01_APPROVAL_STORAGE_KEY);
+      return stored ? JSON.parse(stored) || {} : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function persistApprovalState() {
+    try {
+      window.localStorage.setItem(PM01_APPROVAL_STORAGE_KEY, JSON.stringify(approvalState));
+    } catch (_) {
+      // The board still works in-memory if browser storage is unavailable.
+    }
+  }
+
+  function getDecisionMeta(decisionId) {
+    return decisionOptionsById.get(decisionId) || DECISION_OPTIONS[0];
+  }
+
+  function getPackageDecision(variantId) {
+    const stored = approvalState[variantId] || {};
+    return {
+      decision: stored.decision || "pending",
+      note: stored.note || "",
+      updatedAt: stored.updatedAt || null
+    };
+  }
+
+  function setPackageDecision(variantId, patch) {
+    approvalState[variantId] = {
+      ...getPackageDecision(variantId),
+      ...patch,
+      updatedAt: new Date().toISOString()
+    };
+    persistApprovalState();
+  }
+
+  function resetPackageDecision(variantId) {
+    delete approvalState[variantId];
+    persistApprovalState();
+  }
+
+  function getDecisionCounts(packages) {
+    const counts = Object.fromEntries(DECISION_OPTIONS.map((option) => [option.id, 0]));
+    packages.forEach((packageData) => {
+      const decision = getPackageDecision(packageData.variantId).decision;
+      counts[decision] = (counts[decision] || 0) + 1;
+    });
+    return counts;
+  }
+
   function renderSummary(exam, digitalShift) {
     elements.summary.innerHTML = "";
+    const packages = digitalShift.packages || [];
+    const decisionCounts = getDecisionCounts(packages);
     [
       ["Режим", "training-only", "PX не влияет на ведомость и официальный протокол."],
       ["Контракт", digitalShift.contract || "100 баллов / 20 заданий / 5 вариантов", "Официальный маршрут не расширяется."],
       ["Статус РП", digitalShift.rpStatus || "ожидаются РП", "Темы не переписываются вслепую."],
+      [
+        "Согласование",
+        `${decisionCounts.approved_preview}/${packages.length} на preview`,
+        `${decisionCounts.needs_revision} правок · ${decisionCounts.waiting_rp} ждут РП.`
+      ],
       ["Версия", exam.version || exam.appVersion || "PM01", "Текущий опубликованный пакет."]
     ].forEach(([label, value, detail]) => {
       const card = createNode("article", "approval-summary-card");
@@ -83,14 +155,93 @@
     }
   }
 
+  async function copyApprovalDecision(packageData, button) {
+    const decision = getPackageDecision(packageData.variantId);
+    const meta = getDecisionMeta(decision.decision);
+    const text = [
+      packageData.title,
+      `decision: ${meta.id} (${meta.label})`,
+      `updatedAt: ${decision.updatedAt || "not_saved"}`,
+      `note: ${decision.note || "-"}`,
+      "",
+      "previewAssets:",
+      ...(packageData.previewAssets || []).map(
+        (asset) => `- ${asset.id}\n  targetPath: ${asset.targetPath}\n  status: ${asset.status}\n  finalAsset: ${asset.finalAsset}`
+      )
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = "Решение скопировано";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать решение";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать решение";
+      }, 1600);
+    }
+  }
+
+  function renderDecisionControls(packageData) {
+    const state = getPackageDecision(packageData.variantId);
+    const activeMeta = getDecisionMeta(state.decision);
+    const panel = createNode("section", "approval-package-block approval-decision-panel");
+    const head = createNode("div", "approval-decision-head");
+    head.append(createNode("h3", "", "Решение по пакету"), createNode("span", "", activeMeta.detail));
+
+    const options = createNode("div", "approval-decision-options");
+    DECISION_OPTIONS.forEach((option) => {
+      const button = createNode("button", "approval-decision-button", option.label);
+      button.type = "button";
+      button.dataset.decision = option.id;
+      button.classList.toggle("is-active", state.decision === option.id);
+      button.addEventListener("click", () => {
+        setPackageDecision(packageData.variantId, { decision: option.id });
+        renderSummary(currentExam, currentDigitalShift);
+        renderPackages(currentDigitalShift);
+      });
+      options.appendChild(button);
+    });
+
+    const noteField = createNode("label", "approval-note-field");
+    const note = createNode("textarea", "approval-note");
+    note.value = state.note;
+    note.placeholder = "Что изменить в темах, заданиях или visual prompt";
+    note.addEventListener("input", () => {
+      setPackageDecision(packageData.variantId, { note: note.value });
+      renderSummary(currentExam, currentDigitalShift);
+    });
+    noteField.append(createNode("span", "", "Заметка"), note);
+
+    const actions = createNode("div", "approval-decision-actions");
+    const copyButton = createNode("button", "button secondary", "Скопировать решение");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyApprovalDecision(packageData, copyButton));
+    const resetButton = createNode("button", "button ghost", "Сбросить");
+    resetButton.type = "button";
+    resetButton.addEventListener("click", () => {
+      resetPackageDecision(packageData.variantId);
+      renderSummary(currentExam, currentDigitalShift);
+      renderPackages(currentDigitalShift);
+    });
+    actions.append(copyButton, resetButton);
+    panel.append(head, options, noteField, actions);
+    return panel;
+  }
+
   function renderPackage(packageData, familyMap, index) {
+    const decision = getPackageDecision(packageData.variantId);
+    const decisionMeta = getDecisionMeta(decision.decision);
     const section = createNode("article", "approval-package");
     section.id = `package-${packageData.variantId}`;
+    section.dataset.decision = decisionMeta.id;
 
     const head = createNode("div", "approval-package-head");
     const titleWrap = createNode("div");
     titleWrap.append(createNode("p", "overline", `Пакет ${index + 1}`), createNode("h2", "", packageData.title));
-    const status = createNode("div", "approval-status-pill", "Черновик до РП");
+    const status = createNode("div", "approval-status-pill", decisionMeta.status);
+    status.dataset.decision = decisionMeta.id;
     head.append(titleWrap, status);
 
     const topics = createNode("section", "approval-package-block");
@@ -154,7 +305,7 @@
       )
     );
 
-    section.append(head, topics, tasks, log, prompts, assetPlan, criteria);
+    section.append(head, topics, tasks, log, prompts, assetPlan, renderDecisionControls(packageData), criteria);
     return section;
   }
 
@@ -178,6 +329,8 @@
       if (!digitalShift.packages?.length) {
         throw new Error("Digital shift packages are missing");
       }
+      currentExam = exam;
+      currentDigitalShift = digitalShift;
 
       elements.version.textContent = exam.version || "PM01";
       elements.packages.textContent = `${digitalShift.packages.length} цехов`;

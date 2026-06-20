@@ -930,7 +930,7 @@ select:focus {
 
 .approval-summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 12px;
 }
 
@@ -1076,6 +1076,24 @@ select:focus {
   white-space: nowrap;
 }
 
+.approval-status-pill[data-decision="approved_preview"] {
+  border-color: rgba(28, 117, 93, 0.28);
+  background: #eaf7f1;
+  color: var(--green-900);
+}
+
+.approval-status-pill[data-decision="needs_revision"] {
+  border-color: rgba(199, 72, 72, 0.26);
+  background: #fff0f0;
+  color: #922b2b;
+}
+
+.approval-status-pill[data-decision="waiting_rp"] {
+  border-color: rgba(35, 107, 181, 0.24);
+  background: #eef5ff;
+  color: #174a82;
+}
+
 .approval-package-block {
   display: grid;
   gap: 10px;
@@ -1202,6 +1220,70 @@ select:focus {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.42;
+}
+
+.approval-decision-panel {
+  padding: 12px;
+  border: 1px solid rgba(18, 63, 53, 0.14);
+  border-radius: var(--radius);
+  background: #f8fbf9;
+}
+
+.approval-decision-head {
+  display: grid;
+  gap: 4px;
+}
+
+.approval-decision-head span,
+.approval-note-field span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.approval-decision-options,
+.approval-decision-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.approval-decision-button {
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--green-900);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.approval-decision-button.is-active {
+  color: #fff;
+  border-color: var(--green-800);
+  background: var(--green-800);
+}
+
+.approval-decision-button[data-decision="needs_revision"].is-active {
+  border-color: #9a2d2d;
+  background: #9a2d2d;
+}
+
+.approval-decision-button[data-decision="waiting_rp"].is-active {
+  border-color: #174a82;
+  background: #174a82;
+}
+
+.approval-note-field {
+  display: grid;
+  gap: 6px;
+}
+
+.approval-note {
+  min-height: 74px;
+  font-size: 13px;
 }
 
 .approval-empty {
@@ -3654,6 +3736,10 @@ tr[data-attempt-id].is-selected {
 
   .approval-asset-grid {
     grid-template-columns: 1fr;
+  }
+
+  .approval-decision-actions .button {
+    flex: 1 1 160px;
   }
 
   .approval-status-pill {
