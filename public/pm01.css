@@ -1751,6 +1751,13 @@ select:focus {
   align-items: start;
 }
 
+.approval-state-snapshot-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .approval-state-snapshot-head h3 {
   margin: 0 0 4px;
   color: var(--green-900);
@@ -1797,6 +1804,10 @@ select:focus {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.approval-state-file {
+  display: none;
 }
 
 .approval-state-snapshot-status {
@@ -5653,6 +5664,15 @@ tr[data-attempt-id].is-selected {
 
   .approval-rp-actions .button {
     flex: 1 1 160px;
+  }
+
+  .approval-state-snapshot-head-actions {
+    justify-content: flex-start;
+  }
+
+  .approval-state-snapshot-head-actions .button,
+  .approval-state-snapshot-actions .button {
+    flex: 1 1 170px;
   }
 
   .approval-matrix-grid {

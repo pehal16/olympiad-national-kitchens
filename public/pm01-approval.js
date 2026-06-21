@@ -518,6 +518,24 @@
     persistPreviewInspectionState();
   }
 
+  function getSnapshotFileName() {
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    return `pm01-px-approval-snapshot-${stamp}.json`;
+  }
+
+  function downloadTextFile(fileName, text, mimeType = "application/json") {
+    const blob = new Blob([text], { type: `${mimeType};charset=utf-8` });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.rel = "noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+
   async function copyActionPlan(digitalShift, button) {
     try {
       await navigator.clipboard.writeText(buildActionPlanText(digitalShift));
@@ -619,6 +637,21 @@
       button.textContent = "Не удалось скопировать";
       window.setTimeout(() => {
         button.textContent = "Скопировать snapshot";
+      }, 1600);
+    }
+  }
+
+  function downloadApprovalStateSnapshot(digitalShift, button) {
+    try {
+      downloadTextFile(getSnapshotFileName(), JSON.stringify(buildApprovalStateSnapshot(digitalShift), null, 2));
+      button.textContent = "Snapshot скачан";
+      window.setTimeout(() => {
+        button.textContent = "Скачать snapshot";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скачать";
+      window.setTimeout(() => {
+        button.textContent = "Скачать snapshot";
       }, 1600);
     }
   }
@@ -730,7 +763,12 @@
     const exportButton = createNode("button", "button secondary", "Скопировать snapshot");
     exportButton.type = "button";
     exportButton.addEventListener("click", () => copyApprovalStateSnapshot(digitalShift, exportButton));
-    head.append(title, exportButton);
+    const downloadButton = createNode("button", "button secondary", "Скачать snapshot");
+    downloadButton.type = "button";
+    downloadButton.addEventListener("click", () => downloadApprovalStateSnapshot(digitalShift, downloadButton));
+    const headActions = createNode("div", "approval-state-snapshot-head-actions");
+    headActions.append(exportButton, downloadButton);
+    head.append(title, headActions);
 
     const importField = createNode("label", "approval-state-import-field");
     const textarea = createNode("textarea", "approval-state-import");
@@ -755,7 +793,42 @@
         status.textContent = error.message || "Не удалось импортировать snapshot.";
       }
     });
-    actions.append(importButton);
+    const fileInput = createNode("input", "approval-state-file");
+    fileInput.type = "file";
+    fileInput.accept = "application/json,.json";
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) {
+        return;
+      }
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        textarea.value = String(reader.result || "");
+        try {
+          applyApprovalStateSnapshot(textarea.value.trim());
+          textarea.value = "";
+          refreshApprovalOverview();
+          renderPackages(currentDigitalShift);
+          const freshStatus = elements.actionPlan?.querySelector(".approval-state-snapshot-status");
+          if (freshStatus) {
+            freshStatus.textContent = `Snapshot из файла ${file.name} импортирован.`;
+          }
+        } catch (error) {
+          status.textContent = error.message || "Не удалось импортировать snapshot из файла.";
+        } finally {
+          fileInput.value = "";
+        }
+      });
+      reader.addEventListener("error", () => {
+        status.textContent = "Не удалось прочитать JSON-файл snapshot.";
+        fileInput.value = "";
+      });
+      reader.readAsText(file, "utf-8");
+    });
+    const fileButton = createNode("button", "button secondary", "Загрузить snapshot-файл");
+    fileButton.type = "button";
+    fileButton.addEventListener("click", () => fileInput.click());
+    actions.append(importButton, fileButton, fileInput);
     panel.append(head, importField, actions, status);
     return panel;
   }
