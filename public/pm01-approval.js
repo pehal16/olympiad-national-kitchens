@@ -405,6 +405,125 @@
     }
   }
 
+  function isPackageReadyForPreview(packageData) {
+    return getPackageNextAction(packageData).status === "ready";
+  }
+
+  function getPreviewBatchItems(digitalShift) {
+    return (digitalShift.packages || []).filter(isPackageReadyForPreview);
+  }
+
+  function buildPreviewBatchText(digitalShift) {
+    const readyPackages = getPreviewBatchItems(digitalShift);
+    const assetCount = readyPackages.reduce((sum, packageData) => sum + (packageData.previewAssets || []).length, 0);
+    return [
+      "PM01 PX preview generation batch",
+      `generatedAt: ${new Date().toISOString()}`,
+      "scope: approved-preview packages only",
+      "outputUse: preview_only_until_teacher_approval",
+      "inspectionGate: visual_inspection_before_connection",
+      "finalAsset: false",
+      `readyPackages: ${readyPackages.length}/${(digitalShift.packages || []).length}`,
+      `plannedPreviewAssets: ${assetCount}`,
+      "",
+      ...(readyPackages.length
+        ? readyPackages.map((packageData, packageIndex) => {
+            const decision = getPackageDecision(packageData.variantId);
+            const intake = getPackageRpIntake(packageData.variantId);
+            return [
+              `## ${packageIndex + 1}. ${packageData.title}`,
+              `variantId: ${packageData.variantId}`,
+              `teacherDecision: ${decision.decision}`,
+              `teacherNote: ${decision.note || "-"}`,
+              "rpContext:",
+              `  excerpt: ${intake.excerpt || "-"}`,
+              `  confirmedTopics: ${intake.confirmedTopics || "-"}`,
+              "rpTopics:",
+              ...(packageData.rpTopics || []).map((topic) => `- ${topic}`),
+              "",
+              "previewAssets:",
+              ...(packageData.previewAssets || []).map((asset, assetIndex) =>
+                [
+                  `- asset: ${asset.id || `${packageData.variantId}-preview-${assetIndex + 1}`}`,
+                  `  targetPath: ${asset.targetPath}`,
+                  `  aspectRatio: ${asset.aspectRatio || "-"}`,
+                  `  visualPurpose: ${asset.visualPurpose || "-"}`,
+                  `  prompt: ${asset.prompt}`,
+                  `  negativePrompt: ${asset.negativePrompt}`,
+                  "  styleReferences:",
+                  ...(asset.styleReferences || []).map((reference) => `    - ${reference.label}: ${reference.path}`),
+                  "  inspectionChecklist:",
+                  ...(asset.inspectionChecklist || []).map((item) => `    - ${item}`),
+                  `  outputUse: ${asset.outputUse}`,
+                  `  inspectionRequired: ${asset.inspectionRequired === true}`,
+                  `  finalAsset: ${asset.finalAsset === true}`
+                ].join("\n")
+              )
+            ].join("\n");
+          })
+        : ["No packages are ready for preview generation yet."])
+    ].join("\n\n");
+  }
+
+  async function copyPreviewBatch(digitalShift, button) {
+    try {
+      await navigator.clipboard.writeText(buildPreviewBatchText(digitalShift));
+      button.textContent = "Preview batch скопирован";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать preview batch";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать preview batch";
+      }, 1600);
+    }
+  }
+
+  function renderPreviewBatchPanel(digitalShift, readyPackages) {
+    const panel = createNode("section", "approval-preview-batch");
+    const assetCount = readyPackages.reduce((sum, packageData) => sum + (packageData.previewAssets || []).length, 0);
+    const head = createNode("div", "approval-preview-batch-head");
+    const title = createNode("div");
+    title.append(
+      createNode("h3", "", "Preview batch"),
+      createNode(
+        "span",
+        "",
+        readyPackages.length
+          ? `${readyPackages.length} цехов · ${assetCount} planned preview-assets · finalAsset: false`
+          : "Появится после РП/КТП и решения «На preview»"
+      )
+    );
+    const copyButton = createNode("button", "button secondary", "Скопировать preview batch");
+    copyButton.type = "button";
+    copyButton.disabled = readyPackages.length === 0;
+    copyButton.addEventListener("click", () => copyPreviewBatch(digitalShift, copyButton));
+    head.append(title, copyButton);
+
+    const list = createNode("div", "approval-preview-batch-list");
+    if (readyPackages.length) {
+      readyPackages.forEach((packageData) => {
+        const card = createNode("article", "approval-preview-batch-card");
+        card.append(
+          createNode("strong", "", packageData.title),
+          createNode("p", "", "Готово к генерации 1-2 preview с последующим визуальным осмотром."),
+          renderList(
+            (packageData.previewAssets || []).map((asset) => `${asset.id}: ${asset.targetPath}`),
+            "approval-preview-batch-paths"
+          )
+        );
+        list.appendChild(card);
+      });
+    } else {
+      const empty = createNode("p", "approval-preview-batch-empty", "Нет цехов, прошедших gate РП/КТП + «На preview».");
+      list.appendChild(empty);
+    }
+
+    panel.append(head, list);
+    return panel;
+  }
+
   function renderActionPlan(digitalShift) {
     if (!elements.actionPlan) {
       return;
@@ -420,6 +539,7 @@
     const readyCount = actions.filter((item) => item.action.status === "ready").length;
     const pendingCount = actions.filter((item) => item.action.status === "pending").length;
     const blockedCount = actions.filter((item) => item.action.status === "blocked").length;
+    const readyPackages = actions.filter((item) => item.action.status === "ready").map((item) => item.packageData);
 
     const head = createNode("div", "approval-action-head");
     const title = createNode("div", "approval-action-title");
@@ -462,7 +582,7 @@
       grid.appendChild(card);
     });
 
-    elements.actionPlan.append(head, grid);
+    elements.actionPlan.append(head, grid, renderPreviewBatchPanel(digitalShift, readyPackages));
   }
 
   function refreshApprovalOverview() {
