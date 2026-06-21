@@ -13,6 +13,7 @@
   const PM01_RP_INTAKE_STORAGE_KEY = "pm01RpIntakeV1";
   const PM01_PREVIEW_INSPECTION_STORAGE_KEY = "pm01PreviewInspectionV1";
   const PM01_COMPETENCY_REVIEW_STORAGE_KEY = "pm01CompetencyReviewV1";
+  const PM01_INNOVATION_REVIEW_STORAGE_KEY = "pm01InnovationReviewV1";
   const DECISION_OPTIONS = [
     { id: "pending", label: "Черновик", status: "Черновик до РП", detail: "Ожидает рабочую программу или правку формулировок." },
     { id: "approved_preview", label: "На preview", status: "Preview согласован", detail: "Можно генерировать 1-2 предварительных изображения." },
@@ -47,14 +48,22 @@
     { id: "needs_revision", label: "Уточнить", status: "Нужна правка", detail: "Формулировку задания, компетенции или локальную тему нужно уточнить с преподавателем." },
     { id: "not_in_rp", label: "Нет в РП", status: "Нет в РП", detail: "Не подключать финальный контент по этой компетенции без отдельного методического решения." }
   ];
+  const INNOVATION_REVIEW_OPTIONS = [
+    { id: "pending", label: "Черновик", status: "Ждёт решения", detail: "Идея описана, но современность, реализация и уникальность ещё не согласованы." },
+    { id: "approved", label: "Принято", status: "Принято", detail: "Можно использовать как согласованный интерактивный формат для preview workflow." },
+    { id: "needs_revision", label: "Правка", status: "Нужна правка", detail: "Нужно уточнить визуальный сценарий, интерактив, оценивание или методическую формулировку." },
+    { id: "deferred", label: "Отложить", status: "Отложено", detail: "Идея перспективная, но не идёт в ближайший preview/final пакет." }
+  ];
   const REQUIRED_PM01_COMPETENCIES = ["ПК 1.1", "ПК 1.2", "ПК 1.3", "ПК 1.4", "ОК 01", "ОК 02", "ОК 07", "ОК 09", "ОК 10"];
   const decisionOptionsById = new Map(DECISION_OPTIONS.map((option) => [option.id, option]));
   const previewInspectionOptionsById = new Map(PREVIEW_INSPECTION_OPTIONS.map((option) => [option.id, option]));
   const competencyReviewOptionsById = new Map(COMPETENCY_REVIEW_OPTIONS.map((option) => [option.id, option]));
+  const innovationReviewOptionsById = new Map(INNOVATION_REVIEW_OPTIONS.map((option) => [option.id, option]));
   let approvalState = loadApprovalState();
   let rpIntakeState = loadRpIntakeState();
   let previewInspectionState = loadPreviewInspectionState();
   let competencyReviewState = loadCompetencyReviewState();
+  let innovationReviewState = loadInnovationReviewState();
   let currentExam = null;
   let currentDigitalShift = null;
 
@@ -109,6 +118,15 @@
     }
   }
 
+  function loadInnovationReviewState() {
+    try {
+      const stored = window.localStorage.getItem(PM01_INNOVATION_REVIEW_STORAGE_KEY);
+      return stored ? JSON.parse(stored) || {} : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
   function persistApprovalState() {
     try {
       window.localStorage.setItem(PM01_APPROVAL_STORAGE_KEY, JSON.stringify(approvalState));
@@ -141,6 +159,14 @@
     }
   }
 
+  function persistInnovationReviewState() {
+    try {
+      window.localStorage.setItem(PM01_INNOVATION_REVIEW_STORAGE_KEY, JSON.stringify(innovationReviewState));
+    } catch (_) {
+      // Innovation review remains usable in-memory if browser storage is blocked.
+    }
+  }
+
   function getDecisionMeta(decisionId) {
     return decisionOptionsById.get(decisionId) || DECISION_OPTIONS[0];
   }
@@ -151,6 +177,10 @@
 
   function getCompetencyReviewMeta(statusId) {
     return competencyReviewOptionsById.get(statusId) || COMPETENCY_REVIEW_OPTIONS[0];
+  }
+
+  function getInnovationReviewMeta(statusId) {
+    return innovationReviewOptionsById.get(statusId) || INNOVATION_REVIEW_OPTIONS[0];
   }
 
   function getPackageDecision(variantId) {
@@ -243,6 +273,60 @@
     };
   }
 
+  function getPackageInnovationFamilies(packageData) {
+    return uniqueValues([
+      ...(packageData.methodicalMatrix || []).map((row) => row.familyId),
+      ...(packageData.tasks || []).map((task) => task.familyId),
+      ...(packageData.shiftCockpit?.operationTimeline || []).map((step) => step.familyId)
+    ]);
+  }
+
+  function getInnovationReviewItem(variantId, familyId) {
+    const packageState = innovationReviewState[variantId] || {};
+    const stored = packageState[familyId] || {};
+    return {
+      status: stored.status || "pending",
+      note: stored.note || "",
+      updatedAt: stored.updatedAt || null
+    };
+  }
+
+  function setInnovationReviewItem(variantId, familyId, patch) {
+    const packageState = innovationReviewState[variantId] || {};
+    innovationReviewState[variantId] = {
+      ...packageState,
+      [familyId]: {
+        ...getInnovationReviewItem(variantId, familyId),
+        ...patch,
+        updatedAt: new Date().toISOString()
+      }
+    };
+    persistInnovationReviewState();
+  }
+
+  function resetPackageInnovationReview(variantId) {
+    delete innovationReviewState[variantId];
+    persistInnovationReviewState();
+  }
+
+  function getPackageInnovationReviewSummary(packageData) {
+    const familyIds = getPackageInnovationFamilies(packageData);
+    const statuses = familyIds.map((familyId) => getInnovationReviewItem(packageData.variantId, familyId).status);
+    const summary = {
+      total: familyIds.length,
+      approved: statuses.filter((status) => status === "approved").length,
+      pending: statuses.filter((status) => status === "pending").length,
+      needsRevision: statuses.filter((status) => status === "needs_revision").length,
+      deferred: statuses.filter((status) => status === "deferred").length
+    };
+    return {
+      ...summary,
+      ready: summary.total > 0 && summary.approved === summary.total,
+      blocked: summary.needsRevision > 0,
+      deferredOpen: summary.deferred > 0
+    };
+  }
+
   function getAssetInspection(assetId) {
     const stored = previewInspectionState[assetId] || {};
     return {
@@ -303,6 +387,22 @@
     );
   }
 
+  function getInnovationReviewCount(packages) {
+    return packages.reduce(
+      (totals, packageData) => {
+        const summary = getPackageInnovationReviewSummary(packageData);
+        totals.total += summary.total;
+        totals.approved += summary.approved;
+        totals.pending += summary.pending;
+        totals.needsRevision += summary.needsRevision;
+        totals.deferred += summary.deferred;
+        totals.readyPackages += summary.ready ? 1 : 0;
+        return totals;
+      },
+      { total: 0, approved: 0, pending: 0, needsRevision: 0, deferred: 0, readyPackages: 0 }
+    );
+  }
+
   function resetPackageDecision(variantId) {
     delete approvalState[variantId];
     persistApprovalState();
@@ -358,6 +458,7 @@
       const decision = getPackageDecision(packageData.variantId).decision;
       const previewAccepted = isPackagePreviewInspectionAccepted(packageData);
       const competencyReview = getPackageCompetencyReviewSummary(packageData);
+      const innovationReview = getPackageInnovationReviewSummary(packageData);
       const structuralReady =
         (packageData.methodicalMatrix || []).length === familyIds.length &&
         (packageData.tasks || []).length === familyIds.length &&
@@ -376,6 +477,7 @@
         decision,
         previewAccepted,
         competencyReview,
+        innovationReview,
         finalGateStatus: finalGate?.status || "blocked",
         missingFamilies,
         matrixRows: (packageData.methodicalMatrix || []).length,
@@ -402,6 +504,11 @@
       competencyReviewReady: packageAudits.filter((item) => item.competencyReview.ready).length,
       competencyReviewNeedsRevision: packageAudits.reduce((sum, item) => sum + item.competencyReview.needsRevision, 0),
       competencyReviewNotInRp: packageAudits.reduce((sum, item) => sum + item.competencyReview.notInRp, 0),
+      innovationReviewApproved: packageAudits.reduce((sum, item) => sum + item.innovationReview.approved, 0),
+      innovationReviewTotal: packageAudits.reduce((sum, item) => sum + item.innovationReview.total, 0),
+      innovationReviewReady: packageAudits.filter((item) => item.innovationReview.ready).length,
+      innovationReviewNeedsRevision: packageAudits.reduce((sum, item) => sum + item.innovationReview.needsRevision, 0),
+      innovationReviewDeferred: packageAudits.reduce((sum, item) => sum + item.innovationReview.deferred, 0),
       previewReady: packageAudits.filter((item) => item.hasRp && item.decision === "approved_preview").length,
       previewAccepted: packageAudits.filter((item) => item.previewAccepted).length,
       finalAssetsOpen: packageAudits.filter((item) => item.finalGateStatus === "pending").length,
@@ -450,6 +557,9 @@
     const competencyReview = getPackageCompetencyReviewSummary(packageData);
     const competencyReviewReady = competencyReview.ready;
     const competencyReviewBlocked = competencyReview.blocked;
+    const innovationReview = getPackageInnovationReviewSummary(packageData);
+    const innovationReviewReady = innovationReview.ready;
+    const innovationReviewBlocked = innovationReview.blocked;
     const needsRevision = decision === "needs_revision";
     const waitingRp = decision === "waiting_rp";
 
@@ -489,6 +599,16 @@
               : "Подтвердите ОК09 и ОК10 по РП/КТП перед preview batch и final assets."
       },
       {
+        id: "innovation_review",
+        status: innovationReviewReady ? "done" : innovationReviewBlocked ? "blocked" : "pending",
+        title: "Интерактив",
+        detail: innovationReviewReady
+          ? "Современность, визуальная логика, реализация и уникальность всех пяти интерактивных форматов согласованы."
+          : innovationReviewBlocked
+            ? "Есть интерактивные форматы, отправленные на правку перед preview/final workflow."
+            : "Согласуйте, как выглядит и реализуется каждое современное задание, перед preview batch."
+      },
+      {
         id: "preview_plan",
         status: previewPlanReady ? "done" : "blocked",
         title: "Preview-assets",
@@ -510,11 +630,13 @@
       },
       {
         id: "final_assets",
-        status: hasRp && competencyReviewReady && previewApproved && previewAccepted ? "pending" : "blocked",
+        status: hasRp && competencyReviewReady && innovationReviewReady && previewApproved && previewAccepted ? "pending" : "blocked",
         title: "Финальные assets",
-        detail: hasRp && competencyReviewReady && previewApproved && previewAccepted
+        detail: hasRp && competencyReviewReady && innovationReviewReady && previewApproved && previewAccepted
           ? "Preview принят в журнале осмотра. Следующий gate: сгенерировать final files и снова проверить перед подключением."
-          : hasRp && !competencyReviewReady
+          : hasRp && !innovationReviewReady
+            ? "Финальные картинки нельзя подключать, пока интерактивные новшества не согласованы по визуалу, реализации и уникальности."
+            : hasRp && !competencyReviewReady
             ? "Финальные картинки нельзя подключать, пока ОК09 и ОК10 не подтверждены по РП/КТП."
             : hasRp && previewApproved
             ? "Финальные картинки нельзя подключать, пока preview-assets не приняты в журнале визуального осмотра."
@@ -539,6 +661,7 @@
     const decisionCounts = getDecisionCounts(packages);
     const rpIntakeCount = getRpIntakeCount(packages);
     const competencyReviewCount = getCompetencyReviewCount(packages);
+    const innovationReviewCount = getInnovationReviewCount(packages);
     const gateSummaries = packages.map(getPackageGateSummary);
     const blockedGateCount = gateSummaries.reduce((sum, item) => sum + item.blocked, 0);
     const pendingGateCount = gateSummaries.reduce((sum, item) => sum + item.pending, 0);
@@ -576,6 +699,13 @@
       createNode("p", "", `${competencyReviewCount.readyPackages}/${packages.length} цехов закрыли сверку по РП/КТП.`)
     );
     elements.summary.appendChild(competencySummaryCard);
+    const innovationSummaryCard = createNode("article", "approval-summary-card");
+    innovationSummaryCard.append(
+      createNode("span", "", "Интерактив"),
+      createNode("strong", "", `${innovationReviewCount.approved}/${innovationReviewCount.total} принято`),
+      createNode("p", "", `${innovationReviewCount.readyPackages}/${packages.length} цехов согласовали современность, реализацию и уникальность.`)
+    );
+    elements.summary.appendChild(innovationSummaryCard);
     const exportCard = createNode("article", "approval-summary-card approval-summary-action");
     const exportButton = createNode("button", "button secondary", "Скопировать общий gate-отчёт");
     exportButton.type = "button";
@@ -659,6 +789,27 @@
       };
     }
 
+    const innovationReview = getPackageInnovationReviewSummary(packageData);
+    if (innovationReview.blocked) {
+      return {
+        status: "blocked",
+        label: "Интерактив",
+        title: "Уточнить интерактивные новшества",
+        detail: "Один или несколько форматов отправлены на правку. Уточните визуал, механику, анимацию, оценивание или методическую уникальность.",
+        decisionStatus: decisionMeta.status
+      };
+    }
+
+    if (!innovationReview.ready) {
+      return {
+        status: "pending",
+        label: "Интерактив",
+        title: "Согласовать интерактив",
+        detail: "Подтвердите, как выглядят и реализуются современные задания по пяти семействам, прежде чем выпускать preview batch.",
+        decisionStatus: decisionMeta.status
+      };
+    }
+
     if (state.decision === "pending") {
       return {
         status: "pending",
@@ -709,6 +860,7 @@
         const decision = getPackageDecision(packageData.variantId);
         const gateSummary = getPackageGateSummary(packageData);
         const competencyReview = getPackageCompetencyReviewSummary(packageData);
+        const innovationReview = getPackageInnovationReviewSummary(packageData);
         return [
           `${index + 1}. ${packageData.title}`,
           `variantId: ${packageData.variantId}`,
@@ -719,6 +871,8 @@
           `rpIntake: ${hasRpIntake(packageData.variantId) ? "present" : "missing"}`,
           `competencyReview: ${competencyReview.verified}/${competencyReview.total}`,
           `competencyReviewBlocked: ${competencyReview.blocked}`,
+          `innovationReview: ${innovationReview.approved}/${innovationReview.total}`,
+          `innovationReviewBlocked: ${innovationReview.blocked}`,
           `gatesDone: ${gateSummary.done}/${gateSummary.gates.length}`,
           `gatesBlocked: ${gateSummary.blocked}`,
           `gatesPending: ${gateSummary.pending}`
@@ -745,6 +899,10 @@
       `competencyReviewReady: ${audit.competencyReviewReady}/${audit.packages.length}`,
       `competencyReviewNeedsRevision: ${audit.competencyReviewNeedsRevision}`,
       `competencyReviewNotInRp: ${audit.competencyReviewNotInRp}`,
+      `innovationReviewApproved: ${audit.innovationReviewApproved}/${audit.innovationReviewTotal}`,
+      `innovationReviewReady: ${audit.innovationReviewReady}/${audit.packages.length}`,
+      `innovationReviewNeedsRevision: ${audit.innovationReviewNeedsRevision}`,
+      `innovationReviewDeferred: ${audit.innovationReviewDeferred}`,
       `previewDecision: ${audit.previewReady}/${audit.packages.length}`,
       `previewInspectionAccepted: ${audit.previewAccepted}/${audit.packages.length}`,
       `finalAssetGateOpen: ${audit.finalAssetsOpen}/${audit.packages.length}`,
@@ -767,6 +925,10 @@
           `  competencyNeedsRevision: ${item.competencyReview.needsRevision}`,
           `  competencyNotInRp: ${item.competencyReview.notInRp}`,
           `  competencyPending: ${item.competencyReview.pending}`,
+          `  innovationReview: ${item.innovationReview.approved}/${item.innovationReview.total}`,
+          `  innovationNeedsRevision: ${item.innovationReview.needsRevision}`,
+          `  innovationDeferred: ${item.innovationReview.deferred}`,
+          `  innovationPending: ${item.innovationReview.pending}`,
           `  previewDecision: ${item.decision}`,
           `  previewAccepted: ${item.previewAccepted}`,
           `  finalAssetsGate: ${item.finalGateStatus}`,
@@ -822,6 +984,7 @@
       `- previewSlots: ${audit.previewAssets}/${audit.expectedPreviewAssets}`,
       `- rpIntake: ${audit.rpReady}/${packages.length}`,
       `- ok09Ok10Review: ${audit.competencyReviewVerified}/${audit.competencyReviewTotal}`,
+      `- innovationReview: ${audit.innovationReviewApproved}/${audit.innovationReviewTotal}`,
       `- previewDecision: ${audit.previewReady}/${packages.length}`,
       `- previewInspectionAccepted: ${audit.previewAccepted}/${packages.length}`,
       `- finalAssetGateOpen: ${audit.finalAssetsOpen}/${packages.length}`,
@@ -836,6 +999,7 @@
         const intake = getPackageRpIntake(packageData.variantId);
         const packageAudit = audit.packageAudits.find((item) => item.packageData.variantId === packageData.variantId);
         const competencyReview = getPackageCompetencyReviewSummary(packageData);
+        const innovationReview = getPackageInnovationReviewSummary(packageData);
         return [
           `### ${index + 1}. ${packageData.title}`,
           "",
@@ -844,6 +1008,7 @@
           `confirmedTopicsLocal: ${intake.confirmedTopics || "-"}`,
           `competenciesDraft: ${(packageAudit?.competencies || []).join(", ") || "-"}`,
           `ok09Ok10Review: ${competencyReview.verified}/${competencyReview.total}`,
+          `innovationReview: ${innovationReview.approved}/${innovationReview.total}`,
           "",
           "Текущие темы для подтверждения:",
           ...(packageData.rpTopics || []).map((topic) => `- ${topic}`),
@@ -917,13 +1082,15 @@
         approval: PM01_APPROVAL_STORAGE_KEY,
         rpIntake: PM01_RP_INTAKE_STORAGE_KEY,
         previewInspection: PM01_PREVIEW_INSPECTION_STORAGE_KEY,
-        competencyReview: PM01_COMPETENCY_REVIEW_STORAGE_KEY
+        competencyReview: PM01_COMPETENCY_REVIEW_STORAGE_KEY,
+        innovationReview: PM01_INNOVATION_REVIEW_STORAGE_KEY
       },
       state: {
         approvalDecisions: approvalState,
         rpIntake: rpIntakeState,
         previewInspection: previewInspectionState,
-        competencyReview: competencyReviewState
+        competencyReview: competencyReviewState,
+        innovationReview: innovationReviewState
       }
     };
   }
@@ -945,7 +1112,8 @@
       !isPlainObject(state.approvalDecisions) ||
       !isPlainObject(state.rpIntake) ||
       !isPlainObject(state.previewInspection) ||
-      (state.competencyReview !== undefined && !isPlainObject(state.competencyReview))
+      (state.competencyReview !== undefined && !isPlainObject(state.competencyReview)) ||
+      (state.innovationReview !== undefined && !isPlainObject(state.innovationReview))
     ) {
       throw new Error("Snapshot не содержит полный набор local-state данных.");
     }
@@ -953,10 +1121,12 @@
     rpIntakeState = state.rpIntake;
     previewInspectionState = state.previewInspection;
     competencyReviewState = state.competencyReview || {};
+    innovationReviewState = state.innovationReview || {};
     persistApprovalState();
     persistRpIntakeState();
     persistPreviewInspectionState();
     persistCompetencyReviewState();
+    persistInnovationReviewState();
   }
 
   function getSnapshotFileName() {
@@ -1017,11 +1187,13 @@
         ? readyPackages.map((packageData, packageIndex) => {
             const decision = getPackageDecision(packageData.variantId);
             const intake = getPackageRpIntake(packageData.variantId);
+            const innovationReview = getPackageInnovationReviewSummary(packageData);
             return [
               `## ${packageIndex + 1}. ${packageData.title}`,
               `variantId: ${packageData.variantId}`,
               `teacherDecision: ${decision.decision}`,
               `teacherNote: ${decision.note || "-"}`,
+              `innovationReview: ${innovationReview.approved}/${innovationReview.total}`,
               "rpContext:",
               `  excerpt: ${intake.excerpt || "-"}`,
               `  confirmedTopics: ${intake.confirmedTopics || "-"}`,
@@ -1209,6 +1381,12 @@
         audit.competencyReviewVerified === audit.competencyReviewTotal ? "done" : audit.competencyReviewNeedsRevision || audit.competencyReviewNotInRp ? "blocked" : "pending"
       ),
       renderCoverageMetric(
+        "Интерактив",
+        `${audit.innovationReviewApproved}/${audit.innovationReviewTotal}`,
+        "Подтверждает, что визуальная логика, механика, анимация и уникальность современных заданий согласованы.",
+        audit.innovationReviewApproved === audit.innovationReviewTotal ? "done" : audit.innovationReviewNeedsRevision ? "blocked" : "pending"
+      ),
+      renderCoverageMetric(
         "Final gate",
         `${audit.finalAssetsOpen}/${audit.packages.length}`,
         "Открывается только после РП, решения на preview и принятого визуального осмотра.",
@@ -1246,6 +1424,13 @@
           "p",
           "",
           `ОК09/ОК10: ${item.competencyReview.verified}/${item.competencyReview.total} подтверждено · ${item.competencyReview.pending} ждёт · ${item.competencyReview.needsRevision} правок · ${item.competencyReview.notInRp} нет в РП`
+        )
+      );
+      card.append(
+        createNode(
+          "p",
+          "",
+          `Интерактив: ${item.innovationReview.approved}/${item.innovationReview.total} принято · ${item.innovationReview.pending} ждёт · ${item.innovationReview.needsRevision} правок · ${item.innovationReview.deferred} отложено`
         )
       );
       if (item.missingFamilies.length) {
@@ -1845,6 +2030,61 @@
     }
   }
 
+  function buildInnovationReviewReport(packageData, familyMap = new Map(), blueprintMap = new Map()) {
+    const summary = getPackageInnovationReviewSummary(packageData);
+    const familyIds = getPackageInnovationFamilies(packageData);
+    return [
+      "PM01 PX innovation review",
+      `generatedAt: ${new Date().toISOString()}`,
+      `package: ${packageData.title}`,
+      `variantId: ${packageData.variantId}`,
+      `approved: ${summary.approved}/${summary.total}`,
+      `pending: ${summary.pending}`,
+      `needsRevision: ${summary.needsRevision}`,
+      `deferred: ${summary.deferred}`,
+      `ready: ${summary.ready}`,
+      "",
+      "families:",
+      ...familyIds.map((familyId) => {
+        const family = familyMap.get(familyId) || {};
+        const blueprint = blueprintMap.get(familyId) || {};
+        const review = getInnovationReviewItem(packageData.variantId, familyId);
+        const meta = getInnovationReviewMeta(review.status);
+        return [
+          `- family: ${familyId}`,
+          `  title: ${family.title || blueprint.visualMode || familyId}`,
+          `  interaction: ${family.interaction || "-"}`,
+          `  visualMode: ${blueprint.visualMode || "-"}`,
+          `  layout: ${blueprint.layout || "-"}`,
+          `  implementation: ${blueprint.implementation || "-"}`,
+          `  animation: ${blueprint.animation || "-"}`,
+          `  uniqueness: ${blueprint.uniqueness || family.modernity || "-"}`,
+          `  assessment: ${blueprint.assessment || "-"}`,
+          `  approvalQuestion: ${blueprint.approvalQuestion || "-"}`,
+          `  status: ${review.status}`,
+          `  statusLabel: ${meta.status}`,
+          `  updatedAt: ${review.updatedAt || "not_saved"}`,
+          `  note: ${review.note || "-"}`
+        ].join("\n");
+      })
+    ].join("\n");
+  }
+
+  async function copyInnovationReviewReport(packageData, familyMap, blueprintMap, button) {
+    try {
+      await navigator.clipboard.writeText(buildInnovationReviewReport(packageData, familyMap, blueprintMap));
+      button.textContent = "Интерактив скопирован";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать интерактив";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать интерактив";
+      }, 1600);
+    }
+  }
+
   function buildCompetencyReviewReport(packageData) {
     const summary = getPackageCompetencyReviewSummary(packageData);
     return [
@@ -1895,6 +2135,7 @@
     const intake = getPackageRpIntake(packageData.variantId);
     const summary = getPackageGateSummary(packageData);
     const competencyReview = getPackageCompetencyReviewSummary(packageData);
+    const innovationReview = getPackageInnovationReviewSummary(packageData);
     return [
       packageData.title,
       `variantId: ${packageData.variantId}`,
@@ -1903,6 +2144,8 @@
       `rpUpdatedAt: ${intake.updatedAt || "not_saved"}`,
       `competencyReview: ${competencyReview.verified}/${competencyReview.total}`,
       `competencyReviewBlocked: ${competencyReview.blocked}`,
+      `innovationReview: ${innovationReview.approved}/${innovationReview.total}`,
+      `innovationReviewBlocked: ${innovationReview.blocked}`,
       `gatesDone: ${summary.done}/${summary.gates.length}`,
       `gatesBlocked: ${summary.blocked}`,
       `gatesPending: ${summary.pending}`,
@@ -2201,6 +2444,94 @@
     return panel;
   }
 
+  function renderInnovationReviewPanel(packageData, familyMap = new Map(), blueprintMap = new Map()) {
+    const summary = getPackageInnovationReviewSummary(packageData);
+    const panel = createNode("section", "approval-package-block approval-innovation-review");
+    panel.dataset.status = summary.ready ? "approved" : summary.blocked ? "blocked" : summary.deferredOpen ? "deferred" : "pending";
+
+    const head = createNode("div", "approval-innovation-review-head");
+    head.append(
+      createNode("h3", "", "Согласование интерактива"),
+      createNode(
+        "span",
+        "",
+        `${summary.approved}/${summary.total} принято · ${summary.pending} ждёт · ${summary.needsRevision} правок · ${summary.deferred} отложено`
+      )
+    );
+
+    const gateNote = createNode(
+      "p",
+      "approval-innovation-review-gate",
+      "Этот gate фиксирует, как будет выглядеть, работать и проверяться каждое современное задание до preview и финальных assets."
+    );
+
+    const grid = createNode("div", "approval-innovation-review-grid");
+    getPackageInnovationFamilies(packageData).forEach((familyId) => {
+      const family = familyMap.get(familyId) || {};
+      const blueprint = blueprintMap.get(familyId) || {};
+      const matrixRow = (packageData.methodicalMatrix || []).find((row) => row.familyId === familyId) || {};
+      const task = (packageData.tasks || []).find((item) => item.familyId === familyId) || {};
+      const review = getInnovationReviewItem(packageData.variantId, familyId);
+      const meta = getInnovationReviewMeta(review.status);
+      const card = createNode("article", "approval-innovation-review-card");
+      card.dataset.status = review.status;
+      card.dataset.family = familyId;
+      card.append(
+        createNode("span", "approval-innovation-review-status", meta.status),
+        createNode("strong", "", family.title || task.familyTitle || familyId),
+        createNode("p", "", task.title || matrixRow.newFormat || family.interaction || ""),
+        createNode("small", "", `Визуал: ${blueprint.visualMode || matrixRow.newFormat || "-"}`),
+        createNode("em", "", `Реализация: ${blueprint.implementation || "поверх текущего PX visualMode"}`),
+        createNode("p", "", `Современность: ${blueprint.uniqueness || family.modernity || "-"}`),
+        createNode("p", "", `Проверка: ${blueprint.assessment || matrixRow.checkCriterion || "-"}`)
+      );
+
+      const options = createNode("div", "approval-innovation-review-options");
+      INNOVATION_REVIEW_OPTIONS.forEach((option) => {
+        const button = createNode("button", "approval-innovation-review-button", option.label);
+        button.type = "button";
+        button.dataset.status = option.id;
+        button.classList.toggle("is-active", review.status === option.id);
+        button.title = option.detail;
+        button.addEventListener("click", () => {
+          setInnovationReviewItem(packageData.variantId, familyId, { status: option.id });
+          refreshApprovalOverview();
+          renderPackages(currentDigitalShift);
+        });
+        options.appendChild(button);
+      });
+
+      const noteField = createNode("label", "approval-innovation-review-note-field");
+      const note = createNode("textarea", "approval-innovation-review-note");
+      note.value = review.note;
+      note.placeholder = "Что принять, уточнить или отложить: визуал, механика, анимация, критерий, уникальность";
+      note.addEventListener("input", () => {
+        setInnovationReviewItem(packageData.variantId, familyId, { note: note.value });
+        refreshApprovalOverview();
+      });
+      noteField.append(createNode("span", "", "Комментарий по новшеству"), note);
+
+      card.append(options, noteField);
+      grid.appendChild(card);
+    });
+
+    const actions = createNode("div", "approval-innovation-review-actions");
+    const copyButton = createNode("button", "button secondary", "Скопировать интерактив");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyInnovationReviewReport(packageData, familyMap, blueprintMap, copyButton));
+    const resetButton = createNode("button", "button ghost", "Сбросить интерактив");
+    resetButton.type = "button";
+    resetButton.addEventListener("click", () => {
+      resetPackageInnovationReview(packageData.variantId);
+      refreshApprovalOverview();
+      renderPackages(currentDigitalShift);
+    });
+    actions.append(copyButton, resetButton);
+
+    panel.append(head, gateNote, grid, actions);
+    return panel;
+  }
+
   function renderDecisionControls(packageData) {
     const state = getPackageDecision(packageData.variantId);
     const activeMeta = getDecisionMeta(state.decision);
@@ -2329,7 +2660,7 @@
     return panel;
   }
 
-  function renderPackage(packageData, familyMap, index) {
+  function renderPackage(packageData, familyMap, blueprintMap, index) {
     const decision = getPackageDecision(packageData.variantId);
     const decisionMeta = getDecisionMeta(decision.decision);
     const section = createNode("article", "approval-package");
@@ -2417,6 +2748,7 @@
       renderRpIntake(packageData),
       renderCompetencyReviewPanel(packageData),
       renderMethodicalMatrix(packageData),
+      renderInnovationReviewPanel(packageData, familyMap, blueprintMap),
       renderShiftCockpit(packageData),
       tasks,
       log,
@@ -2432,8 +2764,9 @@
   function renderPackages(digitalShift) {
     elements.packagesList.innerHTML = "";
     const familyMap = new Map((digitalShift.families || []).map((family) => [family.id, family]));
+    const blueprintMap = new Map((digitalShift.interactionBlueprints || []).map((blueprint) => [blueprint.familyId, blueprint]));
     (digitalShift.packages || []).forEach((packageData, index) => {
-      elements.packagesList.appendChild(renderPackage(packageData, familyMap, index));
+      elements.packagesList.appendChild(renderPackage(packageData, familyMap, blueprintMap, index));
     });
   }
 

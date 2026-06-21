@@ -2550,6 +2550,7 @@ select:focus {
 .approval-package-block {
   display: grid;
   gap: 10px;
+  scroll-margin-top: 112px;
 }
 
 .approval-package-block h3 {
@@ -3272,6 +3273,215 @@ select:focus {
 }
 
 .approval-competency-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.approval-innovation-review {
+  padding: 12px;
+  border: 1px solid rgba(35, 107, 181, 0.2);
+  border-radius: var(--radius);
+  background: #f7fbff;
+}
+
+.approval-innovation-review[data-status="approved"] {
+  border-color: rgba(28, 117, 93, 0.22);
+  background: #f7fbf9;
+}
+
+.approval-innovation-review[data-status="blocked"] {
+  border-color: rgba(199, 72, 72, 0.24);
+  background: #fff8f8;
+}
+
+.approval-innovation-review[data-status="deferred"] {
+  border-color: rgba(213, 121, 36, 0.24);
+  background: #fffaf3;
+}
+
+.approval-innovation-review-head {
+  display: grid;
+  gap: 4px;
+}
+
+.approval-innovation-review-head span,
+.approval-innovation-review-gate,
+.approval-innovation-review-note-field span {
+  color: #174a82;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.approval-innovation-review[data-status="approved"] .approval-innovation-review-head span,
+.approval-innovation-review[data-status="approved"] .approval-innovation-review-gate,
+.approval-innovation-review[data-status="approved"] .approval-innovation-review-note-field span {
+  color: var(--green-800);
+}
+
+.approval-innovation-review[data-status="blocked"] .approval-innovation-review-head span,
+.approval-innovation-review[data-status="blocked"] .approval-innovation-review-gate,
+.approval-innovation-review[data-status="blocked"] .approval-innovation-review-note-field span {
+  color: #922b2b;
+}
+
+.approval-innovation-review-gate {
+  margin: 0;
+}
+
+.approval-innovation-review-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.approval-innovation-review-card {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-left: 4px solid rgba(35, 107, 181, 0.58);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.approval-innovation-review-card[data-status="approved"] {
+  border-left-color: rgba(28, 117, 93, 0.64);
+  background: #f8fcfa;
+}
+
+.approval-innovation-review-card[data-status="needs_revision"] {
+  border-left-color: rgba(199, 72, 72, 0.64);
+  background: #fffafa;
+}
+
+.approval-innovation-review-card[data-status="deferred"] {
+  border-left-color: rgba(213, 121, 36, 0.62);
+  background: #fffaf3;
+}
+
+.approval-innovation-review-card strong,
+.approval-innovation-review-card p,
+.approval-innovation-review-card small,
+.approval-innovation-review-card em,
+.approval-innovation-review-status {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.approval-innovation-review-status {
+  width: max-content;
+  max-width: 100%;
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: #eef5ff;
+  color: #174a82;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.approval-innovation-review-card[data-status="approved"] .approval-innovation-review-status {
+  background: #eaf7f1;
+  color: var(--green-900);
+}
+
+.approval-innovation-review-card[data-status="needs_revision"] .approval-innovation-review-status {
+  background: #fff0f0;
+  color: #922b2b;
+}
+
+.approval-innovation-review-card[data-status="deferred"] .approval-innovation-review-status {
+  background: #fff2df;
+  color: #8a4a07;
+}
+
+.approval-innovation-review-card strong {
+  color: var(--green-900);
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.approval-innovation-review-card p,
+.approval-innovation-review-card small,
+.approval-innovation-review-card em {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.approval-innovation-review-card em {
+  color: #174a82;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.approval-innovation-review-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.approval-innovation-review-button {
+  min-height: 32px;
+  padding: 6px 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.15;
+  cursor: pointer;
+}
+
+.approval-innovation-review-button.is-active {
+  border-color: rgba(35, 107, 181, 0.42);
+  background: #eef5ff;
+  color: #174a82;
+}
+
+.approval-innovation-review-button[data-status="approved"].is-active {
+  border-color: rgba(28, 117, 93, 0.45);
+  background: #eaf7f1;
+  color: var(--green-900);
+}
+
+.approval-innovation-review-button[data-status="needs_revision"].is-active {
+  border-color: rgba(199, 72, 72, 0.42);
+  background: #fff0f0;
+  color: #922b2b;
+}
+
+.approval-innovation-review-button[data-status="deferred"].is-active {
+  border-color: rgba(213, 121, 36, 0.44);
+  background: #fff2df;
+  color: #8a4a07;
+}
+
+.approval-innovation-review-note-field {
+  display: grid;
+  gap: 5px;
+}
+
+.approval-innovation-review-note {
+  min-height: 76px;
+  resize: vertical;
+  padding: 10px;
+  border: 1px solid rgba(35, 107, 181, 0.22);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.approval-innovation-review-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -6161,6 +6371,14 @@ tr[data-attempt-id].is-selected {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .approval-innovation-review-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .approval-innovation-review-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .digital-shift-cockpit-head,
   .approval-cockpit-head {
     align-items: start;
@@ -6189,6 +6407,10 @@ tr[data-attempt-id].is-selected {
   }
 
   .approval-competency-review-actions .button {
+    flex: 1 1 170px;
+  }
+
+  .approval-innovation-review-actions .button {
     flex: 1 1 170px;
   }
 
