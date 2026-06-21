@@ -513,14 +513,17 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(uiStyles.includes(".approval-task-row"), true);
   assert.equal(uiStyles.includes(".approval-gate-panel"), true);
   assert.equal(uiStyles.includes(".approval-gate-card"), true);
+  assert.equal(uiStyles.includes(".approval-action-plan"), true);
+  assert.equal(uiStyles.includes(".approval-action-card"), true);
   assert.equal(uiStyles.includes(".quality-card"), true);
   assert.equal(uiStyles.includes("@keyframes qualityScan"), true);
   assert.equal(adminHtml.includes("/pm01-approval.html"), true);
   assert.equal(approvalHtml.includes("id=\"approval-packages-list\""), true);
+  assert.equal(approvalHtml.includes("id=\"approval-action-plan\""), true);
   assert.equal(approvalHtml.includes("Согласование PX"), true);
-  assert.equal(approvalHtml.includes("/pm01-approval.js?v=1.0.8"), true);
+  assert.equal(approvalHtml.includes("/pm01-approval.js?v=1.0.9"), true);
   assert.equal(uiHtml.includes("/pm01.js?v=1.0.29"), true);
-  assert.equal(uiHtml.includes("/pm01.css?v=1.0.35"), true);
+  assert.equal(uiHtml.includes("/pm01.css?v=1.0.36"), true);
   assert.equal(uiScript.includes("selectCockpitFamily"), true);
   assert.equal(uiScript.includes("jumpToPracticeFamily"), true);
   assert.equal(uiScript.includes("canOpenPracticeFamily"), true);
@@ -546,6 +549,10 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(approvalScript.includes("copyApprovalDecision"), true);
   assert.equal(approvalScript.includes("copyAllGateReports"), true);
   assert.equal(approvalScript.includes("copyGateReport"), true);
+  assert.equal(approvalScript.includes("getPackageNextAction"), true);
+  assert.equal(approvalScript.includes("copyActionPlan"), true);
+  assert.equal(approvalScript.includes("renderActionPlan"), true);
+  assert.equal(approvalScript.includes("refreshApprovalOverview"), true);
   assert.equal(approvalScript.includes("renderApprovalGates"), true);
   assert.equal(approvalScript.includes("getPackageGateRows"), true);
   assert.equal(approvalScript.includes("copyRpIntake"), true);
@@ -1377,7 +1384,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(studentScript, /retryDelay/);
   assert.match(studentScript, /X-PM01-Duration-Ms/);
   assert.doesNotMatch(studentScript, /readAsDataURL\(blob\)/);
-  assert.match(studentHtml, /pm01\.css\?v=1\.0\.35/);
+  assert.match(studentHtml, /pm01\.css\?v=1\.0\.36/);
   assert.match(studentHtml, /loadPm01Script/);
   assert.match(studentHtml, /pm01\.js\?v=1\.0\.29/);
   assert.match(adminHtml, /export-group-csv/);
@@ -1391,7 +1398,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(adminScript, /api\/admin\/pm01\/exports\/group-csv\/download/);
   assert.match(adminScript, /voiceAudio/);
   assert.match(adminScript, /audioInfo\.audioUrl/);
-  assert.match(adminHtml, /pm01\.css\?v=1\.0\.35/);
+  assert.match(adminHtml, /pm01\.css\?v=1\.0\.36/);
   assert.match(adminHtml, /pm01-approval\.html/);
   assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.18/);
   assert.match(css, /\.voice-queue-list/);

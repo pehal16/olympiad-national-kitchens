@@ -35,7 +35,7 @@ The PM01 exam is an interactive production exam for:
 
 Current PM01 total score contract: 100 points.
 
-Current PM01 implementation version: `1.6.58`.
+Current PM01 implementation version: `1.6.59`.
 
 Methodical baseline for PM01 should stay aligned with the current FГОС СПО 43.01.09 and 43.02.15, especially ПК 1.1-ПК 1.4 and ОК 01, ОК 02, ОК 07, ОК 09, ОК 10. New tasks should remain production-situation tasks: workplace organization, safe equipment use, raw material preparation, semi-finished product processing, quality control, storage conditions, and practical decision-making.
 
@@ -61,6 +61,7 @@ Important current PM01 content change:
 - Version `1.6.56` adds browser-local PM01 PX shift progress in training: students can select task cards, mark cockpit stages as reviewed, see completed timeline/log/task states, and keep the official score/protocol unchanged.
 - Version `1.6.57` links PM01 PX progress to real training answers: completed practice tasks now mark the matching cockpit stage automatically, and the training result screen shows a separate digital-shift journal summary without affecting official scores or protocols.
 - Version `1.6.58` lets students open a specific PX simulator directly from cockpit timeline steps, focus actions, and right-panel family chips in training; official exam routing and scoring stay unchanged.
+- Version `1.6.59` adds a teacher-facing PM01 PX action queue on `/pm01-approval.html`: each shop now shows the next step before preview/final assets, based on RP/KTP intake, teacher decision, notes, and readiness gates.
 - Official exam routes must stay 100 points and 20 questions; training may include practice-only simulators that do not affect protocols or ведомости.
 
 The active student route is mixed across production areas. Students should not manually choose a favorable shop/section for the exam route.

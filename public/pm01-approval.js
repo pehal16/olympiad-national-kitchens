@@ -4,6 +4,7 @@
     packages: document.getElementById("approval-packages"),
     status: document.getElementById("approval-status"),
     summary: document.getElementById("approval-summary"),
+    actionPlan: document.getElementById("approval-action-plan"),
     families: document.getElementById("approval-families"),
     packagesList: document.getElementById("approval-packages-list")
   };
@@ -282,6 +283,194 @@
       exportButton
     );
     elements.summary.appendChild(exportCard);
+  }
+
+  function getPackageNextAction(packageData) {
+    const state = getPackageDecision(packageData.variantId);
+    const decisionMeta = getDecisionMeta(state.decision);
+    const gates = getPackageGateRows(packageData);
+    const structuralBlocker = gates.find(
+      (gate) => (gate.id === "methodical_matrix" || gate.id === "preview_plan") && gate.status === "blocked"
+    );
+    const hasRp = hasRpIntake(packageData.variantId);
+
+    if (structuralBlocker) {
+      return {
+        status: "blocked",
+        label: "Блок",
+        title: "Проверить пакетные данные",
+        detail: `${structuralBlocker.title}: ${structuralBlocker.detail}`,
+        decisionStatus: decisionMeta.status
+      };
+    }
+
+    if (state.decision === "needs_revision") {
+      return {
+        status: "blocked",
+        label: "Правки",
+        title: "Внести правки",
+        detail: state.note.trim() || "Уточните темы, задания или visual prompt перед генерацией preview.",
+        decisionStatus: decisionMeta.status
+      };
+    }
+
+    if (!hasRp) {
+      return {
+        status: "pending",
+        label: "РП",
+        title: state.decision === "waiting_rp" ? "Ждём РП/КТП" : "Добавить РП/КТП",
+        detail: "Вставьте фрагмент РП или уточнённые темы по цеху, затем выберите решение по preview.",
+        decisionStatus: decisionMeta.status
+      };
+    }
+
+    if (state.decision === "waiting_rp") {
+      return {
+        status: "pending",
+        label: "Решение",
+        title: "Снять ожидание РП",
+        detail: "РП уже добавлена локально: переведите пакет на preview или отправьте его на правки.",
+        decisionStatus: decisionMeta.status
+      };
+    }
+
+    if (state.decision === "pending") {
+      return {
+        status: "pending",
+        label: "Решение",
+        title: "Выбрать решение по preview",
+        detail: "РП есть. Подтвердите генерацию 1-2 preview-изображений или зафиксируйте правки.",
+        decisionStatus: decisionMeta.status
+      };
+    }
+
+    if (state.decision === "approved_preview") {
+      return {
+        status: "ready",
+        label: "Preview",
+        title: "Готово к preview",
+        detail: "Можно генерировать 1-2 preview-изображения, осмотреть их и только после утверждения готовить final assets.",
+        decisionStatus: decisionMeta.status
+      };
+    }
+
+    return {
+      status: "pending",
+      label: "Проверка",
+      title: "Проверить статус пакета",
+      detail: "Сверьте РП, решение преподавателя и gate-чеклист перед следующим шагом.",
+      decisionStatus: decisionMeta.status
+    };
+  }
+
+  function buildActionPlanText(digitalShift) {
+    const packages = digitalShift.packages || [];
+    return [
+      "PM01 PX action plan",
+      `generatedAt: ${new Date().toISOString()}`,
+      `packages: ${packages.length}`,
+      "",
+      ...packages.map((packageData, index) => {
+        const action = getPackageNextAction(packageData);
+        const decision = getPackageDecision(packageData.variantId);
+        const gateSummary = getPackageGateSummary(packageData);
+        return [
+          `${index + 1}. ${packageData.title}`,
+          `variantId: ${packageData.variantId}`,
+          `nextAction: ${action.title}`,
+          `actionStatus: ${action.status}`,
+          `detail: ${action.detail}`,
+          `decision: ${decision.decision}`,
+          `rpIntake: ${hasRpIntake(packageData.variantId) ? "present" : "missing"}`,
+          `gatesDone: ${gateSummary.done}/${gateSummary.gates.length}`,
+          `gatesBlocked: ${gateSummary.blocked}`,
+          `gatesPending: ${gateSummary.pending}`
+        ].join("\n");
+      })
+    ].join("\n\n");
+  }
+
+  async function copyActionPlan(digitalShift, button) {
+    try {
+      await navigator.clipboard.writeText(buildActionPlanText(digitalShift));
+      button.textContent = "План скопирован";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать план";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать план";
+      }, 1600);
+    }
+  }
+
+  function renderActionPlan(digitalShift) {
+    if (!elements.actionPlan) {
+      return;
+    }
+    elements.actionPlan.innerHTML = "";
+    const packages = digitalShift.packages || [];
+    const actions = packages.map((packageData) => ({
+      packageData,
+      action: getPackageNextAction(packageData),
+      decision: getPackageDecision(packageData.variantId),
+      gateSummary: getPackageGateSummary(packageData)
+    }));
+    const readyCount = actions.filter((item) => item.action.status === "ready").length;
+    const pendingCount = actions.filter((item) => item.action.status === "pending").length;
+    const blockedCount = actions.filter((item) => item.action.status === "blocked").length;
+
+    const head = createNode("div", "approval-action-head");
+    const title = createNode("div", "approval-action-title");
+    title.append(
+      createNode("p", "overline", "Управление согласованием"),
+      createNode("h2", "", "Очередь следующих действий"),
+      createNode("span", "", `${readyCount} готовы к preview · ${pendingCount} ожидают · ${blockedCount} требуют правки`)
+    );
+    const copyButton = createNode("button", "button secondary", "Скопировать план");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyActionPlan(digitalShift, copyButton));
+    head.append(title, copyButton);
+
+    const grid = createNode("div", "approval-action-grid");
+    actions.forEach(({ packageData, action, decision, gateSummary }, index) => {
+      const card = createNode("article", "approval-action-card");
+      card.dataset.status = action.status;
+      card.dataset.variant = packageData.variantId;
+      card.dataset.decision = decision.decision;
+
+      const status = createNode("span", "approval-action-status", action.label);
+      const link = createNode("a", "approval-action-link", "Перейти к цеху");
+      link.href = `#package-${packageData.variantId}`;
+      const meta = createNode("div", "approval-action-meta");
+      meta.append(
+        createNode("span", "", `Решение: ${action.decisionStatus}`),
+        createNode("span", "", hasRpIntake(packageData.variantId) ? "РП добавлена" : "РП нужна"),
+        createNode("span", "", `Gates: ${gateSummary.done}/${gateSummary.gates.length}`)
+      );
+
+      card.append(
+        status,
+        createNode("small", "", `Пакет ${index + 1}`),
+        createNode("strong", "", packageData.title),
+        createNode("h3", "", action.title),
+        createNode("p", "", action.detail),
+        meta,
+        link
+      );
+      grid.appendChild(card);
+    });
+
+    elements.actionPlan.append(head, grid);
+  }
+
+  function refreshApprovalOverview() {
+    if (!currentExam || !currentDigitalShift) {
+      return;
+    }
+    renderSummary(currentExam, currentDigitalShift);
+    renderActionPlan(currentDigitalShift);
   }
 
   function renderNormativeAnchors(anchors) {
@@ -798,7 +987,7 @@
     excerpt.placeholder = "Фрагмент РП, КТП или рабочей программы по этому цеху";
     excerpt.addEventListener("input", () => {
       setPackageRpIntake(packageData.variantId, { excerpt: excerpt.value });
-      renderSummary(currentExam, currentDigitalShift);
+      refreshApprovalOverview();
       refreshPackageGates(packageData);
     });
     excerptField.append(createNode("span", "", "Фрагмент РП"), excerpt);
@@ -809,7 +998,7 @@
     confirmedTopics.placeholder = "Уточнённые темы после сверки с РП";
     confirmedTopics.addEventListener("input", () => {
       setPackageRpIntake(packageData.variantId, { confirmedTopics: confirmedTopics.value });
-      renderSummary(currentExam, currentDigitalShift);
+      refreshApprovalOverview();
       refreshPackageGates(packageData);
     });
     confirmedField.append(createNode("span", "", "Уточнённые темы"), confirmedTopics);
@@ -822,7 +1011,7 @@
     resetButton.type = "button";
     resetButton.addEventListener("click", () => {
       resetPackageRpIntake(packageData.variantId);
-      renderSummary(currentExam, currentDigitalShift);
+      refreshApprovalOverview();
       renderPackages(currentDigitalShift);
     });
     actions.append(copyButton, resetButton);
@@ -845,7 +1034,7 @@
       button.classList.toggle("is-active", state.decision === option.id);
       button.addEventListener("click", () => {
         setPackageDecision(packageData.variantId, { decision: option.id });
-        renderSummary(currentExam, currentDigitalShift);
+        refreshApprovalOverview();
         renderPackages(currentDigitalShift);
       });
       options.appendChild(button);
@@ -857,7 +1046,7 @@
     note.placeholder = "Что изменить в темах, заданиях или visual prompt";
     note.addEventListener("input", () => {
       setPackageDecision(packageData.variantId, { note: note.value });
-      renderSummary(currentExam, currentDigitalShift);
+      refreshApprovalOverview();
     });
     noteField.append(createNode("span", "", "Заметка"), note);
 
@@ -869,7 +1058,7 @@
     resetButton.type = "button";
     resetButton.addEventListener("click", () => {
       resetPackageDecision(packageData.variantId);
-      renderSummary(currentExam, currentDigitalShift);
+      refreshApprovalOverview();
       renderPackages(currentDigitalShift);
     });
     actions.append(copyButton, resetButton);
@@ -1001,7 +1190,7 @@
       elements.version.textContent = exam.version || "PM01";
       elements.packages.textContent = `${digitalShift.packages.length} цехов`;
       elements.status.textContent = "готово";
-      renderSummary(exam, digitalShift);
+      refreshApprovalOverview();
       renderFamilies(
         digitalShift.families || [],
         digitalShift.interactionBlueprints || [],

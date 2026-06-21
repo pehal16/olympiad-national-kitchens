@@ -168,7 +168,7 @@ async function main() {
   const student = await getText("/pm01.html");
   assert(student.response.ok, `/pm01.html returned ${student.response.status}`);
   assert(student.text.includes("/pm01.js?v=1.0.29"), "/pm01.html does not include current student JS");
-  assert(student.text.includes("/pm01.css?v=1.0.35"), "/pm01.html does not include current CSS");
+  assert(student.text.includes("/pm01.css?v=1.0.36"), "/pm01.html does not include current CSS");
   checks.push({ route: "/pm01.html", status: student.response.status, bytes: student.text.length });
 
   const admin = await getText("/pm01-admin.html");
@@ -178,8 +178,8 @@ async function main() {
 
   const approval = await getText("/pm01-approval.html");
   assert(approval.response.ok, `/pm01-approval.html returned ${approval.response.status}`);
-  assert(approval.text.includes("/pm01.css?v=1.0.35"), "/pm01-approval.html does not include current CSS");
-  assert(approval.text.includes("/pm01-approval.js?v=1.0.8"), "/pm01-approval.html does not include current approval JS");
+  assert(approval.text.includes("/pm01.css?v=1.0.36"), "/pm01-approval.html does not include current CSS");
+  assert(approval.text.includes("/pm01-approval.js?v=1.0.9"), "/pm01-approval.html does not include current approval JS");
   assert(approval.text.includes("Согласование PX"), "/pm01-approval.html does not include approval title");
   checks.push({ route: "/pm01-approval.html", status: approval.response.status, bytes: approval.text.length });
 
