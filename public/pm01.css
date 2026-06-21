@@ -3090,6 +3090,193 @@ select:focus {
   gap: 8px;
 }
 
+.approval-competency-review {
+  padding: 12px;
+  border: 1px solid rgba(213, 121, 36, 0.2);
+  border-radius: var(--radius);
+  background: #fffaf3;
+}
+
+.approval-competency-review[data-status="verified"] {
+  border-color: rgba(28, 117, 93, 0.22);
+  background: #f7fbf9;
+}
+
+.approval-competency-review[data-status="blocked"] {
+  border-color: rgba(199, 72, 72, 0.24);
+  background: #fff8f8;
+}
+
+.approval-competency-review-head {
+  display: grid;
+  gap: 4px;
+}
+
+.approval-competency-review-head span,
+.approval-competency-review-gate,
+.approval-competency-review-note-field span {
+  color: #74501c;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.approval-competency-review[data-status="verified"] .approval-competency-review-head span,
+.approval-competency-review[data-status="verified"] .approval-competency-review-gate,
+.approval-competency-review[data-status="verified"] .approval-competency-review-note-field span {
+  color: var(--green-800);
+}
+
+.approval-competency-review[data-status="blocked"] .approval-competency-review-head span,
+.approval-competency-review[data-status="blocked"] .approval-competency-review-gate,
+.approval-competency-review[data-status="blocked"] .approval-competency-review-note-field span {
+  color: #922b2b;
+}
+
+.approval-competency-review-gate {
+  margin: 0;
+}
+
+.approval-competency-review-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.approval-competency-review-card {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-left: 4px solid rgba(213, 121, 36, 0.56);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.approval-competency-review-card[data-status="verified"] {
+  border-left-color: rgba(28, 117, 93, 0.64);
+  background: #f8fcfa;
+}
+
+.approval-competency-review-card[data-status="needs_revision"],
+.approval-competency-review-card[data-status="not_in_rp"] {
+  border-left-color: rgba(199, 72, 72, 0.64);
+  background: #fffafa;
+}
+
+.approval-competency-review-card strong,
+.approval-competency-review-card p,
+.approval-competency-review-status {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.approval-competency-review-status {
+  width: max-content;
+  max-width: 100%;
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: #fff2df;
+  color: #8a4a07;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.approval-competency-review-card[data-status="verified"] .approval-competency-review-status {
+  background: #eaf7f1;
+  color: var(--green-900);
+}
+
+.approval-competency-review-card[data-status="needs_revision"] .approval-competency-review-status,
+.approval-competency-review-card[data-status="not_in_rp"] .approval-competency-review-status {
+  background: #fff0f0;
+  color: #922b2b;
+}
+
+.approval-competency-review-card strong {
+  color: var(--green-900);
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.approval-competency-review-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.approval-competency-review-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.approval-competency-review-button {
+  min-height: 32px;
+  padding: 6px 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.15;
+  cursor: pointer;
+}
+
+.approval-competency-review-button.is-active {
+  border-color: rgba(213, 121, 36, 0.44);
+  background: #fff2df;
+  color: #8a4a07;
+}
+
+.approval-competency-review-button[data-status="verified"].is-active {
+  border-color: rgba(28, 117, 93, 0.45);
+  background: #eaf7f1;
+  color: var(--green-900);
+}
+
+.approval-competency-review-button[data-status="needs_revision"].is-active,
+.approval-competency-review-button[data-status="not_in_rp"].is-active {
+  border-color: rgba(199, 72, 72, 0.42);
+  background: #fff0f0;
+  color: #922b2b;
+}
+
+.approval-competency-review-button:disabled,
+.approval-competency-review-note:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.approval-competency-review-note-field {
+  display: grid;
+  gap: 5px;
+}
+
+.approval-competency-review-note {
+  min-height: 76px;
+  resize: vertical;
+  padding: 10px;
+  border: 1px solid rgba(213, 121, 36, 0.22);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.approval-competency-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .approval-methodical-matrix {
   padding: 12px;
   border: 1px solid rgba(18, 63, 53, 0.16);
@@ -5966,6 +6153,14 @@ tr[data-attempt-id].is-selected {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .approval-competency-review-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .approval-competency-review-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .digital-shift-cockpit-head,
   .approval-cockpit-head {
     align-items: start;
@@ -5991,6 +6186,10 @@ tr[data-attempt-id].is-selected {
 
   .approval-rp-actions .button {
     flex: 1 1 160px;
+  }
+
+  .approval-competency-review-actions .button {
+    flex: 1 1 170px;
   }
 
   .approval-rp-request-actions {

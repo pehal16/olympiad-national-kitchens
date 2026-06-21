@@ -12,6 +12,7 @@
   const PM01_APPROVAL_STORAGE_KEY = "pm01ApprovalDecisionsV1";
   const PM01_RP_INTAKE_STORAGE_KEY = "pm01RpIntakeV1";
   const PM01_PREVIEW_INSPECTION_STORAGE_KEY = "pm01PreviewInspectionV1";
+  const PM01_COMPETENCY_REVIEW_STORAGE_KEY = "pm01CompetencyReviewV1";
   const DECISION_OPTIONS = [
     { id: "pending", label: "Черновик", status: "Черновик до РП", detail: "Ожидает рабочую программу или правку формулировок." },
     { id: "approved_preview", label: "На preview", status: "Preview согласован", detail: "Можно генерировать 1-2 предварительных изображения." },
@@ -24,12 +25,36 @@
     { id: "needs_revision", label: "Правка", status: "Нужна правка", detail: "Нужно уточнить prompt, ракурс, сырьё, санитарный контекст или композицию." },
     { id: "rejected_preview", label: "Отклонить", status: "Preview отклонено", detail: "Не использовать для final asset; требуется новая генерация." }
   ];
+  const COMPETENCY_REVIEW_ITEMS = [
+    {
+      id: "ok09",
+      label: "ОК 09",
+      title: "Цифровая документация смены",
+      detail: "Проверяем, что РП/КТП поддерживает работу с цифровой документацией, журналами, маркировкой и производственными данными.",
+      placeholder: "Где в РП/КТП отражены цифровые журналы, маркировка, производственная информация или работа с документацией"
+    },
+    {
+      id: "ok10",
+      label: "ОК 10",
+      title: "Профессиональная коммуникация",
+      detail: "Проверяем, что РП/КТП поддерживает профессиональную терминологию, коммуникацию на смене и при необходимости элементы иностранного языка.",
+      placeholder: "Где в РП/КТП отражены профессиональная терминология, коммуникация, инструкции, заявки или иностранный язык"
+    }
+  ];
+  const COMPETENCY_REVIEW_OPTIONS = [
+    { id: "pending", label: "Ждёт РП", status: "Ждёт сверку", detail: "Сначала нужен фрагмент РП/КТП или подтверждённые темы цеха." },
+    { id: "verified", label: "Подтверждено", status: "Подтверждено РП", detail: "Можно использовать как методическое основание для preview и финальных формулировок." },
+    { id: "needs_revision", label: "Уточнить", status: "Нужна правка", detail: "Формулировку задания, компетенции или локальную тему нужно уточнить с преподавателем." },
+    { id: "not_in_rp", label: "Нет в РП", status: "Нет в РП", detail: "Не подключать финальный контент по этой компетенции без отдельного методического решения." }
+  ];
   const REQUIRED_PM01_COMPETENCIES = ["ПК 1.1", "ПК 1.2", "ПК 1.3", "ПК 1.4", "ОК 01", "ОК 02", "ОК 07", "ОК 09", "ОК 10"];
   const decisionOptionsById = new Map(DECISION_OPTIONS.map((option) => [option.id, option]));
   const previewInspectionOptionsById = new Map(PREVIEW_INSPECTION_OPTIONS.map((option) => [option.id, option]));
+  const competencyReviewOptionsById = new Map(COMPETENCY_REVIEW_OPTIONS.map((option) => [option.id, option]));
   let approvalState = loadApprovalState();
   let rpIntakeState = loadRpIntakeState();
   let previewInspectionState = loadPreviewInspectionState();
+  let competencyReviewState = loadCompetencyReviewState();
   let currentExam = null;
   let currentDigitalShift = null;
 
@@ -75,6 +100,15 @@
     }
   }
 
+  function loadCompetencyReviewState() {
+    try {
+      const stored = window.localStorage.getItem(PM01_COMPETENCY_REVIEW_STORAGE_KEY);
+      return stored ? JSON.parse(stored) || {} : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
   function persistApprovalState() {
     try {
       window.localStorage.setItem(PM01_APPROVAL_STORAGE_KEY, JSON.stringify(approvalState));
@@ -99,12 +133,24 @@
     }
   }
 
+  function persistCompetencyReviewState() {
+    try {
+      window.localStorage.setItem(PM01_COMPETENCY_REVIEW_STORAGE_KEY, JSON.stringify(competencyReviewState));
+    } catch (_) {
+      // Competency review remains usable in-memory if browser storage is blocked.
+    }
+  }
+
   function getDecisionMeta(decisionId) {
     return decisionOptionsById.get(decisionId) || DECISION_OPTIONS[0];
   }
 
   function getPreviewInspectionMeta(statusId) {
     return previewInspectionOptionsById.get(statusId) || PREVIEW_INSPECTION_OPTIONS[0];
+  }
+
+  function getCompetencyReviewMeta(statusId) {
+    return competencyReviewOptionsById.get(statusId) || COMPETENCY_REVIEW_OPTIONS[0];
   }
 
   function getPackageDecision(variantId) {
@@ -153,6 +199,50 @@
     return Boolean(intake.excerpt.trim() || intake.confirmedTopics.trim());
   }
 
+  function getCompetencyReviewItem(variantId, itemId) {
+    const packageState = competencyReviewState[variantId] || {};
+    const stored = packageState[itemId] || {};
+    return {
+      status: stored.status || "pending",
+      note: stored.note || "",
+      updatedAt: stored.updatedAt || null
+    };
+  }
+
+  function setCompetencyReviewItem(variantId, itemId, patch) {
+    const packageState = competencyReviewState[variantId] || {};
+    competencyReviewState[variantId] = {
+      ...packageState,
+      [itemId]: {
+        ...getCompetencyReviewItem(variantId, itemId),
+        ...patch,
+        updatedAt: new Date().toISOString()
+      }
+    };
+    persistCompetencyReviewState();
+  }
+
+  function resetPackageCompetencyReview(variantId) {
+    delete competencyReviewState[variantId];
+    persistCompetencyReviewState();
+  }
+
+  function getPackageCompetencyReviewSummary(packageData) {
+    const statuses = COMPETENCY_REVIEW_ITEMS.map((item) => getCompetencyReviewItem(packageData.variantId, item.id).status);
+    const summary = {
+      total: COMPETENCY_REVIEW_ITEMS.length,
+      verified: statuses.filter((status) => status === "verified").length,
+      pending: statuses.filter((status) => status === "pending").length,
+      needsRevision: statuses.filter((status) => status === "needs_revision").length,
+      notInRp: statuses.filter((status) => status === "not_in_rp").length
+    };
+    return {
+      ...summary,
+      ready: summary.total > 0 && summary.verified === summary.total,
+      blocked: summary.needsRevision > 0 || summary.notInRp > 0
+    };
+  }
+
   function getAssetInspection(assetId) {
     const stored = previewInspectionState[assetId] || {};
     return {
@@ -195,6 +285,22 @@
 
   function getRpIntakeCount(packages) {
     return packages.filter((packageData) => hasRpIntake(packageData.variantId)).length;
+  }
+
+  function getCompetencyReviewCount(packages) {
+    return packages.reduce(
+      (totals, packageData) => {
+        const summary = getPackageCompetencyReviewSummary(packageData);
+        totals.total += summary.total;
+        totals.verified += summary.verified;
+        totals.pending += summary.pending;
+        totals.needsRevision += summary.needsRevision;
+        totals.notInRp += summary.notInRp;
+        totals.readyPackages += summary.ready ? 1 : 0;
+        return totals;
+      },
+      { total: 0, verified: 0, pending: 0, needsRevision: 0, notInRp: 0, readyPackages: 0 }
+    );
   }
 
   function resetPackageDecision(variantId) {
@@ -251,6 +357,7 @@
       const hasRp = hasRpIntake(packageData.variantId);
       const decision = getPackageDecision(packageData.variantId).decision;
       const previewAccepted = isPackagePreviewInspectionAccepted(packageData);
+      const competencyReview = getPackageCompetencyReviewSummary(packageData);
       const structuralReady =
         (packageData.methodicalMatrix || []).length === familyIds.length &&
         (packageData.tasks || []).length === familyIds.length &&
@@ -268,6 +375,7 @@
         hasRp,
         decision,
         previewAccepted,
+        competencyReview,
         finalGateStatus: finalGate?.status || "blocked",
         missingFamilies,
         matrixRows: (packageData.methodicalMatrix || []).length,
@@ -289,6 +397,11 @@
       packageAudits,
       structuralReady: packageAudits.filter((item) => item.structuralReady).length,
       rpReady: packageAudits.filter((item) => item.hasRp).length,
+      competencyReviewVerified: packageAudits.reduce((sum, item) => sum + item.competencyReview.verified, 0),
+      competencyReviewTotal: packageAudits.reduce((sum, item) => sum + item.competencyReview.total, 0),
+      competencyReviewReady: packageAudits.filter((item) => item.competencyReview.ready).length,
+      competencyReviewNeedsRevision: packageAudits.reduce((sum, item) => sum + item.competencyReview.needsRevision, 0),
+      competencyReviewNotInRp: packageAudits.reduce((sum, item) => sum + item.competencyReview.notInRp, 0),
       previewReady: packageAudits.filter((item) => item.hasRp && item.decision === "approved_preview").length,
       previewAccepted: packageAudits.filter((item) => item.previewAccepted).length,
       finalAssetsOpen: packageAudits.filter((item) => item.finalGateStatus === "pending").length,
@@ -334,6 +447,9 @@
       );
     const previewApproved = decision === "approved_preview";
     const previewAccepted = isPackagePreviewInspectionAccepted(packageData);
+    const competencyReview = getPackageCompetencyReviewSummary(packageData);
+    const competencyReviewReady = competencyReview.ready;
+    const competencyReviewBlocked = competencyReview.blocked;
     const needsRevision = decision === "needs_revision";
     const waitingRp = decision === "waiting_rp";
 
@@ -361,6 +477,18 @@
           : "Финальные темы и официальные формулировки ждут фрагмент РП/КТП."
       },
       {
+        id: "competency_review",
+        status: !hasRp ? "pending" : competencyReviewReady ? "done" : competencyReviewBlocked ? "blocked" : "pending",
+        title: "ОК09/ОК10",
+        detail: !hasRp
+          ? "Сверка ОК09/ОК10 включится после фрагмента РП/КТП."
+          : competencyReviewReady
+            ? "ОК09 и ОК10 подтверждены по РП/КТП локально для этого цеха."
+            : competencyReviewBlocked
+              ? "Есть методическое расхождение: ОК09/ОК10 требуют уточнения или не найдены в РП."
+              : "Подтвердите ОК09 и ОК10 по РП/КТП перед preview batch и final assets."
+      },
+      {
         id: "preview_plan",
         status: previewPlanReady ? "done" : "blocked",
         title: "Preview-assets",
@@ -382,11 +510,13 @@
       },
       {
         id: "final_assets",
-        status: hasRp && previewApproved && previewAccepted ? "pending" : "blocked",
+        status: hasRp && competencyReviewReady && previewApproved && previewAccepted ? "pending" : "blocked",
         title: "Финальные assets",
-        detail: hasRp && previewApproved && previewAccepted
+        detail: hasRp && competencyReviewReady && previewApproved && previewAccepted
           ? "Preview принят в журнале осмотра. Следующий gate: сгенерировать final files и снова проверить перед подключением."
-          : hasRp && previewApproved
+          : hasRp && !competencyReviewReady
+            ? "Финальные картинки нельзя подключать, пока ОК09 и ОК10 не подтверждены по РП/КТП."
+            : hasRp && previewApproved
             ? "Финальные картинки нельзя подключать, пока preview-assets не приняты в журнале визуального осмотра."
             : "Финальные картинки нельзя подключать без РП/КТП и утверждённого preview."
       }
@@ -408,6 +538,7 @@
     const packages = digitalShift.packages || [];
     const decisionCounts = getDecisionCounts(packages);
     const rpIntakeCount = getRpIntakeCount(packages);
+    const competencyReviewCount = getCompetencyReviewCount(packages);
     const gateSummaries = packages.map(getPackageGateSummary);
     const blockedGateCount = gateSummaries.reduce((sum, item) => sum + item.blocked, 0);
     const pendingGateCount = gateSummaries.reduce((sum, item) => sum + item.pending, 0);
@@ -438,6 +569,13 @@
       card.append(createNode("span", "", label), createNode("strong", "", value), createNode("p", "", detail));
       elements.summary.appendChild(card);
     });
+    const competencySummaryCard = createNode("article", "approval-summary-card");
+    competencySummaryCard.append(
+      createNode("span", "", "ОК09/ОК10"),
+      createNode("strong", "", `${competencyReviewCount.verified}/${competencyReviewCount.total} подтверждено`),
+      createNode("p", "", `${competencyReviewCount.readyPackages}/${packages.length} цехов закрыли сверку по РП/КТП.`)
+    );
+    elements.summary.appendChild(competencySummaryCard);
     const exportCard = createNode("article", "approval-summary-card approval-summary-action");
     const exportButton = createNode("button", "button secondary", "Скопировать общий gate-отчёт");
     exportButton.type = "button";
@@ -500,6 +638,27 @@
       };
     }
 
+    const competencyReview = getPackageCompetencyReviewSummary(packageData);
+    if (competencyReview.blocked) {
+      return {
+        status: "blocked",
+        label: "ОК",
+        title: "Уточнить ОК09/ОК10",
+        detail: "В сверке есть статус «Уточнить» или «Нет в РП». Перед preview/final нужно закрыть методическое расхождение.",
+        decisionStatus: decisionMeta.status
+      };
+    }
+
+    if (!competencyReview.ready) {
+      return {
+        status: "pending",
+        label: "ОК",
+        title: "Сверить ОК09/ОК10",
+        detail: "РП/КТП уже добавлена локально. Подтвердите ОК09 и ОК10 для этого цеха, затем выбирайте preview или фиксируйте правки.",
+        decisionStatus: decisionMeta.status
+      };
+    }
+
     if (state.decision === "pending") {
       return {
         status: "pending",
@@ -549,6 +708,7 @@
         const action = getPackageNextAction(packageData);
         const decision = getPackageDecision(packageData.variantId);
         const gateSummary = getPackageGateSummary(packageData);
+        const competencyReview = getPackageCompetencyReviewSummary(packageData);
         return [
           `${index + 1}. ${packageData.title}`,
           `variantId: ${packageData.variantId}`,
@@ -557,6 +717,8 @@
           `detail: ${action.detail}`,
           `decision: ${decision.decision}`,
           `rpIntake: ${hasRpIntake(packageData.variantId) ? "present" : "missing"}`,
+          `competencyReview: ${competencyReview.verified}/${competencyReview.total}`,
+          `competencyReviewBlocked: ${competencyReview.blocked}`,
           `gatesDone: ${gateSummary.done}/${gateSummary.gates.length}`,
           `gatesBlocked: ${gateSummary.blocked}`,
           `gatesPending: ${gateSummary.pending}`
@@ -579,6 +741,10 @@
       `visualRubricStatus: ${audit.visualRubricStatus}`,
       `competenciesCovered: ${audit.coveredCompetencies}/${audit.competencyCoverage.length}`,
       `rpIntake: ${audit.rpReady}/${audit.packages.length}`,
+      `competencyReviewVerified: ${audit.competencyReviewVerified}/${audit.competencyReviewTotal}`,
+      `competencyReviewReady: ${audit.competencyReviewReady}/${audit.packages.length}`,
+      `competencyReviewNeedsRevision: ${audit.competencyReviewNeedsRevision}`,
+      `competencyReviewNotInRp: ${audit.competencyReviewNotInRp}`,
       `previewDecision: ${audit.previewReady}/${audit.packages.length}`,
       `previewInspectionAccepted: ${audit.previewAccepted}/${audit.packages.length}`,
       `finalAssetGateOpen: ${audit.finalAssetsOpen}/${audit.packages.length}`,
@@ -597,6 +763,10 @@
           `  tasks: ${item.tasks}/${audit.familyIds.length}`,
           `  previewAssets: ${item.previewAssets}/2`,
           `  rpIntake: ${item.hasRp ? "present" : "missing"}`,
+          `  competencyReview: ${item.competencyReview.verified}/${item.competencyReview.total}`,
+          `  competencyNeedsRevision: ${item.competencyReview.needsRevision}`,
+          `  competencyNotInRp: ${item.competencyReview.notInRp}`,
+          `  competencyPending: ${item.competencyReview.pending}`,
           `  previewDecision: ${item.decision}`,
           `  previewAccepted: ${item.previewAccepted}`,
           `  finalAssetsGate: ${item.finalGateStatus}`,
@@ -651,6 +821,7 @@
       `- methodicalMatrix: ${audit.matrixRows}/${audit.expectedMatrixRows}`,
       `- previewSlots: ${audit.previewAssets}/${audit.expectedPreviewAssets}`,
       `- rpIntake: ${audit.rpReady}/${packages.length}`,
+      `- ok09Ok10Review: ${audit.competencyReviewVerified}/${audit.competencyReviewTotal}`,
       `- previewDecision: ${audit.previewReady}/${packages.length}`,
       `- previewInspectionAccepted: ${audit.previewAccepted}/${packages.length}`,
       `- finalAssetGateOpen: ${audit.finalAssetsOpen}/${packages.length}`,
@@ -664,6 +835,7 @@
       ...packages.map((packageData, index) => {
         const intake = getPackageRpIntake(packageData.variantId);
         const packageAudit = audit.packageAudits.find((item) => item.packageData.variantId === packageData.variantId);
+        const competencyReview = getPackageCompetencyReviewSummary(packageData);
         return [
           `### ${index + 1}. ${packageData.title}`,
           "",
@@ -671,6 +843,7 @@
           `rpIntake: ${hasRpIntake(packageData.variantId) ? "есть локально" : "нужен фрагмент РП/КТП"}`,
           `confirmedTopicsLocal: ${intake.confirmedTopics || "-"}`,
           `competenciesDraft: ${(packageAudit?.competencies || []).join(", ") || "-"}`,
+          `ok09Ok10Review: ${competencyReview.verified}/${competencyReview.total}`,
           "",
           "Текущие темы для подтверждения:",
           ...(packageData.rpTopics || []).map((topic) => `- ${topic}`),
@@ -743,12 +916,14 @@
       storageKeys: {
         approval: PM01_APPROVAL_STORAGE_KEY,
         rpIntake: PM01_RP_INTAKE_STORAGE_KEY,
-        previewInspection: PM01_PREVIEW_INSPECTION_STORAGE_KEY
+        previewInspection: PM01_PREVIEW_INSPECTION_STORAGE_KEY,
+        competencyReview: PM01_COMPETENCY_REVIEW_STORAGE_KEY
       },
       state: {
         approvalDecisions: approvalState,
         rpIntake: rpIntakeState,
-        previewInspection: previewInspectionState
+        previewInspection: previewInspectionState,
+        competencyReview: competencyReviewState
       }
     };
   }
@@ -766,15 +941,22 @@
       throw new Error("Неверный формат snapshot PM01 PX.");
     }
     const state = parsed.state || {};
-    if (!isPlainObject(state.approvalDecisions) || !isPlainObject(state.rpIntake) || !isPlainObject(state.previewInspection)) {
+    if (
+      !isPlainObject(state.approvalDecisions) ||
+      !isPlainObject(state.rpIntake) ||
+      !isPlainObject(state.previewInspection) ||
+      (state.competencyReview !== undefined && !isPlainObject(state.competencyReview))
+    ) {
       throw new Error("Snapshot не содержит полный набор local-state данных.");
     }
     approvalState = state.approvalDecisions;
     rpIntakeState = state.rpIntake;
     previewInspectionState = state.previewInspection;
+    competencyReviewState = state.competencyReview || {};
     persistApprovalState();
     persistRpIntakeState();
     persistPreviewInspectionState();
+    persistCompetencyReviewState();
   }
 
   function getSnapshotFileName() {
@@ -1021,6 +1203,12 @@
         audit.rpReady === audit.packages.length ? "done" : "pending"
       ),
       renderCoverageMetric(
+        "ОК09/ОК10 РП",
+        `${audit.competencyReviewVerified}/${audit.competencyReviewTotal}`,
+        "Локальная сверка подтверждает, что цифровая документация и профессиональная коммуникация есть в РП/КТП.",
+        audit.competencyReviewVerified === audit.competencyReviewTotal ? "done" : audit.competencyReviewNeedsRevision || audit.competencyReviewNotInRp ? "blocked" : "pending"
+      ),
+      renderCoverageMetric(
         "Final gate",
         `${audit.finalAssetsOpen}/${audit.packages.length}`,
         "Открывается только после РП, решения на preview и принятого визуального осмотра.",
@@ -1051,6 +1239,13 @@
           "p",
           "",
           `РП: ${item.hasRp ? "есть" : "ждёт"} · решение: ${item.decision} · осмотр preview: ${item.previewAccepted ? "принят" : "не закрыт"} · final: ${item.finalGateStatus}`
+        )
+      );
+      card.append(
+        createNode(
+          "p",
+          "",
+          `ОК09/ОК10: ${item.competencyReview.verified}/${item.competencyReview.total} подтверждено · ${item.competencyReview.pending} ждёт · ${item.competencyReview.needsRevision} правок · ${item.competencyReview.notInRp} нет в РП`
         )
       );
       if (item.missingFamilies.length) {
@@ -1650,16 +1845,64 @@
     }
   }
 
+  function buildCompetencyReviewReport(packageData) {
+    const summary = getPackageCompetencyReviewSummary(packageData);
+    return [
+      "PM01 PX OK09/OK10 review",
+      `generatedAt: ${new Date().toISOString()}`,
+      `package: ${packageData.title}`,
+      `variantId: ${packageData.variantId}`,
+      `rpIntake: ${hasRpIntake(packageData.variantId) ? "present" : "missing"}`,
+      `verified: ${summary.verified}/${summary.total}`,
+      `pending: ${summary.pending}`,
+      `needsRevision: ${summary.needsRevision}`,
+      `notInRp: ${summary.notInRp}`,
+      `ready: ${summary.ready}`,
+      "",
+      "items:",
+      ...COMPETENCY_REVIEW_ITEMS.map((item) => {
+        const review = getCompetencyReviewItem(packageData.variantId, item.id);
+        const meta = getCompetencyReviewMeta(review.status);
+        return [
+          `- competency: ${item.label}`,
+          `  title: ${item.title}`,
+          `  status: ${review.status}`,
+          `  statusLabel: ${meta.status}`,
+          `  updatedAt: ${review.updatedAt || "not_saved"}`,
+          `  note: ${review.note || "-"}`
+        ].join("\n");
+      })
+    ].join("\n");
+  }
+
+  async function copyCompetencyReviewReport(packageData, button) {
+    try {
+      await navigator.clipboard.writeText(buildCompetencyReviewReport(packageData));
+      button.textContent = "ОК-сверка скопирована";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать ОК-сверку";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать ОК-сверку";
+      }, 1600);
+    }
+  }
+
   function buildGateReportText(packageData) {
     const decision = getPackageDecision(packageData.variantId);
     const intake = getPackageRpIntake(packageData.variantId);
     const summary = getPackageGateSummary(packageData);
+    const competencyReview = getPackageCompetencyReviewSummary(packageData);
     return [
       packageData.title,
       `variantId: ${packageData.variantId}`,
       `decision: ${decision.decision}`,
       `rpIntake: ${hasRpIntake(packageData.variantId) ? "present" : "missing"}`,
       `rpUpdatedAt: ${intake.updatedAt || "not_saved"}`,
+      `competencyReview: ${competencyReview.verified}/${competencyReview.total}`,
+      `competencyReviewBlocked: ${competencyReview.blocked}`,
       `gatesDone: ${summary.done}/${summary.gates.length}`,
       `gatesBlocked: ${summary.blocked}`,
       `gatesPending: ${summary.pending}`,
@@ -1833,6 +2076,10 @@
       refreshApprovalOverview();
       refreshPackageGates(packageData);
     });
+    excerpt.addEventListener("change", () => {
+      refreshApprovalOverview();
+      renderPackages(currentDigitalShift);
+    });
     excerptField.append(createNode("span", "", "Фрагмент РП"), excerpt);
 
     const confirmedField = createNode("label", "approval-rp-field");
@@ -1844,6 +2091,10 @@
       refreshApprovalOverview();
       refreshPackageGates(packageData);
     });
+    confirmedTopics.addEventListener("change", () => {
+      refreshApprovalOverview();
+      renderPackages(currentDigitalShift);
+    });
     confirmedField.append(createNode("span", "", "Уточнённые темы"), confirmedTopics);
 
     const actions = createNode("div", "approval-rp-actions");
@@ -1854,11 +2105,99 @@
     resetButton.type = "button";
     resetButton.addEventListener("click", () => {
       resetPackageRpIntake(packageData.variantId);
+      resetPackageCompetencyReview(packageData.variantId);
       refreshApprovalOverview();
       renderPackages(currentDigitalShift);
     });
     actions.append(copyButton, resetButton);
     panel.append(head, excerptField, confirmedField, actions);
+    return panel;
+  }
+
+  function renderCompetencyReviewPanel(packageData) {
+    const summary = getPackageCompetencyReviewSummary(packageData);
+    const canReview = hasRpIntake(packageData.variantId);
+    const panel = createNode("section", "approval-package-block approval-competency-review");
+    panel.dataset.status = !canReview ? "waiting_rp" : summary.ready ? "verified" : summary.blocked ? "blocked" : "pending";
+
+    const head = createNode("div", "approval-competency-review-head");
+    head.append(
+      createNode("h3", "", "ПК/ОК-сверка по РП"),
+      createNode(
+        "span",
+        "",
+        canReview
+          ? `${summary.verified}/${summary.total} подтверждено · ${summary.pending} ждёт · ${summary.needsRevision} правок · ${summary.notInRp} нет в РП`
+          : "Добавьте фрагмент РП/КТП, затем подтвердите ОК09 и ОК10 по этому цеху."
+      )
+    );
+
+    const gateNote = createNode(
+      "p",
+      "approval-competency-review-gate",
+      canReview
+        ? "Эта сверка открывает preview/final workflow только после явного подтверждения ОК09 и ОК10 по РП/КТП."
+        : "До РП/КТП статусы заблокированы: финальные темы, задания и assets не закрепляются вслепую."
+    );
+
+    const grid = createNode("div", "approval-competency-review-grid");
+    COMPETENCY_REVIEW_ITEMS.forEach((item) => {
+      const review = getCompetencyReviewItem(packageData.variantId, item.id);
+      const meta = getCompetencyReviewMeta(review.status);
+      const card = createNode("article", "approval-competency-review-card");
+      card.dataset.status = review.status;
+      card.dataset.competency = item.id;
+      card.append(
+        createNode("span", "approval-competency-review-status", meta.status),
+        createNode("strong", "", `${item.label} · ${item.title}`),
+        createNode("p", "", item.detail)
+      );
+
+      const options = createNode("div", "approval-competency-review-options");
+      COMPETENCY_REVIEW_OPTIONS.forEach((option) => {
+        const button = createNode("button", "approval-competency-review-button", option.label);
+        button.type = "button";
+        button.dataset.status = option.id;
+        button.classList.toggle("is-active", review.status === option.id);
+        button.disabled = !canReview;
+        button.title = option.detail;
+        button.addEventListener("click", () => {
+          setCompetencyReviewItem(packageData.variantId, item.id, { status: option.id });
+          refreshApprovalOverview();
+          renderPackages(currentDigitalShift);
+        });
+        options.appendChild(button);
+      });
+
+      const noteField = createNode("label", "approval-competency-review-note-field");
+      const note = createNode("textarea", "approval-competency-review-note");
+      note.value = review.note;
+      note.disabled = !canReview;
+      note.placeholder = item.placeholder;
+      note.addEventListener("input", () => {
+        setCompetencyReviewItem(packageData.variantId, item.id, { note: note.value });
+        refreshApprovalOverview();
+      });
+      noteField.append(createNode("span", "", "Основание по РП/КТП"), note);
+
+      card.append(options, noteField);
+      grid.appendChild(card);
+    });
+
+    const actions = createNode("div", "approval-competency-review-actions");
+    const copyButton = createNode("button", "button secondary", "Скопировать ОК-сверку");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyCompetencyReviewReport(packageData, copyButton));
+    const resetButton = createNode("button", "button ghost", "Сбросить ОК-сверку");
+    resetButton.type = "button";
+    resetButton.addEventListener("click", () => {
+      resetPackageCompetencyReview(packageData.variantId);
+      refreshApprovalOverview();
+      renderPackages(currentDigitalShift);
+    });
+    actions.append(copyButton, resetButton);
+
+    panel.append(head, gateNote, grid, actions);
     return panel;
   }
 
@@ -2076,6 +2415,7 @@
       renderApprovalGates(packageData),
       topics,
       renderRpIntake(packageData),
+      renderCompetencyReviewPanel(packageData),
       renderMethodicalMatrix(packageData),
       renderShiftCockpit(packageData),
       tasks,
