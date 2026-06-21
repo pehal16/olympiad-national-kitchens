@@ -517,6 +517,10 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(uiStyles.includes(".approval-action-card"), true);
   assert.equal(uiStyles.includes(".approval-preview-batch"), true);
   assert.equal(uiStyles.includes(".approval-preview-batch-card"), true);
+  assert.equal(uiStyles.includes(".approval-coverage-audit"), true);
+  assert.equal(uiStyles.includes(".approval-coverage-card"), true);
+  assert.equal(uiStyles.includes(".approval-coverage-competency"), true);
+  assert.equal(uiStyles.includes(".approval-coverage-package"), true);
   assert.equal(uiStyles.includes(".approval-inspection-panel"), true);
   assert.equal(uiStyles.includes(".approval-inspection-card"), true);
   assert.equal(uiStyles.includes(".approval-state-snapshot"), true);
@@ -528,9 +532,9 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(approvalHtml.includes("id=\"approval-packages-list\""), true);
   assert.equal(approvalHtml.includes("id=\"approval-action-plan\""), true);
   assert.equal(approvalHtml.includes("Согласование PX"), true);
-  assert.equal(approvalHtml.includes("/pm01-approval.js?v=1.0.13"), true);
+  assert.equal(approvalHtml.includes("/pm01-approval.js?v=1.0.14"), true);
   assert.equal(uiHtml.includes("/pm01.js?v=1.0.29"), true);
-  assert.equal(uiHtml.includes("/pm01.css?v=1.0.40"), true);
+  assert.equal(uiHtml.includes("/pm01.css?v=1.0.41"), true);
   assert.equal(uiScript.includes("selectCockpitFamily"), true);
   assert.equal(uiScript.includes("jumpToPracticeFamily"), true);
   assert.equal(uiScript.includes("canOpenPracticeFamily"), true);
@@ -559,6 +563,13 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(approvalScript.includes("getPackageNextAction"), true);
   assert.equal(approvalScript.includes("copyActionPlan"), true);
   assert.equal(approvalScript.includes("renderActionPlan"), true);
+  assert.equal(approvalScript.includes("REQUIRED_PM01_COMPETENCIES"), true);
+  assert.equal(approvalScript.includes("buildCoverageAudit"), true);
+  assert.equal(approvalScript.includes("buildCoverageAuditText"), true);
+  assert.equal(approvalScript.includes("copyCoverageAudit"), true);
+  assert.equal(approvalScript.includes("renderCoverageAuditPanel"), true);
+  assert.equal(approvalScript.includes("ОК 09"), true);
+  assert.equal(approvalScript.includes("ОК 10"), true);
   assert.equal(approvalScript.includes("buildPreviewBatchText"), true);
   assert.equal(approvalScript.includes("copyPreviewBatch"), true);
   assert.equal(approvalScript.includes("renderPreviewBatchPanel"), true);
@@ -618,6 +629,7 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(approvalDoc.includes("Нормативные anchors"), true);
   assert.equal(approvalDoc.includes("Методическая матрица"), true);
   assert.equal(approvalDoc.includes("Интерактивный storyboard"), true);
+  assert.equal(approvalDoc.includes("Coverage audit"), true);
   assert.equal(approvalScript.includes("Черновик до РП"), true);
   ["Овощной цех", "Рыбный цех", "Мясной цех", "Птица, дичь, кролик", "Комплексный заказ"].forEach((text) => {
     assert.equal(approvalDoc.includes(text), true, `approval doc includes ${text}`);
@@ -1409,7 +1421,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(studentScript, /retryDelay/);
   assert.match(studentScript, /X-PM01-Duration-Ms/);
   assert.doesNotMatch(studentScript, /readAsDataURL\(blob\)/);
-  assert.match(studentHtml, /pm01\.css\?v=1\.0\.40/);
+  assert.match(studentHtml, /pm01\.css\?v=1\.0\.41/);
   assert.match(studentHtml, /loadPm01Script/);
   assert.match(studentHtml, /pm01\.js\?v=1\.0\.29/);
   assert.match(adminHtml, /export-group-csv/);
@@ -1423,7 +1435,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(adminScript, /api\/admin\/pm01\/exports\/group-csv\/download/);
   assert.match(adminScript, /voiceAudio/);
   assert.match(adminScript, /audioInfo\.audioUrl/);
-  assert.match(adminHtml, /pm01\.css\?v=1\.0\.40/);
+  assert.match(adminHtml, /pm01\.css\?v=1\.0\.41/);
   assert.match(adminHtml, /pm01-approval\.html/);
   assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.18/);
   assert.match(css, /\.voice-queue-list/);

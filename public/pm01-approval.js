@@ -24,6 +24,7 @@
     { id: "needs_revision", label: "Правка", status: "Нужна правка", detail: "Нужно уточнить prompt, ракурс, сырьё, санитарный контекст или композицию." },
     { id: "rejected_preview", label: "Отклонить", status: "Preview отклонено", detail: "Не использовать для final asset; требуется новая генерация." }
   ];
+  const REQUIRED_PM01_COMPETENCIES = ["ПК 1.1", "ПК 1.2", "ПК 1.3", "ПК 1.4", "ОК 01", "ОК 02", "ОК 07", "ОК 09", "ОК 10"];
   const decisionOptionsById = new Map(DECISION_OPTIONS.map((option) => [option.id, option]));
   const previewInspectionOptionsById = new Map(PREVIEW_INSPECTION_OPTIONS.map((option) => [option.id, option]));
   let approvalState = loadApprovalState();
@@ -210,6 +211,92 @@
     return counts;
   }
 
+  function uniqueValues(items) {
+    return Array.from(new Set(items.filter(Boolean)));
+  }
+
+  function getMethodicalFamilyCoverage(packageData, familyIds) {
+    const matrixFamilies = new Set((packageData.methodicalMatrix || []).map((row) => row.familyId));
+    const taskFamilies = new Set((packageData.tasks || []).map((task) => task.familyId));
+    const cockpitFamilies = new Set((packageData.shiftCockpit?.operationTimeline || []).map((step) => step.familyId));
+    return familyIds.map((familyId) => ({
+      familyId,
+      matrix: matrixFamilies.has(familyId),
+      task: taskFamilies.has(familyId),
+      cockpit: cockpitFamilies.has(familyId)
+    }));
+  }
+
+  function buildCoverageAudit(digitalShift) {
+    const packages = digitalShift.packages || [];
+    const families = digitalShift.families || [];
+    const familyIds = families.map((family) => family.id);
+    const blueprints = digitalShift.interactionBlueprints || [];
+    const blueprintFamilyIds = new Set(blueprints.map((blueprint) => blueprint.familyId));
+    const allRows = packages.flatMap((packageData) => packageData.methodicalMatrix || []);
+    const allAssets = packages.flatMap((packageData) => packageData.previewAssets || []);
+    const allCompetencies = uniqueValues(allRows.flatMap((row) => row.competencies || []));
+    const competencyCoverage = REQUIRED_PM01_COMPETENCIES.map((competency) => ({
+      competency,
+      covered: allCompetencies.includes(competency)
+    }));
+    const packageAudits = packages.map((packageData) => {
+      const familyCoverage = getMethodicalFamilyCoverage(packageData, familyIds);
+      const missingFamilies = familyCoverage
+        .filter((item) => !item.matrix || !item.task || !item.cockpit)
+        .map((item) => item.familyId);
+      const previewAssets = packageData.previewAssets || [];
+      const gateSummary = getPackageGateSummary(packageData);
+      const finalGate = gateSummary.gates.find((gate) => gate.id === "final_assets");
+      const hasRp = hasRpIntake(packageData.variantId);
+      const decision = getPackageDecision(packageData.variantId).decision;
+      const previewAccepted = isPackagePreviewInspectionAccepted(packageData);
+      const structuralReady =
+        (packageData.methodicalMatrix || []).length === familyIds.length &&
+        (packageData.tasks || []).length === familyIds.length &&
+        familyCoverage.every((item) => item.matrix && item.task && item.cockpit) &&
+        previewAssets.length >= 2 &&
+        previewAssets.every(
+          (asset) =>
+            asset.finalAsset === false &&
+            asset.outputUse === "preview_only_until_teacher_approval" &&
+            asset.inspectionGate === "visual_inspection_before_connection"
+        );
+      return {
+        packageData,
+        structuralReady,
+        hasRp,
+        decision,
+        previewAccepted,
+        finalGateStatus: finalGate?.status || "blocked",
+        missingFamilies,
+        matrixRows: (packageData.methodicalMatrix || []).length,
+        tasks: (packageData.tasks || []).length,
+        previewAssets: previewAssets.length,
+        competencies: uniqueValues((packageData.methodicalMatrix || []).flatMap((row) => row.competencies || []))
+      };
+    });
+    return {
+      packages,
+      familyIds,
+      expectedMatrixRows: packages.length * familyIds.length,
+      expectedPreviewAssets: packages.length * 2,
+      matrixRows: allRows.length,
+      previewAssets: allAssets.length,
+      blueprintFamiliesCovered: familyIds.filter((familyId) => blueprintFamilyIds.has(familyId)).length,
+      competencyCoverage,
+      coveredCompetencies: competencyCoverage.filter((item) => item.covered).length,
+      packageAudits,
+      structuralReady: packageAudits.filter((item) => item.structuralReady).length,
+      rpReady: packageAudits.filter((item) => item.hasRp).length,
+      previewReady: packageAudits.filter((item) => item.hasRp && item.decision === "approved_preview").length,
+      previewAccepted: packageAudits.filter((item) => item.previewAccepted).length,
+      finalAssetsOpen: packageAudits.filter((item) => item.finalGateStatus === "pending").length,
+      visualRubricStatus: digitalShift.visualAssetRubric?.status || "missing",
+      normativeAnchors: (digitalShift.normativeAnchors || []).length
+    };
+  }
+
   function getGateStatusMeta(status) {
     const metas = {
       done: { label: "Готово", detail: "Можно использовать как основание для следующего шага." },
@@ -324,6 +411,7 @@
     const gateSummaries = packages.map(getPackageGateSummary);
     const blockedGateCount = gateSummaries.reduce((sum, item) => sum + item.blocked, 0);
     const pendingGateCount = gateSummaries.reduce((sum, item) => sum + item.pending, 0);
+    const coverageAudit = buildCoverageAudit(digitalShift);
     [
       ["Режим", "training-only", "PX не влияет на ведомость и официальный протокол."],
       ["Контракт", digitalShift.contract || "100 баллов / 20 заданий / 5 вариантов", "Официальный маршрут не расширяется."],
@@ -338,6 +426,11 @@
         "Gate-чеклист",
         `${blockedGateCount} блоков · ${pendingGateCount} ожиданий`,
         "Пока блоки не сняты, final assets не подключаются."
+      ],
+      [
+        "Coverage audit",
+        `${coverageAudit.matrixRows}/${coverageAudit.expectedMatrixRows} matrix · ${coverageAudit.coveredCompetencies}/${coverageAudit.competencyCoverage.length} ПК/ОК`,
+        "Показывает пробелы по семействам, preview-slots и компетенциям до генерации visuals."
       ],
       ["Версия", exam.version || exam.appVersion || "PM01", "Текущий опубликованный пакет."]
     ].forEach(([label, value, detail]) => {
@@ -470,6 +563,63 @@
         ].join("\n");
       })
     ].join("\n\n");
+  }
+
+  function buildCoverageAuditText(digitalShift) {
+    const audit = buildCoverageAudit(digitalShift);
+    return [
+      "PM01 PX coverage audit",
+      `generatedAt: ${new Date().toISOString()}`,
+      `packages: ${audit.packages.length}/5`,
+      `families: ${audit.familyIds.length}`,
+      `matrixRows: ${audit.matrixRows}/${audit.expectedMatrixRows}`,
+      `previewAssets: ${audit.previewAssets}/${audit.expectedPreviewAssets}`,
+      `interactionBlueprints: ${audit.blueprintFamiliesCovered}/${audit.familyIds.length}`,
+      `normativeAnchors: ${audit.normativeAnchors}`,
+      `visualRubricStatus: ${audit.visualRubricStatus}`,
+      `competenciesCovered: ${audit.coveredCompetencies}/${audit.competencyCoverage.length}`,
+      `rpIntake: ${audit.rpReady}/${audit.packages.length}`,
+      `previewDecision: ${audit.previewReady}/${audit.packages.length}`,
+      `previewInspectionAccepted: ${audit.previewAccepted}/${audit.packages.length}`,
+      `finalAssetGateOpen: ${audit.finalAssetsOpen}/${audit.packages.length}`,
+      "",
+      "competencies:",
+      ...audit.competencyCoverage.map((item) => `- ${item.competency}: ${item.covered ? "covered" : "check_with_RP"}`),
+      "",
+      "packages:",
+      ...audit.packageAudits.map((item, index) =>
+        [
+          `- row: ${index + 1}`,
+          `  title: ${item.packageData.title}`,
+          `  variantId: ${item.packageData.variantId}`,
+          `  structuralReady: ${item.structuralReady}`,
+          `  matrixRows: ${item.matrixRows}/${audit.familyIds.length}`,
+          `  tasks: ${item.tasks}/${audit.familyIds.length}`,
+          `  previewAssets: ${item.previewAssets}/2`,
+          `  rpIntake: ${item.hasRp ? "present" : "missing"}`,
+          `  previewDecision: ${item.decision}`,
+          `  previewAccepted: ${item.previewAccepted}`,
+          `  finalAssetsGate: ${item.finalGateStatus}`,
+          `  competencies: ${item.competencies.join(", ") || "-"}`,
+          `  missingFamilies: ${item.missingFamilies.join(", ") || "-"}`
+        ].join("\n")
+      )
+    ].join("\n");
+  }
+
+  async function copyCoverageAudit(digitalShift, button) {
+    try {
+      await navigator.clipboard.writeText(buildCoverageAuditText(digitalShift));
+      button.textContent = "Audit скопирован";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать coverage audit";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать coverage audit";
+      }, 1600);
+    }
   }
 
   function buildApprovalStateSnapshot(digitalShift) {
@@ -654,6 +804,102 @@
         button.textContent = "Скачать snapshot";
       }, 1600);
     }
+  }
+
+  function renderCoverageMetric(label, value, detail, status = "neutral") {
+    const card = createNode("article", "approval-coverage-card");
+    card.dataset.status = status;
+    card.append(createNode("span", "", label), createNode("strong", "", value), createNode("p", "", detail));
+    return card;
+  }
+
+  function renderCoverageAuditPanel(digitalShift) {
+    const audit = buildCoverageAudit(digitalShift);
+    const panel = createNode("section", "approval-coverage-audit");
+    const head = createNode("div", "approval-coverage-head");
+    const title = createNode("div");
+    title.append(
+      createNode("h3", "", "Coverage audit"),
+      createNode("span", "", "Методический контроль перед РП-правкой, preview и финальными assets")
+    );
+    const copyButton = createNode("button", "button secondary", "Скопировать coverage audit");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyCoverageAudit(digitalShift, copyButton));
+    head.append(title, copyButton);
+
+    const metrics = createNode("div", "approval-coverage-grid");
+    metrics.append(
+      renderCoverageMetric(
+        "Матрица",
+        `${audit.matrixRows}/${audit.expectedMatrixRows}`,
+        "5 строк на каждый цех: тема РП, ПК/ОК, формат, asset и критерий.",
+        audit.matrixRows === audit.expectedMatrixRows ? "done" : "blocked"
+      ),
+      renderCoverageMetric(
+        "Семейства",
+        `${audit.blueprintFamiliesCovered}/${audit.familyIds.length}`,
+        "Все современные форматы должны иметь storyboard и визуальный режим.",
+        audit.blueprintFamiliesCovered === audit.familyIds.length ? "done" : "blocked"
+      ),
+      renderCoverageMetric(
+        "Preview slots",
+        `${audit.previewAssets}/${audit.expectedPreviewAssets}`,
+        "Плановые preview-only assets с inspection gate и finalAsset: false.",
+        audit.previewAssets === audit.expectedPreviewAssets ? "done" : "blocked"
+      ),
+      renderCoverageMetric(
+        "ПК/ОК",
+        `${audit.coveredCompetencies}/${audit.competencyCoverage.length}`,
+        "ОК 09/10 держим как явную сверку по РП, если они не прописаны в строках.",
+        audit.coveredCompetencies === audit.competencyCoverage.length ? "done" : "pending"
+      ),
+      renderCoverageMetric(
+        "РП-intake",
+        `${audit.rpReady}/${audit.packages.length}`,
+        "Финальная формулировка тем не делается без рабочих программ.",
+        audit.rpReady === audit.packages.length ? "done" : "pending"
+      ),
+      renderCoverageMetric(
+        "Final gate",
+        `${audit.finalAssetsOpen}/${audit.packages.length}`,
+        "Открывается только после РП, решения на preview и принятого визуального осмотра.",
+        audit.finalAssetsOpen ? "pending" : "blocked"
+      )
+    );
+
+    const competencyStrip = createNode("div", "approval-coverage-competencies");
+    audit.competencyCoverage.forEach((item) => {
+      const chip = createNode("span", "approval-coverage-competency", item.competency);
+      chip.dataset.status = item.covered ? "covered" : "rp_check";
+      chip.title = item.covered ? "Есть в строках методической матрицы" : "Проверить и при необходимости добавить после РП/КТП";
+      competencyStrip.appendChild(chip);
+    });
+
+    const packageList = createNode("div", "approval-coverage-packages");
+    audit.packageAudits.forEach((item) => {
+      const card = createNode("article", "approval-coverage-package");
+      card.dataset.status = item.structuralReady ? "done" : "blocked";
+      card.append(
+        createNode("strong", "", item.packageData.title),
+        createNode(
+          "span",
+          "",
+          `matrix ${item.matrixRows}/${audit.familyIds.length} · tasks ${item.tasks}/${audit.familyIds.length} · preview ${item.previewAssets}/2`
+        ),
+        createNode(
+          "p",
+          "",
+          `РП: ${item.hasRp ? "есть" : "ждёт"} · решение: ${item.decision} · осмотр preview: ${item.previewAccepted ? "принят" : "не закрыт"} · final: ${item.finalGateStatus}`
+        )
+      );
+      if (item.missingFamilies.length) {
+        card.append(createNode("em", "", `Проверить семейства: ${item.missingFamilies.join(", ")}`));
+      }
+      packageList.appendChild(card);
+    });
+
+    panel.append(head, metrics, competencyStrip, packageList);
+    return panel;
   }
 
   function buildPreviewInspectionReport(packageData) {
@@ -891,7 +1137,13 @@
       grid.appendChild(card);
     });
 
-    elements.actionPlan.append(head, grid, renderPreviewBatchPanel(digitalShift, readyPackages), renderStateSnapshotPanel(digitalShift));
+    elements.actionPlan.append(
+      head,
+      grid,
+      renderCoverageAuditPanel(digitalShift),
+      renderPreviewBatchPanel(digitalShift, readyPackages),
+      renderStateSnapshotPanel(digitalShift)
+    );
   }
 
   function refreshApprovalOverview() {
