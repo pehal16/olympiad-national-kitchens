@@ -622,6 +622,115 @@
     }
   }
 
+  function buildRpRequestKitText(digitalShift) {
+    const packages = digitalShift.packages || [];
+    const audit = buildCoverageAudit(digitalShift);
+    return [
+      "# PM01 PX. Запрос РП/КТП для методической финализации",
+      "",
+      `generatedAt: ${new Date().toISOString()}`,
+      `appVersion: ${currentExam?.version || currentExam?.appVersion || "PM01"}`,
+      `officialContract: ${digitalShift.contract || "100 баллов / 20 заданий / 5 вариантов"}`,
+      "scope: темы, задания и визуалы PM01 PX согласуются до генерации final assets",
+      "",
+      "## Что нужно прислать",
+      "",
+      "- фрагменты рабочей программы ПМ.01/МДК 01.01/МДК 01.02 по каждому цеху;",
+      "- календарно-тематический план или список тем с часами и контрольными точками;",
+      "- локальные оценочные материалы, если формулировки отличаются от текущего банка PM01;",
+      "- уточнение, где в РП/КТП проходят ОК 09 и ОК 10 для цифровой документации, коммуникации и профессиональной терминологии;",
+      "- запреты или локальные требования к изображениям, если они есть у преподавателя или комиссии.",
+      "",
+      "## Почему это нужно до переписывания",
+      "",
+      "Без РП/КТП мы не меняем официальные темы и не подключаем финальные изображения. До согласования PX остается training-only, maxScore: 0, без влияния на ведомости.",
+      "",
+      "## Текущее состояние",
+      "",
+      `- packages: ${packages.length}/5`,
+      `- methodicalMatrix: ${audit.matrixRows}/${audit.expectedMatrixRows}`,
+      `- previewSlots: ${audit.previewAssets}/${audit.expectedPreviewAssets}`,
+      `- rpIntake: ${audit.rpReady}/${packages.length}`,
+      `- previewDecision: ${audit.previewReady}/${packages.length}`,
+      `- previewInspectionAccepted: ${audit.previewAccepted}/${packages.length}`,
+      `- finalAssetGateOpen: ${audit.finalAssetsOpen}/${packages.length}`,
+      "",
+      "## ПК/ОК для сверки",
+      "",
+      ...audit.competencyCoverage.map((item) => `- ${item.competency}: ${item.covered ? "есть в черновой матрице" : "подтвердить по РП/КТП"}`),
+      "",
+      "## По цехам",
+      "",
+      ...packages.map((packageData, index) => {
+        const intake = getPackageRpIntake(packageData.variantId);
+        const packageAudit = audit.packageAudits.find((item) => item.packageData.variantId === packageData.variantId);
+        return [
+          `### ${index + 1}. ${packageData.title}`,
+          "",
+          `variantId: ${packageData.variantId}`,
+          `rpIntake: ${hasRpIntake(packageData.variantId) ? "есть локально" : "нужен фрагмент РП/КТП"}`,
+          `confirmedTopicsLocal: ${intake.confirmedTopics || "-"}`,
+          `competenciesDraft: ${(packageAudit?.competencies || []).join(", ") || "-"}`,
+          "",
+          "Текущие темы для подтверждения:",
+          ...(packageData.rpTopics || []).map((topic) => `- ${topic}`),
+          "",
+          "Строки матрицы, которые нужно подтвердить или уточнить:",
+          ...((packageData.methodicalMatrix || []).map((row, rowIndex) =>
+            [
+              `- ${rowIndex + 1}. ${row.rpTopic}`,
+              `  family: ${row.familyId}`,
+              `  competencies: ${(row.competencies || []).join(", ")}`,
+              `  newFormat: ${row.newFormat}`,
+              `  criterion: ${row.checkCriterion}`
+            ].join("\n")
+          )),
+          "",
+          "Просим уточнить:",
+          "- совпадают ли темы с вашей РП/КТП;",
+          "- какую локальную формулировку темы нужно использовать в экзамене;",
+          "- нужно ли добавить ОК 09/ОК 10 в строки этого цеха;",
+          "- какие изображения или формулировки методически недопустимы."
+        ].join("\n");
+      })
+    ].join("\n");
+  }
+
+  function getRpRequestKitFileName() {
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    return `pm01-px-rp-ktp-request-${stamp}.md`;
+  }
+
+  async function copyRpRequestKit(digitalShift, button) {
+    try {
+      await navigator.clipboard.writeText(buildRpRequestKitText(digitalShift));
+      button.textContent = "Запрос скопирован";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать запрос";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать запрос";
+      }, 1600);
+    }
+  }
+
+  function downloadRpRequestKit(digitalShift, button) {
+    try {
+      downloadTextFile(getRpRequestKitFileName(), buildRpRequestKitText(digitalShift), "text/markdown");
+      button.textContent = "Запрос скачан";
+      window.setTimeout(() => {
+        button.textContent = "Скачать .md";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скачать";
+      window.setTimeout(() => {
+        button.textContent = "Скачать .md";
+      }, 1600);
+    }
+  }
+
   function buildApprovalStateSnapshot(digitalShift) {
     const packages = digitalShift.packages || [];
     return {
@@ -804,6 +913,58 @@
         button.textContent = "Скачать snapshot";
       }, 1600);
     }
+  }
+
+  function renderRpRequestKitPanel(digitalShift) {
+    const packages = digitalShift.packages || [];
+    const audit = buildCoverageAudit(digitalShift);
+    const missingRp = packages.length - audit.rpReady;
+    const panel = createNode("section", "approval-rp-request-kit");
+    const head = createNode("div", "approval-rp-request-head");
+    const title = createNode("div");
+    title.append(
+      createNode("h3", "", "Запрос РП/КТП"),
+      createNode("span", "", "Готовый пакет для преподавателя или методиста перед финальным переписыванием тем")
+    );
+    const actions = createNode("div", "approval-rp-request-actions");
+    const copyButton = createNode("button", "button secondary", "Скопировать запрос");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyRpRequestKit(digitalShift, copyButton));
+    const downloadButton = createNode("button", "button secondary", "Скачать .md");
+    downloadButton.type = "button";
+    downloadButton.addEventListener("click", () => downloadRpRequestKit(digitalShift, downloadButton));
+    actions.append(copyButton, downloadButton);
+    head.append(title, actions);
+
+    const metrics = createNode("div", "approval-rp-request-grid");
+    [
+      ["Цехи без РП", `${missingRp}/${packages.length}`, "Пока РП нет, темы остаются черновыми."],
+      ["ОК 09/10", "сверить", "Нужна явная привязка к РП/КТП или локальным материалам."],
+      ["Финальные assets", "блок", "Генерация final-файлов только после РП, preview и визуального осмотра."]
+    ].forEach(([label, value, detail]) => {
+      const card = createNode("article", "approval-rp-request-card");
+      card.append(createNode("span", "", label), createNode("strong", "", value), createNode("p", "", detail));
+      metrics.appendChild(card);
+    });
+
+    const list = createNode("div", "approval-rp-request-packages");
+    packages.forEach((packageData) => {
+      const card = createNode("article", "approval-rp-request-package");
+      card.dataset.status = hasRpIntake(packageData.variantId) ? "done" : "pending";
+      card.append(
+        createNode("strong", "", packageData.title),
+        createNode(
+          "span",
+          "",
+          hasRpIntake(packageData.variantId) ? "РП добавлена локально" : "Нужен фрагмент РП/КТП"
+        ),
+        createNode("p", "", (packageData.rpTopics || []).slice(0, 2).join(" · "))
+      );
+      list.appendChild(card);
+    });
+
+    panel.append(head, metrics, list);
+    return panel;
   }
 
   function renderCoverageMetric(label, value, detail, status = "neutral") {
@@ -1140,6 +1301,7 @@
     elements.actionPlan.append(
       head,
       grid,
+      renderRpRequestKitPanel(digitalShift),
       renderCoverageAuditPanel(digitalShift),
       renderPreviewBatchPanel(digitalShift, readyPackages),
       renderStateSnapshotPanel(digitalShift)

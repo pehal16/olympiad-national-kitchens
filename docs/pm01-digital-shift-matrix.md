@@ -67,6 +67,7 @@ Working programs, calendar-thematic plans, and local assessment materials are ex
 - Answering a PX practice task automatically closes the matching cockpit stage, and the training result screen renders a separate digital-shift journal summary; this remains outside the official 100-point contract.
 - During an active training attempt, PX cockpit timeline steps, focus actions, and right-panel family chips can open the exact practice simulator by `practiceFamily`; this is disabled for official exam routes.
 - Teacher approval uses readiness gates per shop: official exam lock, methodical matrix, RP/KTP intake, preview asset plan, teacher preview decision, and final asset blocker are shown before final generated assets can be connected.
+- `/pm01-approval.html` includes a copyable/downloadable `Запрос РП/КТП` Markdown kit for collecting teacher working-program excerpts, KTP topics, local assessment wording, and explicit OK 09/OK 10 verification before final rewrites.
 - `/pm01-approval.html` includes a copyable `Coverage audit` that checks the 25 matrix rows, five interaction families, 10 preview slots, RP intake, preview decisions, visual inspection status, final-asset gate, and ПК/ОК coverage before image generation continues.
 - New generated final assets should be added only after teacher review of the per-shop prompt package.
 
