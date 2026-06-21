@@ -472,6 +472,52 @@
     ].join("\n\n");
   }
 
+  function buildApprovalStateSnapshot(digitalShift) {
+    const packages = digitalShift.packages || [];
+    return {
+      kind: "pm01_px_approval_snapshot",
+      schemaVersion: 1,
+      exportedAt: new Date().toISOString(),
+      appVersion: currentExam?.version || currentExam?.appVersion || "PM01",
+      packageIds: packages.map((packageData) => packageData.variantId),
+      packageCount: packages.length,
+      storageKeys: {
+        approval: PM01_APPROVAL_STORAGE_KEY,
+        rpIntake: PM01_RP_INTAKE_STORAGE_KEY,
+        previewInspection: PM01_PREVIEW_INSPECTION_STORAGE_KEY
+      },
+      state: {
+        approvalDecisions: approvalState,
+        rpIntake: rpIntakeState,
+        previewInspection: previewInspectionState
+      }
+    };
+  }
+
+  function isPlainObject(value) {
+    return Boolean(value && typeof value === "object" && !Array.isArray(value));
+  }
+
+  function applyApprovalStateSnapshot(text) {
+    if (!text) {
+      throw new Error("Вставьте JSON snapshot перед импортом.");
+    }
+    const parsed = JSON.parse(text);
+    if (parsed?.kind !== "pm01_px_approval_snapshot" || parsed?.schemaVersion !== 1) {
+      throw new Error("Неверный формат snapshot PM01 PX.");
+    }
+    const state = parsed.state || {};
+    if (!isPlainObject(state.approvalDecisions) || !isPlainObject(state.rpIntake) || !isPlainObject(state.previewInspection)) {
+      throw new Error("Snapshot не содержит полный набор local-state данных.");
+    }
+    approvalState = state.approvalDecisions;
+    rpIntakeState = state.rpIntake;
+    previewInspectionState = state.previewInspection;
+    persistApprovalState();
+    persistRpIntakeState();
+    persistPreviewInspectionState();
+  }
+
   async function copyActionPlan(digitalShift, button) {
     try {
       await navigator.clipboard.writeText(buildActionPlanText(digitalShift));
@@ -558,6 +604,21 @@
       button.textContent = "Не удалось скопировать";
       window.setTimeout(() => {
         button.textContent = "Скопировать preview batch";
+      }, 1600);
+    }
+  }
+
+  async function copyApprovalStateSnapshot(digitalShift, button) {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(buildApprovalStateSnapshot(digitalShift), null, 2));
+      button.textContent = "Snapshot скопирован";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать snapshot";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать snapshot";
       }, 1600);
     }
   }
@@ -657,6 +718,48 @@
     return panel;
   }
 
+  function renderStateSnapshotPanel(digitalShift) {
+    const packages = digitalShift.packages || [];
+    const panel = createNode("section", "approval-state-snapshot");
+    const head = createNode("div", "approval-state-snapshot-head");
+    const title = createNode("div");
+    title.append(
+      createNode("h3", "", "Snapshot согласования"),
+      createNode("span", "", "Сохраняет browser-local РП, решения, заметки и журнал осмотра preview без изменения публичного экзамена.")
+    );
+    const exportButton = createNode("button", "button secondary", "Скопировать snapshot");
+    exportButton.type = "button";
+    exportButton.addEventListener("click", () => copyApprovalStateSnapshot(digitalShift, exportButton));
+    head.append(title, exportButton);
+
+    const importField = createNode("label", "approval-state-import-field");
+    const textarea = createNode("textarea", "approval-state-import");
+    textarea.placeholder = "Вставьте JSON snapshot PM01 PX для восстановления локального согласования";
+    importField.append(createNode("span", "", "Импорт snapshot"), textarea);
+
+    const status = createNode("p", "approval-state-snapshot-status", `${packages.length} цехов · import заменяет только localStorage этой страницы.`);
+    const actions = createNode("div", "approval-state-snapshot-actions");
+    const importButton = createNode("button", "button secondary", "Импортировать snapshot");
+    importButton.type = "button";
+    importButton.addEventListener("click", () => {
+      try {
+        applyApprovalStateSnapshot(textarea.value.trim());
+        textarea.value = "";
+        refreshApprovalOverview();
+        renderPackages(currentDigitalShift);
+        const freshStatus = elements.actionPlan?.querySelector(".approval-state-snapshot-status");
+        if (freshStatus) {
+          freshStatus.textContent = "Snapshot импортирован. Локальные решения, РП и осмотры восстановлены.";
+        }
+      } catch (error) {
+        status.textContent = error.message || "Не удалось импортировать snapshot.";
+      }
+    });
+    actions.append(importButton);
+    panel.append(head, importField, actions, status);
+    return panel;
+  }
+
   function renderActionPlan(digitalShift) {
     if (!elements.actionPlan) {
       return;
@@ -715,7 +818,7 @@
       grid.appendChild(card);
     });
 
-    elements.actionPlan.append(head, grid, renderPreviewBatchPanel(digitalShift, readyPackages));
+    elements.actionPlan.append(head, grid, renderPreviewBatchPanel(digitalShift, readyPackages), renderStateSnapshotPanel(digitalShift));
   }
 
   function refreshApprovalOverview() {

@@ -35,7 +35,7 @@ The PM01 exam is an interactive production exam for:
 
 Current PM01 total score contract: 100 points.
 
-Current PM01 implementation version: `1.6.61`.
+Current PM01 implementation version: `1.6.62`.
 
 Methodical baseline for PM01 should stay aligned with the current FГОС СПО 43.01.09 and 43.02.15, especially ПК 1.1-ПК 1.4 and ОК 01, ОК 02, ОК 07, ОК 09, ОК 10. New tasks should remain production-situation tasks: workplace organization, safe equipment use, raw material preparation, semi-finished product processing, quality control, storage conditions, and practical decision-making.
 
@@ -64,6 +64,7 @@ Important current PM01 content change:
 - Version `1.6.59` adds a teacher-facing PM01 PX action queue on `/pm01-approval.html`: each shop now shows the next step before preview/final assets, based on RP/KTP intake, teacher decision, notes, and readiness gates.
 - Version `1.6.60` adds a preview-generation batch export on `/pm01-approval.html`: only shops with RP/KTP intake and teacher decision `На preview` are included, and the export keeps `preview_only_until_teacher_approval`, visual inspection, target paths, style references, and `finalAsset: false`.
 - Version `1.6.61` adds a browser-local preview inspection journal on `/pm01-approval.html`: each planned preview asset can be marked awaiting/accepted/revision/rejected with notes, copyable inspection reports, and the final-assets gate stays blocked until all preview assets in the shop are accepted.
+- Version `1.6.62` adds a browser-local PM01 PX approval snapshot export/import on `/pm01-approval.html`: RP intake, teacher decisions, notes, and preview inspection statuses can be copied as JSON and restored in another browser without changing public exam data.
 - Official exam routes must stay 100 points and 20 questions; training may include practice-only simulators that do not affect protocols or ведомости.
 
 The active student route is mixed across production areas. Students should not manually choose a favorable shop/section for the exam route.
