@@ -11,15 +11,24 @@
 
   const PM01_APPROVAL_STORAGE_KEY = "pm01ApprovalDecisionsV1";
   const PM01_RP_INTAKE_STORAGE_KEY = "pm01RpIntakeV1";
+  const PM01_PREVIEW_INSPECTION_STORAGE_KEY = "pm01PreviewInspectionV1";
   const DECISION_OPTIONS = [
     { id: "pending", label: "Черновик", status: "Черновик до РП", detail: "Ожидает рабочую программу или правку формулировок." },
     { id: "approved_preview", label: "На preview", status: "Preview согласован", detail: "Можно генерировать 1-2 предварительных изображения." },
     { id: "needs_revision", label: "Нужны правки", status: "Нужны правки", detail: "Темы, задания или промпты требуют уточнения." },
     { id: "waiting_rp", label: "Ждём РП", status: "Ждём РП", detail: "Финальная методическая привязка откладывается до РП." }
   ];
+  const PREVIEW_INSPECTION_OPTIONS = [
+    { id: "awaiting_preview", label: "Ждёт preview", status: "Ожидает preview", detail: "Изображение ещё не осмотрено и не может стать основой для final asset." },
+    { id: "accepted_preview", label: "Принять", status: "Preview принято", detail: "Можно использовать как визуальную опору для финального asset после общей проверки пакета." },
+    { id: "needs_revision", label: "Правка", status: "Нужна правка", detail: "Нужно уточнить prompt, ракурс, сырьё, санитарный контекст или композицию." },
+    { id: "rejected_preview", label: "Отклонить", status: "Preview отклонено", detail: "Не использовать для final asset; требуется новая генерация." }
+  ];
   const decisionOptionsById = new Map(DECISION_OPTIONS.map((option) => [option.id, option]));
+  const previewInspectionOptionsById = new Map(PREVIEW_INSPECTION_OPTIONS.map((option) => [option.id, option]));
   let approvalState = loadApprovalState();
   let rpIntakeState = loadRpIntakeState();
+  let previewInspectionState = loadPreviewInspectionState();
   let currentExam = null;
   let currentDigitalShift = null;
 
@@ -56,6 +65,15 @@
     }
   }
 
+  function loadPreviewInspectionState() {
+    try {
+      const stored = window.localStorage.getItem(PM01_PREVIEW_INSPECTION_STORAGE_KEY);
+      return stored ? JSON.parse(stored) || {} : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
   function persistApprovalState() {
     try {
       window.localStorage.setItem(PM01_APPROVAL_STORAGE_KEY, JSON.stringify(approvalState));
@@ -72,8 +90,20 @@
     }
   }
 
+  function persistPreviewInspectionState() {
+    try {
+      window.localStorage.setItem(PM01_PREVIEW_INSPECTION_STORAGE_KEY, JSON.stringify(previewInspectionState));
+    } catch (_) {
+      // Preview inspection still works in-memory if browser storage is unavailable.
+    }
+  }
+
   function getDecisionMeta(decisionId) {
     return decisionOptionsById.get(decisionId) || DECISION_OPTIONS[0];
+  }
+
+  function getPreviewInspectionMeta(statusId) {
+    return previewInspectionOptionsById.get(statusId) || PREVIEW_INSPECTION_OPTIONS[0];
   }
 
   function getPackageDecision(variantId) {
@@ -120,6 +150,46 @@
   function hasRpIntake(variantId) {
     const intake = getPackageRpIntake(variantId);
     return Boolean(intake.excerpt.trim() || intake.confirmedTopics.trim());
+  }
+
+  function getAssetInspection(assetId) {
+    const stored = previewInspectionState[assetId] || {};
+    return {
+      status: stored.status || "awaiting_preview",
+      note: stored.note || "",
+      updatedAt: stored.updatedAt || null
+    };
+  }
+
+  function setAssetInspection(assetId, patch) {
+    previewInspectionState[assetId] = {
+      ...getAssetInspection(assetId),
+      ...patch,
+      updatedAt: new Date().toISOString()
+    };
+    persistPreviewInspectionState();
+  }
+
+  function resetAssetInspection(assetId) {
+    delete previewInspectionState[assetId];
+    persistPreviewInspectionState();
+  }
+
+  function getPackageInspectionSummary(packageData) {
+    const assets = packageData.previewAssets || [];
+    const statuses = assets.map((asset) => getAssetInspection(asset.id).status);
+    return {
+      total: assets.length,
+      accepted: statuses.filter((status) => status === "accepted_preview").length,
+      needsRevision: statuses.filter((status) => status === "needs_revision").length,
+      rejected: statuses.filter((status) => status === "rejected_preview").length,
+      awaiting: statuses.filter((status) => status === "awaiting_preview").length
+    };
+  }
+
+  function isPackagePreviewInspectionAccepted(packageData) {
+    const summary = getPackageInspectionSummary(packageData);
+    return summary.total > 0 && summary.accepted === summary.total;
   }
 
   function getRpIntakeCount(packages) {
@@ -176,6 +246,7 @@
           row.approvalGate === "requires_rp_and_preview_approval"
       );
     const previewApproved = decision === "approved_preview";
+    const previewAccepted = isPackagePreviewInspectionAccepted(packageData);
     const needsRevision = decision === "needs_revision";
     const waitingRp = decision === "waiting_rp";
 
@@ -224,11 +295,13 @@
       },
       {
         id: "final_assets",
-        status: hasRp && previewApproved ? "pending" : "blocked",
+        status: hasRp && previewApproved && previewAccepted ? "pending" : "blocked",
         title: "Финальные assets",
-        detail: hasRp && previewApproved
-          ? "Следующий gate: сгенерировать preview, визуально осмотреть и только потом подключать final files."
-          : "Финальные картинки нельзя подключать без РП/КТП и утверждённого preview."
+        detail: hasRp && previewApproved && previewAccepted
+          ? "Preview принят в журнале осмотра. Следующий gate: сгенерировать final files и снова проверить перед подключением."
+          : hasRp && previewApproved
+            ? "Финальные картинки нельзя подключать, пока preview-assets не приняты в журнале визуального осмотра."
+            : "Финальные картинки нельзя подключать без РП/КТП и утверждённого preview."
       }
     ];
   }
@@ -345,11 +418,20 @@
     }
 
     if (state.decision === "approved_preview") {
+      if (isPackagePreviewInspectionAccepted(packageData)) {
+        return {
+          status: "ready",
+          label: "Final",
+          title: "Preview принято",
+          detail: "Все planned preview-assets приняты в журнале осмотра. Можно готовить final assets, но подключать их только после повторной визуальной проверки.",
+          decisionStatus: decisionMeta.status
+        };
+      }
       return {
         status: "ready",
         label: "Preview",
-        title: "Готово к preview",
-        detail: "Можно генерировать 1-2 preview-изображения, осмотреть их и только после утверждения готовить final assets.",
+        title: "Сгенерировать и осмотреть preview",
+        detail: "Можно генерировать 1-2 preview-изображения, затем зафиксировать результат визуального осмотра по каждому asset.",
         decisionStatus: decisionMeta.status
       };
     }
@@ -476,6 +558,57 @@
       button.textContent = "Не удалось скопировать";
       window.setTimeout(() => {
         button.textContent = "Скопировать preview batch";
+      }, 1600);
+    }
+  }
+
+  function buildPreviewInspectionReport(packageData) {
+    const summary = getPackageInspectionSummary(packageData);
+    const decision = getPackageDecision(packageData.variantId);
+    return [
+      "PM01 PX preview inspection report",
+      `generatedAt: ${new Date().toISOString()}`,
+      `package: ${packageData.title}`,
+      `variantId: ${packageData.variantId}`,
+      `teacherDecision: ${decision.decision}`,
+      `rpIntake: ${hasRpIntake(packageData.variantId) ? "present" : "missing"}`,
+      `inspectionAccepted: ${summary.accepted}/${summary.total}`,
+      `inspectionNeedsRevision: ${summary.needsRevision}`,
+      `inspectionRejected: ${summary.rejected}`,
+      `inspectionAwaiting: ${summary.awaiting}`,
+      `finalAssetGate: ${isPackagePreviewInspectionAccepted(packageData) ? "preview_accepted_waiting_final_generation" : "blocked_until_preview_acceptance"}`,
+      "",
+      "assets:",
+      ...((packageData.previewAssets || []).map((asset) => {
+        const inspection = getAssetInspection(asset.id);
+        const meta = getPreviewInspectionMeta(inspection.status);
+        return [
+          `- asset: ${asset.id}`,
+          `  targetPath: ${asset.targetPath}`,
+          `  outputUse: ${asset.outputUse}`,
+          `  finalAsset: ${asset.finalAsset === true}`,
+          `  inspectionStatus: ${inspection.status}`,
+          `  inspectionLabel: ${meta.status}`,
+          `  updatedAt: ${inspection.updatedAt || "not_saved"}`,
+          `  note: ${inspection.note || "-"}`,
+          "  checklist:",
+          ...(asset.inspectionChecklist || []).map((item) => `    - ${item}`)
+        ].join("\n");
+      }))
+    ].join("\n");
+  }
+
+  async function copyPreviewInspectionReport(packageData, button) {
+    try {
+      await navigator.clipboard.writeText(buildPreviewInspectionReport(packageData));
+      button.textContent = "Отчёт осмотра скопирован";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать отчёт осмотра";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать отчёт осмотра";
       }, 1600);
     }
   }
@@ -1186,6 +1319,87 @@
     return panel;
   }
 
+  function renderPreviewInspectionPanel(packageData) {
+    const summary = getPackageInspectionSummary(packageData);
+    const canInspect = getPackageDecision(packageData.variantId).decision === "approved_preview" && hasRpIntake(packageData.variantId);
+    const panel = createNode("section", "approval-package-block approval-inspection-panel");
+    const head = createNode("div", "approval-inspection-head");
+    head.append(
+      createNode("h3", "", "Журнал визуального осмотра preview"),
+      createNode(
+        "span",
+        "",
+        `${summary.accepted}/${summary.total} принято · ${summary.awaiting} ждёт · ${summary.needsRevision} правок · ${summary.rejected} отклонено`
+      )
+    );
+
+    const gateNote = createNode(
+      "p",
+      "approval-inspection-gate",
+      canInspect
+        ? "Осмотрите preview-изображения после генерации и зафиксируйте решение по каждому planned asset."
+        : "Осмотр активируется после РП/КТП и решения «На preview». До этого final assets заблокированы."
+    );
+
+    const grid = createNode("div", "approval-inspection-grid");
+    (packageData.previewAssets || []).forEach((asset) => {
+      const inspection = getAssetInspection(asset.id);
+      const meta = getPreviewInspectionMeta(inspection.status);
+      const card = createNode("article", "approval-inspection-card");
+      card.dataset.status = inspection.status;
+      card.append(
+        createNode("span", "approval-inspection-status", meta.status),
+        createNode("strong", "", asset.kind === "scene" ? "Общий вид цеха" : "Контрольная партия"),
+        createNode("code", "", asset.targetPath),
+        createNode("p", "", asset.visualPurpose || ""),
+        renderList(asset.inspectionChecklist || [], "approval-inspection-checklist")
+      );
+
+      const options = createNode("div", "approval-inspection-options");
+      PREVIEW_INSPECTION_OPTIONS.forEach((option) => {
+        const button = createNode("button", "approval-inspection-button", option.label);
+        button.type = "button";
+        button.dataset.status = option.id;
+        button.classList.toggle("is-active", inspection.status === option.id);
+        button.disabled = !canInspect;
+        button.addEventListener("click", () => {
+          setAssetInspection(asset.id, { status: option.id });
+          refreshApprovalOverview();
+          renderPackages(currentDigitalShift);
+        });
+        options.appendChild(button);
+      });
+
+      const noteField = createNode("label", "approval-inspection-note-field");
+      const note = createNode("textarea", "approval-inspection-note");
+      note.value = inspection.note;
+      note.disabled = !canInspect;
+      note.placeholder = "Что принять, исправить или отклонить в preview-изображении";
+      note.addEventListener("input", () => {
+        setAssetInspection(asset.id, { note: note.value });
+      });
+      noteField.append(createNode("span", "", "Заметка осмотра"), note);
+
+      const resetButton = createNode("button", "button ghost", "Сбросить осмотр");
+      resetButton.type = "button";
+      resetButton.disabled = !canInspect;
+      resetButton.addEventListener("click", () => {
+        resetAssetInspection(asset.id);
+        refreshApprovalOverview();
+        renderPackages(currentDigitalShift);
+      });
+
+      card.append(options, noteField, resetButton);
+      grid.appendChild(card);
+    });
+
+    const copyButton = createNode("button", "button secondary", "Скопировать отчёт осмотра");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyPreviewInspectionReport(packageData, copyButton));
+    panel.append(head, gateNote, grid, copyButton);
+    return panel;
+  }
+
   function renderPackage(packageData, familyMap, index) {
     const decision = getPackageDecision(packageData.variantId);
     const decisionMeta = getDecisionMeta(decision.decision);
@@ -1278,6 +1492,7 @@
       log,
       prompts,
       assetPlan,
+      renderPreviewInspectionPanel(packageData),
       renderDecisionControls(packageData),
       criteria
     );

@@ -2407,6 +2407,184 @@ select:focus {
   background: #eef8f4;
 }
 
+.approval-inspection-panel {
+  padding: 12px;
+  border: 1px solid rgba(35, 107, 181, 0.2);
+  border-radius: var(--radius);
+  background: #f7fbff;
+}
+
+.approval-inspection-head {
+  display: grid;
+  gap: 4px;
+}
+
+.approval-inspection-head span,
+.approval-inspection-gate,
+.approval-inspection-note-field span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.approval-inspection-gate {
+  margin: 0;
+}
+
+.approval-inspection-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.approval-inspection-card {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-left: 4px solid rgba(213, 121, 36, 0.58);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.approval-inspection-card[data-status="accepted_preview"] {
+  border-left-color: rgba(28, 117, 93, 0.68);
+  background: #f7fbf9;
+}
+
+.approval-inspection-card[data-status="needs_revision"] {
+  border-left-color: rgba(213, 121, 36, 0.68);
+  background: #fffaf3;
+}
+
+.approval-inspection-card[data-status="rejected_preview"] {
+  border-left-color: rgba(199, 72, 72, 0.68);
+  background: #fff8f8;
+}
+
+.approval-inspection-status {
+  width: max-content;
+  max-width: 100%;
+  padding: 4px 7px;
+  border-radius: 6px;
+  color: #8a4a07;
+  background: #fff2df;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.approval-inspection-card[data-status="accepted_preview"] .approval-inspection-status {
+  color: var(--green-900);
+  background: #eaf7f1;
+}
+
+.approval-inspection-card[data-status="rejected_preview"] .approval-inspection-status {
+  color: #922b2b;
+  background: #ffecec;
+}
+
+.approval-inspection-card strong,
+.approval-inspection-card code,
+.approval-inspection-card p,
+.approval-inspection-checklist li {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.approval-inspection-card strong {
+  color: var(--green-900);
+  font-size: 14px;
+  line-height: 1.28;
+}
+
+.approval-inspection-card code {
+  display: block;
+  padding: 7px 8px;
+  border-radius: 6px;
+  background: #eef5ff;
+  color: #174a82;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.approval-inspection-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.approval-inspection-checklist {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.approval-inspection-checklist li {
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #eef8f4;
+  color: var(--green-800);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.approval-inspection-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.approval-inspection-button {
+  min-height: 32px;
+  padding: 6px 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.15;
+  cursor: pointer;
+}
+
+.approval-inspection-button.is-active {
+  border-color: rgba(28, 117, 93, 0.45);
+  background: #eaf7f1;
+  color: var(--green-900);
+}
+
+.approval-inspection-button:disabled,
+.approval-inspection-note:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.approval-inspection-note-field {
+  display: grid;
+  gap: 5px;
+}
+
+.approval-inspection-note {
+  min-height: 74px;
+  resize: vertical;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .approval-decision-panel {
   padding: 12px;
   border: 1px solid rgba(18, 63, 53, 0.14);
@@ -5377,6 +5555,10 @@ tr[data-attempt-id].is-selected {
     grid-template-columns: 1fr;
   }
 
+  .approval-inspection-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .digital-shift-cockpit-head,
   .approval-cockpit-head {
     align-items: start;
@@ -5391,7 +5573,8 @@ tr[data-attempt-id].is-selected {
     grid-template-columns: 1fr;
   }
 
-  .approval-asset-grid {
+  .approval-asset-grid,
+  .approval-inspection-grid {
     grid-template-columns: 1fr;
   }
 
