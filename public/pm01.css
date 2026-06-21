@@ -737,7 +737,8 @@ select:focus {
 }
 
 .digital-shift-topics span,
-.digital-shift-mini-families span {
+.digital-shift-mini-families span,
+.digital-shift-mini-family {
   min-height: 26px;
   display: inline-flex;
   align-items: center;
@@ -750,7 +751,20 @@ select:focus {
   font-weight: 800;
 }
 
-.digital-shift-mini-families span.is-complete {
+.digital-shift-mini-family {
+  font: inherit;
+  cursor: pointer;
+}
+
+.digital-shift-mini-family.is-current,
+.digital-shift-mini-family[aria-pressed="true"] {
+  border-color: rgba(35, 107, 181, 0.35);
+  color: #174a82;
+  background: #eef5ff;
+}
+
+.digital-shift-mini-families span.is-complete,
+.digital-shift-mini-family.is-complete {
   border-color: rgba(28, 117, 93, 0.32);
   color: var(--green-900);
   background: #dcefe8;
@@ -778,6 +792,12 @@ select:focus {
   border-color: rgba(35, 107, 181, 0.5);
   box-shadow: 0 0 0 3px rgba(35, 107, 181, 0.1);
   background: #fff;
+}
+
+.digital-shift-task.is-current {
+  border-color: rgba(35, 107, 181, 0.6);
+  border-left-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(35, 107, 181, 0.14);
 }
 
 .digital-shift-task.is-complete {
@@ -851,6 +871,26 @@ select:focus {
   font-weight: 900;
   line-height: 1.2;
   overflow-wrap: anywhere;
+}
+
+.digital-shift-task-open {
+  width: max-content;
+  max-width: 100%;
+  display: inline-flex;
+  padding: 4px 7px;
+  border-radius: 6px;
+  color: #174a82;
+  background: #eef5ff;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.digital-shift-task.is-current .digital-shift-task-open {
+  color: #fff;
+  background: var(--blue);
 }
 
 .digital-shift-cockpit {
@@ -1219,6 +1259,7 @@ select:focus {
   align-items: center;
 }
 
+.digital-shift-open-action,
 .digital-shift-complete-action {
   min-height: 32px;
   padding: 6px 9px;
@@ -1230,6 +1271,17 @@ select:focus {
   font-weight: 900;
   line-height: 1.2;
   cursor: pointer;
+}
+
+.digital-shift-open-action {
+  border-color: rgba(35, 107, 181, 0.28);
+  color: var(--blue);
+  background: #eef5ff;
+}
+
+.digital-shift-open-action[aria-pressed="true"] {
+  color: #fff;
+  background: var(--blue);
 }
 
 .digital-shift-complete-action[aria-pressed="true"] {

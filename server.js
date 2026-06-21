@@ -3088,7 +3088,23 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    attempt.currentStepIndex = module.stepStart;
+    const practiceFamily = String(body.practiceFamily || "").trim();
+    if (practiceFamily) {
+      const questionIndex = (attempt.variant?.questions || []).findIndex(
+        (question, index) =>
+          index >= module.stepStart &&
+          index <= module.stepEnd &&
+          question.practiceOnly &&
+          question.practiceFamily === practiceFamily
+      );
+      if (questionIndex < 0) {
+        sendJson(res, 400, { ok: false, message: "Выберите корректный тренажер PX." });
+        return;
+      }
+      attempt.currentStepIndex = questionIndex;
+    } else {
+      attempt.currentStepIndex = module.stepStart;
+    }
     attempt.lastFeedback = null;
     markPm01QuestionPresented(attempt);
     await upsertAttempt(attempt);

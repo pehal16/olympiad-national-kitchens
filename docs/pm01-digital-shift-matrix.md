@@ -65,6 +65,7 @@ Working programs, calendar-thematic plans, and local assessment materials are ex
 - Student training uses `shiftCockpit` as an interactive navigator: selecting a PX stage highlights the matching task card and shows the linked action, control signal, journal event, criterion, and competencies without changing official scoring.
 - Student training also stores browser-local PX shift progress: task cards are selectable, cockpit stages can be marked as reviewed, completed timeline/log/task states are highlighted, and the data never enters official scoring or protocols.
 - Answering a PX practice task automatically closes the matching cockpit stage, and the training result screen renders a separate digital-shift journal summary; this remains outside the official 100-point contract.
+- During an active training attempt, PX cockpit timeline steps, focus actions, and right-panel family chips can open the exact practice simulator by `practiceFamily`; this is disabled for official exam routes.
 - Teacher approval uses readiness gates per shop: official exam lock, methodical matrix, RP/KTP intake, preview asset plan, teacher preview decision, and final asset blocker are shown before final generated assets can be connected.
 - New generated final assets should be added only after teacher review of the per-shop prompt package.
 

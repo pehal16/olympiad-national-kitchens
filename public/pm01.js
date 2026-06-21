@@ -776,6 +776,14 @@
     );
   }
 
+  function canOpenPracticeFamily() {
+    return state.attempt?.mode === "training" && state.attempt?.status === "in_progress";
+  }
+
+  function currentPracticeFamilyId() {
+    return state.attempt?.currentQuestion?.practiceFamily || "";
+  }
+
   function selectCockpitFamily(familyId, options = {}) {
     if (!familyId) {
       return;
@@ -796,8 +804,18 @@
     }
   }
 
+  async function jumpToPracticeFamily(familyId) {
+    selectCockpitFamily(familyId, { scrollToTask: false });
+    if (!canOpenPracticeFamily()) {
+      return;
+    }
+    await jumpToModule("digital_shift", { practiceFamily: familyId });
+  }
+
   function renderDigitalShiftTasks(packageData) {
     const activeFamilyId = ensureActiveCockpitFamily(packageData);
+    const currentFamilyId = currentPracticeFamilyId();
+    const canOpen = canOpenPracticeFamily();
     const grid = document.createElement("div");
     grid.className = "digital-shift-task-grid";
     (packageData?.tasks || []).forEach((task, index) => {
@@ -810,12 +828,23 @@
       card.setAttribute("role", "button");
       card.setAttribute("aria-pressed", task.familyId === activeFamilyId ? "true" : "false");
       card.classList.toggle("is-active", task.familyId === activeFamilyId);
+      card.classList.toggle("is-current", canOpen && task.familyId === currentFamilyId);
       card.classList.toggle("is-complete", complete);
-      card.addEventListener("click", () => selectCockpitFamily(task.familyId, { scrollToTask: false }));
+      card.addEventListener("click", () => {
+        if (canOpen) {
+          jumpToPracticeFamily(task.familyId);
+        } else {
+          selectCockpitFamily(task.familyId, { scrollToTask: false });
+        }
+      });
       card.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          selectCockpitFamily(task.familyId, { scrollToTask: false });
+          if (canOpen) {
+            jumpToPracticeFamily(task.familyId);
+          } else {
+            selectCockpitFamily(task.familyId, { scrollToTask: false });
+          }
         }
       });
       const number = document.createElement("span");
@@ -836,6 +865,12 @@
         done.className = "digital-shift-task-done";
         done.textContent = "Этап разобран";
         card.appendChild(done);
+      }
+      if (canOpen) {
+        const open = document.createElement("em");
+        open.className = "digital-shift-task-open";
+        open.textContent = task.familyId === currentFamilyId ? "Открыто сейчас" : "Открыть тренажёр";
+        card.appendChild(open);
       }
       grid.appendChild(card);
     });
@@ -964,6 +999,18 @@
     }
     const actions = document.createElement("div");
     actions.className = "digital-shift-cockpit-focus-actions";
+    const canOpen = canOpenPracticeFamily();
+    const isCurrentPractice = step.familyId === currentPracticeFamilyId();
+    if (canOpen) {
+      const openButton = createButton(
+        "digital-shift-open-action",
+        isCurrentPractice ? "Тренажёр открыт" : "Открыть тренажёр",
+        () => jumpToPracticeFamily(step.familyId)
+      );
+      openButton.type = "button";
+      openButton.setAttribute("aria-pressed", isCurrentPractice ? "true" : "false");
+      actions.appendChild(openButton);
+    }
     const doneButton = createButton(
       "digital-shift-complete-action",
       activeComplete ? "Снять отметку" : compact ? "Этап разобран" : "Отметить этап разобранным",
@@ -1014,6 +1061,8 @@
     timeline.className = "digital-shift-cockpit-timeline";
     (cockpit.operationTimeline || []).forEach((step) => {
       const complete = isCockpitFamilyComplete(packageData, step.familyId);
+      const canOpen = canOpenPracticeFamily();
+      const isCurrentPractice = step.familyId === currentPracticeFamilyId();
       const item = document.createElement("li");
       item.dataset.family = step.familyId || "";
       item.classList.toggle("is-active", step.familyId === activeFamilyId);
@@ -1031,11 +1080,21 @@
       const done = document.createElement("em");
       done.className = "digital-shift-cockpit-done";
       done.textContent = complete ? "Разобрано" : "В работе";
-      const action = createButton("digital-shift-cockpit-action", "Выбрать", () =>
-        selectCockpitFamily(step.familyId, { scrollToTask: !compact })
-      );
+      const action = createButton("digital-shift-cockpit-action", "Выбрать", () => {
+        if (canOpen) {
+          jumpToPracticeFamily(step.familyId);
+        } else {
+          selectCockpitFamily(step.familyId, { scrollToTask: !compact });
+        }
+      });
       action.setAttribute("aria-pressed", step.familyId === activeFamilyId ? "true" : "false");
-      action.textContent = step.familyId === activeFamilyId ? "В фокусе" : "Выбрать";
+      action.textContent = canOpen
+        ? isCurrentPractice
+          ? "Открыто"
+          : "Открыть"
+        : step.familyId === activeFamilyId
+          ? "В фокусе"
+          : "Выбрать";
       copy.append(name, signal, done);
       item.append(number, copy, action);
       timeline.appendChild(item);
@@ -1459,9 +1518,12 @@
         const families = document.createElement("div");
         families.className = "digital-shift-mini-families";
         (packageData.tasks || []).forEach((task) => {
-          const chip = document.createElement("span");
+          const chip = createButton("digital-shift-mini-family", "", () => jumpToPracticeFamily(task.familyId));
+          chip.dataset.family = task.familyId;
           chip.textContent = digitalShiftFamily(task.familyId)?.title || task.familyTitle || task.familyId;
           chip.classList.toggle("is-complete", isCockpitFamilyComplete(packageData, task.familyId));
+          chip.classList.toggle("is-current", task.familyId === currentPracticeFamilyId());
+          chip.setAttribute("aria-pressed", task.familyId === currentPracticeFamilyId() ? "true" : "false");
           families.appendChild(chip);
         });
         elements.trainingShiftReference.append(overline, title, renderDigitalShiftCockpit(packageData, true), log, families);
@@ -2717,17 +2779,21 @@
     }
   }
 
-  async function jumpToModule(moduleId) {
+  async function jumpToModule(moduleId, options = {}) {
     if (!state.attempt || state.attempt.mode !== "training") {
       return;
     }
 
     hideMessage(elements.taskMessage);
-    setSaveStatus("перехожу...");
+    setSaveStatus(options.practiceFamily ? "открываю тренажёр..." : "перехожу...");
+    const body = { moduleId };
+    if (options.practiceFamily) {
+      body.practiceFamily = options.practiceFamily;
+    }
     try {
       const attempt = await api(`/api/pm01/public/attempts/${encodeURIComponent(state.attempt.id)}/jump`, {
         method: "POST",
-        body: JSON.stringify({ moduleId })
+        body: JSON.stringify(body)
       });
       renderAttempt(attempt);
       setSaveStatus("готово");
