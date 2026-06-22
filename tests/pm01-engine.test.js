@@ -6,6 +6,7 @@ const path = require("node:path");
 const {
   getPm01Exam,
   getPm01PublicData,
+  getPm01DigitalShiftPracticeGuard,
   getPm01MaterialTicket,
   isPm01TicketCompatibleWithVariant,
   buildPm01Variant,
@@ -1113,8 +1114,53 @@ test("PM01 digital shift extension is training-only and keeps official scoring s
     ["storage_marking", "storage_marking"],
     ["order_assembly", "order_assembly"]
   ]);
+  const taskTypes = new Map([
+    ["quality_control", "bucket_sort"],
+    ["shift_investigation", "hotspot_scene"],
+    ["production_timeline", "sequence_drag"],
+    ["storage_marking", "bucket_sort"],
+    ["order_assembly", "sequence_drag"]
+  ]);
+  const practiceGuard = getPm01DigitalShiftPracticeGuard(exam);
 
   assert.equal(publicData.digitalShift.mode, "training_extension");
+  assert.equal(publicData.digitalShift.practiceGuard.status, "ok");
+  assert.deepEqual(publicData.digitalShift.practiceGuard, practiceGuard);
+  assert.equal(practiceGuard.guardVersion, "2026-06-22.training-guard.v1");
+  assert.equal(practiceGuard.officialRoute.includePractice, false);
+  assert.equal(practiceGuard.officialRoute.blockedModuleId, "digital_shift");
+  assert.equal(practiceGuard.officialRoute.blockedQuestionFlag, "practiceOnly");
+  assert.equal(practiceGuard.officialRoute.questionCount, 20);
+  assert.equal(practiceGuard.officialRoute.totalMaxScore, 100);
+  assert.equal(practiceGuard.trainingRoute.includePractice, true);
+  assert.equal(practiceGuard.trainingRoute.moduleId, "digital_shift");
+  assert.equal(practiceGuard.trainingRoute.moduleMaxScore, 0);
+  assert.equal(practiceGuard.trainingRoute.questionsPerVariant, 5);
+  assert.equal(practiceGuard.trainingRoute.totalMaxScoreRemains, 100);
+  assert.equal(practiceGuard.familyContracts.length, 5);
+  assert.equal(
+    practiceGuard.familyContracts.every(
+      (contract) =>
+        families.has(contract.familyId) &&
+        contract.visualMode === visualModes.get(contract.familyId) &&
+        contract.taskType === taskTypes.get(contract.familyId) &&
+        contract.scorePolicy === "maxScore_0_training_only" &&
+        contract.publicSafety === "answer_keys_hidden"
+    ),
+    true
+  );
+  assert.deepEqual(practiceGuard.publicDataSafety.blockedPrivateFieldKeys, [
+    "correctAnswer",
+    "correctBuckets",
+    "correctSequence",
+    "hotspots",
+    "isCorrect",
+    "solutionSteps"
+  ]);
+  assert.equal(practiceGuard.approvalBoundary.rpRequiredBeforeOfficialRewrite, true);
+  assert.equal(practiceGuard.approvalBoundary.generatedFinalAssetsManualOnly, true);
+  assert.equal(practiceGuard.approvalBoundary.connectionRequiresReadyForManualCodeChange, true);
+  assert.equal(practiceGuard.approvalBoundary.publicExamChangedByApprovalBoard, false);
   assert.equal(publicData.digitalShift.families.length, 5);
   assert.equal(publicData.digitalShift.visualAssetRubric.status, "approval_required_before_final_asset");
   assert.equal(publicData.digitalShift.visualAssetRubric.stylePrinciples.length >= 4, true);
@@ -1263,9 +1309,13 @@ test("PM01 digital shift extension is training-only and keeps official scoring s
     const practiceModule = trainingVariant.modules.find((module) => module.id === "digital_shift");
     const practiceQuestions = trainingVariant.questions.filter((question) => question.practiceOnly);
     const publicPracticeQuestion = sanitizePm01Question(practiceQuestions[0], { answers: {} });
+    const guardCoverage = practiceGuard.variantCoverage.find((coverage) => coverage.variantId === examVariant.id);
 
     assert.equal(officialVariant.questions.length, 20, `${examVariant.id} official count`);
     assert.equal(officialVariant.modules.some((module) => module.practiceOnly), false, `${examVariant.id} official modules`);
+    assert.equal(officialVariant.modules.some((module) => module.id === "digital_shift"), false, `${examVariant.id} official PX module`);
+    assert.equal(officialVariant.questions.some((question) => question.practiceOnly), false, `${examVariant.id} official practice flag`);
+    assert.equal(officialVariant.questions.some((question) => question.practiceFamily), false, `${examVariant.id} official practice family`);
     assert.equal(trainingVariant.totalMaxScore, 100, `${examVariant.id} training score contract`);
     assert.equal(trainingVariant.questions.length, 25, `${examVariant.id} training count`);
     assert.equal(practiceModule.code, "PX");
@@ -1273,6 +1323,20 @@ test("PM01 digital shift extension is training-only and keeps official scoring s
     assert.equal(practiceQuestions.length, 5);
     assert.equal(practiceQuestions.every((question) => question.maxScore === 0), true);
     assert.deepEqual(new Set(practiceQuestions.map((question) => question.practiceFamily)), families);
+    assert.equal(practiceQuestions.every((question) => question.moduleId === "digital_shift"), true);
+    assert.equal(practiceQuestions.every((question) => question.moduleCode === "PX"), true);
+    assert.equal(
+      practiceQuestions.every(
+        (question) => question.visualMode === visualModes.get(question.practiceFamily) && question.type === taskTypes.get(question.practiceFamily)
+      ),
+      true,
+      `${examVariant.id} practice guard contract`
+    );
+    assert.equal(guardCoverage.status, "ok", `${examVariant.id} guard coverage`);
+    assert.equal(guardCoverage.practiceQuestions, 5);
+    assert.equal(guardCoverage.maxScoreTotal, 0);
+    assert.deepEqual(new Set(guardCoverage.families), families);
+    assert.deepEqual(new Set(guardCoverage.visualModes), new Set(visualModes.values()));
     assert.equal(publicPracticeQuestion.practiceOnly, true);
     assert.equal(publicPracticeQuestion.maxScore, 0);
     assert.equal("correctBuckets" in publicPracticeQuestion, false);

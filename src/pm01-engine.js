@@ -92,7 +92,169 @@ function getPm01MaterialBankPublicData() {
   };
 }
 
+const PM01_DIGITAL_SHIFT_GUARD_VERSION = "2026-06-22.training-guard.v1";
+const PM01_DIGITAL_SHIFT_FAMILY_TASK_TYPES = {
+  quality_control: "bucket_sort",
+  shift_investigation: "hotspot_scene",
+  production_timeline: "sequence_drag",
+  storage_marking: "bucket_sort",
+  order_assembly: "sequence_drag"
+};
+const PM01_DIGITAL_SHIFT_PRIVATE_FIELD_KEYS = [
+  "correctAnswer",
+  "correctBuckets",
+  "correctSequence",
+  "hotspots",
+  "isCorrect",
+  "solutionSteps"
+];
+
+function buildPm01DigitalShiftFamilyContracts(exam = pm01Exam) {
+  const digitalShift = exam.digitalShift || {};
+  const blueprintByFamily = new Map(
+    (digitalShift.interactionBlueprints || []).map((blueprint) => [blueprint.familyId, blueprint])
+  );
+  return (digitalShift.families || []).map((family) => {
+    const blueprint = blueprintByFamily.get(family.id) || {};
+    return {
+      familyId: family.id,
+      title: family.title || family.id,
+      taskType: PM01_DIGITAL_SHIFT_FAMILY_TASK_TYPES[family.id] || "",
+      visualMode: blueprint.visualMode || family.id,
+      scorePolicy: "maxScore_0_training_only",
+      publicSafety: "answer_keys_hidden"
+    };
+  });
+}
+
+function auditPm01DigitalShiftPracticeQuestions(exam = pm01Exam, variant = {}) {
+  const contracts = buildPm01DigitalShiftFamilyContracts(exam);
+  const contractByFamily = new Map(contracts.map((contract) => [contract.familyId, contract]));
+  const practiceQuestions = Array.isArray(variant.practiceOnly) ? variant.practiceOnly : [];
+  const issues = [];
+  const seenFamilies = new Set();
+
+  if (practiceQuestions.length !== contracts.length) {
+    issues.push(`practice_question_count:${practiceQuestions.length}/${contracts.length}`);
+  }
+
+  practiceQuestions.forEach((question) => {
+    const contract = contractByFamily.get(question.practiceFamily);
+    if (!question.practiceOnly) {
+      issues.push(`${question.id}:missing_practiceOnly`);
+    }
+    if (Number(question.maxScore || 0) !== 0) {
+      issues.push(`${question.id}:non_zero_score`);
+    }
+    if (!contract) {
+      issues.push(`${question.id}:unknown_family:${question.practiceFamily || "missing"}`);
+      return;
+    }
+    seenFamilies.add(question.practiceFamily);
+    if (contract.taskType && question.type !== contract.taskType) {
+      issues.push(`${question.id}:type:${question.type}/${contract.taskType}`);
+    }
+    if (contract.visualMode && question.visualMode !== contract.visualMode) {
+      issues.push(`${question.id}:visualMode:${question.visualMode || "missing"}/${contract.visualMode}`);
+    }
+  });
+
+  contracts.forEach((contract) => {
+    if (!seenFamilies.has(contract.familyId)) {
+      issues.push(`missing_family:${contract.familyId}`);
+    }
+  });
+
+  return {
+    variantId: variant.id || "",
+    practiceQuestions: practiceQuestions.length,
+    maxScoreTotal: roundScore(practiceQuestions.reduce((sum, question) => sum + Number(question.maxScore || 0), 0)),
+    families: practiceQuestions.map((question) => question.practiceFamily || ""),
+    visualModes: practiceQuestions.map((question) => question.visualMode || ""),
+    status: issues.length ? "needs_attention" : "ok",
+    issues
+  };
+}
+
+function getPm01DigitalShiftPracticeGuard(exam = pm01Exam) {
+  const familyContracts = buildPm01DigitalShiftFamilyContracts(exam);
+  const variantCoverage = (exam.variants || []).map((variant) =>
+    auditPm01DigitalShiftPracticeQuestions(exam, variant)
+  );
+  const allVariantsOk = variantCoverage.every((coverage) => coverage.status === "ok");
+
+  return {
+    guardVersion: PM01_DIGITAL_SHIFT_GUARD_VERSION,
+    status: allVariantsOk ? "ok" : "needs_attention",
+    scope: "PX training-only extension",
+    officialRoute: {
+      includePractice: false,
+      blockedModuleId: "digital_shift",
+      blockedQuestionFlag: "practiceOnly",
+      questionCount: 20,
+      totalMaxScore: exam.scoring?.totalMaxScore || 100,
+      protocolImpact: "none"
+    },
+    trainingRoute: {
+      includePractice: true,
+      moduleId: "digital_shift",
+      moduleCode: "PX",
+      moduleMaxScore: 0,
+      questionsPerVariant: familyContracts.length,
+      practiceQuestionMaxScore: 0,
+      totalMaxScoreRemains: exam.scoring?.totalMaxScore || 100
+    },
+    familyContracts,
+    publicDataSafety: {
+      blockedPrivateFieldKeys: PM01_DIGITAL_SHIFT_PRIVATE_FIELD_KEYS,
+      hotspotPolicy: "public_data_exposes_target_count_only",
+      sequencePolicy: "public_data_hides_correct_order",
+      bucketPolicy: "public_data_hides_bucket_map"
+    },
+    approvalBoundary: {
+      rpRequiredBeforeOfficialRewrite: true,
+      generatedFinalAssetsManualOnly: true,
+      connectionRequiresReadyForManualCodeChange: true,
+      publicExamChangedByApprovalBoard: false
+    },
+    variantCoverage
+  };
+}
+
+function assertNoPracticeOnlyInOfficialRoute(variant) {
+  const modules = variant.modules || variant.tours || [];
+  const practiceModules = modules.filter((module) => module.practiceOnly || module.id === "digital_shift");
+  const practiceQuestions = (variant.questions || []).filter(
+    (question) => question.practiceOnly || question.practiceFamily || question.moduleId === "digital_shift"
+  );
+
+  if (practiceModules.length || practiceQuestions.length) {
+    throw new Error(
+      `PM01 official route ${variant.variantId || "unknown"} contains training-only PX content.`
+    );
+  }
+}
+
+function assertPracticeQuestionsMatchGuard(exam, sourceVariant, practiceQuestions) {
+  const audit = auditPm01DigitalShiftPracticeQuestions(exam, {
+    ...sourceVariant,
+    practiceOnly: practiceQuestions
+  });
+  if (audit.status !== "ok") {
+    throw new Error(
+      `PM01 training guard failed for ${sourceVariant.id || "unknown"}: ${audit.issues.join(", ")}`
+    );
+  }
+}
+
 function getPm01PublicData(exam = pm01Exam) {
+  const digitalShift = exam.digitalShift
+    ? {
+        ...clone(exam.digitalShift),
+        practiceGuard: getPm01DigitalShiftPracticeGuard(exam)
+      }
+    : null;
+
   return {
     id: exam.id,
     slug: exam.slug,
@@ -111,7 +273,7 @@ function getPm01PublicData(exam = pm01Exam) {
     formulas: exam.formulas,
     assetRegistry: exam.assetRegistry || {},
     visualAtlas: exam.visualAtlas || [],
-    digitalShift: exam.digitalShift || null,
+    digitalShift,
     materials: getPm01MaterialBankPublicData(),
     variants: exam.variants.map((variant) => ({
       id: variant.id,
@@ -498,6 +660,7 @@ function buildPm01Variant(exam, variantId, options = {}) {
   });
 
   if (options.includePractice && Array.isArray(variant.practiceOnly) && variant.practiceOnly.length) {
+    assertPracticeQuestionsMatchGuard(exam, variant, variant.practiceOnly);
     const practiceModule = {
       id: "digital_shift",
       code: "PX",
@@ -538,7 +701,7 @@ function buildPm01Variant(exam, variantId, options = {}) {
     });
   }
 
-  return {
+  const route = {
     schemaVersion: exam.schemaVersion,
     generatedAt: nowIso(),
     routeSeed,
@@ -557,6 +720,12 @@ function buildPm01Variant(exam, variantId, options = {}) {
     questions: flatQuestions,
     issuedQuestionIds: flatQuestions.map((question) => question.sourceId)
   };
+
+  if (!options.includePractice) {
+    assertNoPracticeOnlyInOfficialRoute(route);
+  }
+
+  return route;
 }
 
 function getPm01CurrentQuestion(attempt) {
@@ -1192,6 +1361,7 @@ function formatPm01CorrectAnswer(question) {
 module.exports = {
   getPm01Exam,
   getPm01PublicData,
+  getPm01DigitalShiftPracticeGuard,
   getPm01MaterialBankPublicData,
   getPm01MaterialTicket,
   isPm01TicketCompatibleWithVariant,

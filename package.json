@@ -1,6 +1,6 @@
 {
   "name": "national-kitchens-olympiad",
-  "version": "1.6.78",
+  "version": "1.6.79",
   "author": "Постовит Д.А.",
   "description": "Автономная веб-олимпиада по национальным кухням",
   "main": "electron-main.js",

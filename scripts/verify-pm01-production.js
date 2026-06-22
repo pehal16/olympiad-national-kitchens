@@ -116,6 +116,61 @@ async function main() {
     exam.payload?.data?.digitalShift?.interactionBlueprints?.length === 5,
     "PM01 digital shift must expose 5 interaction blueprints"
   );
+  const practiceGuard = exam.payload?.data?.digitalShift?.practiceGuard || {};
+  assert(practiceGuard.status === "ok", "PM01 digital shift practice guard must be ok");
+  assert(
+    practiceGuard.guardVersion === "2026-06-22.training-guard.v1",
+    "PM01 digital shift practice guard version is unexpected"
+  );
+  assert(
+    practiceGuard.officialRoute?.includePractice === false &&
+      practiceGuard.officialRoute?.blockedModuleId === "digital_shift" &&
+      practiceGuard.officialRoute?.blockedQuestionFlag === "practiceOnly" &&
+      practiceGuard.officialRoute?.questionCount === 20 &&
+      practiceGuard.officialRoute?.totalMaxScore === 100,
+    "PM01 practice guard must protect the official route"
+  );
+  assert(
+    practiceGuard.trainingRoute?.includePractice === true &&
+      practiceGuard.trainingRoute?.moduleId === "digital_shift" &&
+      practiceGuard.trainingRoute?.moduleMaxScore === 0 &&
+      practiceGuard.trainingRoute?.questionsPerVariant === 5 &&
+      practiceGuard.trainingRoute?.totalMaxScoreRemains === 100,
+    "PM01 practice guard must describe the training-only PX route"
+  );
+  assert(
+    Array.isArray(practiceGuard.familyContracts) &&
+      practiceGuard.familyContracts.length === 5 &&
+      practiceGuard.familyContracts.every(
+        (contract) =>
+          contract.familyId &&
+          contract.taskType &&
+          contract.visualMode &&
+          contract.scorePolicy === "maxScore_0_training_only" &&
+          contract.publicSafety === "answer_keys_hidden"
+      ),
+    "PM01 practice guard must expose five safe family contracts"
+  );
+  assert(
+    Array.isArray(practiceGuard.variantCoverage) &&
+      practiceGuard.variantCoverage.length === 5 &&
+      practiceGuard.variantCoverage.every(
+        (coverage) =>
+          coverage.status === "ok" &&
+          coverage.practiceQuestions === 5 &&
+          coverage.maxScoreTotal === 0 &&
+          Array.isArray(coverage.families) &&
+          coverage.families.length === 5
+      ),
+    "PM01 practice guard must prove per-variant PX coverage"
+  );
+  assert(
+    practiceGuard.approvalBoundary?.rpRequiredBeforeOfficialRewrite === true &&
+      practiceGuard.approvalBoundary?.generatedFinalAssetsManualOnly === true &&
+      practiceGuard.approvalBoundary?.connectionRequiresReadyForManualCodeChange === true &&
+      practiceGuard.approvalBoundary?.publicExamChangedByApprovalBoard === false,
+    "PM01 practice guard must keep RP and asset approval boundaries explicit"
+  );
   assert(
     exam.payload?.data?.digitalShift?.visualAssetRubric?.status === "approval_required_before_final_asset",
     "PM01 digital shift must expose visual asset rubric"
@@ -166,6 +221,9 @@ async function main() {
     digitalShiftNormativeAnchors: exam.payload.data.digitalShift.normativeAnchors.length,
     digitalShiftNormativeDossier: exam.payload.data.digitalShift.normativeDossier.verifiedAt,
     digitalShiftInteractionBlueprints: exam.payload.data.digitalShift.interactionBlueprints.length,
+    digitalShiftPracticeGuard: practiceGuard.status,
+    digitalShiftPracticeGuardVersion: practiceGuard.guardVersion,
+    digitalShiftPracticeGuardVariantCoverage: practiceGuard.variantCoverage.length,
     digitalShiftVisualRubric: exam.payload.data.digitalShift.visualAssetRubric.status,
     digitalShiftPackages: exam.payload.data.digitalShift.packages.length,
     digitalShiftPreviewAssets: previewAssets.length,

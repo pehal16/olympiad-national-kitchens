@@ -53,6 +53,7 @@ Working programs, calendar-thematic plans, and local assessment materials are ex
 - Practice questions have `maxScore: 0`.
 - The official score remains `100`.
 - The new training module is `PX Цифровая смена`.
+- The public data exposes `digitalShift.practiceGuard`: a computed training-only guard manifest with the official-route block (`digital_shift`/`practiceOnly` forbidden), PX family contracts, per-variant coverage, public-data safety rules, and the RP/final-asset approval boundary.
 - Current implementation reuses already accepted PM01 visual assets.
 - The digital-shift package exposes four `normativeAnchors`: ФГОС 43.01.09, ФГОС 43.02.15, FIRPO POP 43.01.09, and the pending local RP/KTP gate. Each anchor now carries `sourceEvidence[]` rows.
 - The digital-shift package exposes `normativeDossier` verified on 2026-06-22: it documents the official PM01 scope, allowed training-only modernization, and the items blocked until local RP/KTP arrives.
