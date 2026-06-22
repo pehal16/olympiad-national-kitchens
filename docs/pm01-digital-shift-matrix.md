@@ -75,6 +75,7 @@ Working programs, calendar-thematic plans, and local assessment materials are ex
 - After that all-shop gate, `/pm01-approval.html` can copy or download the `Preview batch` Markdown for preview-image generation while keeping `finalAsset: false` and the official exam unchanged.
 - After preview inspection is accepted, `/pm01-approval.html` can copy/download a `Final assets batch` Markdown with `connectAutomatically: false`; generated final images still need repeated visual inspection before any connection to the exam.
 - After final files are generated, `/pm01-approval.html` keeps a browser-local `Final asset inspection` journal with actual paths, `accepted_final` decisions, revision/rejection notes, snapshot transfer, and a `connection_review` gate. This still does not connect images automatically.
+- The `connection_review` gate has its own browser-local decision journal and Markdown export. `approved_connection` is only permission to prepare a separate code change; no image is connected automatically from the approval board.
 - `/pm01-approval.html` includes a copyable `Coverage audit` that checks the 25 matrix rows, five interaction families, 10 preview slots, RP intake, preview decisions, visual inspection status, final-asset gate, and ПК/ОК coverage before image generation continues.
 - New generated final assets should be added only after teacher review of the per-shop prompt package.
 

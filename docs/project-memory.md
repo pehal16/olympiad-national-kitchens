@@ -35,7 +35,7 @@ The PM01 exam is an interactive production exam for:
 
 Current PM01 total score contract: 100 points.
 
-Current PM01 implementation version: `1.6.74`.
+Current PM01 implementation version: `1.6.75`.
 
 Methodical baseline for PM01 should stay aligned with the current FГОС СПО 43.01.09 and 43.02.15, especially ПК 1.1-ПК 1.4 and ОК 01, ОК 02, ОК 07, ОК 09, ОК 10. New tasks should remain production-situation tasks: workplace organization, safe equipment use, raw material preparation, semi-finished product processing, quality control, storage conditions, and practical decision-making.
 
@@ -77,6 +77,7 @@ Important current PM01 content change:
 - Version `1.6.72` adds downloadable PM01 PX preview batches: after the all-shop review gate and local shop gates, `/pm01-approval.html` can copy or download one Markdown batch with preview prompts, negative prompts, style references, inspection checklists, target paths, `outputUse: preview_only_until_teacher_approval`, and `finalAsset: false`.
 - Version `1.6.73` adds downloadable PM01 PX final asset batches: only packages with the `final_assets` gate open after accepted preview inspection can copy/download Markdown for final generation, and the export keeps `connectAutomatically: false` plus repeated visual inspection before any exam connection.
 - Version `1.6.74` adds browser-local PM01 PX final asset inspection: each generated final file can record actual path, accepted/revision/rejected status, note, copy/download inspection report, snapshot transfer, coverage-audit metrics, `final_visual_inspection` gate, and a separate `connection_review` gate before any exam connection.
+- Version `1.6.75` adds browser-local PM01 PX connection review: after accepted final assets, each shop records draft/approved/revision/hold connection status, teacher note, copy/download connect-review report, snapshot transfer, coverage-audit metrics, and the explicit rule that `approved_connection` only permits a separate code change rather than automatic asset connection.
 - Official exam routes must stay 100 points and 20 questions; training may include practice-only simulators that do not affect protocols or ведомости.
 
 The active student route is mixed across production areas. Students should not manually choose a favorable shop/section for the exam route.

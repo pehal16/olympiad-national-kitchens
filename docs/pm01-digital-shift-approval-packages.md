@@ -95,6 +95,8 @@ Rubric фиксирует:
 
 После генерации final files каждый цех получает browser-local `Final asset inspection`: фактический путь файла, статус `accepted_final`/`needs_revision`/`rejected_final`, заметка и copy/download Markdown отчёт. Gate `final_visual_inspection` должен быть закрыт до `accepted_final` по всем final assets, затем открывается только `connection_review`; автоподключение к экзамену по-прежнему запрещено.
 
+Gate `connection_review` теперь имеет отдельный browser-local журнал: `draft`, `approved_connection`, `needs_revision`, `hold`, заметку преподавателя и copy/download connect-review отчёт. Даже `approved_connection` означает только готовность к отдельному code change и повторной проверке; сам approval board не подключает изображения к экзамену.
+
 Для переноса работы между браузерами или передачи состояния следующему исполнителю страница даёт `Snapshot согласования`: JSON с browser-local РП, решениями, заметками и журналом осмотра preview. Snapshot можно скопировать, скачать как `.json` и затем импортировать через вставку текста или загрузку файла. Импорт snapshot заменяет только локальное состояние `/pm01-approval.html`; публичный экзамен, протоколы и ведомости не меняются.
 
 ## ПК/ОК-сверка

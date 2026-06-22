@@ -13,6 +13,7 @@
   const PM01_RP_INTAKE_STORAGE_KEY = "pm01RpIntakeV1";
   const PM01_PREVIEW_INSPECTION_STORAGE_KEY = "pm01PreviewInspectionV1";
   const PM01_FINAL_ASSET_INSPECTION_STORAGE_KEY = "pm01FinalAssetInspectionV1";
+  const PM01_CONNECTION_REVIEW_STORAGE_KEY = "pm01ConnectionReviewV1";
   const PM01_COMPETENCY_REVIEW_STORAGE_KEY = "pm01CompetencyReviewV1";
   const PM01_INNOVATION_REVIEW_STORAGE_KEY = "pm01InnovationReviewV1";
   const PM01_ALL_SHOP_REVIEW_STORAGE_KEY = "pm01AllShopReviewV1";
@@ -33,6 +34,12 @@
     { id: "accepted_final", label: "Принять final", status: "Final принят", detail: "Изображение методически и визуально принято для отдельного connect-review." },
     { id: "needs_revision", label: "Правка", status: "Нужна правка", detail: "Нужно перегенерировать или исправить изображение до подключения." },
     { id: "rejected_final", label: "Отклонить", status: "Final отклонен", detail: "Нельзя подключать к экзамену; нужен новый final asset." }
+  ];
+  const CONNECTION_REVIEW_OPTIONS = [
+    { id: "draft", label: "Черновик", status: "Ждёт connect-review", detail: "Финальные assets приняты, но решение о подключении ещё не зафиксировано." },
+    { id: "approved_connection", label: "Разрешить", status: "Подключение согласовано", detail: "Можно готовить отдельный code change для подключения assets после проверки преподавателем." },
+    { id: "needs_revision", label: "Правка", status: "Нужны правки", detail: "Перед подключением нужны изменения в final assets, темах, формулировках или методической привязке." },
+    { id: "hold", label: "Пауза", status: "Пауза подключения", detail: "Подключение отложено до РП/КТП, комиссии или дополнительного решения преподавателя." }
   ];
   const COMPETENCY_REVIEW_ITEMS = [
     {
@@ -73,6 +80,7 @@
   const decisionOptionsById = new Map(DECISION_OPTIONS.map((option) => [option.id, option]));
   const previewInspectionOptionsById = new Map(PREVIEW_INSPECTION_OPTIONS.map((option) => [option.id, option]));
   const finalAssetInspectionOptionsById = new Map(FINAL_ASSET_INSPECTION_OPTIONS.map((option) => [option.id, option]));
+  const connectionReviewOptionsById = new Map(CONNECTION_REVIEW_OPTIONS.map((option) => [option.id, option]));
   const competencyReviewOptionsById = new Map(COMPETENCY_REVIEW_OPTIONS.map((option) => [option.id, option]));
   const innovationReviewOptionsById = new Map(INNOVATION_REVIEW_OPTIONS.map((option) => [option.id, option]));
   const allShopReviewOptionsById = new Map(ALL_SHOP_REVIEW_OPTIONS.map((option) => [option.id, option]));
@@ -80,6 +88,7 @@
   let rpIntakeState = loadRpIntakeState();
   let previewInspectionState = loadPreviewInspectionState();
   let finalAssetInspectionState = loadFinalAssetInspectionState();
+  let connectionReviewState = loadConnectionReviewState();
   let competencyReviewState = loadCompetencyReviewState();
   let innovationReviewState = loadInnovationReviewState();
   let allShopReviewState = loadAllShopReviewState();
@@ -131,6 +140,15 @@
   function loadFinalAssetInspectionState() {
     try {
       const stored = window.localStorage.getItem(PM01_FINAL_ASSET_INSPECTION_STORAGE_KEY);
+      return stored ? JSON.parse(stored) || {} : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function loadConnectionReviewState() {
+    try {
+      const stored = window.localStorage.getItem(PM01_CONNECTION_REVIEW_STORAGE_KEY);
       return stored ? JSON.parse(stored) || {} : {};
     } catch (_) {
       return {};
@@ -196,6 +214,14 @@
     }
   }
 
+  function persistConnectionReviewState() {
+    try {
+      window.localStorage.setItem(PM01_CONNECTION_REVIEW_STORAGE_KEY, JSON.stringify(connectionReviewState));
+    } catch (_) {
+      // Connection review still works in-memory if browser storage is unavailable.
+    }
+  }
+
   function persistCompetencyReviewState() {
     try {
       window.localStorage.setItem(PM01_COMPETENCY_REVIEW_STORAGE_KEY, JSON.stringify(competencyReviewState));
@@ -230,6 +256,10 @@
 
   function getFinalAssetInspectionMeta(statusId) {
     return finalAssetInspectionOptionsById.get(statusId) || FINAL_ASSET_INSPECTION_OPTIONS[0];
+  }
+
+  function getConnectionReviewMeta(statusId) {
+    return connectionReviewOptionsById.get(statusId) || CONNECTION_REVIEW_OPTIONS[0];
   }
 
   function getCompetencyReviewMeta(statusId) {
@@ -503,6 +533,39 @@
     return summary.total > 0 && summary.accepted === summary.total && summary.withActualPath === summary.total;
   }
 
+  function getPackageConnectionReview(variantId) {
+    const stored = connectionReviewState[variantId] || {};
+    return {
+      status: stored.status || "draft",
+      note: stored.note || "",
+      approvedAt: stored.approvedAt || null,
+      updatedAt: stored.updatedAt || null
+    };
+  }
+
+  function setPackageConnectionReview(variantId, patch) {
+    const current = getPackageConnectionReview(variantId);
+    const nextStatus = patch.status || current.status;
+    const now = new Date().toISOString();
+    connectionReviewState[variantId] = {
+      ...current,
+      ...patch,
+      status: nextStatus,
+      approvedAt: nextStatus === "approved_connection" ? current.approvedAt || now : null,
+      updatedAt: now
+    };
+    persistConnectionReviewState();
+  }
+
+  function resetPackageConnectionReview(variantId) {
+    delete connectionReviewState[variantId];
+    persistConnectionReviewState();
+  }
+
+  function isPackageConnectionApproved(packageData) {
+    return getPackageConnectionReview(packageData.variantId).status === "approved_connection";
+  }
+
   function getRpIntakeCount(packages) {
     return packages.filter((packageData) => hasRpIntake(packageData.variantId)).length;
   }
@@ -600,6 +663,7 @@
       const previewAccepted = isPackagePreviewInspectionAccepted(packageData);
       const finalInspection = getPackageFinalAssetInspectionSummary(packageData);
       const finalAccepted = isPackageFinalAssetInspectionAccepted(packageData);
+      const connectionReview = getPackageConnectionReview(packageData.variantId);
       const competencyReview = getPackageCompetencyReviewSummary(packageData);
       const innovationReview = getPackageInnovationReviewSummary(packageData);
       const structuralReady =
@@ -621,6 +685,8 @@
         previewAccepted,
         finalInspection,
         finalAccepted,
+        connectionReview,
+        connectionApproved: connectionReview.status === "approved_connection",
         competencyReview,
         innovationReview,
         finalGateStatus: finalGate?.status || "blocked",
@@ -665,6 +731,9 @@
       finalAssetInspectionItemsTotal: packageAudits.reduce((sum, item) => sum + item.finalInspection.total, 0),
       finalAssetInspectionNeedsRevision: packageAudits.reduce((sum, item) => sum + item.finalInspection.needsRevision, 0),
       finalAssetInspectionRejected: packageAudits.reduce((sum, item) => sum + item.finalInspection.rejected, 0),
+      connectionReviewApproved: packageAudits.filter((item) => item.connectionApproved).length,
+      connectionReviewNeedsRevision: packageAudits.filter((item) => item.connectionReview.status === "needs_revision").length,
+      connectionReviewHold: packageAudits.filter((item) => item.connectionReview.status === "hold").length,
       allShopReview,
       allShopReviewStatus: allShopReview.status,
       allShopReviewLabel: allShopReviewMeta.status,
@@ -722,6 +791,10 @@
     const previewAccepted = isPackagePreviewInspectionAccepted(packageData);
     const finalInspectionSummary = getPackageFinalAssetInspectionSummary(packageData);
     const finalAccepted = isPackageFinalAssetInspectionAccepted(packageData);
+    const connectionReview = getPackageConnectionReview(packageData.variantId);
+    const connectionReviewMeta = getConnectionReviewMeta(connectionReview.status);
+    const connectionApproved = connectionReview.status === "approved_connection";
+    const connectionBlocked = connectionReview.status === "needs_revision" || connectionReview.status === "hold";
     const competencyReview = getPackageCompetencyReviewSummary(packageData);
     const competencyReviewReady = competencyReview.ready;
     const competencyReviewBlocked = competencyReview.blocked;
@@ -840,11 +913,15 @@
       },
       {
         id: "connection_review",
-        status: finalAccepted ? "pending" : "blocked",
+        status: !finalAccepted ? "blocked" : connectionApproved ? "done" : connectionBlocked ? "blocked" : "pending",
         title: "Отдельное решение о подключении",
-        detail: finalAccepted
-          ? "Final assets приняты; следующий шаг только отдельный connect-review с преподавателем. Автоподключение запрещено."
-          : "Подключение к экзамену закрыто до принятого повторного visual inspection по всем final assets."
+        detail: !finalAccepted
+          ? "Подключение к экзамену закрыто до принятого повторного visual inspection по всем final assets."
+          : connectionApproved
+            ? "Connect-review согласован. Можно готовить отдельный code change для подключения; автоподключение всё равно запрещено."
+            : connectionBlocked
+              ? `${connectionReviewMeta.status}: ${connectionReview.note.trim() || connectionReviewMeta.detail}`
+              : `${connectionReviewMeta.status}: ${connectionReviewMeta.detail}`
       }
     ];
   }
@@ -924,6 +1001,13 @@
       createNode("p", "", `${coverageAudit.finalAssetInspectionItemsAccepted}/${coverageAudit.finalAssetInspectionItemsTotal} final assets приняты; автоподключение закрыто до connect-review.`)
     );
     elements.summary.appendChild(finalInspectionSummaryCard);
+    const connectionReviewSummaryCard = createNode("article", "approval-summary-card");
+    connectionReviewSummaryCard.append(
+      createNode("span", "", "Connect-review"),
+      createNode("strong", "", `${coverageAudit.connectionReviewApproved}/${packages.length} согласовано`),
+      createNode("p", "", `${coverageAudit.connectionReviewNeedsRevision} правок · ${coverageAudit.connectionReviewHold} на паузе. Подключение только отдельным изменением кода.`)
+    );
+    elements.summary.appendChild(connectionReviewSummaryCard);
     const exportCard = createNode("article", "approval-summary-card approval-summary-action");
     const exportButton = createNode("button", "button secondary", "Скопировать общий gate-отчёт");
     exportButton.type = "button";
@@ -1055,6 +1139,26 @@
       }
       if (isPackagePreviewInspectionAccepted(packageData)) {
         if (isPackageFinalAssetInspectionAccepted(packageData)) {
+          const connectionReview = getPackageConnectionReview(packageData.variantId);
+          const connectionMeta = getConnectionReviewMeta(connectionReview.status);
+          if (connectionReview.status === "approved_connection") {
+            return {
+              status: "ready",
+              label: "Connect OK",
+              title: "Подключение согласовано",
+              detail: "Connect-review разрешён. Следующий шаг - отдельный code change с проверкой, без автоматического подключения из approval board.",
+              decisionStatus: decisionMeta.status
+            };
+          }
+          if (connectionReview.status === "needs_revision" || connectionReview.status === "hold") {
+            return {
+              status: connectionReview.status === "needs_revision" ? "blocked" : "pending",
+              label: "Connect",
+              title: connectionMeta.status,
+              detail: connectionReview.note.trim() || connectionMeta.detail,
+              decisionStatus: decisionMeta.status
+            };
+          }
           return {
             status: "pending",
             label: "Connect",
@@ -1162,6 +1266,9 @@
       `finalAssetInspectionItems: ${audit.finalAssetInspectionItemsAccepted}/${audit.finalAssetInspectionItemsTotal}`,
       `finalAssetInspectionNeedsRevision: ${audit.finalAssetInspectionNeedsRevision}`,
       `finalAssetInspectionRejected: ${audit.finalAssetInspectionRejected}`,
+      `connectionReviewApproved: ${audit.connectionReviewApproved}/${audit.packages.length}`,
+      `connectionReviewNeedsRevision: ${audit.connectionReviewNeedsRevision}`,
+      `connectionReviewHold: ${audit.connectionReviewHold}`,
       "",
       "competencies:",
       ...audit.competencyCoverage.map((item) => `- ${item.competency}: ${item.covered ? "covered" : "check_with_RP"}`),
@@ -1190,6 +1297,7 @@
           `  finalAssetsGate: ${item.finalGateStatus}`,
           `  finalAssetInspection: ${item.finalInspection.accepted}/${item.finalInspection.total}`,
           `  finalAssetsAccepted: ${item.finalAccepted}`,
+          `  connectionReview: ${item.connectionReview.status}`,
           `  competencies: ${item.competencies.join(", ") || "-"}`,
           `  missingFamilies: ${item.missingFamilies.join(", ") || "-"}`
         ].join("\n")
@@ -1249,6 +1357,7 @@
       `- finalAssetGateOpen: ${audit.finalAssetsOpen}/${packages.length}`,
       `- finalAssetInspectionAccepted: ${audit.finalAssetInspectionAccepted}/${packages.length}`,
       `- finalAssetInspectionItems: ${audit.finalAssetInspectionItemsAccepted}/${audit.finalAssetInspectionItemsTotal}`,
+      `- connectionReviewApproved: ${audit.connectionReviewApproved}/${packages.length}`,
       "",
       "## Нормативная граница",
       "",
@@ -1355,6 +1464,7 @@
         rpIntake: PM01_RP_INTAKE_STORAGE_KEY,
         previewInspection: PM01_PREVIEW_INSPECTION_STORAGE_KEY,
         finalAssetInspection: PM01_FINAL_ASSET_INSPECTION_STORAGE_KEY,
+        connectionReview: PM01_CONNECTION_REVIEW_STORAGE_KEY,
         competencyReview: PM01_COMPETENCY_REVIEW_STORAGE_KEY,
         innovationReview: PM01_INNOVATION_REVIEW_STORAGE_KEY,
         allShopReview: PM01_ALL_SHOP_REVIEW_STORAGE_KEY
@@ -1364,6 +1474,7 @@
         rpIntake: rpIntakeState,
         previewInspection: previewInspectionState,
         finalAssetInspection: finalAssetInspectionState,
+        connectionReview: connectionReviewState,
         competencyReview: competencyReviewState,
         innovationReview: innovationReviewState,
         allShopReview: allShopReviewState
@@ -1389,6 +1500,7 @@
       !isPlainObject(state.rpIntake) ||
       !isPlainObject(state.previewInspection) ||
       (state.finalAssetInspection !== undefined && !isPlainObject(state.finalAssetInspection)) ||
+      (state.connectionReview !== undefined && !isPlainObject(state.connectionReview)) ||
       (state.competencyReview !== undefined && !isPlainObject(state.competencyReview)) ||
       (state.innovationReview !== undefined && !isPlainObject(state.innovationReview)) ||
       (state.allShopReview !== undefined && !isPlainObject(state.allShopReview))
@@ -1399,6 +1511,7 @@
     rpIntakeState = state.rpIntake;
     previewInspectionState = state.previewInspection;
     finalAssetInspectionState = state.finalAssetInspection || {};
+    connectionReviewState = state.connectionReview || {};
     competencyReviewState = state.competencyReview || {};
     innovationReviewState = state.innovationReview || {};
     allShopReviewState = state.allShopReview || {};
@@ -1406,6 +1519,7 @@
     persistRpIntakeState();
     persistPreviewInspectionState();
     persistFinalAssetInspectionState();
+    persistConnectionReviewState();
     persistCompetencyReviewState();
     persistInnovationReviewState();
     persistAllShopReviewState();
@@ -1961,6 +2075,12 @@
         `${audit.finalAssetInspectionAccepted}/${audit.packages.length}`,
         `${audit.finalAssetInspectionItemsAccepted}/${audit.finalAssetInspectionItemsTotal} final assets приняты; ${audit.finalAssetInspectionNeedsRevision} правок, ${audit.finalAssetInspectionRejected} отклонено.`,
         audit.finalAssetInspectionAccepted === audit.packages.length ? "done" : audit.finalAssetsOpen ? "pending" : "blocked"
+      ),
+      renderCoverageMetric(
+        "Connect-review",
+        `${audit.connectionReviewApproved}/${audit.packages.length}`,
+        `${audit.connectionReviewNeedsRevision} правок · ${audit.connectionReviewHold} на паузе. Даже approved требует отдельного code change.`,
+        audit.connectionReviewApproved === audit.packages.length ? "done" : audit.finalAssetInspectionAccepted ? "pending" : "blocked"
       )
     );
 
@@ -2132,6 +2252,76 @@
       button.textContent = "Не удалось скачать";
       window.setTimeout(() => {
         button.textContent = "Скачать final-отчёт";
+      }, 1600);
+    }
+  }
+
+  function buildConnectionReviewReport(packageData) {
+    const review = getPackageConnectionReview(packageData.variantId);
+    const meta = getConnectionReviewMeta(review.status);
+    const finalSummary = getPackageFinalAssetInspectionSummary(packageData);
+    const gate = getPackageGateRows(packageData).find((item) => item.id === "connection_review");
+    return [
+      "PM01 PX connection review report",
+      `generatedAt: ${new Date().toISOString()}`,
+      `package: ${packageData.title}`,
+      `variantId: ${packageData.variantId}`,
+      `connectionStatus: ${review.status}`,
+      `connectionLabel: ${meta.status}`,
+      `approvedAt: ${review.approvedAt || "-"}`,
+      `updatedAt: ${review.updatedAt || "not_saved"}`,
+      `connectionGate: ${gate?.status || "blocked"}`,
+      `finalInspectionAccepted: ${finalSummary.accepted}/${finalSummary.total}`,
+      `withActualPath: ${finalSummary.withActualPath}/${finalSummary.total}`,
+      "connectAutomatically: false",
+      "manualCodeChangeRequired: true",
+      `note: ${review.note || "-"}`,
+      "",
+      "assets:",
+      ...((packageData.previewAssets || []).map((asset) => {
+        const finalInspection = getFinalAssetInspection(asset.id, asset);
+        return [
+          `- asset: ${asset.id}`,
+          `  plannedTargetPath: ${asset.targetPath}`,
+          `  actualPath: ${finalInspection.actualPath || "-"}`,
+          `  finalInspectionStatus: ${finalInspection.status}`,
+          `  finalInspectionNote: ${finalInspection.note || "-"}`
+        ].join("\n");
+      }))
+    ].join("\n");
+  }
+
+  function getConnectionReviewFileName(packageData) {
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    return `pm01-px-connection-review-${packageData.variantId}-${stamp}.md`;
+  }
+
+  async function copyConnectionReviewReport(packageData, button) {
+    try {
+      await navigator.clipboard.writeText(buildConnectionReviewReport(packageData));
+      button.textContent = "Connect-отчёт скопирован";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать connect-отчёт";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать connect-отчёт";
+      }, 1600);
+    }
+  }
+
+  function downloadConnectionReviewReport(packageData, button) {
+    try {
+      downloadTextFile(getConnectionReviewFileName(packageData), buildConnectionReviewReport(packageData), "text/markdown");
+      button.textContent = "Connect-отчёт скачан";
+      window.setTimeout(() => {
+        button.textContent = "Скачать connect-отчёт";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скачать";
+      window.setTimeout(() => {
+        button.textContent = "Скачать connect-отчёт";
       }, 1600);
     }
   }
@@ -2775,6 +2965,7 @@
     const gateSummary = getPackageGateSummary(packageData);
     const inspectionSummary = getPackageInspectionSummary(packageData);
     const finalInspectionSummary = getPackageFinalAssetInspectionSummary(packageData);
+    const connectionReview = getPackageConnectionReview(packageData.variantId);
     const competencyReview = getPackageCompetencyReviewSummary(packageData);
     const innovationReview = getPackageInnovationReviewSummary(packageData);
     const nextAction = getPackageNextAction(packageData);
@@ -2908,6 +3099,15 @@
         ].join("\n");
       })),
       "",
+      "## Connection review state",
+      "",
+      `status: ${connectionReview.status}`,
+      `approvedAt: ${connectionReview.approvedAt || "-"}`,
+      `updatedAt: ${connectionReview.updatedAt || "not_saved"}`,
+      `manualCodeChangeRequired: true`,
+      `connectAutomatically: false`,
+      `note: ${connectionReview.note || "-"}`,
+      "",
       "## Teacher decision note",
       "",
       decision.note || "-"
@@ -2984,6 +3184,7 @@
       `finalAssetGateOpen: ${audit.finalAssetsOpen}/${packages.length}`,
       `finalAssetInspectionAccepted: ${audit.finalAssetInspectionAccepted}/${packages.length}`,
       `finalAssetInspectionItems: ${audit.finalAssetInspectionItemsAccepted}/${audit.finalAssetInspectionItemsTotal}`,
+      `connectionReviewApproved: ${audit.connectionReviewApproved}/${packages.length}`,
       "",
       "## Что остаётся заблокированным до РП/КТП",
       "",
@@ -3864,6 +4065,82 @@
     return panel;
   }
 
+  function renderConnectionReviewPanel(packageData) {
+    const review = getPackageConnectionReview(packageData.variantId);
+    const meta = getConnectionReviewMeta(review.status);
+    const finalAccepted = isPackageFinalAssetInspectionAccepted(packageData);
+    const finalSummary = getPackageFinalAssetInspectionSummary(packageData);
+    const panel = createNode("section", "approval-package-block approval-connection-review-panel");
+    panel.dataset.status = review.status;
+    const head = createNode("div", "approval-connection-review-head");
+    head.append(
+      createNode("h3", "", "Connect-review final assets"),
+      createNode("span", "", `${meta.status} · final inspection ${finalSummary.accepted}/${finalSummary.total}`)
+    );
+
+    const gateNote = createNode(
+      "p",
+      "approval-connection-review-gate",
+      finalAccepted
+        ? "Зафиксируйте отдельное решение преподавателя о подключении final assets. Даже статус «Разрешить» не меняет экзамен автоматически."
+        : "Connect-review активируется только после accepted_final по всем final assets цеха."
+    );
+
+    const assetList = renderList(
+      (packageData.previewAssets || []).map((asset) => {
+        const inspection = getFinalAssetInspection(asset.id, asset);
+        return `${asset.id}: ${inspection.actualPath || asset.targetPath} (${inspection.status})`;
+      }),
+      "approval-connection-review-assets"
+    );
+
+    const options = createNode("div", "approval-connection-review-options");
+    CONNECTION_REVIEW_OPTIONS.forEach((option) => {
+      const button = createNode("button", "approval-connection-review-button", option.label);
+      button.type = "button";
+      button.dataset.status = option.id;
+      button.classList.toggle("is-active", review.status === option.id);
+      button.disabled = !finalAccepted;
+      button.title = option.detail;
+      button.addEventListener("click", () => {
+        setPackageConnectionReview(packageData.variantId, { status: option.id });
+        refreshApprovalOverview();
+        renderPackages(currentDigitalShift);
+      });
+      options.appendChild(button);
+    });
+
+    const noteField = createNode("label", "approval-connection-review-note-field");
+    const note = createNode("textarea", "approval-connection-review-note");
+    note.value = review.note;
+    note.disabled = !finalAccepted;
+    note.placeholder = "Решение преподавателя: что подключаем, что ждёт правки, какие ограничения оставить";
+    note.addEventListener("input", () => {
+      setPackageConnectionReview(packageData.variantId, { note: note.value });
+    });
+    noteField.append(createNode("span", "", "Заметка connect-review"), note);
+
+    const actions = createNode("div", "approval-connection-review-actions");
+    const copyButton = createNode("button", "button secondary", "Скопировать connect-отчёт");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyConnectionReviewReport(packageData, copyButton));
+    const downloadButton = createNode("button", "button secondary", "Скачать connect-отчёт");
+    downloadButton.type = "button";
+    downloadButton.addEventListener("click", () => downloadConnectionReviewReport(packageData, downloadButton));
+    const resetButton = createNode("button", "button ghost", "Сбросить connect-review");
+    resetButton.type = "button";
+    resetButton.disabled = !finalAccepted;
+    resetButton.addEventListener("click", () => {
+      resetPackageConnectionReview(packageData.variantId);
+      refreshApprovalOverview();
+      renderPackages(currentDigitalShift);
+    });
+    actions.append(copyButton, downloadButton, resetButton);
+
+    panel.append(head, gateNote, assetList, options, noteField, actions);
+    return panel;
+  }
+
   function renderShopApprovalPackagePanel(packageData, familyMap, blueprintMap) {
     const gateSummary = getPackageGateSummary(packageData);
     const inspectionSummary = getPackageInspectionSummary(packageData);
@@ -4006,6 +4283,7 @@
       assetPlan,
       renderPreviewInspectionPanel(packageData),
       renderFinalAssetInspectionPanel(packageData),
+      renderConnectionReviewPanel(packageData),
       renderDecisionControls(packageData),
       criteria
     );
