@@ -78,6 +78,7 @@ Working programs, calendar-thematic plans, and local assessment materials are ex
 - The `connection_review` gate has its own browser-local decision journal and Markdown export. `approved_connection` is only permission to prepare a separate code change; no image is connected automatically from the approval board.
 - After `approved_connection`, `/pm01-approval.html` shows `Connection implementation package`: a copy/download handoff for a later manual code change with actual final paths, repeated checklist, `publicExamChanged: false`, `manualCodeChangeRequired: true`, and `connectAutomatically: false`.
 - The same package can run `Check public files`, which verifies that approved final paths resolve to reachable image files under the public `/assets/` route and carries `fileCheckStatus` evidence into snapshot/export state.
+- A computed `readyForManualCodeChange` gate stays false until the connection review is approved, all final assets are accepted with actual paths, and every file check is `reachable_image`; blocker codes are exported for the manual implementer.
 - `/pm01-approval.html` includes a copyable `Coverage audit` that checks the 25 matrix rows, five interaction families, 10 preview slots, RP intake, preview decisions, visual inspection status, final-asset gate, and ПК/ОК coverage before image generation continues.
 - New generated final assets should be added only after teacher review of the per-shop prompt package.
 

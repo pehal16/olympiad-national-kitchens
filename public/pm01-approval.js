@@ -1712,6 +1712,53 @@
     };
   }
 
+  function getPackageConnectionReadiness(packageData) {
+    const approvedConnectionAssets = getPackageApprovedConnectionAssets(packageData);
+    const finalSummary = getPackageFinalAssetInspectionSummary(packageData);
+    const connectionReview = getPackageConnectionReview(packageData.variantId);
+    const fileChecks = approvedConnectionAssets.map(({ asset, finalInspection }) =>
+      getConnectionFileCheck(asset.id, finalInspection.actualPath.trim())
+    );
+    const blockers = [];
+    if (connectionReview.status !== "approved_connection") {
+      blockers.push("connection_review_not_approved");
+    }
+    if (finalSummary.total === 0 || finalSummary.accepted !== finalSummary.total || finalSummary.withActualPath !== finalSummary.total) {
+      blockers.push("final_assets_not_fully_accepted");
+    }
+    if (approvedConnectionAssets.length !== finalSummary.total) {
+      blockers.push("accepted_asset_count_mismatch");
+    }
+    if (!fileChecks.length || fileChecks.some((check) => check.status === "not_checked")) {
+      blockers.push("public_file_check_not_complete");
+    }
+    if (fileChecks.some((check) => check.status !== "reachable_image")) {
+      blockers.push("public_file_not_reachable_image");
+    }
+    return {
+      ready: blockers.length === 0,
+      blockers,
+      assets: approvedConnectionAssets.length,
+      reachableImages: fileChecks.filter((check) => check.status === "reachable_image").length,
+      checkedAssets: fileChecks.filter((check) => check.checkedAt).length,
+      totalChecks: fileChecks.length
+    };
+  }
+
+  function getConnectionReadinessSummary(approvedPackages) {
+    const packageReadiness = approvedPackages.map((packageData) => ({
+      packageData,
+      readiness: getPackageConnectionReadiness(packageData)
+    }));
+    return {
+      packageReadiness,
+      readyPackages: packageReadiness.filter((item) => item.readiness.ready).length,
+      totalPackages: approvedPackages.length,
+      readyAssets: packageReadiness.reduce((sum, item) => sum + (item.readiness.ready ? item.readiness.assets : 0), 0),
+      totalAssets: packageReadiness.reduce((sum, item) => sum + item.readiness.assets, 0)
+    };
+  }
+
   async function checkConnectionAssetFile(assetId, actualPath) {
     const resolved = resolveFinalAssetPublicUrl(actualPath);
     if (resolved.status !== "ready") {
@@ -1938,6 +1985,7 @@
     const allPackages = digitalShift.packages || [];
     const approvedAssets = packages.reduce((sum, packageData) => sum + getPackageApprovedConnectionAssets(packageData).length, 0);
     const fileCheckSummary = getConnectionImplementationFileCheckSummary(packages);
+    const readinessSummary = getConnectionReadinessSummary(packages);
     return [
       "PM01 PX connection implementation package",
       `generatedAt: ${new Date().toISOString()}`,
@@ -1946,6 +1994,8 @@
       `approvedAssets: ${approvedAssets}`,
       `fileCheckReachableImages: ${fileCheckSummary.reachable}/${fileCheckSummary.total}`,
       `fileCheckChecked: ${fileCheckSummary.checked}/${fileCheckSummary.total}`,
+      `readyForManualCodeChange: ${readinessSummary.readyPackages}/${readinessSummary.totalPackages}`,
+      `readyAssetsForManualCodeChange: ${readinessSummary.readyAssets}/${readinessSummary.totalAssets}`,
       "publicExamChanged: false",
       "manualCodeChangeRequired: true",
       "connectAutomatically: false",
@@ -1957,6 +2007,7 @@
             const review = getPackageConnectionReview(packageData.variantId);
             const finalSummary = getPackageFinalAssetInspectionSummary(packageData);
             const approvedConnectionAssets = getPackageApprovedConnectionAssets(packageData);
+            const readiness = getPackageConnectionReadiness(packageData);
             return [
               `## ${packageIndex + 1}. ${packageData.title}`,
               `variantId: ${packageData.variantId}`,
@@ -1966,6 +2017,8 @@
               `connectionReviewNote: ${review.note || "-"}`,
               `finalInspectionAccepted: ${finalSummary.accepted}/${finalSummary.total}`,
               `approvedAssets: ${approvedConnectionAssets.length}`,
+              `readyForManualCodeChange: ${readiness.ready}`,
+              `readinessBlockers: ${readiness.blockers.length ? readiness.blockers.join(", ") : "none"}`,
               "publicExamChanged: false",
               "manualCodeChangeRequired: true",
               "",
@@ -2759,6 +2812,7 @@
       0
     );
     const fileCheckSummary = getConnectionImplementationFileCheckSummary(approvedPackages);
+    const readinessSummary = getConnectionReadinessSummary(approvedPackages);
     const head = createNode("div", "approval-connection-implementation-head");
     const title = createNode("div");
     title.append(
@@ -2775,11 +2829,21 @@
       title.append(
         createNode(
           "small",
+          "approval-connection-readiness-summary",
+          `manual readiness: ${readinessSummary.readyPackages}/${readinessSummary.totalPackages} packages В· ${readinessSummary.readyAssets}/${readinessSummary.totalAssets} assets`
+        )
+      );
+      title.append(
+        createNode(
+          "small",
           "approval-connection-implementation-status",
           `file check: ${fileCheckSummary.reachable}/${fileCheckSummary.total} reachable images · ${fileCheckSummary.checked}/${fileCheckSummary.total} checked`
         )
       );
     }
+    title.querySelectorAll("small").forEach((node) => {
+      node.textContent = node.textContent.replace(/Р’В·|В·/g, "-");
+    });
     const checkButton = createNode("button", "button secondary", "Check public files");
     checkButton.type = "button";
     checkButton.disabled = approvedPackages.length === 0;
@@ -2801,6 +2865,13 @@
       approvedPackages.forEach((packageData) => {
         const approvedConnectionAssets = getPackageApprovedConnectionAssets(packageData);
         const review = getPackageConnectionReview(packageData.variantId);
+        const readiness = getPackageConnectionReadiness(packageData);
+        const readinessGate = createNode(
+          "span",
+          "approval-connection-readiness",
+          readiness.ready ? "Ready for manual code change" : `Blocked: ${readiness.blockers.join(", ")}`
+        );
+        readinessGate.dataset.ready = readiness.ready ? "true" : "false";
         const card = createNode("article", "approval-connection-implementation-card");
         card.append(
           createNode("strong", "", packageData.title),
@@ -2809,6 +2880,7 @@
             "",
             `approved_connection · ${approvedConnectionAssets.length} accepted final assets · approvedAt: ${review.approvedAt || "-"}`
           ),
+          readinessGate,
           renderConnectionImplementationAssetList(approvedConnectionAssets)
         );
         list.appendChild(card);

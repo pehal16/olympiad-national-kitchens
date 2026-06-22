@@ -2407,6 +2407,16 @@ select:focus {
   line-height: 1.35;
 }
 
+.approval-connection-readiness-summary {
+  display: inline-block;
+  margin-top: 4px;
+  margin-right: 8px;
+  color: #176542;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
 .approval-connection-implementation-actions {
   display: flex;
   flex-wrap: wrap;
@@ -2462,6 +2472,24 @@ select:focus {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.4;
+}
+
+.approval-connection-readiness {
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #f8efd4;
+  color: #7a5512;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.approval-connection-readiness[data-ready="true"] {
+  background: #def6e8;
+  color: #176542;
 }
 
 .approval-connection-implementation-paths {
