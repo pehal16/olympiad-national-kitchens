@@ -3543,6 +3543,201 @@ select:focus {
   line-height: 1.4;
 }
 
+.approval-final-inspection-panel {
+  padding: 12px;
+  border: 1px solid rgba(28, 117, 93, 0.22);
+  border-radius: var(--radius);
+  background: #f7fbf9;
+}
+
+.approval-final-inspection-head {
+  display: grid;
+  gap: 4px;
+}
+
+.approval-final-inspection-head span,
+.approval-final-inspection-gate,
+.approval-final-inspection-path-field span,
+.approval-final-inspection-note-field span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.approval-final-inspection-gate {
+  margin: 0;
+}
+
+.approval-final-inspection-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.approval-final-inspection-card {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-left: 4px solid rgba(28, 117, 93, 0.5);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.approval-final-inspection-card[data-status="accepted_final"] {
+  border-left-color: rgba(28, 117, 93, 0.72);
+  background: #f4fbf8;
+}
+
+.approval-final-inspection-card[data-status="needs_revision"] {
+  border-left-color: rgba(213, 121, 36, 0.68);
+  background: #fffaf3;
+}
+
+.approval-final-inspection-card[data-status="rejected_final"] {
+  border-left-color: rgba(199, 72, 72, 0.68);
+  background: #fff8f8;
+}
+
+.approval-final-inspection-status {
+  width: max-content;
+  max-width: 100%;
+  padding: 4px 7px;
+  border-radius: 6px;
+  color: var(--green-900);
+  background: #eaf7f1;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.approval-final-inspection-card[data-status="needs_revision"] .approval-final-inspection-status {
+  color: #8a4a07;
+  background: #fff2df;
+}
+
+.approval-final-inspection-card[data-status="rejected_final"] .approval-final-inspection-status {
+  color: #922b2b;
+  background: #ffecec;
+}
+
+.approval-final-inspection-card strong,
+.approval-final-inspection-card code,
+.approval-final-inspection-card p,
+.approval-final-inspection-checklist li,
+.approval-final-inspection-path,
+.approval-final-inspection-note {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.approval-final-inspection-card strong {
+  color: var(--green-900);
+  font-size: 14px;
+  line-height: 1.28;
+}
+
+.approval-final-inspection-card code {
+  display: block;
+  padding: 7px 8px;
+  border-radius: 6px;
+  background: #edf8f4;
+  color: var(--green-900);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.approval-final-inspection-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.approval-final-inspection-checklist {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.approval-final-inspection-checklist li {
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #eef8f4;
+  color: var(--green-800);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.approval-final-inspection-path-field,
+.approval-final-inspection-note-field {
+  display: grid;
+  gap: 5px;
+}
+
+.approval-final-inspection-path,
+.approval-final-inspection-note {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.approval-final-inspection-note {
+  min-height: 74px;
+  resize: vertical;
+}
+
+.approval-final-inspection-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.approval-final-inspection-button {
+  min-height: 32px;
+  padding: 6px 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.15;
+  cursor: pointer;
+}
+
+.approval-final-inspection-button.is-active {
+  border-color: rgba(28, 117, 93, 0.45);
+  background: #eaf7f1;
+  color: var(--green-900);
+}
+
+.approval-final-inspection-button:disabled,
+.approval-final-inspection-path:disabled,
+.approval-final-inspection-note:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.approval-final-inspection-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .approval-decision-panel {
   padding: 12px;
   border: 1px solid rgba(18, 63, 53, 0.14);
@@ -6919,6 +7114,10 @@ tr[data-attempt-id].is-selected {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .approval-final-inspection-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .approval-competency-review-grid {
     grid-template-columns: 1fr;
   }
@@ -6988,7 +7187,8 @@ tr[data-attempt-id].is-selected {
   }
 
   .approval-asset-grid,
-  .approval-inspection-grid {
+  .approval-inspection-grid,
+  .approval-final-inspection-grid {
     grid-template-columns: 1fr;
   }
 
@@ -7049,6 +7249,14 @@ tr[data-attempt-id].is-selected {
   }
 
   .approval-final-asset-batch-actions .button {
+    flex: 1 1 170px;
+  }
+
+  .approval-final-inspection-actions {
+    justify-content: flex-start;
+  }
+
+  .approval-final-inspection-actions .button {
     flex: 1 1 170px;
   }
 

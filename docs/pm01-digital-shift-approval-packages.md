@@ -93,6 +93,8 @@ Rubric фиксирует:
 
 После принятого preview и открытого `final_assets` gate action queue показывает `Final assets batch`: copy/download `.md` для финальной генерации тех же targetPath. Этот пакет явно содержит `connectAutomatically: false` и `connectAfter: repeated_visual_inspection_and_teacher_acceptance`, поэтому финальные изображения всё равно не подключаются к экзамену без повторного визуального осмотра и отдельного решения преподавателя.
 
+После генерации final files каждый цех получает browser-local `Final asset inspection`: фактический путь файла, статус `accepted_final`/`needs_revision`/`rejected_final`, заметка и copy/download Markdown отчёт. Gate `final_visual_inspection` должен быть закрыт до `accepted_final` по всем final assets, затем открывается только `connection_review`; автоподключение к экзамену по-прежнему запрещено.
+
 Для переноса работы между браузерами или передачи состояния следующему исполнителю страница даёт `Snapshot согласования`: JSON с browser-local РП, решениями, заметками и журналом осмотра preview. Snapshot можно скопировать, скачать как `.json` и затем импортировать через вставку текста или загрузку файла. Импорт snapshot заменяет только локальное состояние `/pm01-approval.html`; публичный экзамен, протоколы и ведомости не меняются.
 
 ## ПК/ОК-сверка
