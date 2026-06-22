@@ -14,6 +14,7 @@
   const PM01_PREVIEW_INSPECTION_STORAGE_KEY = "pm01PreviewInspectionV1";
   const PM01_FINAL_ASSET_INSPECTION_STORAGE_KEY = "pm01FinalAssetInspectionV1";
   const PM01_CONNECTION_REVIEW_STORAGE_KEY = "pm01ConnectionReviewV1";
+  const PM01_CONNECTION_FILE_CHECK_STORAGE_KEY = "pm01ConnectionFileCheckV1";
   const PM01_COMPETENCY_REVIEW_STORAGE_KEY = "pm01CompetencyReviewV1";
   const PM01_INNOVATION_REVIEW_STORAGE_KEY = "pm01InnovationReviewV1";
   const PM01_ALL_SHOP_REVIEW_STORAGE_KEY = "pm01AllShopReviewV1";
@@ -89,6 +90,7 @@
   let previewInspectionState = loadPreviewInspectionState();
   let finalAssetInspectionState = loadFinalAssetInspectionState();
   let connectionReviewState = loadConnectionReviewState();
+  let connectionFileCheckState = loadConnectionFileCheckState();
   let competencyReviewState = loadCompetencyReviewState();
   let innovationReviewState = loadInnovationReviewState();
   let allShopReviewState = loadAllShopReviewState();
@@ -149,6 +151,15 @@
   function loadConnectionReviewState() {
     try {
       const stored = window.localStorage.getItem(PM01_CONNECTION_REVIEW_STORAGE_KEY);
+      return stored ? JSON.parse(stored) || {} : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function loadConnectionFileCheckState() {
+    try {
+      const stored = window.localStorage.getItem(PM01_CONNECTION_FILE_CHECK_STORAGE_KEY);
       return stored ? JSON.parse(stored) || {} : {};
     } catch (_) {
       return {};
@@ -219,6 +230,14 @@
       window.localStorage.setItem(PM01_CONNECTION_REVIEW_STORAGE_KEY, JSON.stringify(connectionReviewState));
     } catch (_) {
       // Connection review still works in-memory if browser storage is unavailable.
+    }
+  }
+
+  function persistConnectionFileCheckState() {
+    try {
+      window.localStorage.setItem(PM01_CONNECTION_FILE_CHECK_STORAGE_KEY, JSON.stringify(connectionFileCheckState));
+    } catch (_) {
+      // File availability evidence remains usable in-memory if browser storage is unavailable.
     }
   }
 
@@ -1465,6 +1484,7 @@
         previewInspection: PM01_PREVIEW_INSPECTION_STORAGE_KEY,
         finalAssetInspection: PM01_FINAL_ASSET_INSPECTION_STORAGE_KEY,
         connectionReview: PM01_CONNECTION_REVIEW_STORAGE_KEY,
+        connectionFileCheck: PM01_CONNECTION_FILE_CHECK_STORAGE_KEY,
         competencyReview: PM01_COMPETENCY_REVIEW_STORAGE_KEY,
         innovationReview: PM01_INNOVATION_REVIEW_STORAGE_KEY,
         allShopReview: PM01_ALL_SHOP_REVIEW_STORAGE_KEY
@@ -1475,6 +1495,7 @@
         previewInspection: previewInspectionState,
         finalAssetInspection: finalAssetInspectionState,
         connectionReview: connectionReviewState,
+        connectionFileCheck: connectionFileCheckState,
         competencyReview: competencyReviewState,
         innovationReview: innovationReviewState,
         allShopReview: allShopReviewState
@@ -1501,6 +1522,7 @@
       !isPlainObject(state.previewInspection) ||
       (state.finalAssetInspection !== undefined && !isPlainObject(state.finalAssetInspection)) ||
       (state.connectionReview !== undefined && !isPlainObject(state.connectionReview)) ||
+      (state.connectionFileCheck !== undefined && !isPlainObject(state.connectionFileCheck)) ||
       (state.competencyReview !== undefined && !isPlainObject(state.competencyReview)) ||
       (state.innovationReview !== undefined && !isPlainObject(state.innovationReview)) ||
       (state.allShopReview !== undefined && !isPlainObject(state.allShopReview))
@@ -1512,6 +1534,7 @@
     previewInspectionState = state.previewInspection;
     finalAssetInspectionState = state.finalAssetInspection || {};
     connectionReviewState = state.connectionReview || {};
+    connectionFileCheckState = state.connectionFileCheck || {};
     competencyReviewState = state.competencyReview || {};
     innovationReviewState = state.innovationReview || {};
     allShopReviewState = state.allShopReview || {};
@@ -1520,6 +1543,7 @@
     persistPreviewInspectionState();
     persistFinalAssetInspectionState();
     persistConnectionReviewState();
+    persistConnectionFileCheckState();
     persistCompetencyReviewState();
     persistInnovationReviewState();
     persistAllShopReviewState();
@@ -1588,6 +1612,138 @@
     return (digitalShift.packages || []).filter(
       (packageData) => isPackageConnectionApproved(packageData) && getPackageApprovedConnectionAssets(packageData).length > 0
     );
+  }
+
+  function resolveFinalAssetPublicUrl(actualPath) {
+    const raw = String(actualPath || "").trim().replace(/\\/g, "/");
+    if (!raw) {
+      return { status: "missing_path", url: "" };
+    }
+    if (/^https?:\/\//i.test(raw)) {
+      try {
+        const parsed = new URL(raw);
+        if (parsed.origin !== window.location.origin) {
+          return { status: "external_url", url: raw };
+        }
+        return { status: "ready", url: `${parsed.pathname}${parsed.search || ""}` };
+      } catch (_) {
+        return { status: "invalid_path", url: raw };
+      }
+    }
+    let normalized = raw;
+    const publicIndex = normalized.indexOf("/public/");
+    if (publicIndex >= 0) {
+      normalized = normalized.slice(publicIndex + "/public".length);
+    } else if (normalized.startsWith("./public/")) {
+      normalized = normalized.slice("./public".length);
+    } else if (normalized.startsWith("public/")) {
+      normalized = normalized.slice("public".length);
+    } else if (!normalized.startsWith("/")) {
+      normalized = `/${normalized}`;
+    }
+    if (!normalized.startsWith("/assets/")) {
+      return { status: "outside_public_assets", url: normalized };
+    }
+    return { status: "ready", url: encodeURI(normalized) };
+  }
+
+  function getConnectionFileCheck(assetId, actualPath) {
+    const stored = connectionFileCheckState[assetId] || {};
+    const resolved = resolveFinalAssetPublicUrl(actualPath);
+    if (stored.actualPath === actualPath && stored.url === resolved.url) {
+      return {
+        status: stored.status || "not_checked",
+        actualPath,
+        url: stored.url || resolved.url,
+        httpStatus: stored.httpStatus || null,
+        contentType: stored.contentType || "",
+        checkedAt: stored.checkedAt || null,
+        note: stored.note || ""
+      };
+    }
+    return {
+      status: resolved.status === "ready" ? "not_checked" : resolved.status,
+      actualPath,
+      url: resolved.url,
+      httpStatus: null,
+      contentType: "",
+      checkedAt: null,
+      note: ""
+    };
+  }
+
+  function setConnectionFileCheck(assetId, actualPath, patch) {
+    const current = getConnectionFileCheck(assetId, actualPath);
+    connectionFileCheckState[assetId] = {
+      ...current,
+      ...patch,
+      actualPath,
+      checkedAt: patch.checkedAt || new Date().toISOString()
+    };
+    persistConnectionFileCheckState();
+  }
+
+  function getConnectionFileCheckLabel(status) {
+    const labels = {
+      not_checked: "not checked",
+      reachable_image: "reachable image",
+      reachable_non_image: "reachable non-image",
+      unavailable: "not available",
+      missing_path: "missing path",
+      invalid_path: "invalid path",
+      external_url: "external URL",
+      outside_public_assets: "outside /assets",
+      network_error: "network error"
+    };
+    return labels[status] || status || "not checked";
+  }
+
+  function getConnectionImplementationFileCheckSummary(approvedPackages) {
+    const checks = approvedPackages.flatMap((packageData) =>
+      getPackageApprovedConnectionAssets(packageData).map(({ asset, finalInspection }) =>
+        getConnectionFileCheck(asset.id, finalInspection.actualPath.trim())
+      )
+    );
+    return {
+      total: checks.length,
+      reachable: checks.filter((check) => check.status === "reachable_image").length,
+      checked: checks.filter((check) => check.checkedAt).length,
+      issues: checks.filter((check) => check.status !== "reachable_image").length
+    };
+  }
+
+  async function checkConnectionAssetFile(assetId, actualPath) {
+    const resolved = resolveFinalAssetPublicUrl(actualPath);
+    if (resolved.status !== "ready") {
+      setConnectionFileCheck(assetId, actualPath, {
+        status: resolved.status,
+        url: resolved.url,
+        httpStatus: null,
+        contentType: "",
+        note: getConnectionFileCheckLabel(resolved.status)
+      });
+      return;
+    }
+    try {
+      const response = await fetch(resolved.url, { cache: "no-store" });
+      const contentType = response.headers.get("content-type") || "";
+      const status = response.ok ? (contentType.toLowerCase().startsWith("image/") ? "reachable_image" : "reachable_non_image") : "unavailable";
+      setConnectionFileCheck(assetId, actualPath, {
+        status,
+        url: resolved.url,
+        httpStatus: response.status,
+        contentType,
+        note: response.ok ? getConnectionFileCheckLabel(status) : `HTTP ${response.status}`
+      });
+    } catch (error) {
+      setConnectionFileCheck(assetId, actualPath, {
+        status: "network_error",
+        url: resolved.url,
+        httpStatus: null,
+        contentType: "",
+        note: error?.message || "fetch failed"
+      });
+    }
   }
 
   function buildPreviewBatchText(digitalShift) {
@@ -1781,12 +1937,15 @@
     const packages = getConnectionImplementationPackages(digitalShift);
     const allPackages = digitalShift.packages || [];
     const approvedAssets = packages.reduce((sum, packageData) => sum + getPackageApprovedConnectionAssets(packageData).length, 0);
+    const fileCheckSummary = getConnectionImplementationFileCheckSummary(packages);
     return [
       "PM01 PX connection implementation package",
       `generatedAt: ${new Date().toISOString()}`,
       "scope: approved_connection packages with accepted final assets only",
       `approvedConnectionPackages: ${packages.length}/${allPackages.length}`,
       `approvedAssets: ${approvedAssets}`,
+      `fileCheckReachableImages: ${fileCheckSummary.reachable}/${fileCheckSummary.total}`,
+      `fileCheckChecked: ${fileCheckSummary.checked}/${fileCheckSummary.total}`,
       "publicExamChanged: false",
       "manualCodeChangeRequired: true",
       "connectAutomatically: false",
@@ -1812,11 +1971,18 @@
               "",
               "assets:",
               ...approvedConnectionAssets.map(({ asset, finalInspection }) =>
-                [
+                {
+                  const fileCheck = getConnectionFileCheck(asset.id, finalInspection.actualPath.trim());
+                  return [
                   `- asset: ${asset.id}`,
                   `  plannedTargetPath: ${asset.targetPath}`,
                   `  finalActualPath: ${finalInspection.actualPath.trim()}`,
                   `  suggestedRepoTargetPath: ${finalInspection.actualPath.trim()}`,
+                  `  fileCheckStatus: ${fileCheck.status}`,
+                  `  fileCheckUrl: ${fileCheck.url || "-"}`,
+                  `  fileCheckHttpStatus: ${fileCheck.httpStatus || "-"}`,
+                  `  fileCheckContentType: ${fileCheck.contentType || "-"}`,
+                  `  fileCheckCheckedAt: ${fileCheck.checkedAt || "not_checked"}`,
                   `  visualPurpose: ${asset.visualPurpose || "-"}`,
                   `  finalInspectionNote: ${finalInspection.note || "-"}`,
                   "  inspectionChecklist:",
@@ -1829,7 +1995,8 @@
                   "    - run_pm01_tests_build_and_verify",
                   "  publicExamChanged: false",
                   "  connectAutomatically: false"
-                ].join("\n")
+                  ].join("\n");
+                }
               )
             ].join("\n");
           })
@@ -1870,6 +2037,22 @@
         button.textContent = "Download .md";
       }, 1600);
     }
+  }
+
+  async function checkConnectionImplementationFiles(digitalShift, button) {
+    const packages = getConnectionImplementationPackages(digitalShift);
+    const items = packages.flatMap((packageData) => getPackageApprovedConnectionAssets(packageData));
+    if (!items.length) {
+      return;
+    }
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Checking public files...";
+    await Promise.all(
+      items.map(({ asset, finalInspection }) => checkConnectionAssetFile(asset.id, finalInspection.actualPath.trim()))
+    );
+    refreshApprovalOverview();
+    button.textContent = originalText;
   }
 
   async function copyApprovalStateSnapshot(digitalShift, button) {
@@ -2546,12 +2729,36 @@
     return panel;
   }
 
+  function renderConnectionImplementationAssetList(approvedConnectionAssets) {
+    const list = createNode("ul", "approval-connection-implementation-paths");
+    approvedConnectionAssets.forEach(({ asset, finalInspection }) => {
+      const actualPath = finalInspection.actualPath.trim();
+      const fileCheck = getConnectionFileCheck(asset.id, actualPath);
+      const item = createNode("li");
+      const pathLink = createNode(fileCheck.url ? "a" : "span", "", `${asset.id}: ${actualPath}`);
+      if (fileCheck.url) {
+        pathLink.href = fileCheck.url;
+        pathLink.target = "_blank";
+        pathLink.rel = "noreferrer";
+      }
+      const status = createNode("span", "approval-connection-file-check", getConnectionFileCheckLabel(fileCheck.status));
+      status.dataset.status = fileCheck.status;
+      status.title = fileCheck.checkedAt
+        ? `${fileCheck.url || actualPath} | ${fileCheck.httpStatus || "-"} | ${fileCheck.contentType || "-"} | ${fileCheck.checkedAt}`
+        : `${fileCheck.url || actualPath} | not checked`;
+      item.append(pathLink, status);
+      list.appendChild(item);
+    });
+    return list;
+  }
+
   function renderConnectionImplementationPanel(digitalShift, approvedPackages) {
     const panel = createNode("section", "approval-connection-implementation");
     const assetCount = approvedPackages.reduce(
       (sum, packageData) => sum + getPackageApprovedConnectionAssets(packageData).length,
       0
     );
+    const fileCheckSummary = getConnectionImplementationFileCheckSummary(approvedPackages);
     const head = createNode("div", "approval-connection-implementation-head");
     const title = createNode("div");
     title.append(
@@ -2564,6 +2771,19 @@
           : "No shops with approved_connection yet. Manual code change remains closed."
       )
     );
+    if (approvedPackages.length) {
+      title.append(
+        createNode(
+          "small",
+          "approval-connection-implementation-status",
+          `file check: ${fileCheckSummary.reachable}/${fileCheckSummary.total} reachable images · ${fileCheckSummary.checked}/${fileCheckSummary.total} checked`
+        )
+      );
+    }
+    const checkButton = createNode("button", "button secondary", "Check public files");
+    checkButton.type = "button";
+    checkButton.disabled = approvedPackages.length === 0;
+    checkButton.addEventListener("click", () => checkConnectionImplementationFiles(digitalShift, checkButton));
     const copyButton = createNode("button", "button secondary", "Copy implementation package");
     copyButton.type = "button";
     copyButton.disabled = approvedPackages.length === 0;
@@ -2573,7 +2793,7 @@
     downloadButton.disabled = approvedPackages.length === 0;
     downloadButton.addEventListener("click", () => downloadConnectionImplementationPackage(digitalShift, downloadButton));
     const actions = createNode("div", "approval-connection-implementation-actions");
-    actions.append(copyButton, downloadButton);
+    actions.append(checkButton, copyButton, downloadButton);
     head.append(title, actions);
 
     const list = createNode("div", "approval-connection-implementation-list");
@@ -2589,10 +2809,7 @@
             "",
             `approved_connection · ${approvedConnectionAssets.length} accepted final assets · approvedAt: ${review.approvedAt || "-"}`
           ),
-          renderList(
-            approvedConnectionAssets.map(({ asset, finalInspection }) => `${asset.id}: ${finalInspection.actualPath.trim()}`),
-            "approval-connection-implementation-paths"
-          )
+          renderConnectionImplementationAssetList(approvedConnectionAssets)
         );
         list.appendChild(card);
       });
