@@ -70,6 +70,7 @@ Working programs, calendar-thematic plans, and local assessment materials are ex
 - Teacher approval uses readiness gates per shop: official exam lock, methodical matrix, RP/KTP intake, `competency_review` for OK 09/OK 10, `innovation_review` for modern task appearance/implementation/uniqueness, preview asset plan, teacher preview decision, and final asset blocker are shown before final generated assets can be connected.
 - `/pm01-approval.html` includes a copyable/downloadable `Запрос РП/КТП` Markdown kit for collecting teacher working-program excerpts, KTP topics, local assessment wording, and explicit OK 09/OK 10 verification before final rewrites.
 - Each shop on `/pm01-approval.html` includes a copyable/downloadable `Пакет согласования цеха` Markdown export that combines RP topics, gates, OK/innovation review, five tasks, methodical matrix rows, preview prompts, target paths, style references, inspection checklist, and current visual-inspection state for teacher approval.
+- `/pm01-approval.html` also includes a copyable/downloadable `Сводный пакет 5 цехов` Markdown export for sending the full PM01 PX approval package in one file.
 - `/pm01-approval.html` includes a copyable `Coverage audit` that checks the 25 matrix rows, five interaction families, 10 preview slots, RP intake, preview decisions, visual inspection status, final-asset gate, and ПК/ОК coverage before image generation continues.
 - New generated final assets should be added only after teacher review of the per-shop prompt package.
 

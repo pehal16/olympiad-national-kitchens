@@ -1797,6 +1797,49 @@
     return panel;
   }
 
+  function renderAllShopPackagesPanel(digitalShift) {
+    const packages = digitalShift.packages || [];
+    const audit = buildCoverageAudit(digitalShift);
+    const panel = createNode("section", "approval-all-shop-packages");
+    const head = createNode("div", "approval-all-shop-packages-head");
+    const title = createNode("div");
+    title.append(
+      createNode("h3", "", "Сводный пакет 5 цехов"),
+      createNode("span", "", "Один Markdown для согласования всех цехов: audit, gates, задания, промпты, preview и блокеры до РП")
+    );
+    const actions = createNode("div", "approval-all-shop-packages-actions");
+    const copyButton = createNode("button", "button secondary", "Скопировать все пакеты");
+    copyButton.type = "button";
+    copyButton.disabled = packages.length === 0;
+    copyButton.addEventListener("click", () => copyAllShopApprovalPackages(digitalShift, copyButton));
+    const downloadButton = createNode("button", "button secondary", "Скачать .md");
+    downloadButton.type = "button";
+    downloadButton.disabled = packages.length === 0;
+    downloadButton.addEventListener("click", () => downloadAllShopApprovalPackages(digitalShift, downloadButton));
+    actions.append(copyButton, downloadButton);
+    head.append(title, actions);
+
+    const grid = createNode("div", "approval-all-shop-packages-grid");
+    [
+      ["Цехи", `${packages.length}/5`, "Овощи, рыба, мясо, птица/кролик и комплексный заказ."],
+      ["РП-intake", `${audit.rpReady}/${packages.length}`, "Без РП/КТП финальные темы и official questions не меняются."],
+      ["Интерактив", `${audit.innovationReviewApproved}/${audit.innovationReviewTotal}`, "Согласование визуала, механики, анимации и уникальности."],
+      ["Preview", `${audit.previewReady}/${packages.length}`, "Включаются только цехи с закрытыми gates и решением на preview."]
+    ].forEach(([label, value, detail]) => {
+      const card = createNode("article", "approval-all-shop-packages-card");
+      card.append(createNode("span", "", label), createNode("strong", "", value), createNode("p", "", detail));
+      grid.appendChild(card);
+    });
+
+    const note = createNode(
+      "p",
+      "approval-all-shop-packages-note",
+      "Сводный пакет предназначен для согласования; он не содержит ключей ответов, не создаёт изображения и не меняет официальный экзамен."
+    );
+    panel.append(head, grid, note);
+    return panel;
+  }
+
   function renderActionPlan(digitalShift) {
     if (!elements.actionPlan) {
       return;
@@ -1858,6 +1901,7 @@
     elements.actionPlan.append(
       head,
       grid,
+      renderAllShopPackagesPanel(digitalShift),
       renderNormativeDossierPanel(digitalShift),
       renderRpRequestKitPanel(digitalShift),
       renderCoverageAuditPanel(digitalShift),
@@ -2133,7 +2177,7 @@
     }
   }
 
-  function buildShopApprovalPackageText(packageData, familyMap = new Map(), blueprintMap = new Map()) {
+  function buildShopApprovalPackageText(packageData, familyMap = new Map(), blueprintMap = new Map(), digitalShift = currentDigitalShift) {
     const decision = getPackageDecision(packageData.variantId);
     const decisionMeta = getDecisionMeta(decision.decision);
     const rpIntake = getPackageRpIntake(packageData.variantId);
@@ -2149,7 +2193,7 @@
       "",
       `generatedAt: ${new Date().toISOString()}`,
       `variantId: ${packageData.variantId}`,
-      `officialContract: ${currentDigitalShift?.contract || "100 баллов / 20 заданий / 5 вариантов"}`,
+      `officialContract: ${digitalShift?.contract || "100 баллов / 20 заданий / 5 вариантов"}`,
       `practiceScope: PX training-only, maxScore 0, official protocol unchanged`,
       `rpStatus: ${hasRpIntake(packageData.variantId) ? "local_rp_excerpt_present" : "awaiting_rp_ktp"}`,
       `decision: ${decision.decision} (${decisionMeta.label})`,
@@ -2165,7 +2209,7 @@
       "",
       "## What must stay blocked until RP/KTP",
       "",
-      ...((currentDigitalShift?.normativeDossier?.blockedUntilRp || []).map((item) => `- ${item}`)),
+      ...((digitalShift?.normativeDossier?.blockedUntilRp || []).map((item) => `- ${item}`)),
       "",
       "## RP/KTP intake",
       "",
@@ -2281,6 +2325,81 @@
         "text/markdown"
       );
       button.textContent = "Пакет скачан";
+      window.setTimeout(() => {
+        button.textContent = "Скачать .md";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скачать";
+      window.setTimeout(() => {
+        button.textContent = "Скачать .md";
+      }, 1600);
+    }
+  }
+
+  function buildAllShopApprovalPackagesText(digitalShift) {
+    const packages = digitalShift.packages || [];
+    const familyMap = new Map((digitalShift.families || []).map((family) => [family.id, family]));
+    const blueprintMap = new Map((digitalShift.interactionBlueprints || []).map((blueprint) => [blueprint.familyId, blueprint]));
+    const audit = buildCoverageAudit(digitalShift);
+    return [
+      "# PM01 PX. Сводный пакет согласования 5 цехов",
+      "",
+      `generatedAt: ${new Date().toISOString()}`,
+      `appVersion: ${currentExam?.version || currentExam?.appVersion || "PM01"}`,
+      `officialContract: ${digitalShift.contract || "100 баллов / 20 заданий / 5 вариантов"}`,
+      `practiceScope: PX training-only, maxScore 0, official protocol unchanged`,
+      `packages: ${packages.length}/5`,
+      "",
+      "## Сводный audit",
+      "",
+      `methodicalMatrix: ${audit.matrixRows}/${audit.expectedMatrixRows}`,
+      `previewSlots: ${audit.previewAssets}/${audit.expectedPreviewAssets}`,
+      `rpIntake: ${audit.rpReady}/${packages.length}`,
+      `ok09Ok10Review: ${audit.competencyReviewVerified}/${audit.competencyReviewTotal}`,
+      `innovationReview: ${audit.innovationReviewApproved}/${audit.innovationReviewTotal}`,
+      `previewDecision: ${audit.previewReady}/${packages.length}`,
+      `previewInspectionAccepted: ${audit.previewAccepted}/${packages.length}`,
+      `finalAssetGateOpen: ${audit.finalAssetsOpen}/${packages.length}`,
+      "",
+      "## Что остаётся заблокированным до РП/КТП",
+      "",
+      ...((digitalShift.normativeDossier?.blockedUntilRp || []).map((item) => `- ${item}`)),
+      "",
+      "## Пакеты цехов",
+      "",
+      ...packages.map((packageData, index) =>
+        [
+          `<!-- shop ${index + 1}/${packages.length}: ${packageData.variantId} -->`,
+          buildShopApprovalPackageText(packageData, familyMap, blueprintMap, digitalShift)
+        ].join("\n")
+      ).map((text) => `${text}\n---`)
+    ].join("\n");
+  }
+
+  function getAllShopApprovalPackagesFileName() {
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    return `pm01-px-all-shop-approval-packages-${stamp}.md`;
+  }
+
+  async function copyAllShopApprovalPackages(digitalShift, button) {
+    try {
+      await navigator.clipboard.writeText(buildAllShopApprovalPackagesText(digitalShift));
+      button.textContent = "Пакеты скопированы";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать все пакеты";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать все пакеты";
+      }, 1600);
+    }
+  }
+
+  function downloadAllShopApprovalPackages(digitalShift, button) {
+    try {
+      downloadTextFile(getAllShopApprovalPackagesFileName(), buildAllShopApprovalPackagesText(digitalShift), "text/markdown");
+      button.textContent = "Пакеты скачаны";
       window.setTimeout(() => {
         button.textContent = "Скачать .md";
       }, 1600);

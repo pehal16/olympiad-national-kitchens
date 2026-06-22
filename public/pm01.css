@@ -32,6 +32,7 @@ body {
     var(--bg);
 }
 
+html,
 body {
   overflow-x: hidden;
 }
@@ -1637,6 +1638,108 @@ select:focus {
   text-decoration: underline;
 }
 
+.approval-all-shop-packages {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(35, 107, 181, 0.2);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
+}
+
+.approval-all-shop-packages-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.approval-all-shop-packages-head h3 {
+  margin: 0 0 4px;
+  color: var(--green-900);
+  font-size: 16px;
+}
+
+.approval-all-shop-packages-head span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.approval-all-shop-packages-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.approval-all-shop-packages-actions .button {
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.approval-all-shop-packages-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.approval-all-shop-packages-card {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  align-content: start;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-left: 4px solid rgba(35, 107, 181, 0.48);
+  border-radius: 7px;
+  background: #fff;
+}
+
+.approval-all-shop-packages-card span,
+.approval-all-shop-packages-card strong,
+.approval-all-shop-packages-card p,
+.approval-all-shop-packages-note {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.approval-all-shop-packages-card span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.approval-all-shop-packages-card strong {
+  color: var(--green-900);
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.approval-all-shop-packages-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.approval-all-shop-packages-note {
+  margin: 0;
+  padding: 9px 10px;
+  border-left: 4px solid rgba(28, 117, 93, 0.44);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
 .approval-rp-request-kit {
   display: grid;
   gap: 12px;
@@ -2711,10 +2814,13 @@ select:focus {
 }
 
 .approval-summary-action .button {
-  width: max-content;
+  width: 100%;
+  max-width: 100%;
   min-height: 34px;
   padding: 7px 10px;
   font-size: 12px;
+  justify-content: center;
+  white-space: normal;
 }
 
 .approval-gate-panel {
@@ -6560,6 +6666,7 @@ tr[data-attempt-id].is-selected {
   .approval-hero,
   .approval-summary-grid,
   .approval-action-head,
+  .approval-all-shop-packages-head,
   .approval-rp-request-head,
   .approval-coverage-head,
   .approval-preview-batch-head,
@@ -6696,6 +6803,18 @@ tr[data-attempt-id].is-selected {
 
   .approval-rp-request-actions {
     justify-content: flex-start;
+  }
+
+  .approval-all-shop-packages-actions {
+    justify-content: flex-start;
+  }
+
+  .approval-all-shop-packages-actions .button {
+    flex: 1 1 170px;
+  }
+
+  .approval-all-shop-packages-grid {
+    grid-template-columns: 1fr;
   }
 
   .approval-rp-request-actions .button {
