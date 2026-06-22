@@ -2263,6 +2263,111 @@ select:focus {
   line-height: 1.3;
 }
 
+.approval-final-asset-batch {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(28, 117, 93, 0.22);
+  border-radius: var(--radius);
+  background: #f7fbf9;
+}
+
+.approval-final-asset-batch-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.approval-final-asset-batch-head h3 {
+  margin: 0 0 4px;
+  color: var(--green-900);
+  font-size: 16px;
+}
+
+.approval-final-asset-batch-head span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.approval-final-asset-batch-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.approval-final-asset-batch-head .button {
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.approval-final-asset-batch-head .button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.approval-final-asset-batch-list {
+  display: grid;
+  gap: 8px;
+}
+
+.approval-final-asset-batch-card {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-left: 4px solid rgba(28, 117, 93, 0.5);
+  border-radius: 7px;
+  background: #fff;
+}
+
+.approval-final-asset-batch-card strong,
+.approval-final-asset-batch-card p,
+.approval-final-asset-batch-paths li,
+.approval-final-asset-batch-empty {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.approval-final-asset-batch-card strong {
+  color: var(--green-900);
+  font-size: 13px;
+  line-height: 1.28;
+}
+
+.approval-final-asset-batch-card p,
+.approval-final-asset-batch-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.approval-final-asset-batch-paths {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.approval-final-asset-batch-paths li {
+  padding: 5px 7px;
+  border-radius: 6px;
+  background: #edf8f4;
+  color: var(--green-900);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.3;
+}
+
 .approval-state-snapshot {
   display: grid;
   gap: 12px;
@@ -6771,6 +6876,7 @@ tr[data-attempt-id].is-selected {
   .approval-rp-request-head,
   .approval-coverage-head,
   .approval-preview-batch-head,
+  .approval-final-asset-batch-head,
   .approval-state-snapshot-head,
   .approval-layout {
     grid-template-columns: 1fr;
@@ -6935,6 +7041,14 @@ tr[data-attempt-id].is-selected {
   }
 
   .approval-preview-batch-actions .button {
+    flex: 1 1 170px;
+  }
+
+  .approval-final-asset-batch-actions {
+    justify-content: flex-start;
+  }
+
+  .approval-final-asset-batch-actions .button {
     flex: 1 1 170px;
   }
 

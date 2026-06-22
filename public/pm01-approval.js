@@ -1319,6 +1319,15 @@
     return (digitalShift.packages || []).filter(isPackageReadyForPreview);
   }
 
+  function isPackageReadyForFinalAssets(packageData) {
+    const finalGate = getPackageGateRows(packageData).find((gate) => gate.id === "final_assets");
+    return finalGate?.status === "pending";
+  }
+
+  function getFinalAssetBatchItems(digitalShift) {
+    return (digitalShift.packages || []).filter(isPackageReadyForFinalAssets);
+  }
+
   function buildPreviewBatchText(digitalShift) {
     const readyPackages = getPreviewBatchItems(digitalShift);
     const assetCount = readyPackages.reduce((sum, packageData) => sum + (packageData.previewAssets || []).length, 0);
@@ -1401,6 +1410,100 @@
     try {
       downloadTextFile(getPreviewBatchFileName(), buildPreviewBatchText(digitalShift), "text/markdown");
       button.textContent = "Preview batch скачан";
+      window.setTimeout(() => {
+        button.textContent = "Скачать .md";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скачать";
+      window.setTimeout(() => {
+        button.textContent = "Скачать .md";
+      }, 1600);
+    }
+  }
+
+  function buildFinalAssetBatchText(digitalShift) {
+    const readyPackages = getFinalAssetBatchItems(digitalShift);
+    const assetCount = readyPackages.reduce((sum, packageData) => sum + (packageData.previewAssets || []).length, 0);
+    const allShopReview = getAllShopReview();
+    const allShopReviewMeta = getAllShopReviewMeta(allShopReview.status);
+    return [
+      "PM01 PX final asset generation batch",
+      `generatedAt: ${new Date().toISOString()}`,
+      "scope: accepted-preview packages only",
+      "sourceGate: final_assets pending",
+      "finalAssetRequested: true",
+      "connectAutomatically: false",
+      "connectAfter: repeated_visual_inspection_and_teacher_acceptance",
+      `allShopReview: ${allShopReview.status} (${allShopReviewMeta.status})`,
+      `allShopReviewNote: ${allShopReview.note || "-"}`,
+      `readyPackages: ${readyPackages.length}/${(digitalShift.packages || []).length}`,
+      `plannedFinalAssets: ${assetCount}`,
+      "",
+      ...(readyPackages.length
+        ? readyPackages.map((packageData, packageIndex) => {
+            const decision = getPackageDecision(packageData.variantId);
+            const intake = getPackageRpIntake(packageData.variantId);
+            const inspectionSummary = getPackageInspectionSummary(packageData);
+            return [
+              `## ${packageIndex + 1}. ${packageData.title}`,
+              `variantId: ${packageData.variantId}`,
+              `teacherDecision: ${decision.decision}`,
+              `teacherNote: ${decision.note || "-"}`,
+              `previewInspection: ${inspectionSummary.accepted}/${inspectionSummary.total} accepted`,
+              "rpContext:",
+              `  excerpt: ${intake.excerpt || "-"}`,
+              `  confirmedTopics: ${intake.confirmedTopics || "-"}`,
+              "",
+              "finalAssets:",
+              ...(packageData.previewAssets || []).map((asset, assetIndex) => {
+                const inspection = getAssetInspection(asset.id);
+                return [
+                  `- asset: ${asset.id || `${packageData.variantId}-final-${assetIndex + 1}`}`,
+                  `  finalTargetPath: ${asset.targetPath}`,
+                  `  acceptedPreviewStatus: ${inspection.status}`,
+                  `  acceptedPreviewNote: ${inspection.note || "-"}`,
+                  `  visualPurpose: ${asset.visualPurpose || "-"}`,
+                  `  prompt: ${asset.prompt}`,
+                  `  negativePrompt: ${asset.negativePrompt}`,
+                  "  styleReferences:",
+                  ...(asset.styleReferences || []).map((reference) => `    - ${reference.label}: ${reference.path}`),
+                  "  inspectionChecklist:",
+                  ...(asset.inspectionChecklist || []).map((item) => `    - ${item}`),
+                  "  finalAssetRequested: true",
+                  "  connectAutomatically: false",
+                  "  connectAfter: repeated_visual_inspection_and_teacher_acceptance"
+                ].join("\n");
+              })
+            ].join("\n");
+          })
+        : ["No packages are ready for final asset generation yet."])
+    ].join("\n\n");
+  }
+
+  async function copyFinalAssetBatch(digitalShift, button) {
+    try {
+      await navigator.clipboard.writeText(buildFinalAssetBatchText(digitalShift));
+      button.textContent = "Final batch скопирован";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать final batch";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать final batch";
+      }, 1600);
+    }
+  }
+
+  function getFinalAssetBatchFileName() {
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    return `pm01-px-final-asset-batch-${stamp}.md`;
+  }
+
+  function downloadFinalAssetBatch(digitalShift, button) {
+    try {
+      downloadTextFile(getFinalAssetBatchFileName(), buildFinalAssetBatchText(digitalShift), "text/markdown");
+      button.textContent = "Final batch скачан";
       window.setTimeout(() => {
         button.textContent = "Скачать .md";
       }, 1600);
@@ -1874,6 +1977,64 @@
     return panel;
   }
 
+  function renderFinalAssetBatchPanel(digitalShift, readyPackages) {
+    const panel = createNode("section", "approval-final-asset-batch");
+    const assetCount = readyPackages.reduce((sum, packageData) => sum + (packageData.previewAssets || []).length, 0);
+    const head = createNode("div", "approval-final-asset-batch-head");
+    const title = createNode("div");
+    title.append(
+      createNode("h3", "", "Final assets batch"),
+      createNode(
+        "span",
+        "",
+        readyPackages.length
+          ? `${readyPackages.length} цехов · ${assetCount} final assets · connectAutomatically: false`
+          : "Появится только после принятого preview и открытого final-assets gate"
+      )
+    );
+    const copyButton = createNode("button", "button secondary", "Скопировать final batch");
+    copyButton.type = "button";
+    copyButton.disabled = readyPackages.length === 0;
+    copyButton.addEventListener("click", () => copyFinalAssetBatch(digitalShift, copyButton));
+    const downloadButton = createNode("button", "button secondary", "Скачать .md");
+    downloadButton.type = "button";
+    downloadButton.disabled = readyPackages.length === 0;
+    downloadButton.addEventListener("click", () => downloadFinalAssetBatch(digitalShift, downloadButton));
+    const actions = createNode("div", "approval-final-asset-batch-actions");
+    actions.append(copyButton, downloadButton);
+    head.append(title, actions);
+
+    const list = createNode("div", "approval-final-asset-batch-list");
+    if (readyPackages.length) {
+      readyPackages.forEach((packageData) => {
+        const card = createNode("article", "approval-final-asset-batch-card");
+        card.append(
+          createNode("strong", "", packageData.title),
+          createNode(
+            "p",
+            "",
+            "Готово к генерации final files после принятого preview. Подключение остаётся закрытым до повторного визуального осмотра."
+          ),
+          renderList(
+            (packageData.previewAssets || []).map((asset) => `${asset.id}: ${asset.targetPath}`),
+            "approval-final-asset-batch-paths"
+          )
+        );
+        list.appendChild(card);
+      });
+    } else {
+      const empty = createNode(
+        "p",
+        "approval-final-asset-batch-empty",
+        "Нет цехов с принятыми preview-assets и открытым final-assets gate."
+      );
+      list.appendChild(empty);
+    }
+
+    panel.append(head, list);
+    return panel;
+  }
+
   function renderStateSnapshotPanel(digitalShift) {
     const packages = digitalShift.packages || [];
     const panel = createNode("section", "approval-state-snapshot");
@@ -2073,6 +2234,7 @@
     const pendingCount = actions.filter((item) => item.action.status === "pending").length;
     const blockedCount = actions.filter((item) => item.action.status === "blocked").length;
     const readyPackages = actions.filter((item) => item.action.status === "ready").map((item) => item.packageData);
+    const finalReadyPackages = getFinalAssetBatchItems(digitalShift);
 
     const head = createNode("div", "approval-action-head");
     const title = createNode("div", "approval-action-title");
@@ -2123,6 +2285,7 @@
       renderRpRequestKitPanel(digitalShift),
       renderCoverageAuditPanel(digitalShift),
       renderPreviewBatchPanel(digitalShift, readyPackages),
+      renderFinalAssetBatchPanel(digitalShift, finalReadyPackages),
       renderStateSnapshotPanel(digitalShift)
     );
   }

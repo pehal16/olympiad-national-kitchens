@@ -73,6 +73,7 @@ Working programs, calendar-thematic plans, and local assessment materials are ex
 - `/pm01-approval.html` also includes a copyable/downloadable `Сводный пакет 5 цехов` Markdown export for sending the full PM01 PX approval package in one file.
 - The same all-shop block includes a browser-local `Журнал сводного согласования`; `Preview batch` stays closed until the combined package is marked `На preview`, even when individual shops are locally ready.
 - After that all-shop gate, `/pm01-approval.html` can copy or download the `Preview batch` Markdown for preview-image generation while keeping `finalAsset: false` and the official exam unchanged.
+- After preview inspection is accepted, `/pm01-approval.html` can copy/download a `Final assets batch` Markdown with `connectAutomatically: false`; generated final images still need repeated visual inspection before any connection to the exam.
 - `/pm01-approval.html` includes a copyable `Coverage audit` that checks the 25 matrix rows, five interaction families, 10 preview slots, RP intake, preview decisions, visual inspection status, final-asset gate, and ПК/ОК coverage before image generation continues.
 - New generated final assets should be added only after teacher review of the per-shop prompt package.
 
