@@ -1392,6 +1392,26 @@
     }
   }
 
+  function getPreviewBatchFileName() {
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    return `pm01-px-preview-batch-${stamp}.md`;
+  }
+
+  function downloadPreviewBatch(digitalShift, button) {
+    try {
+      downloadTextFile(getPreviewBatchFileName(), buildPreviewBatchText(digitalShift), "text/markdown");
+      button.textContent = "Preview batch скачан";
+      window.setTimeout(() => {
+        button.textContent = "Скачать .md";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скачать";
+      window.setTimeout(() => {
+        button.textContent = "Скачать .md";
+      }, 1600);
+    }
+  }
+
   async function copyApprovalStateSnapshot(digitalShift, button) {
     try {
       await navigator.clipboard.writeText(JSON.stringify(buildApprovalStateSnapshot(digitalShift), null, 2));
@@ -1823,7 +1843,13 @@
     copyButton.type = "button";
     copyButton.disabled = readyPackages.length === 0;
     copyButton.addEventListener("click", () => copyPreviewBatch(digitalShift, copyButton));
-    head.append(title, copyButton);
+    const downloadButton = createNode("button", "button secondary", "Скачать .md");
+    downloadButton.type = "button";
+    downloadButton.disabled = readyPackages.length === 0;
+    downloadButton.addEventListener("click", () => downloadPreviewBatch(digitalShift, downloadButton));
+    const actions = createNode("div", "approval-preview-batch-actions");
+    actions.append(copyButton, downloadButton);
+    head.append(title, actions);
 
     const list = createNode("div", "approval-preview-batch-list");
     if (readyPackages.length) {

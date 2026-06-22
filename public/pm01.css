@@ -2188,6 +2188,13 @@ select:focus {
   line-height: 1.4;
 }
 
+.approval-preview-batch-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .approval-preview-batch-head .button {
   min-height: 34px;
   padding: 7px 10px;
@@ -6921,6 +6928,14 @@ tr[data-attempt-id].is-selected {
 
   .approval-coverage-head .button {
     width: 100%;
+  }
+
+  .approval-preview-batch-actions {
+    justify-content: flex-start;
+  }
+
+  .approval-preview-batch-actions .button {
+    flex: 1 1 170px;
   }
 
   .approval-state-snapshot-head-actions {

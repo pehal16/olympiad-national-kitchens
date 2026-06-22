@@ -519,6 +519,7 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(uiStyles.includes(".approval-rp-request-card"), true);
   assert.equal(uiStyles.includes(".approval-rp-request-package"), true);
   assert.equal(uiStyles.includes(".approval-preview-batch"), true);
+  assert.equal(uiStyles.includes(".approval-preview-batch-actions"), true);
   assert.equal(uiStyles.includes(".approval-preview-batch-card"), true);
   assert.equal(uiStyles.includes(".approval-coverage-audit"), true);
   assert.equal(uiStyles.includes(".approval-coverage-card"), true);
@@ -541,9 +542,9 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(approvalHtml.includes("id=\"approval-packages-list\""), true);
   assert.equal(approvalHtml.includes("id=\"approval-action-plan\""), true);
   assert.equal(approvalHtml.includes("Согласование PX"), true);
-  assert.equal(approvalHtml.includes("/pm01-approval.js?v=1.0.21"), true);
+  assert.equal(approvalHtml.includes("/pm01-approval.js?v=1.0.22"), true);
   assert.equal(uiHtml.includes("/pm01.js?v=1.0.29"), true);
-  assert.equal(uiHtml.includes("/pm01.css?v=1.0.48"), true);
+  assert.equal(uiHtml.includes("/pm01.css?v=1.0.49"), true);
   assert.equal(uiScript.includes("selectCockpitFamily"), true);
   assert.equal(uiScript.includes("jumpToPracticeFamily"), true);
   assert.equal(uiScript.includes("canOpenPracticeFamily"), true);
@@ -618,6 +619,8 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(approvalScript.includes("ОК 10"), true);
   assert.equal(approvalScript.includes("buildPreviewBatchText"), true);
   assert.equal(approvalScript.includes("copyPreviewBatch"), true);
+  assert.equal(approvalScript.includes("downloadPreviewBatch"), true);
+  assert.equal(approvalScript.includes("pm01-px-preview-batch"), true);
   assert.equal(approvalScript.includes("renderPreviewBatchPanel"), true);
   assert.equal(approvalScript.includes("PM01_PREVIEW_INSPECTION_STORAGE_KEY"), true);
   assert.equal(approvalScript.includes("buildPreviewInspectionReport"), true);
@@ -1489,7 +1492,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(studentScript, /retryDelay/);
   assert.match(studentScript, /X-PM01-Duration-Ms/);
   assert.doesNotMatch(studentScript, /readAsDataURL\(blob\)/);
-  assert.match(studentHtml, /pm01\.css\?v=1\.0\.48/);
+  assert.match(studentHtml, /pm01\.css\?v=1\.0\.49/);
   assert.match(studentHtml, /loadPm01Script/);
   assert.match(studentHtml, /pm01\.js\?v=1\.0\.29/);
   assert.match(adminHtml, /export-group-csv/);
@@ -1503,7 +1506,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(adminScript, /api\/admin\/pm01\/exports\/group-csv\/download/);
   assert.match(adminScript, /voiceAudio/);
   assert.match(adminScript, /audioInfo\.audioUrl/);
-  assert.match(adminHtml, /pm01\.css\?v=1\.0\.48/);
+  assert.match(adminHtml, /pm01\.css\?v=1\.0\.49/);
   assert.match(adminHtml, /pm01-approval\.html/);
   assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.18/);
   assert.match(css, /\.voice-queue-list/);

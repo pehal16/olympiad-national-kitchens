@@ -87,7 +87,7 @@ Rubric фиксирует:
 
 Внутри action queue есть `Coverage audit`: компактная методическая проверка, которая показывает 25 строк матрицы, 5 интерактивных семейств, 10 preview-slots, состояние РП-intake, решение по preview, визуальный осмотр и gate финальных assets. В audit отдельно подсвечиваются ПК/ОК: ПК 1.1-ПК 1.4 и ОК 01/02/07 уже представлены в строках, а ОК 09/10 остаются явной точкой сверки по РП/КТП перед окончательным переписыванием тем.
 
-Когда пакет прошёл РП/КТП и решение `На preview`, страница включает его в `Preview batch`. Этот export-only блок копирует prompt, negative prompt, style references, inspection checklist, targetPath и `finalAsset: false` для генерации 1-2 preview-изображений. Он не создаёт изображения, не подключает файлы и не меняет официальный экзамен.
+Когда пакет прошёл РП/КТП и решение `На preview`, страница включает его в `Preview batch`. Этот export-only блок copy/download `.md` собирает prompt, negative prompt, style references, inspection checklist, targetPath и `finalAsset: false` для генерации 1-2 preview-изображений. Он не создаёт изображения, не подключает файлы и не меняет официальный экзамен.
 
 После генерации preview преподаватель фиксирует результат в browser-local журнале визуального осмотра: `Ждёт preview`, `Принять`, `Правка`, `Отклонить`, заметка и copyable inspection report. Gate `Финальные assets` остаётся заблокированным, пока все preview-assets по цеху не отмечены как принятые.
 
