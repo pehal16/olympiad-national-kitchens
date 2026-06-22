@@ -2133,6 +2133,165 @@
     }
   }
 
+  function buildShopApprovalPackageText(packageData, familyMap = new Map(), blueprintMap = new Map()) {
+    const decision = getPackageDecision(packageData.variantId);
+    const decisionMeta = getDecisionMeta(decision.decision);
+    const rpIntake = getPackageRpIntake(packageData.variantId);
+    const gateSummary = getPackageGateSummary(packageData);
+    const inspectionSummary = getPackageInspectionSummary(packageData);
+    const competencyReview = getPackageCompetencyReviewSummary(packageData);
+    const innovationReview = getPackageInnovationReviewSummary(packageData);
+    const nextAction = getPackageNextAction(packageData);
+    const packageRows = packageData.methodicalMatrix || [];
+    const packageTasks = packageData.tasks || [];
+    return [
+      `# PM01 PX. Согласовательный пакет цеха: ${packageData.title}`,
+      "",
+      `generatedAt: ${new Date().toISOString()}`,
+      `variantId: ${packageData.variantId}`,
+      `officialContract: ${currentDigitalShift?.contract || "100 баллов / 20 заданий / 5 вариантов"}`,
+      `practiceScope: PX training-only, maxScore 0, official protocol unchanged`,
+      `rpStatus: ${hasRpIntake(packageData.variantId) ? "local_rp_excerpt_present" : "awaiting_rp_ktp"}`,
+      `decision: ${decision.decision} (${decisionMeta.label})`,
+      `nextAction: ${nextAction.title}`,
+      `nextActionStatus: ${nextAction.status}`,
+      "",
+      "## Gate status",
+      "",
+      `gatesDone: ${gateSummary.done}/${gateSummary.gates.length}`,
+      `gatesBlocked: ${gateSummary.blocked}`,
+      `gatesPending: ${gateSummary.pending}`,
+      ...gateSummary.gates.map((gate) => `- ${gate.id}: ${gate.status}\n  title: ${gate.title}\n  detail: ${gate.detail}`),
+      "",
+      "## What must stay blocked until RP/KTP",
+      "",
+      ...((currentDigitalShift?.normativeDossier?.blockedUntilRp || []).map((item) => `- ${item}`)),
+      "",
+      "## RP/KTP intake",
+      "",
+      `updatedAt: ${rpIntake.updatedAt || "not_saved"}`,
+      `confirmedTopics: ${rpIntake.confirmedTopics || "-"}`,
+      "",
+      "rpExcerpt:",
+      rpIntake.excerpt || "-",
+      "",
+      "## Current topics to confirm",
+      "",
+      ...(packageData.rpTopics || []).map((topic) => `- ${topic}`),
+      "",
+      "## Competency and innovation review",
+      "",
+      `ok09Ok10Verified: ${competencyReview.verified}/${competencyReview.total}`,
+      `ok09Ok10NeedsRevision: ${competencyReview.needsRevision}`,
+      `ok09Ok10NotInRp: ${competencyReview.notInRp}`,
+      `innovationApproved: ${innovationReview.approved}/${innovationReview.total}`,
+      `innovationNeedsRevision: ${innovationReview.needsRevision}`,
+      `innovationDeferred: ${innovationReview.deferred}`,
+      "",
+      "## Production journal",
+      "",
+      ...(packageData.productionLog || []).map((item) => `- ${item}`),
+      "",
+      "## Proposed tasks and modernity",
+      "",
+      ...packageTasks.map((task, index) => {
+        const family = familyMap.get(task.familyId) || {};
+        const row = packageRows.find((item) => item.familyId === task.familyId) || {};
+        const blueprint = blueprintMap.get(task.familyId) || {};
+        return [
+          `### ${index + 1}. ${task.title}`,
+          "",
+          `familyId: ${task.familyId}`,
+          `familyTitle: ${family.title || task.familyTitle || "-"}`,
+          `rpTopicDraft: ${row.rpTopic || "-"}`,
+          `competenciesDraft: ${(row.competencies || []).join(", ") || "-"}`,
+          `currentQuestion: ${row.currentQuestion || "-"}`,
+          `newFormat: ${row.newFormat || "-"}`,
+          `visualMode: ${blueprint.visualMode || "-"}`,
+          `interaction: ${family.interaction || "-"}`,
+          `modernity: ${family.modernity || blueprint.uniqueness || "-"}`,
+          `implementation: ${blueprint.implementation || "-"}`,
+          `animation: ${blueprint.animation || "-"}`,
+          `checkCriterion: ${row.checkCriterion || blueprint.assessment || "-"}`
+        ].join("\n");
+      }),
+      "",
+      "## Preview image prompts",
+      "",
+      ...(packageData.previewAssets || []).map((asset, index) =>
+        [
+          `### ${index + 1}. ${asset.kind === "scene" ? "Общий вид цеха" : "Контрольная партия"}`,
+          "",
+          `id: ${asset.id}`,
+          `targetPath: ${asset.targetPath}`,
+          `status: ${asset.status}`,
+          `finalAsset: ${asset.finalAsset}`,
+          `outputUse: ${asset.outputUse}`,
+          `inspectionGate: ${asset.inspectionGate}`,
+          `visualPurpose: ${asset.visualPurpose || "-"}`,
+          `prompt: ${asset.prompt}`,
+          `negativePrompt: ${asset.negativePrompt}`,
+          "",
+          "styleReferences:",
+          ...((asset.styleReferences || []).map((reference) => `- ${reference.label}: ${reference.path}`)),
+          "",
+          "inspectionChecklist:",
+          ...((asset.inspectionChecklist || []).map((item) => `- ${item}`))
+        ].join("\n")
+      ),
+      "",
+      "## Preview inspection state",
+      "",
+      `accepted: ${inspectionSummary.accepted}/${inspectionSummary.total}`,
+      `awaiting: ${inspectionSummary.awaiting}`,
+      `needsRevision: ${inspectionSummary.needsRevision}`,
+      `rejected: ${inspectionSummary.rejected}`,
+      "",
+      "## Teacher decision note",
+      "",
+      decision.note || "-"
+    ].join("\n");
+  }
+
+  function getShopApprovalPackageFileName(packageData) {
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    return `pm01-px-shop-package-${packageData.variantId}-${stamp}.md`;
+  }
+
+  async function copyShopApprovalPackage(packageData, familyMap, blueprintMap, button) {
+    try {
+      await navigator.clipboard.writeText(buildShopApprovalPackageText(packageData, familyMap, blueprintMap));
+      button.textContent = "Пакет скопирован";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать пакет";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать пакет";
+      }, 1600);
+    }
+  }
+
+  function downloadShopApprovalPackage(packageData, familyMap, blueprintMap, button) {
+    try {
+      downloadTextFile(
+        getShopApprovalPackageFileName(packageData),
+        buildShopApprovalPackageText(packageData, familyMap, blueprintMap),
+        "text/markdown"
+      );
+      button.textContent = "Пакет скачан";
+      window.setTimeout(() => {
+        button.textContent = "Скачать .md";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скачать";
+      window.setTimeout(() => {
+        button.textContent = "Скачать .md";
+      }, 1600);
+    }
+  }
+
   async function copyApprovalDecision(packageData, button) {
     const decision = getPackageDecision(packageData.variantId);
     const meta = getDecisionMeta(decision.decision);
@@ -2859,6 +3018,49 @@
     return panel;
   }
 
+  function renderShopApprovalPackagePanel(packageData, familyMap, blueprintMap) {
+    const gateSummary = getPackageGateSummary(packageData);
+    const inspectionSummary = getPackageInspectionSummary(packageData);
+    const nextAction = getPackageNextAction(packageData);
+    const panel = createNode("section", "approval-package-block approval-shop-package");
+    panel.dataset.status = nextAction.status;
+    const head = createNode("div", "approval-shop-package-head");
+    const title = createNode("div");
+    title.append(
+      createNode("h3", "", "Пакет согласования цеха"),
+      createNode("span", "", "Единый Markdown для преподавателя: темы, задания, промпты, preview, gates и границы до РП")
+    );
+    const actions = createNode("div", "approval-shop-package-actions");
+    const copyButton = createNode("button", "button secondary", "Скопировать пакет");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyShopApprovalPackage(packageData, familyMap, blueprintMap, copyButton));
+    const downloadButton = createNode("button", "button secondary", "Скачать .md");
+    downloadButton.type = "button";
+    downloadButton.addEventListener("click", () => downloadShopApprovalPackage(packageData, familyMap, blueprintMap, downloadButton));
+    actions.append(copyButton, downloadButton);
+    head.append(title, actions);
+
+    const metrics = createNode("div", "approval-shop-package-grid");
+    [
+      ["Следующий шаг", nextAction.title, nextAction.detail],
+      ["Задания", `${(packageData.tasks || []).length}/5`, "Пять современных семейств в тренировочной PX-версии."],
+      ["Preview", `${(packageData.previewAssets || []).length}/2`, `Осмотр: ${inspectionSummary.accepted}/${inspectionSummary.total} принято.`],
+      ["Gates", `${gateSummary.done}/${gateSummary.gates.length}`, `${gateSummary.blocked} блоков · ${gateSummary.pending} ожиданий.`]
+    ].forEach(([label, value, detail]) => {
+      const card = createNode("article", "approval-shop-package-card");
+      card.append(createNode("span", "", label), createNode("strong", "", value), createNode("p", "", detail));
+      metrics.appendChild(card);
+    });
+
+    const note = createNode(
+      "p",
+      "approval-shop-package-note",
+      "Пакет можно отправлять на согласование до генерации final assets; он не меняет официальный экзамен и не открывает ответы."
+    );
+    panel.append(head, metrics, note);
+    return panel;
+  }
+
   function renderPackage(packageData, familyMap, blueprintMap, index) {
     const decision = getPackageDecision(packageData.variantId);
     const decisionMeta = getDecisionMeta(decision.decision);
@@ -2942,6 +3144,7 @@
 
     section.append(
       head,
+      renderShopApprovalPackagePanel(packageData, familyMap, blueprintMap),
       renderApprovalGates(packageData),
       topics,
       renderRpIntake(packageData),

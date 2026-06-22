@@ -35,7 +35,7 @@ The PM01 exam is an interactive production exam for:
 
 Current PM01 total score contract: 100 points.
 
-Current PM01 implementation version: `1.6.68`.
+Current PM01 implementation version: `1.6.69`.
 
 Methodical baseline for PM01 should stay aligned with the current FГОС СПО 43.01.09 and 43.02.15, especially ПК 1.1-ПК 1.4 and ОК 01, ОК 02, ОК 07, ОК 09, ОК 10. New tasks should remain production-situation tasks: workplace organization, safe equipment use, raw material preparation, semi-finished product processing, quality control, storage conditions, and practical decision-making.
 
@@ -71,6 +71,7 @@ Important current PM01 content change:
 - Version `1.6.66` adds a browser-local PM01 PX ПК/ОК-сверка gate on `/pm01-approval.html`: every shop now records OK 09 and OK 10 status, notes, copyable review export, snapshot transfer, coverage audit totals, and a `competency_review` readiness gate before preview/final assets can proceed.
 - Version `1.6.67` adds a browser-local PM01 PX interactive innovation review on `/pm01-approval.html`: every shop now records whether each modern task family is accepted, needs revision, or is deferred, with notes, copyable innovation export, snapshot transfer, coverage audit totals, action-queue routing, and an `innovation_review` gate before preview/final assets can proceed.
 - Version `1.6.68` adds a source-backed PM01 PX normative dossier: ФГОС 43.01.09, ФГОС 43.02.15, ИРПО/ФИРПО ПОП and local RP/KTP gate now expose `sourceEvidence[]`, `normativeDossier`, copy/download Markdown export, coverage audit totals, and the explicit boundary that final topics/questions/assets wait for local РП/КТП.
+- Version `1.6.69` adds a per-shop PM01 PX approval package export on `/pm01-approval.html`: every shop can copy/download one Markdown packet with RP topics, gates, next action, OK09/OK10 review, innovation review, production log, five task briefs, methodical matrix rows, preview prompts, target paths, style references, inspection checklist, and current preview-inspection state for teacher/user approval.
 - Official exam routes must stay 100 points and 20 questions; training may include practice-only simulators that do not affect protocols or ведомости.
 
 The active student route is mixed across production areas. Students should not manually choose a favorable shop/section for the exam route.
