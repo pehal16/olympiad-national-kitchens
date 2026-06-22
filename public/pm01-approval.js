@@ -1575,6 +1575,21 @@
     return (digitalShift.packages || []).filter(isPackageReadyForFinalAssets);
   }
 
+  function getPackageApprovedConnectionAssets(packageData) {
+    return (packageData.previewAssets || [])
+      .map((asset) => ({
+        asset,
+        finalInspection: getFinalAssetInspection(asset.id, asset)
+      }))
+      .filter(({ finalInspection }) => finalInspection.status === "accepted_final" && finalInspection.actualPath.trim());
+  }
+
+  function getConnectionImplementationPackages(digitalShift) {
+    return (digitalShift.packages || []).filter(
+      (packageData) => isPackageConnectionApproved(packageData) && getPackageApprovedConnectionAssets(packageData).length > 0
+    );
+  }
+
   function buildPreviewBatchText(digitalShift) {
     const readyPackages = getPreviewBatchItems(digitalShift);
     const assetCount = readyPackages.reduce((sum, packageData) => sum + (packageData.previewAssets || []).length, 0);
@@ -1758,6 +1773,101 @@
       button.textContent = "Не удалось скачать";
       window.setTimeout(() => {
         button.textContent = "Скачать .md";
+      }, 1600);
+    }
+  }
+
+  function buildConnectionImplementationText(digitalShift) {
+    const packages = getConnectionImplementationPackages(digitalShift);
+    const allPackages = digitalShift.packages || [];
+    const approvedAssets = packages.reduce((sum, packageData) => sum + getPackageApprovedConnectionAssets(packageData).length, 0);
+    return [
+      "PM01 PX connection implementation package",
+      `generatedAt: ${new Date().toISOString()}`,
+      "scope: approved_connection packages with accepted final assets only",
+      `approvedConnectionPackages: ${packages.length}/${allPackages.length}`,
+      `approvedAssets: ${approvedAssets}`,
+      "publicExamChanged: false",
+      "manualCodeChangeRequired: true",
+      "connectAutomatically: false",
+      "requiresBeforeCodeChange: file_exists_visual_reinspection_teacher_acceptance",
+      "containsAnswerKeys: false",
+      "",
+      ...(packages.length
+        ? packages.map((packageData, packageIndex) => {
+            const review = getPackageConnectionReview(packageData.variantId);
+            const finalSummary = getPackageFinalAssetInspectionSummary(packageData);
+            const approvedConnectionAssets = getPackageApprovedConnectionAssets(packageData);
+            return [
+              `## ${packageIndex + 1}. ${packageData.title}`,
+              `variantId: ${packageData.variantId}`,
+              `connectionReviewStatus: ${review.status}`,
+              `connectionReviewApprovedAt: ${review.approvedAt || "-"}`,
+              `connectionReviewUpdatedAt: ${review.updatedAt || "not_saved"}`,
+              `connectionReviewNote: ${review.note || "-"}`,
+              `finalInspectionAccepted: ${finalSummary.accepted}/${finalSummary.total}`,
+              `approvedAssets: ${approvedConnectionAssets.length}`,
+              "publicExamChanged: false",
+              "manualCodeChangeRequired: true",
+              "",
+              "assets:",
+              ...approvedConnectionAssets.map(({ asset, finalInspection }) =>
+                [
+                  `- asset: ${asset.id}`,
+                  `  plannedTargetPath: ${asset.targetPath}`,
+                  `  finalActualPath: ${finalInspection.actualPath.trim()}`,
+                  `  suggestedRepoTargetPath: ${finalInspection.actualPath.trim()}`,
+                  `  visualPurpose: ${asset.visualPurpose || "-"}`,
+                  `  finalInspectionNote: ${finalInspection.note || "-"}`,
+                  "  inspectionChecklist:",
+                  ...(asset.inspectionChecklist || []).map((item) => `    - ${item}`),
+                  "  implementationChecklist:",
+                  "    - verify_file_exists_at_finalActualPath",
+                  "    - visually_reinspect_against_pm01_rubric",
+                  "    - confirm_teacher_acceptance_before_mapping",
+                  "    - update_exam_mapping_only_in_a_separate_code_change",
+                  "    - run_pm01_tests_build_and_verify",
+                  "  publicExamChanged: false",
+                  "  connectAutomatically: false"
+                ].join("\n")
+              )
+            ].join("\n");
+          })
+        : ["No approved_connection packages with accepted final asset paths yet."])
+    ].join("\n\n");
+  }
+
+  function getConnectionImplementationFileName() {
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    return `pm01-px-connection-implementation-${stamp}.md`;
+  }
+
+  async function copyConnectionImplementationPackage(digitalShift, button) {
+    try {
+      await navigator.clipboard.writeText(buildConnectionImplementationText(digitalShift));
+      button.textContent = "Implementation package copied";
+      window.setTimeout(() => {
+        button.textContent = "Copy implementation package";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Copy failed";
+      window.setTimeout(() => {
+        button.textContent = "Copy implementation package";
+      }, 1600);
+    }
+  }
+
+  function downloadConnectionImplementationPackage(digitalShift, button) {
+    try {
+      downloadTextFile(getConnectionImplementationFileName(), buildConnectionImplementationText(digitalShift), "text/markdown");
+      button.textContent = "Implementation package downloaded";
+      window.setTimeout(() => {
+        button.textContent = "Download .md";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Download failed";
+      window.setTimeout(() => {
+        button.textContent = "Download .md";
       }, 1600);
     }
   }
@@ -2436,6 +2546,64 @@
     return panel;
   }
 
+  function renderConnectionImplementationPanel(digitalShift, approvedPackages) {
+    const panel = createNode("section", "approval-connection-implementation");
+    const assetCount = approvedPackages.reduce(
+      (sum, packageData) => sum + getPackageApprovedConnectionAssets(packageData).length,
+      0
+    );
+    const head = createNode("div", "approval-connection-implementation-head");
+    const title = createNode("div");
+    title.append(
+      createNode("h3", "", "Connection implementation package"),
+      createNode(
+        "span",
+        "",
+        approvedPackages.length
+          ? `${approvedPackages.length} shops · ${assetCount} approved assets · publicExamChanged: false`
+          : "No shops with approved_connection yet. Manual code change remains closed."
+      )
+    );
+    const copyButton = createNode("button", "button secondary", "Copy implementation package");
+    copyButton.type = "button";
+    copyButton.disabled = approvedPackages.length === 0;
+    copyButton.addEventListener("click", () => copyConnectionImplementationPackage(digitalShift, copyButton));
+    const downloadButton = createNode("button", "button secondary", "Download .md");
+    downloadButton.type = "button";
+    downloadButton.disabled = approvedPackages.length === 0;
+    downloadButton.addEventListener("click", () => downloadConnectionImplementationPackage(digitalShift, downloadButton));
+    const actions = createNode("div", "approval-connection-implementation-actions");
+    actions.append(copyButton, downloadButton);
+    head.append(title, actions);
+
+    const list = createNode("div", "approval-connection-implementation-list");
+    if (approvedPackages.length) {
+      approvedPackages.forEach((packageData) => {
+        const approvedConnectionAssets = getPackageApprovedConnectionAssets(packageData);
+        const review = getPackageConnectionReview(packageData.variantId);
+        const card = createNode("article", "approval-connection-implementation-card");
+        card.append(
+          createNode("strong", "", packageData.title),
+          createNode(
+            "p",
+            "",
+            `approved_connection · ${approvedConnectionAssets.length} accepted final assets · approvedAt: ${review.approvedAt || "-"}`
+          ),
+          renderList(
+            approvedConnectionAssets.map(({ asset, finalInspection }) => `${asset.id}: ${finalInspection.actualPath.trim()}`),
+            "approval-connection-implementation-paths"
+          )
+        );
+        list.appendChild(card);
+      });
+    } else {
+      list.appendChild(createNode("p", "approval-connection-implementation-empty", "No shops with approved_connection."));
+    }
+
+    panel.append(head, list);
+    return panel;
+  }
+
   function renderStateSnapshotPanel(digitalShift) {
     const packages = digitalShift.packages || [];
     const panel = createNode("section", "approval-state-snapshot");
@@ -2636,6 +2804,7 @@
     const blockedCount = actions.filter((item) => item.action.status === "blocked").length;
     const readyPackages = actions.filter((item) => item.action.status === "ready").map((item) => item.packageData);
     const finalReadyPackages = getFinalAssetBatchItems(digitalShift);
+    const connectionImplementationPackages = getConnectionImplementationPackages(digitalShift);
 
     const head = createNode("div", "approval-action-head");
     const title = createNode("div", "approval-action-title");
@@ -2687,6 +2856,7 @@
       renderCoverageAuditPanel(digitalShift),
       renderPreviewBatchPanel(digitalShift, readyPackages),
       renderFinalAssetBatchPanel(digitalShift, finalReadyPackages),
+      renderConnectionImplementationPanel(digitalShift, connectionImplementationPackages),
       renderStateSnapshotPanel(digitalShift)
     );
   }
