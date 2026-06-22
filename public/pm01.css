@@ -1684,7 +1684,7 @@ select:focus {
 
 .approval-all-shop-packages-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 8px;
 }
 
@@ -1726,6 +1726,99 @@ select:focus {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.35;
+}
+
+.approval-all-shop-review {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(28, 117, 93, 0.2);
+  border-radius: var(--radius);
+  background: #f7fbf9;
+}
+
+.approval-all-shop-review-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: start;
+}
+
+.approval-all-shop-review-head strong {
+  min-width: 0;
+  color: var(--green-900);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.approval-all-shop-review-head span,
+.approval-all-shop-review-detail,
+.approval-all-shop-review-dates,
+.approval-all-shop-review-note-field span {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.approval-all-shop-review-options,
+.approval-all-shop-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.approval-all-shop-review-button {
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid rgba(35, 107, 181, 0.22);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--green-900);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.approval-all-shop-review-button.is-active {
+  border-color: rgba(28, 117, 93, 0.62);
+  background: #dcefe8;
+}
+
+.approval-all-shop-review[data-status="needs_revision"] .approval-all-shop-review-button.is-active {
+  border-color: rgba(199, 72, 72, 0.5);
+  background: #fff0f0;
+  color: #8f2d2d;
+}
+
+.approval-all-shop-review[data-status="approved_preview"] .approval-all-shop-review-button.is-active {
+  background: #e7f3ff;
+  border-color: rgba(35, 107, 181, 0.46);
+}
+
+.approval-all-shop-review-detail {
+  margin: 0;
+  font-weight: 700;
+}
+
+.approval-all-shop-review-note-field {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.approval-all-shop-review-note {
+  width: 100%;
+  min-height: 72px;
+  resize: vertical;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--ink);
+  line-height: 1.45;
 }
 
 .approval-all-shop-packages-note {
@@ -6667,6 +6760,7 @@ tr[data-attempt-id].is-selected {
   .approval-summary-grid,
   .approval-action-head,
   .approval-all-shop-packages-head,
+  .approval-all-shop-review-head,
   .approval-rp-request-head,
   .approval-coverage-head,
   .approval-preview-batch-head,
@@ -6815,6 +6909,10 @@ tr[data-attempt-id].is-selected {
 
   .approval-all-shop-packages-grid {
     grid-template-columns: 1fr;
+  }
+
+  .approval-all-shop-review-button {
+    flex: 1 1 130px;
   }
 
   .approval-rp-request-actions .button {

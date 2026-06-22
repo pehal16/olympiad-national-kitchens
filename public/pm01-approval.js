@@ -14,6 +14,7 @@
   const PM01_PREVIEW_INSPECTION_STORAGE_KEY = "pm01PreviewInspectionV1";
   const PM01_COMPETENCY_REVIEW_STORAGE_KEY = "pm01CompetencyReviewV1";
   const PM01_INNOVATION_REVIEW_STORAGE_KEY = "pm01InnovationReviewV1";
+  const PM01_ALL_SHOP_REVIEW_STORAGE_KEY = "pm01AllShopReviewV1";
   const DECISION_OPTIONS = [
     { id: "pending", label: "Черновик", status: "Черновик до РП", detail: "Ожидает рабочую программу или правку формулировок." },
     { id: "approved_preview", label: "На preview", status: "Preview согласован", detail: "Можно генерировать 1-2 предварительных изображения." },
@@ -54,16 +55,25 @@
     { id: "needs_revision", label: "Правка", status: "Нужна правка", detail: "Нужно уточнить визуальный сценарий, интерактив, оценивание или методическую формулировку." },
     { id: "deferred", label: "Отложить", status: "Отложено", detail: "Идея перспективная, но не идёт в ближайший preview/final пакет." }
   ];
+  const ALL_SHOP_REVIEW_OPTIONS = [
+    { id: "draft", label: "Черновик", status: "Пакет не отправлен", detail: "Сводный Markdown можно копировать и дополнять, но preview workflow ещё не согласован." },
+    { id: "sent", label: "Отправлен", status: "На согласовании", detail: "Пакет передан пользователю или преподавателю; ждём решение по всем 5 цехам." },
+    { id: "approved_preview", label: "На preview", status: "Сводно согласовано", detail: "Общий пакет согласован: можно готовить preview batch для цехов, у которых закрыты локальные gates." },
+    { id: "needs_revision", label: "Правки", status: "Нужна общая правка", detail: "В пакете есть методические, визуальные или интерактивные правки до preview." },
+    { id: "waiting_rp", label: "Ждём РП", status: "Отложено до РП/КТП", detail: "Общее решение не закрыто, пока не получены локальные РП/КТП и оценочные материалы." }
+  ];
   const REQUIRED_PM01_COMPETENCIES = ["ПК 1.1", "ПК 1.2", "ПК 1.3", "ПК 1.4", "ОК 01", "ОК 02", "ОК 07", "ОК 09", "ОК 10"];
   const decisionOptionsById = new Map(DECISION_OPTIONS.map((option) => [option.id, option]));
   const previewInspectionOptionsById = new Map(PREVIEW_INSPECTION_OPTIONS.map((option) => [option.id, option]));
   const competencyReviewOptionsById = new Map(COMPETENCY_REVIEW_OPTIONS.map((option) => [option.id, option]));
   const innovationReviewOptionsById = new Map(INNOVATION_REVIEW_OPTIONS.map((option) => [option.id, option]));
+  const allShopReviewOptionsById = new Map(ALL_SHOP_REVIEW_OPTIONS.map((option) => [option.id, option]));
   let approvalState = loadApprovalState();
   let rpIntakeState = loadRpIntakeState();
   let previewInspectionState = loadPreviewInspectionState();
   let competencyReviewState = loadCompetencyReviewState();
   let innovationReviewState = loadInnovationReviewState();
+  let allShopReviewState = loadAllShopReviewState();
   let currentExam = null;
   let currentDigitalShift = null;
 
@@ -127,6 +137,15 @@
     }
   }
 
+  function loadAllShopReviewState() {
+    try {
+      const stored = window.localStorage.getItem(PM01_ALL_SHOP_REVIEW_STORAGE_KEY);
+      return stored ? JSON.parse(stored) || {} : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
   function persistApprovalState() {
     try {
       window.localStorage.setItem(PM01_APPROVAL_STORAGE_KEY, JSON.stringify(approvalState));
@@ -167,6 +186,14 @@
     }
   }
 
+  function persistAllShopReviewState() {
+    try {
+      window.localStorage.setItem(PM01_ALL_SHOP_REVIEW_STORAGE_KEY, JSON.stringify(allShopReviewState));
+    } catch (_) {
+      // The all-shop review remains usable in-memory if browser storage is blocked.
+    }
+  }
+
   function getDecisionMeta(decisionId) {
     return decisionOptionsById.get(decisionId) || DECISION_OPTIONS[0];
   }
@@ -181,6 +208,42 @@
 
   function getInnovationReviewMeta(statusId) {
     return innovationReviewOptionsById.get(statusId) || INNOVATION_REVIEW_OPTIONS[0];
+  }
+
+  function getAllShopReviewMeta(statusId) {
+    return allShopReviewOptionsById.get(statusId) || ALL_SHOP_REVIEW_OPTIONS[0];
+  }
+
+  function getAllShopReview() {
+    return {
+      status: allShopReviewState.status || "draft",
+      note: allShopReviewState.note || "",
+      sentAt: allShopReviewState.sentAt || null,
+      reviewedAt: allShopReviewState.reviewedAt || null,
+      updatedAt: allShopReviewState.updatedAt || null
+    };
+  }
+
+  function setAllShopReview(patch) {
+    const current = getAllShopReview();
+    const nextStatus = patch.status || current.status;
+    const now = new Date().toISOString();
+    allShopReviewState = {
+      ...current,
+      ...patch,
+      sentAt: patch.sentAt || current.sentAt || (nextStatus !== "draft" ? now : null),
+      reviewedAt:
+        patch.reviewedAt ||
+        current.reviewedAt ||
+        (["approved_preview", "needs_revision", "waiting_rp"].includes(nextStatus) ? now : null),
+      updatedAt: now
+    };
+    persistAllShopReviewState();
+  }
+
+  function resetAllShopReview() {
+    allShopReviewState = {};
+    persistAllShopReviewState();
   }
 
   function getPackageDecision(variantId) {
@@ -437,6 +500,10 @@
     const packages = digitalShift.packages || [];
     const families = digitalShift.families || [];
     const normativeAnchors = digitalShift.normativeAnchors || [];
+    const allShopReview = getAllShopReview();
+    const allShopReviewMeta = getAllShopReviewMeta(allShopReview.status);
+    const allShopReviewApproved = allShopReview.status === "approved_preview";
+    const allShopReviewBlocked = allShopReview.status === "needs_revision";
     const familyIds = families.map((family) => family.id);
     const blueprints = digitalShift.interactionBlueprints || [];
     const blueprintFamilyIds = new Set(blueprints.map((blueprint) => blueprint.familyId));
@@ -511,8 +578,18 @@
       innovationReviewNeedsRevision: packageAudits.reduce((sum, item) => sum + item.innovationReview.needsRevision, 0),
       innovationReviewDeferred: packageAudits.reduce((sum, item) => sum + item.innovationReview.deferred, 0),
       previewReady: packageAudits.filter((item) => item.hasRp && item.decision === "approved_preview").length,
+      previewReadyWithAllShopReview: allShopReviewApproved
+        ? packageAudits.filter((item) => item.hasRp && item.decision === "approved_preview").length
+        : 0,
       previewAccepted: packageAudits.filter((item) => item.previewAccepted).length,
       finalAssetsOpen: packageAudits.filter((item) => item.finalGateStatus === "pending").length,
+      allShopReview,
+      allShopReviewStatus: allShopReview.status,
+      allShopReviewLabel: allShopReviewMeta.status,
+      allShopReviewDetail: allShopReviewMeta.detail,
+      allShopReviewSent: Boolean(allShopReview.sentAt),
+      allShopReviewApproved,
+      allShopReviewBlocked,
       visualRubricStatus: digitalShift.visualAssetRubric?.status || "missing",
       normativeAnchors: normativeAnchors.length,
       normativeEvidenceRows: normativeAnchors.reduce((sum, anchor) => sum + (anchor.sourceEvidence || []).length, 0),
@@ -567,6 +644,10 @@
     const innovationReview = getPackageInnovationReviewSummary(packageData);
     const innovationReviewReady = innovationReview.ready;
     const innovationReviewBlocked = innovationReview.blocked;
+    const allShopReview = getAllShopReview();
+    const allShopReviewMeta = getAllShopReviewMeta(allShopReview.status);
+    const allShopReviewApproved = allShopReview.status === "approved_preview";
+    const allShopReviewBlocked = allShopReview.status === "needs_revision";
     const needsRevision = decision === "needs_revision";
     const waitingRp = decision === "waiting_rp";
 
@@ -624,6 +705,16 @@
           : "Нужны planned slots, inspection gate и запрет на finalAsset до согласования."
       },
       {
+        id: "all_shop_review",
+        status: allShopReviewApproved ? "done" : allShopReviewBlocked ? "blocked" : "pending",
+        title: "Сводное согласование",
+        detail: allShopReviewApproved
+          ? "Сводный пакет 5 цехов согласован на preview; можно двигать локально готовые цеха в preview batch."
+          : allShopReviewBlocked
+            ? allShopReview.note.trim() || "Сводный пакет требует общей правки перед preview."
+            : `${allShopReviewMeta.status}: ${allShopReviewMeta.detail}`
+      },
+      {
         id: "teacher_preview_decision",
         status: previewApproved ? "done" : needsRevision ? "blocked" : "pending",
         title: "Решение по preview",
@@ -637,10 +728,12 @@
       },
       {
         id: "final_assets",
-        status: hasRp && competencyReviewReady && innovationReviewReady && previewApproved && previewAccepted ? "pending" : "blocked",
+        status: hasRp && competencyReviewReady && innovationReviewReady && allShopReviewApproved && previewApproved && previewAccepted ? "pending" : "blocked",
         title: "Финальные assets",
-        detail: hasRp && competencyReviewReady && innovationReviewReady && previewApproved && previewAccepted
+        detail: hasRp && competencyReviewReady && innovationReviewReady && allShopReviewApproved && previewApproved && previewAccepted
           ? "Preview принят в журнале осмотра. Следующий gate: сгенерировать final files и снова проверить перед подключением."
+          : hasRp && competencyReviewReady && innovationReviewReady && !allShopReviewApproved
+            ? "Финальные картинки нельзя подключать, пока сводный пакет 5 цехов не согласован на preview."
           : hasRp && !innovationReviewReady
             ? "Финальные картинки нельзя подключать, пока интерактивные новшества не согласованы по визуалу, реализации и уникальности."
             : hasRp && !competencyReviewReady
@@ -835,6 +928,20 @@
     }
 
     if (state.decision === "approved_preview") {
+      const allShopReview = getAllShopReview();
+      const allShopReviewMeta = getAllShopReviewMeta(allShopReview.status);
+      if (allShopReview.status !== "approved_preview") {
+        return {
+          status: allShopReview.status === "needs_revision" ? "blocked" : "pending",
+          label: "Сводный gate",
+          title: allShopReview.status === "needs_revision" ? "Внести общие правки" : "Согласовать сводный пакет 5 цехов",
+          detail:
+            allShopReview.status === "needs_revision"
+              ? allShopReview.note.trim() || "Сводный пакет отправлен на правку. Preview batch закрыт до повторного согласования."
+              : `${allShopReviewMeta.status}. Сначала зафиксируйте общее решение по сводному пакету, затем выпускайте preview batch.`,
+          decisionStatus: decisionMeta.status
+        };
+      }
       if (isPackagePreviewInspectionAccepted(packageData)) {
         return {
           status: "ready",
@@ -864,10 +971,14 @@
 
   function buildActionPlanText(digitalShift) {
     const packages = digitalShift.packages || [];
+    const allShopReview = getAllShopReview();
+    const allShopReviewMeta = getAllShopReviewMeta(allShopReview.status);
     return [
       "PM01 PX action plan",
       `generatedAt: ${new Date().toISOString()}`,
       `packages: ${packages.length}`,
+      `allShopReview: ${allShopReview.status} (${allShopReviewMeta.status})`,
+      `allShopReviewNote: ${allShopReview.note || "-"}`,
       "",
       ...packages.map((packageData, index) => {
         const action = getPackageNextAction(packageData);
@@ -920,6 +1031,11 @@
       `innovationReviewNeedsRevision: ${audit.innovationReviewNeedsRevision}`,
       `innovationReviewDeferred: ${audit.innovationReviewDeferred}`,
       `previewDecision: ${audit.previewReady}/${audit.packages.length}`,
+      `allShopReviewStatus: ${audit.allShopReviewStatus}`,
+      `allShopReviewLabel: ${audit.allShopReviewLabel}`,
+      `allShopReviewSentAt: ${audit.allShopReview.sentAt || "-"}`,
+      `allShopReviewReviewedAt: ${audit.allShopReview.reviewedAt || "-"}`,
+      `previewReadyAfterAllShopReview: ${audit.previewReadyWithAllShopReview}/${audit.packages.length}`,
       `previewInspectionAccepted: ${audit.previewAccepted}/${audit.packages.length}`,
       `finalAssetGateOpen: ${audit.finalAssetsOpen}/${audit.packages.length}`,
       "",
@@ -1111,14 +1227,16 @@
         rpIntake: PM01_RP_INTAKE_STORAGE_KEY,
         previewInspection: PM01_PREVIEW_INSPECTION_STORAGE_KEY,
         competencyReview: PM01_COMPETENCY_REVIEW_STORAGE_KEY,
-        innovationReview: PM01_INNOVATION_REVIEW_STORAGE_KEY
+        innovationReview: PM01_INNOVATION_REVIEW_STORAGE_KEY,
+        allShopReview: PM01_ALL_SHOP_REVIEW_STORAGE_KEY
       },
       state: {
         approvalDecisions: approvalState,
         rpIntake: rpIntakeState,
         previewInspection: previewInspectionState,
         competencyReview: competencyReviewState,
-        innovationReview: innovationReviewState
+        innovationReview: innovationReviewState,
+        allShopReview: allShopReviewState
       }
     };
   }
@@ -1141,7 +1259,8 @@
       !isPlainObject(state.rpIntake) ||
       !isPlainObject(state.previewInspection) ||
       (state.competencyReview !== undefined && !isPlainObject(state.competencyReview)) ||
-      (state.innovationReview !== undefined && !isPlainObject(state.innovationReview))
+      (state.innovationReview !== undefined && !isPlainObject(state.innovationReview)) ||
+      (state.allShopReview !== undefined && !isPlainObject(state.allShopReview))
     ) {
       throw new Error("Snapshot не содержит полный набор local-state данных.");
     }
@@ -1150,11 +1269,13 @@
     previewInspectionState = state.previewInspection;
     competencyReviewState = state.competencyReview || {};
     innovationReviewState = state.innovationReview || {};
+    allShopReviewState = state.allShopReview || {};
     persistApprovalState();
     persistRpIntakeState();
     persistPreviewInspectionState();
     persistCompetencyReviewState();
     persistInnovationReviewState();
+    persistAllShopReviewState();
   }
 
   function getSnapshotFileName() {
@@ -1201,6 +1322,8 @@
   function buildPreviewBatchText(digitalShift) {
     const readyPackages = getPreviewBatchItems(digitalShift);
     const assetCount = readyPackages.reduce((sum, packageData) => sum + (packageData.previewAssets || []).length, 0);
+    const allShopReview = getAllShopReview();
+    const allShopReviewMeta = getAllShopReviewMeta(allShopReview.status);
     return [
       "PM01 PX preview generation batch",
       `generatedAt: ${new Date().toISOString()}`,
@@ -1208,6 +1331,8 @@
       "outputUse: preview_only_until_teacher_approval",
       "inspectionGate: visual_inspection_before_connection",
       "finalAsset: false",
+      `allShopReview: ${allShopReview.status} (${allShopReviewMeta.status})`,
+      `allShopReviewNote: ${allShopReview.note || "-"}`,
       `readyPackages: ${readyPackages.length}/${(digitalShift.packages || []).length}`,
       `plannedPreviewAssets: ${assetCount}`,
       "",
@@ -1564,6 +1689,12 @@
         audit.innovationReviewApproved === audit.innovationReviewTotal ? "done" : audit.innovationReviewNeedsRevision ? "blocked" : "pending"
       ),
       renderCoverageMetric(
+        "Сводный gate",
+        audit.allShopReviewLabel,
+        "Общее решение по пакету 5 цехов перед preview batch и генерацией изображений.",
+        audit.allShopReviewApproved ? "done" : audit.allShopReviewBlocked ? "blocked" : "pending"
+      ),
+      renderCoverageMetric(
         "Final gate",
         `${audit.finalAssetsOpen}/${audit.packages.length}`,
         "Открывается только после РП, решения на preview и принятого визуального осмотра.",
@@ -1674,6 +1805,8 @@
   function renderPreviewBatchPanel(digitalShift, readyPackages) {
     const panel = createNode("section", "approval-preview-batch");
     const assetCount = readyPackages.reduce((sum, packageData) => sum + (packageData.previewAssets || []).length, 0);
+    const allShopReview = getAllShopReview();
+    const allShopReviewMeta = getAllShopReviewMeta(allShopReview.status);
     const head = createNode("div", "approval-preview-batch-head");
     const title = createNode("div");
     title.append(
@@ -1683,7 +1816,7 @@
         "",
         readyPackages.length
           ? `${readyPackages.length} цехов · ${assetCount} planned preview-assets · finalAsset: false`
-          : "Появится после РП/КТП и решения «На preview»"
+          : `Ждёт РП/КТП, локальные решения «На preview» и общий gate: ${allShopReviewMeta.status}`
       )
     );
     const copyButton = createNode("button", "button secondary", "Скопировать preview batch");
@@ -1707,7 +1840,7 @@
         list.appendChild(card);
       });
     } else {
-      const empty = createNode("p", "approval-preview-batch-empty", "Нет цехов, прошедших gate РП/КТП + «На preview».");
+      const empty = createNode("p", "approval-preview-batch-empty", "Нет цехов, прошедших РП/КТП, локальные gates и сводное согласование 5 цехов.");
       list.appendChild(empty);
     }
 
@@ -1824,7 +1957,8 @@
       ["Цехи", `${packages.length}/5`, "Овощи, рыба, мясо, птица/кролик и комплексный заказ."],
       ["РП-intake", `${audit.rpReady}/${packages.length}`, "Без РП/КТП финальные темы и official questions не меняются."],
       ["Интерактив", `${audit.innovationReviewApproved}/${audit.innovationReviewTotal}`, "Согласование визуала, механики, анимации и уникальности."],
-      ["Preview", `${audit.previewReady}/${packages.length}`, "Включаются только цехи с закрытыми gates и решением на preview."]
+      ["Сводный gate", audit.allShopReviewLabel, "Общее решение по пакету 5 цехов перед preview workflow."],
+      ["Preview", `${audit.previewReadyWithAllShopReview}/${packages.length}`, "Включаются только цехи с закрытыми gates и общим решением на preview."]
     ].forEach(([label, value, detail]) => {
       const card = createNode("article", "approval-all-shop-packages-card");
       card.append(createNode("span", "", label), createNode("strong", "", value), createNode("p", "", detail));
@@ -1836,7 +1970,64 @@
       "approval-all-shop-packages-note",
       "Сводный пакет предназначен для согласования; он не содержит ключей ответов, не создаёт изображения и не меняет официальный экзамен."
     );
-    panel.append(head, grid, note);
+    panel.append(head, grid, renderAllShopReviewPanel(digitalShift), note);
+    return panel;
+  }
+
+  function renderAllShopReviewPanel(digitalShift) {
+    const review = getAllShopReview();
+    const meta = getAllShopReviewMeta(review.status);
+    const panel = createNode("div", "approval-all-shop-review");
+    panel.dataset.status = review.status;
+
+    const head = createNode("div", "approval-all-shop-review-head");
+    head.append(
+      createNode("strong", "", "Журнал сводного согласования"),
+      createNode("span", "", `${meta.status} · ${digitalShift.packages?.length || 0}/5 цехов`)
+    );
+
+    const options = createNode("div", "approval-all-shop-review-options");
+    ALL_SHOP_REVIEW_OPTIONS.forEach((option) => {
+      const button = createNode("button", "approval-all-shop-review-button", option.label);
+      button.type = "button";
+      button.dataset.status = option.id;
+      button.classList.toggle("is-active", review.status === option.id);
+      button.title = option.detail;
+      button.addEventListener("click", () => {
+        setAllShopReview({ status: option.id });
+        refreshApprovalOverview();
+        renderPackages(currentDigitalShift);
+      });
+      options.appendChild(button);
+    });
+
+    const detail = createNode("p", "approval-all-shop-review-detail", meta.detail);
+    const dates = createNode(
+      "small",
+      "approval-all-shop-review-dates",
+      `sentAt: ${review.sentAt || "not_sent"} · reviewedAt: ${review.reviewedAt || "not_reviewed"}`
+    );
+
+    const noteField = createNode("label", "approval-all-shop-review-note-field");
+    const note = createNode("textarea", "approval-all-shop-review-note");
+    note.value = review.note;
+    note.placeholder = "Кто согласовал пакет, какие правки нужны, что разрешено генерировать на preview";
+    note.addEventListener("input", () => {
+      setAllShopReview({ note: note.value });
+    });
+    noteField.append(createNode("span", "", "Заметка по общему решению"), note);
+
+    const actions = createNode("div", "approval-all-shop-review-actions");
+    const resetButton = createNode("button", "button ghost", "Сбросить общий gate");
+    resetButton.type = "button";
+    resetButton.addEventListener("click", () => {
+      resetAllShopReview();
+      refreshApprovalOverview();
+      renderPackages(currentDigitalShift);
+    });
+    actions.appendChild(resetButton);
+
+    panel.append(head, options, detail, dates, noteField, actions);
     return panel;
   }
 
@@ -2186,6 +2377,8 @@
     const competencyReview = getPackageCompetencyReviewSummary(packageData);
     const innovationReview = getPackageInnovationReviewSummary(packageData);
     const nextAction = getPackageNextAction(packageData);
+    const allShopReview = getAllShopReview();
+    const allShopReviewMeta = getAllShopReviewMeta(allShopReview.status);
     const packageRows = packageData.methodicalMatrix || [];
     const packageTasks = packageData.tasks || [];
     return [
@@ -2197,6 +2390,8 @@
       `practiceScope: PX training-only, maxScore 0, official protocol unchanged`,
       `rpStatus: ${hasRpIntake(packageData.variantId) ? "local_rp_excerpt_present" : "awaiting_rp_ktp"}`,
       `decision: ${decision.decision} (${decisionMeta.label})`,
+      `allShopReview: ${allShopReview.status} (${allShopReviewMeta.status})`,
+      `allShopReviewNote: ${allShopReview.note || "-"}`,
       `nextAction: ${nextAction.title}`,
       `nextActionStatus: ${nextAction.status}`,
       "",
@@ -2349,6 +2544,10 @@
       `officialContract: ${digitalShift.contract || "100 баллов / 20 заданий / 5 вариантов"}`,
       `practiceScope: PX training-only, maxScore 0, official protocol unchanged`,
       `packages: ${packages.length}/5`,
+      `allShopReview: ${audit.allShopReviewStatus} (${audit.allShopReviewLabel})`,
+      `allShopReviewSentAt: ${audit.allShopReview.sentAt || "-"}`,
+      `allShopReviewReviewedAt: ${audit.allShopReview.reviewedAt || "-"}`,
+      `allShopReviewNote: ${audit.allShopReview.note || "-"}`,
       "",
       "## Сводный audit",
       "",
@@ -2358,6 +2557,7 @@
       `ok09Ok10Review: ${audit.competencyReviewVerified}/${audit.competencyReviewTotal}`,
       `innovationReview: ${audit.innovationReviewApproved}/${audit.innovationReviewTotal}`,
       `previewDecision: ${audit.previewReady}/${packages.length}`,
+      `previewReadyAfterAllShopReview: ${audit.previewReadyWithAllShopReview}/${packages.length}`,
       `previewInspectionAccepted: ${audit.previewAccepted}/${packages.length}`,
       `finalAssetGateOpen: ${audit.finalAssetsOpen}/${packages.length}`,
       "",
