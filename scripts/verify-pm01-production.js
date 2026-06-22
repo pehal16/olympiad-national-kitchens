@@ -105,6 +105,14 @@ async function main() {
     "PM01 digital shift must expose 4 normative anchors"
   );
   assert(
+    exam.payload.data.digitalShift.normativeDossier?.verifiedAt === "2026-06-22",
+    "PM01 digital shift must expose current normative dossier"
+  );
+  assert(
+    exam.payload.data.digitalShift.normativeAnchors.every((anchor) => Array.isArray(anchor.sourceEvidence) && anchor.sourceEvidence.length > 0),
+    "PM01 normative anchors must expose source evidence rows"
+  );
+  assert(
     exam.payload?.data?.digitalShift?.interactionBlueprints?.length === 5,
     "PM01 digital shift must expose 5 interaction blueprints"
   );
@@ -156,6 +164,7 @@ async function main() {
     variants: exam.payload.data.variants.length,
     modules: exam.payload.data.modules.length,
     digitalShiftNormativeAnchors: exam.payload.data.digitalShift.normativeAnchors.length,
+    digitalShiftNormativeDossier: exam.payload.data.digitalShift.normativeDossier.verifiedAt,
     digitalShiftInteractionBlueprints: exam.payload.data.digitalShift.interactionBlueprints.length,
     digitalShiftVisualRubric: exam.payload.data.digitalShift.visualAssetRubric.status,
     digitalShiftPackages: exam.payload.data.digitalShift.packages.length,
@@ -168,7 +177,7 @@ async function main() {
   const student = await getText("/pm01.html");
   assert(student.response.ok, `/pm01.html returned ${student.response.status}`);
   assert(student.text.includes("/pm01.js?v=1.0.29"), "/pm01.html does not include current student JS");
-  assert(student.text.includes("/pm01.css?v=1.0.44"), "/pm01.html does not include current CSS");
+  assert(student.text.includes("/pm01.css?v=1.0.45"), "/pm01.html does not include current CSS");
   checks.push({ route: "/pm01.html", status: student.response.status, bytes: student.text.length });
 
   const admin = await getText("/pm01-admin.html");
@@ -178,8 +187,8 @@ async function main() {
 
   const approval = await getText("/pm01-approval.html");
   assert(approval.response.ok, `/pm01-approval.html returned ${approval.response.status}`);
-  assert(approval.text.includes("/pm01.css?v=1.0.44"), "/pm01-approval.html does not include current CSS");
-  assert(approval.text.includes("/pm01-approval.js?v=1.0.17"), "/pm01-approval.html does not include current approval JS");
+  assert(approval.text.includes("/pm01.css?v=1.0.45"), "/pm01-approval.html does not include current CSS");
+  assert(approval.text.includes("/pm01-approval.js?v=1.0.18"), "/pm01-approval.html does not include current approval JS");
   assert(approval.text.includes("Согласование PX"), "/pm01-approval.html does not include approval title");
   checks.push({ route: "/pm01-approval.html", status: approval.response.status, bytes: approval.text.length });
 

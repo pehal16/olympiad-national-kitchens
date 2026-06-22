@@ -541,9 +541,9 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(approvalHtml.includes("id=\"approval-packages-list\""), true);
   assert.equal(approvalHtml.includes("id=\"approval-action-plan\""), true);
   assert.equal(approvalHtml.includes("Согласование PX"), true);
-  assert.equal(approvalHtml.includes("/pm01-approval.js?v=1.0.17"), true);
+  assert.equal(approvalHtml.includes("/pm01-approval.js?v=1.0.18"), true);
   assert.equal(uiHtml.includes("/pm01.js?v=1.0.29"), true);
-  assert.equal(uiHtml.includes("/pm01.css?v=1.0.44"), true);
+  assert.equal(uiHtml.includes("/pm01.css?v=1.0.45"), true);
   assert.equal(uiScript.includes("selectCockpitFamily"), true);
   assert.equal(uiScript.includes("jumpToPracticeFamily"), true);
   assert.equal(uiScript.includes("canOpenPracticeFamily"), true);
@@ -563,6 +563,10 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(approvalScript.includes("copyPromptPackage"), true);
   assert.equal(approvalScript.includes("copyVisualAssetRubric"), true);
   assert.equal(approvalScript.includes("copyNormativeAnchors"), true);
+  assert.equal(approvalScript.includes("buildNormativeDossierText"), true);
+  assert.equal(approvalScript.includes("copyNormativeDossier"), true);
+  assert.equal(approvalScript.includes("downloadNormativeDossier"), true);
+  assert.equal(approvalScript.includes("renderNormativeDossierPanel"), true);
   assert.equal(approvalScript.includes("copyInteractionBlueprints"), true);
   assert.equal(approvalScript.includes("PM01_APPROVAL_STORAGE_KEY"), true);
   assert.equal(approvalScript.includes("PM01_RP_INTAKE_STORAGE_KEY"), true);
@@ -646,6 +650,8 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(uiStyles.includes(".approval-matrix-card"), true);
   assert.equal(uiStyles.includes(".approval-normative-panel"), true);
   assert.equal(uiStyles.includes(".approval-normative-card"), true);
+  assert.equal(uiStyles.includes(".approval-normative-evidence"), true);
+  assert.equal(uiStyles.includes(".approval-normative-dossier"), true);
   assert.equal(uiStyles.includes(".approval-blueprint-panel"), true);
   assert.equal(uiStyles.includes(".approval-blueprint-card"), true);
   assert.equal(uiStyles.includes(".approval-cockpit-panel"), true);
@@ -660,6 +666,7 @@ test("PM01 student UI gives clear action steps for interactive tasks", () => {
   assert.equal(approvalDoc.includes("Coverage audit"), true);
   assert.equal(approvalDoc.includes("ПК/ОК-сверка"), true);
   assert.equal(approvalDoc.includes("Согласование интерактива"), true);
+  assert.equal(approvalDoc.includes("normativeDossier"), true);
   assert.equal(approvalScript.includes("Черновик до РП"), true);
   ["Овощной цех", "Рыбный цех", "Мясной цех", "Птица, дичь, кролик", "Комплексный заказ"].forEach((text) => {
     assert.equal(approvalDoc.includes(text), true, `approval doc includes ${text}`);
@@ -1026,6 +1033,8 @@ test("PM01 digital shift extension is training-only and keeps official scoring s
   assert.equal(publicData.digitalShift.visualAssetRubric.rejectIf.length >= 5, true);
   assert.equal(publicData.digitalShift.visualAssetRubric.inspectionSteps.length >= 5, true);
   assert.equal(publicData.digitalShift.normativeAnchors.length, 4);
+  assert.equal(publicData.digitalShift.normativeDossier.verifiedAt, "2026-06-22");
+  assert.equal(publicData.digitalShift.normativeDossier.blockedUntilRp.includes("замена официальных вопросов и правильных ответов"), true);
   assert.equal(
     publicData.digitalShift.normativeAnchors.every(
       (anchor) =>
@@ -1033,11 +1042,14 @@ test("PM01 digital shift extension is training-only and keeps official scoring s
         anchor.title &&
         anchor.sourceStatus &&
         anchor.documentStatus &&
-        anchor.verifiedAt === "2026-06-21" &&
+        anchor.verifiedAt === "2026-06-22" &&
         anchor.relevance &&
         Array.isArray(anchor.focus) &&
         anchor.focus.length >= 2 &&
-        anchor.approvalUse
+        anchor.approvalUse &&
+        Array.isArray(anchor.sourceEvidence) &&
+        anchor.sourceEvidence.length > 0 &&
+        anchor.sourceEvidence.every((item) => item.label && item.evidence && item.examUse)
     ),
     true
   );
@@ -1451,7 +1463,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(studentScript, /retryDelay/);
   assert.match(studentScript, /X-PM01-Duration-Ms/);
   assert.doesNotMatch(studentScript, /readAsDataURL\(blob\)/);
-  assert.match(studentHtml, /pm01\.css\?v=1\.0\.44/);
+  assert.match(studentHtml, /pm01\.css\?v=1\.0\.45/);
   assert.match(studentHtml, /loadPm01Script/);
   assert.match(studentHtml, /pm01\.js\?v=1\.0\.29/);
   assert.match(adminHtml, /export-group-csv/);
@@ -1465,7 +1477,7 @@ test("PM01 teacher cabinet exposes exam controls and printable protocol", () => 
   assert.match(adminScript, /api\/admin\/pm01\/exports\/group-csv\/download/);
   assert.match(adminScript, /voiceAudio/);
   assert.match(adminScript, /audioInfo\.audioUrl/);
-  assert.match(adminHtml, /pm01\.css\?v=1\.0\.44/);
+  assert.match(adminHtml, /pm01\.css\?v=1\.0\.45/);
   assert.match(adminHtml, /pm01-approval\.html/);
   assert.match(adminHtml, /pm01-admin\.js\?v=1\.0\.18/);
   assert.match(css, /\.voice-queue-list/);

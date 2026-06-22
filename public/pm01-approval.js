@@ -436,6 +436,7 @@
   function buildCoverageAudit(digitalShift) {
     const packages = digitalShift.packages || [];
     const families = digitalShift.families || [];
+    const normativeAnchors = digitalShift.normativeAnchors || [];
     const familyIds = families.map((family) => family.id);
     const blueprints = digitalShift.interactionBlueprints || [];
     const blueprintFamilyIds = new Set(blueprints.map((blueprint) => blueprint.familyId));
@@ -513,7 +514,13 @@
       previewAccepted: packageAudits.filter((item) => item.previewAccepted).length,
       finalAssetsOpen: packageAudits.filter((item) => item.finalGateStatus === "pending").length,
       visualRubricStatus: digitalShift.visualAssetRubric?.status || "missing",
-      normativeAnchors: (digitalShift.normativeAnchors || []).length
+      normativeAnchors: normativeAnchors.length,
+      normativeEvidenceRows: normativeAnchors.reduce((sum, anchor) => sum + (anchor.sourceEvidence || []).length, 0),
+      normativeDossierReady: Boolean(
+        digitalShift.normativeDossier?.verifiedAt &&
+          normativeAnchors.length >= 4 &&
+          normativeAnchors.every((anchor) => (anchor.sourceEvidence || []).length)
+      )
     };
   }
 
@@ -685,6 +692,13 @@
         "Coverage audit",
         `${coverageAudit.matrixRows}/${coverageAudit.expectedMatrixRows} matrix · ${coverageAudit.coveredCompetencies}/${coverageAudit.competencyCoverage.length} ПК/ОК`,
         "Показывает пробелы по семействам, preview-slots и компетенциям до генерации visuals."
+      ],
+      [
+        "Нормативы",
+        `${coverageAudit.normativeAnchors} источника · ${coverageAudit.normativeEvidenceRows} доказательств`,
+        coverageAudit.normativeDossierReady
+          ? "ФГОС/ПОП изучены, граница РП зафиксирована."
+          : "Нужно дополнить source evidence перед финальной методической правкой."
       ],
       ["Версия", exam.version || exam.appVersion || "PM01", "Текущий опубликованный пакет."]
     ].forEach(([label, value, detail]) => {
@@ -892,6 +906,8 @@
       `previewAssets: ${audit.previewAssets}/${audit.expectedPreviewAssets}`,
       `interactionBlueprints: ${audit.blueprintFamiliesCovered}/${audit.familyIds.length}`,
       `normativeAnchors: ${audit.normativeAnchors}`,
+      `normativeEvidenceRows: ${audit.normativeEvidenceRows}`,
+      `normativeDossierReady: ${audit.normativeDossierReady}`,
       `visualRubricStatus: ${audit.visualRubricStatus}`,
       `competenciesCovered: ${audit.coveredCompetencies}/${audit.competencyCoverage.length}`,
       `rpIntake: ${audit.rpReady}/${audit.packages.length}`,
@@ -982,12 +998,24 @@
       `- packages: ${packages.length}/5`,
       `- methodicalMatrix: ${audit.matrixRows}/${audit.expectedMatrixRows}`,
       `- previewSlots: ${audit.previewAssets}/${audit.expectedPreviewAssets}`,
+      `- normativeDossier: ${audit.normativeDossierReady ? "ready" : "needs_source_evidence"} (${audit.normativeAnchors} sources, ${audit.normativeEvidenceRows} evidence rows)`,
       `- rpIntake: ${audit.rpReady}/${packages.length}`,
       `- ok09Ok10Review: ${audit.competencyReviewVerified}/${audit.competencyReviewTotal}`,
       `- innovationReview: ${audit.innovationReviewApproved}/${audit.innovationReviewTotal}`,
       `- previewDecision: ${audit.previewReady}/${packages.length}`,
       `- previewInspectionAccepted: ${audit.previewAccepted}/${packages.length}`,
       `- finalAssetGateOpen: ${audit.finalAssetsOpen}/${packages.length}`,
+      "",
+      "## Нормативная граница",
+      "",
+      digitalShift.normativeDossier?.methodicalBoundary ||
+        "ФГОС задает рамку компетенций, но финальные темы и формулировки нужно брать из РП/КТП.",
+      "",
+      "Что уже допустимо как training-only модернизация:",
+      ...((digitalShift.normativeDossier?.allowedModernization || []).map((item) => `- ${item}`)),
+      "",
+      "Что заблокировано до РП/КТП:",
+      ...((digitalShift.normativeDossier?.blockedUntilRp || []).map((item) => `- ${item}`)),
       "",
       "## ПК/ОК для сверки",
       "",
@@ -1269,6 +1297,149 @@
     }
   }
 
+  function buildNormativeDossierText(digitalShift) {
+    const dossier = digitalShift.normativeDossier || {};
+    const anchors = digitalShift.normativeAnchors || [];
+    const audit = buildCoverageAudit(digitalShift);
+    return [
+      `# ${dossier.title || "Нормативное досье PM01"}`,
+      "",
+      `generatedAt: ${new Date().toISOString()}`,
+      `verifiedAt: ${dossier.verifiedAt || "n/a"}`,
+      `sources: ${audit.normativeAnchors}`,
+      `evidenceRows: ${audit.normativeEvidenceRows}`,
+      `officialContract: ${digitalShift.contract || "100 баллов / 20 заданий / 5 вариантов"}`,
+      "",
+      "## Source basis",
+      "",
+      dossier.sourceBasis || "ФГОС, ПОП и локальная РП/КТП.",
+      "",
+      "## Official scope",
+      "",
+      dossier.officialScope || "Официальный экзамен PM01 не меняет контракт.",
+      "",
+      "## Methodical boundary",
+      "",
+      dossier.methodicalBoundary || "ФГОС задает рамку компетенций, но не заменяет рабочую программу.",
+      "",
+      "## Allowed modernization",
+      "",
+      ...((dossier.allowedModernization || []).map((item) => `- ${item}`)),
+      "",
+      "## Blocked until RP/KTP",
+      "",
+      ...((dossier.blockedUntilRp || []).map((item) => `- ${item}`)),
+      "",
+      "## RP intake needed",
+      "",
+      ...((dossier.rpIntakeNeeded || []).map((item) => `- ${item}`)),
+      "",
+      "## Source evidence",
+      "",
+      ...anchors.map((anchor, index) =>
+        [
+          `### ${index + 1}. ${anchor.title}`,
+          "",
+          `id: ${anchor.id}`,
+          `sourceUrl: ${anchor.sourceUrl || "-"}`,
+          `sourceStatus: ${anchor.sourceStatus || "-"}`,
+          `documentStatus: ${anchor.documentStatus || "-"}`,
+          `verifiedAt: ${anchor.verifiedAt || "-"}`,
+          `focus: ${(anchor.focus || []).join(", ")}`,
+          "",
+          "evidence:",
+          ...((anchor.sourceEvidence || []).map(
+            (item) => `- ${item.label}: ${item.evidence}\n  examUse: ${item.examUse}`
+          )),
+          "",
+          `approvalUse: ${anchor.approvalUse || "-"}`
+        ].join("\n")
+      )
+    ].join("\n");
+  }
+
+  function getNormativeDossierFileName() {
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    return `pm01-px-normative-dossier-${stamp}.md`;
+  }
+
+  async function copyNormativeDossier(digitalShift, button) {
+    try {
+      await navigator.clipboard.writeText(buildNormativeDossierText(digitalShift));
+      button.textContent = "Досье скопировано";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать досье";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скопировать";
+      window.setTimeout(() => {
+        button.textContent = "Скопировать досье";
+      }, 1600);
+    }
+  }
+
+  function downloadNormativeDossier(digitalShift, button) {
+    try {
+      downloadTextFile(getNormativeDossierFileName(), buildNormativeDossierText(digitalShift), "text/markdown");
+      button.textContent = "Досье скачано";
+      window.setTimeout(() => {
+        button.textContent = "Скачать .md";
+      }, 1600);
+    } catch (_) {
+      button.textContent = "Не удалось скачать";
+      window.setTimeout(() => {
+        button.textContent = "Скачать .md";
+      }, 1600);
+    }
+  }
+
+  function renderNormativeDossierPanel(digitalShift) {
+    const dossier = digitalShift.normativeDossier || {};
+    const audit = buildCoverageAudit(digitalShift);
+    const panel = createNode("section", "approval-normative-dossier");
+    panel.dataset.status = audit.normativeDossierReady ? "ready" : "pending";
+    const head = createNode("div", "approval-normative-dossier-head");
+    const title = createNode("div");
+    title.append(
+      createNode("h3", "", dossier.title || "Нормативное досье PM01"),
+      createNode("span", "", "ФГОС/ПОП подтверждают рамку PM01, а РП/КТП остаются gate для финальных вопросов")
+    );
+    const actions = createNode("div", "approval-normative-dossier-actions");
+    const copyButton = createNode("button", "button secondary", "Скопировать досье");
+    copyButton.type = "button";
+    copyButton.addEventListener("click", () => copyNormativeDossier(digitalShift, copyButton));
+    const downloadButton = createNode("button", "button secondary", "Скачать .md");
+    downloadButton.type = "button";
+    downloadButton.addEventListener("click", () => downloadNormativeDossier(digitalShift, downloadButton));
+    actions.append(copyButton, downloadButton);
+    head.append(title, actions);
+
+    const metrics = createNode("div", "approval-normative-dossier-grid");
+    [
+      ["Источники", `${audit.normativeAnchors}`, "ФГОС 43.01.09, ФГОС 43.02.15, ПОП ИРПО/ФИРПО и pending РП."],
+      ["Evidence", `${audit.normativeEvidenceRows}`, "Короткие доказательные пункты: что подтверждает источник и как это применять в PM01."],
+      ["РП/КТП gate", audit.rpReady === audit.packages.length ? "закрыт" : "ждёт", "Финальные темы, вопросы и assets не меняются до локальной программы."]
+    ].forEach(([label, value, detail]) => {
+      const card = createNode("article", "approval-normative-dossier-card");
+      card.append(createNode("span", "", label), createNode("strong", "", value), createNode("p", "", detail));
+      metrics.appendChild(card);
+    });
+
+    const scope = createNode("div", "approval-normative-dossier-scope");
+    scope.append(
+      createNode("strong", "", "Граница методической правки"),
+      createNode("p", "", dossier.methodicalBoundary || "ФГОС задает рамку компетенций, но не заменяет рабочую программу.")
+    );
+
+    const allowed = createNode("article", "approval-normative-dossier-list");
+    allowed.append(createNode("strong", "", "Разрешено в тренировочном режиме"), renderList(dossier.allowedModernization || [], "approval-checklist"));
+    const blocked = createNode("article", "approval-normative-dossier-list is-blocked");
+    blocked.append(createNode("strong", "", "Блок до РП/КТП"), renderList(dossier.blockedUntilRp || [], "approval-checklist"));
+
+    panel.append(head, metrics, scope, allowed, blocked);
+    return panel;
+  }
+
   function renderRpRequestKitPanel(digitalShift) {
     const packages = digitalShift.packages || [];
     const audit = buildCoverageAudit(digitalShift);
@@ -1361,6 +1532,12 @@
         `${audit.previewAssets}/${audit.expectedPreviewAssets}`,
         "Плановые preview-only assets с inspection gate и finalAsset: false.",
         audit.previewAssets === audit.expectedPreviewAssets ? "done" : "blocked"
+      ),
+      renderCoverageMetric(
+        "Нормативы",
+        `${audit.normativeAnchors} / ${audit.normativeEvidenceRows}`,
+        "Источник считается готовым, когда у него есть evidence: что подтверждено и как это применять в PM01.",
+        audit.normativeDossierReady ? "done" : "blocked"
       ),
       renderCoverageMetric(
         "ПК/ОК",
@@ -1681,6 +1858,7 @@
     elements.actionPlan.append(
       head,
       grid,
+      renderNormativeDossierPanel(digitalShift),
       renderRpRequestKitPanel(digitalShift),
       renderCoverageAuditPanel(digitalShift),
       renderPreviewBatchPanel(digitalShift, readyPackages),
@@ -1721,6 +1899,9 @@
         createNode("span", "", anchor.approvalUse || ""),
         createNode("code", "", `${anchor.sourceStatus || "source"} · checked ${anchor.verifiedAt || "n/a"}`)
       );
+      if ((anchor.sourceEvidence || []).length) {
+        card.appendChild(renderNormativeEvidenceList(anchor.sourceEvidence));
+      }
       list.appendChild(card);
     });
     const copyButton = createNode("button", "button secondary", "Копировать источники");
@@ -1728,6 +1909,20 @@
     copyButton.addEventListener("click", () => copyNormativeAnchors(anchors, copyButton));
     section.append(heading, list, copyButton);
     return section;
+  }
+
+  function renderNormativeEvidenceList(items) {
+    const list = createNode("ul", "approval-normative-evidence");
+    items.forEach((item) => {
+      const entry = createNode("li");
+      entry.append(
+        createNode("strong", "", item.label || "Evidence"),
+        createNode("span", "", item.evidence || ""),
+        createNode("em", "", item.examUse || "")
+      );
+      list.appendChild(entry);
+    });
+    return list;
   }
 
   function renderVisualAssetRubric(rubric) {
@@ -1860,7 +2055,11 @@
           `  verifiedAt: ${anchor.verifiedAt}`,
           `  focus: ${(anchor.focus || []).join(", ")}`,
           `  relevance: ${anchor.relevance}`,
-          `  approvalUse: ${anchor.approvalUse}`
+          `  approvalUse: ${anchor.approvalUse}`,
+          "  sourceEvidence:",
+          ...((anchor.sourceEvidence || []).map(
+            (item) => `    - ${item.label}: ${item.evidence}\n      examUse: ${item.examUse}`
+          ))
         ].join("\n")
       )
     ].join("\n");

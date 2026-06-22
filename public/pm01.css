@@ -2291,6 +2291,154 @@ select:focus {
   line-height: 1.3;
 }
 
+.approval-normative-evidence {
+  display: grid;
+  gap: 6px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.approval-normative-evidence li {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid rgba(28, 117, 93, 0.14);
+  border-radius: 7px;
+  background: #fff;
+}
+
+.approval-normative-evidence strong,
+.approval-normative-evidence span,
+.approval-normative-evidence em {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.approval-normative-evidence strong {
+  color: var(--green-900);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.approval-normative-evidence span,
+.approval-normative-evidence em {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.approval-normative-evidence em {
+  color: #174a82;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.approval-normative-dossier {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 14px;
+  scroll-margin-top: 112px;
+  border: 1px solid rgba(28, 117, 93, 0.2);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, #f7fbf8 0%, #ffffff 100%);
+}
+
+.approval-normative-dossier[data-status="pending"] {
+  border-color: rgba(213, 121, 36, 0.32);
+}
+
+.approval-normative-dossier-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.approval-normative-dossier-head h3 {
+  margin-bottom: 4px;
+}
+
+.approval-normative-dossier-head span,
+.approval-normative-dossier-card span,
+.approval-normative-dossier-card p,
+.approval-normative-dossier-scope p,
+.approval-normative-dossier-list li {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.approval-normative-dossier-head span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.approval-normative-dossier-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.approval-normative-dossier-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.approval-normative-dossier-card,
+.approval-normative-dossier-scope,
+.approval-normative-dossier-list {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+}
+
+.approval-normative-dossier-card span,
+.approval-normative-dossier-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.approval-normative-dossier-card strong {
+  color: var(--green-900);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.approval-normative-dossier-scope {
+  border-left: 4px solid rgba(28, 117, 93, 0.42);
+  background: #f8fbf9;
+}
+
+.approval-normative-dossier-scope strong,
+.approval-normative-dossier-list strong {
+  color: var(--green-900);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.approval-normative-dossier-scope p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.42;
+}
+
+.approval-normative-dossier-list.is-blocked {
+  border-left: 4px solid rgba(199, 72, 72, 0.46);
+  background: #fffafa;
+}
+
 .approval-visual-rubric-panel {
   display: grid;
   gap: 10px;
@@ -6377,6 +6525,27 @@ tr[data-attempt-id].is-selected {
 
   .approval-innovation-review-options {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .approval-normative-dossier-head {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .approval-normative-dossier-actions {
+    justify-content: flex-start;
+  }
+
+  .approval-normative-dossier-actions .button {
+    flex: 1 1 160px;
+  }
+
+  .approval-normative-dossier-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .approval-normative-dossier {
+    scroll-margin-top: 176px;
   }
 
   .digital-shift-cockpit-head,
