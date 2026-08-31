@@ -1,6 +1,6 @@
 # Project Memory
 
-Last updated: 2026-06-22
+Last updated: 2026-09-01
 
 ## Current Baseline
 
@@ -22,6 +22,20 @@ Always treat the latest `origin/main` as the source of truth. Older chat instruc
 - Do not discard old results or student attempts while changing UI/content.
 - Do not overwrite user/local changes without explicit instruction.
 - Prefer additive, reviewable changes with tests.
+
+## Learning Works Pilot
+
+- The living source of truth for the teacher's daily material-preparation workflow is `docs/teacher-daily-workflow.md`.
+- Private local paths, the VK schedule chat, and the working email address are stored only in the ignored file `storage/teacher-workflow-private.json`.
+- The separate mode `Учебные работы` is implemented under `/learning.html`, `/learning-admin.html`, and `/api/learning/*`; it remains independent from PM01 and olympiad attempts.
+- The pilot includes roles, groups, subjects, courses, roster import, 18 block types, immutable work versions, assignments, autosave, file evidence, automatic and manual review, correction cycles, grades, audit, and the journal.
+- Local development uses a file repository; Cloudflare uses D1 migrations `0003`–`0005` and the private `LEARNING_FILES` R2 binding.
+- The teacher can open a group roster and issue a one-time temporary password; active student sessions are revoked and the next login requires password replacement.
+- A safe synthetic pilot creates one fictional group, four fictional students, five subjects, and five representative works.
+- Manual schedule/replacement intake is still separate. Automatic VK access is a later optional integration.
+- Draft generation may use working programs, lesson plans, approved old materials, and templates, but publication remains blocked until teacher review.
+- Email preparation may be automated, but external sending always requires explicit confirmation and an idempotent delivery record.
+- Current implementation status: the full local pilot lifecycle is implemented and covered by automated and browser tests. Real-group rollout must follow `docs/learning-pilot-runbook.md`, beginning with one group and one subject.
 
 ## PM01 Exam State
 

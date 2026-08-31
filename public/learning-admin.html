@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#087a45" />
+    <title>Учебные работы · Кабинет преподавателя</title>
+    <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
+    <link rel="stylesheet" href="/learning.css?v=1.1.0" />
+  </head>
+  <body class="learning-body learning-teacher-body">
+    <a class="skip-link" href="#main-content">Перейти к содержанию</a>
+
+    <div id="app-loading" class="boot-screen" role="status" aria-live="polite">
+      <div class="boot-mark" aria-hidden="true">У</div>
+      <div><strong>Учебные работы</strong><span>Загружаем кабинет преподавателя…</span></div>
+    </div>
+
+    <main id="auth-screen" class="auth-screen hidden" tabindex="-1">
+      <section class="auth-panel" aria-labelledby="auth-title">
+        <div class="auth-brand" aria-hidden="true">У</div>
+        <p class="auth-product">ГБПОУ «ГКТС»</p>
+        <h1 id="auth-title">Кабинет преподавателя</h1>
+        <p class="auth-lead">Создание, назначение и проверка учебных работ в одном контуре.</p>
+        <form id="login-form" class="auth-form" novalidate>
+          <label class="field"><span>Логин</span><input id="login-name" name="login" autocomplete="username" required aria-describedby="login-error" /></label>
+          <label class="field"><span>Пароль</span><input id="login-password" name="password" type="password" autocomplete="current-password" required aria-describedby="login-error" /></label>
+          <div id="login-error" class="form-error hidden" role="alert"></div>
+          <button class="learning-button primary wide" type="submit">Войти</button>
+        </form>
+        <form id="setup-form" class="auth-form hidden" novalidate>
+          <p>Первый запуск. Создайте защищённую учётную запись администратора.</p>
+          <label class="field"><span>Секрет первичной настройки</span><input id="setup-secret" type="password" autocomplete="one-time-code" required /></label>
+          <label class="field"><span>Имя преподавателя</span><input id="setup-display-name" autocomplete="name" required /></label>
+          <label class="field"><span>Логин</span><input id="setup-login" autocomplete="username" minlength="3" required /></label>
+          <label class="field"><span>Пароль, не менее 10 символов</span><input id="setup-password" type="password" autocomplete="new-password" minlength="10" required /></label>
+          <label class="field"><span>Повторите пароль</span><input id="setup-password-repeat" type="password" autocomplete="new-password" minlength="10" required /></label>
+          <div id="setup-error" class="form-error hidden" role="alert"></div>
+          <button class="learning-button primary wide" type="submit">Создать администратора</button>
+        </form>
+        <a class="auth-switch" href="/learning.html">Открыть кабинет студента</a>
+      </section>
+    </main>
+
+    <div id="teacher-shell" class="teacher-shell hidden">
+      <aside id="teacher-sidebar" class="teacher-sidebar">
+        <a class="teacher-brand" href="/learning-admin.html" aria-label="Учебные работы, обзор преподавателя">
+          <span class="teacher-brand-mark" aria-hidden="true">У</span><span><strong>Учебные работы</strong><small>Преподаватель</small></span>
+        </a>
+        <nav class="teacher-nav" aria-label="Разделы кабинета">
+          <button type="button" data-teacher-view="overview" class="teacher-nav-item is-active" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Обзор</button>
+          <button type="button" data-teacher-view="works" class="teacher-nav-item"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5zM8 10h8M8 14h8M8 18h5"/></svg>Работы</button>
+          <button type="button" data-teacher-view="assignments" class="teacher-nav-item"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Назначения</button>
+          <button type="button" data-teacher-view="review" class="teacher-nav-item"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 3h14v18H5zM8 8h8M8 12h5M8 16l2 2 4-5"/></svg>Проверка</button>
+          <button type="button" data-teacher-view="groups" class="teacher-nav-item"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg>Группы</button>
+          <button type="button" data-teacher-view="journal" class="teacher-nav-item"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 4v16M4 9h16M4 14h16"/></svg>Журнал</button>
+          <button type="button" data-teacher-view="settings" class="teacher-nav-item"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>Настройки</button>
+        </nav>
+        <div class="teacher-user-card"><div class="avatar" aria-hidden="true">П</div><div><strong id="teacher-name">Преподаватель</strong><span id="teacher-role">Преподаватель</span></div></div>
+      </aside>
+
+      <header class="teacher-topbar">
+        <button id="sidebar-toggle" class="icon-control" type="button" aria-label="Открыть навигацию" aria-expanded="false" aria-controls="teacher-sidebar"><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <div id="teacher-breadcrumbs" class="breadcrumbs">Учебные работы <span aria-hidden="true">›</span> Обзор</div>
+        <div class="teacher-top-actions">
+          <div id="teacher-save-state" class="autosave-state" role="status" aria-live="polite">Готово</div>
+          <button id="teacher-logout" class="learning-button quiet" type="button">Выйти</button>
+        </div>
+      </header>
+
+      <main id="main-content" class="teacher-main" tabindex="-1">
+        <div id="teacher-content"></div>
+      </main>
+    </div>
+
+    <dialog id="password-dialog" class="learning-dialog" aria-labelledby="password-title">
+      <form id="password-form" method="dialog" class="dialog-form" novalidate>
+        <div class="dialog-head"><div><p class="section-kicker">Безопасность</p><h2 id="password-title">Смените временный пароль</h2></div></div>
+        <label class="field"><span>Текущий пароль</span><input id="current-password" type="password" autocomplete="current-password" required /></label>
+        <label class="field"><span>Новый пароль</span><input id="new-password" type="password" autocomplete="new-password" minlength="10" required /></label>
+        <label class="field"><span>Повторите новый пароль</span><input id="new-password-repeat" type="password" autocomplete="new-password" minlength="10" required /></label>
+        <div id="password-error" class="form-error hidden" role="alert"></div>
+        <button class="learning-button primary wide" type="submit">Сохранить новый пароль</button>
+      </form>
+    </dialog>
+
+    <dialog id="confirm-dialog" class="learning-dialog" aria-labelledby="confirm-title">
+      <form method="dialog" class="dialog-form">
+        <div class="dialog-head"><h2 id="confirm-title">Подтвердите действие</h2></div>
+        <p id="confirm-message"></p>
+        <div class="dialog-actions"><button id="confirm-cancel" class="learning-button secondary" value="cancel">Отмена</button><button id="confirm-accept" class="learning-button primary" value="confirm">Подтвердить</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="preview-dialog" class="learning-dialog preview-dialog" aria-labelledby="preview-title">
+      <form method="dialog" class="dialog-form preview-dialog-form">
+        <div class="dialog-head"><h2 id="preview-title">Предпросмотр работы</h2><button class="icon-control" value="cancel" aria-label="Закрыть предпросмотр"><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m5 5 14 14M19 5 5 19"/></svg></button></div>
+        <div id="preview-content"></div>
+      </form>
+    </dialog>
+
+    <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+    <script type="module" src="/learning/teacher-app.js?v=1.1.6"></script>
+  </body>
+</html>

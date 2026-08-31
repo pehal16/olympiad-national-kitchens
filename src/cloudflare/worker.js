@@ -111,7 +111,15 @@ async function handleApiRequest(request, env) {
   const url = new URL(request.url);
 
   try {
-    await handleApi(nodeReq, nodeRes, url);
+    await handleApi(nodeReq, nodeRes, url, {
+      learning: {
+        db: env.DB,
+        files: env.LEARNING_FILES,
+        authSecret: env.LEARNING_AUTH_SECRET,
+        bootstrapSecret: env.LEARNING_BOOTSTRAP_SECRET,
+        enabled: env.LEARNING_ENABLED
+      }
+    });
     return nodeRes.toResponse();
   } catch (error) {
     runtimeDiagnostics.apiErrors += 1;

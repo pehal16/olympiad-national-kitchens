@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#087a45" />
+    <title>Учебные работы · Кабинет студента</title>
+    <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
+    <link rel="stylesheet" href="/learning.css?v=1.1.0" />
+  </head>
+  <body class="learning-body learning-student-body">
+    <a class="skip-link" href="#main-content">Перейти к содержанию</a>
+
+    <div id="app-loading" class="boot-screen" role="status" aria-live="polite">
+      <div class="boot-mark" aria-hidden="true">У</div>
+      <div>
+        <strong>Учебные работы</strong>
+        <span>Загружаем кабинет студента…</span>
+      </div>
+    </div>
+
+    <main id="auth-screen" class="auth-screen hidden" tabindex="-1">
+      <section class="auth-panel" aria-labelledby="auth-title">
+        <div class="auth-brand" aria-hidden="true">У</div>
+        <p class="auth-product">ГБПОУ «ГКТС»</p>
+        <h1 id="auth-title">Учебные работы</h1>
+        <p class="auth-lead">Войдите, чтобы открыть назначенные работы, черновики и результаты проверки.</p>
+        <form id="login-form" class="auth-form" novalidate>
+          <label class="field">
+            <span>Логин</span>
+            <input id="login-name" name="login" autocomplete="username" required aria-describedby="login-error" />
+          </label>
+          <label class="field">
+            <span>Пароль</span>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required aria-describedby="login-error" />
+          </label>
+          <div id="login-error" class="form-error hidden" role="alert"></div>
+          <button class="learning-button primary wide" type="submit">Войти</button>
+        </form>
+      </section>
+    </main>
+
+    <div id="student-shell" class="student-shell hidden">
+      <header class="student-topbar">
+        <a class="student-brand" href="/learning.html" aria-label="Учебные работы, главная">
+          <span class="student-brand-mark" aria-hidden="true">У</span>
+          <span><strong>Учебные работы</strong><small>Кабинет студента</small></span>
+        </a>
+        <div class="student-top-meta">
+          <div class="user-compact"><strong id="student-name">Студент</strong><span id="student-group">Группа</span></div>
+          <div id="global-save-state" class="autosave-state" role="status" aria-live="polite">Готово</div>
+          <button id="student-logout" class="learning-button quiet" type="button">Выйти</button>
+        </div>
+      </header>
+
+      <nav class="student-nav" aria-label="Разделы кабинета">
+        <button class="student-nav-item is-active" type="button" data-student-view="dashboard" aria-current="page">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg> Мои работы
+        </button>
+        <button class="student-nav-item" type="button" data-student-view="history">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M9 12l2 2 4-5"/></svg> История
+        </button>
+      </nav>
+
+      <main id="main-content" class="student-main" tabindex="-1">
+        <div id="student-content"></div>
+      </main>
+    </div>
+
+    <dialog id="password-dialog" class="learning-dialog" aria-labelledby="password-title">
+      <form id="password-form" method="dialog" class="dialog-form" novalidate>
+        <div class="dialog-head">
+          <div><p class="section-kicker">Безопасность</p><h2 id="password-title">Смените временный пароль</h2></div>
+        </div>
+        <p>Перед началом работы задайте новый пароль. Он должен содержать не менее десяти символов.</p>
+        <label class="field">
+          <span>Текущий пароль</span>
+          <input id="current-password" type="password" autocomplete="current-password" required />
+        </label>
+        <label class="field">
+          <span>Новый пароль</span>
+          <input id="new-password" type="password" autocomplete="new-password" minlength="10" required />
+        </label>
+        <label class="field">
+          <span>Повторите новый пароль</span>
+          <input id="new-password-repeat" type="password" autocomplete="new-password" minlength="10" required />
+        </label>
+        <div id="password-error" class="form-error hidden" role="alert"></div>
+        <button class="learning-button primary wide" type="submit">Сохранить новый пароль</button>
+      </form>
+    </dialog>
+
+    <dialog id="confirm-dialog" class="learning-dialog" aria-labelledby="confirm-title">
+      <form method="dialog" class="dialog-form">
+        <div class="dialog-head"><h2 id="confirm-title">Подтвердите действие</h2></div>
+        <p id="confirm-message"></p>
+        <div class="dialog-actions">
+          <button id="confirm-cancel" class="learning-button secondary" value="cancel">Отмена</button>
+          <button id="confirm-accept" class="learning-button primary" value="confirm">Подтвердить</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+    <script type="module" src="/learning/student-app.js?v=1.1.5"></script>
+  </body>
+</html>

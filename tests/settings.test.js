@@ -3,12 +3,12 @@ const assert = require("node:assert/strict");
 
 const { loadSettings } = require("../src/store");
 
-test("loadSettings prefers configured teacher password over stale environment password", () => {
+test("loadSettings takes the teacher password from protected environment configuration", () => {
   const previous = process.env.ADMIN_PASSWORD;
-  process.env.ADMIN_PASSWORD = "STALE-ENV-PASSWORD";
+  process.env.ADMIN_PASSWORD = "TEST-ENV-PASSWORD";
   try {
     const settings = loadSettings();
-    assert.equal(settings.adminPassword, "PM01-GKTS-2026!");
+    assert.equal(settings.adminPassword, "TEST-ENV-PASSWORD");
   } finally {
     if (previous === undefined) {
       delete process.env.ADMIN_PASSWORD;

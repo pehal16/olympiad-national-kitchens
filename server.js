@@ -55,6 +55,7 @@ const {
 const { buildQuestionCatalog, buildQuestionBankSummary } = require("./src/question-bank");
 const { createAttemptsCsv, saveExportFile } = require("./src/exporter");
 const { ensureFolder, uploadBuffer } = require("./src/yandex-disk");
+const { handleLearningApi } = require("./src/learning/api");
 
 let fsModule = null;
 let pathModule = null;
@@ -2822,11 +2823,15 @@ function serveStatic(req, res, pathname) {
   fs.createReadStream(filePath).pipe(res);
 }
 
-async function handleApi(req, res, url) {
+async function handleApi(req, res, url, runtime = {}) {
   await storageReady;
 
   const method = req.method;
   const pathname = url.pathname;
+  if (pathname === "/api/learning" || pathname.startsWith("/api/learning/")) {
+    await handleLearningApi(req, res, url, runtime.learning || runtime);
+    return;
+  }
   const settings = getCachedSettings();
   let olympiadBase = null;
   let customQuestionMap = null;

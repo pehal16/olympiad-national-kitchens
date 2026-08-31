@@ -28,8 +28,11 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+      LEARNING_AUTH_SECRET: ${{ secrets.LEARNING_AUTH_SECRET }}
+      LEARNING_BOOTSTRAP_SECRET: ${{ secrets.LEARNING_BOOTSTRAP_SECRET }}
       CF_PAGES_PROJECT: olympiad-gkts
       CF_D1_DATABASE: olympiad-gkts-db
+      CF_LEARNING_FILES_BUCKET: olympiad-gkts-learning-files
 
     steps:
       - name: Checkout
@@ -45,12 +48,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-            echo "Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID repository secrets." >&2
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ] || \
+             [ -z "${ADMIN_PASSWORD:-}" ] || [ -z "${LEARNING_AUTH_SECRET:-}" ] || \
+             [ -z "${LEARNING_BOOTSTRAP_SECRET:-}" ]; then
+            echo "Set CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, ADMIN_PASSWORD, LEARNING_AUTH_SECRET, and LEARNING_BOOTSTRAP_SECRET repository secrets." >&2
             exit 1
           fi
 
           npx wrangler pages project create "$CF_PAGES_PROJECT" --production-branch main || true
+          npx wrangler r2 bucket create "$CF_LEARNING_FILES_BUCKET" || true
 
           DB_ID="$(npx wrangler d1 list --json | jq -r --arg name "$CF_D1_DATABASE" '.[] | select(.name == $name) | .uuid' | head -n 1)"
           if [ -z "$DB_ID" ]; then
@@ -69,11 +75,12 @@ jobs:
       - name: Build Cloudflare Pages bundle
         run: npm run build:cloudflare
 
-      - name: Configure Pages secret
-        if: env.ADMIN_PASSWORD != ''
+      - name: Configure Pages secrets
         shell: bash
         run: |
           printf '%s' "$ADMIN_PASSWORD" | npx wrangler pages secret put ADMIN_PASSWORD --project-name "$CF_PAGES_PROJECT"
+          printf '%s' "$LEARNING_AUTH_SECRET" | npx wrangler pages secret put LEARNING_AUTH_SECRET --project-name "$CF_PAGES_PROJECT"
+          printf '%s' "$LEARNING_BOOTSTRAP_SECRET" | npx wrangler pages secret put LEARNING_BOOTSTRAP_SECRET --project-name "$CF_PAGES_PROJECT"
 
       - name: Deploy Pages
         run: npx wrangler pages deploy dist-cloudflare --project-name "$CF_PAGES_PROJECT" --branch main --commit-dirty=true

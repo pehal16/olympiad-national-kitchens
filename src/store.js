@@ -168,9 +168,9 @@ function loadSettings() {
     ...settings,
     storageBackend: getStorageBackend(),
     adminPassword:
-      settings.adminPassword ||
-      process.env.ADMIN_PASSWORD ||
       cloudflareEnv?.ADMIN_PASSWORD ||
+      process.env.ADMIN_PASSWORD ||
+      settings.adminPassword ||
       "",
     showParticipantScore: parseBoolean(
       process.env.SHOW_PARTICIPANT_SCORE,

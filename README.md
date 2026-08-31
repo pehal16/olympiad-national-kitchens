@@ -19,6 +19,9 @@ Production-домен: [https://olympiada.gorlkts.ru](https://olympiada.gorlkts.
 - админка с рейтингом, раскладкой по турам и экспортом;
 - выгрузка протоколов на Яндекс Диск;
 - отдельный PM01-модуль для интерактивного практического экзамена.
+- отдельный режим «Учебные работы» с кабинетами преподавателя и студента;
+- практические, лабораторные, самостоятельные работы и промежуточные тесты;
+- 18 типов учебных блоков, автосохранение, файлы, проверка, журнал и CSV.
 
 ## Для кого
 
@@ -46,6 +49,10 @@ Production-домен: [https://olympiada.gorlkts.ru](https://olympiada.gorlkts.
 - [public/admin.html](public/admin.html) - панель организатора
 - [public/pm01.html](public/pm01.html) - интерфейс студента PM01
 - [public/pm01-admin.html](public/pm01-admin.html) - панель преподавателя PM01
+- [public/learning.html](public/learning.html) - кабинет студента для учебных работ
+- [public/learning-admin.html](public/learning-admin.html) - кабинет преподавателя и конструктор работ
+- [src/learning](src/learning) - отдельный доменный модуль учебных работ
+- [docs/learning-pilot-runbook.md](docs/learning-pilot-runbook.md) - запуск, пилот, безопасность и эксплуатация
 - [docs](docs) - документация по деплою, восстановлению и production-процессу
 - [tests](tests) - регрессионные тесты
 
@@ -62,6 +69,8 @@ npm start
 - админка: [http://localhost:3100/admin.html](http://localhost:3100/admin.html)
 - студент PM01: [http://localhost:3100/pm01.html](http://localhost:3100/pm01.html)
 - преподаватель PM01: [http://localhost:3100/pm01-admin.html](http://localhost:3100/pm01-admin.html)
+- студент «Учебных работ»: [http://localhost:3100/learning.html](http://localhost:3100/learning.html)
+- преподаватель «Учебных работ»: [http://localhost:3100/learning-admin.html](http://localhost:3100/learning-admin.html)
 
 Настройки лежат в [config/settings.json](config/settings.json). Для production
 секреты передаются через переменные окружения и GitHub Actions secrets.
@@ -81,9 +90,11 @@ npm.cmd run verify:pm01 -- https://olympiada.gorlkts.ru
 
 ## Production
 
-Проект развернут в Yandex Cloud через workflow
-[deploy-yandex-cloud.yml](.github/workflows/deploy-yandex-cloud.yml). Подробности:
+Основной production-контур разворачивается в Cloudflare Pages через workflow
+[deploy-cloudflare.yml](.github/workflows/deploy-cloudflare.yml). Метаданные учебного модуля хранятся в D1, студенческие вложения – в приватном R2. Подробности:
 
+- [docs/learning-pilot-runbook.md](docs/learning-pilot-runbook.md)
+- [docs/cloudflare-migration-runbook.md](docs/cloudflare-migration-runbook.md)
 - [docs/yandex-cloud-serverless.md](docs/yandex-cloud-serverless.md)
 - [docs/pm01-production-rollout.md](docs/pm01-production-rollout.md)
 - [docs/platform-audit.md](docs/platform-audit.md)
@@ -98,6 +109,14 @@ npm.cmd run verify:pm01 -- https://olympiada.gorlkts.ru
 - тур 4: [data/banks/tour4.js](data/banks/tour4.js)
 - тур 5: [data/banks/tour5.js](data/banks/tour5.js)
 - PM01-экзамен: [data/exams/pm01.js](data/exams/pm01.js)
+
+## Режим «Учебные работы»
+
+Пилот режима реализован отдельно от официального экзамена PM01. Преподаватель создаёт группы, предметы и неизменяемые версии работ, назначает их студентам, проверяет сдачи и публикует оценки. Студент работает под собственной учётной записью, ответы автосохраняются, а закрытые ключи проверки не передаются в его кабинет.
+
+Перед подключением реальных данных выполните синтетический выпуск из кабинета преподавателя и пройдите чек-листы из [регламента пилота](docs/learning-pilot-runbook.md). Массовое подключение 10–15 групп проводится поэтапно после настройки отдельных production-секретов, D1, R2 и резервного копирования.
+
+Ежедневный процесс преподавателя, постоянные требования к документам и поэтапный план автоматизации зафиксированы в [docs/teacher-daily-workflow.md](docs/teacher-daily-workflow.md).
 
 ## Участие в разработке
 

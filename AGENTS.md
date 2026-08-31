@@ -35,3 +35,13 @@ When the user asks to finish the work end to end, commit and push to `main`, the
 ## Memory Maintenance
 
 When a major feature, deployment migration, data model, exam structure, or asset strategy changes, update `docs/project-memory.md` in the same commit. This keeps future dialogs anchored to the current project state.
+
+## College Workflow Continuity
+
+When a task concerns daily college materials, schedules, working programs, lesson plans, lectures, homework, practical work, or laboratory work:
+
+1. Read `docs/teacher-daily-workflow.md` before acting.
+2. Read `storage/teacher-workflow-private.json` when it exists. Treat it as private local configuration and never commit or quote its personal values in public documentation.
+3. When the user adds or changes a standing rule, update `docs/teacher-daily-workflow.md` and its change log in the same task.
+4. Preserve old source documents and existing exam/olympiad behavior unless the user explicitly asks to change them.
+5. Never send email or another external message until the user has reviewed the final files and explicitly confirmed the exact outgoing action.
