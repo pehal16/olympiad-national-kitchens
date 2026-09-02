@@ -23,7 +23,7 @@ const PILOT_SUBJECTS = Object.freeze([
   { code: "ОП-08", name: "Основы калькуляции и учёта" }
 ]);
 
-const PILOT_CONTENT_REVISION = 3;
+const PILOT_CONTENT_REVISION = 4;
 
 const SPICE_VISUALS = Object.freeze({
   "black-pepper": { src: "/assets/learning/spices/black-pepper.jpg", alt: "Фотография пряности: образец 1" },
@@ -33,14 +33,26 @@ const SPICE_VISUALS = Object.freeze({
   clove: { src: "/assets/learning/spices/clove.jpg", alt: "Фотография пряности: образец 5" },
   coriander: { src: "/assets/learning/spices/coriander.jpg", alt: "Фотография пряности: образец 6" },
   turmeric: { src: "/assets/learning/spices/turmeric.jpg", alt: "Фотография пряности: образец 7" },
-  basil: { src: "/assets/learning/spices/dried-basil.jpg", alt: "Фотография пряности: образец 8" }
+  basil: { src: "/assets/learning/spices/dried-basil.jpg", alt: "Фотография пряности: образец 8" },
+  caraway: { src: "/assets/learning/spices/caraway.png", alt: "Фотография пряности: образец 9" },
+  ginger: { src: "/assets/learning/spices/ginger.png", alt: "Фотография пряности: образец 10" },
+  nutmeg: { src: "/assets/learning/spices/nutmeg.png", alt: "Фотография пряности: образец 11" },
+  paprika: { src: "/assets/learning/spices/paprika.png", alt: "Фотография пряности: образец 12" },
+  cardamom: { src: "/assets/learning/spices/cardamom.png", alt: "Фотография пряности: образец 13" },
+  "star-anise": { src: "/assets/learning/spices/star-anise.png", alt: "Фотография пряности: образец 14" },
+  "mustard-seeds": { src: "/assets/learning/spices/mustard-seeds.png", alt: "Фотография пряности: образец 15" },
+  "dried-dill": { src: "/assets/learning/spices/dried-dill.png", alt: "Фотография пряности: образец 16" }
 });
 
 const SPICES = Object.freeze([
   ["black-pepper", "Перец чёрный"], ["allspice", "Перец душистый"],
   ["bay", "Лавровый лист"], ["cinnamon", "Корица"],
   ["clove", "Гвоздика"], ["coriander", "Кориандр"],
-  ["turmeric", "Куркума"], ["basil", "Базилик сушёный"]
+  ["turmeric", "Куркума"], ["basil", "Базилик сушёный"],
+  ["caraway", "Тмин"], ["ginger", "Имбирь"],
+  ["nutmeg", "Мускатный орех"], ["paprika", "Паприка"],
+  ["cardamom", "Кардамон"], ["star-anise", "Бадьян"],
+  ["mustard-seeds", "Семена горчицы"], ["dried-dill", "Укроп сушёный"]
 ]);
 
 function instruction(id, title, prompt, extra = {}) {
@@ -56,7 +68,7 @@ function spice(id, label, description = "") {
 }
 
 function sourceImages() {
-  return SPICES.map(([id], index) => ({ ...SPICE_VISUALS[id], caption: `Образец ${index + 1}` }));
+  return SPICES.map(([id, label], index) => ({ ...SPICE_VISUALS[id], caption: `Образец ${index + 1}. ${label}` }));
 }
 
 function pilotWorks(courseIds, groupId) {
@@ -73,6 +85,21 @@ function pilotWorks(courseIds, groupId) {
           formulaCards: [
             { label: "Нетто всего", value: "mнетто = m1 × N" },
             { label: "Брутто", value: "mбрутто = mнетто ÷ (1 − W ÷ 100)" }
+          ],
+          keyPoints: [
+            { title: "1. Нетто", text: "Рассчитать массу каждого продукта на заданное количество порций." },
+            { title: "2. Брутто", text: "Для овощей учесть отходы холодной обработки." },
+            { title: "3. Заявка", text: "Объединить одинаковое сырьё и перевести граммы в килограммы." }
+          ],
+          controlPoints: [
+            { title: "Единицы", text: "Промежуточные расчёты вести в граммах; заявку оформить в килограммах." },
+            { title: "Проверка", text: "Брутто продукта с отходами не может быть меньше рассчитанного нетто." }
+          ],
+          images: [
+            { src: "/assets/learning/practices/pz1/worksheet.png", alt: "Рабочий лист для расчёта заявки на сырьё", caption: "Рабочий лист и калькулятор" },
+            { src: "/assets/learning/practices/pz1/weighing.png", alt: "Взвешивание картофеля и моркови на производственных весах", caption: "Проверка массы сырья" },
+            { src: "/assets/learning/practices/pz1/calculation.png", alt: "Заполнение расчётной таблицы", caption: "Промежуточный расчёт" },
+            { src: "/assets/learning/practices/pz1/requisition.png", alt: "Оформление итоговой заявки на сырьё", caption: "Итоговая заявка" }
           ]
         }),
         {
@@ -113,7 +140,11 @@ function pilotWorks(courseIds, groupId) {
             "soup-oil:total": numeric(125), "soup-salt:total": numeric(75),
             "puree-potato:total": numeric(4800), "puree-milk:total": numeric(900),
             "puree-butter:total": numeric(300), "puree-salt:total": numeric(60)
-          } }
+          } },
+          hints: [
+            "Для каждой строки сначала найдите норму на одну порцию и количество порций.",
+            "Проверьте порядок величин: 100 г × 25 порций должно дать несколько тысяч граммов, а не десятки."
+          ]
         },
         {
           id: "pz1-gross", type: "table", title: "Таблица 2. Расчёт массы брутто",
@@ -140,7 +171,11 @@ function pilotWorks(courseIds, groupId) {
             "soup-potato:gross": numeric(3125), "soup-carrot:gross": numeric(625),
             "soup-onion:gross": numeric(446.43, 0.02), "soup-cabbage:gross": numeric(1388.89, 0.02),
             "puree-potato:gross": numeric(6000)
-          } }
+          } },
+          hints: [
+            "20 % отходов означает, что нетто составляет 80 % от брутто: делите нетто на 0,80.",
+            "После расчёта сравните значения: при ненулевых отходах брутто всегда больше нетто."
+          ]
         },
         {
           id: "pz1-request", type: "table", title: "Таблица 3. Заявка на сырьё",
@@ -170,7 +205,11 @@ function pilotWorks(courseIds, groupId) {
             "onion:amount": numeric(0.446, 0.001), "cabbage:amount": numeric(1.389, 0.001),
             "oil:amount": numeric(0.125, 0.001), "salt:amount": numeric(0.135, 0.001),
             "milk:amount": numeric(0.9, 0.001), "butter:amount": numeric(0.3, 0.001)
-          } }
+          } },
+          hints: [
+            "Картофель и соль встречаются в двух блюдах — сначала сложите их количества.",
+            "Чтобы перевести граммы в килограммы, разделите результат на 1000 и округлите до 0,001 кг."
+          ]
         }
       ],
       rubric: []
@@ -179,64 +218,156 @@ function pilotWorks(courseIds, groupId) {
       courseId: mdkCourseId, defaultGroupId: groupId, kind: "practice",
       title: "Практическая работа № 2. Ассортимент и правила использования традиционных пряностей и приправ",
       topic: "Ассортимент и правила использования традиционных пряностей и приправ",
-      instructions: "Определите восемь пряностей по фотографиям, распределите их по используемой части растения и заполните производственные характеристики.",
+      instructions: "Распознайте шестнадцать пряностей, классифицируйте их, выберите правила применения и разберите контроль качества на производстве.",
       estimatedMinutes: 90, defaultDueAt: addDays(8),
       blocks: [
-        instruction("pz2-source", "Образцы пряностей", "Рассмотрите внешний вид каждого образца. Названия понадобятся на следующем этапе.", { images: sourceImages() }),
+        instruction("pz2-source", "Краткая теория и образцы", [
+          "Пряности — ароматические части растений: плоды и семена, кора, цветочные почки, листья, травы или корневища. Приправа — более широкое понятие: это может быть готовый продукт или смесь, которая меняет вкус блюда и иногда содержит соль, сахар, горчицу и другие компоненты.",
+          "Пряность распознают по форме, цвету, поверхности и характерному аромату. Неизвестный образец не пробуют. Точное количество и момент внесения определяют по рецептуре или технологической карте.",
+          "На производстве проверяют маркировку, срок годности, сухость, отсутствие плесени, вредителей и постороннего запаха. Пряности хранят в закрытой маркированной таре, в сухом тёмном месте, вдали от пара и резко пахнущих продуктов; отбирают чистой сухой ложкой."
+        ], {
+          keyPoints: [
+            { title: "Распознавание", text: "Форма и часть растения → цвет и поверхность → аромат." },
+            { title: "Применение", text: "Совместимость с продуктом → дозировка по рецептуре → момент внесения." },
+            { title: "Безопасность", text: "Маркировка → состояние продукта → хранение → чистый сухой инвентарь." }
+          ],
+          controlPoints: [
+            { title: "Приёмка", text: "Целая упаковка, читаемая маркировка, срок годности, характерные цвет и аромат." },
+            { title: "Бракераж", text: "Влага, плесень, вредители, затхлый или посторонний запах — основание изолировать продукт." },
+            { title: "Дозирование", text: "Только по рецептуре или ТК; не вносить «на глаз» и не сыпать из банки над паром." }
+          ],
+          images: sourceImages()
+        }),
         {
           id: "pz2-identification", type: "matching", title: "Определение пряностей по фотографии",
           prompt: "Перетащите название к соответствующему образцу.", maxScore: 20, allowTargetReuse: false,
           leftItems: SPICES.map(([id], index) => ({ id, label: `Образец ${index + 1}`, ...SPICE_VISUALS[id] })),
           rightItems: SPICES.map(([id, label]) => ({ id: `${id}-name`, label })),
+          hints: [
+            "Сначала отделите целые листья, кору, цветочные почки и корневища от плодов и семян.",
+            "У похожих семян сравните размер, форму, рёбра и окраску; аромат используйте как дополнительный признак."
+          ],
           privateKey: { pairs: Object.fromEntries(SPICES.map(([id]) => [id, `${id}-name`])) }
         },
         {
           id: "pz2-classification", type: "classification", title: "Классификация по части растения",
-          prompt: "Распределите карточки пряностей по используемой части растения.", maxScore: 20,
+          prompt: "Перетащите карточки в группу по той части растения, которую используют как пряность.", maxScore: 15,
           items: SPICES.map(([id, label]) => spice(id, label)),
           categories: [
             { id: "fruit", label: "Плоды и семена" }, { id: "bark", label: "Кора" },
             { id: "bud", label: "Цветочные почки" }, { id: "leaf", label: "Листья и травы" },
             { id: "rhizome", label: "Корневище" }
           ],
+          hints: [
+            "Определяйте не товарную форму «целая/молотая», а ботаническую часть растения.",
+            "Корица — это кора; гвоздика — не семя, а высушенная цветочная почка."
+          ],
           privateKey: { assignments: {
             "black-pepper": "fruit", allspice: "fruit", coriander: "fruit",
-            cinnamon: "bark", clove: "bud", bay: "leaf", basil: "leaf", turmeric: "rhizome"
+            caraway: "fruit", nutmeg: "fruit", paprika: "fruit", cardamom: "fruit",
+            "star-anise": "fruit", "mustard-seeds": "fruit",
+            cinnamon: "bark", clove: "bud", bay: "leaf", basil: "leaf",
+            "dried-dill": "leaf", turmeric: "rhizome", ginger: "rhizome"
+          } }
+        },
+        {
+          id: "pz2-distinction", type: "classification", title: "Пряность или приправа",
+          prompt: "Распределите примеры по учебной классификации, приведённой в начале работы.", maxScore: 10,
+          items: [
+            { id: "pepper-product", label: "Перец чёрный молотый" },
+            { id: "cinnamon-product", label: "Корица молотая" },
+            { id: "bay-product", label: "Лавровый лист" },
+            { id: "ginger-product", label: "Имбирь сушёный" },
+            { id: "salt-product", label: "Соль поваренная" },
+            { id: "mustard-product", label: "Горчица столовая" },
+            { id: "vinegar-product", label: "Уксус" },
+            { id: "mix-product", label: "Готовая смесь для плова с солью" }
+          ],
+          categories: [
+            { id: "spice", label: "Пряность — ароматическая часть растения" },
+            { id: "seasoning", label: "Приправа — готовый продукт или смесь" }
+          ],
+          hints: ["Посмотрите на состав: один ароматический растительный компонент или готовый продукт/смесь?"],
+          privateKey: { assignments: {
+            "pepper-product": "spice", "cinnamon-product": "spice", "bay-product": "spice", "ginger-product": "spice",
+            "salt-product": "seasoning", "mustard-product": "seasoning", "vinegar-product": "seasoning", "mix-product": "seasoning"
           } }
         },
         {
           id: "pz2-use", type: "table", title: "Выбор пряности для блюда",
-          prompt: "Для каждой ситуации укажите подходящую пряность и момент её внесения.",
+          prompt: "Для каждой ситуации выберите уместную пряность, момент внесения и кратко объясните решение. Возможны разные обоснованные варианты.",
           rowHeader: "Производственная ситуация", maxScore: 20,
           rows: [
             { id: "apples", label: "Запекание яблок" },
-            { id: "broth", label: "Прозрачный мясной или овощной бульон" },
-            { id: "potato", label: "Блюдо из картофеля" },
+            { id: "broth", label: "Прозрачный мясной бульон" },
+            { id: "potato", label: "Отварной картофель перед отпуском" },
             { id: "pilaf", label: "Плов" },
-            { id: "tomato", label: "Томатный соус" }
+            { id: "tomato", label: "Томатный соус" },
+            { id: "pastry", label: "Пряное тесто или печенье" },
+            { id: "marinade", label: "Маринад для овощей" }
           ],
           columns: [
-            { id: "spice", label: "Пряность", type: "text", required: true, placeholder: "Название" },
-            { id: "time", label: "Момент внесения", type: "text", required: true, placeholder: "Когда добавить" }
+            { id: "spice", label: "Пряность", type: "select", required: true, placeholder: "Выберите", options: SPICES.map(([id, label]) => ({ id, label })) },
+            { id: "time", label: "Момент внесения", type: "select", required: true, placeholder: "Выберите", options: [
+              { id: "before", label: "До тепловой обработки" },
+              { id: "during", label: "В процессе приготовления" },
+              { id: "near-end", label: "Ближе к окончанию" },
+              { id: "service", label: "Перед отпуском" },
+              { id: "recipe", label: "По этапу, указанному в рецептуре" }
+            ] },
+            { id: "reason", label: "Почему подходит", type: "textarea", rows: 2, required: true, placeholder: "Вкус, аромат и форма продукта" }
+          ],
+          hints: [
+            "Сначала определите основной продукт и желаемый аромат, затем форму пряности и момент внесения.",
+            "Целые пряности обычно требуют времени для извлечения аромата; тонкие травы и молотые пряности часто вносят позже. Окончательное решение сверяйте с рецептурой."
           ]
         },
         {
+          id: "pz2-control", type: "classification", title: "Производственные контрольные точки",
+          prompt: "Перетащите каждую ситуацию к правильному решению.", maxScore: 15,
+          items: [
+            { id: "label-ok", label: "Упаковка целая, маркировка читается, срок годности не истёк" },
+            { id: "mold", label: "Обнаружены влага и следы плесени" },
+            { id: "steam", label: "Банку держат открытой над кипящей кастрюлей" },
+            { id: "dry-spoon", label: "Пряность отбирают чистой сухой ложкой" },
+            { id: "unlabeled", label: "На производственной ёмкости нет названия и даты вскрытия" },
+            { id: "recipe-dose", label: "Количество сверяют с рецептурой или ТК" },
+            { id: "dark-storage", label: "Закрытая тара стоит в сухом шкафу вдали от пара" },
+            { id: "musty", label: "У продукта затхлый посторонний запах" }
+          ],
+          categories: [
+            { id: "accept", label: "Допустить / продолжить работу" },
+            { id: "correct", label: "Исправить способ работы или маркировку" },
+            { id: "isolate", label: "Не использовать, изолировать и сообщить ответственному" }
+          ],
+          hints: [
+            "Сначала назовите риск: потеря качества, загрязнение, ошибка дозирования или отсутствие прослеживаемости.",
+            "Если безопасность или качество продукта уже вызывают сомнение, простого исправления способа работы недостаточно."
+          ],
+          privateKey: { assignments: {
+            "label-ok": "accept", "dry-spoon": "accept", "recipe-dose": "accept", "dark-storage": "accept",
+            steam: "correct", unlabeled: "correct", mold: "isolate", musty: "isolate"
+          } }
+        },
+        {
           id: "pz2-characteristics", type: "table", title: "Характеристика пряностей",
-          prompt: "Заполните производственную характеристику каждого образца.",
-          rowHeader: "Пряность", maxScore: 40,
+          prompt: "Заполните краткую производственную характеристику. Формулируйте признаки так, чтобы другой повар смог распознать продукт и безопасно применить его.",
+          rowHeader: "Пряность", maxScore: 20,
           rows: SPICES.map(([id, label]) => ({ id, label })),
           columns: [
-            { id: "part", label: "Часть растения", type: "text", required: true },
-            { id: "appearanceAroma", label: "Внешний вид и аромат", type: "textarea", rows: 2, required: true },
-            { id: "use", label: "Блюда и применение", type: "textarea", rows: 2, required: true },
-            { id: "time", label: "Момент внесения", type: "textarea", rows: 2, required: true },
-            { id: "qualityStorage", label: "Качество и хранение", type: "textarea", rows: 2, required: true }
+            { id: "appearanceAroma", label: "Как распознать", type: "textarea", rows: 2, required: true, placeholder: "Форма, цвет, поверхность, аромат" },
+            { id: "use", label: "Где и как применяют", type: "textarea", rows: 2, required: true, placeholder: "Блюдо, форма, момент внесения" },
+            { id: "qualityStorage", label: "Контроль качества", type: "textarea", rows: 2, required: true, placeholder: "Признак годности и условие хранения" }
+          ],
+          hints: [
+            "Не пишите только «приятный запах»: назовите характер аромата и минимум два внешних признака.",
+            "Для контроля укажите один признак доброкачественности и одно условие хранения."
           ]
         }
       ],
       rubric: [
-        { title: "Выбор пряности", description: "Пряность и момент внесения соответствуют производственной ситуации.", maxScore: 20 },
-        { title: "Производственная характеристика", description: "Для восьми пряностей заполнены все требуемые характеристики.", maxScore: 40 }
+        { title: "Выбор и применение пряностей", description: "Для семи ситуаций выбран обоснованный вариант и указан корректный момент внесения.", maxScore: 20 },
+        { title: "Производственная характеристика", description: "Для шестнадцати пряностей приведены различимые признаки, применение и контроль качества.", maxScore: 20 }
       ]
     },
     {
@@ -247,7 +378,22 @@ function pilotWorks(courseIds, groupId) {
       estimatedMinutes: 90, defaultDueAt: addDays(9),
       blocks: [
         instruction("pz3-source", "Исходная рецептура", "Л. Е. Голунова, «Сборник рецептур блюд и кулинарных изделий», 2003 год, рецептура № 423 «Тефтели», страница 261. Используйте II вариант, левую пару граф «брутто/нетто», вид мяса — говядина. Расчёт выполнить на 20 порций.", {
-          formulaCards: [{ label: "Коэффициент", value: "k = 20" }, { label: "Пересчёт", value: "m20 = m1 × 20" }]
+          formulaCards: [{ label: "Коэффициент", value: "k = 20" }, { label: "Пересчёт", value: "m20 = m1 × 20" }],
+          keyPoints: [
+            { title: "Рецептура", text: "Сначала проверить номер, наименование блюда и выбранный вариант колонок." },
+            { title: "Нормы", text: "Не смешивать брутто, нетто, массу полуфабриката и выход готового блюда." },
+            { title: "Пересчёт", text: "Каждую исходную норму на одну порцию умножить на 20." }
+          ],
+          controlPoints: [
+            { title: "Единицы", text: "Все значения этой работы рассчитываются в граммах." },
+            { title: "Обратная проверка", text: "Итог на 20 порций разделить на 20 и получить исходную норму." }
+          ],
+          images: [
+            { src: "/assets/learning/practices/pz3/recipe-map.png", alt: "Схема чтения рецептуры: брутто, нетто и выход", caption: "Что читать в рецептуре" },
+            { src: "/assets/learning/practices/pz3/scaling-algorithm.png", alt: "Алгоритм пересчёта рецептуры на заданное количество порций", caption: "Алгоритм пересчёта" },
+            { src: "/assets/learning/practices/pz3/recipe-423-table.png", alt: "Фрагмент рабочей таблицы рецептуры номер 423", caption: "Рецептура № 423" },
+            { src: "/assets/learning/practices/pz3/recipe-423-technology.png", alt: "Опорная схема технологии приготовления тефтелей", caption: "Технологическая последовательность" }
+          ]
         }),
         {
           id: "pz3-recipe", type: "table", title: "Таблица 1. Пересчёт сырья на 20 порций",
@@ -280,7 +426,11 @@ function pilotWorks(courseIds, groupId) {
             "saute-fat:gross20": numeric(80), "saute-fat:net20": numeric(80),
             "flour:gross20": numeric(160), "flour:net20": numeric(160),
             "fry-fat:gross20": numeric(140), "fry-fat:net20": numeric(140)
-          } }
+          } },
+          hints: [
+            "Сначала заполните одну строку полностью: брутто × 20 и нетто × 20, затем переходите к следующей.",
+            "Если брутто и нетто на одну порцию одинаковы, после пересчёта они также останутся одинаковыми."
+          ]
         },
         {
           id: "pz3-output", type: "table", title: "Таблица 2. Выход на 20 порций",
@@ -299,7 +449,11 @@ function pilotWorks(courseIds, groupId) {
           privateKey: { cells: {
             "semi:output20": numeric(2700), "meatballs:output20": numeric(2300),
             "sauce:output20": numeric(1500), "garnish:output20": numeric(2500), "dish:output20": numeric(6300)
-          } }
+          } },
+          hints: [
+            "Каждый показатель выхода пересчитывается отдельно; выход блюда не равен простой сумме всех строк таблицы.",
+            "Для проверки разделите полученный выход на 20 и сравните с колонкой на одну порцию."
+          ]
         },
         {
           id: "pz3-full-calculation", type: "table", title: "Полный расчёт строки «Говядина»",
@@ -312,6 +466,10 @@ function pilotWorks(courseIds, groupId) {
             { id: "substitution", label: "Подстановка и единицы", type: "textarea", rows: 3, required: true },
             { id: "answer", label: "Ответ", type: "textarea", rows: 3, required: true },
             { id: "check", label: "Проверка делением на 20", type: "textarea", rows: 3, required: true }
+          ],
+          hints: [
+            "В разделе «Дано» запишите две исходные нормы говядины: 103 г брутто и 76 г нетто на одну порцию, а также N = 20.",
+            "Оформите два параллельных вычисления, обязательно подпишите граммы и завершите обратной проверкой."
           ]
         }
       ],
@@ -327,7 +485,24 @@ function pilotWorks(courseIds, groupId) {
       instructions: "Расположите операции в трёх технологических потоках, отметьте контроль после мойки, очистки и нарезки, затем заполните таблицу оснащения и предупреждения ошибок.",
       estimatedMinutes: 90, defaultDueAt: addDays(10),
       blocks: [
-        instruction("pz4-source", "Требования к схеме", "На схеме должны быть показаны зона сырья, сортировка и мойка, очистка и нарезка, оборудование и инвентарь, ёмкость и путь удаления отходов, чистая маркированная тара. Потоки компонентов соединять не требуется."),
+        instruction("pz4-source", "Требования к схеме", "На схеме должны быть показаны зона сырья, сортировка и мойка, очистка и нарезка, оборудование и инвентарь, ёмкость и путь удаления отходов, чистая маркированная тара. Потоки компонентов соединять не требуется.", {
+          keyPoints: [
+            { title: "Загрязнённая зона", text: "Приём сырья, осмотр, сортировка и первичная мойка." },
+            { title: "Переходная зона", text: "Очистка, дочистка и удаление несъедобных частей." },
+            { title: "Чистая зона", text: "Промывание очищенного продукта, нарезка и укладка в чистую тару." }
+          ],
+          controlPoints: [
+            { title: "После мойки", text: "Нет земли и видимых загрязнений; вода и оборудование использованы по назначению." },
+            { title: "После очистки", text: "Удалены кожура, глазки и повреждённые части; отходы направлены в отдельную ёмкость." },
+            { title: "После нарезки", text: "Форма и размер соответствуют дальнейшему использованию; тара чистая и маркированная." }
+          ],
+          images: [
+            { src: "/assets/learning/practices/pz4/workplace-flow.png", alt: "Схема потока рабочего места овощного участка", caption: "Поток обработки овощей" },
+            { src: "/assets/learning/practices/pz4/three-checks.png", alt: "Три проверки схемы рабочего места", caption: "Поток, инвентарь и безопасность" },
+            { src: "/assets/pm01/semi-finished/vegetables/veg-washed-root-vegetables.png", alt: "Вымытые корнеплоды", caption: "Результат мойки" },
+            { src: "/assets/pm01/semi-finished/vegetables/veg-mushroom-slices-ready.png", alt: "Нарезанные грибы", caption: "Подготовленный полуфабрикат" }
+          ]
+        }),
         {
           id: "pz4-flow", type: "scheme_builder", title: "Схема технологических потоков",
           prompt: "Перетаскивайте этапы внутри каждого потока. В трёх отмеченных местах заполните контрольную точку.",
@@ -365,7 +540,12 @@ function pilotWorks(courseIds, groupId) {
             }
           ],
           wastePath: "Отходы → маркированная ёмкость → удаление из зоны обработки",
-          cleanOutput: "Нарезанные продукты → чистая маркированная тара → передача на следующий участок"
+          cleanOutput: "Нарезанные продукты → чистая маркированная тара → передача на следующий участок",
+          hints: [
+            "Начинайте каждый поток с осмотра или сортировки, затем выполняйте мойку до операций в чистой зоне.",
+            "После очистки продукт нужно промыть, и только потом переносить к чистой нарезке.",
+            "Контрольная точка должна содержать три части: что проверяем, как распознаём отклонение и что делаем при нарушении."
+          ]
         },
         {
           id: "pz4-workplace", type: "table", title: "Оснащение рабочего места и предупреждение ошибок",
@@ -380,6 +560,10 @@ function pilotWorks(courseIds, groupId) {
             { id: "equipment", label: "Оборудование и инвентарь", type: "textarea", rows: 2, required: true },
             { id: "error", label: "Возможная ошибка", type: "textarea", rows: 2, required: true },
             { id: "prevention", label: "Способ предупреждения", type: "textarea", rows: 2, required: true }
+          ],
+          hints: [
+            "Для каждой операции называйте конкретный инвентарь, а не общее слово «оборудование».",
+            "Ошибка и предупреждение должны быть связаны: например, риск смешения чистого и загрязнённого инвентаря предупреждают маркировкой и раздельным размещением."
           ]
         },
         {
@@ -387,7 +571,8 @@ function pilotWorks(courseIds, groupId) {
           prompt: "Приложите оформленную схему в PDF или DOCX.",
           required: true, maxScore: 10, minFiles: 1, maxFiles: 1, maxFileBytes: 10_000_000,
           allowedMimeTypes: ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
-          allowedExtensions: ["pdf", "docx"]
+          allowedExtensions: ["pdf", "docx"],
+          hints: ["Перед загрузкой откройте файл и проверьте, что схема читается целиком, заголовок указан, а все три потока и контрольные точки видны."]
         }
       ],
       rubric: [
@@ -404,7 +589,18 @@ function pilotWorks(courseIds, groupId) {
       instructions: "Составьте две операционные карты — для МОК-150М и МПР-350М — и выполните расчёт времени работы и количества загрузок МОК-150М.",
       estimatedMinutes: 90, defaultDueAt: addDays(11),
       blocks: [
-        instruction("pz5-source", "Оборудование", "Изучите внешний вид машин и рабочих органов. При заполнении карт указывайте только допустимые операции и безопасные действия.", { images: [
+        instruction("pz5-source", "Оборудование", "Изучите внешний вид машин и рабочих органов. При заполнении карт указывайте только допустимые операции и безопасные действия.", {
+          keyPoints: [
+            { title: "МОК-150М", text: "Периодическая очистка картофеля и корнеплодов абразивным рабочим органом." },
+            { title: "МПР-350М", text: "Механическая нарезка и протирание продукта установленным сменным рабочим органом." },
+            { title: "Операционная карта", text: "Назначение → подготовка → безопасная работа → остановка → санитарная обработка." }
+          ],
+          controlPoints: [
+            { title: "До пуска", text: "Исправность, комплектность, ограждения, заземление и правильность установки рабочего органа." },
+            { title: "Во время работы", text: "Штатная загрузка или подача; руки и посторонние предметы не попадают в рабочую камеру." },
+            { title: "После остановки", text: "Отключение от сети до разборки, очистки, устранения застревания и санитарной обработки." }
+          ],
+          images: [
           { src: "/assets/learning/equipment/mok-150m.png", alt: "Картофелеочистительная машина МОК-150М", caption: "МОК-150М" },
           { src: "/assets/learning/equipment/mpr-350m.png", alt: "Машина для переработки овощей МПР-350М", caption: "МПР-350М" },
           { src: "/assets/learning/equipment/cutting-discs.png", alt: "Сменные режущие диски", caption: "Рабочие органы МПР-350М" },
@@ -426,6 +622,11 @@ function pilotWorks(courseIds, groupId) {
           columns: [
             { id: "mok", label: "МОК-150М", type: "textarea", rows: 2, required: true },
             { id: "mpr", label: "МПР-350М", type: "textarea", rows: 2, required: true }
+          ],
+          hints: [
+            "Не копируйте одну формулировку в обе колонки: у машин разные назначение, рабочие органы и способ подачи продукта.",
+            "Любое застревание устраняют только после полной остановки и отключения машины от электросети.",
+            "В санитарной обработке укажите последовательность безопасного отключения, разборки разрешённых деталей, очистки, мойки, сушки и обратной сборки."
           ]
         },
         {
@@ -433,7 +634,11 @@ function pilotWorks(courseIds, groupId) {
           prompt: "Масса картофеля Q = 30 кг, производительность машины G = 150 кг/ч. Определите время работы в минутах.",
           formula: "t = Q ÷ G; результат в часах перевести в минуты", calculatorExpression: "30/150*60",
           valueLabel: "Время работы", maxScore: 20, unit: "мин",
-          privateKey: { value: 12, unit: "мин", tolerance: { type: "absolute", value: 0.01 }, partialCredit: { valueOnlyFraction: 0.75 } }
+          privateKey: { value: 12, unit: "мин", tolerance: { type: "absolute", value: 0.01 }, partialCredit: { valueOnlyFraction: 0.75 } },
+          hints: [
+            "Разделив 30 кг на 150 кг/ч, вы сначала получите время в часах.",
+            "Чтобы перевести часы в минуты, умножьте полученное число на 60."
+          ]
         },
         {
           id: "pz5-batches", type: "table", title: "Расчёт количества загрузок МОК-150М",
@@ -449,7 +654,11 @@ function pilotWorks(courseIds, groupId) {
             { id: "total", label: "Всего загрузок" }
           ],
           columns: [{ id: "value", label: "Результат", type: "number", required: true }],
-          privateKey: { cells: { "full:value": numeric(4), "remainder:value": numeric(2), "total:value": numeric(5) } }
+          privateKey: { cells: { "full:value": numeric(4), "remainder:value": numeric(2), "total:value": numeric(5) } },
+          hints: [
+            "Сначала найдите число полных загрузок по 7 кг, затем остаток.",
+            "Неполная последняя загрузка тоже считается отдельной загрузкой."
+          ]
         }
       ],
       rubric: [

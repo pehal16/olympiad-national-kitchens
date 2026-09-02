@@ -1,6 +1,6 @@
 import { attachmentApi, studentApi } from './api.js?v=1.1.3';
 import { AutosaveQueue } from './autosave.js?v=1.1.1';
-import { isValueMeaningful, mountTask } from './tasks.js?v=1.3.0';
+import { isValueMeaningful, mountTask } from './tasks.js?v=1.4.0';
 import {
   $, $$, asArray, confirmAction, errorText, escapeHtml, formatDate, fullName,
   initSession, logout, pick, renderEmpty, renderError, renderLoading, setBusy,

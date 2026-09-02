@@ -12,3 +12,4 @@ migrations_dir = "migrations"
 [vars]
 STORAGE_BACKEND = "cloudflare"
 LEARNING_ENABLED = "true"
+LEARNING_PILOT_GROUP_CODE = "1-ПК-24Б"

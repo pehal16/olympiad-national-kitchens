@@ -369,6 +369,24 @@ function renderInstruction(environment) {
     });
     panel.append(formulas);
   }
+  const appendReferenceCards = (items, title, modifier = '') => {
+    const collection = normalizedCollection(items || [], 'instruction-point');
+    if (!collection.length) return;
+    const section = createElement('section', `instruction-reference${modifier ? ` ${modifier}` : ''}`);
+    section.append(createElement('h3', null, title));
+    const grid = createElement('div', 'instruction-reference-grid');
+    collection.forEach((item) => {
+      const raw = isObject(item.raw) ? item.raw : {};
+      const card = createElement('article', 'instruction-point');
+      card.append(createElement('strong', null, raw.title || item.label));
+      card.append(createElement('p', null, raw.text || raw.description || ''));
+      grid.append(card);
+    });
+    section.append(grid);
+    panel.append(section);
+  };
+  appendReferenceCards(block.keyPoints, 'Опорные ориентиры');
+  appendReferenceCards(block.controlPoints, 'Контрольные точки', 'is-control');
   const images = normalizedCollection(block.images || [], 'instruction-image');
   if (images.length) {
     const gallery = createElement('div', 'instruction-gallery');
@@ -390,6 +408,39 @@ function renderInstruction(environment) {
   }
   root.append(panel);
   return { getValue: () => null };
+}
+
+function renderHints(root, block, announce) {
+  const hints = asArray(block.hints).map((item) => humanText(item)).filter(Boolean);
+  if (!hints.length) return;
+  const section = createElement('section', 'task-hints');
+  const heading = createElement('div', 'task-hints-heading');
+  heading.append(createElement('div', null, 'Подсказки по ходу работы'));
+  heading.append(createElement('p', null, 'Открывайте по одной, если не знаете, с чего начать. Готового ответа здесь нет.'));
+  const list = createElement('ol', 'task-hint-list');
+  const button = createElement('button', 'learning-button secondary task-hint-button');
+  button.type = 'button';
+  let revealed = 0;
+
+  const updateButton = () => {
+    if (revealed >= hints.length) {
+      button.textContent = 'Все подсказки открыты';
+      button.disabled = true;
+      return;
+    }
+    button.textContent = `Открыть подсказку ${revealed + 1} из ${hints.length}`;
+  };
+  button.addEventListener('click', () => {
+    if (revealed >= hints.length) return;
+    const item = createElement('li', 'task-hint', hints[revealed]);
+    list.append(item);
+    revealed += 1;
+    updateButton();
+    announce?.(`Открыта подсказка ${revealed}.`);
+  });
+  updateButton();
+  section.append(heading, list, button);
+  root.append(section);
 }
 
 function renderChoices(environment, forceMultiple) {
@@ -2693,6 +2744,7 @@ export function mountTask(container, block = {}, value = null, context = {}) {
     isDestroyed: () => destroyed,
   };
   renderer = rendererFor(type)(environment);
+  renderHints(root, block, announce);
   return controller;
 }
 

@@ -208,3 +208,32 @@ test("pilot supports group and full-name entry, assignment, submission and grade
   assert.equal(preserved.preserved_for_revision, true);
   assert.deepEqual((await fileStore.get(readyFile.object_key)).body, pdf);
 });
+
+test("production learning pack can target a pre-imported real group without storing its roster in code", async (t) => {
+  const storageDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "learning-real-group-"));
+  t.after(() => fs.promises.rm(storageDir, { recursive: true, force: true }));
+  const repository = await new FileLearningRepository({ storageDir }).init();
+  const baseOptions = { pepper: "test-pepper", passwordIterations: 10_000 };
+  const setupService = new LearningService(repository, baseOptions);
+  await setupService.bootstrapAdmin({
+    bootstrapSecret: "bootstrap-test",
+    login: "teacher-real-group",
+    password: "RealGroup2026",
+    displayName: "Преподаватель"
+  }, "bootstrap-test");
+  const login = await setupService.login({ login: "teacher-real-group", password: "RealGroup2026" });
+  const admin = await setupService.authenticate(login.token);
+  const roster = await setupService.rosterCommit(admin, {
+    groupCode: "1-ПК-24Б",
+    groupName: "1-ПК-24Б",
+    students: [{ login: "pk24b-001", displayName: "Учебный Студент" }]
+  });
+
+  const service = new LearningService(repository, { ...baseOptions, pilotGroupCode: "1-ПК-24Б" });
+  const result = await service.seedPilot(admin);
+  assert.equal(result.group.id, roster.group.id);
+  assert.equal(result.group.code, "1-ПК-24Б");
+  assert.equal(result.credentials.length, 0);
+  assert.equal(result.works.length, 5);
+  assert.equal((await service.studentAccessStudents(roster.group.id)).students.length, 1);
+});

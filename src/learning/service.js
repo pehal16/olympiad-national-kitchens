@@ -130,6 +130,7 @@ class LearningService {
     this.attachmentFileStore = options.fileStore || null;
     this.pepper = String(options.pepper || process.env.LEARNING_PASSWORD_PEPPER || "");
     this.passwordIterations = Number(options.passwordIterations || process.env.LEARNING_PASSWORD_ITERATIONS || 210_000);
+    this.pilotGroupCode = String(options.pilotGroupCode || process.env.LEARNING_PILOT_GROUP_CODE || PILOT_GROUP.code).trim();
   }
 
   async status() {
@@ -561,13 +562,16 @@ class LearningService {
   async seedPilot(context) {
     this.requireRole(context, "admin");
     let catalog = await this.repository.listCatalog(context.user.id, context.roles);
-    let group = catalog.groups.find((item) => item.code === PILOT_GROUP.code);
+    const targetGroup = this.pilotGroupCode === PILOT_GROUP.code
+      ? PILOT_GROUP
+      : { code: this.pilotGroupCode, name: this.pilotGroupCode, students: [] };
+    let group = catalog.groups.find((item) => item.code === targetGroup.code);
     let credentials = [];
     if (!group) {
       const roster = await this.rosterCommit(context, {
-        groupCode: PILOT_GROUP.code,
-        groupName: PILOT_GROUP.name,
-        students: PILOT_GROUP.students
+        groupCode: targetGroup.code,
+        groupName: targetGroup.name,
+        students: targetGroup.students
       });
       group = roster.group;
       credentials = roster.credentials;
@@ -608,7 +612,7 @@ class LearningService {
     const prepared = [];
     for (const definition of workDefinitions) {
       const matchingTitles = new Set([definition.title, ...(PILOT_LEGACY_TITLES.get(definition.title) || [])]);
-      let template = existingTemplates.find((item) => matchingTitles.has(item.title));
+      let template = existingTemplates.find((item) => matchingTitles.has(item.title) && item.course_id === definition.courseId);
       let version = null;
       let upgraded = false;
       if (!template) {
@@ -628,7 +632,7 @@ class LearningService {
       } else {
         version = await this.publishTemplate(context, template.id);
       }
-      let assignment = assignments.find((item) => item.status === "published" && matchingTitles.has(item.title));
+      let assignment = assignments.find((item) => item.status === "published" && matchingTitles.has(item.title) && item.course_id === definition.courseId);
       const needsAssignmentUpgrade = assignment && (assignment.version_id !== version.id || assignment.title !== definition.title);
       if (needsAssignmentUpgrade && Number(assignment.submittedCount || 0) > 0) {
         await this.repository.archiveAssignment({ assignmentId: assignment.id, actorId: context.user.id, archivedAt: nowIso() });

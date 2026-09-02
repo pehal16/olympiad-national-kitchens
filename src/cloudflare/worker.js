@@ -124,6 +124,7 @@ async function handleApiRequest(request, env) {
         },
         authSecret: env.LEARNING_AUTH_SECRET,
         bootstrapSecret: env.LEARNING_BOOTSTRAP_SECRET,
+        pilotGroupCode: env.LEARNING_PILOT_GROUP_CODE,
         enabled: env.LEARNING_ENABLED
       }
     });

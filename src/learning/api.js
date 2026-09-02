@@ -83,7 +83,7 @@ async function handleLearningApi(req, res, url, runtime = {}) {
         return;
       }
       const repository = await getLearningRepository();
-      const service = new LearningService(repository, { pepper: runtime.authSecret });
+      const service = new LearningService(repository, { pepper: runtime.authSecret, pilotGroupCode: runtime.pilotGroupCode });
       sendData(res, await service.status());
       return;
     }
@@ -93,7 +93,7 @@ async function handleLearningApi(req, res, url, runtime = {}) {
     }
 
     const repository = await getLearningRepository();
-    const service = new LearningService(repository, { pepper: runtime.authSecret });
+    const service = new LearningService(repository, { pepper: runtime.authSecret, pilotGroupCode: runtime.pilotGroupCode });
 
     if (method === "GET" && pathname === "/api/learning/auth/student-groups") {
       sendData(res, await service.studentAccessGroups());

@@ -49,20 +49,27 @@ test("practice 1 uses the exact soup, puree and raw-material requisition data", 
   assert.equal(result.correct, true);
 });
 
-test("practice 2 covers exactly eight source spices and keeps ambiguous use cases manual", () => {
+test("practice 2 covers sixteen illustrated spices, application and production controls", () => {
   const work = works()[1];
   const identification = work.blocks.find((block) => block.id === "pz2-identification");
   const classification = work.blocks.find((block) => block.id === "pz2-classification");
+  const distinction = work.blocks.find((block) => block.id === "pz2-distinction");
   const usage = work.blocks.find((block) => block.id === "pz2-use");
+  const control = work.blocks.find((block) => block.id === "pz2-control");
   const characteristics = work.blocks.find((block) => block.id === "pz2-characteristics");
-  assert.equal(identification.leftItems.length, 8);
+  assert.equal(identification.leftItems.length, 16);
   assert.ok(identification.leftItems.every((item) => item.src && item.alt));
-  assert.equal(classification.items.length, 8);
-  assert.equal(Object.keys(classification.privateKey.assignments).length, 8);
-  assert.equal(usage.rows.length, 5);
+  assert.equal(classification.items.length, 16);
+  assert.equal(Object.keys(classification.privateKey.assignments).length, 16);
+  assert.equal(distinction.items.length, 8);
+  assert.equal(usage.rows.length, 7);
   assert.equal(usage.privateKey, undefined);
-  assert.equal(characteristics.rows.length, 8);
-  assert.deepEqual(characteristics.columns.map((column) => column.id), ["part", "appearanceAroma", "use", "time", "qualityStorage"]);
+  assert.equal(control.items.length, 8);
+  assert.equal(Object.keys(control.privateKey.assignments).length, 8);
+  assert.equal(characteristics.rows.length, 16);
+  assert.deepEqual(characteristics.columns.map((column) => column.id), ["appearanceAroma", "use", "qualityStorage"]);
+  [identification, classification, distinction, usage, control, characteristics]
+    .forEach((block) => assert.ok(block.hints?.length, `${block.id} should offer guidance`));
 });
 
 test("practice 3 reproduces recipe 423 for beef and twenty portions", () => {
@@ -98,5 +105,14 @@ test("practices 4 and 5 contain the exact workplace and machine tasks", () => {
   assert.equal(time.privateKey.value, 12);
   assert.deepEqual(Object.fromEntries(Object.entries(batches.privateKey.cells).map(([key, value]) => [key, value.value])), {
     "full:value": 4, "remainder:value": 2, "total:value": 5
+  });
+});
+
+test("every scored pilot step has progressive student guidance", () => {
+  works().forEach((work) => {
+    work.blocks.filter((block) => Number(block.maxScore || 0) > 0).forEach((block) => {
+      assert.ok(Array.isArray(block.hints) && block.hints.length > 0, `${work.title}: ${block.id}`);
+      assert.ok(block.hints.every((hint) => typeof hint === "string" && hint.trim().length > 12), `${block.id}: weak hint`);
+    });
   });
 });

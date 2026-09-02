@@ -475,10 +475,23 @@ textarea:disabled { color: var(--learning-muted); background: var(--learning-ban
 .instruction-formula { display: grid; gap: 2px; min-width: 220px; padding: 10px 12px; background: #fff; border: 1px solid #b8c6d7; border-radius: 7px; }
 .instruction-formula span { color: var(--learning-muted); font-size: 11px; font-weight: 750; text-transform: uppercase; }
 .instruction-formula strong { color: #183b63; font-size: 15px; font-variant-numeric: tabular-nums; }
+.instruction-reference { margin-top: 16px; }
+.instruction-reference h3 { margin: 0 0 9px; color: #29435f; font-size: 13px; }
+.instruction-reference-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 9px; }
+.instruction-point { padding: 11px 12px; background: #fff; border: 1px solid #c5d1df; border-radius: 8px; }
+.instruction-point strong { color: #183b63; font-size: 13px; }
+.instruction-point p { margin: 5px 0 0; color: #53627a; font-size: 12px; line-height: 1.45; }
+.instruction-reference.is-control .instruction-point { border-left: 4px solid var(--learning-warning); }
 .instruction-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 14px; }
 .instruction-figure { display: grid; align-content: start; gap: 7px; margin: 0; padding: 8px; background: #fff; border: 1px solid var(--learning-border); border-radius: 8px; }
 .instruction-figure img { width: 100%; aspect-ratio: 4 / 3; object-fit: contain; border-radius: 5px; }
 .instruction-figure figcaption { color: var(--learning-muted); font-size: 12px; font-weight: 650; line-height: 1.35; }
+.task-hints { padding: 14px; background: #fff9ec; border: 1px solid #e7c982; border-radius: 8px; }
+.task-hints-heading div { color: #664d03; font-size: 14px; font-weight: 750; }
+.task-hints-heading p { margin: 4px 0 0; color: #75643b; font-size: 12px; }
+.task-hint-list { display: grid; gap: 7px; margin: 10px 0 0; padding-left: 22px; }
+.task-hint { padding: 8px 10px; color: #4d4634; background: rgba(255, 255, 255, .82); border-radius: 6px; line-height: 1.45; }
+.task-hint-button { min-height: 38px; margin-top: 10px; }
 .choice-group { display: grid; gap: 9px; margin: 0; padding: 0; border: 0; }
 .choice-option { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid var(--learning-border); border-radius: 8px; }
 .choice-option:has(input:checked) { border-color: #80b79d; background: var(--learning-primary-soft); }
