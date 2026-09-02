@@ -3,7 +3,11 @@
 const crypto = require("crypto");
 const { LearningError } = require("./errors");
 
-const DEFAULT_ITERATIONS = Number(process.env.LEARNING_PASSWORD_ITERATIONS || 210_000);
+const MAX_PORTABLE_PBKDF2_ITERATIONS = 100_000;
+const DEFAULT_ITERATIONS = Math.min(
+  MAX_PORTABLE_PBKDF2_ITERATIONS,
+  Math.max(10_000, Number(process.env.LEARNING_PASSWORD_ITERATIONS || MAX_PORTABLE_PBKDF2_ITERATIONS))
+);
 const MIN_PASSWORD_LENGTH = 10;
 const SESSION_COOKIE = "learning_session";
 
@@ -83,7 +87,10 @@ function pbkdf2Async(value, salt, iterations) {
 
 async function hashPassword(password, options = {}) {
   const value = validatePassword(password, { temporary: Boolean(options.temporary) });
-  const iterations = Math.max(10_000, Number(options.iterations || DEFAULT_ITERATIONS));
+  const iterations = Math.min(
+    MAX_PORTABLE_PBKDF2_ITERATIONS,
+    Math.max(10_000, Number(options.iterations || DEFAULT_ITERATIONS))
+  );
   const salt = options.salt || crypto.randomBytes(18).toString("base64url");
   const pepper = String(options.pepper || "");
   const key = await pbkdf2Async(`${value}\u0000${pepper}`, salt, iterations);
@@ -183,6 +190,7 @@ function sessionTokenFromRequest(req) {
 
 module.exports = {
   DEFAULT_ITERATIONS,
+  MAX_PORTABLE_PBKDF2_ITERATIONS,
   MIN_PASSWORD_LENGTH,
   SESSION_COOKIE,
   normalizeLogin,

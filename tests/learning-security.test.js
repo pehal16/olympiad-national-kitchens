@@ -7,6 +7,7 @@ const crypto = require("node:crypto");
 const {
   hashPassword,
   verifyPassword,
+  MAX_PORTABLE_PBKDF2_ITERATIONS,
   sessionCookie,
   clearSessionCookie,
   sessionTokenFromRequest
@@ -48,6 +49,12 @@ test("learning password hashing matches the PBKDF2 SHA-256 contract", async () =
 
   assert.equal(result.hash, expected);
   assert.equal(result.algorithm, "pbkdf2-sha256");
+});
+
+test("learning password hashing stays within the Cloudflare Workers PBKDF2 limit", async () => {
+  const result = await hashPassword("PortablePassword2026", { iterations: 210_000 });
+  assert.equal(result.iterations, MAX_PORTABLE_PBKDF2_ITERATIONS);
+  assert.equal(result.iterations, 100_000);
 });
 
 test("learning session cookie is HttpOnly, same-site and secure behind HTTPS", () => {
