@@ -173,6 +173,11 @@ async function prepareRequiredFileSubmission(repository, fileStore, suffix) {
   student = await service.authenticate(studentLogin.token);
   const dashboard = await service.studentDashboard(student);
   const assignment = dashboard.assignments.find((item) => item.title === `Лабораторная проверка вложений ${suffix}`);
+  const assignmentDetail = await service.getStudentAssignment(student, assignment.id);
+  const fileBlockId = assignmentDetail.work.blocks.find(
+    (block) => block.contentKey === "lab-photo" || block.id === "lab-photo"
+  )?.id;
+  assert.ok(fileBlockId);
   const submission = await service.startSubmission(student, assignment.id);
   const answers = [];
   let revision = 0;
@@ -183,13 +188,13 @@ async function prepareRequiredFileSubmission(repository, fileStore, suffix) {
     });
     revision = saved.draftRevision;
   }
-  return { service, repository, fileStore, teacher, student, submission, revision };
+  return { service, repository, fileStore, teacher, student, submission, revision, fileBlockId };
 }
 
 async function exerciseAttachmentIntegrity(fixture) {
-  const { service, repository, fileStore, student, submission } = fixture;
+  const { service, repository, fileStore, student, submission, fileBlockId } = fixture;
   let revision = fixture.revision;
-  const forged = await service.saveAnswer(student, submission.id, "lab-photo", {
+  const forged = await service.saveAnswer(student, submission.id, fileBlockId, {
     value: {
       files: [{
         id: "attachment_forged",
@@ -213,7 +218,7 @@ async function exerciseAttachmentIntegrity(fixture) {
 
   const png = Buffer.from("89504e470d0a1a0a0000000d49484452", "hex");
   const pending = await service.prepareAttachment(student, submission.id, {
-    blockId: "lab-photo",
+    blockId: fileBlockId,
     fileName: "result.png",
     mimeType: "image/png",
     byteSize: png.length,
@@ -221,7 +226,7 @@ async function exerciseAttachmentIntegrity(fixture) {
   });
   const attachment = await repository.getAttachment(pending.id);
   await service.verifyAndFinalizeAttachment(student, pending.id, png, "file");
-  const missingObject = await service.saveAnswer(student, submission.id, "lab-photo", {
+  const missingObject = await service.saveAnswer(student, submission.id, fileBlockId, {
     value: { files: [{ id: pending.id, status: "stored" }] },
     expectedRevision: revision
   });
@@ -240,7 +245,7 @@ async function exerciseAttachmentIntegrity(fixture) {
     attachmentId: attachment.id,
     submissionId: submission.id
   });
-  const trusted = await service.saveAnswer(student, submission.id, "lab-photo", {
+  const trusted = await service.saveAnswer(student, submission.id, fileBlockId, {
     value: {
       files: [{
         id: pending.id,

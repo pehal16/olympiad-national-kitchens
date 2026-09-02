@@ -96,6 +96,31 @@ test("D1 repository runs the complete pilot lifecycle transactionally", async (t
   const pilot = await service.seedPilot(teacher);
   assert.equal(pilot.works.length, 5);
   assert.equal((await repository.listAuditEvents()).length > 10, true);
+
+  const sharedBlockDraft = {
+    courseId: pilot.courses[0].id,
+    kind: "practice",
+    title: "Проверка уникальности блока",
+    topic: "Проверка идентификаторов",
+    blocks: [{
+      id: "shared-content-key",
+      type: "short_text",
+      title: "Ответ",
+      prompt: "Введите ответ.",
+      required: true,
+      maxScore: 1
+    }],
+    rubric: []
+  };
+  const firstSharedTemplate = await service.createTemplate(teacher, sharedBlockDraft);
+  const secondSharedTemplate = await service.createTemplate(teacher, {
+    ...sharedBlockDraft,
+    title: "Повторная проверка уникальности блока"
+  });
+  assert.notEqual(firstSharedTemplate.draft.blocks[0].id, secondSharedTemplate.draft.blocks[0].id);
+  assert.equal(firstSharedTemplate.draft.blocks[0].config.contentKey, "shared-content-key");
+  assert.equal(secondSharedTemplate.draft.blocks[0].config.contentKey, "shared-content-key");
+
   const originalWork = pilot.works[0];
   const templateDetail = await service.getTemplate(teacher, originalWork.templateId);
   const savedDraft = await service.saveTemplate(teacher, originalWork.templateId, {
@@ -128,18 +153,23 @@ test("D1 repository runs the complete pilot lifecycle transactionally", async (t
   const dashboard = await service.studentDashboard(student);
   const testAssignment = dashboard.assignments.find((item) => item.title.includes("Составление заявки на сырьё"));
   assert.ok(testAssignment);
+  const testDefinition = await service.getStudentAssignment(student, testAssignment.id);
+  const blockId = (contentKey) => testDefinition.work.blocks.find((block) => block.contentKey === contentKey)?.id;
+  assert.ok(blockId("pz1-net"));
+  assert.ok(blockId("pz1-gross"));
+  assert.ok(blockId("pz1-request"));
   const submission = await service.startSubmission(student, testAssignment.id);
   const answers = [
-    ["pz1-net", { cells: {
+    [blockId("pz1-net"), { cells: {
       "soup-potato:total": 2500, "soup-carrot:total": 500, "soup-onion:total": 375,
       "soup-cabbage:total": 1250, "soup-oil:total": 125, "soup-salt:total": 75,
       "puree-potato:total": 4800, "puree-milk:total": 900, "puree-butter:total": 300, "puree-salt:total": 60
     } }],
-    ["pz1-gross", { cells: {
+    [blockId("pz1-gross"), { cells: {
       "soup-potato:gross": 3125, "soup-carrot:gross": 625, "soup-onion:gross": 446.43,
       "soup-cabbage:gross": 1388.89, "puree-potato:gross": 6000
     } }],
-    ["pz1-request", { cells: {
+    [blockId("pz1-request"), { cells: {
       "potato:amount": 9.125, "carrot:amount": 0.625, "onion:amount": 0.446,
       "cabbage:amount": 1.389, "oil:amount": 0.125, "salt:amount": 0.135,
       "milk:amount": 0.9, "butter:amount": 0.3

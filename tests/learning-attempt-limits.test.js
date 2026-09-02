@@ -130,9 +130,10 @@ async function createRepository(t, backend) {
   return new D1LearningRepository(new SqliteD1Database(database)).init();
 }
 
-async function saveTestAnswers(service, student, submissionId) {
+async function saveTestAnswers(service, student, submissionId, blockIds = new Map()) {
   let expectedRevision = 0;
-  for (const [blockId, value] of Object.entries(correctTestAnswers)) {
+  for (const [contentKey, value] of Object.entries(correctTestAnswers)) {
+    const blockId = blockIds.get(contentKey) || contentKey;
     const saved = await service.saveAnswer(student, submissionId, blockId, { value, expectedRevision });
     expectedRevision = saved.draftRevision;
   }
@@ -185,8 +186,10 @@ for (const backend of ["file", "d1"]) {
       allowLate: true,
       maxAttempts: 2
     });
+    const limitedDefinition = await service.getStudentAssignment(student, limitedAssignment.id);
+    const blockIds = new Map(limitedDefinition.work.blocks.map((block) => [block.contentKey || block.id, block.id]));
     const submission = await service.startSubmission(student, limitedAssignment.id);
-    const expectedRevision = await saveTestAnswers(service, student, submission.id);
+    const expectedRevision = await saveTestAnswers(service, student, submission.id, blockIds);
 
     const first = await service.submit(student, submission.id, {
       expectedRevision,
@@ -255,7 +258,7 @@ for (const backend of ["file", "d1"]) {
 
       const sameKeyAssignment = await createRaceAssignment("Параллельный идемпотентный тест", 2);
       const sameKeySubmission = await service.startSubmission(student, sameKeyAssignment.id);
-      const sameKeyRevision = await saveTestAnswers(service, student, sameKeySubmission.id);
+      const sameKeyRevision = await saveTestAnswers(service, student, sameKeySubmission.id, blockIds);
       repository.db.armBatchBarrier(2);
       const sameKeyResults = await Promise.all([
         service.submit(student, sameKeySubmission.id, {
@@ -275,7 +278,7 @@ for (const backend of ["file", "d1"]) {
 
       const distinctKeyAssignment = await createRaceAssignment("Параллельный тест лимита", 1);
       const distinctKeySubmission = await service.startSubmission(student, distinctKeyAssignment.id);
-      const distinctKeyRevision = await saveTestAnswers(service, student, distinctKeySubmission.id);
+      const distinctKeyRevision = await saveTestAnswers(service, student, distinctKeySubmission.id, blockIds);
       repository.db.armBatchBarrier(2);
       const distinctKeyResults = await Promise.allSettled([
         service.submit(student, distinctKeySubmission.id, {

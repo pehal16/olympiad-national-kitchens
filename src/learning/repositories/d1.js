@@ -621,6 +621,49 @@ class D1LearningRepository {
     return { blockRows, keyRows, rubricRows };
   }
 
+  persistenceSafeDraft(draft, existingDraft = null) {
+    const existingBlocks = Array.isArray(existingDraft?.blocks) ? existingDraft.blocks : [];
+    const existingBlockIds = new Set(existingBlocks.map((block) => String(block.id || "")).filter(Boolean));
+    const existingByContentKey = new Map();
+    for (const block of existingBlocks) {
+      const contentKey = String(block?.config?.contentKey || "").trim();
+      if (contentKey && !existingByContentKey.has(contentKey)) existingByContentKey.set(contentKey, block.id);
+    }
+    const usedBlockIds = new Set();
+    const blocks = (Array.isArray(draft?.blocks) ? draft.blocks : []).map((block) => {
+      const incomingId = String(block.id || "").trim();
+      const contentKey = String(block?.config?.contentKey || incomingId).trim();
+      const reusableId = existingBlockIds.has(incomingId)
+        ? incomingId
+        : existingByContentKey.get(contentKey);
+      const id = reusableId && !usedBlockIds.has(reusableId)
+        ? reusableId
+        : `block_${cryptoRandomId()}`;
+      usedBlockIds.add(id);
+      return {
+        ...block,
+        id,
+        config: { ...(block.config || {}), contentKey: contentKey || id }
+      };
+    });
+
+    const existingRubricIds = new Set(
+      (Array.isArray(existingDraft?.rubric) ? existingDraft.rubric : [])
+        .map((item) => String(item.id || ""))
+        .filter(Boolean)
+    );
+    const usedRubricIds = new Set();
+    const rubric = (Array.isArray(draft?.rubric) ? draft.rubric : []).map((item) => {
+      const incomingId = String(item.id || "").trim();
+      const id = existingRubricIds.has(incomingId) && !usedRubricIds.has(incomingId)
+        ? incomingId
+        : `rubric_${cryptoRandomId()}`;
+      usedRubricIds.add(id);
+      return { ...item, id };
+    });
+    return { ...draft, blocks, rubric };
+  }
+
   blockInsert(row) {
     return this.stmt(
       `INSERT INTO learning_work_blocks
@@ -660,7 +703,9 @@ class D1LearningRepository {
     if (!course || !allowed || template.created_by !== actorId) {
       throw new LearningError("Учебный курс не найден.", 404, "course_not_found");
     }
-    const draft = json(template.draft_json, { blocks: [], rubric: [] });
+    const draft = this.persistenceSafeDraft(
+      json(template.draft_json, { blocks: [], rubric: [] })
+    );
     const versionId = template.draft_version_id;
     const parts = this.draftParts(draft, versionId, template.created_at);
     const maxScore = parts.blockRows.reduce((sum, item) => sum + Number(item.max_score || 0), 0);
@@ -809,15 +854,16 @@ class D1LearningRepository {
         "template_course_immutable"
       );
     }
-    const parts = this.draftParts(draft, template.draft_version_id, updatedAt);
+    const persistedDraft = this.persistenceSafeDraft(draft, template.draft);
+    const parts = this.draftParts(persistedDraft, template.draft_version_id, updatedAt);
     const maxScore = parts.blockRows.reduce((sum,item)=>sum+Number(item.max_score||0),0);
     const config = {
       ...json(template.config_json,{}),
       draftRevision:Number(template.draft_revision)+1,
       draftVersionId:template.draft_version_id,
-      estimatedMinutes:Number(draft.estimatedMinutes||0),
-      defaultGroupId:draft.defaultGroupId||null,
-      defaultDueAt:draft.defaultDueAt||null
+      estimatedMinutes:Number(persistedDraft.estimatedMinutes||0),
+      defaultGroupId:persistedDraft.defaultGroupId||null,
+      defaultDueAt:persistedDraft.defaultDueAt||null
     };
     await this.batch([
       this.stmt("DELETE FROM learning_rubric_criteria WHERE version_id=?1",[template.draft_version_id]),
@@ -830,16 +876,16 @@ class D1LearningRepository {
         `UPDATE learning_work_versions SET title=?2,topic=?3,instructions=?4,
          content_json=?5,public_rubric_json=?6,private_key_json=?7,max_score=?8,updated_at=?9
          WHERE id=?1 AND status='draft'`,
-        [template.draft_version_id,draft.title,draft.topic,draft.instructions||"",
+        [template.draft_version_id,persistedDraft.title,persistedDraft.topic,persistedDraft.instructions||"",
           JSON.stringify({schemaVersion:1,blocks:parts.blockRows.map((row)=>row.id)}),
-          JSON.stringify(draft.rubric||[]),
-          JSON.stringify(Object.fromEntries((draft.blocks||[]).map((block)=>[block.id,block.privateKey||{}]))),
+          JSON.stringify(persistedDraft.rubric||[]),
+          JSON.stringify(Object.fromEntries((persistedDraft.blocks||[]).map((block)=>[block.id,block.privateKey||{}]))),
           maxScore,updatedAt]
       ),
       this.stmt(
         `UPDATE learning_work_templates SET topic_id=?2,title=?3,activity_kind=?4,
          config_json=?5,updated_at=?6 WHERE id=?1 AND created_by=?7`,
-        [templateId,draft.topicId,draft.title,draft.kind,JSON.stringify(config),updatedAt,teacherId]
+        [templateId,persistedDraft.topicId,persistedDraft.title,persistedDraft.kind,JSON.stringify(config),updatedAt,teacherId]
       )
     ]);
     return this.getTemplate(templateId,teacherId);
