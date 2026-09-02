@@ -21,12 +21,20 @@ const migrations = [
 ];
 
 const correctTestAnswers = Object.freeze({
-  "test-single": "cutter",
-  "test-multiple": ["inspect", "guard", "idle"],
-  "test-match": { cutter: "slice", peeler: "peel", mixer: "whip" },
-  "test-classify": { fridge: "cold", stove: "heat", scale: "weight", slicer: "mechanical" },
-  "test-order": ["stop", "power", "warn", "report"],
-  "test-crossword": { words: { one: "ограждение", two: "стоп" } }
+  "pz1-net": { cells: {
+    "soup-potato:total": 2500, "soup-carrot:total": 500, "soup-onion:total": 375,
+    "soup-cabbage:total": 1250, "soup-oil:total": 125, "soup-salt:total": 75,
+    "puree-potato:total": 4800, "puree-milk:total": 900, "puree-butter:total": 300, "puree-salt:total": 60
+  } },
+  "pz1-gross": { cells: {
+    "soup-potato:gross": 3125, "soup-carrot:gross": 625, "soup-onion:gross": 446.43,
+    "soup-cabbage:gross": 1388.89, "puree-potato:gross": 6000
+  } },
+  "pz1-request": { cells: {
+    "potato:amount": 9.125, "carrot:amount": 0.625, "onion:amount": 0.446,
+    "cabbage:amount": 1.389, "oil:amount": 0.125, "salt:amount": 0.135,
+    "milk:amount": 0.9, "butter:amount": 0.3
+  } }
 });
 
 class SqliteD1Statement {
@@ -165,14 +173,14 @@ for (const backend of ["file", "d1"]) {
     const studentLogin = await service.login({ login: credentials.login, password: studentPassword });
     student = await service.authenticate(studentLogin.token);
 
-    const pilotTest = pilot.works.find((item) => item.kind === "test");
+    const pilotTest = pilot.works[0];
     const original = (await service.listTeacherAssignments(teacher))
       .find((item) => item.id === pilotTest.assignmentId);
     const limitedAssignment = await service.createAssignment(teacher, {
       versionId: pilotTest.versionId,
       courseId: original.course_id,
       groupIds: [pilot.group.id],
-      title: `Тест лимита попыток – ${backend}`,
+      title: `Работа лимита попыток – ${backend}`,
       dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       allowLate: true,
       maxAttempts: 2

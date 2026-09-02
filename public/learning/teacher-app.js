@@ -1,5 +1,5 @@
 import { teacherApi } from './api.js?v=1.1.3';
-import { mountTask } from './tasks.js?v=1.2.0';
+import { mountTask } from './tasks.js?v=1.3.0';
 import {
   $, $$, asArray, confirmAction, debounce, downloadCsv, errorText, escapeHtml,
   formatDate, fullName, initials, initSession, logout, pick, renderEmpty,
@@ -854,7 +854,7 @@ function drawGroups() {
   const isAdmin = asArray(state.user?.roles).includes('admin') || state.user?.role === 'admin';
   content.innerHTML = `<div class="teacher-page">${pageHeader('Состав групп', 'Группы и предметы', 'Создавайте учебный контур, затем импортируйте список студентов с предварительной проверкой.')}
     <div class="section-stack">
-    ${isAdmin ? `<section class="panel"><div class="panel-head"><div><h2>Пилотный выпуск</h2><p class="muted">Синтетическая группа, пять предметов и пять готовых работ для безопасной проверки полного сценария.</p></div><button id="seed-pilot" class="learning-button primary" type="button">Развернуть пилот</button></div><div id="pilot-result" class="panel-body hidden"></div></section>` : ''}
+    ${isAdmin ? `<section class="panel"><div class="panel-head"><div><h2>Пилотный выпуск</h2><p class="muted">Синтетическая группа, пять предметов и практические работы № 1–5 МДК 01.01 для безопасной проверки полного сценария.</p></div><button id="seed-pilot" class="learning-button primary" type="button">Развернуть пилот</button></div><div id="pilot-result" class="panel-body hidden"></div></section>` : ''}
     <section class="panel"><div class="panel-head"><h2>Учебный контур</h2><span>${groups.length} групп · ${subjects.length} предметов · ${courses.length} курсов</span></div><div class="panel-body"><div class="summary-grid">
       <form id="create-group-form" class="summary-card"><h3>Новая группа</h3><label class="field"><span>Код</span><input id="new-group-code" placeholder="1-ПК-24Б" required /></label><label class="field"><span>Название</span><input id="new-group-name" placeholder="1-ПК-24Б" required /></label><button class="learning-button secondary" type="submit">Добавить группу</button></form>
       <form id="create-subject-form" class="summary-card"><h3>Новый предмет</h3><label class="field"><span>Код</span><input id="new-subject-code" placeholder="МДК 03.01" required /></label><label class="field"><span>Название</span><input id="new-subject-name" required /></label><button class="learning-button secondary" type="submit">Добавить предмет</button></form>

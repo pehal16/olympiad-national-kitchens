@@ -1062,6 +1062,22 @@ class D1LearningRepository {
     return this.normalizeAssignment(await this.first(this.assignmentSelect("a.id=?1"),[assignmentId]));
   }
 
+  async archiveAssignment({assignmentId,actorId,archivedAt}) {
+    const assignment = await this.first(
+      "SELECT id FROM learning_assignments WHERE id=?1 AND created_by=?2",
+      [assignmentId,actorId]
+    );
+    if (!assignment) throw new LearningError("Назначение не найдено.",404,"assignment_not_found");
+    await this.batch([
+      this.stmt(
+        "UPDATE learning_assignments SET status='archived',closed_at=?3,updated_at=?3 WHERE id=?1 AND created_by=?2",
+        [assignmentId,actorId,archivedAt]
+      ),
+      this.auditStatement(actorId,"assignment.archived","assignment",assignmentId,{},archivedAt)
+    ]);
+    return this.normalizeAssignment(await this.first(this.assignmentSelect("a.id=?1"),[assignmentId]));
+  }
+
   async assignmentGroups(assignmentIds) {
     if (!assignmentIds.length) return new Map();
     const rows = await this.all(
@@ -1093,7 +1109,7 @@ class D1LearningRepository {
 
   async listAssignmentsForStudent(studentId) {
     const rows = await this.all(
-      `${this.assignmentSelect("EXISTS (SELECT 1 FROM learning_assignment_recipients ar WHERE ar.assignment_id=a.id AND ar.user_id=?1 AND ar.status='active')")}
+      `${this.assignmentSelect("a.status='published' AND EXISTS (SELECT 1 FROM learning_assignment_recipients ar WHERE ar.assignment_id=a.id AND ar.user_id=?1 AND ar.status='active')")}
        ORDER BY COALESCE(a.due_at,'9999-12-31'),a.title`,[studentId]
     );
     const submissions = await this.all("SELECT * FROM learning_submissions WHERE student_id=?1",[studentId]);
@@ -1103,7 +1119,7 @@ class D1LearningRepository {
 
   async getAssignmentForStudent(assignmentId,studentId,includeKeys=false) {
     const row = await this.first(
-      this.assignmentSelect(`a.id=?1 AND EXISTS (
+      this.assignmentSelect(`a.id=?1 AND a.status='published' AND EXISTS (
         SELECT 1 FROM learning_assignment_recipients ar
         WHERE ar.assignment_id=a.id AND ar.user_id=?2 AND ar.status='active')`),
       [assignmentId,studentId]

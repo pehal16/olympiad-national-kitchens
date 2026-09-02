@@ -8,56 +8,95 @@ const { validateDefinition } = require("../src/learning/validation");
 const { autoGrade } = require("../src/learning/grading");
 const { sanitizeForStudent } = require("../src/learning/serializers");
 
-test("MDK 01.01 pilot contains numbered, publishable works", () => {
-  const works = pilotWorks(["course-mdk", "course-2", "course-3", "course-4", "course-5"], "group-1");
-  assert.equal(works.length, 5);
-  works.forEach((work) => {
+function works() {
+  return pilotWorks(["course-mdk", "course-2", "course-3", "course-4", "course-5"], "group-1");
+}
+
+test("MDK 01.01 pilot contains five source-faithful, numbered practices", () => {
+  const pilot = works();
+  assert.equal(pilot.length, 5);
+  pilot.forEach((work, index) => {
     assert.equal(work.courseId, "course-mdk");
+    assert.equal(work.kind, "practice");
+    assert.match(work.title, new RegExp(`Практическая работа № ${index + 1}`));
     const validation = validateDefinition(work);
     assert.equal(validation.valid, true, `${work.title}: ${JSON.stringify(validation.errors)}`);
     assert.equal(JSON.stringify(sanitizeForStudent(work)).includes("privateKey"), false);
     assert.equal(work.blocks[0].pilotContentRevision, PILOT_CONTENT_REVISION);
   });
-  works.filter((work) => work.kind === "practice").forEach((work, index) => assert.match(work.title, new RegExp(`Практическая работа № ${index + 1}`)));
-  assert.match(works.find((work) => work.kind === "test").title, /Промежуточный тест № 1/);
-  works.flatMap((work) => work.blocks.filter((block) => block.type === "ordering")).forEach((block) => {
-    assert.notDeepEqual(block.items.map((item) => item.id), block.privateKey.order, `${block.id} must not reveal the correct order`);
-  });
+  const serialized = JSON.stringify(pilot);
+  ["Промежуточный тест", "Жарочный шкаф", "Взбивальная машина", "Холодильный шкаф", "Кроссворд", "Рефлексия"]
+    .forEach((foreignText) => assert.equal(serialized.includes(foreignText), false, `unexpected pilot content: ${foreignText}`));
 });
 
-test("first practice is a calculation worksheet with given data and calculator formulas", () => {
-  const work = pilotWorks(["course-mdk"], "group-1")[0];
-  const lines = work.blocks.find((block) => block.id === "pz1-lines");
-  assert.equal(lines.worksheet.title, "Расчёт потребности в сырье");
-  assert.equal(lines.calculator, true);
-  assert.deepEqual(lines.columns.slice(0, 4).map((column) => column.readOnly), [true, true, true, true]);
-  assert.deepEqual(lines.columns.slice(4).map((column) => column.type), ["number", "number"]);
-  assert.match(lines.rows[0].calculatorExpressions.gross, /1-20\/100/);
-});
-
-test("spice practice supplies images for drag classification and one-to-one matching", () => {
-  const work = pilotWorks(["course-mdk"], "group-1")[1];
-  const classification = work.blocks.find((block) => block.id === "pz2-classification");
-  const matching = work.blocks.find((block) => block.id === "pz2-matching");
-  assert.equal(classification.items.length, 8);
-  assert.ok(classification.items.every((item) => item.src && item.alt));
-  assert.equal(matching.allowTargetReuse, false);
-  assert.ok(matching.rightItems.every((item) => item.src && item.alt));
-});
-
-test("raw-material request uses corrected kilogram totals and accepts decimal comma", () => {
-  const work = pilotWorks(["course-mdk"], "group-1")[0];
+test("practice 1 uses the exact soup, puree and raw-material requisition data", () => {
+  const work = works()[0];
+  const net = work.blocks.find((block) => block.id === "pz1-net");
+  const gross = work.blocks.find((block) => block.id === "pz1-gross");
   const request = work.blocks.find((block) => block.id === "pz1-request");
+  assert.equal(net.rows.length, 10);
+  assert.equal(net.rows[0].cells.perPortion, 100);
+  assert.equal(net.rows[0].cells.portions, 25);
+  assert.equal(net.rows[6].cells.perPortion, 160);
+  assert.equal(net.rows[6].cells.portions, 30);
+  assert.deepEqual(gross.rows.map((row) => row.cells.waste), [20, 20, 16, 10, 20]);
   const result = autoGrade(request, { cells: {
-    "potato:kg": "9,125",
-    "carrot:kg": "0,625",
-    "onion:kg": "0,446",
-    "cabbage:kg": "1,389",
-    "oil:kg": "0,125",
-    "salt:kg": "0,135",
-    "milk:kg": "0,900",
-    "butter:kg": "0,300"
+    "potato:amount": "9,125", "carrot:amount": "0,625", "onion:amount": "0,446",
+    "cabbage:amount": "1,389", "oil:amount": "0,125", "salt:amount": "0,135",
+    "milk:amount": "0,900", "butter:amount": "0,300"
   } });
   assert.equal(result.score, request.maxScore);
   assert.equal(result.correct, true);
+});
+
+test("practice 2 covers exactly eight source spices and keeps ambiguous use cases manual", () => {
+  const work = works()[1];
+  const identification = work.blocks.find((block) => block.id === "pz2-identification");
+  const classification = work.blocks.find((block) => block.id === "pz2-classification");
+  const usage = work.blocks.find((block) => block.id === "pz2-use");
+  const characteristics = work.blocks.find((block) => block.id === "pz2-characteristics");
+  assert.equal(identification.leftItems.length, 8);
+  assert.ok(identification.leftItems.every((item) => item.src && item.alt));
+  assert.equal(classification.items.length, 8);
+  assert.equal(Object.keys(classification.privateKey.assignments).length, 8);
+  assert.equal(usage.rows.length, 5);
+  assert.equal(usage.privateKey, undefined);
+  assert.equal(characteristics.rows.length, 8);
+  assert.deepEqual(characteristics.columns.map((column) => column.id), ["part", "appearanceAroma", "use", "time", "qualityStorage"]);
+});
+
+test("practice 3 reproduces recipe 423 for beef and twenty portions", () => {
+  const work = works()[2];
+  const recipe = work.blocks.find((block) => block.id === "pz3-recipe");
+  const output = work.blocks.find((block) => block.id === "pz3-output");
+  assert.match(work.blocks[0].prompt, /Голунова/);
+  assert.match(work.blocks[0].prompt, /№ 423/);
+  assert.deepEqual(recipe.rows.map((row) => [row.label, row.cells.gross1, row.cells.net1]), [
+    ["Говядина", 103, 76], ["Вода", 12, 12], ["Крупа рисовая", 11, 11],
+    ["Лук репчатый", 29, 24], ["Жир для пассерования", 4, 4],
+    ["Мука пшеничная", 8, 8], ["Жир для жаренья", 7, 7]
+  ]);
+  assert.deepEqual(output.rows.map((row) => row.cells.output1), [135, 115, 75, 125, 315]);
+  assert.equal(recipe.privateKey.cells["beef:net20"].value, 1520);
+  assert.equal(output.privateKey.cells["dish:output20"].value, 6300);
+});
+
+test("practices 4 and 5 contain the exact workplace and machine tasks", () => {
+  const workplace = works()[3];
+  const flow = workplace.blocks.find((block) => block.id === "pz4-flow");
+  assert.deepEqual(flow.flowLanes.map((lane) => lane.label), ["Картофель", "Морковь", "Грибы"]);
+  assert.equal(flow.flowLanes.flatMap((lane) => lane.steps).length, 15);
+  assert.equal(flow.flowLanes.flatMap((lane) => lane.steps).filter((step) => step.requiresControl).length, 3);
+  assert.match(flow.wastePath, /маркированная ёмкость/);
+
+  const equipment = works()[4];
+  const cards = equipment.blocks.find((block) => block.id === "pz5-cards");
+  const time = equipment.blocks.find((block) => block.id === "pz5-time");
+  const batches = equipment.blocks.find((block) => block.id === "pz5-batches");
+  assert.deepEqual(cards.columns.map((column) => column.label), ["МОК-150М", "МПР-350М"]);
+  assert.equal(cards.rows.length, 8);
+  assert.equal(time.privateKey.value, 12);
+  assert.deepEqual(Object.fromEntries(Object.entries(batches.privateKey.cells).map(([key, value]) => [key, value.value])), {
+    "full:value": 4, "remainder:value": 2, "total:value": 5
+  });
 });

@@ -126,16 +126,24 @@ test("D1 repository runs the complete pilot lifecycle transactionally", async (t
   student = await service.authenticate(studentLogin.token);
 
   const dashboard = await service.studentDashboard(student);
-  const testAssignment = dashboard.assignments.find((item) => item.kind === "test");
+  const testAssignment = dashboard.assignments.find((item) => item.title.includes("Составление заявки на сырьё"));
   assert.ok(testAssignment);
   const submission = await service.startSubmission(student, testAssignment.id);
   const answers = [
-    ["test-single", "cutter"],
-    ["test-multiple", ["inspect", "guard", "idle"]],
-    ["test-match", { cutter: "slice", peeler: "peel", mixer: "whip" }],
-    ["test-classify", { fridge: "cold", stove: "heat", scale: "weight", slicer: "mechanical" }],
-    ["test-order", ["stop", "power", "warn", "report"]],
-    ["test-crossword", { words: { one: "ограждение", two: "стоп" } }]
+    ["pz1-net", { cells: {
+      "soup-potato:total": 2500, "soup-carrot:total": 500, "soup-onion:total": 375,
+      "soup-cabbage:total": 1250, "soup-oil:total": 125, "soup-salt:total": 75,
+      "puree-potato:total": 4800, "puree-milk:total": 900, "puree-butter:total": 300, "puree-salt:total": 60
+    } }],
+    ["pz1-gross", { cells: {
+      "soup-potato:gross": 3125, "soup-carrot:gross": 625, "soup-onion:gross": 446.43,
+      "soup-cabbage:gross": 1388.89, "puree-potato:gross": 6000
+    } }],
+    ["pz1-request", { cells: {
+      "potato:amount": 9.125, "carrot:amount": 0.625, "onion:amount": 0.446,
+      "cabbage:amount": 1.389, "oil:amount": 0.125, "salt:amount": 0.135,
+      "milk:amount": 0.9, "butter:amount": 0.3
+    } }]
   ];
   const firstSaved = await service.saveAnswer(student, submission.id, answers[0][0], {
     value: answers[0][1],
@@ -144,7 +152,7 @@ test("D1 repository runs the complete pilot lifecycle transactionally", async (t
   assert.equal(firstSaved.draftRevision, 1);
   await assert.rejects(
     () => service.saveAnswer(student, submission.id, answers[0][0], {
-      value: "peeler",
+      value: { cells: { "soup-potato:total": 1 } },
       expectedRevision: 0
     }),
     (error) => {
@@ -154,7 +162,7 @@ test("D1 repository runs the complete pilot lifecycle transactionally", async (t
       return true;
     }
   );
-  assert.equal((await repository.getSubmission(submission.id)).answers[answers[0][0]], answers[0][1]);
+  assert.deepEqual((await repository.getSubmission(submission.id)).answers[answers[0][0]], answers[0][1]);
 
   let expectedRevision = firstSaved.draftRevision;
   for (const [blockId, value] of answers.slice(1)) {

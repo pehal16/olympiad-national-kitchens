@@ -703,6 +703,18 @@ class FileLearningRepository {
     });
   }
 
+  async archiveAssignment({ assignmentId, actorId, archivedAt }) {
+    return this.mutate((state) => {
+      const assignment = state.assignments.find((item) => item.id === assignmentId && item.created_by === actorId);
+      if (!assignment) throw new LearningError("Назначение не найдено.", 404, "assignment_not_found");
+      assignment.status = "archived";
+      assignment.closed_at = archivedAt;
+      assignment.updated_at = archivedAt;
+      this.auditState(state, actorId, "assignment.archived", "assignment", assignmentId, {});
+      return clone(assignment);
+    });
+  }
+
   assignmentView(state, assignment) {
     const version = state.workVersions.find((item) => item.id === assignment.version_id);
     const template = version
@@ -732,7 +744,7 @@ class FileLearningRepository {
       state.assignmentRecipients
         .filter((item) => item.user_id === studentId)
         .map((recipient) => state.assignments.find((item) => item.id === recipient.assignment_id))
-        .filter(Boolean)
+        .filter((assignment) => assignment?.status === "published")
         .map((assignment) => {
           const submission = state.submissions.find(
             (item) => item.assignment_id === assignment.id && item.student_id === studentId
@@ -750,7 +762,7 @@ class FileLearningRepository {
       );
       if (!allowed) return null;
       const assignment = state.assignments.find((item) => item.id === assignmentId);
-      if (!assignment) return null;
+      if (!assignment || assignment.status !== "published") return null;
       const submission = state.submissions.find(
         (item) => item.assignment_id === assignmentId && item.student_id === studentId
       );

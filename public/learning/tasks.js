@@ -358,6 +358,17 @@ function renderInstruction(environment) {
   } else {
     paragraphs.forEach((paragraph) => panel.append(createElement('p', null, paragraph)));
   }
+  const formulaCards = normalizedCollection(block.formulaCards || [], 'formula-card');
+  if (formulaCards.length) {
+    const formulas = createElement('div', 'instruction-formulas');
+    formulaCards.forEach((item) => {
+      const raw = isObject(item.raw) ? item.raw : {};
+      const card = createElement('div', 'instruction-formula');
+      card.append(createElement('span', null, item.label), createElement('strong', null, raw.value || raw.formula || ''));
+      formulas.append(card);
+    });
+    panel.append(formulas);
+  }
   const images = normalizedCollection(block.images || [], 'instruction-image');
   if (images.length) {
     const gallery = createElement('div', 'instruction-gallery');
@@ -937,8 +948,17 @@ function renderMapping(environment, classification = false) {
     items.forEach((item, index) => {
       const row = createElement('section', 'matching-row');
       const prompt = createElement('div', 'matching-prompt');
-      prompt.append(createElement('span', 'matching-number', index + 1), createElement('strong', null, item.label));
       const itemRaw = isObject(item.raw) ? item.raw : {};
+      const imageSource = itemRaw.image || itemRaw.imageUrl || itemRaw.src;
+      prompt.append(createElement('span', 'matching-number', index + 1));
+      if (imageSource) {
+        const image = createElement('img', 'matching-prompt-image');
+        image.src = String(imageSource);
+        image.alt = String(itemRaw.alt || itemRaw.imageAlt || item.label);
+        image.loading = 'lazy';
+        prompt.append(image);
+      }
+      prompt.append(createElement('strong', null, item.label));
       if (itemRaw.description) prompt.append(createElement('small', null, itemRaw.description));
       const zone = createElement('div', 'matching-dropzone');
       zone.tabIndex = readOnly ? -1 : 0;
@@ -1127,6 +1147,7 @@ function normalizeColumns(block) {
     return {
       ...column,
       type: String(raw.type || raw.inputType || 'text').toLowerCase(),
+      rows: Math.max(2, Number(raw.rows || 2) || 2),
       options: normalizedCollection(raw.options || raw.choices || [], `${column.id}-option`),
       required: raw.required === true,
       readOnly: raw.readOnly === true || raw.editable === false || raw.input === false,
@@ -1161,6 +1182,17 @@ function renderTable(environment) {
         factList.append(createElement('dt', null, raw.label || ''), createElement('dd', null, raw.value || ''));
       });
       worksheet.append(factList);
+    }
+    const formulas = asArray(block.worksheet.formulas);
+    if (formulas.length) {
+      const formulaList = createElement('div', 'worksheet-formulas');
+      formulas.forEach((formula) => {
+        const raw = isObject(formula) ? formula : { label: 'Формула', value: formula };
+        const item = createElement('div', 'worksheet-formula');
+        item.append(createElement('span', null, raw.label || 'Формула'), createElement('strong', null, raw.value || ''));
+        formulaList.append(item);
+      });
+      worksheet.append(formulaList);
     }
     root.append(worksheet);
   }
@@ -1199,6 +1231,11 @@ function renderTable(environment) {
         control.value = seeded === null || seeded === undefined ? '' : String(seeded);
       } else if (column.type === 'select' && column.options.length) {
         control = makeSelect(column.options, column.placeholder || 'Не выбрано', seeded);
+      } else if (column.type === 'textarea') {
+        control = createElement('textarea');
+        control.rows = column.rows;
+        control.placeholder = column.placeholder;
+        setControlValue(control, seeded);
       } else {
         control = createElement('input');
         control.type = column.type === 'checkbox' ? 'checkbox' : 'text';
@@ -1234,8 +1271,13 @@ function renderTable(environment) {
   table.append(caption, head, body);
   wrap.append(table);
   if (!rows.length || !columns.length) wrap.append(createElement('p', 'inline-error', 'Для таблицы не заданы строки или столбцы.'));
-  root.append(wrap);
-  if (calculator) root.append(calculator.panel);
+  if (calculator) {
+    const layout = createElement('div', 'worksheet-layout');
+    layout.append(wrap, calculator.panel);
+    root.append(layout);
+  } else {
+    root.append(wrap);
+  }
   return {
     getValue: () => {
       const cells = Object.create(null);
@@ -1630,6 +1672,190 @@ const DYNAMIC_DEFAULTS = {
   },
 };
 
+function renderFlowScheme(environment) {
+  const { root, block, value, readOnly, emit, announce } = environment;
+  const laneDefinitions = asArray(block.flowLanes).map((lane, laneIndex) => ({
+    id: String(lane?.id || `lane-${laneIndex + 1}`),
+    label: String(lane?.label || `Поток ${laneIndex + 1}`),
+    color: String(lane?.color || 'blue'),
+    steps: asArray(lane?.steps).map((step, stepIndex) => ({
+      id: String(step?.id || `lane-${laneIndex + 1}-step-${stepIndex + 1}`),
+      label: String(step?.label || `Этап ${stepIndex + 1}`),
+      zone: String(step?.zone || ''),
+      requiresControl: step?.requiresControl === true,
+    })),
+  }));
+  const savedNodes = new Map(asArray(value?.nodes).map((node) => [String(node?.id || ''), node]));
+  const orderByLane = new Map();
+  const controls = new Map();
+  laneDefinitions.forEach((lane) => {
+    const savedOrder = asArray(value?.nodes)
+      .filter((node) => String(node?.lane || '') === lane.id && lane.steps.some((step) => step.id === String(node?.id || '')))
+      .map((node) => String(node.id));
+    const missing = lane.steps.map((step) => step.id).filter((id) => !savedOrder.includes(id));
+    orderByLane.set(lane.id, [...savedOrder, ...missing]);
+    lane.steps.forEach((step) => controls.set(step.id, String(savedNodes.get(step.id)?.control || '')));
+  });
+  const board = createElement('div', 'flow-scheme');
+  let selected = null;
+
+  function definitionFor(stepId) {
+    for (const lane of laneDefinitions) {
+      const step = lane.steps.find((candidate) => candidate.id === stepId);
+      if (step) return { lane, step };
+    }
+    return null;
+  }
+
+  function reorder(laneId, sourceId, targetId, after = false) {
+    if (readOnly || sourceId === targetId) return;
+    const order = orderByLane.get(laneId) || [];
+    const fromIndex = order.indexOf(sourceId);
+    if (fromIndex < 0) return;
+    order.splice(fromIndex, 1);
+    const targetIndex = order.indexOf(targetId);
+    if (targetIndex < 0) return;
+    order.splice(targetIndex + (after ? 1 : 0), 0, sourceId);
+    selected = null;
+    render();
+    emit();
+    announce(`${definitionFor(sourceId)?.step.label || 'Этап'}: позиция ${order.indexOf(sourceId) + 1} в потоке.`);
+    board.querySelector(`[data-flow-step="${CSS.escape(sourceId)}"]`)?.focus();
+  }
+
+  function render() {
+    board.replaceChildren();
+    board.append(createElement('p', 'drag-instruction', readOnly
+      ? 'Итоговая схема технологических потоков.'
+      : 'Перетаскивайте этапы мышью. На сенсорном экране выберите один этап, затем другой. Для клавиатуры используйте Alt + стрелка влево или вправо.'));
+    const lanes = createElement('div', 'flow-lanes');
+    laneDefinitions.forEach((lane) => {
+      const laneElement = createElement('section', 'flow-lane');
+      laneElement.dataset.flowColor = lane.color;
+      const heading = createElement('header', 'flow-lane-head');
+      heading.append(createElement('span', 'flow-lane-marker'), createElement('h4', null, lane.label));
+      laneElement.append(heading);
+      const track = createElement('div', 'flow-lane-track');
+      const order = orderByLane.get(lane.id) || [];
+      order.forEach((stepId, index) => {
+        const step = lane.steps.find((candidate) => candidate.id === stepId);
+        if (!step) return;
+        const card = createElement('article', `flow-step${selected?.stepId === stepId ? ' is-selected' : ''}`);
+        card.tabIndex = readOnly ? -1 : 0;
+        card.draggable = !readOnly;
+        card.dataset.flowStep = stepId;
+        card.dataset.laneId = lane.id;
+        card.setAttribute('aria-label', `${lane.label}: ${step.label}, позиция ${index + 1}`);
+        const copy = createElement('div', 'flow-step-copy');
+        copy.append(createElement('span', 'flow-step-index', index + 1), createElement('strong', null, step.label));
+        if (step.zone) copy.append(createElement('small', null, `Зона: ${step.zone}`));
+        const grip = createElement('span', 'flow-step-grip');
+        grip.append(createSvgIcon('grip'));
+        card.append(copy, grip);
+        if (step.requiresControl) {
+          const control = createElement('input');
+          control.type = 'text';
+          control.placeholder = 'Что проверить';
+          control.value = controls.get(stepId) || '';
+          control.disabled = readOnly;
+          control.setAttribute('aria-label', `Контрольная точка: ${step.label}`);
+          control.addEventListener('click', (event) => event.stopPropagation());
+          control.addEventListener('input', () => {
+            controls.set(stepId, control.value);
+            emit();
+          });
+          const field = makeField('Контрольная точка *', control);
+          field.classList.add('flow-control-field');
+          card.append(field);
+        }
+        card.addEventListener('click', (event) => {
+          if (readOnly || event.target.closest('input')) return;
+          if (!selected) {
+            selected = { laneId: lane.id, stepId };
+            render();
+            announce(`Выбрано: ${step.label}. Выберите этап, перед которым его поставить.`);
+            return;
+          }
+          if (selected.laneId === lane.id && selected.stepId !== stepId) reorder(lane.id, selected.stepId, stepId, false);
+          else {
+            selected = { laneId: lane.id, stepId };
+            render();
+          }
+        });
+        card.addEventListener('dragstart', (event) => {
+          activeDragPayload = { kind: 'flow-step', laneId: lane.id, id: stepId };
+          event.dataTransfer.effectAllowed = 'move';
+          event.dataTransfer.setData('text/plain', JSON.stringify(activeDragPayload));
+          card.classList.add('is-dragging');
+        });
+        card.addEventListener('dragend', () => {
+          activeDragPayload = null;
+          card.classList.remove('is-dragging');
+          track.querySelectorAll('.is-drag-over').forEach((node) => node.classList.remove('is-drag-over', 'drop-after'));
+        });
+        card.addEventListener('dragover', (event) => {
+          const payload = dragPayload(event);
+          if (payload.kind !== 'flow-step' || payload.laneId !== lane.id || payload.id === stepId) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = 'move';
+          const after = event.clientX > card.getBoundingClientRect().left + card.offsetWidth / 2;
+          card.classList.add('is-drag-over');
+          card.classList.toggle('drop-after', after);
+        });
+        card.addEventListener('dragleave', () => card.classList.remove('is-drag-over', 'drop-after'));
+        card.addEventListener('drop', (event) => {
+          const payload = dragPayload(event);
+          if (payload.kind !== 'flow-step' || payload.laneId !== lane.id || payload.id === stepId) return;
+          event.preventDefault();
+          reorder(lane.id, payload.id, stepId, card.classList.contains('drop-after'));
+        });
+        card.addEventListener('keydown', (event) => {
+          if (!event.altKey || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return;
+          event.preventDefault();
+          const delta = event.key === 'ArrowLeft' ? -1 : 1;
+          const targetId = order[index + delta];
+          if (targetId) reorder(lane.id, stepId, targetId, delta > 0);
+        });
+        track.append(card);
+        if (index < order.length - 1) track.append(createElement('span', 'flow-arrow', '→'));
+      });
+      laneElement.append(track);
+      lanes.append(laneElement);
+    });
+    board.append(lanes);
+    const routes = createElement('div', 'flow-routes');
+    if (block.wastePath) routes.append(createElement('p', 'flow-route waste-route', block.wastePath));
+    if (block.cleanOutput) routes.append(createElement('p', 'flow-route clean-route', block.cleanOutput));
+    if (routes.childElementCount) board.append(routes);
+  }
+
+  render();
+  root.append(board);
+  return {
+    getValue: () => {
+      const nodes = [];
+      const edges = [];
+      laneDefinitions.forEach((lane) => {
+        const order = orderByLane.get(lane.id) || [];
+        order.forEach((stepId, index) => {
+          const step = lane.steps.find((candidate) => candidate.id === stepId);
+          nodes.push({ id: step.id, type: 'operation', label: step.label, lane: lane.id, zone: step.zone, control: controls.get(step.id) || '' });
+          if (index > 0) edges.push({ from: order[index - 1], to: stepId });
+        });
+      });
+      return { nodes, edges };
+    },
+    validate: () => {
+      const missingControl = laneDefinitions.flatMap((lane) => lane.steps).find((step) => step.requiresControl && !nonEmptyText(controls.get(step.id)));
+      if (missingControl) {
+        return { valid: false, message: `Заполните контрольную точку для этапа «${missingControl.label}».`, element: board.querySelector(`[data-flow-step="${CSS.escape(missingControl.id)}"] input`) };
+      }
+      return { valid: true };
+    },
+    firstControl: board.querySelector('input, [tabindex="0"]'),
+  };
+}
+
 function normalizeDynamicFields(block, type) {
   const configured = asArray(block.fields || block.columns);
   const source = configured.length ? configured : DYNAMIC_DEFAULTS[type].fields;
@@ -1662,6 +1888,9 @@ function normalizeDynamicFields(block, type) {
 }
 
 function renderDynamicBuilder(environment, type) {
+  if (type === 'scheme_builder' && asArray(environment.block.flowLanes).length) {
+    return renderFlowScheme(environment);
+  }
   const { root, block, value, readOnly, emit, announce } = environment;
   const defaults = DYNAMIC_DEFAULTS[type];
   const fields = normalizeDynamicFields(block, type);

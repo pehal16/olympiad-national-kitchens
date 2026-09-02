@@ -48,6 +48,19 @@ test("pilot supports group and full-name entry, assignment, submission and grade
   assert.notEqual(repeated.works[0].versionId, initialFirstWork.versionId);
   assert.equal(repeated.works[0].upgraded, true);
 
+  const obsolete = await service.createAssignment(admin, {
+    versionId: repeated.works[0].versionId,
+    courseId: repeated.courses[0].id,
+    groupIds: [pilot.group.id],
+    title: "Промежуточный тест. Оборудование и безопасная работа",
+    dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    allowLate: true,
+    maxAttempts: 1
+  });
+  await service.seedPilot(admin);
+  const archivedObsolete = (await service.listTeacherAssignments(admin)).find((item) => item.id === obsolete.id);
+  assert.equal(archivedObsolete.status, "archived");
+
   const directory = await service.studentAccessStudents(pilot.group.id);
   assert.equal(directory.students.length, 4);
   const firstLogin = await service.selectStudent({
@@ -59,9 +72,10 @@ test("pilot supports group and full-name entry, assignment, submission and grade
 
   const dashboard = await service.studentDashboard(student);
   assert.equal(dashboard.assignments.length, 5);
-  const testAssignment = dashboard.assignments.find((item) => item.title.includes("Промежуточный тест"));
-  assert.ok(testAssignment);
-  const started = await service.startSubmission(student, testAssignment.id);
+  assert.equal(dashboard.assignments.some((item) => item.id === obsolete.id), false);
+  const calculationAssignment = dashboard.assignments.find((item) => item.title.includes("Составление заявки на сырьё"));
+  assert.ok(calculationAssignment);
+  const started = await service.startSubmission(student, calculationAssignment.id);
 
   const secondLogin = await service.selectStudent({
     groupId: pilot.group.id,
@@ -69,7 +83,7 @@ test("pilot supports group and full-name entry, assignment, submission and grade
   });
   const secondStudent = await service.authenticate(secondLogin.token);
   await assert.rejects(
-    () => service.saveAnswer(secondStudent, started.id, "test-single", { value: "cutter", expectedRevision: 0 }),
+    () => service.saveAnswer(secondStudent, started.id, "pz1-net", { value: { cells: {} }, expectedRevision: 0 }),
     (error) => error.code === "submission_not_found"
   );
   await assert.rejects(
@@ -78,12 +92,21 @@ test("pilot supports group and full-name entry, assignment, submission and grade
   );
 
   const answers = {
-    "test-single": "cutter",
-    "test-multiple": ["inspect", "guard", "idle"],
-    "test-match": { cutter: "slice", peeler: "peel", mixer: "whip" },
-    "test-classify": { fridge: "cold", stove: "heat", scale: "weight", slicer: "mechanical" },
-    "test-order": ["stop", "power", "warn", "report"],
-    "test-crossword": { words: { one: "ограждение", two: "стоп" } }
+    "pz1-net": { cells: {
+      "soup-potato:total": 2500, "soup-carrot:total": 500, "soup-onion:total": 375,
+      "soup-cabbage:total": 1250, "soup-oil:total": 125, "soup-salt:total": 75,
+      "puree-potato:total": 4800, "puree-milk:total": 900, "puree-butter:total": 300,
+      "puree-salt:total": 60
+    } },
+    "pz1-gross": { cells: {
+      "soup-potato:gross": 3125, "soup-carrot:gross": 625, "soup-onion:gross": 446.43,
+      "soup-cabbage:gross": 1388.89, "puree-potato:gross": 6000
+    } },
+    "pz1-request": { cells: {
+      "potato:amount": 9.125, "carrot:amount": 0.625, "onion:amount": 0.446,
+      "cabbage:amount": 1.389, "oil:amount": 0.125, "salt:amount": 0.135,
+      "milk:amount": 0.9, "butter:amount": 0.3
+    } }
   };
   let draftRevision = 0;
   for (const [blockId, value] of Object.entries(answers)) {
@@ -96,19 +119,19 @@ test("pilot supports group and full-name entry, assignment, submission and grade
 
   const submitted = await service.submit(student, started.id, {
     expectedRevision: draftRevision,
-    idempotencyKey: "pilot-complete-test"
+    idempotencyKey: "pilot-complete-calculation"
   });
   assert.equal(submitted.submission.status, "submitted");
   assert.equal(submitted.submission.auto_score, 100);
   const cached = await service.submit(student, started.id, {
     expectedRevision: draftRevision,
-    idempotencyKey: "pilot-complete-test"
+    idempotencyKey: "pilot-complete-calculation"
   });
   assert.equal(cached.revision.id, submitted.revision.id);
 
   const detail = await service.getTeacherSubmission(admin, started.id);
   assert.equal(detail.student.id, student.user.id);
-  assert.equal(JSON.stringify(await service.getStudentAssignment(student, testAssignment.id)).includes("optionId"), false);
+  assert.equal(JSON.stringify(await service.getStudentAssignment(student, calculationAssignment.id)).includes("privateKey"), false);
   const graded = await service.gradeSubmission(admin, started.id, {
     rubricScores: [],
     comment: "Работа выполнена верно.",
@@ -118,12 +141,12 @@ test("pilot supports group and full-name entry, assignment, submission and grade
   assert.equal(graded.grade, "5");
 
   const finalDashboard = await service.studentDashboard(student);
-  const completed = finalDashboard.assignments.find((item) => item.id === testAssignment.id);
+  const completed = finalDashboard.assignments.find((item) => item.id === calculationAssignment.id);
   assert.equal(completed.status, "accepted");
   assert.equal(completed.grade, "5");
 
   configureLearningRuntime({ storageDir, enabled: true });
-  const practiceAssignment = finalDashboard.assignments.find((item) => item.title.includes("Технологическая схема"));
+  const practiceAssignment = finalDashboard.assignments.find((item) => item.title.includes("Организация рабочего места"));
   const practiceSubmission = await service.startSubmission(student, practiceAssignment.id);
   const pdf = Buffer.from("%PDF-1.7\n1 0 obj\n<<>>\nendobj\n%%EOF\n", "utf8");
   const pendingFile = await service.prepareAttachment(student, practiceSubmission.id, {
@@ -145,19 +168,29 @@ test("pilot supports group and full-name entry, assignment, submission and grade
   assert.deepEqual((await fileStore.get(readyFile.object_key)).body, pdf);
 
   const practiceAnswers = {
-    "practice-order": ["receive", "sort", "wash", "peel", "trim", "rinse", "cut"],
-    "practice-scheme": { nodes: [
-      { id: "n1", type: "raw_material", label: "Получение сырья", zone: "загрязнённая", control: "Проверить качество" },
-      { id: "n2", type: "operation", label: "Сортировка", zone: "загрязнённая", control: "Удалить повреждённые экземпляры" },
-      { id: "n3", type: "operation", label: "Мойка", zone: "загрязнённая", control: "Проверить качество мойки" },
-      { id: "n4", type: "operation", label: "Очистка", zone: "переходная" },
-      { id: "n5", type: "operation", label: "Дочистка", zone: "чистая" },
-      { id: "n6", type: "operation", label: "Промывание", zone: "чистая" },
-      { id: "n7", type: "result", label: "Нарезка в чистую тару", zone: "чистая" }
+    "pz4-flow": { nodes: [
+      { id: "potato-sort", type: "operation", label: "Сортировка", lane: "potato", zone: "загрязнённая" },
+      { id: "potato-wash", type: "operation", label: "Мойка", lane: "potato", zone: "загрязнённая", control: "Проверить качество мойки" },
+      { id: "potato-peel", type: "operation", label: "Очистка", lane: "potato", zone: "переходная", control: "Проверить качество очистки" },
+      { id: "potato-trim", type: "operation", label: "Дочистка", lane: "potato", zone: "переходная" },
+      { id: "potato-rinse", type: "operation", label: "Промывание", lane: "potato", zone: "чистая" },
+      { id: "potato-cut", type: "operation", label: "Нарезка", lane: "potato", zone: "чистая", control: "Проверить форму нарезки" },
+      { id: "carrot-sort", type: "operation", label: "Сортировка", lane: "carrot", zone: "загрязнённая" },
+      { id: "carrot-wash", type: "operation", label: "Мойка", lane: "carrot", zone: "загрязнённая" },
+      { id: "carrot-peel", type: "operation", label: "Очистка", lane: "carrot", zone: "переходная" },
+      { id: "carrot-rinse", type: "operation", label: "Промывание", lane: "carrot", zone: "чистая" },
+      { id: "carrot-cut", type: "operation", label: "Нарезка", lane: "carrot", zone: "чистая" },
+      { id: "mushrooms-inspect", type: "operation", label: "Осмотр", lane: "mushrooms", zone: "загрязнённая" },
+      { id: "mushrooms-base", type: "operation", label: "Удаление загрязнённого основания", lane: "mushrooms", zone: "загрязнённая" },
+      { id: "mushrooms-water", type: "operation", label: "Обработка водой по технологии", lane: "mushrooms", zone: "переходная" },
+      { id: "mushrooms-cut", type: "operation", label: "Нарезка", lane: "mushrooms", zone: "чистая" }
     ] },
-    "practice-safety": { checks: { uniform: true, hands: true, boards: true } },
-    "practice-file": { files: [{ id: readyFile.id, name: "scheme.pdf", mimeType: "application/pdf", size: pdf.length, status: "stored" }] },
-    "practice-conclusion": "Чистые и загрязнённые потоки разделены, а инвентарь используется по маркировке."
+    "pz4-workplace": { cells: Object.fromEntries(
+      ["sort", "wash", "peel", "trim", "cut", "pack"].flatMap((row) =>
+        ["equipment", "error", "prevention"].map((column) => [`${row}:${column}`, `${row} ${column}`])
+      )
+    ) },
+    "practice-file": { files: [{ id: readyFile.id, name: "scheme.pdf", mimeType: "application/pdf", size: pdf.length, status: "stored" }] }
   };
   let practiceDraftRevision = 0;
   for (const [blockId, value] of Object.entries(practiceAnswers)) {

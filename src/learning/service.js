@@ -29,9 +29,26 @@ const SESSION_HOURS = Number(process.env.LEARNING_SESSION_HOURS || 12);
 const LOGIN_FAILURE_LIMIT = Number(process.env.LEARNING_LOGIN_FAILURE_LIMIT || 5);
 const LOGIN_LOCK_MINUTES = Number(process.env.LEARNING_LOGIN_LOCK_MINUTES || 15);
 const PILOT_LEGACY_TITLES = new Map([
-  ["Промежуточный тест № 1. Оборудование для обработки овощей и грибов", [
+  ["Практическая работа № 2. Ассортимент и правила использования традиционных пряностей и приправ", [
+    "Практическая работа № 2. Пряности и приправы"
+  ]],
+  ["Практическая работа № 3. Порядок пользования сборником рецептур", [
+    "Практическая работа № 3. Работа со сборником рецептур"
+  ]],
+  ["Практическая работа № 4. Организация рабочего места повара по обработке, нарезке овощей и грибов", [
+    "Практическая работа № 4. Технологическая схема рабочего места"
+  ]],
+  ["Практическая работа № 5. Правила использования оборудования для обработки, нарезки овощей и грибов", [
+    "Промежуточный тест № 1. Оборудование для обработки овощей и грибов",
     "Промежуточный тест к практической работе № 5. Оборудование для овощей и грибов"
   ]]
+]);
+const PILOT_DEPRECATED_TITLES = new Set([
+  "Промежуточный тест. Оборудование и безопасная работа",
+  "Практическая работа. Технологическая схема холодного блюда",
+  "Практическая работа. Сборка и санитарная оценка блюда",
+  "Лабораторная работа. Оценка качества овощного полуфабриката",
+  "Самостоятельная работа. Проект технологической карты"
 ]);
 
 function newId(prefix) {
@@ -584,6 +601,10 @@ class LearningService {
     const workDefinitions = pilotWorks(courses.map((item) => item.id), group.id);
     const existingTemplates = await this.repository.listTemplates(context.user.id, true);
     let assignments = await this.repository.listAssignmentsForTeacher(context.user.id);
+    for (const obsolete of assignments.filter((item) => item.status === "published" && PILOT_DEPRECATED_TITLES.has(item.title))) {
+      await this.repository.archiveAssignment({ assignmentId: obsolete.id, actorId: context.user.id, archivedAt: nowIso() });
+    }
+    assignments = assignments.map((item) => PILOT_DEPRECATED_TITLES.has(item.title) ? { ...item, status: "archived" } : item);
     const prepared = [];
     for (const definition of workDefinitions) {
       const matchingTitles = new Set([definition.title, ...(PILOT_LEGACY_TITLES.get(definition.title) || [])]);
@@ -607,7 +628,14 @@ class LearningService {
       } else {
         version = await this.publishTemplate(context, template.id);
       }
-      let assignment = assignments.find((item) => matchingTitles.has(item.title));
+      let assignment = assignments.find((item) => item.status === "published" && matchingTitles.has(item.title));
+      const needsAssignmentUpgrade = assignment && (assignment.version_id !== version.id || assignment.title !== definition.title);
+      if (needsAssignmentUpgrade && Number(assignment.submittedCount || 0) > 0) {
+        await this.repository.archiveAssignment({ assignmentId: assignment.id, actorId: context.user.id, archivedAt: nowIso() });
+        assignments = assignments.map((item) => item.id === assignment.id ? { ...item, status: "archived" } : item);
+        assignment = null;
+        upgraded = true;
+      }
       if (!assignment) {
         assignment = await this.createAssignment(context, {
           versionId: version.id,
@@ -639,7 +667,7 @@ class LearningService {
         title: definition.title,
         kind: definition.kind,
         upgraded,
-        upgradeDeferred: assignment.version_id !== version.id || assignment.title !== definition.title
+        upgradeDeferred: false
       });
     }
 
