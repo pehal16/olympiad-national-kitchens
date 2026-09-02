@@ -223,6 +223,11 @@ test("production learning pack can target a pre-imported real group without stor
   }, "bootstrap-test");
   const login = await setupService.login({ login: "teacher-real-group", password: "RealGroup2026" });
   const admin = await setupService.authenticate(login.token);
+  const legacyPilot = await setupService.rosterCommit(admin, {
+    groupCode: "ПИЛОТ-1-ПК-24Б",
+    groupName: "1-ПК-24Б – пилотная группа",
+    students: [{ login: "pilot-pk24b-001", displayName: "Тестовый Студент" }]
+  });
   const roster = await setupService.rosterCommit(admin, {
     groupCode: "1-ПК-24Б",
     groupName: "1-ПК-24Б",
@@ -236,4 +241,9 @@ test("production learning pack can target a pre-imported real group without stor
   assert.equal(result.credentials.length, 0);
   assert.equal(result.works.length, 5);
   assert.equal((await service.studentAccessStudents(roster.group.id)).students.length, 1);
+  assert.deepEqual((await service.studentAccessGroups()).groups.map((group) => group.code), ["1-ПК-24Б"]);
+  await assert.rejects(
+    () => service.studentAccessStudents(legacyPilot.group.id),
+    (error) => error.code === "group_not_found"
+  );
 });

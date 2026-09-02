@@ -234,15 +234,20 @@ class LearningService {
   }
 
   async studentAccessGroups() {
-    const groups = await this.repository.listStudentAccessGroups();
+    const groups = (await this.repository.listStudentAccessGroups())
+      .filter((group) => !this.isHiddenLegacyPilotGroup(group));
     return {
       groups: groups.map((group) => ({ id: group.id, code: group.code, name: group.name }))
     };
   }
 
+  isHiddenLegacyPilotGroup(group) {
+    return this.pilotGroupCode !== PILOT_GROUP.code && group?.code === PILOT_GROUP.code;
+  }
+
   async studentAccessStudents(groupId) {
     const group = await this.repository.getGroup(String(groupId || ""));
-    if (!group || group.status !== "active") {
+    if (!group || group.status !== "active" || this.isHiddenLegacyPilotGroup(group)) {
       throw new LearningError("Группа не найдена.", 404, "group_not_found");
     }
     const students = await this.repository.listGroupStudents(group.id);
@@ -262,7 +267,7 @@ class LearningService {
     const auth = studentId ? await this.repository.getUserAuthById(studentId) : null;
     const belongsToGroup = auth?.groups?.some((item) => item.id === groupId);
     const isStudent = auth?.roles?.includes("student");
-    if (!group || group.status !== "active" || !auth || auth.user.status !== "active" || !belongsToGroup || !isStudent) {
+    if (!group || group.status !== "active" || this.isHiddenLegacyPilotGroup(group) || !auth || auth.user.status !== "active" || !belongsToGroup || !isStudent) {
       throw new LearningError("Студент не найден в выбранной группе.", 404, "student_not_found");
     }
 
