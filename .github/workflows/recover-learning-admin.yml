@@ -67,7 +67,6 @@ jobs:
           RECOVERY_AT="$(date -u +'%Y-%m-%dT%H:%M:%S.000Z')"
           AUDIT_ID="audit_recovery_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}"
           cat > recovery.sql <<SQL
-          BEGIN TRANSACTION;
           UPDATE learning_users
              SET login='$RECOVERY_LOGIN', updated_at='$RECOVERY_AT'
            WHERE id='$ADMIN_ID';
@@ -88,7 +87,6 @@ jobs:
           VALUES
             ('$AUDIT_ID', '$ADMIN_ID', 'administrator.credential_recovered', 'user', '$ADMIN_ID',
              '{"source":"github_actions","sessions_revoked":true}', '$RECOVERY_AT');
-          COMMIT;
           SQL
           npx wrangler d1 execute "$CF_D1_DATABASE" --remote --file recovery.sql
           rm -f recovery.sql
