@@ -11,6 +11,7 @@ test("Cloudflare deployment contract exposes Pages, D1, and Yandex Disk file sto
   const worker = fs.readFileSync(path.join(root, "src", "cloudflare", "worker.js"), "utf8");
   const store = fs.readFileSync(path.join(root, "src", "cloudflare-store.js"), "utf8");
   const workflow = fs.readFileSync(path.join(root, ".github", "workflows", "deploy-cloudflare.yml"), "utf8");
+  const diskVerifier = fs.readFileSync(path.join(root, "scripts", "verify-yandex-disk-storage.js"), "utf8");
   const verifier = fs.readFileSync(path.join(root, "scripts", "verify-pm01-production.js"), "utf8");
   const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 
@@ -30,8 +31,12 @@ test("Cloudflare deployment contract exposes Pages, D1, and Yandex Disk file sto
   assert.match(store, /pm01-voice\/\$\{encodeURIComponent\(meta\.attemptId\)\}/);
   assert.match(workflow, /wrangler pages deploy dist-cloudflare/);
   assert.match(workflow, /pages secret put YANDEX_DISK_OAUTH_TOKEN/);
-  assert.match(workflow, /cloud-api\.yandex\.net\/v1\/disk/);
+  assert.match(workflow, /node scripts\/verify-yandex-disk-storage\.js/);
   assert.doesNotMatch(workflow, /wrangler r2 bucket create/);
+  assert.match(diskVerifier, /uploadBuffer/);
+  assert.match(diskVerifier, /downloadBuffer/);
+  assert.match(diskVerifier, /deleteResource/);
+  assert.match(diskVerifier, /timingSafeEqual/);
   assert.match(verifier, /digitalShift/);
   assert.match(verifier, /\/pm01-approval\.html/);
   assert.match(verifier, /\/pm01-approval\.js/);

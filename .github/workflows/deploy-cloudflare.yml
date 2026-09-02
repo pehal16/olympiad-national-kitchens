@@ -11,6 +11,7 @@ on:
       - "data/**"
       - "config/**"
       - "scripts/build-cloudflare-pages.js"
+      - "scripts/verify-yandex-disk-storage.js"
       - "migrations/**"
       - "server.js"
       - "package.json"
@@ -59,13 +60,7 @@ jobs:
 
           npx wrangler pages project create "$CF_PAGES_PROJECT" --production-branch main || true
 
-          YANDEX_STATUS="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-            --header "Authorization: OAuth $YANDEX_DISK_OAUTH_TOKEN" \
-            'https://cloud-api.yandex.net/v1/disk?fields=user.login')"
-          if [ "$YANDEX_STATUS" != "200" ]; then
-            echo "Yandex Disk OAuth validation failed with HTTP $YANDEX_STATUS." >&2
-            exit 1
-          fi
+          node scripts/verify-yandex-disk-storage.js
 
           DB_ID="$(npx wrangler d1 list --json | jq -r --arg name "$CF_D1_DATABASE" '.[] | select(.name == $name) | .uuid' | head -n 1)"
           if [ -z "$DB_ID" ]; then
