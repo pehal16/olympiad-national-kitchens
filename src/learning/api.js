@@ -425,6 +425,17 @@ async function handleLearningApi(req, res, url, runtime = {}) {
 
     throw new LearningError("Маршрут учебных работ не найден.", 404, "route_not_found");
   } catch (error) {
+    const statusCode = Number(error?.statusCode || error?.status || 500);
+    if (statusCode >= 500) {
+      console.error("learning_api_failure", {
+        method,
+        pathname,
+        name: error?.name || "Error",
+        code: error?.code || "internal_error",
+        message: error?.message || "Unknown learning API failure",
+        stack: error?.stack || ""
+      });
+    }
     sendLearningError(res, error);
   }
 }
