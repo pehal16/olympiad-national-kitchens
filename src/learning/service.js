@@ -76,14 +76,16 @@ function scoreCapacities(work) {
 }
 
 function publicUser(context) {
-  return {
+  const roles = [...context.roles];
+  const user = {
     id: context.user.id,
-    login: context.user.login,
     displayName: context.user.display_name,
-    roles: [...context.roles],
-    mustChangePassword: Boolean(context.credential?.must_change_password),
+    roles,
+    mustChangePassword: !roles.includes("student") && Boolean(context.credential?.must_change_password),
     groups: (context.groups || []).map((group) => ({ id: group.id, code: group.code, name: group.name }))
   };
+  if (!roles.includes("student")) user.login = context.user.login;
+  return user;
 }
 
 function hasRole(context, roles) {
@@ -199,6 +201,59 @@ class LearningService {
     };
   }
 
+  async studentAccessGroups() {
+    const groups = await this.repository.listStudentAccessGroups();
+    return {
+      groups: groups.map((group) => ({ id: group.id, code: group.code, name: group.name }))
+    };
+  }
+
+  async studentAccessStudents(groupId) {
+    const group = await this.repository.getGroup(String(groupId || ""));
+    if (!group || group.status !== "active") {
+      throw new LearningError("Группа не найдена.", 404, "group_not_found");
+    }
+    const students = await this.repository.listGroupStudents(group.id);
+    return {
+      group: { id: group.id, code: group.code, name: group.name },
+      students: students.map((student) => ({
+        id: student.id,
+        displayName: student.display_name
+      }))
+    };
+  }
+
+  async selectStudent(payload) {
+    const groupId = String(payload.groupId || "");
+    const studentId = String(payload.studentId || "");
+    const group = groupId ? await this.repository.getGroup(groupId) : null;
+    const auth = studentId ? await this.repository.getUserAuthById(studentId) : null;
+    const belongsToGroup = auth?.groups?.some((item) => item.id === groupId);
+    const isStudent = auth?.roles?.includes("student");
+    if (!group || group.status !== "active" || !auth || auth.user.status !== "active" || !belongsToGroup || !isStudent) {
+      throw new LearningError("Студент не найден в выбранной группе.", 404, "student_not_found");
+    }
+
+    const now = nowIso();
+    const token = randomToken(32);
+    const session = {
+      token_hash: hashToken(token),
+      user_id: auth.user.id,
+      csrf_token: randomToken(24),
+      expires_at: addHours(now, SESSION_HOURS),
+      revoked_at: null,
+      created_at: now,
+      last_seen_at: now
+    };
+    await this.repository.createSession(session);
+    return {
+      token,
+      maxAgeSeconds: SESSION_HOURS * 60 * 60,
+      csrfToken: session.csrf_token,
+      user: publicUser({ ...auth, session })
+    };
+  }
+
   async authenticate(token) {
     if (!token) return null;
     const context = await this.repository.getSessionContext(hashToken(token));
@@ -215,7 +270,7 @@ class LearningService {
   requireRole(context, roles, options = {}) {
     if (!context) throw new LearningError("Требуется вход в систему.", 401, "authentication_required");
     if (!hasRole(context, roles)) throw new LearningError("Недостаточно прав.", 403, "forbidden");
-    if (context.credential?.must_change_password && !options.allowPasswordChange) {
+    if (context.credential?.must_change_password && !hasRole(context, "student") && !options.allowPasswordChange) {
       throw new LearningError(
         "Перед началом работы смените временный пароль.",
         403,
@@ -413,11 +468,16 @@ class LearningService {
     const students = rawStudents.map((item, index) => {
       const displayName = String(item.displayName || item.fullName || item.name || "").trim().slice(0, 160);
       assertLearning(displayName, `Не указано имя студента в строке ${index + 1}.`, 400, "student_name_required");
-      let login = normalizeLogin(item.login || `${groupCode.toLowerCase()}-${String(index + 1).padStart(3, "0")}`);
+      const code = normalizeCode(item.code || String(index + 1));
+      const internalKey = crypto.createHash("sha256")
+        .update(`${groupCode}:${code}:${displayName}`, "utf8")
+        .digest("hex")
+        .slice(0, 16);
+      let login = normalizeLogin(item.login || `student-${internalKey}`);
       login = validateLogin(login);
       assertLearning(!logins.has(login), `Логин ${login} повторяется.`, 400, "duplicate_login");
       logins.add(login);
-      return { row: index + 1, displayName, login };
+      return { row: index + 1, code, displayName, login };
     });
     return { group: { code: groupCode, name: groupName }, students };
   }

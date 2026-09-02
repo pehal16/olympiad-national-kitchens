@@ -11,7 +11,7 @@ const { LearningService } = require("../src/learning/service");
 const { configureLearningRuntime } = require("../src/learning/repository");
 const { LearningFileStore } = require("../src/learning/files");
 
-test("pilot supports bootstrap, forced password change, assignment, submission and grade", async (t) => {
+test("pilot supports group and full-name entry, assignment, submission and grade", async (t) => {
   const storageDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "learning-pilot-"));
   t.after(() => fs.promises.rm(storageDir, { recursive: true, force: true }));
 
@@ -28,33 +28,23 @@ test("pilot supports bootstrap, forced password change, assignment, submission a
   const admin = await service.authenticate(adminLogin.token);
   const pilot = await service.seedPilot(admin);
   assert.equal(pilot.seeded, true);
-  assert.equal(pilot.credentials.length, 4);
   assert.equal(pilot.subjects.length, 5);
   assert.equal(pilot.courses.length, 5);
   assert.equal(pilot.works.length, 5);
 
   const repeated = await service.seedPilot(admin);
   assert.equal(repeated.seeded, false);
-  assert.equal(repeated.credentials.length, 0);
   assert.equal(repeated.works.length, 5);
   assert.equal((await service.listTeacherAssignments(admin)).length, 5);
 
-  const firstCredential = pilot.credentials[0];
-  const firstLogin = await service.login({
-    login: firstCredential.login,
-    password: firstCredential.temporaryPassword
+  const directory = await service.studentAccessStudents(pilot.group.id);
+  assert.equal(directory.students.length, 4);
+  const firstLogin = await service.selectStudent({
+    groupId: pilot.group.id,
+    studentId: directory.students[0].id
   });
-  let student = await service.authenticate(firstLogin.token);
-  assert.equal(student.credential.must_change_password, 1);
-  await assert.rejects(() => service.studentDashboard(student), (error) => error.code === "password_change_required");
-
-  await service.changePassword(student, {
-    currentPassword: firstCredential.temporaryPassword,
-    newPassword: "NewStudent2026",
-    confirmPassword: "NewStudent2026"
-  });
-  const changedLogin = await service.login({ login: firstCredential.login, password: "NewStudent2026" });
-  student = await service.authenticate(changedLogin.token);
+  const student = await service.authenticate(firstLogin.token);
+  assert.equal(firstLogin.user.mustChangePassword, false);
 
   const dashboard = await service.studentDashboard(student);
   assert.equal(dashboard.assignments.length, 5);
@@ -62,19 +52,11 @@ test("pilot supports bootstrap, forced password change, assignment, submission a
   assert.ok(testAssignment);
   const started = await service.startSubmission(student, testAssignment.id);
 
-  const secondCredential = pilot.credentials[1];
-  const secondTemporaryLogin = await service.login({
-    login: secondCredential.login,
-    password: secondCredential.temporaryPassword
+  const secondLogin = await service.selectStudent({
+    groupId: pilot.group.id,
+    studentId: directory.students[1].id
   });
-  let secondStudent = await service.authenticate(secondTemporaryLogin.token);
-  await service.changePassword(secondStudent, {
-    currentPassword: secondCredential.temporaryPassword,
-    newPassword: "SecondStudent2026",
-    confirmPassword: "SecondStudent2026"
-  });
-  const secondLogin = await service.login({ login: secondCredential.login, password: "SecondStudent2026" });
-  secondStudent = await service.authenticate(secondLogin.token);
+  const secondStudent = await service.authenticate(secondLogin.token);
   await assert.rejects(
     () => service.saveAnswer(secondStudent, started.id, "test-single", { value: "cutter", expectedRevision: 0 }),
     (error) => error.code === "submission_not_found"

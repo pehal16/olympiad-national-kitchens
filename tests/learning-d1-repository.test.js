@@ -205,7 +205,7 @@ test("D1 repository runs the complete pilot lifecycle transactionally", async (t
   assert.equal((await service.login({
     login: studentCredentials.login,
     password: reset.temporaryPassword
-  })).user.mustChangePassword, true);
+  })).user.mustChangePassword, false);
   const resetAudit = (await repository.listAuditEvents())
     .find((item) => item.action === "student.password_reset");
   assert.equal(resetAudit.entity_id, student.user.id);

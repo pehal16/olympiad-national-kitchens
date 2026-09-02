@@ -1,11 +1,11 @@
-import { attachmentApi, studentApi } from './api.js?v=1.1.2';
+import { attachmentApi, studentApi } from './api.js?v=1.1.3';
 import { AutosaveQueue } from './autosave.js?v=1.1.1';
 import { isValueMeaningful, mountTask } from './tasks.js?v=1.1.0';
 import {
   $, $$, asArray, confirmAction, errorText, escapeHtml, formatDate, fullName,
   initSession, logout, pick, renderEmpty, renderError, renderLoading, setBusy,
   setViewInUrl, statusBadge, statusMeta, toast,
-} from './ui.js?v=1.1.3';
+} from './ui.js?v=1.1.4';
 
 const content = $('#student-content');
 const saveState = $('#global-save-state');
@@ -444,6 +444,7 @@ window.addEventListener('beforeunload', (event) => {
 
 const session = initSession({
   expectedRole: 'student',
+  loginMode: 'student-picker',
   shellSelector: '#student-shell',
   onReady: async (user) => {
     state.user = user;

@@ -1,4 +1,4 @@
-import { ApiError } from './api.js?v=1.1.2';
+import { ApiError } from './api.js?v=1.1.3';
 
 function clone(value) {
   try { return structuredClone(value); } catch { return JSON.parse(JSON.stringify(value)); }

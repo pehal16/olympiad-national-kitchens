@@ -95,6 +95,29 @@ async function handleLearningApi(req, res, url, runtime = {}) {
     const repository = await getLearningRepository();
     const service = new LearningService(repository, { pepper: runtime.authSecret });
 
+    if (method === "GET" && pathname === "/api/learning/auth/student-groups") {
+      sendData(res, await service.studentAccessGroups());
+      return;
+    }
+
+    const studentGroupParams = routeMatch(pathname, "/api/learning/auth/student-groups/:groupId/students");
+    if (method === "GET" && studentGroupParams) {
+      sendData(res, await service.studentAccessStudents(studentGroupParams.groupId));
+      return;
+    }
+
+    if (method === "POST" && pathname === "/api/learning/auth/student-select") {
+      assertSameOrigin(req);
+      const result = await service.selectStudent(await parseJsonBody(req));
+      sendData(res, {
+        user: result.user,
+        csrfToken: result.csrfToken
+      }, 200, {
+        "Set-Cookie": sessionCookie(result.token, req, { maxAgeSeconds: result.maxAgeSeconds })
+      });
+      return;
+    }
+
     if (method === "POST" && pathname === "/api/learning/setup") {
       assertSameOrigin(req);
       const body = await parseJsonBody(req);

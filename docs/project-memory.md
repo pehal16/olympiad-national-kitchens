@@ -27,14 +27,15 @@ Always treat the latest `origin/main` as the source of truth. Older chat instruc
 ## Learning Works Pilot
 
 - The living source of truth for the teacher's daily material-preparation workflow is `docs/teacher-daily-workflow.md`.
-- Current platform package version: `1.6.80`; this release changes the learning-works pilot and does not change the official PM01 100-point contract.
+- Current platform package version: `1.6.81`; this release changes the student entry flow and does not change the official PM01 100-point contract.
 - Private local paths, the VK schedule chat, and the working email address are stored only in the ignored file `storage/teacher-workflow-private.json`.
 - The separate mode `Учебные работы` is implemented under `/learning.html`, `/learning-admin.html`, and `/api/learning/*`; it remains independent from PM01 and olympiad attempts.
 - The pilot includes roles, groups, subjects, courses, roster import, 18 block types, immutable work versions, assignments, autosave, file evidence, automatic and manual review, correction cycles, grades, audit, and the journal.
 - Local development uses a file repository; Cloudflare uses D1 migrations `0003`–`0005`, while student attachments are kept under the configured private Yandex Disk folder and served only through authorized learning API routes.
 - The Cloudflare workflow validates the existing Yandex Disk OAuth token, writes the Yandex settings as Pages secrets, and deliberately has no R2 binding or R2 subscription dependency.
 - Learning passwords use salted PBKDF2-SHA-256 with the private server pepper and a portable 100,000-iteration ceiling required by the Cloudflare Workers Web Crypto runtime.
-- The teacher can open a group roster and issue a one-time temporary password; active student sessions are revoked and the next login requires password replacement.
+- Students enter the learning cabinet by selecting an active group and their full name; student logins and passwords are not displayed or requested. The teacher cabinet continues to require protected credentials. Legacy student credential rows remain only for schema and data compatibility.
+- Group/name entry deliberately prioritizes classroom convenience over identity assurance: anyone who can see a roster can select another student's profile. Use this mode only under the college's approved organizational rules and do not expose grades or sensitive personal data beyond the learning purpose.
 - A safe synthetic pilot creates one fictional group, four fictional students, five subjects, and five works based on the verified sequence of МДК 01.01 for 3-ПК-26: raw-material request, spices, recipe-book use, workplace flow, and equipment use.
 - The first pilot work uses corrected raw-material calculations and kilogram totals. The platform accepts decimal commas and configured numerical tolerances.
 - The technology-card builder now covers source details, scope, gross/net formulation, technological operations, output, serving, quality, storage, and allergens. The technology-scheme builder creates a live ordered flow and can enforce minimum stages and control points.

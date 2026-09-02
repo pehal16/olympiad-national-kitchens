@@ -99,6 +99,97 @@ test("learning HTTP API enforces bootstrap, cookie authentication and CSRF", asy
   assert.equal(foreignOrigin.json.error.code, "origin_rejected");
 });
 
+test("student opens a scoped session by selecting group and full name", async (t) => {
+  const storageDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "learning-student-picker-"));
+  t.after(() => fs.promises.rm(storageDir, { recursive: true, force: true }));
+  const runtime = {
+    enabled: true,
+    storageDir,
+    authSecret: "picker-api-pepper",
+    bootstrapSecret: "picker-api-bootstrap"
+  };
+
+  const setup = await request(runtime, "POST", "/api/learning/setup", {
+    bootstrapSecret: runtime.bootstrapSecret,
+    login: "picker-admin",
+    password: "PickerAdmin2026",
+    displayName: "Администратор"
+  });
+  const adminLogin = await request(runtime, "POST", "/api/learning/auth/login", {
+    login: "picker-admin",
+    password: "PickerAdmin2026"
+  });
+  const adminHeaders = {
+    cookie: adminLogin.headers["set-cookie"].split(";")[0],
+    "x-csrf-token": adminLogin.json.data.csrfToken
+  };
+  const firstRoster = await request(runtime, "POST", "/api/learning/teacher/rosters/import/commit", {
+    groupCode: "PICKER-A",
+    groupName: "1-ПК-26",
+    students: [{ displayName: "Иванов Иван Иванович" }]
+  }, adminHeaders);
+  const secondRoster = await request(runtime, "POST", "/api/learning/teacher/rosters/import/commit", {
+    groupCode: "PICKER-B",
+    groupName: "2-ПК-26",
+    students: [{ displayName: "Петрова Анна Сергеевна" }]
+  }, adminHeaders);
+  assert.equal(firstRoster.status, 201);
+  assert.equal(secondRoster.status, 201);
+
+  const groups = await request(runtime, "GET", "/api/learning/auth/student-groups");
+  assert.equal(groups.status, 200);
+  assert.deepEqual(groups.json.data.groups.map((item) => item.name), ["1-ПК-26", "2-ПК-26"]);
+  assert.equal(JSON.stringify(groups.json).includes("login"), false);
+
+  const groupId = groups.json.data.groups[0].id;
+  const students = await request(
+    runtime,
+    "GET",
+    `/api/learning/auth/student-groups/${groupId}/students`
+  );
+  assert.equal(students.status, 200);
+  assert.equal(students.json.data.students[0].displayName, "Иванов Иван Иванович");
+  assert.equal(JSON.stringify(students.json).includes("login"), false);
+  assert.equal(JSON.stringify(students.json).includes("password"), false);
+
+  const selected = await request(runtime, "POST", "/api/learning/auth/student-select", {
+    groupId,
+    studentId: students.json.data.students[0].id
+  });
+  assert.equal(selected.status, 200);
+  assert.match(selected.headers["set-cookie"], /HttpOnly/);
+  assert.equal(selected.json.data.user.displayName, "Иванов Иван Иванович");
+  assert.equal("login" in selected.json.data.user, false);
+  assert.equal(selected.json.data.user.mustChangePassword, false);
+  assert.deepEqual(selected.json.data.user.roles, ["student"]);
+
+  const studentCookie = selected.headers["set-cookie"].split(";")[0];
+  const me = await request(runtime, "GET", "/api/learning/auth/me", undefined, { cookie: studentCookie });
+  assert.equal(me.json.data.authenticated, true);
+  assert.equal(me.json.data.user.id, students.json.data.students[0].id);
+  const dashboard = await request(runtime, "GET", "/api/learning/student/dashboard", undefined, { cookie: studentCookie });
+  assert.equal(dashboard.status, 200);
+
+  const secondStudents = await request(
+    runtime,
+    "GET",
+    `/api/learning/auth/student-groups/${groups.json.data.groups[1].id}/students`
+  );
+  const mismatched = await request(runtime, "POST", "/api/learning/auth/student-select", {
+    groupId,
+    studentId: secondStudents.json.data.students[0].id
+  });
+  assert.equal(mismatched.status, 404);
+  assert.equal(mismatched.json.error.code, "student_not_found");
+
+  const teacherSelection = await request(runtime, "POST", "/api/learning/auth/student-select", {
+    groupId,
+    studentId: setup.json.data.user.id
+  });
+  assert.equal(teacherSelection.status, 404);
+  assert.equal(teacherSelection.json.error.code, "student_not_found");
+});
+
 test("teacher can list and reset only students in assigned groups", async (t) => {
   const storageDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "learning-password-reset-"));
   t.after(() => fs.promises.rm(storageDir, { recursive: true, force: true }));
@@ -409,7 +500,7 @@ test("teacher can list and reset only students in assigned groups", async (t) =>
     login: studentA.login, password: reset.json.data.temporaryPassword
   });
   assert.equal(temporaryLogin.status, 200);
-  assert.equal(temporaryLogin.json.data.user.mustChangePassword, true);
+  assert.equal(temporaryLogin.json.data.user.mustChangePassword, false);
 
   const adminReset = await request(
     runtime,

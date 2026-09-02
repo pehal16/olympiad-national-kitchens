@@ -467,6 +467,23 @@ class FileLearningRepository {
     );
   }
 
+  async listStudentAccessGroups() {
+    return this.read((state) => {
+      const studentIds = new Set(
+        state.userRoles.filter((item) => item.role === "student").map((item) => item.user_id)
+      );
+      const groupIds = new Set(
+        state.memberships
+          .filter((item) => item.status === "active" && studentIds.has(item.user_id))
+          .filter((item) => state.users.some((user) => user.id === item.user_id && user.status === "active"))
+          .map((item) => item.group_id)
+      );
+      return state.groups
+        .filter((item) => item.status === "active" && groupIds.has(item.id))
+        .sort((left, right) => left.name.localeCompare(right.name, "ru"));
+    });
+  }
+
   async teacherHasGroupAccess(teacherId, groupId) {
     return this.read((state) => this.teacherHasGroupAccessState(state, teacherId, groupId));
   }

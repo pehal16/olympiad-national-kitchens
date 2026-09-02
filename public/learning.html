@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#087a45" />
     <title>Учебные работы · Кабинет студента</title>
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/learning.css?v=1.1.0" />
+    <link rel="stylesheet" href="/learning.css?v=1.1.1" />
   </head>
   <body class="learning-body learning-student-body">
     <a class="skip-link" href="#main-content">Перейти к содержанию</a>
@@ -24,18 +24,23 @@
         <div class="auth-brand" aria-hidden="true">У</div>
         <p class="auth-product">ГБПОУ «ГКТС»</p>
         <h1 id="auth-title">Учебные работы</h1>
-        <p class="auth-lead">Войдите, чтобы открыть назначенные работы, черновики и результаты проверки.</p>
+        <p class="auth-lead">Выберите свою группу и ФИО, чтобы открыть назначенные работы, черновики и результаты проверки.</p>
         <form id="login-form" class="auth-form" novalidate>
           <label class="field">
-            <span>Логин</span>
-            <input id="login-name" name="login" autocomplete="username" required aria-describedby="login-error" />
+            <span>Группа</span>
+            <select id="student-login-group" required aria-describedby="student-picker-status login-error" disabled>
+              <option value="">Загружаем группы…</option>
+            </select>
           </label>
           <label class="field">
-            <span>Пароль</span>
-            <input id="login-password" name="password" type="password" autocomplete="current-password" required aria-describedby="login-error" />
+            <span>ФИО</span>
+            <select id="student-login-name" required aria-describedby="student-picker-status login-error" disabled>
+              <option value="">Сначала выберите группу</option>
+            </select>
           </label>
+          <p id="student-picker-status" class="field-hint" role="status">Загружаем список групп…</p>
           <div id="login-error" class="form-error hidden" role="alert"></div>
-          <button class="learning-button primary wide" type="submit">Войти</button>
+          <button id="student-login-submit" class="learning-button primary wide" type="submit" disabled>Открыть кабинет</button>
         </form>
       </section>
     </main>
@@ -67,29 +72,6 @@
       </main>
     </div>
 
-    <dialog id="password-dialog" class="learning-dialog" aria-labelledby="password-title">
-      <form id="password-form" method="dialog" class="dialog-form" novalidate>
-        <div class="dialog-head">
-          <div><p class="section-kicker">Безопасность</p><h2 id="password-title">Смените временный пароль</h2></div>
-        </div>
-        <p>Перед началом работы задайте новый пароль. Он должен содержать не менее десяти символов.</p>
-        <label class="field">
-          <span>Текущий пароль</span>
-          <input id="current-password" type="password" autocomplete="current-password" required />
-        </label>
-        <label class="field">
-          <span>Новый пароль</span>
-          <input id="new-password" type="password" autocomplete="new-password" minlength="10" required />
-        </label>
-        <label class="field">
-          <span>Повторите новый пароль</span>
-          <input id="new-password-repeat" type="password" autocomplete="new-password" minlength="10" required />
-        </label>
-        <div id="password-error" class="form-error hidden" role="alert"></div>
-        <button class="learning-button primary wide" type="submit">Сохранить новый пароль</button>
-      </form>
-    </dialog>
-
     <dialog id="confirm-dialog" class="learning-dialog" aria-labelledby="confirm-title">
       <form method="dialog" class="dialog-form">
         <div class="dialog-head"><h2 id="confirm-title">Подтвердите действие</h2></div>
@@ -102,6 +84,6 @@
     </dialog>
 
     <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
-    <script type="module" src="/learning/student-app.js?v=1.1.5"></script>
+    <script type="module" src="/learning/student-app.js?v=1.1.6"></script>
   </body>
 </html>

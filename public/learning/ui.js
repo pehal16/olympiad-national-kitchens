@@ -1,4 +1,4 @@
-import { ApiError, authApi } from './api.js?v=1.1.2';
+import { ApiError, authApi } from './api.js?v=1.1.3';
 
 export const $ = (selector, root = document) => root.querySelector(selector);
 export const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -189,14 +189,99 @@ function showOnly(id) {
   });
 }
 
-export function initSession({ expectedRole, shellSelector, onReady }) {
+export function initSession({ expectedRole, shellSelector, onReady, loginMode = 'password' }) {
   const loginForm = $('#login-form');
   const setupForm = $('#setup-form');
   const loginError = $('#login-error');
   const passwordDialog = $('#password-dialog');
   const passwordForm = $('#password-form');
+  const usesStudentPicker = loginMode === 'student-picker';
+  const groupSelect = $('#student-login-group');
+  const studentSelect = $('#student-login-name');
+  const pickerStatus = $('#student-picker-status');
+  const pickerSubmit = $('#student-login-submit');
   let currentUser = null;
   let passwordMandatory = false;
+  let studentLoadRevision = 0;
+
+  const replaceOptions = (select, placeholder, items = []) => {
+    if (!select) return;
+    select.replaceChildren();
+    const first = document.createElement('option');
+    first.value = '';
+    first.textContent = placeholder;
+    select.append(first);
+    items.forEach((item) => {
+      const option = document.createElement('option');
+      option.value = item.id;
+      option.textContent = item.label;
+      select.append(option);
+    });
+  };
+
+  const loadStudents = async (groupId) => {
+    const revision = ++studentLoadRevision;
+    replaceOptions(studentSelect, groupId ? 'Загружаем список…' : 'Сначала выберите группу');
+    studentSelect.disabled = true;
+    pickerSubmit.disabled = true;
+    if (!groupId) {
+      pickerStatus.textContent = 'Выберите группу, затем своё ФИО.';
+      return;
+    }
+    pickerStatus.textContent = 'Загружаем список студентов…';
+    try {
+      const payload = await authApi.studentNames(groupId);
+      if (revision !== studentLoadRevision || groupSelect.value !== groupId) return;
+      const students = asArray(payload?.students).map((student) => ({
+        id: student.id,
+        label: student.displayName || student.name || 'Студент',
+      }));
+      replaceOptions(studentSelect, students.length ? 'Выберите ФИО' : 'В группе пока нет студентов', students);
+      studentSelect.disabled = students.length === 0;
+      pickerStatus.textContent = students.length
+        ? 'Выберите своё ФИО и откройте кабинет.'
+        : 'Состав этой группы пока не загружен преподавателем.';
+      if (students.length === 1) {
+        studentSelect.value = students[0].id;
+        pickerSubmit.disabled = false;
+      }
+    } catch (error) {
+      if (revision !== studentLoadRevision || groupSelect.value !== groupId) return;
+      replaceOptions(studentSelect, 'Не удалось загрузить список');
+      pickerStatus.textContent = errorText(error);
+      loginError.textContent = errorText(error);
+      loginError.classList.remove('hidden');
+    }
+  };
+
+  const loadStudentPicker = async () => {
+    if (!usesStudentPicker || !groupSelect || !studentSelect) return;
+    groupSelect.disabled = true;
+    studentSelect.disabled = true;
+    pickerSubmit.disabled = true;
+    pickerStatus.textContent = 'Загружаем список групп…';
+    try {
+      const payload = await authApi.studentGroups();
+      const groups = asArray(payload?.groups).map((group) => ({
+        id: group.id,
+        label: group.name || group.code || 'Группа',
+      }));
+      replaceOptions(groupSelect, groups.length ? 'Выберите группу' : 'Группы пока не добавлены', groups);
+      groupSelect.disabled = groups.length === 0;
+      pickerStatus.textContent = groups.length
+        ? 'Выберите группу, затем своё ФИО.'
+        : 'Преподаватель ещё не добавил состав групп.';
+      if (groups.length === 1) {
+        groupSelect.value = groups[0].id;
+        await loadStudents(groups[0].id);
+      }
+    } catch (error) {
+      replaceOptions(groupSelect, 'Не удалось загрузить группы');
+      pickerStatus.textContent = errorText(error);
+      loginError.textContent = errorText(error);
+      loginError.classList.remove('hidden');
+    }
+  };
 
   const revealUser = async (user) => {
     currentUser = user || {};
@@ -210,7 +295,7 @@ export function initSession({ expectedRole, shellSelector, onReady }) {
       return;
     }
     showOnly(shellSelector);
-    passwordMandatory = needsPasswordChange(currentUser);
+    passwordMandatory = !usesStudentPicker && needsPasswordChange(currentUser);
     if (passwordMandatory) {
       passwordDialog?.showModal();
       return;
@@ -239,7 +324,12 @@ export function initSession({ expectedRole, shellSelector, onReady }) {
         loginError.textContent = errorText(error);
         loginError.classList.remove('hidden');
       }
-      requestAnimationFrame(() => $('#login-name')?.focus());
+      if (usesStudentPicker) {
+        await loadStudentPicker();
+        requestAnimationFrame(() => groupSelect?.focus());
+      } else {
+        requestAnimationFrame(() => $('#login-name')?.focus());
+      }
     }
   };
 
@@ -287,15 +377,29 @@ export function initSession({ expectedRole, shellSelector, onReady }) {
     const button = $('button[type="submit"]', loginForm);
     setBusy(button, true, 'Входим…');
     try {
-      await revealUser(await authApi.login($('#login-name').value.trim(), $('#login-password').value));
+      const user = usesStudentPicker
+        ? await authApi.selectStudent(groupSelect.value, studentSelect.value)
+        : await authApi.login($('#login-name').value.trim(), $('#login-password').value);
+      await revealUser(user);
       loginForm.reset();
     } catch (error) {
-      loginError.textContent = errorText(error, 'Проверьте логин и пароль.');
+      loginError.textContent = errorText(error, usesStudentPicker ? 'Проверьте выбранную группу и ФИО.' : 'Проверьте логин и пароль.');
       loginError.classList.remove('hidden');
-      $('#login-password')?.focus();
+      if (usesStudentPicker) studentSelect?.focus(); else $('#login-password')?.focus();
     } finally {
       setBusy(button, false);
     }
+  });
+
+  groupSelect?.addEventListener('change', async () => {
+    loginError?.classList.add('hidden');
+    await loadStudents(groupSelect.value);
+    studentSelect?.focus();
+  });
+
+  studentSelect?.addEventListener('change', () => {
+    pickerSubmit.disabled = !studentSelect.value;
+    loginError?.classList.add('hidden');
   });
 
   passwordForm?.addEventListener('submit', async (event) => {

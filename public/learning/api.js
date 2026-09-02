@@ -129,6 +129,16 @@ function unwrap(payload, keys = []) {
 export const authApi = {
   status() { return request(`${API_ROOT}/status`); },
   setup(body) { return request(`${API_ROOT}/setup`, { method: 'POST', body }); },
+  studentGroups() { return request(`${API_ROOT}/auth/student-groups`); },
+  studentNames(groupId) {
+    return request(`${API_ROOT}/auth/student-groups/${encodeURIComponent(groupId)}/students`);
+  },
+  async selectStudent(groupId, studentId) {
+    const payload = await request(`${API_ROOT}/auth/student-select`, {
+      method: 'POST', body: { groupId, studentId },
+    });
+    return unwrap(payload, ['user', 'session']);
+  },
   async me() {
     const payload = await request(`${API_ROOT}/auth/me`);
     if (payload?.authenticated === false || !payload?.user) throw new ApiError('Нужно войти в систему.', { status: 401, code: 'authentication_required' });
@@ -231,9 +241,6 @@ export const teacherApi = {
   rosterCommit(body) { return request(`${API_ROOT}/teacher/rosters/import/commit`, { method: 'POST', body }); },
   createGroup(body) { return request(`${API_ROOT}/teacher/groups`, { method: 'POST', body }); },
   groupStudents(groupId) { return request(`${API_ROOT}/teacher/groups/${encodeURIComponent(groupId)}/students`); },
-  resetStudentPassword(groupId, studentId) {
-    return request(`${API_ROOT}/teacher/groups/${encodeURIComponent(groupId)}/students/${encodeURIComponent(studentId)}/reset-password`, { method: 'POST', body: {} });
-  },
   createSubject(body) { return request(`${API_ROOT}/teacher/subjects`, { method: 'POST', body }); },
   createCourse(body) { return request(`${API_ROOT}/teacher/courses`, { method: 'POST', body }); },
   seedPilot() { return request(`${API_ROOT}/teacher/pilot/seed`, { method: 'POST', body: {} }); },

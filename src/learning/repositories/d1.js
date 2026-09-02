@@ -535,6 +535,17 @@ class D1LearningRepository {
     );
   }
 
+  async listStudentAccessGroups() {
+    return this.all(
+      `SELECT DISTINCT g.* FROM learning_groups g
+       INNER JOIN learning_memberships m ON m.group_id=g.id AND m.status='active'
+       INNER JOIN learning_users u ON u.id=m.user_id AND u.status='active'
+       INNER JOIN learning_user_roles r ON r.user_id=u.id AND r.role='student'
+       WHERE g.status='active'
+       ORDER BY g.name COLLATE NOCASE`, []
+    );
+  }
+
   async teacherHasGroupAccess(teacherId, groupId) {
     const row = await this.first(
       `SELECT 1 AS allowed FROM learning_course_teachers ct

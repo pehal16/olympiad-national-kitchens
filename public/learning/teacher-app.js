@@ -1,10 +1,10 @@
-import { teacherApi } from './api.js?v=1.1.2';
+import { teacherApi } from './api.js?v=1.1.3';
 import { mountTask } from './tasks.js?v=1.1.0';
 import {
   $, $$, asArray, confirmAction, debounce, downloadCsv, errorText, escapeHtml,
   formatDate, fullName, initials, initSession, logout, pick, renderEmpty,
   renderError, renderLoading, setBusy, setViewInUrl, statusBadge, statusMeta, toast,
-} from './ui.js?v=1.1.3';
+} from './ui.js?v=1.1.4';
 
 const content = $('#teacher-content');
 const saveState = $('#teacher-save-state');
@@ -862,7 +862,7 @@ function drawGroups() {
     </div></div></section>
     <section class="panel"><div class="panel-head"><h2>Доступные группы</h2><span>${groups.length}</span></div><div class="panel-body"><div class="data-table-wrap"><table class="data-table"><thead><tr><th>Группа</th><th>Студентов</th><th>Обновлено</th><th>Действие</th></tr></thead><tbody>${groups.map((group) => `<tr><td data-label="Группа"><strong>${escapeHtml(nameOf(group))}</strong></td><td data-label="Студентов">${escapeHtml(group.studentCount ?? group.studentsCount ?? asArray(group.students).length)}</td><td data-label="Обновлено">${escapeHtml(formatDate(group.updatedAt || group.updated_at))}</td><td data-label="Действие"><button class="learning-button quiet" data-open-group="${escapeHtml(idOf(group))}" type="button">Открыть состав</button></td></tr>`).join('')}</tbody></table></div></div></section>
     <section id="group-students-panel" class="panel hidden" aria-live="polite"></section>
-    <section class="panel" aria-labelledby="import-title"><div class="panel-head"><h2 id="import-title">Импорт состава</h2></div><div class="panel-body"><form id="roster-form"><div class="teacher-filter-row"><label class="field"><span>Группа</span><select id="roster-group" required>${optionsHtml(groups, '', 'Выберите группу')}</select></label><label class="field"><span>CSV-файл</span><input id="roster-file" type="file" accept=".csv,text/csv,text/plain" /></label></div><label class="field" style="margin-top:14px"><span>Данные CSV: код; отображаемое имя; логин</span><textarea id="roster-data" rows="8" placeholder="С001;Студент 001;student001" required></textarea></label><button class="learning-button secondary" type="submit">Проверить импорт</button></form><div id="roster-preview" class="roster-preview"></div></div></section></div></div>`;
+    <section class="panel" aria-labelledby="import-title"><div class="panel-head"><h2 id="import-title">Импорт состава</h2></div><div class="panel-body"><form id="roster-form"><div class="teacher-filter-row"><label class="field"><span>Группа</span><select id="roster-group" required>${optionsHtml(groups, '', 'Выберите группу')}</select></label><label class="field"><span>CSV-файл</span><input id="roster-file" type="file" accept=".csv,text/csv,text/plain" /></label></div><label class="field" style="margin-top:14px"><span>Данные CSV: код; ФИО</span><textarea id="roster-data" rows="8" placeholder="С001;Иванов Иван Иванович" required></textarea></label><button class="learning-button secondary" type="submit">Проверить импорт</button></form><div id="roster-preview" class="roster-preview"></div></div></section></div></div>`;
   $('#create-group-form').addEventListener('submit', (event) => createCatalogEntity(event, () => teacherApi.createGroup({ code: $('#new-group-code').value, name: $('#new-group-name').value }), 'Группа добавлена.'));
   $('#create-subject-form').addEventListener('submit', (event) => createCatalogEntity(event, () => teacherApi.createSubject({ code: $('#new-subject-code').value, name: $('#new-subject-name').value }), 'Предмет добавлен.'));
   $('#create-course-form').addEventListener('submit', (event) => createCatalogEntity(event, () => teacherApi.createCourse({ name: $('#new-course-name').value, subjectId: $('#new-course-subject').value, groupIds: [$('#new-course-group').value], academicYear: $('#new-course-year').value }), 'Учебный курс создан.'));
@@ -884,31 +884,10 @@ async function openGroupStudents(groupId) {
   try {
     const result = await teacherApi.groupStudents(groupId);
     const students = asArray(result.students);
-    target.innerHTML = `<div class="panel-head"><div><h2>${escapeHtml(nameOf(result.group, 'Состав группы'))}</h2><p class="muted">Учётные записи студентов и безопасный сброс доступа.</p></div><span>${students.length}</span></div><div class="panel-body"><div id="password-reset-result"></div>${students.length ? `<div class="data-table-wrap"><table class="data-table"><thead><tr><th>Студент</th><th>Логин</th><th>Статус</th><th>Действие</th></tr></thead><tbody>${students.map((student) => `<tr><td data-label="Студент"><strong>${escapeHtml(student.displayName || student.login)}</strong></td><td data-label="Логин"><code>${escapeHtml(student.login)}</code></td><td data-label="Статус">${statusBadge(student.status || 'active')}</td><td data-label="Действие"><button class="learning-button quiet" data-reset-student="${escapeHtml(student.id)}" type="button">Сбросить пароль</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty-state"><h3>В группе пока нет студентов</h3><p>Добавьте состав через импорт CSV ниже.</p></div>'}</div>`;
-    $$('[data-reset-student]', target).forEach((button) => button.addEventListener('click', () => resetStudentPassword(groupId, button.dataset.resetStudent, button)));
+    target.innerHTML = `<div class="panel-head"><div><h2>${escapeHtml(nameOf(result.group, 'Состав группы'))}</h2><p class="muted">Студенты выбирают группу и своё ФИО при входе.</p></div><span>${students.length}</span></div><div class="panel-body">${students.length ? `<div class="data-table-wrap"><table class="data-table"><thead><tr><th>Студент</th><th>Статус</th></tr></thead><tbody>${students.map((student) => `<tr><td data-label="Студент"><strong>${escapeHtml(student.displayName || 'Студент')}</strong></td><td data-label="Статус">${statusBadge(student.status || 'active')}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty-state"><h3>В группе пока нет студентов</h3><p>Добавьте состав через импорт CSV ниже.</p></div>'}</div>`;
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (error) {
     target.innerHTML = `<div class="panel-body"><div class="form-error" role="alert">${escapeHtml(errorText(error))}</div></div>`;
-  }
-}
-
-async function resetStudentPassword(groupId, studentId, button) {
-  const confirmed = await confirmAction({
-    title: 'Сбросить пароль студента?',
-    message: 'Все активные сеансы студента будут завершены. Новый временный пароль отобразится только один раз.',
-    acceptLabel: 'Сбросить пароль',
-  });
-  if (!confirmed) return;
-  setBusy(button, true, 'Сбрасываем…');
-  try {
-    const result = await teacherApi.resetStudentPassword(groupId, studentId);
-    const target = $('#password-reset-result');
-    target.innerHTML = `<div class="revision-panel"><strong>Сохраните временный пароль сейчас</strong><p>${escapeHtml(result.student?.displayName || result.student?.login || 'Студент')} · логин <code>${escapeHtml(result.student?.login || '')}</code></p><p>Временный пароль: <code>${escapeHtml(result.temporaryPassword || '')}</code></p><p>При следующем входе студент обязан установить новый пароль. Завершено активных сеансов: ${Number(result.sessionsRevoked || 0)}.</p></div>`;
-    toast('Временный пароль создан.', 'success');
-  } catch (error) {
-    toast(errorText(error), 'danger');
-  } finally {
-    setBusy(button, false);
   }
 }
 
@@ -928,13 +907,8 @@ async function createCatalogEntity(event, action, successMessage) {
   }
 }
 
-function drawCredentials(target, credentials, title = 'Временные данные для входа') {
-  if (!credentials.length) {
-    target.innerHTML = '<div class="revision-panel"><strong>Пилот уже подготовлен</strong><p>Повторно временные пароли не отображаются. Существующие данные и назначения сохранены.</p></div>';
-    return;
-  }
-  target.innerHTML = `<div class="revision-panel"><strong>Сохраните список сейчас</strong><p>Временные пароли показываются один раз и должны передаваться студентам безопасным способом.</p></div><div class="data-table-wrap"><table class="data-table"><thead><tr><th>Отображаемое имя</th><th>Логин</th><th>Временный пароль</th></tr></thead><tbody>${credentials.map((item) => `<tr><td data-label="Имя">${escapeHtml(item.displayName)}</td><td data-label="Логин"><code>${escapeHtml(item.login)}</code></td><td data-label="Пароль"><code>${escapeHtml(item.temporaryPassword)}</code></td></tr>`).join('')}</tbody></table></div><button data-pilot-credentials-export class="learning-button secondary" type="button">Скачать CSV</button>`;
-  $('[data-pilot-credentials-export]', target)?.addEventListener('click', () => downloadCsv(`temporary-access-${new Date().toISOString().slice(0, 10)}.csv`, [[title, 'Логин', 'Временный пароль'], ...credentials.map((item) => [item.displayName, item.login, item.temporaryPassword])]));
+function drawPilotResult(target, students) {
+  target.innerHTML = `<div class="revision-panel"><strong>Пилотный выпуск готов</strong><p>Студент выбирает пилотную группу и своё ФИО. Логин и пароль не требуются.</p></div>${students.length ? `<div class="data-table-wrap"><table class="data-table"><thead><tr><th>ФИО</th></tr></thead><tbody>${students.map((item) => `<tr><td data-label="ФИО">${escapeHtml(item.displayName || 'Студент')}</td></tr>`).join('')}</tbody></table></div>` : ''}`;
 }
 
 async function seedPilot(event) {
@@ -950,7 +924,7 @@ async function seedPilot(event) {
     drawGroups();
     const refreshedResultBox = $('#pilot-result');
     refreshedResultBox.classList.remove('hidden');
-    drawCredentials(refreshedResultBox, asArray(result.credentials), 'Отображаемое имя');
+    drawPilotResult(refreshedResultBox, asArray(result.credentials));
     toast(result.seeded ? 'Пилотный выпуск готов.' : 'Пилот уже был подготовлен.', 'success');
   } catch (error) {
     resultBox.innerHTML = `<div class="form-error" role="alert">${escapeHtml(errorText(error))}</div>`;
@@ -967,8 +941,8 @@ async function previewRoster(event) {
     const group = catalogData().groups.find((item) => String(idOf(item)) === $('#roster-group').value);
     const students = $('#roster-data').value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line, index) => {
       const cells = line.split(/[;,\t]/).map((cell) => cell.trim());
-      return { sourceRow: index + 1, code: cells[0] || '', displayName: cells[1] || cells[0] || '', login: cells[2] || '' };
-    }).filter((row, index) => !(index === 0 && /имя|name/i.test(row.displayName) && /логин|login/i.test(row.login)));
+      return { sourceRow: index + 1, code: cells[0] || '', displayName: cells[1] || cells[0] || '' };
+    }).filter((row, index) => !(index === 0 && /фио|имя|name/i.test(row.displayName)));
     state.rosterRequest = { groupCode: group?.code || nameOf(group), groupName: nameOf(group), students };
     state.rosterPreview = await teacherApi.rosterPreview(state.rosterRequest);
     drawRosterPreview();
@@ -982,23 +956,19 @@ function drawRosterPreview() {
   const accepted = rows.filter((row) => row.valid !== false && !row.error);
   const rejected = rows.filter((row) => row.valid === false || row.error);
   const target = $('#roster-preview');
-  target.innerHTML = `<div class="panel"><div class="panel-head"><h3>Предпросмотр</h3><span>Принято: ${accepted.length} · Ошибок: ${rejected.length}</span></div><div class="panel-body"><div class="data-table-wrap"><table class="data-table"><thead><tr><th>Строка</th><th>Код</th><th>Отображаемое имя</th><th>Логин</th><th>Результат</th></tr></thead><tbody>${rows.map((row, index) => `<tr><td data-label="Строка">${row.line || index + 1}</td><td data-label="Код">${escapeHtml(row.code || '')}</td><td data-label="Имя">${escapeHtml(row.displayName || row.name || '')}</td><td data-label="Логин">${escapeHtml(row.login || '')}</td><td data-label="Результат">${row.error ? `<span class="form-error">${escapeHtml(row.error)}</span>` : '<span class="status-mark success">Готово</span>'}</td></tr>`).join('')}</tbody></table></div>${accepted.length ? '<div class="review-actions"><button id="roster-commit" class="learning-button primary" type="button">Сохранить состав</button></div>' : ''}</div></div>`;
+  target.innerHTML = `<div class="panel"><div class="panel-head"><h3>Предпросмотр</h3><span>Принято: ${accepted.length} · Ошибок: ${rejected.length}</span></div><div class="panel-body"><div class="data-table-wrap"><table class="data-table"><thead><tr><th>Строка</th><th>Код</th><th>ФИО</th><th>Результат</th></tr></thead><tbody>${rows.map((row, index) => `<tr><td data-label="Строка">${row.line || index + 1}</td><td data-label="Код">${escapeHtml(row.code || '')}</td><td data-label="ФИО">${escapeHtml(row.displayName || row.name || '')}</td><td data-label="Результат">${row.error ? `<span class="form-error">${escapeHtml(row.error)}</span>` : '<span class="status-mark success">Готово</span>'}</td></tr>`).join('')}</tbody></table></div>${accepted.length ? '<div class="review-actions"><button id="roster-commit" class="learning-button primary" type="button">Сохранить состав</button></div>' : ''}</div></div>`;
   $('#roster-commit')?.addEventListener('click', commitRoster);
 }
 
 async function commitRoster(event) {
-  const confirmed = await confirmAction({ title: 'Сохранить состав группы?', message: 'Существующие учётные записи будут сопоставлены по логину; новые строки будут добавлены.', acceptLabel: 'Сохранить' });
+  const confirmed = await confirmAction({ title: 'Сохранить состав группы?', message: 'Студенты появятся в списке выбора ФИО для указанной группы.', acceptLabel: 'Сохранить' });
   if (!confirmed) return;
   setBusy(event.currentTarget, true, 'Сохраняем…');
   try {
-    const result = await teacherApi.rosterCommit(state.rosterRequest);
+    await teacherApi.rosterCommit(state.rosterRequest);
     state.catalog = null; state.rosterPreview = null; state.rosterRequest = null;
     toast('Состав группы обновлён.', 'success');
-    const credentials = asArray(result.credentials);
-    const target = $('#roster-preview');
-    if (!credentials.length) { renderGroups(); return; }
-    target.innerHTML = `<div class="panel"><div class="panel-head"><h3>Временные данные для входа</h3><button id="credentials-export" class="learning-button secondary" type="button">Скачать CSV</button></div><div class="panel-body"><div class="revision-panel"><strong>Сохраните список сейчас</strong><p>Временные пароли показываются после импорта и должны передаваться студентам безопасным способом.</p></div><div class="data-table-wrap"><table class="data-table"><thead><tr><th>Отображаемое имя</th><th>Логин</th><th>Временный пароль</th></tr></thead><tbody>${credentials.map((item) => `<tr><td data-label="Имя">${escapeHtml(item.displayName)}</td><td data-label="Логин"><code>${escapeHtml(item.login)}</code></td><td data-label="Пароль"><code>${escapeHtml(item.temporaryPassword)}</code></td></tr>`).join('')}</tbody></table></div></div></div>`;
-    $('#credentials-export').addEventListener('click', () => downloadCsv(`temporary-access-${new Date().toISOString().slice(0, 10)}.csv`, [['Отображаемое имя', 'Логин', 'Временный пароль'], ...credentials.map((item) => [item.displayName, item.login, item.temporaryPassword])]));
+    await renderGroups();
   } catch (error) { toast(errorText(error), 'danger'); setBusy(event.currentTarget, false); }
 }
 
