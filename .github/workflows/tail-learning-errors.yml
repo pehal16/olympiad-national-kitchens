@@ -15,9 +15,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          DEPLOYMENT_ID="$(npx --yes wrangler@4.20.0 pages deployment list --project-name olympiad-gkts --environment production --json | jq -r '.[0].id')"
+          DEPLOYMENT_ID="$(npx --yes wrangler@4.128.0 pages deployment list --project-name olympiad-gkts --environment production --json | jq -r '.[0].id')"
           test -n "$DEPLOYMENT_ID"
-          npx --yes wrangler@4.20.0 pages deployment tail "$DEPLOYMENT_ID" \
+          npx --yes wrangler@4.128.0 pages deployment tail "$DEPLOYMENT_ID" \
             --format pretty \
             --status error \
             --method POST
