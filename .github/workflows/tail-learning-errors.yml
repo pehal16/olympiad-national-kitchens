@@ -18,6 +18,7 @@ jobs:
           DEPLOYMENT_ID="$(npx --yes wrangler@4.128.0 pages deployment list --project-name olympiad-gkts --environment production --json | jq -r '.[0].id')"
           test -n "$DEPLOYMENT_ID"
           npx --yes wrangler@4.128.0 pages deployment tail "$DEPLOYMENT_ID" \
+            --project-name olympiad-gkts \
             --format pretty \
             --status error \
             --method POST
