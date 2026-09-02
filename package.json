@@ -1,6 +1,6 @@
 {
   "name": "national-kitchens-olympiad",
-  "version": "1.6.79",
+  "version": "1.6.80",
   "author": "Постовит Д.А.",
   "description": "Автономная веб-олимпиада по национальным кухням",
   "main": "electron-main.js",
@@ -65,5 +65,14 @@
       ],
       "artifactName": "Olympiad-National-Kitchens-${version}.exe"
     }
+  },
+  "allowScripts": {
+    "electron@41.1.1": true,
+    "electron-winstaller@5.4.0": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.27.3": true,
+    "protobufjs@7.6.2": true,
+    "sharp@0.34.5": true,
+    "workerd@1.20260611.1": true
   }
 }

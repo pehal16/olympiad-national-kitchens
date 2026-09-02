@@ -570,11 +570,13 @@ function validateAnswer(definition, rawAnswer) {
       break;
     case "ttk_builder":
       validateRequiredFields(definition.requiredFields, normalized, errors);
+      validateTtkAnswer(definition, normalized, errors);
       break;
     case "scheme_builder":
       if (!hasMeaningfulObjectValue(normalized)) {
         errors.push(issue("answer", "scheme_required", "Добавьте элементы технологической схемы."));
       }
+      validateSchemeAnswer(definition, normalized, errors);
       break;
     case "dish_assembly": {
       const componentIds = new Set(items.map((item) => item.id));
@@ -918,6 +920,94 @@ function validateRequiredFields(requiredFields, answer, errors) {
     ) {
       errors.push(issue(`answer.${fieldName}`, "field_required", `Заполните поле «${fieldName}».`));
     }
+  }
+}
+
+function decimalNumber(value) {
+  if (value === undefined || value === null || (typeof value === "string" && !value.trim())) {
+    return null;
+  }
+  const normalized = typeof value === "string" ? value.replace(/\s+/g, "").replace(",", ".") : value;
+  const number = Number(normalized);
+  return Number.isFinite(number) ? number : null;
+}
+
+function validateTtkAnswer(definition, answer, errors) {
+  if (!isPlainObject(answer)) {
+    return;
+  }
+  const requiredFields = new Set((Array.isArray(definition.requiredFields) ? definition.requiredFields : []).map(text));
+  const ingredients = Array.isArray(answer.ingredients)
+    ? answer.ingredients
+    : Array.isArray(answer.grossNet)
+      ? answer.grossNet
+      : [];
+  const minimumIngredients = Math.max(0, Number(definition.minIngredients ?? (requiredFields.has("ingredients") ? 1 : 0)) || 0);
+  if (ingredients.length < minimumIngredients) {
+    errors.push(issue("answer.ingredients", "ingredient_count", `Добавьте не меньше ${minimumIngredients} строк рецептуры.`));
+  }
+  const requireMasses = definition.requireIngredientMasses === true || requiredFields.has("grossNet");
+  ingredients.forEach((ingredient, index) => {
+    if (!isPlainObject(ingredient) || !text(ingredient.name)) {
+      errors.push(issue(`answer.ingredients.${index}.name`, "ingredient_name_required", "Укажите наименование сырья."));
+      return;
+    }
+    if (!requireMasses) {
+      return;
+    }
+    const gross = decimalNumber(ingredient.gross ?? ingredient.amount);
+    const net = decimalNumber(ingredient.net ?? ingredient.amount);
+    if (gross === null || net === null || gross < 0 || net < 0 || !text(ingredient.unit)) {
+      errors.push(issue(`answer.ingredients.${index}`, "ingredient_mass_required", "Укажите неотрицательные значения брутто, нетто и единицу измерения."));
+    } else if (definition.enforceGrossNotLessThanNet === true && gross < net) {
+      errors.push(issue(`answer.ingredients.${index}.gross`, "gross_less_than_net", "Масса брутто не должна быть меньше массы нетто."));
+    }
+  });
+
+  const steps = Array.isArray(answer.steps) ? answer.steps : [];
+  const minimumSteps = Math.max(0, Number(definition.minSteps ?? (requiredFields.has("steps") ? 1 : 0)) || 0);
+  if (steps.length < minimumSteps) {
+    errors.push(issue("answer.steps", "step_count", `Добавьте не меньше ${minimumSteps} технологических операций.`));
+  }
+  steps.forEach((step, index) => {
+    const operation = isPlainObject(step) ? step.operation ?? step.value : step;
+    if (!text(operation)) {
+      errors.push(issue(`answer.steps.${index}.operation`, "step_operation_required", "Укажите технологическую операцию."));
+    }
+  });
+
+  if (requiredFields.has("output")) {
+    const output = answer.output;
+    const outputValue = isPlainObject(output) ? output.value ?? output.amount : output;
+    const outputUnit = isPlainObject(output) ? output.unit : "";
+    if (decimalNumber(outputValue) === null || !text(outputUnit)) {
+      errors.push(issue("answer.output", "output_required", "Укажите числовой выход и единицу измерения."));
+    }
+  }
+}
+
+function validateSchemeAnswer(definition, answer, errors) {
+  const nodes = Array.isArray(answer?.nodes) ? answer.nodes : [];
+  const minimum = Math.max(0, Number(definition.minNodes ?? 1) || 0);
+  if (nodes.length < minimum) {
+    errors.push(issue("answer.nodes", "scheme_node_count", `Добавьте не меньше ${minimum} этапов схемы.`));
+    return;
+  }
+  const ids = new Set();
+  nodes.forEach((node, index) => {
+    if (!isPlainObject(node) || !text(node.label)) {
+      errors.push(issue(`answer.nodes.${index}.label`, "scheme_label_required", "Укажите название этапа схемы."));
+    }
+    const id = text(node?.id);
+    if (!id || ids.has(id)) {
+      errors.push(issue(`answer.nodes.${index}.id`, "scheme_node_id", "Каждый этап схемы должен иметь уникальный идентификатор."));
+    }
+    ids.add(id);
+  });
+  const minimumControls = Math.max(0, Number(definition.minControlPoints ?? 0) || 0);
+  const controls = nodes.filter((node) => text(node?.control) || text(node?.type) === "control").length;
+  if (controls < minimumControls) {
+    errors.push(issue("answer.nodes", "scheme_control_count", `Добавьте не меньше ${minimumControls} контрольных точек.`));
   }
 }
 

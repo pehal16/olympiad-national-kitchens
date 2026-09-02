@@ -22,10 +22,12 @@ Always treat the latest `origin/main` as the source of truth. Older chat instruc
 - Do not discard old results or student attempts while changing UI/content.
 - Do not overwrite user/local changes without explicit instruction.
 - Prefer additive, reviewable changes with tests.
+- Every learning work must be traceable to the applicable working program and lesson sequence; factual norms, recipe data, equipment modes, sanitary requirements, and standards must be checked before publication. Student-facing wording must remain appropriately challenging, self-contained, concise, and accessible.
 
 ## Learning Works Pilot
 
 - The living source of truth for the teacher's daily material-preparation workflow is `docs/teacher-daily-workflow.md`.
+- Current platform package version: `1.6.80`; this release changes the learning-works pilot and does not change the official PM01 100-point contract.
 - Private local paths, the VK schedule chat, and the working email address are stored only in the ignored file `storage/teacher-workflow-private.json`.
 - The separate mode `Учебные работы` is implemented under `/learning.html`, `/learning-admin.html`, and `/api/learning/*`; it remains independent from PM01 and olympiad attempts.
 - The pilot includes roles, groups, subjects, courses, roster import, 18 block types, immutable work versions, assignments, autosave, file evidence, automatic and manual review, correction cycles, grades, audit, and the journal.
@@ -33,11 +35,14 @@ Always treat the latest `origin/main` as the source of truth. Older chat instruc
 - The Cloudflare workflow validates the existing Yandex Disk OAuth token, writes the Yandex settings as Pages secrets, and deliberately has no R2 binding or R2 subscription dependency.
 - Learning passwords use salted PBKDF2-SHA-256 with the private server pepper and a portable 100,000-iteration ceiling required by the Cloudflare Workers Web Crypto runtime.
 - The teacher can open a group roster and issue a one-time temporary password; active student sessions are revoked and the next login requires password replacement.
-- A safe synthetic pilot creates one fictional group, four fictional students, five subjects, and five representative works.
+- A safe synthetic pilot creates one fictional group, four fictional students, five subjects, and five works based on the verified sequence of МДК 01.01 for 3-ПК-26: raw-material request, spices, recipe-book use, workplace flow, and equipment use.
+- The first pilot work uses corrected raw-material calculations and kilogram totals. The platform accepts decimal commas and configured numerical tolerances.
+- The technology-card builder now covers source details, scope, gross/net formulation, technological operations, output, serving, quality, storage, and allergens. The technology-scheme builder creates a live ordered flow and can enforce minimum stages and control points.
+- Verified illustrations reused from the teacher's accepted source documents are stored under `public/assets/learning/spices/` and `public/assets/learning/equipment/`.
 - Manual schedule/replacement intake is still separate. Automatic VK access is a later optional integration.
 - Draft generation may use working programs, lesson plans, approved old materials, and templates, but publication remains blocked until teacher review.
 - Email preparation may be automated, but external sending always requires explicit confirmation and an idempotent delivery record.
-- Current implementation status: the full local pilot lifecycle is implemented and covered by automated and browser tests. Real-group rollout must follow `docs/learning-pilot-runbook.md`, beginning with one group and one subject.
+- Current implementation status: the full local pilot lifecycle and the first methodically grounded МДК 01.01 content package are implemented. Real-group rollout must follow `docs/learning-pilot-runbook.md`, beginning with one group and one subject; roster import and publication require a separate deliberate step.
 
 ## PM01 Exam State
 

@@ -354,6 +354,25 @@ function renderInstruction(environment) {
   } else {
     paragraphs.forEach((paragraph) => panel.append(createElement('p', null, paragraph)));
   }
+  const images = normalizedCollection(block.images || [], 'instruction-image');
+  if (images.length) {
+    const gallery = createElement('div', 'instruction-gallery');
+    images.forEach((item) => {
+      const raw = isObject(item.raw) ? item.raw : {};
+      const source = raw.src || raw.image || raw.imageUrl;
+      if (!source) return;
+      const figure = createElement('figure', 'instruction-figure');
+      const image = createElement('img');
+      image.src = String(source);
+      image.alt = String(raw.alt || item.label || 'Учебная иллюстрация');
+      image.loading = 'lazy';
+      figure.append(image);
+      const caption = raw.caption || raw.label || item.label;
+      if (caption) figure.append(createElement('figcaption', null, caption));
+      gallery.append(figure);
+    });
+    if (gallery.childElementCount) panel.append(gallery);
+  }
   root.append(panel);
   return { getValue: () => null };
 }
@@ -381,8 +400,19 @@ function renderChoices(environment, forceMultiple) {
     input.value = option.id;
     input.checked = selected.has(option.id);
     input.disabled = readOnly;
-    const copy = createElement('span', null, option.label);
-    label.append(input, copy);
+    const content = createElement('span', 'choice-option-content');
+    const raw = isObject(option.raw) ? option.raw : {};
+    const imageSource = raw.image || raw.imageUrl || raw.src;
+    if (imageSource) {
+      const image = createElement('img', 'choice-option-image');
+      image.src = String(imageSource);
+      image.alt = String(raw.imageAlt || raw.alt || option.label);
+      image.loading = 'lazy';
+      content.append(image);
+    }
+    content.append(createElement('span', 'choice-option-label', option.label));
+    if (raw.description) content.append(createElement('small', 'choice-option-description', raw.description));
+    label.append(input, content);
     group.append(label);
     controls.push(input);
     input.addEventListener('change', () => {
@@ -732,21 +762,66 @@ function renderTable(environment) {
 function renderTtkBuilder(environment) {
   const { root, block, value, readOnly, emit, announce } = environment;
   const initial = isObject(value) ? cloneSerializable(value) : {};
-  const dishName = createElement('input');
-  dishName.value = initial.dishName ?? '';
-  dishName.placeholder = block.dishNamePlaceholder || 'Название блюда';
-  dishName.disabled = readOnly;
-  dishName.addEventListener('input', emit);
-  root.append(makeField('Название блюда', dishName));
+  const section = (title, description) => {
+    const heading = createElement('div', 'builder-section-heading');
+    heading.append(createElement('h4', null, title));
+    if (description) heading.append(createElement('p', null, description));
+    return heading;
+  };
+  const inputControl = (value, placeholder = '', type = 'text') => {
+    const control = createElement(type === 'textarea' ? 'textarea' : 'input');
+    if (type === 'textarea') control.rows = 3;
+    else control.type = type;
+    control.value = value ?? '';
+    control.placeholder = placeholder;
+    control.disabled = readOnly;
+    control.addEventListener('input', emit);
+    return control;
+  };
 
-  const ingredients = asArray(initial.ingredients).map((ingredient) => ({
+  const initialSource = isObject(initial.source) ? initial.source : {};
+  const initialOutput = isObject(initial.output) ? initial.output : { value: initial.output ?? '', unit: '' };
+  const dishName = inputControl(initial.dishName, block.dishNamePlaceholder || 'Например, суп картофельный');
+  const scope = inputControl(initial.scope, 'Где и при каких условиях применяется карта', 'textarea');
+  const collectionTitle = inputControl(initialSource.collectionTitle ?? initial.collectionTitle, 'Название сборника или документа');
+  const recipeNumber = inputControl(initialSource.recipeNumber ?? initial.recipeNumber, 'Номер рецептуры');
+  const variant = inputControl(initialSource.variant ?? initial.variant, 'Вариант или колонка');
+  const sourceBasis = inputControl(initialSource.basis ?? initial.sourceBasis, 'Год издания, страница или реквизиты');
+  const outputValue = inputControl(initialOutput.value ?? initialOutput.amount, 'Например, 250', 'number');
+  outputValue.step = 'any';
+  outputValue.min = '0';
+  const outputUnit = inputControl(initialOutput.unit, 'г, кг или порций');
+  const serving = inputControl(initial.serving, 'Температура подачи, посуда и оформление', 'textarea');
+  const quality = inputControl(initial.quality, 'Внешний вид, цвет, вкус, запах и консистенция', 'textarea');
+  const storage = inputControl(initial.storage, 'Условия и допустимый срок хранения', 'textarea');
+  const allergens = inputControl(initial.allergens, 'Аллергены или «не выявлены по составу»');
+
+  const identityGrid = createElement('div', 'builder-field-grid');
+  identityGrid.append(
+    makeField('Название блюда', dishName),
+    makeField('Область применения', scope),
+    makeField('Источник рецептуры', collectionTitle),
+    makeField('Номер рецептуры', recipeNumber),
+    makeField('Вариант', variant),
+    makeField('Реквизиты источника', sourceBasis),
+  );
+  root.append(section('1. Основание и назначение', 'Укажите источник данных так, чтобы расчёт можно было проверить.'), identityGrid);
+
+  const ingredientSource = asArray(initial.ingredients).length ? initial.ingredients : asArray(initial.grossNet);
+  const ingredients = ingredientSource.map((ingredient) => ({
     runtimeId: nextId('ingredient'),
     name: isObject(ingredient) ? String(ingredient.name ?? '') : humanText(ingredient),
-    amount: isObject(ingredient) ? ingredient.amount ?? '' : '',
+    gross: isObject(ingredient) ? ingredient.gross ?? ingredient.amount ?? '' : '',
+    net: isObject(ingredient) ? ingredient.net ?? ingredient.amount ?? '' : '',
+    unit: isObject(ingredient) ? ingredient.unit ?? 'г' : 'г',
+    notes: isObject(ingredient) ? String(ingredient.notes ?? '') : '',
   }));
   const steps = asArray(initial.steps).map((step) => ({
     runtimeId: nextId('step'),
-    value: isObject(step) ? humanText(step) : String(step ?? ''),
+    operation: isObject(step) ? String(step.operation ?? step.value ?? humanText(step)) : String(step ?? ''),
+    equipment: isObject(step) ? String(step.equipment ?? '') : '',
+    mode: isObject(step) ? String(step.mode ?? '') : '',
+    control: isObject(step) ? String(step.control ?? '') : '',
   }));
   const ingredientList = createElement('div', 'dynamic-list');
   const stepList = createElement('div', 'dynamic-list');
@@ -811,15 +886,39 @@ function renderTtkBuilder(environment) {
       name.value = ingredient.name;
       name.placeholder = 'Наименование';
       name.disabled = readOnly;
-      const amount = createElement('input');
-      amount.type = 'text';
-      amount.inputMode = 'decimal';
-      amount.value = ingredient.amount ?? '';
-      amount.placeholder = 'Количество';
-      amount.disabled = readOnly;
+      const gross = createElement('input');
+      gross.type = 'text';
+      gross.inputMode = 'decimal';
+      gross.value = ingredient.gross ?? '';
+      gross.placeholder = '0';
+      gross.disabled = readOnly;
+      const net = createElement('input');
+      net.type = 'text';
+      net.inputMode = 'decimal';
+      net.value = ingredient.net ?? '';
+      net.placeholder = '0';
+      net.disabled = readOnly;
+      const unit = createElement('input');
+      unit.value = ingredient.unit ?? '';
+      unit.placeholder = 'г';
+      unit.disabled = readOnly;
+      const notes = createElement('input');
+      notes.value = ingredient.notes ?? '';
+      notes.placeholder = 'Состояние сырья или примечание';
+      notes.disabled = readOnly;
       name.addEventListener('input', () => { ingredient.name = name.value; emit(); });
-      amount.addEventListener('input', () => { ingredient.amount = amount.value; emit(); });
-      row.append(makeField('Ингредиент', name), makeField('Количество', amount), rowActions(ingredients, index, renderIngredients, 'Ингредиент'));
+      gross.addEventListener('input', () => { ingredient.gross = gross.value; emit(); });
+      net.addEventListener('input', () => { ingredient.net = net.value; emit(); });
+      unit.addEventListener('input', () => { ingredient.unit = unit.value; emit(); });
+      notes.addEventListener('input', () => { ingredient.notes = notes.value; emit(); });
+      row.append(
+        makeField('Сырьё', name),
+        makeField('Брутто', gross),
+        makeField('Нетто', net),
+        makeField('Ед.', unit),
+        makeField('Примечание', notes),
+        rowActions(ingredients, index, renderIngredients, 'Ингредиент'),
+      );
       ingredientList.append(row);
     });
   }
@@ -829,43 +928,113 @@ function renderTtkBuilder(environment) {
     steps.forEach((step, index) => {
       const row = createElement('div', 'dynamic-row');
       row.dataset.ttkStep = String(index);
-      const input = createElement('input');
-      input.value = step.value;
-      input.placeholder = 'Опишите этап приготовления';
-      input.disabled = readOnly;
-      if (stepDataList) input.setAttribute('list', stepDataList.id);
-      input.addEventListener('input', () => { step.value = input.value; emit(); });
-      row.append(makeField(`Этап ${index + 1}`, input), rowActions(steps, index, renderSteps, 'Этап'));
+      const operation = createElement('input');
+      operation.value = step.operation;
+      operation.placeholder = 'Операция';
+      operation.disabled = readOnly;
+      if (stepDataList) operation.setAttribute('list', stepDataList.id);
+      const equipment = createElement('input');
+      equipment.value = step.equipment;
+      equipment.placeholder = 'Оборудование и инвентарь';
+      equipment.disabled = readOnly;
+      const mode = createElement('input');
+      mode.value = step.mode;
+      mode.placeholder = 'Режим, время, температура';
+      mode.disabled = readOnly;
+      const control = createElement('input');
+      control.value = step.control;
+      control.placeholder = 'Признак правильного выполнения';
+      control.disabled = readOnly;
+      operation.addEventListener('input', () => { step.operation = operation.value; emit(); });
+      equipment.addEventListener('input', () => { step.equipment = equipment.value; emit(); });
+      mode.addEventListener('input', () => { step.mode = mode.value; emit(); });
+      control.addEventListener('input', () => { step.control = control.value; emit(); });
+      row.append(
+        makeField(`Операция ${index + 1}`, operation),
+        makeField('Оборудование', equipment),
+        makeField('Режим', mode),
+        makeField('Контроль', control),
+        rowActions(steps, index, renderSteps, 'Этап'),
+      );
       stepList.append(row);
     });
   }
 
   ingredientAdd.addEventListener('click', () => {
     if (readOnly || (Number(block.maxIngredients) > 0 && ingredients.length >= Number(block.maxIngredients))) return;
-    ingredients.push({ runtimeId: nextId('ingredient'), name: '', amount: '' });
+    ingredients.push({ runtimeId: nextId('ingredient'), name: '', gross: '', net: '', unit: 'г', notes: '' });
     renderIngredients();
     emit();
     ingredientList.querySelector(`[data-ttk-ingredient="${ingredients.length - 1}"] input`)?.focus();
   });
   stepAdd.addEventListener('click', () => {
     if (readOnly || (Number(block.maxSteps) > 0 && steps.length >= Number(block.maxSteps))) return;
-    steps.push({ runtimeId: nextId('step'), value: '' });
+    steps.push({ runtimeId: nextId('step'), operation: '', equipment: '', mode: '', control: '' });
     renderSteps();
     emit();
     stepList.querySelector(`[data-ttk-step="${steps.length - 1}"] input`)?.focus();
   });
 
-  const ingredientHeading = createElement('h4', null, 'Ингредиенты');
-  const stepHeading = createElement('h4', null, 'Последовательность приготовления');
   renderIngredients();
   renderSteps();
-  root.append(ingredientHeading, ingredientList, ingredientAdd, stepHeading, stepList, stepAdd);
+  const outputGrid = createElement('div', 'builder-field-grid compact');
+  outputGrid.append(makeField('Выход', outputValue), makeField('Единица выхода', outputUnit));
+  const qualityGrid = createElement('div', 'builder-field-grid');
+  qualityGrid.append(
+    makeField('Оформление и подача', serving),
+    makeField('Показатели качества', quality),
+    makeField('Хранение', storage),
+    makeField('Аллергены', allergens),
+  );
+  root.append(
+    section('2. Рецептура', 'Для каждого продукта укажите массу брутто и нетто в одной единице измерения.'),
+    ingredientList,
+    ingredientAdd,
+    section('3. Технологический процесс', 'Запишите операции по порядку; режимы берите из проверенного источника.'),
+    stepList,
+    stepAdd,
+    section('4. Выход, подача и качество'),
+    outputGrid,
+    qualityGrid,
+  );
+
+  function ingredientValue(ingredient) {
+    return {
+      name: ingredient.name.trim(),
+      gross: parsedAmount(ingredient.gross),
+      net: parsedAmount(ingredient.net),
+      unit: ingredient.unit.trim(),
+      notes: ingredient.notes.trim(),
+    };
+  }
+
+  function outputAnswer() {
+    return { value: parsedAmount(outputValue.value), unit: outputUnit.value.trim() };
+  }
 
   return {
     getValue: () => ({
       dishName: dishName.value.trim(),
-      ingredients: ingredients.map((ingredient) => ({ name: ingredient.name.trim(), amount: parsedAmount(ingredient.amount) })),
-      steps: steps.map((step) => step.value.trim()),
+      scope: scope.value.trim(),
+      source: {
+        collectionTitle: collectionTitle.value.trim(),
+        recipeNumber: recipeNumber.value.trim(),
+        variant: variant.value.trim(),
+        basis: sourceBasis.value.trim(),
+      },
+      ingredients: ingredients.map(ingredientValue),
+      grossNet: ingredients.map(ingredientValue),
+      steps: steps.map((step) => ({
+        operation: step.operation.trim(),
+        equipment: step.equipment.trim(),
+        mode: step.mode.trim(),
+        control: step.control.trim(),
+      })),
+      output: outputAnswer(),
+      serving: serving.value.trim(),
+      quality: quality.value.trim(),
+      storage: storage.value.trim(),
+      allergens: allergens.value.trim(),
     }),
     validate: () => {
       const requiredFields = new Set(asArray(block.requiredFields).map(String));
@@ -879,17 +1048,63 @@ function renderTtkBuilder(environment) {
       if (incompleteIngredient >= 0) {
         return { valid: false, message: `Укажите название ингредиента ${incompleteIngredient + 1}.`, element: ingredientList.querySelector(`[data-ttk-ingredient="${incompleteIngredient}"] input`) };
       }
+      const incompleteMass = ingredients.findIndex((ingredient) => parseDecimal(ingredient.gross) === null || parseDecimal(ingredient.net) === null || !ingredient.unit.trim());
+      if (incompleteMass >= 0) {
+        return { valid: false, message: `Заполните брутто, нетто и единицу измерения для строки ${incompleteMass + 1}.`, element: ingredientList.querySelector(`[data-ttk-ingredient="${incompleteMass}"] input[inputmode="decimal"]`) };
+      }
+      const invalidMass = ingredients.findIndex((ingredient) => Number(parseDecimal(ingredient.gross)) < 0 || Number(parseDecimal(ingredient.net)) < 0);
+      if (invalidMass >= 0) {
+        return { valid: false, message: 'Масса продукта не может быть отрицательной.', element: ingredientList.querySelector(`[data-ttk-ingredient="${invalidMass}"] input[inputmode="decimal"]`) };
+      }
+      if (block.enforceGrossNotLessThanNet === true) {
+        const reversedMass = ingredients.findIndex((ingredient) => Number(parseDecimal(ingredient.gross)) < Number(parseDecimal(ingredient.net)));
+        if (reversedMass >= 0) {
+          return { valid: false, message: `В строке ${reversedMass + 1} масса брутто меньше массы нетто. Проверьте исходные данные.`, element: ingredientList.querySelector(`[data-ttk-ingredient="${reversedMass}"] input[inputmode="decimal"]`) };
+        }
+      }
       if ((requiredFields.has('steps') || Number(block.minSteps) > 0) && steps.length < Math.max(1, Number(block.minSteps) || 0)) {
         return { valid: false, message: `Добавьте не меньше ${Math.max(1, Number(block.minSteps) || 0)} этапа приготовления.`, element: stepAdd };
       }
-      const incompleteStep = steps.findIndex((step) => !step.value.trim());
+      const incompleteStep = steps.findIndex((step) => !step.operation.trim());
       if (incompleteStep >= 0) {
         return { valid: false, message: `Заполните этап ${incompleteStep + 1}.`, element: stepList.querySelector(`[data-ttk-step="${incompleteStep}"] input`) };
+      }
+      const fieldControls = {
+        scope,
+        quality,
+        storage,
+        serving,
+        allergens,
+        output: outputValue,
+        source: collectionTitle,
+      };
+      for (const field of requiredFields) {
+        if (['dishName', 'ingredients', 'grossNet', 'steps'].includes(field)) continue;
+        if (field === 'output' && (!nonEmptyText(outputValue.value) || !outputUnit.value.trim())) {
+          return { valid: false, message: 'Укажите выход и единицу измерения.', element: outputValue };
+        }
+        const control = fieldControls[field];
+        if (control && !control.value.trim()) {
+          return { valid: false, message: `Заполните поле «${makeFieldLabel(field)}».`, element: control };
+        }
       }
       return { valid: true };
     },
     firstControl: dishName,
   };
+}
+
+function makeFieldLabel(field) {
+  const labels = {
+    scope: 'Область применения',
+    quality: 'Показатели качества',
+    storage: 'Хранение',
+    serving: 'Оформление и подача',
+    allergens: 'Аллергены',
+    source: 'Источник рецептуры',
+    output: 'Выход',
+  };
+  return labels[field] || field;
 }
 
 const DYNAMIC_DEFAULTS = {
@@ -899,6 +1114,8 @@ const DYNAMIC_DEFAULTS = {
     fields: [
       { id: 'type', label: 'Тип узла', required: true },
       { id: 'label', label: 'Название этапа', required: true },
+      { id: 'zone', label: 'Поток или зона' },
+      { id: 'control', label: 'Контрольная точка' },
     ],
   },
   observation_log: {
@@ -951,9 +1168,14 @@ function renderDynamicBuilder(environment, type) {
   const keyCandidates = [block.collectionKey, defaults.key, 'rows', 'items'].filter(Boolean);
   const collectionKey = keyCandidates.find((key) => Array.isArray(value?.[key])) || block.collectionKey || defaults.key;
   const initialRows = Array.isArray(value) ? value : asArray(value?.[collectionKey]);
-  const rows = initialRows.map((row) => ({ runtimeId: nextId('row'), data: isObject(row) ? cloneSerializable(row) : {} }));
+  const rows = initialRows.map((row) => {
+    const data = isObject(row) ? cloneSerializable(row) : {};
+    if (type === 'scheme_builder' && !data.id) data.id = nextId('node');
+    return { runtimeId: nextId('row'), data };
+  });
   const list = createElement('div', 'dynamic-list');
   const add = createElement('button', 'learning-button secondary', block.addLabel || defaults.addLabel);
+  const preview = type === 'scheme_builder' ? createElement('div', 'scheme-preview') : null;
   add.type = 'button';
   add.disabled = readOnly;
 
@@ -973,6 +1195,43 @@ function renderDynamicBuilder(environment, type) {
     emit();
     announce(`Запись перемещена на позицию ${nextIndex + 1} из ${rows.length}.`);
     list.querySelector(`[data-dynamic-index="${nextIndex}"]`)?.focus();
+  }
+
+  function renderSchemePreview() {
+    if (!preview) return;
+    preview.replaceChildren();
+    const heading = createElement('div', 'scheme-preview-heading');
+    heading.append(createElement('h4', null, 'Предпросмотр технологического потока'));
+    const lastTwo = rows.length % 100;
+    const last = rows.length % 10;
+    const stageWord = lastTwo >= 11 && lastTwo <= 14 ? 'этапов' : last === 1 ? 'этап' : last >= 2 && last <= 4 ? 'этапа' : 'этапов';
+    heading.append(createElement('span', null, `${rows.length} ${stageWord}`));
+    preview.append(heading);
+    if (!rows.length) {
+      preview.append(createElement('p', 'scheme-preview-empty', 'Добавьте этапы – схема появится здесь автоматически.'));
+      return;
+    }
+    const track = createElement('div', 'scheme-preview-track');
+    rows.forEach((rowState, index) => {
+      const node = createElement('article', 'scheme-node');
+      const typeField = fields.find((field) => field.id === 'type');
+      const labelField = fields.find((field) => field.id === 'label');
+      const selectedType = typeField?.options.find((option) => option.id === String(rowState.data.type ?? ''));
+      const selectedLabel = labelField?.options.find((option) => option.id === String(rowState.data.label ?? ''));
+      const typeLabel = selectedType?.label || humanText(rowState.data.type, 'Этап');
+      node.dataset.nodeType = String(rowState.data.type || 'operation');
+      node.append(createElement('span', 'scheme-node-type', typeLabel));
+      node.append(createElement('strong', null, selectedLabel?.label || String(rowState.data.label || `Этап ${index + 1}`)));
+      if (rowState.data.zone) node.append(createElement('small', null, `Поток: ${rowState.data.zone}`));
+      if (rowState.data.control) node.append(createElement('p', 'scheme-node-control', String(rowState.data.control)));
+      track.append(node);
+      if (index < rows.length - 1) {
+        const arrow = createElement('span', 'scheme-arrow', '→');
+        arrow.setAttribute('aria-hidden', 'true');
+        track.append(arrow);
+      }
+    });
+    preview.append(track);
   }
 
   function renderRows() {
@@ -1002,6 +1261,7 @@ function renderDynamicBuilder(environment, type) {
         control.dataset.fieldId = field.id;
         control.addEventListener(control.type === 'checkbox' || control.tagName === 'SELECT' ? 'change' : 'input', () => {
           rowState.data[field.id] = control.type === 'checkbox' ? control.checked : control.value;
+          renderSchemePreview();
           emit();
         });
         row.append(makeField(`${field.label}${field.required ? ' *' : ''}`, control));
@@ -1030,6 +1290,7 @@ function renderDynamicBuilder(environment, type) {
       });
       list.append(row);
     });
+    renderSchemePreview();
   }
 
   add.addEventListener('click', () => {
@@ -1045,12 +1306,20 @@ function renderDynamicBuilder(environment, type) {
 
   renderRows();
   root.append(list, add);
+  if (preview) root.append(preview);
   return {
-    getValue: () => ({ [collectionKey]: rows.map((row) => cloneSerializable(row.data)) }),
+    getValue: () => {
+      const values = rows.map((row) => cloneSerializable(row.data));
+      const answer = { [collectionKey]: values };
+      if (type === 'scheme_builder') {
+        answer.edges = values.slice(1).map((node, index) => ({ from: values[index].id, to: node.id }));
+      }
+      return answer;
+    },
     validate: () => {
       const requiredMinimum = type === 'observation_log'
         ? (requiresAnswer(block) || rows.length ? Number(block.minEntries ?? 1) : 0)
-        : (requiresAnswer(block) ? 1 : 0);
+        : (requiresAnswer(block) ? Number(block.minNodes ?? 1) : 0);
       if (requiredMinimum > 0 && rows.length < requiredMinimum) {
         return { valid: false, message: `Добавьте не меньше ${requiredMinimum} записей.`, element: add };
       }
@@ -1070,6 +1339,12 @@ function renderDynamicBuilder(environment, type) {
         if (emptyRow >= 0) {
           const element = list.querySelector(`[data-dynamic-index="${emptyRow}"] input, [data-dynamic-index="${emptyRow}"] textarea, [data-dynamic-index="${emptyRow}"] select`);
           return { valid: false, message: `Заполните запись наблюдения ${emptyRow + 1}.`, element };
+        }
+      }
+      if (type === 'scheme_builder' && Number(block.minControlPoints) > 0) {
+        const controlCount = rows.filter((row) => nonEmptyText(row.data.control) || row.data.type === 'control').length;
+        if (controlCount < Number(block.minControlPoints)) {
+          return { valid: false, message: `Добавьте не меньше ${Number(block.minControlPoints)} контрольных точек.`, element: list.querySelector('[data-field-id="control"]') || add };
         }
       }
       return { valid: true };

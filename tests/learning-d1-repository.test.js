@@ -194,7 +194,7 @@ test("D1 repository runs the complete pilot lifecycle transactionally", async (t
   });
   assert.equal(graded.status, "accepted");
   assert.equal(graded.grade, "5");
-  assert.equal((await service.journal(teacher)).find((item) => item.studentId === student.user.id).grade, "5");
+  assert.equal((await service.journal(teacher)).some((item) => item.studentId === student.user.id && item.grade === "5"), true);
 
   const groupRoster = await service.listGroupStudents(teacher, pilot.group.id);
   assert.equal(groupRoster.students.some((item) => item.id === student.user.id), true);

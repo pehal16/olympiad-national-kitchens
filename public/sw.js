@@ -1,4 +1,4 @@
-const CACHE_NAME = "national-kitchens-olympiad-v1-6-23";
+const CACHE_NAME = "national-kitchens-olympiad-v1-6-80";
 const PRECACHE_URLS = [
   "/",
   "/admin.html",

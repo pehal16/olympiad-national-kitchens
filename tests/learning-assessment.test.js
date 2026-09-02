@@ -258,6 +258,64 @@ test("every registered block type accepts its canonical answer shape", () => {
   }
 });
 
+test("full technology-card answer requires masses, output and professional sections", () => {
+  const definition = block("ttk_builder", {
+    requiredFields: ["dishName", "scope", "ingredients", "grossNet", "steps", "quality", "storage", "output"],
+    minIngredients: 1,
+    minSteps: 1,
+    requireIngredientMasses: true,
+    enforceGrossNotLessThanNet: true
+  });
+  const complete = validateAnswer(definition, {
+    dishName: "Салат овощной",
+    scope: "Предприятия общественного питания",
+    ingredients: [{ name: "Огурцы", gross: "110,0", net: 100, unit: "г" }],
+    grossNet: [{ name: "Огурцы", gross: 110, net: 100, unit: "г" }],
+    steps: [{ operation: "Промыть и нарезать", equipment: "Стол, нож", control: "Чистота" }],
+    quality: "Овощи свежие, нарезка однородная.",
+    storage: "Соблюдать условия действующего документа.",
+    output: { value: 100, unit: "г" }
+  });
+  assert.equal(complete.valid, true, JSON.stringify(complete.errors));
+
+  const invalid = validateAnswer(definition, {
+    dishName: "Салат овощной",
+    scope: "Предприятия общественного питания",
+    ingredients: [{ name: "Огурцы", gross: 90, net: 100, unit: "г" }],
+    grossNet: [{ name: "Огурцы", gross: 90, net: 100, unit: "г" }],
+    steps: [{ operation: "Нарезать" }],
+    quality: "Однородная нарезка",
+    storage: "По действующему документу",
+    output: { value: "", unit: "г" }
+  });
+  assert.equal(invalid.valid, false);
+  assert.equal(invalid.errors.some((entry) => entry.code === "gross_less_than_net"), true);
+  assert.equal(invalid.errors.some((entry) => entry.code === "output_required"), true);
+});
+
+test("technology scheme enforces stages and control points", () => {
+  const definition = block("scheme_builder", {
+    minNodes: 3,
+    minControlPoints: 2,
+    nodeTypes: ["raw_material", "operation", "control", "result"]
+  });
+  const valid = validateAnswer(definition, {
+    nodes: [
+      { id: "n1", type: "raw_material", label: "Сырьё", control: "Входной контроль" },
+      { id: "n2", type: "operation", label: "Мойка", control: "Качество мойки" },
+      { id: "n3", type: "result", label: "Чистое сырьё" }
+    ],
+    edges: [{ from: "n1", to: "n2" }, { from: "n2", to: "n3" }]
+  });
+  assert.equal(valid.valid, true, JSON.stringify(valid.errors));
+
+  const invalid = validateAnswer(definition, {
+    nodes: [{ id: "n1", type: "operation", label: "Мойка" }]
+  });
+  assert.equal(invalid.valid, false);
+  assert.equal(invalid.errors.some((entry) => entry.code === "scheme_node_count"), true);
+});
+
 test("autoGrade scores choices and structured tasks with deterministic partial credit", () => {
   const single = autoGrade(validDefinitions.single_choice, "b");
   assert.equal(single.score, 5);

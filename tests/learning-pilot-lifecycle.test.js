@@ -152,8 +152,16 @@ test("pilot supports bootstrap, forced password change, assignment, submission a
   assert.deepEqual((await fileStore.get(readyFile.object_key)).body, pdf);
 
   const practiceAnswers = {
-    "practice-order": ["receive", "wash", "cook", "cool", "cut", "mix", "serve"],
-    "practice-scheme": { nodes: [{ id: "n1", type: "operation", label: "Подготовка сырья" }] },
+    "practice-order": ["receive", "sort", "wash", "peel", "trim", "rinse", "cut"],
+    "practice-scheme": { nodes: [
+      { id: "n1", type: "raw_material", label: "Получение сырья", zone: "загрязнённая", control: "Проверить качество" },
+      { id: "n2", type: "operation", label: "Сортировка", zone: "загрязнённая", control: "Удалить повреждённые экземпляры" },
+      { id: "n3", type: "operation", label: "Мойка", zone: "загрязнённая", control: "Проверить качество мойки" },
+      { id: "n4", type: "operation", label: "Очистка", zone: "переходная" },
+      { id: "n5", type: "operation", label: "Дочистка", zone: "чистая" },
+      { id: "n6", type: "operation", label: "Промывание", zone: "чистая" },
+      { id: "n7", type: "result", label: "Нарезка в чистую тару", zone: "чистая" }
+    ] },
     "practice-safety": { checks: { uniform: true, hands: true, boards: true } },
     "practice-file": { files: [{ id: readyFile.id, name: "scheme.pdf", mimeType: "application/pdf", size: pdf.length, status: "stored" }] },
     "practice-conclusion": "Чистые и загрязнённые потоки разделены, а инвентарь используется по маркировке."

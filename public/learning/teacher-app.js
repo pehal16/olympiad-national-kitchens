@@ -308,8 +308,8 @@ function defaultBlock(type) {
   if (type === 'crossword') return { ...common, clues: [{ id: uniqueId('clue'), number: 1, clue: 'Вопрос 1' }] };
   if (type === 'safety_checklist') return { ...common, items: [{ id: uniqueId('safe'), label: 'Требование безопасности' }] };
   if (type === 'dish_assembly') return { ...common, components: [{ id: uniqueId('component'), label: 'Компонент' }], slots: [{ id: uniqueId('slot'), label: 'Зона' }] };
-  if (type === 'ttk_builder') return { ...common, requiredFields: ['dishName', 'ingredients', 'steps'], columns: [{ id: 'product', label: 'Сырьё' }, { id: 'gross', label: 'Брутто' }, { id: 'net', label: 'Нетто' }] };
-  if (type === 'scheme_builder') return { ...common, nodeTypes: [{ id: 'operation', label: 'Операция' }], availableSteps: [{ id: uniqueId('step'), label: 'Операция' }] };
+  if (type === 'ttk_builder') return { ...common, requiredFields: ['dishName', 'scope', 'ingredients', 'grossNet', 'steps', 'quality', 'storage', 'output'], minIngredients: 3, minSteps: 3, requireIngredientMasses: true, enforceGrossNotLessThanNet: true };
+  if (type === 'scheme_builder') return { ...common, minNodes: 3, minControlPoints: 1, nodeTypes: [{ id: 'raw_material', label: 'Сырьё' }, { id: 'operation', label: 'Операция' }, { id: 'control', label: 'Контроль' }, { id: 'result', label: 'Результат' }], fields: [{ id: 'type', label: 'Тип узла', required: true }, { id: 'label', label: 'Название этапа', required: true }, { id: 'zone', label: 'Поток или зона' }, { id: 'control', label: 'Контрольная точка' }], availableSteps: [{ id: uniqueId('step'), label: 'Операция' }] };
   if (type === 'observation_log') return { ...common, minEntries: 1, columns: [{ id: 'time', label: 'Время' }, { id: 'observation', label: 'Наблюдение' }] };
   if (type === 'file_evidence') return { ...common, minFiles: 1, maxFiles: 3, maxFileBytes: 25 * 1024 * 1024, allowedMimeTypes: ['application/pdf', 'image/jpeg', 'image/png'], allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'] };
   return common;
@@ -486,7 +486,8 @@ function inspectorConfig(block) {
   if (block.type === 'matching') return `<label class="field"><span>Правильные пары в формате «элемент | соответствие»</span><textarea id="block-pairs" rows="7">${escapeHtml(asArray(block.pairs).map((pair) => `${pair.left || pair.label || ''} | ${pair.right || pair.match || ''}`).join('\n'))}</textarea><small>Каждая строка одновременно создаёт элементы задания и задаёт правильное соответствие.</small></label>`;
   if (['ordering', 'safety_checklist', 'scheme_builder'].includes(block.type)) return `<label class="field"><span>Элементы, по одному в строке</span><textarea id="block-items" rows="7">${escapeHtml(asArray(block.items || block.availableSteps).map((item) => item.label || item.text || item).join('\n'))}</textarea></label>${block.type === 'ordering' ? `<label class="field"><span>Ключ: номера через запятую</span><input id="block-key" value="${escapeHtml(keyDisplay(block))}" /></label>` : ''}`;
   if (block.type === 'classification') return `<label class="field"><span>Категории, по одной в строке</span><textarea id="block-categories" rows="4">${escapeHtml(asArray(block.categories).map((item) => item.label || item).join('\n'))}</textarea></label><label class="field"><span>Элементы, по одному в строке</span><textarea id="block-items" rows="5">${escapeHtml(asArray(block.items).map((item) => item.label || item).join('\n'))}</textarea></label><label class="field"><span>Правильное распределение в формате «элемент | категория»</span><textarea id="block-classification-key" rows="5" placeholder="Морковь | Овощи">${escapeHtml(classificationKeyDisplay(block))}</textarea><small>Названия должны совпадать со списками выше.</small></label>`;
-  if (['table', 'ttk_builder'].includes(block.type)) return `<label class="field"><span>Строки, по одной в строке</span><textarea id="block-rows" rows="4">${escapeHtml(asArray(block.rows).map((item) => item.label).join('\n'))}</textarea></label><label class="field"><span>Столбцы, по одному в строке</span><textarea id="block-columns" rows="4">${escapeHtml(asArray(block.columns).map((item) => item.label).join('\n'))}</textarea></label>`;
+  if (block.type === 'table') return `<label class="field"><span>Строки, по одной в строке</span><textarea id="block-rows" rows="4">${escapeHtml(asArray(block.rows).map((item) => item.label).join('\n'))}</textarea></label><label class="field"><span>Столбцы, по одному в строке</span><textarea id="block-columns" rows="4">${escapeHtml(asArray(block.columns).map((item) => item.label).join('\n'))}</textarea></label>`;
+  if (block.type === 'ttk_builder') return `<div class="revision-panel"><strong>Полная технологическая карта</strong><p>Студент заполняет источник, рецептуру брутто/нетто, технологический процесс, выход, качество, хранение и подачу.</p></div><label class="field"><span>Минимум строк рецептуры</span><input id="block-min-ingredients" type="number" min="1" max="50" value="${escapeHtml(block.minIngredients || 3)}" /></label><label class="field"><span>Минимум операций</span><input id="block-min-steps" type="number" min="1" max="50" value="${escapeHtml(block.minSteps || 3)}" /></label><label class="switch-field"><span>Проверять, что брутто не меньше нетто</span><input id="block-gross-check" type="checkbox" ${block.enforceGrossNotLessThanNet !== false ? 'checked' : ''} /></label>`;
   if (block.type === 'crossword') return `<label class="field"><span>Подсказки, по одной в строке</span><textarea id="block-clues" rows="6">${escapeHtml(asArray(block.clues).map((item) => item.clue || item.label).join('\n'))}</textarea></label><label class="field"><span>Ответы через запятую</span><input id="block-key" value="${escapeHtml(keyDisplay(block))}" /></label>`;
   if (block.type === 'dish_assembly') return `<label class="field"><span>Компоненты, по одному в строке</span><textarea id="block-items" rows="5">${escapeHtml(asArray(block.components).map((item) => item.label).join('\n'))}</textarea></label><label class="field"><span>Зоны, по одной в строке</span><textarea id="block-slots" rows="4">${escapeHtml(asArray(block.slots).map((item) => item.label).join('\n'))}</textarea></label>`;
   if (block.type === 'observation_log') return `<label class="field"><span>Поля журнала, по одному в строке</span><textarea id="block-fields" rows="5">${escapeHtml(asArray(block.fields || block.columns).map((item) => item.label || item).join('\n'))}</textarea></label>`;
@@ -519,6 +520,9 @@ function drawInspector() {
   bind('#block-slots', 'input', (field) => { block.slots = linesToItems(field.value, block.slots, 'slot'); });
   bind('#block-rows', 'input', (field) => { block.rows = linesToItems(field.value, block.rows, 'row'); });
   bind('#block-columns', 'input', (field) => { block.columns = linesToItems(field.value, block.columns, 'column'); });
+  bind('#block-min-ingredients', 'input', (field) => { block.minIngredients = Math.max(1, Number(field.value) || 1); });
+  bind('#block-min-steps', 'input', (field) => { block.minSteps = Math.max(1, Number(field.value) || 1); });
+  bind('#block-gross-check', 'change', (field) => { block.enforceGrossNotLessThanNet = field.checked; });
   bind('#block-fields', 'input', (field) => { block.columns = linesToItems(field.value, block.columns || block.fields, 'field'); });
   bind('#block-clues', 'input', (field) => { block.clues = field.value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((clue, index) => ({ id: block.clues?.[index]?.id || uniqueId('clue'), number: index + 1, clue })); });
   bind('#block-pairs', 'input', (field) => { block.pairs = field.value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line, index) => { const [left, right] = line.split('|').map((part) => part.trim()); return { id: block.pairs?.[index]?.id || uniqueId('pair'), targetId: block.pairs?.[index]?.targetId || uniqueId('target'), left, right: right || '' }; }); });
@@ -942,7 +946,11 @@ async function seedPilot(event) {
   try {
     const result = await teacherApi.seedPilot();
     state.catalog = null; state.templates = null; state.assignments = null; state.overview = null;
-    drawCredentials(resultBox, asArray(result.credentials), 'Отображаемое имя');
+    await ensureCatalog();
+    drawGroups();
+    const refreshedResultBox = $('#pilot-result');
+    refreshedResultBox.classList.remove('hidden');
+    drawCredentials(refreshedResultBox, asArray(result.credentials), 'Отображаемое имя');
     toast(result.seeded ? 'Пилотный выпуск готов.' : 'Пилот уже был подготовлен.', 'success');
   } catch (error) {
     resultBox.innerHTML = `<div class="form-error" role="alert">${escapeHtml(errorText(error))}</div>`;

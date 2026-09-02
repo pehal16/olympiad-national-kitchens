@@ -123,6 +123,38 @@ async function prepareRequiredFileSubmission(repository, fileStore, suffix) {
   });
   const teacher = await service.authenticate(teacherLogin.token);
   const pilot = await service.seedPilot(teacher);
+  const fileTemplate = await service.createTemplate(teacher, {
+    courseId: pilot.courses[0].id,
+    kind: "lab",
+    title: `Лабораторная проверка вложений ${suffix}`,
+    topic: "Проверка подтверждающего файла",
+    instructions: "Приложите фотографию результата.",
+    estimatedMinutes: 15,
+    blocks: [{
+      id: "lab-photo",
+      type: "file_evidence",
+      title: "Фото результата",
+      prompt: "Приложите фотографию в формате PNG.",
+      required: true,
+      maxScore: 10,
+      minFiles: 1,
+      maxFiles: 1,
+      maxFileBytes: 2_000_000,
+      allowedMimeTypes: ["image/png"],
+      allowedExtensions: ["png"]
+    }],
+    rubric: [{ title: "Файл", description: "Файл загружен и доступен для проверки.", maxScore: 10 }]
+  });
+  const fileVersion = await service.publishTemplate(teacher, fileTemplate.id);
+  await service.createAssignment(teacher, {
+    versionId: fileVersion.id,
+    courseId: pilot.courses[0].id,
+    groupIds: [pilot.group.id],
+    title: `Лабораторная проверка вложений ${suffix}`,
+    dueAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    allowLate: true,
+    maxAttempts: 1
+  });
   const credential = pilot.credentials[0];
   const temporaryLogin = await service.login({
     login: credential.login,
@@ -140,28 +172,9 @@ async function prepareRequiredFileSubmission(repository, fileStore, suffix) {
   });
   student = await service.authenticate(studentLogin.token);
   const dashboard = await service.studentDashboard(student);
-  const assignment = dashboard.assignments.find((item) => item.kind === "lab");
+  const assignment = dashboard.assignments.find((item) => item.title === `Лабораторная проверка вложений ${suffix}`);
   const submission = await service.startSubmission(student, assignment.id);
-  const answers = [
-    ["lab-safety", { checks: { equipment: true, knife: true, surface: true } }],
-    ["lab-log", { entries: [
-      { stage: "Подготовка", time: "09:00", observation: "Сырьё принято", action: "Проверено" },
-      { stage: "Обработка", time: "09:20", observation: "Дефекты удалены", action: "Очищено" },
-      { stage: "Контроль", time: "09:40", observation: "Качество соответствует", action: "Взвешено" }
-    ] }],
-    ["lab-calc", { value: 2.05, unit: "кг" }],
-    ["lab-table", { cells: {
-      "appearance:result": "Поверхность чистая",
-      "appearance:conclusion": "Соответствует",
-      "color:result": "Естественный",
-      "color:conclusion": "Соответствует",
-      "smell:result": "Свойственный",
-      "smell:conclusion": "Соответствует",
-      "cut:result": "Ровная обработка",
-      "cut:conclusion": "Соответствует"
-    } }],
-    ["lab-reflection", "Качество полуфабриката соответствует требованиям, отклонений при обработке не выявлено."]
-  ];
+  const answers = [];
   let revision = 0;
   for (const [blockId, value] of answers) {
     const saved = await service.saveAnswer(student, submission.id, blockId, {
