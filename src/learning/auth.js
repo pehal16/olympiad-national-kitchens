@@ -51,6 +51,25 @@ function validatePassword(password, options = {}) {
 }
 
 function pbkdf2Async(value, salt, iterations) {
+  const subtle = globalThis.crypto?.subtle || crypto.webcrypto?.subtle;
+  if (subtle) {
+    return subtle
+      .importKey(
+        "raw",
+        new TextEncoder().encode(String(value)),
+        { name: "PBKDF2" },
+        false,
+        ["deriveBits"]
+      )
+      .then((keyMaterial) => subtle.deriveBits({
+        name: "PBKDF2",
+        salt: new TextEncoder().encode(String(salt)),
+        iterations,
+        hash: "SHA-256"
+      }, keyMaterial, 256))
+      .then((derivedBits) => Buffer.from(derivedBits));
+  }
+
   return new Promise((resolve, reject) => {
     crypto.pbkdf2(value, salt, iterations, 32, "sha256", (error, derivedKey) => {
       if (error) {

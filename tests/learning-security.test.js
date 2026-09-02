@@ -2,6 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const crypto = require("node:crypto");
 
 const {
   hashPassword,
@@ -33,6 +34,20 @@ test("learning credentials are salted, peppered and compared safely", async () =
     password_salt: first.salt,
     password_iterations: first.iterations
   }, { pepper: "wrong" }), false);
+});
+
+test("learning password hashing matches the PBKDF2 SHA-256 contract", async () => {
+  const password = "WorkerCompatible2026";
+  const pepper = "deployment-pepper";
+  const salt = "fixed-base64url-salt";
+  const iterations = 10_000;
+  const result = await hashPassword(password, { pepper, salt, iterations });
+  const expected = crypto
+    .pbkdf2Sync(`${password}\u0000${pepper}`, salt, iterations, 32, "sha256")
+    .toString("base64url");
+
+  assert.equal(result.hash, expected);
+  assert.equal(result.algorithm, "pbkdf2-sha256");
 });
 
 test("learning session cookie is HttpOnly, same-site and secure behind HTTPS", () => {
