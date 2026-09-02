@@ -188,9 +188,20 @@ function loadSettings() {
       "",
     yandexDiskIntegration: {
       ...disk,
-      enabled: parseBoolean(process.env.YANDEX_DISK_ENABLED, Boolean(disk.enabled)),
-      oauthToken: process.env.YANDEX_DISK_OAUTH_TOKEN || disk.oauthToken || "",
-      folder: process.env.YANDEX_DISK_FOLDER || disk.folder || "/olympiad-results"
+      enabled: parseBoolean(
+        cloudflareEnv?.YANDEX_DISK_ENABLED ?? process.env.YANDEX_DISK_ENABLED,
+        Boolean(disk.enabled)
+      ),
+      oauthToken:
+        cloudflareEnv?.YANDEX_DISK_OAUTH_TOKEN ||
+        process.env.YANDEX_DISK_OAUTH_TOKEN ||
+        disk.oauthToken ||
+        "",
+      folder:
+        cloudflareEnv?.YANDEX_DISK_FOLDER ||
+        process.env.YANDEX_DISK_FOLDER ||
+        disk.folder ||
+        "/olympiad-results"
     },
     ydb: {
       enabled: STORAGE_BACKEND === "ydb",

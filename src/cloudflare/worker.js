@@ -115,6 +115,13 @@ async function handleApiRequest(request, env) {
       learning: {
         db: env.DB,
         files: env.LEARNING_FILES,
+        yandexDisk: {
+          enabled: !["0", "false", "off", "disabled"].includes(
+            String(env.YANDEX_DISK_ENABLED || "true").trim().toLowerCase()
+          ),
+          oauthToken: env.YANDEX_DISK_OAUTH_TOKEN,
+          folder: env.YANDEX_DISK_FOLDER || "/olympiad-results"
+        },
         authSecret: env.LEARNING_AUTH_SECRET,
         bootstrapSecret: env.LEARNING_BOOTSTRAP_SECRET,
         enabled: env.LEARNING_ENABLED

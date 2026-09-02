@@ -30,9 +30,11 @@ jobs:
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
       LEARNING_AUTH_SECRET: ${{ secrets.LEARNING_AUTH_SECRET }}
       LEARNING_BOOTSTRAP_SECRET: ${{ secrets.LEARNING_BOOTSTRAP_SECRET }}
+      YANDEX_DISK_OAUTH_TOKEN: ${{ secrets.YANDEX_DISK_OAUTH_TOKEN }}
+      YANDEX_DISK_FOLDER: ${{ secrets.YANDEX_DISK_FOLDER }}
+      YANDEX_DISK_ENABLED: "true"
       CF_PAGES_PROJECT: olympiad-gkts
       CF_D1_DATABASE: olympiad-gkts-db
-      CF_LEARNING_FILES_BUCKET: olympiad-gkts-learning-files
 
     steps:
       - name: Checkout
@@ -50,13 +52,20 @@ jobs:
           set -euo pipefail
           if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ] || \
              [ -z "${ADMIN_PASSWORD:-}" ] || [ -z "${LEARNING_AUTH_SECRET:-}" ] || \
-             [ -z "${LEARNING_BOOTSTRAP_SECRET:-}" ]; then
-            echo "Set CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, ADMIN_PASSWORD, LEARNING_AUTH_SECRET, and LEARNING_BOOTSTRAP_SECRET repository secrets." >&2
+             [ -z "${LEARNING_BOOTSTRAP_SECRET:-}" ] || [ -z "${YANDEX_DISK_OAUTH_TOKEN:-}" ]; then
+            echo "Set CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, ADMIN_PASSWORD, LEARNING_AUTH_SECRET, LEARNING_BOOTSTRAP_SECRET, and YANDEX_DISK_OAUTH_TOKEN repository secrets." >&2
             exit 1
           fi
 
           npx wrangler pages project create "$CF_PAGES_PROJECT" --production-branch main || true
-          npx wrangler r2 bucket create "$CF_LEARNING_FILES_BUCKET" || true
+
+          YANDEX_STATUS="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --header "Authorization: OAuth $YANDEX_DISK_OAUTH_TOKEN" \
+            'https://cloud-api.yandex.net/v1/disk?fields=user.login')"
+          if [ "$YANDEX_STATUS" != "200" ]; then
+            echo "Yandex Disk OAuth validation failed with HTTP $YANDEX_STATUS." >&2
+            exit 1
+          fi
 
           DB_ID="$(npx wrangler d1 list --json | jq -r --arg name "$CF_D1_DATABASE" '.[] | select(.name == $name) | .uuid' | head -n 1)"
           if [ -z "$DB_ID" ]; then
@@ -81,6 +90,9 @@ jobs:
           printf '%s' "$ADMIN_PASSWORD" | npx wrangler pages secret put ADMIN_PASSWORD --project-name "$CF_PAGES_PROJECT"
           printf '%s' "$LEARNING_AUTH_SECRET" | npx wrangler pages secret put LEARNING_AUTH_SECRET --project-name "$CF_PAGES_PROJECT"
           printf '%s' "$LEARNING_BOOTSTRAP_SECRET" | npx wrangler pages secret put LEARNING_BOOTSTRAP_SECRET --project-name "$CF_PAGES_PROJECT"
+          printf '%s' "$YANDEX_DISK_OAUTH_TOKEN" | npx wrangler pages secret put YANDEX_DISK_OAUTH_TOKEN --project-name "$CF_PAGES_PROJECT"
+          printf '%s' "$YANDEX_DISK_FOLDER" | npx wrangler pages secret put YANDEX_DISK_FOLDER --project-name "$CF_PAGES_PROJECT"
+          printf '%s' "$YANDEX_DISK_ENABLED" | npx wrangler pages secret put YANDEX_DISK_ENABLED --project-name "$CF_PAGES_PROJECT"
 
       - name: Deploy Pages
         run: npx wrangler pages deploy dist-cloudflare --project-name "$CF_PAGES_PROJECT" --branch main --commit-dirty=true

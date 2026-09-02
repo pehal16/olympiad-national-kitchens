@@ -5,6 +5,13 @@ const fs = require("fs");
 const path = require("path");
 const { LearningError } = require("./errors");
 const { getLearningRuntime } = require("./repository");
+const {
+  normalizeDiskPath,
+  ensureFolder,
+  uploadBuffer,
+  downloadBuffer,
+  deleteResource
+} = require("../yandex-disk");
 
 const MAX_FILE_BYTES = Number(process.env.LEARNING_FILE_MAX_BYTES || 25 * 1024 * 1024);
 const ALLOWED_TYPES = new Map([
@@ -79,21 +86,57 @@ function safeLocalPath(root, key) {
   return target;
 }
 
+function safeObjectKey(key) {
+  const relative = String(key || "").replace(/\\/g, "/").replace(/^\/+/, "");
+  const parts = relative.split("/").filter(Boolean);
+  if (!parts.length || parts.some((part) => part === "." || part === "..")) {
+    throw new LearningError("Некорректный ключ файла.", 400, "invalid_object_key");
+  }
+  return parts.join("/");
+}
+
+function yandexObjectPath(folder, key) {
+  const root = normalizeDiskPath(folder || "/olympiad-results").replace(/\/+$/, "");
+  return `${root}/learning-files/${safeObjectKey(key)}`;
+}
+
+function parentDiskPath(remotePath) {
+  const index = String(remotePath || "").lastIndexOf("/");
+  return index > 0 ? remotePath.slice(0, index) : remotePath;
+}
+
+function contentTypeForKey(key) {
+  const extension = path.extname(String(key || "")).toLowerCase();
+  for (const [mimeType, extensions] of ALLOWED_TYPES.entries()) {
+    if (extensions.includes(extension)) return mimeType;
+  }
+  return "application/octet-stream";
+}
+
 class LearningFileStore {
   constructor() {
     const runtime = getLearningRuntime();
     this.r2 = runtime.files || null;
+    const disk = runtime.yandexDisk || null;
+    this.yandexDisk = disk && disk.enabled !== false && disk.oauthToken
+      ? {
+          oauthToken: String(disk.oauthToken),
+          folder: String(disk.folder || "/olympiad-results")
+        }
+      : null;
     this.cloudMode = Boolean(runtime.db);
     const storageDir = runtime.storageDir || process.env.STORAGE_DIR || path.join(process.cwd(), "storage");
     this.localRoot = path.resolve(storageDir, "learning-files");
   }
 
   backend() {
-    return this.r2 ? "r2" : "file";
+    if (this.r2) return "r2";
+    if (this.yandexDisk) return "yandex-disk";
+    return "file";
   }
 
   async put(key, buffer, metadata = {}) {
-    if (this.cloudMode && !this.r2) {
+    if (this.cloudMode && !this.r2 && !this.yandexDisk) {
       throw new LearningError("Хранилище учебных файлов не настроено.", 503, "file_storage_unavailable");
     }
     if (!Buffer.isBuffer(buffer)) buffer = Buffer.from(buffer || "");
@@ -110,6 +153,12 @@ class LearningFileStore {
       });
       return;
     }
+    if (this.yandexDisk) {
+      const remotePath = yandexObjectPath(this.yandexDisk.folder, key);
+      await ensureFolder(parentDiskPath(remotePath), this.yandexDisk.oauthToken);
+      await uploadBuffer(remotePath, buffer, this.yandexDisk.oauthToken);
+      return;
+    }
     const target = safeLocalPath(this.localRoot, key);
     await fs.promises.mkdir(path.dirname(target), { recursive: true });
     const temporary = `${target}.${process.pid}.${Date.now()}.tmp`;
@@ -118,7 +167,7 @@ class LearningFileStore {
   }
 
   async get(key) {
-    if (this.cloudMode && !this.r2) {
+    if (this.cloudMode && !this.r2 && !this.yandexDisk) {
       throw new LearningError("Хранилище учебных файлов не настроено.", 503, "file_storage_unavailable");
     }
     if (this.r2) {
@@ -128,6 +177,18 @@ class LearningFileStore {
         body: Buffer.from(await object.arrayBuffer()),
         contentType: object.httpMetadata?.contentType || "application/octet-stream",
         customMetadata: { ...(object.customMetadata || {}) }
+      };
+    }
+    if (this.yandexDisk) {
+      const body = await downloadBuffer(
+        yandexObjectPath(this.yandexDisk.folder, key),
+        this.yandexDisk.oauthToken
+      );
+      if (!body) return null;
+      return {
+        body,
+        contentType: contentTypeForKey(key),
+        customMetadata: null
       };
     }
     const target = safeLocalPath(this.localRoot, key);
@@ -144,11 +205,18 @@ class LearningFileStore {
   }
 
   async delete(key) {
-    if (this.cloudMode && !this.r2) {
+    if (this.cloudMode && !this.r2 && !this.yandexDisk) {
       throw new LearningError("Хранилище учебных файлов не настроено.", 503, "file_storage_unavailable");
     }
     if (this.r2) {
       await this.r2.delete(key);
+      return;
+    }
+    if (this.yandexDisk) {
+      await deleteResource(
+        yandexObjectPath(this.yandexDisk.folder, key),
+        this.yandexDisk.oauthToken
+      );
       return;
     }
     const target = safeLocalPath(this.localRoot, key);
@@ -172,5 +240,6 @@ module.exports = {
   validateFileDeclaration,
   hasExpectedSignature,
   objectKey,
+  yandexObjectPath,
   sha256
 };

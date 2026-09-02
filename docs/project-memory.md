@@ -1,6 +1,6 @@
 # Project Memory
 
-Last updated: 2026-09-01
+Last updated: 2026-09-02
 
 ## Current Baseline
 
@@ -9,7 +9,7 @@ Last updated: 2026-09-01
 - Latest functional baseline before this memory note: `29738dc Add generated PM01 semi-finished cards`
 - Production URL: `https://olympiad-gkts.pages.dev`
 - Hosting/runtime: Cloudflare Pages + Pages Functions
-- Storage: Cloudflare D1 via binding `DB`, R2/Cloudflare bindings for larger assets and voice storage where configured
+- Storage: Cloudflare D1 via binding `DB`; learning attachments use the private Yandex Disk REST API because R2 billing is not enabled
 - Wrangler project: `olympiad-gkts`
 
 Always treat the latest `origin/main` as the source of truth. Older chat instructions, screenshots, Yandex-era assumptions, and old implementation plans are historical context only.
@@ -29,7 +29,8 @@ Always treat the latest `origin/main` as the source of truth. Older chat instruc
 - Private local paths, the VK schedule chat, and the working email address are stored only in the ignored file `storage/teacher-workflow-private.json`.
 - The separate mode `Учебные работы` is implemented under `/learning.html`, `/learning-admin.html`, and `/api/learning/*`; it remains independent from PM01 and olympiad attempts.
 - The pilot includes roles, groups, subjects, courses, roster import, 18 block types, immutable work versions, assignments, autosave, file evidence, automatic and manual review, correction cycles, grades, audit, and the journal.
-- Local development uses a file repository; Cloudflare uses D1 migrations `0003`–`0005` and the private `LEARNING_FILES` R2 binding.
+- Local development uses a file repository; Cloudflare uses D1 migrations `0003`–`0005`, while student attachments are kept under the configured private Yandex Disk folder and served only through authorized learning API routes.
+- The Cloudflare workflow validates the existing Yandex Disk OAuth token, writes the Yandex settings as Pages secrets, and deliberately has no R2 binding or R2 subscription dependency.
 - The teacher can open a group roster and issue a one-time temporary password; active student sessions are revoked and the next login requires password replacement.
 - A safe synthetic pilot creates one fictional group, four fictional students, five subjects, and five representative works.
 - Manual schedule/replacement intake is still separate. Automatic VK access is a later optional integration.
