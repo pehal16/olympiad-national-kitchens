@@ -1042,7 +1042,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.6.85");
+    await navigator.serviceWorker.register("/sw.js?v=1.6.86");
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       registration.update().catch(() => {});

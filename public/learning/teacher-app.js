@@ -422,6 +422,11 @@ function drawBuilder() {
   drawCanvas();
   drawInspector();
   $('#builder-back').addEventListener('click', async () => { await flushBuilder(); navigate('works', { force: true }); });
+  // Keep toolbar actions stable when an inspector field is focused: its blur handler
+  // can redraw the builder before the following click event reaches the old button.
+  ['#builder-preview', '#builder-publish'].forEach((selector) => {
+    $(selector).addEventListener('pointerdown', (event) => event.preventDefault());
+  });
   $('#builder-preview').addEventListener('click', previewBuilder);
   $('#builder-publish').addEventListener('click', publishBuilder);
   $$('[data-add-block]').forEach((button) => button.addEventListener('click', () => addBlock(button.dataset.addBlock)));
@@ -912,7 +917,7 @@ function drawPilotResult(target, students) {
 }
 
 async function seedPilot(event) {
-  const confirmed = await confirmAction({ title: 'Развернуть пилотный выпуск?', message: 'Будут созданы синтетическая группа, пять предметов, пять работ и назначения. Реальные данные студентов не используются.', acceptLabel: 'Развернуть' });
+  const confirmed = await confirmAction({ title: 'Обновить учебный комплект?', message: 'Будут созданы или обновлены пять практических работ МДК 01.01 и назначения для выбранной в настройках группы. Уже начатые работы сохранятся.', acceptLabel: 'Обновить' });
   if (!confirmed) return;
   setBusy(event.currentTarget, true, 'Разворачиваем…');
   const resultBox = $('#pilot-result');
