@@ -32,10 +32,21 @@ test("pilot supports group and full-name entry, assignment, submission and grade
   assert.equal(pilot.courses.length, 5);
   assert.equal(pilot.works.length, 5);
 
+  const initialFirstWork = pilot.works[0];
+  await repository.mutate((state) => {
+    const marker = state.workBlocks.find((block) => block.version_id === initialFirstWork.versionId);
+    const config = JSON.parse(marker.config_json || "{}");
+    delete config.pilotContentRevision;
+    marker.config_json = JSON.stringify(config);
+  });
+
   const repeated = await service.seedPilot(admin);
   assert.equal(repeated.seeded, false);
   assert.equal(repeated.works.length, 5);
   assert.equal((await service.listTeacherAssignments(admin)).length, 5);
+  assert.equal(repeated.works[0].assignmentId, initialFirstWork.assignmentId);
+  assert.notEqual(repeated.works[0].versionId, initialFirstWork.versionId);
+  assert.equal(repeated.works[0].upgraded, true);
 
   const directory = await service.studentAccessStudents(pilot.group.id);
   assert.equal(directory.students.length, 4);

@@ -23,12 +23,42 @@ const PILOT_SUBJECTS = Object.freeze([
   { code: "ОП-08", name: "Основы калькуляции и учёта" }
 ]);
 
+const PILOT_CONTENT_REVISION = 2;
+
+const SPICE_VISUALS = Object.freeze({
+  "black-pepper": { src: "/assets/learning/spices/black-pepper.jpg", alt: "Горошины чёрного перца" },
+  allspice: { src: "/assets/learning/spices/allspice.jpg", alt: "Горошины душистого перца" },
+  bay: { src: "/assets/learning/spices/bay-leaf.jpg", alt: "Сушёные лавровые листья" },
+  cinnamon: { src: "/assets/learning/spices/cinnamon.jpg", alt: "Кусочки коры корицы" },
+  clove: { src: "/assets/learning/spices/clove.jpg", alt: "Сушёные бутоны гвоздики" },
+  coriander: { src: "/assets/learning/spices/coriander.jpg", alt: "Плоды кориандра" },
+  turmeric: { src: "/assets/learning/spices/turmeric.jpg", alt: "Молотая куркума" },
+  basil: { src: "/assets/learning/spices/dried-basil.jpg", alt: "Сушёные листья базилика" }
+});
+
 function instruction(id, title, prompt, extra = {}) {
-  return { id, type: "instruction", title, prompt, required: false, maxScore: 0, ...extra };
+  return { id, type: "instruction", title, prompt, required: false, maxScore: 0, pilotContentRevision: PILOT_CONTENT_REVISION, ...extra };
 }
 
 function numeric(value, tolerance = 0.01) {
   return { value, tolerance: { type: "absolute", value: tolerance } };
+}
+
+function requisitionRow(id, dish, ingredient, netPerPortion, portions, wastePercent) {
+  const netTotal = netPerPortion * portions;
+  return {
+    id,
+    label: ingredient,
+    cells: { dish, netPerPortion, portions, wastePercent },
+    calculatorExpressions: {
+      net: `${netPerPortion}*${portions}`,
+      gross: `${netTotal}/(1-${wastePercent}/100)`
+    }
+  };
+}
+
+function spice(id, label, description = "") {
+  return { id, label, description, ...SPICE_VISUALS[id] };
 }
 
 function pilotWorks(courseIds, groupId) {
@@ -38,41 +68,55 @@ function pilotWorks(courseIds, groupId) {
       courseId: mdkCourseId, defaultGroupId: groupId, kind: "practice",
       title: "Практическая работа № 1. Составление заявки на сырьё",
       topic: "Расчёт потребности в сырье с учётом количества порций и отходов",
-      instructions: "Выполняйте расчёт в граммах, затем переведите итоговую заявку в килограммы. Допустимо округление до 0,001 кг.",
+      instructions: "Заполните рабочий лист заявки: исходные нормы уже внесены. Рассчитайте нетто и брутто по строкам, затем объедините одинаковые продукты в сводной заявке. Массу в заявке округляйте до 0,001 кг.",
       estimatedMinutes: 90, defaultDueAt: addDays(7),
       blocks: [
-        instruction("pz1-theory", "Формулы и разобранный пример", "Масса нетто всего = масса нетто на одну порцию × количество порций. Масса брутто = масса нетто всего ÷ (1 − процент отходов ÷ 100). Пример: для 20 порций требуется по 100 г картофеля нетто, отходы составляют 20 %. Нетто всего: 100 × 20 = 2000 г. Брутто: 2000 ÷ 0,80 = 2500 г = 2,500 кг."),
+        instruction("pz1-theory", "Исходные данные и пример", "Заказ производственной смены: 25 порций супа картофельного и 30 порций картофельного пюре. Масса нетто всего = норма нетто на одну порцию × количество порций. Масса брутто = масса нетто всего × 100 ÷ (100 − отходы, %). Пример: морковь – 20 г × 25 = 500 г нетто; 500 × 100 ÷ 80 = 625 г брутто. Проценты отходов в работе являются учебными исходными данными."),
         {
           id: "pz1-order", type: "ordering", title: "Алгоритм расчёта", prompt: "Расположите действия по порядку.", maxScore: 15,
           items: [
-            { id: "source", label: "Выписать нормы нетто на одну порцию" },
             { id: "portions", label: "Умножить норму на количество порций" },
-            { id: "waste", label: "Учесть процент отходов и определить брутто" },
-            { id: "merge", label: "Объединить одинаковое сырьё по двум блюдам" },
+            { id: "source", label: "Выписать нормы нетто на одну порцию" },
             { id: "units", label: "Перевести итог из граммов в килограммы" },
-            { id: "check", label: "Проверить единицы измерения и округление" }
+            { id: "waste", label: "Учесть процент отходов и определить брутто" },
+            { id: "check", label: "Проверить единицы измерения и округление" },
+            { id: "merge", label: "Объединить одинаковое сырьё по двум блюдам" }
           ],
           privateKey: { order: ["source", "portions", "waste", "merge", "units", "check"] }
         },
         {
-          id: "pz1-lines", type: "table", title: "Расчёт по каждой строке",
-          prompt: "Рассчитайте массу нетто всего и массу брутто в граммах. Исходные данные указаны в названии строки.",
-          rowHeader: "Блюдо и сырьё", maxScore: 35, autoGrade: true,
+          id: "pz1-lines", type: "table", title: "Бланк расчёта заявки",
+          prompt: "Заполните только два последних столбца. Кнопка с калькулятором подставляет формулу для выбранной строки и переносит результат в ячейку.",
+          rowHeader: "Сырьё", maxScore: 35, autoGrade: true, calculator: true,
+          worksheet: {
+            eyebrow: "Практическая работа № 1",
+            title: "Расчёт потребности в сырье",
+            facts: [
+              { label: "Суп картофельный", value: "25 порций" },
+              { label: "Картофельное пюре", value: "30 порций" },
+              { label: "Расчётная единица", value: "граммы" },
+              { label: "Точность заявки", value: "0,001 кг" }
+            ]
+          },
           rows: [
-            { id: "soup-potato", label: "Суп: картофель – 100 г × 25 порций, отходы 20 %" },
-            { id: "soup-carrot", label: "Суп: морковь – 20 г × 25 порций, отходы 20 %" },
-            { id: "soup-onion", label: "Суп: лук – 15 г × 25 порций, отходы 16 %" },
-            { id: "soup-cabbage", label: "Суп: капуста – 50 г × 25 порций, отходы 10 %" },
-            { id: "soup-oil", label: "Суп: масло растительное – 5 г × 25 порций, отходы 0 %" },
-            { id: "soup-salt", label: "Суп: соль – 3 г × 25 порций, отходы 0 %" },
-            { id: "puree-potato", label: "Пюре: картофель – 160 г × 30 порций, отходы 20 %" },
-            { id: "puree-milk", label: "Пюре: молоко – 30 г × 30 порций, отходы 0 %" },
-            { id: "puree-butter", label: "Пюре: масло сливочное – 10 г × 30 порций, отходы 0 %" },
-            { id: "puree-salt", label: "Пюре: соль – 2 г × 30 порций, отходы 0 %" }
+            requisitionRow("soup-potato", "Суп картофельный", "Картофель", 100, 25, 20),
+            requisitionRow("soup-carrot", "Суп картофельный", "Морковь", 20, 25, 20),
+            requisitionRow("soup-onion", "Суп картофельный", "Лук репчатый", 15, 25, 16),
+            requisitionRow("soup-cabbage", "Суп картофельный", "Капуста", 50, 25, 10),
+            requisitionRow("soup-oil", "Суп картофельный", "Масло растительное", 5, 25, 0),
+            requisitionRow("soup-salt", "Суп картофельный", "Соль", 3, 25, 0),
+            requisitionRow("puree-potato", "Картофельное пюре", "Картофель", 160, 30, 20),
+            requisitionRow("puree-milk", "Картофельное пюре", "Молоко", 30, 30, 0),
+            requisitionRow("puree-butter", "Картофельное пюре", "Масло сливочное", 10, 30, 0),
+            requisitionRow("puree-salt", "Картофельное пюре", "Соль", 2, 30, 0)
           ],
           columns: [
-            { id: "net", label: "Нетто всего, г", type: "number", required: true },
-            { id: "gross", label: "Брутто, г", type: "number", required: true }
+            { id: "dish", label: "Блюдо", readOnly: true },
+            { id: "netPerPortion", label: "Нетто на 1 порцию", hint: "г", readOnly: true },
+            { id: "portions", label: "Порций", readOnly: true },
+            { id: "wastePercent", label: "Отходы", hint: "%", readOnly: true },
+            { id: "net", label: "Нетто всего", hint: "г", type: "number", required: true },
+            { id: "gross", label: "Брутто", hint: "г", type: "number", required: true }
           ],
           privateKey: { cells: {
             "soup-potato:net": numeric(2500), "soup-potato:gross": numeric(3125),
@@ -88,16 +132,31 @@ function pilotWorks(courseIds, groupId) {
           } }
         },
         {
-          id: "pz1-request", type: "table", title: "Сводная заявка",
-          prompt: "Объедините одинаковые продукты и укажите требуемую массу брутто в килограммах.",
-          rowHeader: "Сырьё", maxScore: 25, autoGrade: true,
+          id: "pz1-request", type: "table", title: "Заявка на сырьё",
+          prompt: "Перенесите итоговую потребность: одинаковое сырьё по двум блюдам сложите, граммы переведите в килограммы.",
+          rowHeader: "Наименование сырья", maxScore: 25, autoGrade: true, calculator: true,
+          worksheet: {
+            eyebrow: "Итоговый документ",
+            title: "Заявка на отпуск сырья в производство",
+            facts: [
+              { label: "Основание", value: "производственная программа смены" },
+              { label: "Единица измерения", value: "килограмм" }
+            ]
+          },
           rows: [
-            { id: "potato", label: "Картофель" }, { id: "carrot", label: "Морковь" },
-            { id: "onion", label: "Лук репчатый" }, { id: "cabbage", label: "Капуста" },
-            { id: "oil", label: "Масло растительное" }, { id: "salt", label: "Соль" },
-            { id: "milk", label: "Молоко" }, { id: "butter", label: "Масло сливочное" }
+            { id: "potato", label: "Картофель", cells: { unit: "кг" }, calculatorExpressions: { kg: "(3125+6000)/1000" } },
+            { id: "carrot", label: "Морковь", cells: { unit: "кг" }, calculatorExpressions: { kg: "625/1000" } },
+            { id: "onion", label: "Лук репчатый", cells: { unit: "кг" }, calculatorExpressions: { kg: "446.43/1000" } },
+            { id: "cabbage", label: "Капуста", cells: { unit: "кг" }, calculatorExpressions: { kg: "1388.89/1000" } },
+            { id: "oil", label: "Масло растительное", cells: { unit: "кг" }, calculatorExpressions: { kg: "125/1000" } },
+            { id: "salt", label: "Соль", cells: { unit: "кг" }, calculatorExpressions: { kg: "(75+60)/1000" } },
+            { id: "milk", label: "Молоко", cells: { unit: "кг" }, calculatorExpressions: { kg: "900/1000" } },
+            { id: "butter", label: "Масло сливочное", cells: { unit: "кг" }, calculatorExpressions: { kg: "300/1000" } }
           ],
-          columns: [{ id: "kg", label: "Количество, кг", type: "number", required: true }],
+          columns: [
+            { id: "unit", label: "Ед. изм.", readOnly: true },
+            { id: "kg", label: "Заказать", hint: "округлить до 0,001", type: "number", required: true }
+          ],
           privateKey: { cells: {
             "potato:kg": numeric(9.125, 0.001), "carrot:kg": numeric(0.625, 0.001),
             "onion:kg": numeric(0.446, 0.001), "cabbage:kg": numeric(1.389, 0.001),
@@ -108,7 +167,7 @@ function pilotWorks(courseIds, groupId) {
         {
           id: "pz1-home", type: "calculation", title: "Самостоятельная проверка",
           prompt: "Для 35 порций супа требуется по 100 г картофеля нетто. Отходы – 20 %. Определите массу картофеля брутто.",
-          formula: "mбрутто = mнетто × n ÷ (1 − отходы / 100)", maxScore: 15, unit: "кг",
+          formula: "mбрутто = mнетто × n × 100 ÷ (100 − отходы, %)", calculatorExpression: "100*35/(1-20/100)/1000", maxScore: 15, unit: "кг",
           privateKey: { value: 4.375, unit: "кг", tolerance: { type: "absolute", value: 0.001 }, partialCredit: { valueOnlyFraction: 0.75, nearValueFraction: 0.5 } }
         },
         { id: "pz1-reflection", type: "reflection", title: "Вывод", prompt: "Назовите одну проверку, которая помогает обнаружить ошибку в заявке.", maxScore: 10, minLength: 25, maxLength: 500 }
@@ -135,16 +194,19 @@ function pilotWorks(courseIds, groupId) {
           { src: "/assets/learning/spices/dried-basil.jpg", alt: "Сушёные листья базилика", caption: "Базилик сушёный" }
         ] }),
         {
-          id: "pz2-classification", type: "classification", title: "Используемая часть растения", prompt: "Распределите пряности по группам.", maxScore: 25,
+          id: "pz2-classification", type: "classification", title: "Интерактивная классификация", prompt: "Распределите карточки пряностей по используемой части растения. Карточки можно перетаскивать между зонами.", maxScore: 25,
           items: [
-            { id: "black-pepper", label: "Перец чёрный" }, { id: "allspice", label: "Перец душистый" },
-            { id: "bay", label: "Лавровый лист" }, { id: "cinnamon", label: "Корица" },
-            { id: "clove", label: "Гвоздика" }, { id: "coriander", label: "Кориандр" },
-            { id: "turmeric", label: "Куркума" }, { id: "basil", label: "Базилик сушёный" }
+            spice("black-pepper", "Перец чёрный", "горошины"), spice("allspice", "Перец душистый", "горошины"),
+            spice("bay", "Лавровый лист", "сушёный"), spice("cinnamon", "Корица", "палочки"),
+            spice("clove", "Гвоздика", "целая"), spice("coriander", "Кориандр", "целый"),
+            spice("turmeric", "Куркума", "молотая"), spice("basil", "Базилик", "сушёный")
           ],
           categories: [
-            { id: "fruit", label: "Плод или семя" }, { id: "leaf", label: "Лист" },
-            { id: "bark", label: "Кора" }, { id: "bud", label: "Цветочная почка" }, { id: "rhizome", label: "Корневище" }
+            { id: "fruit", label: "Плод или семя", description: "пряные плоды и семена" },
+            { id: "leaf", label: "Лист", description: "листовые пряности" },
+            { id: "bark", label: "Кора", description: "высушенная кора" },
+            { id: "bud", label: "Цветочная почка", description: "нераскрывшийся бутон" },
+            { id: "rhizome", label: "Корневище", description: "подземная часть растения" }
           ],
           privateKey: { assignments: {
             "black-pepper": "fruit", allspice: "fruit", bay: "leaf", cinnamon: "bark",
@@ -152,21 +214,21 @@ function pilotWorks(courseIds, groupId) {
           } }
         },
         {
-          id: "pz2-matching", type: "matching", title: "Производственные ситуации", prompt: "Подберите наиболее подходящую пряность к каждой ситуации.", maxScore: 25,
+          id: "pz2-matching", type: "matching", title: "Пряность и кулинарное применение", prompt: "Перетащите фотографию с названием к наиболее подходящей производственной ситуации. Каждый вариант используется один раз.", maxScore: 25, allowTargetReuse: false,
           leftItems: [
             { id: "apples", label: "Запекание яблок" }, { id: "broth", label: "Приготовление прозрачного бульона" },
             { id: "potato", label: "Доведение до вкуса блюда из картофеля" }, { id: "pilaf", label: "Приготовление плова" },
             { id: "tomato", label: "Приготовление томатного соуса" }
           ],
           rightItems: [
-            { id: "cinnamon", label: "Корица" }, { id: "bay", label: "Лавровый лист" },
-            { id: "basil", label: "Базилик" }, { id: "turmeric", label: "Куркума" }, { id: "coriander", label: "Кориандр" }
+            spice("cinnamon", "Корица"), spice("bay", "Лавровый лист"),
+            spice("basil", "Базилик"), spice("turmeric", "Куркума"), spice("coriander", "Кориандр")
           ],
           privateKey: { pairs: { apples: "cinnamon", broth: "bay", potato: "basil", pilaf: "turmeric", tomato: "coriander" } }
         },
         {
           id: "pz2-table", type: "table", title: "Карточки пряностей",
-          prompt: "Кратко запишите внешний вид, аромат, применение и рекомендуемый момент внесения.", rowHeader: "Пряность", maxScore: 30,
+          prompt: "По фотографиям и результатам классификации заполните краткую производственную характеристику.", rowHeader: "Пряность", maxScore: 30,
           rows: [
             { id: "black-pepper", label: "Перец чёрный" }, { id: "allspice", label: "Перец душистый" },
             { id: "bay", label: "Лавровый лист" }, { id: "cinnamon", label: "Корица" },
@@ -255,10 +317,10 @@ function pilotWorks(courseIds, groupId) {
         {
           id: "practice-order", type: "ordering", title: "Последовательность обработки картофеля", prompt: "Расположите основные операции по порядку.", maxScore: 15,
           items: [
-            { id: "receive", label: "Получение и осмотр сырья" }, { id: "sort", label: "Сортировка" },
-            { id: "wash", label: "Мойка" }, { id: "peel", label: "Очистка" },
-            { id: "trim", label: "Дочистка" }, { id: "rinse", label: "Промывание" },
-            { id: "cut", label: "Нарезка и помещение в чистую тару" }
+            { id: "trim", label: "Дочистка" }, { id: "receive", label: "Получение и осмотр сырья" },
+            { id: "cut", label: "Нарезка и помещение в чистую тару" }, { id: "wash", label: "Мойка" },
+            { id: "rinse", label: "Промывание" }, { id: "sort", label: "Сортировка" },
+            { id: "peel", label: "Очистка" }
           ],
           privateKey: { order: ["receive", "sort", "wash", "peel", "trim", "rinse", "cut"] }
         },
@@ -305,7 +367,7 @@ function pilotWorks(courseIds, groupId) {
     },
     {
       courseId: mdkCourseId, defaultGroupId: groupId, kind: "test",
-      title: "Промежуточный тест к практической работе № 5. Оборудование для овощей и грибов",
+      title: "Промежуточный тест № 1. Оборудование для обработки овощей и грибов",
       topic: "Правила использования оборудования для обработки и нарезки овощей и грибов",
       instructions: "Перед ответом определите назначение машины, проверьте порядок подготовки и безопасной остановки. Результат проверяется автоматически.",
       estimatedMinutes: 35, defaultDueAt: addDays(11),
@@ -341,7 +403,7 @@ function pilotWorks(courseIds, groupId) {
         },
         {
           id: "test-order", type: "ordering", title: "Аварийная остановка", prompt: "Расположите действия в верном порядке.", maxScore: 15,
-          items: [{ id: "stop", label: "Нажать кнопку остановки" }, { id: "power", label: "Отключить питание" }, { id: "warn", label: "Предупредить окружающих" }, { id: "report", label: "Сообщить ответственному лицу" }],
+          items: [{ id: "warn", label: "Предупредить окружающих" }, { id: "power", label: "Отключить питание" }, { id: "report", label: "Сообщить ответственному лицу" }, { id: "stop", label: "Нажать кнопку остановки" }],
           privateKey: { order: ["stop", "power", "warn", "report"] }
         },
         {
@@ -355,4 +417,4 @@ function pilotWorks(courseIds, groupId) {
   ];
 }
 
-module.exports = { PILOT_GROUP, PILOT_SUBJECTS, pilotWorks };
+module.exports = { PILOT_GROUP, PILOT_SUBJECTS, PILOT_CONTENT_REVISION, pilotWorks };

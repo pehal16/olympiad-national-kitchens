@@ -1,5 +1,5 @@
 import { teacherApi } from './api.js?v=1.1.3';
-import { mountTask } from './tasks.js?v=1.1.0';
+import { mountTask } from './tasks.js?v=1.2.0';
 import {
   $, $$, asArray, confirmAction, debounce, downloadCsv, errorText, escapeHtml,
   formatDate, fullName, initials, initSession, logout, pick, renderEmpty,

@@ -1031,6 +1031,37 @@ class D1LearningRepository {
     return this.normalizeAssignment(await this.first(this.assignmentSelect("a.id=?1"),[assignment.id]));
   }
 
+  async replaceAssignmentVersion({assignmentId,versionId,title,actorId,updatedAt}) {
+    const assignment = await this.first(
+      "SELECT id,course_id FROM learning_assignments WHERE id=?1 AND created_by=?2",
+      [assignmentId,actorId]
+    );
+    const version = await this.first(
+      `SELECT v.id,t.course_id FROM learning_work_versions v
+       INNER JOIN learning_work_templates t ON t.id=v.template_id
+       WHERE v.id=?1 AND v.status='published'`,
+      [versionId]
+    );
+    if (!assignment || !version || version.course_id !== assignment.course_id) {
+      throw new LearningError("Работа или версия не найдены.",404,"assignment_scope_not_found");
+    }
+    const submission = await this.first(
+      "SELECT id FROM learning_submissions WHERE assignment_id=?1 LIMIT 1",
+      [assignmentId]
+    );
+    if (submission) {
+      throw new LearningError("Нельзя заменить версию начатой работы.",409,"assignment_version_in_use");
+    }
+    await this.batch([
+      this.stmt(
+        "UPDATE learning_assignments SET work_version_id=?2,title=COALESCE(?3,title),updated_at=?4 WHERE id=?1 AND created_by=?5",
+        [assignmentId,versionId,title || null,updatedAt,actorId]
+      ),
+      this.auditStatement(actorId,"assignment.version_replaced","assignment",assignmentId,{versionId},updatedAt)
+    ]);
+    return this.normalizeAssignment(await this.first(this.assignmentSelect("a.id=?1"),[assignmentId]));
+  }
+
   async assignmentGroups(assignmentIds) {
     if (!assignmentIds.length) return new Map();
     const rows = await this.all(

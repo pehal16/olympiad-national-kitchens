@@ -552,6 +552,9 @@ class FileLearningRepository {
         );
       }
       item.draft_json = JSON.stringify(draft);
+      item.title = draft.title;
+      item.activity_kind = draft.kind;
+      item.topic_id = draft.topicId || null;
       item.draft_revision = Number(item.draft_revision || 0) + 1;
       item.updated_at = updatedAt;
       return { ...item, draft: clone(draft) };
@@ -676,6 +679,27 @@ class FileLearningRepository {
         recipients: recipients.length
       });
       return assignment;
+    });
+  }
+
+  async replaceAssignmentVersion({ assignmentId, versionId, title, actorId, updatedAt }) {
+    return this.mutate((state) => {
+      const assignment = state.assignments.find((item) => item.id === assignmentId && item.created_by === actorId);
+      const version = state.workVersions.find((item) => item.id === versionId && item.status === "published");
+      const template = version && state.workTemplates.find((item) => item.id === version.template_id);
+      const hasSubmissions = state.submissions.some((item) => item.assignment_id === assignmentId);
+      if (!assignment || !version || template?.course_id !== assignment.course_id) {
+        throw new LearningError("Работа или версия не найдены.", 404, "assignment_scope_not_found");
+      }
+      if (hasSubmissions) {
+        throw new LearningError("Нельзя заменить версию начатой работы.", 409, "assignment_version_in_use");
+      }
+      assignment.version_id = versionId;
+      assignment.work_version_id = versionId;
+      if (title) assignment.title = String(title);
+      assignment.updated_at = updatedAt;
+      this.auditState(state, actorId, "assignment.version_replaced", "assignment", assignmentId, { versionId });
+      return clone(assignment);
     });
   }
 

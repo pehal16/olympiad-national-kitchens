@@ -483,24 +483,95 @@ textarea:disabled { color: var(--learning-muted); background: var(--learning-ban
 .choice-option-description { color: var(--learning-muted); line-height: 1.45; }
 .calculation-row { display: grid; grid-template-columns: minmax(180px, 1fr) 140px; gap: 12px; align-items: end; }
 .formula-box { padding: 12px; color: #294a7a; background: var(--learning-info-soft); border-radius: 8px; }
-.mapping-list,
 .arrangement-list,
 .dynamic-list { display: grid; gap: 8px; }
-.mapping-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, .7fr); gap: 12px; align-items: center; padding: 10px; border: 1px solid var(--learning-border); border-radius: 8px; }
-.arrangement-row { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px; border: 1px solid var(--learning-border); border-radius: 8px; background: #fff; }
+.drag-instruction { margin: 0; padding: 9px 12px; color: #42536a; background: #f4f7fa; border-left: 3px solid #6d839d; font-size: 13px; }
+.drag-board { display: grid; gap: 14px; }
+.drag-board-status { justify-self: start; color: #17633d; font-size: 13px; font-weight: 750; }
+.drag-tray { display: grid; gap: 10px; padding: 12px; background: #f8fafc; border: 1px dashed #9aa9ba; border-radius: 8px; }
+.drag-tray:focus-visible,
+.classification-zone:focus-visible,
+.matching-dropzone:focus-visible { outline: 3px solid rgba(27, 102, 168, .22); outline-offset: 2px; }
+.drag-tray h4 { margin: 0; font-size: 13px; }
+.drag-tray-items { display: flex; flex-wrap: wrap; gap: 8px; min-height: 58px; align-items: stretch; }
+.drag-card { display: grid; grid-template-columns: auto minmax(0, 1fr) 20px; gap: 8px; align-items: center; min-width: 160px; min-height: 54px; padding: 7px 8px; color: var(--learning-text); text-align: left; background: #fff; border: 1px solid #abb7c6; border-radius: 7px; box-shadow: 0 2px 7px rgba(19, 32, 58, .06); cursor: grab; touch-action: manipulation; }
+.drag-card:hover { border-color: #60758f; box-shadow: 0 4px 12px rgba(19, 32, 58, .1); }
+.drag-card:active { cursor: grabbing; }
+.drag-card.is-selected { color: #0f5d38; background: #f0faf5; border-color: #198754; box-shadow: 0 0 0 2px rgba(25, 135, 84, .13); }
+.drag-card.is-dragging { opacity: .45; }
+.drag-card:disabled { opacity: 1; cursor: default; }
+.drag-card-image { width: 52px; height: 44px; object-fit: cover; background: #fff; border: 1px solid #d3dae3; border-radius: 5px; }
+.drag-card-copy { display: grid; gap: 2px; min-width: 0; }
+.drag-card-copy strong { font-size: 13px; line-height: 1.3; }
+.drag-card-copy small { color: var(--learning-muted); font-size: 11px; line-height: 1.25; }
+.drag-card-grip { display: grid; place-items: center; color: #73839a; }
+.drag-empty { margin: 0; align-self: center; color: var(--learning-muted); font-size: 12px; }
+.classification-zones { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.classification-zone { min-width: 0; background: #fff; border: 1px solid #aeb9c7; border-radius: 8px; }
+.classification-zone.is-drag-over,
+.matching-dropzone.is-drag-over,
+.drag-tray.is-drag-over { background: #eef9f3; border-color: #198754; box-shadow: inset 0 0 0 2px rgba(25, 135, 84, .15); }
+.classification-zone-head { position: relative; display: grid; gap: 2px; min-height: 58px; padding: 11px 42px 9px 11px; background: #f4f7fa; border-bottom: 1px solid var(--learning-border); border-radius: 7px 7px 0 0; }
+.classification-zone-head strong { font-size: 14px; }
+.classification-zone-head small { color: var(--learning-muted); font-size: 11px; }
+.zone-count { position: absolute; top: 10px; right: 10px; display: grid; width: 25px; height: 25px; place-items: center; color: #fff; background: #243a57; border-radius: 50%; font-size: 12px; font-weight: 800; }
+.classification-zone-body { display: grid; gap: 7px; align-content: start; min-height: 130px; padding: 9px; }
+.classification-zone-body .drag-card { width: 100%; min-width: 0; }
+.matching-zones { display: grid; gap: 8px; }
+.matching-row { display: grid; grid-template-columns: minmax(220px, .9fr) minmax(250px, 1.1fr); min-height: 74px; border: 1px solid var(--learning-border); border-radius: 8px; overflow: hidden; }
+.matching-prompt { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 4px 9px; align-content: center; padding: 11px; background: #f7f9fb; }
+.matching-prompt small { grid-column: 2; color: var(--learning-muted); }
+.matching-number { grid-row: 1 / span 2; display: grid; width: 28px; height: 28px; place-items: center; color: #fff; background: #243a57; border-radius: 50%; font-size: 12px; font-weight: 800; }
+.matching-dropzone { display: grid; min-width: 0; align-items: center; padding: 8px; border-left: 1px dashed #aeb9c7; }
+.matching-dropzone .drag-card { width: 100%; min-width: 0; }
+.arrangement-row { position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr) 24px; gap: 10px; align-items: center; padding: 10px; border: 1px solid var(--learning-border); border-radius: 8px; background: #fff; cursor: grab; }
+.arrangement-row:active { cursor: grabbing; }
+.arrangement-row.is-dragging { opacity: .45; }
+.arrangement-row.is-drag-over::before,
+.arrangement-row.is-drag-over.drop-after::after { content: ''; position: absolute; left: 8px; right: 8px; height: 3px; background: #198754; border-radius: 3px; }
+.arrangement-row.is-drag-over::before { top: -6px; }
+.arrangement-row.is-drag-over.drop-after::before { content: none; }
+.arrangement-row.is-drag-over.drop-after::after { bottom: -6px; }
 .arrangement-index { width: 32px; height: 32px; display: grid; place-items: center; color: #fff; background: var(--learning-text); border-radius: 50%; font-weight: 700; }
-.reorder-actions { display: flex; gap: 4px; }
-.reorder-actions button { width: 36px; min-height: 36px; padding: 0; }
+.arrangement-grip { display: grid; place-items: center; color: #718096; }
+.numeric-input-shell { display: grid; grid-template-columns: minmax(0, 1fr) 36px; align-items: stretch; }
+.numeric-input-shell input { border-radius: 7px 0 0 7px; }
+.calculator-trigger { width: 36px; min-height: 36px; padding: 0; color: #243a57; background: #f4f7fa; border-left: 0; border-radius: 0 7px 7px 0; }
+.task-calculator { display: grid; gap: 10px; max-width: 430px; padding: 14px; background: #f8fafc; border: 1px solid #aeb9c7; border-top: 4px solid #198754; border-radius: 8px; }
+.task-calculator[hidden] { display: none; }
+.task-calculator-head { display: flex; justify-content: space-between; align-items: center; }
+.task-calculator-head .icon-control { width: 34px; min-height: 34px; padding: 0; }
+.task-calculator-expression { font-variant-numeric: tabular-nums; }
+.task-calculator-result { min-height: 50px; padding: 8px 10px; color: #0f2b4a; text-align: right; background: #fff; border: 1px solid #c5ced9; border-radius: 6px; font-size: 27px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.task-calculator-error { margin: 0; color: var(--learning-danger); font-size: 12px; }
+.task-calculator-keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.calculator-key { min-height: 42px; color: #172b46; background: #fff; border: 1px solid #b8c3d0; border-radius: 6px; font-size: 16px; font-weight: 700; }
+.calculator-key:hover { background: #eef2f6; }
+.calculator-key.is-primary { color: #fff; background: #198754; border-color: #198754; }
+.task-calculator-actions { display: flex; justify-content: space-between; gap: 8px; }
+.worksheet-brief { display: grid; grid-template-columns: minmax(200px, .65fr) minmax(0, 1.35fr); gap: 18px; align-items: center; padding: 13px 15px; border: 1px solid #aeb9c7; border-left: 4px solid #198754; border-radius: 8px; }
+.worksheet-brief-title { display: grid; gap: 2px; }
+.worksheet-brief-title span { color: #17633d; font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.worksheet-brief-title strong { font-size: 15px; }
+.worksheet-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 4px 16px; margin: 0; }
+.worksheet-facts dt { color: var(--learning-muted); font-size: 11px; }
+.worksheet-facts dd { margin: 0; font-size: 13px; font-weight: 700; }
 .task-table-wrap { width: 100%; overflow-x: auto; border: 1px solid var(--learning-border); border-radius: 8px; }
 .task-table { width: 100%; min-width: 680px; border-collapse: collapse; }
 .task-table th,
 .task-table td { padding: 8px; border-right: 1px solid var(--learning-border); border-bottom: 1px solid var(--learning-border); text-align: left; vertical-align: top; }
 .task-table th { background: var(--learning-band); font-size: 13px; }
+.task-table th > span,
+.task-table th > small { display: block; }
+.task-table th > small { margin-top: 2px; color: var(--learning-muted); font-size: 10px; font-weight: 500; }
 .task-table tr:last-child td { border-bottom: 0; }
 .task-table th:last-child,
 .task-table td:last-child { border-right: 0; }
 .task-table input,
 .task-table select { min-height: 36px; padding: 6px 8px; }
+.task-table .numeric-input-shell input { min-width: 94px; }
+.table-given-value { display: block; padding: 8px 4px; color: #243a57; font-weight: 700; font-variant-numeric: tabular-nums; }
+.table-cell-unit { display: block; margin-top: 3px; color: var(--learning-muted); font-size: 10px; }
 .dynamic-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) auto; gap: 8px; align-items: end; padding: 10px; border: 1px solid var(--learning-border); border-radius: 8px; }
 .dynamic-row-actions { display: flex; gap: 4px; }
 .dynamic-row-actions button { width: 36px; min-height: 36px; padding: 0; }
@@ -712,9 +783,14 @@ textarea:disabled { color: var(--learning-muted); background: var(--learning-ban
   .workspace-footer { position: fixed; z-index: 55; left: 0; right: 0; bottom: 0; padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); background: rgba(255, 255, 255, .98); box-shadow: 0 -6px 24px rgba(19, 32, 58, .1); }
   .workspace-footer .learning-button { flex: 1; }
   .workspace-footer .mobile-only { display: inline-flex; }
-  .mapping-row,
   .crossword-clue,
   .calculation-row { grid-template-columns: 1fr; }
+  .worksheet-brief { grid-template-columns: 1fr; gap: 10px; }
+  .classification-zones { grid-template-columns: 1fr; }
+  .matching-row { grid-template-columns: 1fr; }
+  .matching-dropzone { min-height: 72px; border-top: 1px dashed #aeb9c7; border-left: 0; }
+  .drag-card { min-width: min(100%, 210px); }
+  .task-calculator { max-width: none; }
   .task-table-wrap { overflow: visible; border: 0; }
   .task-table { display: block; min-width: 0; }
   .task-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

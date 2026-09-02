@@ -23,11 +23,16 @@ const {
   objectKey,
   sha256
 } = require("./files");
-const { PILOT_GROUP, PILOT_SUBJECTS, pilotWorks } = require("./pilot");
+const { PILOT_GROUP, PILOT_SUBJECTS, PILOT_CONTENT_REVISION, pilotWorks } = require("./pilot");
 
 const SESSION_HOURS = Number(process.env.LEARNING_SESSION_HOURS || 12);
 const LOGIN_FAILURE_LIMIT = Number(process.env.LEARNING_LOGIN_FAILURE_LIMIT || 5);
 const LOGIN_LOCK_MINUTES = Number(process.env.LEARNING_LOGIN_LOCK_MINUTES || 15);
+const PILOT_LEGACY_TITLES = new Map([
+  ["Промежуточный тест № 1. Оборудование для обработки овощей и грибов", [
+    "Промежуточный тест к практической работе № 5. Оборудование для овощей и грибов"
+  ]]
+]);
 
 function newId(prefix) {
   return `${prefix}_${crypto.randomUUID()}`;
@@ -57,6 +62,15 @@ function parseJson(value, fallback = {}) {
   } catch (error) {
     return JSON.parse(JSON.stringify(fallback));
   }
+}
+
+function pilotRevisionOf(version) {
+  for (const block of version?.blocks || []) {
+    const config = block.config || parseJson(block.config_json, {});
+    const revision = Number(config.pilotContentRevision || 0);
+    if (revision > 0) return revision;
+  }
+  return 0;
 }
 
 function scoreCapacities(work) {
@@ -572,18 +586,28 @@ class LearningService {
     let assignments = await this.repository.listAssignmentsForTeacher(context.user.id);
     const prepared = [];
     for (const definition of workDefinitions) {
-      let template = existingTemplates.find((item) => item.title === definition.title);
+      const matchingTitles = new Set([definition.title, ...(PILOT_LEGACY_TITLES.get(definition.title) || [])]);
+      let template = existingTemplates.find((item) => matchingTitles.has(item.title));
       let version = null;
+      let upgraded = false;
       if (!template) {
         template = await this.createTemplate(context, definition);
       }
       const detail = await this.repository.getTemplate(template.id, context.user.id);
       if (detail?.current_version_id) {
         version = await this.repository.getWorkVersion(detail.current_version_id, true);
+        if (pilotRevisionOf(version) < PILOT_CONTENT_REVISION) {
+          await this.saveTemplate(context, template.id, {
+            ...definition,
+            expectedRevision: Number(detail.draft_revision || 0)
+          });
+          version = await this.publishTemplate(context, template.id);
+          upgraded = true;
+        }
       } else {
         version = await this.publishTemplate(context, template.id);
       }
-      let assignment = assignments.find((item) => item.title === definition.title);
+      let assignment = assignments.find((item) => matchingTitles.has(item.title));
       if (!assignment) {
         assignment = await this.createAssignment(context, {
           versionId: version.id,
@@ -597,13 +621,25 @@ class LearningService {
           feedbackPolicy: "after_review"
         });
         assignments = [...assignments, assignment];
+      } else if ((assignment.version_id !== version.id || assignment.title !== definition.title) && Number(assignment.submittedCount || 0) === 0) {
+        assignment = await this.repository.replaceAssignmentVersion({
+          assignmentId: assignment.id,
+          versionId: version.id,
+          title: definition.title,
+          actorId: context.user.id,
+          updatedAt: nowIso()
+        });
+        assignments = assignments.map((item) => item.id === assignment.id ? { ...item, ...assignment } : item);
+        upgraded = true;
       }
       prepared.push({
         templateId: template.id,
         versionId: version.id,
         assignmentId: assignment.id,
         title: definition.title,
-        kind: definition.kind
+        kind: definition.kind,
+        upgraded,
+        upgradeDeferred: assignment.version_id !== version.id || assignment.title !== definition.title
       });
     }
 

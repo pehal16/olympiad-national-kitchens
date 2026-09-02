@@ -22,6 +22,7 @@ const KNOWN_TYPES = new Set([
 ]);
 
 let idSequence = 0;
+let activeDragPayload = null;
 
 function nextId(prefix = 'task') {
   idSequence += 1;
@@ -51,6 +52,9 @@ function createSvgIcon(kind) {
   const paths = {
     up: ['M12 19V5', 'm5 7-5-7-5 7'],
     down: ['M12 5v14', 'm7-7-7 7-7-7'],
+    grip: ['M9 5h.01', 'M15 5h.01', 'M9 12h.01', 'M15 12h.01', 'M9 19h.01', 'M15 19h.01'],
+    calculator: ['M5 3h14v18H5z', 'M8 7h8', 'M8 11h.01', 'M12 11h.01', 'M16 11h.01', 'M8 15h.01', 'M12 15h.01', 'M16 15h.01', 'M8 18h.01', 'M12 18h.01', 'M16 18h.01'],
+    close: ['M6 6l12 12', 'M18 6 6 18'],
     delete: ['M4 7h16', 'M9 7V4h6v3', 'm6 0-1 14H8L7 7', 'M10 11v6', 'M14 11v6'],
     download: ['M12 3v12', 'm7-7-7 7-7-7', 'M5 21h14'],
   };
@@ -484,6 +488,190 @@ function parseDecimal(value) {
   return Number.isFinite(number) ? number : Number.NaN;
 }
 
+export function evaluateCalculatorExpression(source) {
+  const expression = String(source ?? '')
+    .replace(/\s+/g, '')
+    .replace(/,/g, '.')
+    .replace(/[×х]/gi, '*')
+    .replace(/÷/g, '/')
+    .replace(/[−–—]/g, '-');
+  let index = 0;
+
+  function primary() {
+    const sign = expression[index] === '-' || expression[index] === '+' ? expression[index++] : '';
+    let result;
+    if (expression[index] === '(') {
+      index += 1;
+      result = sum();
+      if (expression[index] !== ')') throw new Error('Не закрыта скобка.');
+      index += 1;
+    } else {
+      const match = expression.slice(index).match(/^(?:\d+(?:\.\d*)?|\.\d+)/);
+      if (!match) throw new Error('Введите число или выражение.');
+      index += match[0].length;
+      result = Number(match[0]);
+    }
+    if (sign === '-') result *= -1;
+    while (expression[index] === '%') {
+      result /= 100;
+      index += 1;
+    }
+    return result;
+  }
+
+  function product() {
+    let result = primary();
+    while (expression[index] === '*' || expression[index] === '/') {
+      const operator = expression[index++];
+      const next = primary();
+      if (operator === '/' && next === 0) throw new Error('На ноль делить нельзя.');
+      result = operator === '*' ? result * next : result / next;
+    }
+    return result;
+  }
+
+  function sum() {
+    let result = product();
+    while (expression[index] === '+' || expression[index] === '-') {
+      const operator = expression[index++];
+      const next = product();
+      result = operator === '+' ? result + next : result - next;
+    }
+    return result;
+  }
+
+  if (!expression) throw new Error('Введите выражение.');
+  const result = sum();
+  if (index !== expression.length || !Number.isFinite(result)) throw new Error('Проверьте выражение.');
+  return result;
+}
+
+function calculatorNumber(value) {
+  return Number(value.toFixed(6)).toLocaleString('ru-RU', {
+    maximumFractionDigits: 6,
+    useGrouping: false,
+  });
+}
+
+function createCalculator(root, readOnly) {
+  const panel = createElement('section', 'task-calculator');
+  panel.hidden = true;
+  panel.setAttribute('aria-label', 'Встроенный калькулятор');
+  const head = createElement('div', 'task-calculator-head');
+  head.append(createElement('strong', null, 'Калькулятор'));
+  const close = iconButton('Закрыть калькулятор', 'close', readOnly);
+  head.append(close);
+  const expression = createElement('input', 'task-calculator-expression');
+  expression.type = 'text';
+  expression.inputMode = 'decimal';
+  expression.autocomplete = 'off';
+  expression.placeholder = 'Например: 100 × 25';
+  expression.disabled = readOnly;
+  const result = createElement('output', 'task-calculator-result', '0');
+  result.setAttribute('aria-live', 'polite');
+  const error = createElement('p', 'task-calculator-error');
+  error.hidden = true;
+  const keypad = createElement('div', 'task-calculator-keypad');
+  const keys = [
+    ['7', '7'], ['8', '8'], ['9', '9'], ['÷', '÷'],
+    ['4', '4'], ['5', '5'], ['6', '6'], ['×', '×'],
+    ['1', '1'], ['2', '2'], ['3', '3'], ['−', '−'],
+    ['0', '0'], [',', ','], ['%', '%'], ['+', '+'],
+    ['(', '('], [')', ')'], ['⌫', 'backspace'], ['=', 'equals'],
+  ];
+  let target = null;
+
+  function calculate() {
+    try {
+      const calculated = evaluateCalculatorExpression(expression.value);
+      result.value = calculatorNumber(calculated);
+      result.textContent = result.value;
+      error.hidden = true;
+      return calculated;
+    } catch (calculationError) {
+      result.value = '';
+      result.textContent = '—';
+      error.textContent = calculationError.message || 'Проверьте выражение.';
+      error.hidden = false;
+      return null;
+    }
+  }
+
+  keys.forEach(([label, action]) => {
+    const button = createElement('button', action === 'equals' ? 'calculator-key is-primary' : 'calculator-key', label);
+    button.type = 'button';
+    button.disabled = readOnly;
+    button.addEventListener('click', () => {
+      if (action === 'equals') {
+        calculate();
+      } else if (action === 'backspace') {
+        expression.value = expression.value.slice(0, -1);
+      } else {
+        expression.value += action;
+      }
+      expression.focus();
+    });
+    keypad.append(button);
+  });
+
+  const actions = createElement('div', 'task-calculator-actions');
+  const clear = createElement('button', 'learning-button quiet', 'Очистить');
+  clear.type = 'button';
+  clear.disabled = readOnly;
+  const insert = createElement('button', 'learning-button primary', 'Вставить результат');
+  insert.type = 'button';
+  insert.disabled = readOnly;
+  clear.addEventListener('click', () => {
+    expression.value = '';
+    result.value = '';
+    result.textContent = '0';
+    error.hidden = true;
+    expression.focus();
+  });
+  insert.addEventListener('click', () => {
+    const calculated = calculate();
+    if (calculated === null || !target) return;
+    target.value = calculatorNumber(calculated).replace(',', '.');
+    target.dispatchEvent(new Event('input', { bubbles: true }));
+    target.focus();
+  });
+  actions.append(clear, insert);
+  expression.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    calculate();
+  });
+  close.addEventListener('click', () => {
+    panel.hidden = true;
+    target?.focus();
+  });
+  panel.append(head, expression, result, error, keypad, actions);
+
+  return {
+    panel,
+    open(nextTarget, suggestedExpression = '') {
+      if (readOnly) return;
+      target = nextTarget;
+      expression.value = suggestedExpression || nextTarget?.value || '';
+      result.value = '';
+      result.textContent = '0';
+      error.hidden = true;
+      panel.hidden = false;
+      expression.focus();
+      expression.select();
+    },
+  };
+}
+
+function wrapWithCalculatorButton(input, label, calculator, expression = '') {
+  const shell = createElement('div', 'numeric-input-shell');
+  const button = iconButton(`Открыть калькулятор: ${label}`, 'calculator', input.disabled);
+  button.classList.add('calculator-trigger');
+  button.addEventListener('click', () => calculator.open(input, expression));
+  shell.append(input, button);
+  return shell;
+}
+
 function renderCalculation(environment) {
   const { root, block, value, readOnly, emit } = environment;
   const initial = isObject(value) ? value : { value };
@@ -498,7 +686,12 @@ function renderCalculation(environment) {
   numberInput.value = initial.value === null || initial.value === undefined ? '' : String(initial.value);
   numberInput.placeholder = block.placeholder || 'Числовое значение';
   numberInput.disabled = readOnly;
-  row.append(makeField(block.valueLabel || 'Результат расчёта', numberInput));
+  const calculator = createCalculator(root, readOnly);
+  row.append(makeField(
+    block.valueLabel || 'Результат расчёта',
+    wrapWithCalculatorButton(numberInput, block.valueLabel || 'результат расчёта', calculator, block.calculatorExpression || ''),
+    'Можно рассчитать во встроенном калькуляторе.',
+  ));
 
   const units = normalizedCollection(valueByKnownKey(block, ['units', 'unitOptions'], []), 'unit');
   let unitControl;
@@ -512,7 +705,7 @@ function renderCalculation(environment) {
   }
   unitControl.disabled = readOnly;
   row.append(makeField(block.unitLabel || 'Единица измерения', unitControl));
-  root.append(row);
+  root.append(row, calculator.panel);
   numberInput.addEventListener('input', emit);
   unitControl.addEventListener(units.length ? 'change' : 'input', emit);
 
@@ -541,8 +734,73 @@ function renderCalculation(environment) {
   };
 }
 
+function visualCard(item, { selected = false, readOnly = false, dragKind = 'item' } = {}) {
+  const raw = isObject(item.raw) ? item.raw : {};
+  const card = createElement('button', `drag-card${selected ? ' is-selected' : ''}`);
+  card.type = 'button';
+  card.disabled = readOnly;
+  card.draggable = !readOnly;
+  card.dataset.dragId = item.id;
+  card.dataset.dragKind = dragKind;
+  card.setAttribute('aria-pressed', selected ? 'true' : 'false');
+  const imageSource = raw.image || raw.imageUrl || raw.src;
+  if (imageSource) {
+    const image = createElement('img', 'drag-card-image');
+    image.src = String(imageSource);
+    image.alt = String(raw.alt || raw.imageAlt || item.label);
+    image.loading = 'lazy';
+    card.append(image);
+  }
+  const copy = createElement('span', 'drag-card-copy');
+  copy.append(createElement('strong', null, item.label));
+  if (raw.description) copy.append(createElement('small', null, raw.description));
+  const grip = createElement('span', 'drag-card-grip');
+  grip.append(createSvgIcon('grip'));
+  card.append(copy, grip);
+  return card;
+}
+
+function dragPayload(event) {
+  if (activeDragPayload) return activeDragPayload;
+  try { return JSON.parse(event.dataTransfer?.getData('text/plain') || '{}'); } catch (_error) { return {}; }
+}
+
+function bindDraggable(card, payload) {
+  card.addEventListener('dragstart', (event) => {
+    activeDragPayload = payload;
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', JSON.stringify(payload));
+    card.classList.add('is-dragging');
+  });
+  card.addEventListener('dragend', () => {
+    activeDragPayload = null;
+    card.classList.remove('is-dragging');
+  });
+}
+
+function bindDropZone(zone, accept, onDrop) {
+  zone.addEventListener('dragover', (event) => {
+    const payload = dragPayload(event);
+    if (!accept(payload)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    zone.classList.add('is-drag-over');
+  });
+  zone.addEventListener('dragleave', (event) => {
+    if (!zone.contains(event.relatedTarget)) zone.classList.remove('is-drag-over');
+  });
+  zone.addEventListener('drop', (event) => {
+    zone.classList.remove('is-drag-over');
+    const payload = dragPayload(event);
+    if (!accept(payload)) return;
+    event.preventDefault();
+    activeDragPayload = null;
+    onDrop(payload);
+  });
+}
+
 function renderMapping(environment, classification = false) {
-  const { root, block, value, readOnly, emit } = environment;
+  const { root, block, value, readOnly, emit, announce } = environment;
   const items = blockItems(block);
   const targets = normalizedCollection(
     classification
@@ -551,37 +809,198 @@ function renderMapping(environment, classification = false) {
     classification ? 'category' : 'target',
   );
   const state = recordFrom(value);
-  const list = createElement('div', 'mapping-list');
-  const controls = [];
+  const board = createElement('div', `drag-board ${classification ? 'is-classification' : 'is-matching'}`);
+  let selectedId = '';
 
-  items.forEach((item) => {
-    const row = createElement('div', 'mapping-row');
-    row.append(createElement('span', null, item.label));
-    let control;
-    if (targets.length) {
-      control = makeSelect(targets, classification ? 'Выберите категорию' : 'Выберите соответствие', state[item.id]);
-      control.addEventListener('change', () => {
-        state[item.id] = control.value;
-        emit();
+  function announcePlacement(itemLabel, targetLabel) {
+    announce(`${itemLabel}: ${targetLabel}.`);
+  }
+
+  function classificationBoard() {
+    const placed = items.filter((item) => nonEmptyText(state[item.id])).length;
+    const status = createElement('div', 'drag-board-status', `Размещено ${placed} из ${items.length}`);
+    const tray = createElement('section', 'drag-tray');
+    tray.tabIndex = readOnly ? -1 : 0;
+    tray.setAttribute('aria-label', 'Нераспределённые карточки');
+    tray.append(createElement('h4', null, 'Карточки для распределения'));
+    const trayItems = createElement('div', 'drag-tray-items');
+    items.filter((item) => !nonEmptyText(state[item.id])).forEach((item) => {
+      const card = visualCard(item, { selected: selectedId === item.id, readOnly, dragKind: 'classification-item' });
+      card.dataset.itemId = item.id;
+      card.addEventListener('click', () => {
+        selectedId = selectedId === item.id ? '' : item.id;
+        render();
+        if (selectedId) announce(`Выбрано: ${item.label}. Теперь выберите группу.`);
       });
-    } else {
-      control = createElement('input');
-      control.value = state[item.id] ?? '';
-      control.placeholder = classification ? 'Категория' : 'Соответствие';
-      control.addEventListener('input', () => {
-        state[item.id] = control.value;
-        emit();
+      bindDraggable(card, { kind: 'classification-item', id: item.id });
+      trayItems.append(card);
+    });
+    if (!trayItems.childElementCount) trayItems.append(createElement('p', 'drag-empty', 'Все карточки распределены. Перетащите карточку сюда, чтобы вернуть её.'));
+    tray.append(trayItems);
+    bindDropZone(tray, (payload) => payload.kind === 'classification-item', (payload) => {
+      state[payload.id] = '';
+      selectedId = '';
+      render();
+      emit();
+    });
+    tray.addEventListener('click', (event) => {
+      if (!selectedId || event.target.closest('.drag-card')) return;
+      state[selectedId] = '';
+      selectedId = '';
+      render();
+      emit();
+    });
+
+    const zones = createElement('div', 'classification-zones');
+    targets.forEach((target) => {
+      const zone = createElement('section', 'classification-zone');
+      zone.tabIndex = readOnly ? -1 : 0;
+      zone.dataset.targetId = target.id;
+      zone.setAttribute('role', 'group');
+      zone.setAttribute('aria-label', `Группа «${target.label}»`);
+      const targetRaw = isObject(target.raw) ? target.raw : {};
+      const head = createElement('header', 'classification-zone-head');
+      head.append(createElement('strong', null, target.label));
+      if (targetRaw.description) head.append(createElement('small', null, targetRaw.description));
+      const placedItems = items.filter((item) => state[item.id] === target.id);
+      head.append(createElement('span', 'zone-count', placedItems.length));
+      const body = createElement('div', 'classification-zone-body');
+      placedItems.forEach((item) => {
+        const card = visualCard(item, { selected: selectedId === item.id, readOnly, dragKind: 'classification-item' });
+        card.dataset.itemId = item.id;
+        card.addEventListener('click', (event) => {
+          event.stopPropagation();
+          selectedId = selectedId === item.id ? '' : item.id;
+          render();
+          if (selectedId) announce(`Выбрано: ${item.label}. Теперь выберите другую группу.`);
+        });
+        bindDraggable(card, { kind: 'classification-item', id: item.id });
+        body.append(card);
       });
+      if (!placedItems.length) body.append(createElement('p', 'drag-empty', 'Перетащите карточки сюда'));
+      zone.append(head, body);
+      const place = (itemId) => {
+        const item = items.find((candidate) => candidate.id === itemId);
+        if (!item || readOnly) return;
+        state[item.id] = target.id;
+        selectedId = '';
+        render();
+        emit();
+        announcePlacement(item.label, target.label);
+      };
+      zone.addEventListener('click', (event) => {
+        if (event.target.closest('.drag-card') || !selectedId) return;
+        place(selectedId);
+      });
+      zone.addEventListener('keydown', (event) => {
+        if (!selectedId || (event.key !== 'Enter' && event.key !== ' ')) return;
+        event.preventDefault();
+        place(selectedId);
+      });
+      bindDropZone(zone, (payload) => payload.kind === 'classification-item', (payload) => place(payload.id));
+      zones.append(zone);
+    });
+    board.append(status, tray, zones);
+  }
+
+  function matchingBoard() {
+    const reuse = block.allowTargetReuse !== false;
+    const usedTargetIds = new Set(Object.values(state).filter(nonEmptyText).map(String));
+    const matched = items.filter((item) => nonEmptyText(state[item.id])).length;
+    const status = createElement('div', 'drag-board-status', `Сопоставлено ${matched} из ${items.length}`);
+    const bank = createElement('section', 'drag-tray matching-bank');
+    bank.tabIndex = readOnly ? -1 : 0;
+    bank.setAttribute('aria-label', 'Варианты соответствий');
+    bank.append(createElement('h4', null, 'Варианты'));
+    const bankItems = createElement('div', 'drag-tray-items');
+    targets.filter((target) => reuse || !usedTargetIds.has(target.id)).forEach((target) => {
+      const card = visualCard(target, { selected: selectedId === target.id, readOnly, dragKind: 'matching-target' });
+      card.dataset.targetId = target.id;
+      card.addEventListener('click', () => {
+        selectedId = selectedId === target.id ? '' : target.id;
+        render();
+        if (selectedId) announce(`Выбрано: ${target.label}. Теперь выберите подходящую строку.`);
+      });
+      bindDraggable(card, { kind: 'matching-target', id: target.id });
+      bankItems.append(card);
+    });
+    if (!bankItems.childElementCount) bankItems.append(createElement('p', 'drag-empty', 'Все варианты использованы.'));
+    bank.append(bankItems);
+    bindDropZone(bank, (payload) => payload.kind === 'matching-target', (payload) => {
+      Object.keys(state).forEach((itemId) => { if (state[itemId] === payload.id) state[itemId] = ''; });
+      selectedId = '';
+      render();
+      emit();
+    });
+
+    const list = createElement('div', 'matching-zones');
+    items.forEach((item, index) => {
+      const row = createElement('section', 'matching-row');
+      const prompt = createElement('div', 'matching-prompt');
+      prompt.append(createElement('span', 'matching-number', index + 1), createElement('strong', null, item.label));
+      const itemRaw = isObject(item.raw) ? item.raw : {};
+      if (itemRaw.description) prompt.append(createElement('small', null, itemRaw.description));
+      const zone = createElement('div', 'matching-dropzone');
+      zone.tabIndex = readOnly ? -1 : 0;
+      zone.dataset.itemId = item.id;
+      zone.setAttribute('aria-label', `Соответствие для «${item.label}»`);
+      const assigned = targets.find((target) => target.id === String(state[item.id] || ''));
+      if (assigned) {
+        const card = visualCard(assigned, { selected: selectedId === assigned.id, readOnly, dragKind: 'matching-target' });
+        card.dataset.targetId = assigned.id;
+        card.addEventListener('click', (event) => {
+          event.stopPropagation();
+          selectedId = selectedId === assigned.id ? '' : assigned.id;
+          render();
+          if (selectedId) announce(`Выбрано: ${assigned.label}. Перенесите в другую строку или в область вариантов.`);
+        });
+        bindDraggable(card, { kind: 'matching-target', id: assigned.id });
+        zone.append(card);
+      } else {
+        zone.append(createElement('span', 'drag-empty', 'Перетащите вариант сюда'));
+      }
+      const place = (targetId) => {
+        const target = targets.find((candidate) => candidate.id === targetId);
+        if (!target || readOnly) return;
+        if (!reuse) {
+          Object.keys(state).forEach((itemId) => { if (state[itemId] === target.id) state[itemId] = ''; });
+        }
+        state[item.id] = target.id;
+        selectedId = '';
+        render();
+        emit();
+        announcePlacement(item.label, target.label);
+      };
+      zone.addEventListener('click', (event) => {
+        if (event.target.closest('.drag-card') || !selectedId) return;
+        place(selectedId);
+      });
+      zone.addEventListener('keydown', (event) => {
+        if (!selectedId || (event.key !== 'Enter' && event.key !== ' ')) return;
+        event.preventDefault();
+        place(selectedId);
+      });
+      bindDropZone(zone, (payload) => payload.kind === 'matching-target', (payload) => place(payload.id));
+      row.append(prompt, zone);
+      list.append(row);
+    });
+    board.append(status, bank, list);
+  }
+
+  function render() {
+    board.replaceChildren();
+    if (!items.length || !targets.length) {
+      board.append(createElement('p', 'inline-error', 'Для этого блока не заданы элементы или варианты.'));
+      return;
     }
-    control.setAttribute('aria-label', `${classification ? 'Категория' : 'Соответствие'}: ${item.label}`);
-    control.disabled = readOnly;
-    controls.push(control);
-    row.append(control);
-    list.append(row);
-  });
+    board.append(createElement('p', 'drag-instruction', readOnly
+      ? 'Результат распределения.'
+      : 'Перетащите карточку мышью. На сенсорном экране или с клавиатуры сначала выберите карточку, затем нужную область.'));
+    if (classification) classificationBoard(); else matchingBoard();
+  }
 
-  if (!items.length) list.append(createElement('p', 'inline-error', 'Для этого блока не заданы элементы.'));
-  root.append(list);
+  render();
+  root.append(board);
   return {
     getValue: () => {
       const answer = Object.create(null);
@@ -590,18 +1009,22 @@ function renderMapping(environment, classification = false) {
     },
     validate: () => {
       if (requiresAnswer(block)) {
-        const missingIndex = items.findIndex((item) => !nonEmptyText(state[item.id]));
-        if (missingIndex >= 0) return { valid: false, message: 'Заполните все соответствия.', element: controls[missingIndex] };
+        const missing = items.find((item) => !nonEmptyText(state[item.id]));
+        if (missing) return {
+          valid: false,
+          message: classification ? 'Распределите все карточки по группам.' : 'Заполните все соответствия.',
+          element: board.querySelector(`[data-item-id="${CSS.escape(missing.id)}"]`) || board.querySelector('[tabindex]'),
+        };
       }
       if (!classification && block.allowTargetReuse === false) {
         const values = items.map((item) => state[item.id]).filter(nonEmptyText);
         if (new Set(values).size !== values.length) {
-          return { valid: false, message: 'Каждый вариант соответствия можно использовать только один раз.', element: controls[0] };
+          return { valid: false, message: 'Каждый вариант соответствия можно использовать только один раз.', element: board.querySelector('[tabindex]') };
         }
       }
       return { valid: true };
     },
-    firstControl: controls[0],
+    get firstControl() { return board.querySelector('button:not(:disabled), [tabindex="0"]'); },
   };
 }
 
@@ -613,6 +1036,9 @@ function renderOrdering(environment) {
   const order = [...initial, ...items.map((item) => item.id).filter((id) => !initial.includes(id))];
   const labelById = new Map(items.map((item) => [item.id, item.label]));
   const list = createElement('div', 'arrangement-list');
+  const hint = createElement('p', 'drag-instruction', readOnly
+    ? 'Итоговая последовательность.'
+    : 'Перетащите строки мышью за любую область карточки. Для клавиатуры: Alt + стрелка вверх или вниз.');
 
   function move(index, delta) {
     const nextIndex = index + delta;
@@ -631,16 +1057,51 @@ function renderOrdering(environment) {
       const label = labelById.get(id) || id;
       const row = createElement('div', 'arrangement-row');
       row.tabIndex = readOnly ? -1 : 0;
+      row.draggable = !readOnly;
       row.dataset.orderIndex = String(index);
+      row.dataset.orderId = id;
       row.setAttribute('aria-label', `${index + 1}. ${label}`);
-      row.append(createElement('span', 'arrangement-index', index + 1), createElement('span', null, label));
-      const actions = createElement('div', 'reorder-actions');
-      const up = iconButton(`Переместить «${label}» вверх`, 'up', readOnly || index === 0);
-      const down = iconButton(`Переместить «${label}» вниз`, 'down', readOnly || index === order.length - 1);
-      up.addEventListener('click', () => move(index, -1));
-      down.addEventListener('click', () => move(index, 1));
-      actions.append(up, down);
-      row.append(actions);
+      const grip = createElement('span', 'arrangement-grip');
+      grip.append(createSvgIcon('grip'));
+      row.append(createElement('span', 'arrangement-index', index + 1), createElement('span', 'arrangement-label', label), grip);
+      row.addEventListener('dragstart', (event) => {
+        activeDragPayload = { kind: 'ordering-item', id };
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', JSON.stringify({ kind: 'ordering-item', id }));
+        row.classList.add('is-dragging');
+      });
+      row.addEventListener('dragend', () => {
+        activeDragPayload = null;
+        row.classList.remove('is-dragging');
+        list.querySelectorAll('.is-drag-over').forEach((node) => node.classList.remove('is-drag-over', 'drop-after'));
+      });
+      row.addEventListener('dragover', (event) => {
+        const payload = dragPayload(event);
+        if (payload.kind !== 'ordering-item' || payload.id === id) return;
+        event.preventDefault();
+        activeDragPayload = null;
+        event.dataTransfer.dropEffect = 'move';
+        const after = event.clientY > row.getBoundingClientRect().top + row.offsetHeight / 2;
+        row.classList.add('is-drag-over');
+        row.classList.toggle('drop-after', after);
+      });
+      row.addEventListener('dragleave', () => row.classList.remove('is-drag-over', 'drop-after'));
+      row.addEventListener('drop', (event) => {
+        const payload = dragPayload(event);
+        if (payload.kind !== 'ordering-item' || payload.id === id) return;
+        event.preventDefault();
+        const after = row.classList.contains('drop-after');
+        const fromIndex = order.indexOf(payload.id);
+        if (fromIndex < 0) return;
+        order.splice(fromIndex, 1);
+        const currentTargetIndex = order.indexOf(id);
+        order.splice(currentTargetIndex + (after ? 1 : 0), 0, payload.id);
+        renderRows();
+        emit();
+        const nextIndex = order.indexOf(payload.id);
+        announce(`${labelById.get(payload.id)}: позиция ${nextIndex + 1} из ${order.length}.`);
+        list.querySelector(`[data-order-id="${CSS.escape(payload.id)}"]`)?.focus();
+      });
       row.addEventListener('keydown', (event) => {
         if (!event.altKey || (event.key !== 'ArrowUp' && event.key !== 'ArrowDown')) return;
         event.preventDefault();
@@ -651,7 +1112,7 @@ function renderOrdering(environment) {
   }
 
   renderRows();
-  root.append(list);
+  root.append(hint, list);
   return {
     getValue: () => order.slice(),
     validate: () => ({ valid: !requiresAnswer(block) || order.length > 0, message: 'Расположите элементы по порядку.', element: list.querySelector('[tabindex]') }),
@@ -671,6 +1132,8 @@ function normalizeColumns(block) {
       readOnly: raw.readOnly === true || raw.editable === false || raw.input === false,
       placeholder: raw.placeholder || '',
       defaultValue: raw.defaultValue,
+      hint: raw.hint || '',
+      unit: raw.unit || '',
     };
   });
 }
@@ -682,6 +1145,25 @@ function renderTable(environment) {
   const initialCells = recordFrom(isObject(value?.cells) ? value.cells : value);
   const state = recordFrom(initialCells);
   const controls = [];
+  const needsCalculator = !readOnly && block.calculator !== false && columns.some((column) => column.type === 'number' && !column.readOnly);
+  const calculator = needsCalculator ? createCalculator(root, false) : null;
+  if (isObject(block.worksheet)) {
+    const worksheet = createElement('section', 'worksheet-brief');
+    const heading = createElement('div', 'worksheet-brief-title');
+    heading.append(createElement('span', null, block.worksheet.eyebrow || 'Рабочий лист'));
+    heading.append(createElement('strong', null, block.worksheet.title || block.title || 'Расчётная таблица'));
+    worksheet.append(heading);
+    const facts = asArray(block.worksheet.facts);
+    if (facts.length) {
+      const factList = createElement('dl', 'worksheet-facts');
+      facts.forEach((fact) => {
+        const raw = isObject(fact) ? fact : { label: '', value: fact };
+        factList.append(createElement('dt', null, raw.label || ''), createElement('dd', null, raw.value || ''));
+      });
+      worksheet.append(factList);
+    }
+    root.append(worksheet);
+  }
   const wrap = createElement('div', 'task-table-wrap');
   const table = createElement('table', 'task-table');
   const caption = createElement('caption', 'visually-hidden', block.caption || block.title || 'Таблица ответа');
@@ -690,7 +1172,9 @@ function renderTable(environment) {
   const rowHeader = block.rowHeader || 'Позиция';
   headRow.append(createElement('th', null, rowHeader));
   columns.forEach((column) => {
-    const th = createElement('th', null, column.label);
+    const th = createElement('th');
+    th.append(createElement('span', null, column.label));
+    if (column.hint) th.append(createElement('small', null, column.hint));
     th.scope = 'col';
     headRow.append(th);
   });
@@ -710,23 +1194,38 @@ function renderTable(environment) {
       const rowRaw = isObject(row.raw) ? row.raw : {};
       const seeded = state[cellKey] ?? (isObject(rowRaw.cells) ? rowRaw.cells[column.id] : undefined) ?? column.defaultValue ?? '';
       let control;
-      if (column.type === 'select' && column.options.length) {
+      if (column.readOnly) {
+        control = createElement('output', 'table-given-value', seeded);
+        control.value = seeded === null || seeded === undefined ? '' : String(seeded);
+      } else if (column.type === 'select' && column.options.length) {
         control = makeSelect(column.options, column.placeholder || 'Не выбрано', seeded);
       } else {
         control = createElement('input');
-        control.type = column.type === 'checkbox' ? 'checkbox' : (column.type === 'number' ? 'number' : 'text');
+        control.type = column.type === 'checkbox' ? 'checkbox' : 'text';
+        if (column.type === 'number') {
+          control.inputMode = 'decimal';
+          control.autocomplete = 'off';
+        }
         control.placeholder = column.placeholder;
         setControlValue(control, seeded);
       }
       control.setAttribute('aria-label', `${column.label}, ${row.label}`);
-      control.disabled = readOnly || column.readOnly;
+      if ('disabled' in control) control.disabled = readOnly || column.readOnly;
       state[cellKey] = control.type === 'checkbox' ? control.checked : control.value;
-      control.addEventListener(control.type === 'checkbox' || control.tagName === 'SELECT' ? 'change' : 'input', () => {
-        state[cellKey] = control.type === 'checkbox' ? control.checked : control.value;
-        emit();
-      });
+      if (!column.readOnly) {
+        control.addEventListener(control.type === 'checkbox' || control.tagName === 'SELECT' ? 'change' : 'input', () => {
+          state[cellKey] = control.type === 'checkbox' ? control.checked : control.value;
+          emit();
+        });
+      }
       controls.push({ control, column, cellKey });
-      td.append(control);
+      if (calculator && column.type === 'number' && !column.readOnly) {
+        const expressions = isObject(rowRaw.calculatorExpressions) ? rowRaw.calculatorExpressions : {};
+        td.append(wrapWithCalculatorButton(control, `${column.label}, ${row.label}`, calculator, expressions[column.id] || ''));
+      } else {
+        td.append(control);
+      }
+      if (column.unit) td.append(createElement('small', 'table-cell-unit', column.unit));
       tr.append(td);
     });
     body.append(tr);
@@ -736,6 +1235,7 @@ function renderTable(environment) {
   wrap.append(table);
   if (!rows.length || !columns.length) wrap.append(createElement('p', 'inline-error', 'Для таблицы не заданы строки или столбцы.'));
   root.append(wrap);
+  if (calculator) root.append(calculator.panel);
   return {
     getValue: () => {
       const cells = Object.create(null);
@@ -755,7 +1255,7 @@ function renderTable(environment) {
       }
       return { valid: true };
     },
-    firstControl: controls[0]?.control,
+    firstControl: controls.find(({ column }) => !column.readOnly)?.control || controls[0]?.control,
   };
 }
 

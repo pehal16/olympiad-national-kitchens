@@ -1,6 +1,6 @@
 import { attachmentApi, studentApi } from './api.js?v=1.1.3';
 import { AutosaveQueue } from './autosave.js?v=1.1.1';
-import { isValueMeaningful, mountTask } from './tasks.js?v=1.1.0';
+import { isValueMeaningful, mountTask } from './tasks.js?v=1.2.0';
 import {
   $, $$, asArray, confirmAction, errorText, escapeHtml, formatDate, fullName,
   initSession, logout, pick, renderEmpty, renderError, renderLoading, setBusy,
@@ -306,7 +306,7 @@ function renderWorkspace() {
       <div class="workspace-center">
         ${['needs_revision', 'changes_requested', 'returned'].includes(submission.status) ? `<div class="revision-panel"><strong>Работа возвращена на доработку</strong><p>${escapeHtml(feedback || 'Исправьте отмеченные пункты и отправьте работу повторно.')}</p></div>` : ''}
         ${state.conflict ? `<div class="conflict-panel" role="alert"><strong>Ответ изменён в другой вкладке</strong><p>Чтобы не перезаписать более свежую версию, обновите данные с сервера.</p><button id="resolve-conflict" class="learning-button secondary" type="button">Загрузить свежую версию</button></div>` : ''}
-        <div class="workspace-block-head"><p class="section-kicker">Шаг ${state.activeIndex + 1} из ${state.blocks.length}</p><h2>${escapeHtml(titleForBlock(current, state.activeIndex))}${blockIsRequired(current) ? ' <span class="block-required" aria-label="обязательное">*</span>' : ''}</h2>${current.prompt && current.prompt !== current.title ? `<p>${escapeHtml(current.prompt)}</p>` : ''}</div>
+        <div class="workspace-block-head"><p class="section-kicker">Шаг ${state.activeIndex + 1} из ${state.blocks.length}</p><h2>${escapeHtml(titleForBlock(current, state.activeIndex))}${blockIsRequired(current) ? ' <span class="block-required" aria-label="обязательное">*</span>' : ''}</h2>${current.type !== 'instruction' && current.prompt && current.prompt !== current.title ? `<p>${escapeHtml(current.prompt)}</p>` : ''}</div>
         <div id="active-task" class="task-surface"></div>
         <div class="workspace-footer"><button id="save-now" class="learning-button secondary mobile-only" type="button" ${readonly ? 'disabled' : ''}>Сохранить</button><button id="previous-step" class="learning-button secondary" type="button" ${state.activeIndex === 0 ? 'disabled' : ''}>Назад</button>${state.activeIndex < state.blocks.length - 1 ? '<button id="next-step" class="learning-button primary" type="button">Далее</button>' : (canSubmit ? `<button id="footer-submit-work" class="learning-button primary mobile-only" type="button">${escapeHtml(submitLabel)}</button>` : '<button class="learning-button primary" type="button" disabled>Работа завершена</button>')}</div>
       </div>
