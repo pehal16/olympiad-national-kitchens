@@ -20,5 +20,4 @@ jobs:
           npx --yes wrangler@4.128.0 pages deployment tail "$DEPLOYMENT_ID" \
             --project-name olympiad-gkts \
             --format pretty \
-            --status error \
             --method POST
