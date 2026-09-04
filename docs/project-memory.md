@@ -1,6 +1,6 @@
 # Project Memory
 
-Last updated: 2026-09-02
+Last updated: 2026-09-04
 
 ## Current Baseline
 
@@ -27,7 +27,7 @@ Always treat the latest `origin/main` as the source of truth. Older chat instruc
 ## Learning Works Pilot
 
 - The living source of truth for the teacher's daily material-preparation workflow is `docs/teacher-daily-workflow.md`.
-- Current platform package version: `1.6.83`; this release replaces the learning pilot with five source-faithful МДК 01.01 practical works and does not change the official PM01 100-point contract.
+- Current platform package version: `1.6.88`; the learning pilot contains six source-faithful МДК 01.01 practical works and does not change the official PM01 100-point contract.
 - Private local paths, the VK schedule chat, and the working email address are stored only in the ignored file `storage/teacher-workflow-private.json`.
 - The separate mode `Учебные работы` is implemented under `/learning.html`, `/learning-admin.html`, and `/api/learning/*`; it remains independent from PM01 and olympiad attempts.
 - The pilot includes roles, groups, subjects, courses, roster import, 18 block types, immutable work versions, assignments, autosave, file evidence, automatic and manual review, correction cycles, grades, audit, and the journal.
@@ -36,13 +36,14 @@ Always treat the latest `origin/main` as the source of truth. Older chat instruc
 - Learning passwords use salted PBKDF2-SHA-256 with the private server pepper and a portable 100,000-iteration ceiling required by the Cloudflare Workers Web Crypto runtime.
 - Students enter the learning cabinet by selecting an active group and their full name; student logins and passwords are not displayed or requested. The teacher cabinet continues to require protected credentials. Legacy student credential rows remain only for schema and data compatibility.
 - Group/name entry deliberately prioritizes classroom convenience over identity assurance: anyone who can see a roster can select another student's profile. Use this mode only under the college's approved organizational rules and do not expose grades or sensitive personal data beyond the learning purpose.
-- A safe synthetic pilot creates one fictional group, four fictional students, five subjects, and five works based on the verified sequence of МДК 01.01 for 3-ПК-26: raw-material request, spices, recipe-book use, workplace flow, and equipment use.
-- The current pilot contains only practical works № 1–5 from the teacher's МДК 01.01 materials for 3-ПК-26: raw-material requisition; traditional spices and seasonings; recipe-book use; workplace organization; МОК-150М and МПР-350М operation. Generic tests, unrelated equipment, reflections, and invented examples are prohibited in these pilot works.
+- A safe synthetic pilot creates one fictional group, four fictional students, five subjects, and six works based on the verified sequence of МДК 01.01 for 3-ПК-26: raw-material request, spices, recipe-book use, vegetable-workplace flow, equipment use, and fish-workplace organization.
+- The current pilot contains only practical works № 1–6 from the teacher's МДК 01.01 materials for 3-ПК-26: raw-material requisition; traditional spices and seasonings; recipe-book use; vegetable workplace organization; МОК-150М and МПР-350М operation; fish-workplace organization. Generic tests, unrelated equipment, reflections, and invented examples are prohibited in these pilot works.
 - The first pilot work is a real calculation worksheet: the dish, per-portion norm, portions, and waste percentage are supplied; the student fills the net table, the vegetable gross table, and the final requisition.
 - Calculation blocks and numeric table cells provide a contextual four-operation calculator. A row can preload its own safe arithmetic expression, and the result is inserted into the selected answer cell without exposing the answer key.
 - Ordering, matching, and classification use direct drag-and-drop on desktop. Touch and keyboard users can select a card and then its destination; ordering keeps an Alt + arrow keyboard path but no longer displays up/down buttons.
 - The spice practical uses the exact eight source samples: black pepper, allspice, bay leaf, cinnamon, clove, coriander, turmeric, and dried basil. Photo identification and plant-part classification are automatic; the five culinary-use situations remain manual because several professionally valid answers may exist.
 - Practical № 3 uses L. E. Golunova's 2003 collection, recipe № 423 «Тефтели», II variant, beef, page 261, and an exact 20-portion recalculation. Practical № 5 contains only МОК-150М and МПР-350М operation cards plus the source calculation Q=30 kg, G=150 kg/h and a 7 kg batch limit.
+- Practical № 6 is the two-academic-hour fish-workplace task from the 2026–2027 thematic plan. It uses the source production situation of 15 kg chilled scaly fish and covers functional zoning, sanitary sequence, the six-stage processing flow, four control points, the workplace equipment table, and one uploaded workplace diagram. Four verified illustrations from the teacher's source package are reused under `public/assets/learning/practices/pz6/`.
 - Pilot content has an explicit revision marker. Re-running pilot deployment upgrades untouched assignments; a started assignment stays bound to its immutable version, is archived, and receives a separate corrected assignment. The five deprecated generic pilot titles are archived and hidden from the student dashboard without deleting submissions.
 - Accepted visual references are `docs/assets/learning-practice-1-calculation-concept.png`, `docs/assets/learning-practice-workspace-v2-concept.png`, and `docs/assets/learning-practice-workspace-mobile-v2-concept.png`. Generated concept text is never an authoritative content source.
 - The technology-card builder now covers source details, scope, gross/net formulation, technological operations, output, serving, quality, storage, and allergens. The technology-scheme builder creates a live ordered flow and can enforce minimum stages and control points.

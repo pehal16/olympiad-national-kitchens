@@ -12,9 +12,9 @@ function works() {
   return pilotWorks(["course-mdk", "course-2", "course-3", "course-4", "course-5"], "group-1");
 }
 
-test("MDK 01.01 pilot contains five source-faithful, numbered practices", () => {
+test("MDK 01.01 pilot contains six source-faithful, numbered practices", () => {
   const pilot = works();
-  assert.equal(pilot.length, 5);
+  assert.equal(pilot.length, 6);
   pilot.forEach((work, index) => {
     assert.equal(work.courseId, "course-mdk");
     assert.equal(work.kind, "practice");
@@ -106,6 +106,36 @@ test("practices 4 and 5 contain the exact workplace and machine tasks", () => {
   assert.deepEqual(Object.fromEntries(Object.entries(batches.privateKey.cells).map(([key, value]) => [key, value.value])), {
     "full:value": 4, "remainder:value": 2, "total:value": 5
   });
+});
+
+test("practice 6 follows the fish-workplace source task and uses four verified visuals", () => {
+  const work = works()[5];
+  const source = work.blocks.find((block) => block.id === "pz6-source");
+  const zones = work.blocks.find((block) => block.id === "pz6-zones");
+  const sanitaryOrder = work.blocks.find((block) => block.id === "pz6-sanitary-order");
+  const flow = work.blocks.find((block) => block.id === "pz6-flow");
+  const workplace = work.blocks.find((block) => block.id === "pz6-workplace");
+  const evidence = work.blocks.find((block) => block.id === "pz6-file");
+
+  assert.equal(work.estimatedMinutes, 90);
+  assert.match(work.instructions, /15 кг охлаждённой чешуйчатой рыбы/);
+  assert.equal(source.images.length, 4);
+  assert.ok(source.images.every((image) => image.src.startsWith("/assets/learning/practices/pz6/") && image.alt));
+  assert.deepEqual(zones.categories.map((category) => category.label), [
+    "Сырьевая зона", "Предварительная обработка", "Разделочная зона", "Чистая зона"
+  ]);
+  assert.equal(zones.items.length, 12);
+  assert.equal(Object.keys(zones.privateKey.assignments).length, 12);
+  assert.deepEqual(sanitaryOrder.privateKey.order, [
+    "personal-preparation", "check-raw", "prepare-containers", "dirty-operations",
+    "transition-sanitation", "clean-stage", "pack-output", "finish-sanitation"
+  ]);
+  assert.equal(flow.flowLanes[0].steps.length, 6);
+  assert.equal(flow.flowLanes[0].steps.filter((step) => step.requiresControl).length, 4);
+  assert.equal(workplace.rows.length, 6);
+  assert.deepEqual(workplace.columns.map((column) => column.id), ["equipment", "zone", "control"]);
+  assert.equal(evidence.required, true);
+  assert.deepEqual(evidence.allowedExtensions, ["pdf", "docx", "jpg", "jpeg", "png"]);
 });
 
 test("every scored pilot step has progressive student guidance", () => {

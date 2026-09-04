@@ -911,6 +911,11 @@ textarea:disabled { color: var(--learning-muted); background: var(--learning-ban
 @media (max-width: 480px) {
   .student-brand strong { font-size: 14px; }
   .autosave-state { min-width: 72px; font-size: 12px; }
+  .step-rail { overflow-x: visible; padding: 7px 8px; }
+  .step-list { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); min-width: 0; gap: 4px; }
+  .step-button { width: auto; min-width: 0; padding: 6px 2px; border-radius: 8px; }
+  .step-copy { display: none; }
+  .step-button.is-active .step-number { border-color: var(--learning-info); box-shadow: 0 0 0 3px var(--learning-info-soft); }
   .summary-strip { grid-template-columns: 1fr; }
   .summary-item { border-right: 0; border-bottom: 1px solid var(--learning-border); }
   .summary-item:last-child { border-bottom: 0; }

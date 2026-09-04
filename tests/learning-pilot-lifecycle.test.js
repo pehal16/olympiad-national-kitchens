@@ -30,7 +30,7 @@ test("pilot supports group and full-name entry, assignment, submission and grade
   assert.equal(pilot.seeded, true);
   assert.equal(pilot.subjects.length, 5);
   assert.equal(pilot.courses.length, 5);
-  assert.equal(pilot.works.length, 5);
+  assert.equal(pilot.works.length, 6);
 
   const initialFirstWork = pilot.works[0];
   await repository.mutate((state) => {
@@ -42,8 +42,8 @@ test("pilot supports group and full-name entry, assignment, submission and grade
 
   const repeated = await service.seedPilot(admin);
   assert.equal(repeated.seeded, false);
-  assert.equal(repeated.works.length, 5);
-  assert.equal((await service.listTeacherAssignments(admin)).length, 5);
+  assert.equal(repeated.works.length, 6);
+  assert.equal((await service.listTeacherAssignments(admin)).length, 6);
   assert.equal(repeated.works[0].assignmentId, initialFirstWork.assignmentId);
   assert.notEqual(repeated.works[0].versionId, initialFirstWork.versionId);
   assert.equal(repeated.works[0].upgraded, true);
@@ -71,7 +71,7 @@ test("pilot supports group and full-name entry, assignment, submission and grade
   assert.equal(firstLogin.user.mustChangePassword, false);
 
   const dashboard = await service.studentDashboard(student);
-  assert.equal(dashboard.assignments.length, 5);
+  assert.equal(dashboard.assignments.length, 6);
   assert.equal(dashboard.assignments.some((item) => item.id === obsolete.id), false);
   const calculationAssignment = dashboard.assignments.find((item) => item.title.includes("Составление заявки на сырьё"));
   assert.ok(calculationAssignment);
@@ -239,7 +239,7 @@ test("production learning pack can target a pre-imported real group without stor
   assert.equal(result.group.id, roster.group.id);
   assert.equal(result.group.code, "1-ПК-24Б");
   assert.equal(result.credentials.length, 0);
-  assert.equal(result.works.length, 5);
+  assert.equal(result.works.length, 6);
   assert.equal((await service.studentAccessStudents(roster.group.id)).students.length, 1);
   assert.deepEqual((await service.studentAccessGroups()).groups.map((group) => group.code), ["1-ПК-24Б"]);
   await assert.rejects(
