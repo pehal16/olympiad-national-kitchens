@@ -161,6 +161,7 @@ export function confirmAction({ title = 'Подтвердите действие
   const accept = $('#confirm-accept', dialog);
   accept.textContent = acceptLabel;
   accept.classList.toggle('danger', danger);
+  dialog.returnValue = '';
   dialog.showModal();
   return new Promise((resolve) => {
     const done = () => {

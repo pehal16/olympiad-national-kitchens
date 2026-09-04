@@ -32,7 +32,7 @@ function nextId(prefix = 'task') {
 function createElement(tagName, className, text) {
   const node = document.createElement(tagName);
   if (className) node.className = className;
-  if (text !== undefined && text !== null) node.textContent = String(text);
+  if (text !== undefined && text !== null) node.textContent = String(text).replace(/\u2014/g, '–');
   return node;
 }
 
@@ -75,6 +75,64 @@ function iconButton(label, icon, disabled = false) {
   button.disabled = disabled;
   button.append(createSvgIcon(icon));
   return button;
+}
+
+function imagePreviewButton(image, className = '') {
+  const button = createElement('button', `image-preview-trigger ${className}`.trim());
+  button.type = 'button';
+  button.dataset.imagePreview = '';
+  button.setAttribute('aria-label', `Увеличить изображение: ${image.alt}`);
+  image.draggable = false;
+  button.append(image, createElement('span', 'image-preview-label', 'Увеличить'));
+  return button;
+}
+
+function attachImagePreview(root) {
+  let dialog = null;
+  const open = (event) => {
+    const trigger = event.target.closest('[data-image-preview]');
+    if (!trigger || !root.contains(trigger)) return;
+    const original = trigger.querySelector('img');
+    if (!original || dialog) return;
+    event.stopPropagation();
+    dialog = createElement('dialog', 'learning-dialog image-preview-dialog');
+    const heading = createElement('h2', null, original.alt || 'Учебная иллюстрация');
+    heading.id = nextId('image-title');
+    dialog.setAttribute('aria-labelledby', heading.id);
+    const header = createElement('div', 'image-preview-header');
+    const close = iconButton('Закрыть изображение', 'close');
+    close.addEventListener('click', () => dialog?.close());
+    header.append(heading, close);
+    const image = createElement('img', 'image-preview-full');
+    image.src = original.src;
+    image.alt = original.alt;
+    const viewport = createElement('div', 'image-preview-viewport');
+    viewport.append(image);
+    dialog.append(header, viewport);
+    dialog.addEventListener('click', (click) => {
+      if (click.target !== dialog) return;
+      const bounds = dialog.getBoundingClientRect();
+      if (click.clientX < bounds.left || click.clientX > bounds.right || click.clientY < bounds.top || click.clientY > bounds.bottom) dialog.close();
+    });
+    dialog.addEventListener('close', () => {
+      dialog?.remove();
+      dialog = null;
+      if (trigger.isConnected) trigger.focus({ preventScroll: true });
+    }, { once: true });
+    root.append(dialog);
+    dialog.showModal();
+    close.focus();
+  };
+  root.addEventListener('click', open);
+  return () => {
+    root.removeEventListener('click', open);
+    if (dialog) {
+      const previous = dialog;
+      previous.close();
+      previous.remove();
+      dialog = null;
+    }
+  };
 }
 
 function asArray(value) {
@@ -399,7 +457,7 @@ function renderInstruction(environment) {
       image.src = String(source);
       image.alt = String(raw.alt || item.label || 'Учебная иллюстрация');
       image.loading = 'lazy';
-      figure.append(image);
+      figure.append(imagePreviewButton(image));
       const caption = raw.caption || raw.label || item.label;
       if (caption) figure.append(createElement('figcaption', null, caption));
       gallery.append(figure);
@@ -416,7 +474,7 @@ function renderHints(root, block, announce) {
   const section = createElement('section', 'task-hints');
   const heading = createElement('div', 'task-hints-heading');
   heading.append(createElement('div', null, 'Подсказки по ходу работы'));
-  heading.append(createElement('p', null, 'Открывайте по одной, если не знаете, с чего начать. Готового ответа здесь нет.'));
+  heading.append(createElement('p', null, 'Откройте подсказку, если нужна помощь.'));
   const list = createElement('ol', 'task-hint-list');
   const button = createElement('button', 'learning-button secondary task-hint-button');
   button.type = 'button';
@@ -1007,7 +1065,7 @@ function renderMapping(environment, classification = false) {
         image.src = String(imageSource);
         image.alt = String(itemRaw.alt || itemRaw.imageAlt || item.label);
         image.loading = 'lazy';
-        prompt.append(image);
+        prompt.append(imagePreviewButton(image, 'matching-image-preview'));
       }
       prompt.append(createElement('strong', null, item.label));
       if (itemRaw.description) prompt.append(createElement('small', null, itemRaw.description));
@@ -2629,6 +2687,7 @@ export function mountTask(container, block = {}, value = null, context = {}) {
   liveRegion.setAttribute('aria-atomic', 'true');
   root.append(liveRegion);
   container.replaceChildren(root);
+  const destroyImagePreview = attachImagePreview(root);
 
   let destroyed = false;
   let renderer;
@@ -2713,6 +2772,7 @@ export function mountTask(container, block = {}, value = null, context = {}) {
       destroyed = true;
       clearValidation();
       renderer?.destroy?.();
+      destroyImagePreview();
       if (root.parentNode === container) root.remove();
     },
   };

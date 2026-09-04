@@ -25,6 +25,8 @@ export class AutosaveQueue {
     this.running = false;
     this.waiters = [];
     this.destroyed = false;
+    this.backupAvailable = false;
+    this.blockedError = null;
     this.onlineHandler = () => this.flushAll().catch(() => {});
     window.addEventListener('online', this.onlineHandler);
   }
@@ -49,7 +51,9 @@ export class AutosaveQueue {
         updatedAt: new Date().toISOString(),
         answers: Object.fromEntries(this.pending),
       }));
+      this.backupAvailable = true;
     } catch {
+      this.backupAvailable = false;
       // Autosave continues even when storage is unavailable or full.
     }
   }
@@ -57,8 +61,26 @@ export class AutosaveQueue {
   readBackup() {
     try {
       const parsed = JSON.parse(localStorage.getItem(this.storageKey));
-      return parsed?.submissionId === this.submissionId ? parsed : null;
+      return parsed?.submissionId === this.submissionId && Number.isInteger(parsed.revision) && parsed.revision >= 0 &&
+        parsed.answers && typeof parsed.answers === 'object' && !Array.isArray(parsed.answers) ? parsed : null;
     } catch { return null; }
+  }
+
+  recover({ blockIds, serverAnswers = {}, readOnly = false }) {
+    const backup = this.readBackup();
+    if (!backup) return { state: 'empty' };
+    const allowed = new Set(blockIds);
+    const answers = Object.fromEntries(Object.entries(backup.answers).filter(([id, value]) =>
+      allowed.has(id) && JSON.stringify(value) !== JSON.stringify(serverAnswers[id])));
+    if (!Object.keys(answers).length) {
+      this.clearBackupIfEmpty();
+      return { state: 'empty' };
+    }
+    this.backupAvailable = true;
+    if (readOnly || backup.revision !== this.revision) return { state: 'conflict', backup: { ...backup, answers } };
+    Object.entries(answers).forEach(([id, value]) => this.pending.set(id, clone(value)));
+    this.writeBackup();
+    return { state: 'restored', answers: clone(answers) };
   }
 
   clearBackupIfEmpty() {
@@ -67,6 +89,7 @@ export class AutosaveQueue {
   }
 
   async pump() {
+    if (this.blockedError) throw this.blockedError;
     if (this.running || this.destroyed) return;
     this.running = true;
     try {
@@ -83,10 +106,13 @@ export class AutosaveQueue {
           this.onSaved({ blockId, value, payload, revision: this.revision });
         } catch (error) {
           if (error instanceof ApiError && error.status === 409) {
+            this.blockedError = error;
             this.onStatus({ state: 'conflict', label: 'Конфликт изменений', blockId });
             this.onConflict({ blockId, value, error, revision: this.revision });
           } else if (error instanceof ApiError && error.code === 'NETWORK_ERROR') {
-            this.onStatus({ state: 'offline', label: 'Нет сети — черновик сохранён на устройстве', blockId });
+            this.onStatus({ state: 'offline', label: this.backupAvailable
+              ? 'Нет сети – черновик сохранён на устройстве'
+              : 'Нет сети – не закрывайте работу: копию на устройстве сохранить не удалось', blockId });
             this.onError({ blockId, value, error, retryable: true });
           } else {
             this.onStatus({ state: 'error', label: 'Не удалось сохранить', blockId });

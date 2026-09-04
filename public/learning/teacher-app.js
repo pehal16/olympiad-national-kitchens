@@ -1,10 +1,10 @@
 import { teacherApi } from './api.js?v=1.1.3';
-import { mountTask } from './tasks.js?v=1.4.0';
+import { mountTask } from './tasks.js?v=1.4.2';
 import {
   $, $$, asArray, confirmAction, debounce, downloadCsv, errorText, escapeHtml,
   formatDate, fullName, initials, initSession, logout, pick, renderEmpty,
   renderError, renderLoading, setBusy, setViewInUrl, statusBadge, statusMeta, toast,
-} from './ui.js?v=1.1.4';
+} from './ui.js?v=1.1.5';
 
 const content = $('#teacher-content');
 const saveState = $('#teacher-save-state');

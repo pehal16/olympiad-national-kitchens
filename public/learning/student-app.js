@@ -1,11 +1,11 @@
 import { attachmentApi, studentApi } from './api.js?v=1.1.3';
-import { AutosaveQueue } from './autosave.js?v=1.1.1';
-import { isValueMeaningful, mountTask } from './tasks.js?v=1.4.0';
+import { AutosaveQueue } from './autosave.js?v=1.2.0';
+import { isValueMeaningful, mountTask } from './tasks.js?v=1.4.2';
 import {
   $, $$, asArray, confirmAction, errorText, escapeHtml, formatDate, fullName,
   initSession, logout, pick, renderEmpty, renderError, renderLoading, setBusy,
   setViewInUrl, statusBadge, statusMeta, toast,
-} from './ui.js?v=1.1.4';
+} from './ui.js?v=1.1.5';
 
 const content = $('#student-content');
 const saveState = $('#global-save-state');
@@ -21,6 +21,7 @@ const state = {
   taskController: null,
   autosave: null,
   conflict: null,
+  recovery: null,
   view: new URL(location.href).searchParams.get('view') || 'dashboard',
 };
 
@@ -112,10 +113,25 @@ function cleanupWorkspace() {
   state.autosave?.destroy();
   state.autosave = null;
   state.conflict = null;
+  state.recovery = null;
+}
+
+async function saveBeforeLeaving() {
+  try {
+    if (state.conflict || state.recovery) throw new Error('Сначала проверьте несохранённый черновик в работе.');
+    await state.autosave?.flushAll();
+    return true;
+  } catch (error) {
+    toast(`${errorText(error)} Работа остаётся открытой, чтобы не потерять ответы.`, 'danger');
+    if (state.assignment) setViewInUrl('workspace', { assignment: assignmentId(state.assignment), step: state.activeIndex + 1 }, true);
+    return false;
+  }
 }
 
 async function loadDashboard(force = false) {
+  if (!await saveBeforeLeaving()) return;
   cleanupWorkspace();
+  setSaveStatus({ state: 'saved', label: '' });
   showNav(state.view);
   renderLoading(content, 'Загружаем учебные работы…');
   try {
@@ -182,17 +198,19 @@ function renderDashboard(historyOnly = false) {
   renderRows();
 }
 
-async function openAssignment(id, replace = false) {
+async function openAssignment(id, replace = false, { reloadConflict = false } = {}) {
   if (!id) return;
+  if (!reloadConflict && !await saveBeforeLeaving()) return;
+  const params = new URL(location.href).searchParams;
+  const requestedStep = params.get('assignment') === id ? Number(params.get('step')) : 0;
   cleanupWorkspace();
-  setViewInUrl('workspace', { assignment: id, step: null }, replace);
+  setViewInUrl('workspace', { assignment: id, step: requestedStep || null }, replace);
   state.view = 'workspace';
   showNav('');
   renderLoading(content, 'Открываем работу…');
   try {
     const detail = normalizeDetail(await studentApi.assignment(id));
     Object.assign(state, detail, { activeIndex: 0 });
-    const requestedStep = Number(new URL(location.href).searchParams.get('step'));
     if (Number.isInteger(requestedStep) && requestedStep >= 1 && requestedStep <= state.blocks.length) state.activeIndex = requestedStep - 1;
     if (!state.submission) renderStartPage(); else setupWorkspace();
   } catch (error) {
@@ -261,7 +279,46 @@ function setupWorkspace() {
       if (!retryable) toast(errorText(error), 'danger');
     },
   });
+  const recovery = state.autosave.recover({
+    blockIds: state.blocks.filter((block) => block.type !== 'instruction').map((block) => block.id),
+    serverAnswers: state.answers,
+    readOnly: isReadonlySubmission(state.submission),
+  });
+  if (recovery.state === 'restored') {
+    Object.assign(state.answers, recovery.answers);
+    toast('Несохранённые ответы восстановлены с этого устройства.', 'info', 6000);
+  } else if (recovery.state === 'conflict') {
+    state.recovery = recovery.backup;
+    setSaveStatus({ state: 'conflict', label: 'Нужно проверить локальный черновик' });
+  } else {
+    setSaveStatus({ state: 'saved', label: 'Все изменения сохранены' });
+  }
   renderWorkspace();
+  if (recovery.state === 'restored') state.autosave.flushAll().catch(() => {});
+}
+
+function downloadRecoveryCopy() {
+  const backup = state.recovery || state.autosave?.readBackup();
+  if (!backup) return;
+  const file = new Blob([JSON.stringify({ workTitle: state.assignment.title || state.version.title, ...backup }, null, 2)], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(file);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'uchebnaya-rabota-chernovik.json';
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function keepServerVersion() {
+  const confirmed = await confirmAction({
+    title: 'Продолжить с версией сервера?',
+    message: 'Несохранённая копия с этого устройства будет удалена. Если в ней есть нужные ответы, сначала скачайте копию.',
+    acceptLabel: 'Использовать версию сервера',
+  });
+  if (!confirmed) return;
+  state.autosave.clearBackupIfEmpty();
+  state.recovery = null;
+  await openAssignment(assignmentId(state.assignment), true);
 }
 
 function answeredCount() {
@@ -284,6 +341,7 @@ function renderWorkspace() {
   const assignment = state.assignment;
   const submission = state.submission;
   const readonly = isReadonlySubmission(submission);
+  const locked = readonly || Boolean(state.conflict || state.recovery);
   const current = state.blocks[state.activeIndex];
   if (!current) {
     renderEmpty(content, 'В работе нет заданий', 'Сообщите преподавателю, что опубликованная версия пуста.', '<button id="back-to-list" class="learning-button secondary" type="button">К списку работ</button>');
@@ -294,7 +352,7 @@ function renderWorkspace() {
   const percent = state.blocks.length ? Math.round((complete / state.blocks.length) * 100) : 0;
   const rubric = asArray(state.definition.rubric || assignment.rubric || submission.rubric);
   const feedback = submission.feedback || submission.teacherComment || submission.review?.comment;
-  const canSubmit = !readonly && ['draft', 'in_progress', 'needs_revision', 'changes_requested', 'returned'].includes(String(submission.status || 'draft').toLowerCase());
+  const canSubmit = !locked && ['draft', 'in_progress', 'needs_revision', 'changes_requested', 'returned'].includes(String(submission.status || 'draft').toLowerCase());
   const submitLabel = ['needs_revision', 'changes_requested', 'returned'].includes(String(submission.status || '').toLowerCase()) ? 'Отправить повторно' : 'Отправить на проверку';
   content.innerHTML = `<section class="workspace-page" aria-labelledby="workspace-title">
     <header class="workspace-toolbar">
@@ -306,9 +364,10 @@ function renderWorkspace() {
       <div class="workspace-center">
         ${['needs_revision', 'changes_requested', 'returned'].includes(submission.status) ? `<div class="revision-panel"><strong>Работа возвращена на доработку</strong><p>${escapeHtml(feedback || 'Исправьте отмеченные пункты и отправьте работу повторно.')}</p></div>` : ''}
         ${state.conflict ? `<div class="conflict-panel" role="alert"><strong>Ответ изменён в другой вкладке</strong><p>Чтобы не перезаписать более свежую версию, обновите данные с сервера.</p><button id="resolve-conflict" class="learning-button secondary" type="button">Загрузить свежую версию</button></div>` : ''}
+        ${state.recovery ? `<div class="conflict-panel" role="alert"><strong>На устройстве остались несохранённые ответы</strong><p>Версия работы на сервере уже изменилась или отправлена на проверку. Локальный черновик не заменяет её автоматически. Скачайте копию, чтобы сохранить свои записи.</p><div class="dialog-actions"><button id="download-recovery" class="learning-button secondary" type="button">Скачать мой черновик</button><button id="keep-server-version" class="learning-button secondary" type="button">Продолжить с версией сервера</button></div></div>` : ''}
         <div class="workspace-block-head"><p class="section-kicker">Шаг ${state.activeIndex + 1} из ${state.blocks.length}</p><h2>${escapeHtml(titleForBlock(current, state.activeIndex))}${blockIsRequired(current) ? ' <span class="block-required" aria-label="обязательное">*</span>' : ''}</h2>${current.type !== 'instruction' && current.prompt && current.prompt !== current.title ? `<p>${escapeHtml(current.prompt)}</p>` : ''}</div>
         <div id="active-task" class="task-surface"></div>
-        <div class="workspace-footer"><button id="save-now" class="learning-button secondary mobile-only" type="button" ${readonly ? 'disabled' : ''}>Сохранить</button><button id="previous-step" class="learning-button secondary" type="button" ${state.activeIndex === 0 ? 'disabled' : ''}>Назад</button>${state.activeIndex < state.blocks.length - 1 ? '<button id="next-step" class="learning-button primary" type="button">Далее</button>' : (canSubmit ? `<button id="footer-submit-work" class="learning-button primary mobile-only" type="button">${escapeHtml(submitLabel)}</button>` : '<button class="learning-button primary" type="button" disabled>Работа завершена</button>')}</div>
+        <div class="workspace-footer"><button id="save-now" class="learning-button secondary" type="button" ${locked ? 'disabled' : ''}>Сохранить</button><button id="previous-step" class="learning-button secondary" type="button" ${state.activeIndex === 0 ? 'disabled' : ''}>Назад</button>${state.activeIndex < state.blocks.length - 1 ? '<button id="next-step" class="learning-button primary" type="button">Далее</button>' : (canSubmit ? `<button id="footer-submit-work" class="learning-button primary mobile-only" type="button">${escapeHtml(submitLabel)}</button>` : `<button class="learning-button primary" type="button" disabled>${readonly ? 'Работа завершена' : 'Проверьте черновик'}</button>`)}</div>
       </div>
       <aside class="workspace-aside" aria-label="Сведения о работе">
         <div class="workspace-card"><h3>Прогресс</h3><div class="progress-track" aria-hidden="true"><span id="workspace-progress" style="width:${percent}%"></span></div><p id="workspace-progress-label">${complete} из ${state.blocks.length}</p></div>
@@ -322,12 +381,12 @@ function renderWorkspace() {
 
   state.taskController?.destroy?.();
   state.taskController = mountTask($('#active-task'), current, state.answers[current.id], {
-    readOnly: readonly,
+    readOnly: locked,
     announce: (message) => toast(message, 'info', 2200),
     onChange: (value) => {
       state.answers[current.id] = value;
       updateStepState(current.id);
-      if (!readonly) state.autosave.schedule(current.id, value);
+      if (!locked) state.autosave.schedule(current.id, value);
     },
     uploadFile: (file, onProgress) => uploadFile(current.id, file, onProgress),
     confirm: (message) => confirmAction({ title: 'Удалить файл?', message, acceptLabel: 'Удалить', danger: true }),
@@ -338,15 +397,18 @@ function renderWorkspace() {
   $('#previous-step').addEventListener('click', () => selectStep(state.activeIndex - 1));
   $('#next-step')?.addEventListener('click', () => selectStep(state.activeIndex + 1));
   $('#save-now')?.addEventListener('click', async (event) => {
-    setBusy(event.currentTarget, true, 'Сохраняем…');
+    const button = event.currentTarget;
+    setBusy(button, true, 'Сохраняем…');
     try { await state.autosave.flushAll(); toast('Все изменения сохранены.', 'success', 2200); }
     catch (error) { toast(errorText(error), 'danger'); }
-    finally { setBusy(event.currentTarget, false); }
+    finally { setBusy(button, false); }
   });
   $('#workspace-close').addEventListener('click', navigateDashboard);
   $('#submit-work')?.addEventListener('click', submitWork);
   $('#footer-submit-work')?.addEventListener('click', submitWork);
-  $('#resolve-conflict')?.addEventListener('click', () => openAssignment(assignmentId(state.assignment), true));
+  $('#resolve-conflict')?.addEventListener('click', () => openAssignment(assignmentId(state.assignment), true, { reloadConflict: true }));
+  $('#download-recovery')?.addEventListener('click', downloadRecoveryCopy);
+  $('#keep-server-version')?.addEventListener('click', keepServerVersion);
 }
 
 async function uploadFile(blockId, file, onProgress) {
@@ -382,6 +444,7 @@ function selectStep(index) {
 }
 
 async function submitWork(event) {
+  if (state.conflict || state.recovery) return;
   if (state.taskController?.validate?.() === false) {
     state.taskController.focusFirstError?.();
     return;
@@ -415,10 +478,11 @@ async function submitWork(event) {
   }
 }
 
-function navigateDashboard() {
-  state.view = 'dashboard';
-  setViewInUrl('dashboard', { assignment: null, step: null });
-  loadDashboard(true);
+async function navigateDashboard(view = 'dashboard') {
+  if (!await saveBeforeLeaving()) return;
+  state.view = typeof view === 'string' ? view : 'dashboard';
+  setViewInUrl(state.view, { assignment: null, step: null });
+  await loadDashboard(true);
 }
 
 async function route({ replace = false } = {}) {
@@ -429,11 +493,9 @@ async function route({ replace = false } = {}) {
 }
 
 $$('[data-student-view]').forEach((button) => button.addEventListener('click', () => {
-  state.view = button.dataset.studentView;
-  setViewInUrl(state.view, { assignment: null, step: null });
-  loadDashboard();
+  navigateDashboard(button.dataset.studentView);
 }));
-$('#student-logout').addEventListener('click', logout);
+$('#student-logout').addEventListener('click', async () => { if (await saveBeforeLeaving()) await logout(); });
 window.addEventListener('popstate', () => route({ replace: true }));
 window.addEventListener('beforeunload', (event) => {
   if (state.autosave?.pending?.size) {
