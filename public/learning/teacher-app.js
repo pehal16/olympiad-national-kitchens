@@ -859,7 +859,7 @@ function drawGroups() {
   const isAdmin = asArray(state.user?.roles).includes('admin') || state.user?.role === 'admin';
   content.innerHTML = `<div class="teacher-page">${pageHeader('Состав групп', 'Группы и предметы', 'Создавайте учебный контур, затем импортируйте список студентов с предварительной проверкой.')}
     <div class="section-stack">
-    ${isAdmin ? `<section class="panel"><div class="panel-head"><div><h2>Учебный комплект МДК 01.01</h2><p class="muted">Шесть пронумерованных практических работ с интерактивными заданиями, расчётами, подсказками и контролем выполнения.</p></div><button id="seed-pilot" class="learning-button primary" type="button">Обновить комплект</button></div><div id="pilot-result" class="panel-body hidden"></div></section>` : ''}
+    ${isAdmin ? `<section class="panel"><div class="panel-head"><div><h2>Учебный комплект МДК 01.01</h2><p class="muted">Семь пронумерованных практических работ с интерактивными заданиями, расчётами, подсказками и контролем выполнения.</p></div><button id="seed-pilot" class="learning-button primary" type="button">Обновить комплект</button></div><div id="pilot-result" class="panel-body hidden"></div></section>` : ''}
     <section class="panel"><div class="panel-head"><h2>Учебный контур</h2><span>${groups.length} групп · ${subjects.length} предметов · ${courses.length} курсов</span></div><div class="panel-body"><div class="summary-grid">
       <form id="create-group-form" class="summary-card"><h3>Новая группа</h3><label class="field"><span>Код</span><input id="new-group-code" placeholder="1-ПК-24Б" required /></label><label class="field"><span>Название</span><input id="new-group-name" placeholder="1-ПК-24Б" required /></label><button class="learning-button secondary" type="submit">Добавить группу</button></form>
       <form id="create-subject-form" class="summary-card"><h3>Новый предмет</h3><label class="field"><span>Код</span><input id="new-subject-code" placeholder="МДК 03.01" required /></label><label class="field"><span>Название</span><input id="new-subject-name" required /></label><button class="learning-button secondary" type="submit">Добавить предмет</button></form>
@@ -917,7 +917,7 @@ function drawPilotResult(target, students) {
 }
 
 async function seedPilot(event) {
-  const confirmed = await confirmAction({ title: 'Обновить учебный комплект?', message: 'Будут созданы или обновлены шесть практических работ МДК 01.01 и назначения для выбранной в настройках группы. Уже начатые работы сохранятся.', acceptLabel: 'Обновить' });
+  const confirmed = await confirmAction({ title: 'Обновить учебный комплект?', message: 'Будут созданы или обновлены семь практических работ МДК 01.01 и назначения для выбранной в настройках группы. Уже начатые работы сохранятся.', acceptLabel: 'Обновить' });
   if (!confirmed) return;
   setBusy(event.currentTarget, true, 'Разворачиваем…');
   const resultBox = $('#pilot-result');

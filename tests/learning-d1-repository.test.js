@@ -94,7 +94,7 @@ test("D1 repository runs the complete pilot lifecycle transactionally", async (t
   const teacherLogin = await service.login({ login: "d1-teacher", password: "TeacherD12026" });
   const teacher = await service.authenticate(teacherLogin.token);
   const pilot = await service.seedPilot(teacher);
-  assert.equal(pilot.works.length, 6);
+  assert.equal(pilot.works.length, 7);
   assert.equal((await repository.listAuditEvents()).length > 10, true);
 
   const sharedBlockDraft = {

@@ -12,9 +12,9 @@ function works() {
   return pilotWorks(["course-mdk", "course-2", "course-3", "course-4", "course-5"], "group-1");
 }
 
-test("MDK 01.01 pilot contains six source-faithful, numbered practices", () => {
+test("MDK 01.01 pilot contains seven source-faithful, numbered practices", () => {
   const pilot = works();
-  assert.equal(pilot.length, 6);
+  assert.equal(pilot.length, 7);
   pilot.forEach((work, index) => {
     assert.equal(work.courseId, "course-mdk");
     assert.equal(work.kind, "practice");
@@ -136,6 +136,36 @@ test("practice 6 follows the fish-workplace source task and uses four verified v
   assert.deepEqual(workplace.columns.map((column) => column.id), ["equipment", "zone", "control"]);
   assert.equal(evidence.required, true);
   assert.deepEqual(evidence.allowedExtensions, ["pdf", "docx", "jpg", "jpeg", "png"]);
+});
+
+test("practice 7 covers fish-processing equipment and safe RO-1M operation for two pairs", () => {
+  const work = works()[6];
+  const source = work.blocks.find((block) => block.id === "pz7-source");
+  const equipment = work.blocks.find((block) => block.id === "pz7-equipment");
+  const parts = work.blocks.find((block) => block.id === "pz7-parts");
+  const order = work.blocks.find((block) => block.id === "pz7-order");
+  const safety = work.blocks.find((block) => block.id === "pz7-safety");
+  const card = work.blocks.find((block) => block.id === "pz7-card");
+  const evidence = work.blocks.find((block) => block.id === "pz7-file");
+
+  assert.equal(work.estimatedMinutes, 180);
+  assert.match(work.title, /Практическая работа № 7/);
+  assert.match(work.instructions, /РО-1М/);
+  assert.equal(source.images.length, 4);
+  assert.ok(source.images.every((image) => image.src.startsWith("/assets/learning/practices/pz7/") && image.alt));
+  assert.deepEqual(Object.keys(equipment.privateKey.pairs), ["ro1m", "pr2", "gs1", "grinder"]);
+  assert.equal(Object.keys(parts.privateKey.pairs).length, 6);
+  assert.deepEqual(order.privateKey.order, [
+    "prepare-place", "inspect-machine", "prepare-flow", "idle-check",
+    "process-fish", "stop-machine", "disconnect", "clean-parts"
+  ]);
+  assert.equal(safety.items.length, 12);
+  assert.equal(Object.keys(safety.privateKey.assignments).length, 12);
+  assert.equal(card.rows.length, 8);
+  assert.deepEqual(card.columns.map((column) => column.id), ["action", "control"]);
+  assert.equal(evidence.required, true);
+  assert.equal(work.blocks.reduce((sum, block) => sum + Number(block.maxScore || 0), 0), 100);
+  assert.doesNotMatch(JSON.stringify(work), /при включ[её]нном двигателе/i);
 });
 
 test("every scored pilot step has progressive student guidance", () => {
