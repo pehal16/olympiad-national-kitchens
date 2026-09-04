@@ -42,6 +42,8 @@ When a task concerns daily college materials, schedules, working programs, lesso
 
 1. Read `docs/teacher-daily-workflow.md` before acting.
 2. Read `storage/teacher-workflow-private.json` when it exists. Treat it as private local configuration and never commit or quote its personal values in public documentation.
+   Read the complete additional teaching-material rules file referenced by `paths.lessonRulesPath`, when configured. It contains newer standing teacher requirements; do not rely only on the shorter repository summary. If the file is unavailable, report that the complete rule check is not verified.
 3. When the user adds or changes a standing rule, update `docs/teacher-daily-workflow.md` and its change log in the same task.
 4. Preserve old source documents and existing exam/olympiad behavior unless the user explicitly asks to change them.
 5. Never send email or another external message until the user has reviewed the final files and explicitly confirmed the exact outgoing action.
+6. Read `docs/learning-methodical-audit.md` for learning-platform content work. Technical deployment or passing tests is not evidence that a work satisfies every pedagogical requirement. Do not describe flagged content as fully methodically accepted until its source-backed corrective review is complete.
