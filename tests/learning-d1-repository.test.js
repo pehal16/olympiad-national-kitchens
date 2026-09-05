@@ -80,6 +80,12 @@ function createDatabase(t) {
   return database;
 }
 
+test("D1: optional excellent task accepts base-only and partial submissions but guards bonus points", async (t) => {
+  const database = createDatabase(t);
+  const repository = await new D1LearningRepository(new SqliteD1Database(database)).init();
+  await require("./helpers/learning-excellent-scenarios").excellentScenarios(repository);
+});
+
 test("D1 repository runs the complete pilot lifecycle transactionally", async (t) => {
   const database = createDatabase(t);
   const repository = await new D1LearningRepository(new SqliteD1Database(database)).init();

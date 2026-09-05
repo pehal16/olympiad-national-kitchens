@@ -992,3 +992,27 @@ textarea:disabled { color: var(--learning-muted); background: var(--learning-ban
   .study-section { margin: 1.6rem 0; }
   .study-section > h3, .study-library > h3 { scroll-margin-top: 12rem; }
 }
+.guided-calculation { display: grid; gap: 20px; max-width: 1060px; }
+.guided-calculation > .study-section { margin: 0; }
+.guided-calculation > .study-section .study-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
+.guided-calculation > .study-section .study-facts > div { padding: 14px 16px; border: 1px solid #d5deea; border-radius: 10px; background: #f8fafc; }
+.guided-calculation > .study-section .study-facts dd { font-size: 24px; color: #087c4a; font-weight: 700; }
+.guided-grade-note { margin: 0 0 16px; padding: 16px 20px; border-left: 4px solid #087c4a; background: #edf8f2; border-radius: 6px; line-height: 1.65; }
+.guided-step { padding: 22px; border: 1px solid #d5deea; border-radius: 12px; background: #fff; }
+.guided-step h3 { margin: 0 0 8px; font-size: 19px; }
+.guided-step > p { margin: 0 0 18px; color: #52647a; line-height: 1.65; }
+.guided-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.guided-fields .field { min-width: 0; margin: 0; }
+.guided-fields textarea { min-height: 112px; width: 100%; resize: vertical; }
+.guided-example { border: 1px solid #cbd8e9; border-radius: 10px; padding: 16px 20px; background: #f8faff; }
+.guided-example > summary { cursor: pointer; font-weight: 700; line-height: 1.5; }
+.guided-example[open] > summary { margin-bottom: 18px; }
+.guided-status { margin: 0; color: #52647a; font-size: 14px; line-height: 1.6; }
+@media (max-width: 720px) {
+  .guided-calculation > .study-section .study-facts { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .guided-calculation > .study-section .study-facts > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; }
+  .guided-calculation > .study-section .study-facts dt { margin: 0; }
+  .guided-fields { grid-template-columns: minmax(0, 1fr); }
+  .guided-step, .guided-example { padding: 16px; }
+  .guided-grade-note { padding: 12px 14px; }
+}

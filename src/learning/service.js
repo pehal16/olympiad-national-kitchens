@@ -90,20 +90,38 @@ function pilotRevisionOf(version) {
   return 0;
 }
 
-function scoreCapacities(work) {
+function scoreCapacities(work, answers) {
   let automaticMaxScore = 0;
   let manualMaxScore = 0;
+  let manualScoreAvailable = 0;
   for (const block of work?.blocks || []) {
     const maxScore = Math.max(0, Number(block.maxScore ?? block.max_score ?? 0) || 0);
     const mode = resolveGradingMode(block);
     if (mode === "automatic") automaticMaxScore += maxScore;
-    if (mode === "manual") manualMaxScore += maxScore;
+    if (mode === "manual") {
+      manualMaxScore += maxScore;
+      const eligible = block.gradePurpose !== "excellent" || answers === undefined
+        || (() => {
+          const validation = validateAnswer({ ...block, required: true, requireAllCells: true }, answers[block.id]);
+          return validation.valid && validation.complete;
+        })();
+      if (eligible) manualScoreAvailable += maxScore;
+    }
   }
   const rubricMaxScore = (work?.rubric || []).reduce(
     (sum, criterion) => sum + Math.max(0, Number(criterion.maxScore ?? criterion.max_score ?? 0) || 0),
     0
   );
-  return { automaticMaxScore, manualMaxScore, rubricMaxScore };
+  return { automaticMaxScore, manualMaxScore, rubricMaxScore, manualScoreAvailable };
+}
+
+function submittedAnswers(detail) {
+  // Grade the sealed revision, never mutable draft answers supplied by a client.
+  const revision = detail.revisions?.find((item) => item.id === detail.current_revision_id) || detail.revisions?.at(-1);
+  const raw = parseJson(revision?.answers, {});
+  return Object.fromEntries(Object.entries(raw).map(([id, answer]) => [id,
+    answer && Object.prototype.hasOwnProperty.call(answer, "value") ? answer.value : answer
+  ]));
 }
 
 function publicUser(context) {
@@ -1366,7 +1384,7 @@ class LearningService {
     this.requireRole(context, ["admin", "teacher"]);
     const result = await this.repository.getSubmissionForTeacher(submissionId, context.user.id);
     if (!result) throw new LearningError("Сдача не найдена.", 404, "submission_not_found");
-    return result;
+    return { ...result, manualScoreAvailable: scoreCapacities(this.workDefinition(result.work, true), submittedAnswers(result)).manualScoreAvailable };
   }
 
   async returnSubmission(context, submissionId, payload) {
@@ -1397,7 +1415,7 @@ class LearningService {
     if (!detail) throw new LearningError("Сдача не найдена.", 404, "submission_not_found");
     const rubricInput = Array.isArray(payload.rubricScores) ? payload.rubricScores : [];
     const criteria = detail.work?.rubric || [];
-    const capacities = scoreCapacities(this.workDefinition(detail.work, true));
+    const capacities = scoreCapacities(this.workDefinition(detail.work, true), submittedAnswers(detail));
     assertLearning(
       Math.abs(capacities.rubricMaxScore - capacities.manualMaxScore) <= 0.0001,
       "Сумма критериев проверки не совпадает с максимальным ручным баллом работы. Создайте исправленную версию работы.",
@@ -1417,6 +1435,12 @@ class LearningService {
       return { criterion, input, score, max };
     });
     const manualScore = normalized.reduce((sum, item) => sum + item.score, 0);
+    assertLearning(
+      manualScore <= capacities.manualScoreAvailable + 0.0001,
+      "Дополнительный разбор на «5» заполнен не полностью. За него нельзя начислить баллы; оцените основную часть или верните работу на доработку.",
+      422,
+      "manual_score_unavailable"
+    );
     const autoScore = Number(detail.auto_score || 0);
     assertLearning(
       Number.isFinite(autoScore) && autoScore >= 0 && autoScore <= capacities.automaticMaxScore + 0.0001,

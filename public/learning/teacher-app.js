@@ -1,5 +1,5 @@
 import { teacherApi } from './api.js?v=1.1.3';
-import { mountTask } from './tasks.js?v=1.5.0';
+import { mountTask } from './tasks.js?v=1.5.1';
 import {
   $, $$, asArray, confirmAction, debounce, downloadCsv, errorText, escapeHtml,
   formatDate, fullName, initials, initSession, logout, pick, renderEmpty,
@@ -822,6 +822,26 @@ function drawSubmissionReview(payload, id) {
   });
   $('#return-review').addEventListener('click', (event) => completeReview(id, 'return', event.currentTarget));
   $('#grade-review').addEventListener('click', (event) => completeReview(id, 'grade', event.currentTarget));
+  if (blocks.some((block) => block.gradePurpose === 'excellent')) {
+    const available = Number(submission.manualScoreAvailable);
+    const note = document.createElement('p');
+    note.className = 'guided-grade-note';
+    note.textContent = available === 0
+      ? 'Дополнительный разбор заполнен не полностью – за него 0 баллов. Основная часть оценивается отдельно, до 80 баллов и оценки «4». Можно принять работу или вернуть её на доработку.'
+      : 'Основная часть – до 80 баллов. За дополнительный разбор начислите до 20 баллов по качеству ответа. Оценка «5» – от 90 баллов суммарно; само заполнение полей её не гарантирует.';
+    $('#review-form').prepend(note);
+    const inputs = $$('[data-rubric-id]', target);
+    if (available === 0) inputs.forEach((input) => { input.value = '0'; input.disabled = true; });
+    const grade = $('#review-grade');
+    grade.readOnly = true;
+    const updateGrade = () => {
+      if (inputs.some((input) => input.value === '')) { grade.value = ''; return; }
+      const score = Number(submission.autoScore ?? submission.auto_score ?? 0) + inputs.reduce((sum, input) => sum + Number(input.value || 0), 0);
+      grade.value = score >= 90 ? '5' : score >= 75 ? '4' : score >= 60 ? '3' : '2';
+    };
+    inputs.forEach((input) => input.addEventListener('input', updateGrade));
+    updateGrade();
+  }
 }
 
 function reviewPayload() {

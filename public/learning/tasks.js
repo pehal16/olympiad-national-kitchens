@@ -323,7 +323,7 @@ export function isValueMeaningful(first, second) {
     if (!isObject(cells)) return false;
     const cellHasValue = (cell) => typeof cell === 'boolean' || nonEmptyText(cell);
     let requiredCellIds = asArray(block.requiredCells).map(String).filter(Boolean);
-    if (!requiredCellIds.length && block.requireAllCells !== false) {
+    if (!requiredCellIds.length && (block.requireAllCells !== false || block.gradePurpose === 'excellent')) {
       const rows = normalizedCollection(valueByKnownKey(block, ['rows', 'items'], []), 'row');
       const columns = normalizeColumns(block).filter((column) => !column.readOnly);
       requiredCellIds = rows.flatMap((row) => columns.map((column) => `${row.id}:${column.id}`));
@@ -820,6 +820,7 @@ function createCalculator(root, readOnly) {
     ['(', '('], [')', ')'], ['⌫', 'backspace'], ['=', 'equals'],
   ];
   let target = null;
+  let insertionFormat = null;
 
   function calculate() {
     try {
@@ -871,8 +872,11 @@ function createCalculator(root, readOnly) {
   insert.addEventListener('click', () => {
     const calculated = calculate();
     if (calculated === null || !target) return;
-    target.value = calculatorNumber(calculated).replace(',', '.');
+    target.value = insertionFormat?.includeExpression
+      ? `${expression.value.replaceAll('*', '×').replaceAll('/', '÷')} = ${calculatorNumber(calculated)} ${insertionFormat.unit || ''}`.trim()
+      : calculatorNumber(calculated).replace(',', '.');
     target.dispatchEvent(new Event('input', { bubbles: true }));
+    if (insertionFormat?.includeExpression) panel.hidden = true;
     target.focus();
   });
   actions.append(clear, insert);
@@ -889,10 +893,13 @@ function createCalculator(root, readOnly) {
 
   return {
     panel,
-    open(nextTarget, suggestedExpression = '') {
+    open(nextTarget, suggestedExpression = '', format = null) {
       if (readOnly) return;
       target = nextTarget;
-      expression.value = suggestedExpression || nextTarget?.value || '';
+      insertionFormat = format;
+      const current = format?.includeExpression ? String(nextTarget?.value || '').split('=')[0].trim() : nextTarget?.value;
+      expression.value = suggestedExpression || current || '';
+      insert.textContent = format?.includeExpression ? 'Вставить вычисление' : 'Вставить результат';
       result.value = '';
       result.textContent = '0';
       error.hidden = true;
@@ -903,11 +910,11 @@ function createCalculator(root, readOnly) {
   };
 }
 
-function wrapWithCalculatorButton(input, label, calculator, expression = '') {
+function wrapWithCalculatorButton(input, label, calculator, expression = '', format = null) {
   const shell = createElement('div', 'numeric-input-shell');
   const button = iconButton(`Открыть калькулятор: ${label}`, 'calculator', input.disabled);
   button.classList.add('calculator-trigger');
-  button.addEventListener('click', () => calculator.open(input, expression));
+  button.addEventListener('click', () => calculator.open(input, expression, format));
   shell.append(input, button);
   return shell;
 }
@@ -1388,7 +1395,68 @@ function normalizeColumns(block) {
   });
 }
 
+function renderGuidedCalculation(environment) {
+  const { root, block, value, readOnly, emit } = environment;
+  const panel = createElement('div', 'guided-calculation');
+  const note = createElement('p', 'guided-grade-note', 'По желанию, для оценки «5» · до 20 баллов. Основные таблицы можно сдать без этого задания. Чтобы получить дополнительные баллы, заполните весь разбор; правильность проверит преподаватель.');
+  panel.append(note);
+  appendStudySections(panel, [{ title: '1. Прочитайте исходные данные', paragraphs: [block.goal, block.formula], facts: block.given }]);
+  const example = createElement('details', 'guided-example');
+  example.append(createElement('summary', null, 'Посмотреть полный пример на 10 порций'));
+  appendStudySections(example, block.workedExample);
+  panel.append(example);
+  const calculator = readOnly ? null : createCalculator(root, false);
+  const controls = [];
+  const columns = normalizeColumns(block);
+  const rowId = normalizedCollection(block.rows, 'row')[0]?.id;
+  const initialCells = recordFrom(value?.cells);
+  const addFields = (title, description, selected) => {
+    const section = createElement('section', 'guided-step');
+    section.append(createElement('h3', null, title), createElement('p', null, description));
+    const fields = createElement('div', 'guided-fields');
+    selected.forEach((column) => {
+      const key = `${rowId}:${column.id}`;
+      const control = createElement('textarea');
+      control.rows = column.id === 'check' ? 4 : 3;
+      control.placeholder = column.placeholder;
+      control.setAttribute('aria-label', column.label);
+      control.disabled = readOnly;
+      setControlValue(control, initialCells[key] ?? '');
+      control.addEventListener('input', () => { updateStatus(); emit(); });
+      const field = makeField(column.label, control);
+      if (calculator && column.raw.calculator) {
+        field.append(wrapWithCalculatorButton(control, column.label, calculator, '', { includeExpression: true, unit: column.unit }));
+      }
+      fields.append(field);
+      controls.push({ key, control });
+    });
+    section.append(fields);
+    panel.append(section);
+  };
+  addFields('2. Запишите два вычисления', 'Подставьте нормы и число порций в формулу. В каждом поле нужны выражение, результат и граммы. Калькулятор переносит всю запись.', columns.slice(0, 2));
+  if (calculator) panel.append(calculator.panel);
+  addFields('3. Проверьте и сформулируйте ответ', 'Разделите каждую полученную массу на 20: должны восстановиться нормы на одну порцию. Затем запишите обе массы в коротком ответе.', columns.slice(2));
+  const status = createElement('p', 'guided-status');
+  status.setAttribute('role', 'status');
+  function updateStatus() {
+    const count = controls.filter(({ control }) => control.value.trim()).length;
+    const message = count === 0 ? 'Дополнительное задание не выполнено. Оно не препятствует сдаче основной части.'
+      : count < controls.length ? `Заполнено ${count} из ${controls.length} полей. Для дополнительных баллов завершите разбор. Основную часть можно сдать сейчас.`
+        : 'Все поля заполнены. Преподаватель проверит вычисления, обратную проверку и ответ.';
+    if (status.textContent !== message) status.textContent = message;
+  }
+  updateStatus();
+  panel.append(status);
+  root.append(panel);
+  return {
+    getValue: () => ({ cells: Object.fromEntries(controls.map(({ key, control }) => [key, control.value])) }),
+    validate: () => ({ valid: !requiresAnswer(block) || controls.every(({ control }) => control.value.trim()), message: 'Заполните все поля разбора.' }),
+    firstControl: controls[0]?.control,
+  };
+}
+
 function renderTable(environment) {
+  if (environment.block.layout === 'guided-calculation') return renderGuidedCalculation(environment);
   const { root, block, value, readOnly, emit } = environment;
   const columns = normalizeColumns(block);
   const rows = normalizedCollection(valueByKnownKey(block, ['rows', 'items'], []), 'row');

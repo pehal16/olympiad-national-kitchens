@@ -22,7 +22,7 @@ test("MDK 01.01 pilot contains seven source-faithful, numbered practices", () =>
     const validation = validateDefinition(work);
     assert.equal(validation.valid, true, `${work.title}: ${JSON.stringify(validation.errors)}`);
     assert.equal(JSON.stringify(sanitizeForStudent(work)).includes("privateKey"), false);
-    assert.equal(work.blocks[0].pilotContentRevision, index < 3 ? PILOT_CONTENT_REVISION : 6);
+    assert.equal(work.blocks[0].pilotContentRevision, [7, 7, PILOT_CONTENT_REVISION, 6, 6, 6, 6][index]);
   });
   const serialized = JSON.stringify(pilot);
   ["Промежуточный тест", "Жарочный шкаф", "Взбивальная машина", "Холодильный шкаф", "Кроссворд", "Рефлексия"]

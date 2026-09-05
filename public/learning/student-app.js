@@ -1,6 +1,6 @@
 import { attachmentApi, studentApi } from './api.js?v=1.1.3';
 import { AutosaveQueue } from './autosave.js?v=1.2.0';
-import { isValueMeaningful, mountTask } from './tasks.js?v=1.5.0';
+import { isValueMeaningful, mountTask } from './tasks.js?v=1.5.1';
 import {
   $, $$, asArray, confirmAction, errorText, escapeHtml, formatDate, fullName,
   initSession, logout, pick, renderEmpty, renderError, renderLoading, setBusy,
@@ -325,6 +325,16 @@ function answeredCount() {
   return state.blocks.filter((block) => block.type === 'instruction' || isValueMeaningful(state.answers[block.id], block)).length;
 }
 
+function workspaceProgress() {
+  const extra = state.blocks.find((block) => block.gradePurpose === 'excellent');
+  const blocks = extra ? state.blocks.filter(blockIsRequired) : state.blocks;
+  const complete = extra ? blocks.filter((block) => isValueMeaningful(state.answers[block.id], block)).length : answeredCount();
+  return {
+    percent: blocks.length ? Math.round(complete / blocks.length * 100) : 0,
+    label: extra ? `Основная часть: ${complete} из ${blocks.length}. Задание на «5»: ${isValueMeaningful(state.answers[extra.id], extra) ? 'заполнено' : 'по желанию'}.` : `${complete} из ${blocks.length}`,
+  };
+}
+
 function updateStepState(blockId) {
   const index = state.blocks.findIndex((block) => block.id === blockId);
   const button = $(`[data-step-index="${index}"]`);
@@ -332,9 +342,9 @@ function updateStepState(blockId) {
   button.classList.toggle('is-complete', isValueMeaningful(state.answers[blockId], state.blocks[index]) || state.blocks[index].type === 'instruction');
   const progress = $('#workspace-progress');
   const label = $('#workspace-progress-label');
-  const percent = state.blocks.length ? Math.round((answeredCount() / state.blocks.length) * 100) : 0;
-  if (progress) progress.style.width = `${percent}%`;
-  if (label) label.textContent = `${answeredCount()} из ${state.blocks.length}`;
+  const summary = workspaceProgress();
+  if (progress) progress.style.width = `${summary.percent}%`;
+  if (label) label.textContent = summary.label;
 }
 
 function renderWorkspace() {
@@ -348,8 +358,8 @@ function renderWorkspace() {
     $('#back-to-list')?.addEventListener('click', navigateDashboard);
     return;
   }
-  const complete = answeredCount();
-  const percent = state.blocks.length ? Math.round((complete / state.blocks.length) * 100) : 0;
+  const progressSummary = workspaceProgress();
+  const percent = progressSummary.percent;
   const rubric = asArray(state.definition.rubric || assignment.rubric || submission.rubric);
   const feedback = submission.feedback || submission.teacherComment || submission.review?.comment;
   const canSubmit = !locked && ['draft', 'in_progress', 'needs_revision', 'changes_requested', 'returned'].includes(String(submission.status || 'draft').toLowerCase());
@@ -360,7 +370,7 @@ function renderWorkspace() {
       <div class="workspace-toolbar-actions"><button id="workspace-close" class="learning-button quiet" type="button">Закрыть</button>${canSubmit ? `<button id="submit-work" class="learning-button primary" type="button">${escapeHtml(submitLabel)}</button>` : ''}</div>
     </header>
     <div class="workspace-grid">
-      <nav class="step-rail" aria-label="Задания работы"><ol class="step-list">${state.blocks.map((block, index) => `<li><button type="button" class="step-button ${index === state.activeIndex ? 'is-active' : ''} ${(block.type === 'instruction' || isValueMeaningful(state.answers[block.id], block)) ? 'is-complete' : ''}" data-step-index="${index}" ${index === state.activeIndex ? 'aria-current="step"' : ''}><span class="step-number">${index + 1}</span><span class="step-copy"><strong>${escapeHtml(titleForBlock(block, index))}</strong><span>${block.type === 'instruction' ? 'Учебная опора' : (blockIsRequired(block) ? 'Обязательное' : 'Можно пропустить')}</span></span></button></li>`).join('')}</ol></nav>
+      <nav class="step-rail" aria-label="Задания работы"><ol class="step-list">${state.blocks.map((block, index) => `<li><button type="button" class="step-button ${index === state.activeIndex ? 'is-active' : ''} ${(block.type === 'instruction' || isValueMeaningful(state.answers[block.id], block)) ? 'is-complete' : ''}" data-step-index="${index}" ${index === state.activeIndex ? 'aria-current="step"' : ''}><span class="step-number">${index + 1}</span><span class="step-copy"><strong>${escapeHtml(titleForBlock(block, index))}</strong><span>${block.type === 'instruction' ? 'Учебная опора' : (blockIsRequired(block) ? 'Обязательное' : block.gradePurpose === 'excellent' ? 'По желанию · на «5»' : 'Можно пропустить')}</span></span></button></li>`).join('')}</ol></nav>
       <div class="workspace-center">
         ${['needs_revision', 'changes_requested', 'returned'].includes(submission.status) ? `<div class="revision-panel"><strong>Работа возвращена на доработку</strong><p>${escapeHtml(feedback || 'Исправьте отмеченные пункты и отправьте работу повторно.')}</p></div>` : ''}
         ${state.conflict ? `<div class="conflict-panel" role="alert"><strong>Ответ изменён в другой вкладке</strong><p>Чтобы не перезаписать более свежую версию, обновите данные с сервера.</p><button id="resolve-conflict" class="learning-button secondary" type="button">Загрузить свежую версию</button></div>` : ''}
@@ -370,7 +380,7 @@ function renderWorkspace() {
         <div class="workspace-footer"><button id="save-now" class="learning-button secondary" type="button" ${locked ? 'disabled' : ''}>Сохранить</button><button id="previous-step" class="learning-button secondary" type="button" ${state.activeIndex === 0 ? 'disabled' : ''}>Назад</button>${state.activeIndex < state.blocks.length - 1 ? '<button id="next-step" class="learning-button primary" type="button">Далее</button>' : (canSubmit ? `<button id="footer-submit-work" class="learning-button primary mobile-only" type="button">${escapeHtml(submitLabel)}</button>` : `<button class="learning-button primary" type="button" disabled>${readonly ? 'Работа завершена' : 'Проверьте черновик'}</button>`)}</div>
       </div>
       <aside class="workspace-aside" aria-label="Сведения о работе">
-        <div class="workspace-card"><h3>Прогресс</h3><div class="progress-track" aria-hidden="true"><span id="workspace-progress" style="width:${percent}%"></span></div><p id="workspace-progress-label">${complete} из ${state.blocks.length}</p></div>
+        <div class="workspace-card"><h3>Прогресс</h3><div class="progress-track" aria-hidden="true"><span id="workspace-progress" style="width:${percent}%"></span></div><p id="workspace-progress-label">${escapeHtml(progressSummary.label)}</p></div>
         <div class="workspace-card"><h3>Срок сдачи</h3><p class="${deadlineClass(assignment.dueAt || assignment.deadline)}">${escapeHtml(formatDate(assignment.dueAt || assignment.deadline, { withTime: true }))}</p></div>
         ${feedback ? `<div class="workspace-card"><h3>Комментарий преподавателя</h3><p>${escapeHtml(feedback)}</p></div>` : ''}
         ${rubric.length ? `<div class="workspace-card"><h3>Критерии</h3><ul class="rubric-list">${rubric.map((row) => `<li class="rubric-row"><span>${escapeHtml(row.title || row.name)}</span><strong>${escapeHtml(row.maxScore ?? row.points ?? '')}</strong></li>`).join('')}</ul></div>` : ''}

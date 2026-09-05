@@ -1,6 +1,6 @@
 "use strict";
 
-const { requisitionStudy, spicesStudy, recipeStudy } = require("./pilot-study");
+const { requisitionStudy, spicesStudy, recipeStudy, recipeExcellentTask } = require("./pilot-study");
 
 function addDays(days) {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
@@ -25,8 +25,8 @@ const PILOT_SUBJECTS = Object.freeze([
   { code: "ОП-08", name: "Основы калькуляции и учёта" }
 ]);
 
-const PILOT_CONTENT_REVISION = 7;
-const PILOT_STUDY_BLOCKS = new Set(["pz1-source", "pz2-source", "pz3-source"]);
+const PILOT_CONTENT_REVISION = 8;
+const PILOT_BLOCK_REVISIONS = { "pz1-source": 7, "pz2-source": 7, "pz3-source": 8 };
 
 const SPICE_VISUALS = Object.freeze({
   "black-pepper": { src: "/assets/learning/spices/black-pepper.jpg", alt: "Изображение пряности: образец 1" },
@@ -60,7 +60,7 @@ const SPICES = Object.freeze([
 
 function instruction(id, title, prompt, extra = {}) {
   return { id, type: "instruction", title, prompt, required: false, maxScore: 0,
-    pilotContentRevision: PILOT_STUDY_BLOCKS.has(id) ? PILOT_CONTENT_REVISION : 6, ...extra };
+    pilotContentRevision: PILOT_BLOCK_REVISIONS[id] || 6, ...extra };
 }
 
 function numeric(value, tolerance = 0.01) {
@@ -338,13 +338,13 @@ function pilotWorks(courseIds, groupId) {
       courseId: mdkCourseId, defaultGroupId: groupId, kind: "practice",
       title: "Практическая работа № 3. Порядок пользования сборником рецептур",
       topic: "Порядок пользования сборником рецептур",
-      instructions: "По рецептуре № 423 «Тефтели» пересчитайте нормы сырья и выход на 20 порций, затем оформите полный расчёт строки «Говядина».",
+      instructions: "По рецептуре № 423 «Тефтели» пересчитайте сырьё и выход на 20 порций. Две таблицы – основная часть, до 80 баллов. Для оценки «5» выполните дополнительный разбор говядины – ещё до 20 баллов; «5» выставляется от 90 баллов после проверки.",
       estimatedMinutes: 90, defaultDueAt: addDays(9),
       blocks: [
         instruction("pz3-source", "Сборник рецептур: чтение и расчёт", "Л. Е. Голунова, 2003. Рецептура № 423 «Тефтели», 2-й вариант с рисом, страница 261. Левая заполненная пара граф; говядина; самостоятельный расчёт на 20 порций.", recipeStudy()),
         {
           id: "pz3-recipe", type: "table", title: "Таблица 1. Пересчёт сырья на 20 порций",
-          prompt: "Умножьте нормы на одну порцию на 20.", rowHeader: "Наименование сырья", maxScore: 35, autoGrade: true, calculator: true,
+          prompt: "Умножьте нормы на одну порцию на 20.", rowHeader: "Наименование сырья", maxScore: 50, autoGrade: true, calculator: true,
           worksheet: {
             eyebrow: "Рецептура № 423", title: "Тефтели – 2-й вариант с рисом, говядина",
             facts: [{ label: "Исходная норма", value: "1 порция" }, { label: "Требуется", value: "20 порций" }, { label: "Единица", value: "г" }],
@@ -381,7 +381,7 @@ function pilotWorks(courseIds, groupId) {
         },
         {
           id: "pz3-output", type: "table", title: "Таблица 2. Выход на 20 порций",
-          prompt: "Пересчитайте каждый показатель выхода.", rowHeader: "Показатель", maxScore: 20, autoGrade: true, calculator: true,
+          prompt: "Пересчитайте каждый показатель выхода.", rowHeader: "Показатель", maxScore: 30, autoGrade: true, calculator: true,
           rows: [
             { id: "semi", label: "Масса полуфабриката", cells: { output1: 135 }, calculatorExpressions: { output20: "135*20" } },
             { id: "meatballs", label: "Тефтели готовые", cells: { output1: 115 }, calculatorExpressions: { output20: "115*20" } },
@@ -403,26 +403,15 @@ function pilotWorks(courseIds, groupId) {
           ]
         },
         {
-          id: "pz3-full-calculation", type: "table", title: "Полный расчёт строки «Говядина»",
-          prompt: "Оформите расчёт массы брутто и нетто говядины на 20 порций.", rowHeader: "Расчёт", maxScore: 45,
-          rows: [{ id: "beef", label: "Говядина" }],
-          columns: [
-            { id: "given", label: "Дано", type: "textarea", rows: 3, required: true, placeholder: "Нормы на 1 порцию и количество порций" },
-            { id: "find", label: "Найти", type: "textarea", rows: 3, required: true },
-            { id: "formula", label: "Формула и обозначения", type: "textarea", rows: 3, required: true },
-            { id: "substitution", label: "Подстановка и единицы", type: "textarea", rows: 3, required: true },
-            { id: "answer", label: "Ответ", type: "textarea", rows: 3, required: true },
-            { id: "check", label: "Проверка делением на 20", type: "textarea", rows: 3, required: true }
-          ],
-          hints: [
-            "В разделе «Дано» запишите две исходные нормы говядины: 103 г брутто и 76 г нетто на одну порцию, а также N = 20.",
-            "Оформите два параллельных вычисления, обязательно подпишите граммы и завершите обратной проверкой."
-          ]
+          id: "pz3-full-calculation", type: "table", title: "На «5»: разбор расчёта говядины",
+          prompt: "Дополнительное задание. Покажите, как получены массы на 20 порций, и проверьте их обратным делением.",
+          required: false, requireAllCells: false, maxScore: 20, gradePurpose: "excellent",
+          ...recipeExcellentTask()
         }
       ],
       rubric: [
-        { title: "Полнота расчёта", description: "Есть дано, найти, формула, обозначения, подстановка, единицы и ответ.", maxScore: 30 },
-        { title: "Проверка", description: "Брутто и нетто проверены обратным делением на 20.", maxScore: 15 }
+        { title: "Вычисления и ответ", description: "Два верных выражения с результатами и единицами; понятный ответ по брутто и нетто. Проверять после заполнения всего дополнительного разбора.", maxScore: 14 },
+        { title: "Обратная проверка", description: "Обе массы разделены на 20, получены исходные нормы и сделан вывод о совпадении.", maxScore: 6 }
       ]
     },
     {
