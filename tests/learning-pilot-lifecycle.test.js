@@ -47,6 +47,11 @@ test("pilot supports group and full-name entry, assignment, submission and grade
   assert.equal(repeated.works[0].assignmentId, initialFirstWork.assignmentId);
   assert.notEqual(repeated.works[0].versionId, initialFirstWork.versionId);
   assert.equal(repeated.works[0].upgraded, true);
+  for (let i = 1; i < 7; i++) {
+    assert.equal(repeated.works[i].upgraded, false);
+    assert.equal(repeated.works[i].versionId, pilot.works[i].versionId);
+    assert.equal(repeated.works[i].assignmentId, pilot.works[i].assignmentId);
+  }
 
   const obsolete = await service.createAssignment(admin, {
     versionId: repeated.works[0].versionId,
@@ -140,6 +145,7 @@ test("pilot supports group and full-name entry, assignment, submission and grade
   assert.equal(graded.status, "accepted");
   assert.equal(graded.grade, "5");
 
+
   const finalDashboard = await service.studentDashboard(student);
   const completed = finalDashboard.assignments.find((item) => item.id === calculationAssignment.id);
   assert.equal(completed.status, "accepted");
@@ -166,6 +172,29 @@ test("pilot supports group and full-name entry, assignment, submission and grade
   const readyFile = await service.verifyAndFinalizeAttachment(student, pendingFile.id, pdf, "file");
   assert.equal(readyFile.status, "ready");
   assert.deepEqual((await fileStore.get(readyFile.object_key)).body, pdf);
+  // Emulate a started revision-6 pack. Only practices 1–3 need revision 7.
+  await repository.mutate((state) => {
+    for (const work of repeated.works.slice(0, 3)) {
+      const marker = state.workBlocks.find((block) => block.version_id === work.versionId);
+      const config = JSON.parse(marker.config_json || "{}");
+      config.pilotContentRevision = 6;
+      marker.config_json = JSON.stringify(config);
+    }
+  });
+  const studyUpgrade = await service.seedPilot(admin);
+  assert.deepEqual(studyUpgrade.works.map((work) => work.upgraded), [true, true, true, false, false, false, false]);
+  assert.notEqual(studyUpgrade.works[0].assignmentId, calculationAssignment.id);
+  assert.equal((await service.listTeacherAssignments(admin)).find((work) => work.id === calculationAssignment.id).status, "archived");
+  const preservedReview = await service.getTeacherSubmission(admin, started.id);
+  assert.equal(preservedReview.status, "accepted");
+  assert.equal(preservedReview.grade, "5");
+  assert.equal((await repository.getSubmission(started.id)).answers["pz1-net"].cells["soup-potato:total"], 2500);
+  for (let i = 1; i < 7; i++) {
+    assert.equal(studyUpgrade.works[i].assignmentId, repeated.works[i].assignmentId);
+    if (i >= 3) assert.equal(studyUpgrade.works[i].versionId, repeated.works[i].versionId);
+  }
+  const idempotentStudyUpgrade = await service.seedPilot(admin);
+  assert.ok(idempotentStudyUpgrade.works.every((work) => !work.upgraded));
 
   const practiceAnswers = {
     "pz4-flow": { nodes: [

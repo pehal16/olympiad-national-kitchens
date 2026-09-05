@@ -22,7 +22,7 @@ test("MDK 01.01 pilot contains seven source-faithful, numbered practices", () =>
     const validation = validateDefinition(work);
     assert.equal(validation.valid, true, `${work.title}: ${JSON.stringify(validation.errors)}`);
     assert.equal(JSON.stringify(sanitizeForStudent(work)).includes("privateKey"), false);
-    assert.equal(work.blocks[0].pilotContentRevision, PILOT_CONTENT_REVISION);
+    assert.equal(work.blocks[0].pilotContentRevision, index < 3 ? PILOT_CONTENT_REVISION : 6);
   });
   const serialized = JSON.stringify(pilot);
   ["Промежуточный тест", "Жарочный шкаф", "Взбивальная машина", "Холодильный шкаф", "Кроссворд", "Рефлексия"]
@@ -86,6 +86,49 @@ test("practice 3 reproduces recipe 423 for beef and twenty portions", () => {
   assert.deepEqual(output.rows.map((row) => row.cells.output1), [135, 115, 75, 125, 315]);
   assert.equal(recipe.privateKey.cells["beef:net20"].value, 1520);
   assert.equal(output.privateKey.cells["dish:output20"].value, 6300);
+});
+
+test("self-study explanations precede every practice 1–3 exercise without changing scores", () => {
+  for (const work of works().slice(0, 3)) {
+    const intro = work.blocks[0];
+    assert.equal(intro.type, "instruction");
+    assert.equal(intro.required, false);
+    assert.equal(intro.maxScore, 0);
+    assert.ok(intro.studySections.length >= 5);
+    assert.equal(work.blocks.reduce((sum, block) => sum + (block.maxScore || 0), 0), 100);
+    assert.match(JSON.stringify(intro), /Отправить на проверку/);
+  }
+  const first = JSON.stringify(works()[0].blocks[0]);
+  for (const part of ["Дано", "Найти", "Формула", "Подстановка", "Ответ", "Обратная проверка", "0,80", "4,000", "0,070"]) {
+    assert.ok(first.toLowerCase().includes(part.toLowerCase()), part);
+  }
+  assert.match(first, /учебные исходные данные/);
+  const third = works()[2].blocks[0];
+  assert.ok(third.studySections[0].image.src.endsWith("recipe-423-table.png"));
+  assert.match(JSON.stringify(third), /«или»/);
+  assert.match(JSON.stringify(third), /это не ноль/);
+  assert.match(JSON.stringify(third), /1030 г/);
+  assert.match(JSON.stringify(third), /10 порций/);
+  assert.doesNotMatch(JSON.stringify(works()[2]), /II вариант/);
+});
+
+test("all sixteen spice tasks have a consistent six-field study entry", () => {
+  const work = works()[1];
+  const intro = work.blocks[0];
+  const entries = intro.referenceEntries;
+  assert.equal(entries.length, 16);
+  assert.equal(new Set(entries.map((entry) => entry.id)).size, 16);
+  assert.deepEqual(entries.map((entry) => entry.id), work.blocks[1].leftItems.map((entry) => entry.id));
+  entries.forEach((entry) => {
+    assert.equal(entry.facts.length, 6);
+    assert.ok(entry.facts.every((fact) => fact.label && fact.text.trim().length > 10));
+    assert.ok(entry.image.src && entry.image.alt);
+  });
+  assert.ok(intro.studySections.some((section) => section.title === "Свежий базилик"));
+  assert.match(entries.find((entry) => entry.id === "basil").subtitle, /Сушёные/);
+  assert.match(JSON.stringify(intro.studySections), /Пар увлажняет/);
+  assert.match(JSON.stringify(intro.studyAfterReference), /фруктового напитка/);
+  assert.equal(JSON.stringify(sanitizeForStudent(work)).includes("privateKey"), false);
 });
 
 test("practices 4 and 5 contain the exact workplace and machine tasks", () => {

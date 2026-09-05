@@ -403,9 +403,103 @@ function makeSelect(options, placeholder, selectedValue) {
   return select;
 }
 
+function studyFigure(raw) {
+  if (!isObject(raw) || !raw.src) return null;
+  const figure = createElement('figure', 'study-figure');
+  const img = createElement('img');
+  img.src = String(raw.src);
+  img.alt = String(raw.alt || raw.caption || 'Учебная иллюстрация');
+  img.loading = 'lazy';
+  figure.append(imagePreviewButton(img));
+  if (raw.caption) figure.append(createElement('figcaption', null, raw.caption));
+  return figure;
+}
+
+function appendStudySections(panel, sections) {
+  asArray(sections).filter(isObject).forEach((item) => {
+    const section = createElement('section', 'study-section');
+    section.append(createElement('h3', null, item.title || 'Учебный материал'));
+    asArray(item.paragraphs).forEach((text) => section.append(createElement('p', null, humanText(text))));
+    const figure = studyFigure(item.image);
+    if (figure) section.append(figure);
+    if (asArray(item.facts).length) {
+      const list = createElement('dl', 'study-facts');
+      item.facts.forEach((fact) => {
+        if (!isObject(fact)) return;
+        const pair = createElement('div');
+        pair.append(createElement('dt', null, fact.label), createElement('dd', null, fact.text));
+        list.append(pair);
+      });
+      section.append(list);
+    }
+    if (asArray(item.steps).length) {
+      const list = createElement('ol', 'study-example');
+      item.steps.forEach((step) => {
+        if (!isObject(step)) return;
+        const row = createElement('li');
+        row.append(createElement('strong', null, step.label), createElement('p', null, step.text));
+        list.append(row);
+      });
+      section.append(list);
+    }
+    panel.append(section);
+  });
+}
+
+function appendReferenceLibrary(panel, block) {
+  const entries = asArray(block.referenceEntries).filter(isObject);
+  if (!entries.length) return;
+  const library = createElement('section', 'study-library');
+  library.append(createElement('h3', null, block.referenceTitle || 'Справочник'));
+  library.append(createElement('p', null, 'Откройте карточку: форма, признаки, применение и хранение. Поиск работает по названию, продукту или блюду.'));
+  const input = createElement('input');
+  input.type = 'search';
+  input.placeholder = 'Например: базилик, рис, маринад';
+  library.append(makeField('Найти в справочнике', input));
+  const status = createElement('p', 'study-library-status');
+  status.setAttribute('role', 'status');
+  const grid = createElement('div', 'study-library-grid');
+  const cards = entries.map((entry) => {
+    const details = createElement('details', 'study-entry');
+    const summary = createElement('summary');
+    if (entry.image?.src) {
+      const image = createElement('img');
+      image.src = entry.image.src;
+      image.alt = '';
+      image.loading = 'lazy';
+      summary.append(image);
+    }
+    const title = createElement('span');
+    title.append(createElement('strong', null, `${entry.number || ''}. ${entry.title}`));
+    title.append(createElement('small', null, entry.subtitle || ''));
+    summary.append(title);
+    const body = createElement('div', 'study-entry-body');
+    const figure = studyFigure(entry.image);
+    if (figure) body.append(figure);
+    appendStudySections(body, [{ title: entry.title, facts: entry.facts }]);
+    details.append(summary, body);
+    grid.append(details);
+    const searchable = [entry.title, entry.subtitle, ...asArray(entry.facts).map((fact) => fact.text)].join(' ').toLocaleLowerCase('ru').replaceAll('ё', 'е');
+    return { details, searchable };
+  });
+  const filter = () => {
+    const words = input.value.trim().toLocaleLowerCase('ru').replaceAll('ё', 'е').split(/\s+/).filter(Boolean);
+    let visible = 0;
+    cards.forEach(({ details, searchable }) => {
+      details.hidden = !words.every((word) => searchable.includes(word));
+      if (!details.hidden) visible++;
+    });
+    status.textContent = visible ? `Показано ${visible} из ${entries.length}` : 'Ничего не найдено. Измените запрос или очистите поиск.';
+  };
+  input.addEventListener('input', filter);
+  filter();
+  library.append(status, grid);
+  panel.append(library);
+}
+
 function renderInstruction(environment) {
   const { root, block } = environment;
-  const panel = createElement('div', 'task-instruction');
+  const panel = createElement('div', `task-instruction${asArray(block.studySections).length ? ' is-study' : ''}`);
   const content = valueByKnownKey(block, ['content', 'text', 'instruction', 'description', 'prompt'], '');
   const paragraphs = Array.isArray(content)
     ? content.map((item) => humanText(item)).filter(Boolean)
@@ -463,6 +557,32 @@ function renderInstruction(environment) {
       gallery.append(figure);
     });
     if (gallery.childElementCount) panel.append(gallery);
+  }
+  appendStudySections(panel, block.studySections);
+  appendReferenceLibrary(panel, block);
+  appendStudySections(panel, block.studyAfterReference);
+  const studyTargets = [...panel.children].filter((node) => node.matches('.study-section, .study-library'));
+  if (studyTargets.length > 1) {
+    const jump = makeSelect(studyTargets.map((node, index) => ({ id: String(index), label: node.querySelector('h3').textContent })), 'Выберите раздел', '');
+    jump.addEventListener('change', () => {
+      if (jump.value === '') return;
+      const heading = studyTargets[Number(jump.value)].querySelector('h3');
+      // Long work titles and wrapped mobile steps change the sticky header height.
+      // Teacher previews have their own scrolling dialog and no student headers.
+      const headers = heading.closest('.workspace-page')
+        ? document.querySelectorAll('.student-topbar, .student-nav, .workspace-toolbar, .step-rail')
+        : [];
+      const inset = [...headers].reduce((height, node) => {
+        const position = getComputedStyle(node).position;
+        return height + (['sticky', 'fixed'].includes(position) ? node.getBoundingClientRect().height : 0);
+      }, 24);
+      heading.style.scrollMarginTop = `${inset}px`;
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+      heading.scrollIntoView({ block: 'start' });
+      jump.value = '';
+    });
+    panel.prepend(makeField('Перейти к разделу', jump));
   }
   root.append(panel);
   return { getValue: () => null };

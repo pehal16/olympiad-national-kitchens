@@ -1,5 +1,7 @@
 "use strict";
 
+const { requisitionStudy, spicesStudy, recipeStudy } = require("./pilot-study");
+
 function addDays(days) {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
 }
@@ -23,25 +25,26 @@ const PILOT_SUBJECTS = Object.freeze([
   { code: "ОП-08", name: "Основы калькуляции и учёта" }
 ]);
 
-const PILOT_CONTENT_REVISION = 6;
+const PILOT_CONTENT_REVISION = 7;
+const PILOT_STUDY_BLOCKS = new Set(["pz1-source", "pz2-source", "pz3-source"]);
 
 const SPICE_VISUALS = Object.freeze({
-  "black-pepper": { src: "/assets/learning/spices/black-pepper.jpg", alt: "Фотография пряности: образец 1" },
-  allspice: { src: "/assets/learning/spices/allspice.jpg", alt: "Фотография пряности: образец 2" },
-  bay: { src: "/assets/learning/spices/bay-leaf.jpg", alt: "Фотография пряности: образец 3" },
-  cinnamon: { src: "/assets/learning/spices/cinnamon.jpg", alt: "Фотография пряности: образец 4" },
-  clove: { src: "/assets/learning/spices/clove.jpg", alt: "Фотография пряности: образец 5" },
-  coriander: { src: "/assets/learning/spices/coriander.jpg", alt: "Фотография пряности: образец 6" },
-  turmeric: { src: "/assets/learning/spices/turmeric.jpg", alt: "Фотография пряности: образец 7" },
-  basil: { src: "/assets/learning/spices/dried-basil.jpg", alt: "Фотография пряности: образец 8" },
-  caraway: { src: "/assets/learning/spices/caraway.png", alt: "Фотография пряности: образец 9" },
-  ginger: { src: "/assets/learning/spices/ginger.png", alt: "Фотография пряности: образец 10" },
-  nutmeg: { src: "/assets/learning/spices/nutmeg.png", alt: "Фотография пряности: образец 11" },
-  paprika: { src: "/assets/learning/spices/paprika.png", alt: "Фотография пряности: образец 12" },
-  cardamom: { src: "/assets/learning/spices/cardamom.png", alt: "Фотография пряности: образец 13" },
-  "star-anise": { src: "/assets/learning/spices/star-anise.png", alt: "Фотография пряности: образец 14" },
-  "mustard-seeds": { src: "/assets/learning/spices/mustard-seeds.png", alt: "Фотография пряности: образец 15" },
-  "dried-dill": { src: "/assets/learning/spices/dried-dill.png", alt: "Фотография пряности: образец 16" }
+  "black-pepper": { src: "/assets/learning/spices/black-pepper.jpg", alt: "Изображение пряности: образец 1" },
+  allspice: { src: "/assets/learning/spices/allspice.jpg", alt: "Изображение пряности: образец 2" },
+  bay: { src: "/assets/learning/spices/bay-leaf.jpg", alt: "Изображение пряности: образец 3" },
+  cinnamon: { src: "/assets/learning/spices/cinnamon.jpg", alt: "Изображение пряности: образец 4" },
+  clove: { src: "/assets/learning/spices/clove.jpg", alt: "Изображение пряности: образец 5" },
+  coriander: { src: "/assets/learning/spices/coriander.jpg", alt: "Изображение пряности: образец 6" },
+  turmeric: { src: "/assets/learning/spices/turmeric.jpg", alt: "Изображение пряности: образец 7" },
+  basil: { src: "/assets/learning/spices/dried-basil.jpg", alt: "Изображение пряности: образец 8" },
+  caraway: { src: "/assets/learning/spices/caraway.png", alt: "Изображение пряности: образец 9" },
+  ginger: { src: "/assets/learning/spices/ginger.png", alt: "Изображение пряности: образец 10" },
+  nutmeg: { src: "/assets/learning/spices/nutmeg.png", alt: "Изображение пряности: образец 11" },
+  paprika: { src: "/assets/learning/spices/paprika.png", alt: "Изображение пряности: образец 12" },
+  cardamom: { src: "/assets/learning/spices/cardamom.png", alt: "Изображение пряности: образец 13" },
+  "star-anise": { src: "/assets/learning/spices/star-anise.png", alt: "Изображение пряности: образец 14" },
+  "mustard-seeds": { src: "/assets/learning/spices/mustard-seeds.png", alt: "Изображение пряности: образец 15" },
+  "dried-dill": { src: "/assets/learning/spices/dried-dill.png", alt: "Изображение пряности: образец 16" }
 });
 
 const SPICES = Object.freeze([
@@ -56,7 +59,8 @@ const SPICES = Object.freeze([
 ]);
 
 function instruction(id, title, prompt, extra = {}) {
-  return { id, type: "instruction", title, prompt, required: false, maxScore: 0, pilotContentRevision: PILOT_CONTENT_REVISION, ...extra };
+  return { id, type: "instruction", title, prompt, required: false, maxScore: 0,
+    pilotContentRevision: PILOT_STUDY_BLOCKS.has(id) ? PILOT_CONTENT_REVISION : 6, ...extra };
 }
 
 function numeric(value, tolerance = 0.01) {
@@ -67,10 +71,6 @@ function spice(id, label, description = "") {
   return { id, label, description, ...SPICE_VISUALS[id] };
 }
 
-function sourceImages() {
-  return SPICES.map(([id, label], index) => ({ ...SPICE_VISUALS[id], caption: `Образец ${index + 1}. ${label}` }));
-}
-
 function pilotWorks(courseIds, groupId) {
   const mdkCourseId = courseIds[0];
   return [
@@ -78,30 +78,10 @@ function pilotWorks(courseIds, groupId) {
       courseId: mdkCourseId, defaultGroupId: groupId, kind: "practice",
       title: "Практическая работа № 1. Составление заявки на сырьё",
       topic: "Составление заявки на сырьё",
-      instructions: "Рассчитайте потребность в сырье для 25 порций супа картофельного и 30 порций картофельного пюре. Заполните три рабочие таблицы по порядку.",
+      instructions: "Рассчитайте потребность в сырье для 25 порций овощного супа и 30 порций картофельного пюре. Заполните три рабочие таблицы по порядку.",
       estimatedMinutes: 90, defaultDueAt: addDays(7),
       blocks: [
-        instruction("pz1-source", "Исходные данные", "Масса нетто всего = норма нетто на одну порцию × количество порций. Масса брутто = масса нетто всего ÷ (1 − отходы ÷ 100). В итоговой заявке объедините одинаковые продукты и переведите граммы в килограммы с точностью до 0,001 кг.", {
-          formulaCards: [
-            { label: "Нетто всего", value: "mнетто = m1 × N" },
-            { label: "Брутто", value: "mбрутто = mнетто ÷ (1 − W ÷ 100)" }
-          ],
-          keyPoints: [
-            { title: "1. Нетто", text: "Рассчитать массу каждого продукта на заданное количество порций." },
-            { title: "2. Брутто", text: "Для овощей учесть отходы холодной обработки." },
-            { title: "3. Заявка", text: "Объединить одинаковое сырьё и перевести граммы в килограммы." }
-          ],
-          controlPoints: [
-            { title: "Единицы", text: "Промежуточные расчёты вести в граммах; заявку оформить в килограммах." },
-            { title: "Проверка", text: "Брутто продукта с отходами не может быть меньше рассчитанного нетто." }
-          ],
-          images: [
-            { src: "/assets/learning/practices/pz1/worksheet.png", alt: "Рабочий лист для расчёта заявки на сырьё", caption: "Рабочий лист и калькулятор" },
-            { src: "/assets/learning/practices/pz1/weighing.png", alt: "Взвешивание картофеля и моркови на производственных весах", caption: "Проверка массы сырья" },
-            { src: "/assets/learning/practices/pz1/calculation.png", alt: "Заполнение расчётной таблицы", caption: "Промежуточный расчёт" },
-            { src: "/assets/learning/practices/pz1/requisition.png", alt: "Оформление итоговой заявки на сырьё", caption: "Итоговая заявка" }
-          ]
-        }),
+        instruction("pz1-source", "Теория и разбор заявки", "Изучите пример, затем заполните три таблицы своей заявки.", requisitionStudy()),
         {
           id: "pz1-net", type: "table", title: "Таблица 1. Расчёт массы нетто",
           prompt: "Рассчитайте массу нетто каждого продукта для заданного количества порций.",
@@ -110,19 +90,19 @@ function pilotWorks(courseIds, groupId) {
             eyebrow: "Этап 1",
             title: "Масса нетто на всё количество порций",
             facts: [
-              { label: "Суп картофельный", value: "25 порций" },
+              { label: "Овощной суп", value: "25 порций" },
               { label: "Картофельное пюре", value: "30 порций" },
               { label: "Единица расчёта", value: "г" }
             ],
             formulas: [{ label: "Формула", value: "mнетто = m1 × N" }]
           },
           rows: [
-            { id: "soup-potato", label: "Картофель", cells: { dish: "Суп картофельный", perPortion: 100, portions: 25 }, calculatorExpressions: { total: "100*25" } },
-            { id: "soup-carrot", label: "Морковь", cells: { dish: "Суп картофельный", perPortion: 20, portions: 25 }, calculatorExpressions: { total: "20*25" } },
-            { id: "soup-onion", label: "Лук репчатый", cells: { dish: "Суп картофельный", perPortion: 15, portions: 25 }, calculatorExpressions: { total: "15*25" } },
-            { id: "soup-cabbage", label: "Капуста", cells: { dish: "Суп картофельный", perPortion: 50, portions: 25 }, calculatorExpressions: { total: "50*25" } },
-            { id: "soup-oil", label: "Масло растительное", cells: { dish: "Суп картофельный", perPortion: 5, portions: 25 }, calculatorExpressions: { total: "5*25" } },
-            { id: "soup-salt", label: "Соль", cells: { dish: "Суп картофельный", perPortion: 3, portions: 25 }, calculatorExpressions: { total: "3*25" } },
+            { id: "soup-potato", label: "Картофель", cells: { dish: "Овощной суп", perPortion: 100, portions: 25 }, calculatorExpressions: { total: "100*25" } },
+            { id: "soup-carrot", label: "Морковь", cells: { dish: "Овощной суп", perPortion: 20, portions: 25 }, calculatorExpressions: { total: "20*25" } },
+            { id: "soup-onion", label: "Лук репчатый", cells: { dish: "Овощной суп", perPortion: 15, portions: 25 }, calculatorExpressions: { total: "15*25" } },
+            { id: "soup-cabbage", label: "Капуста", cells: { dish: "Овощной суп", perPortion: 50, portions: 25 }, calculatorExpressions: { total: "50*25" } },
+            { id: "soup-oil", label: "Масло растительное", cells: { dish: "Овощной суп", perPortion: 5, portions: 25 }, calculatorExpressions: { total: "5*25" } },
+            { id: "soup-salt", label: "Соль", cells: { dish: "Овощной суп", perPortion: 3, portions: 25 }, calculatorExpressions: { total: "3*25" } },
             { id: "puree-potato", label: "Картофель", cells: { dish: "Картофельное пюре", perPortion: 160, portions: 30 }, calculatorExpressions: { total: "160*30" } },
             { id: "puree-milk", label: "Молоко", cells: { dish: "Картофельное пюре", perPortion: 30, portions: 30 }, calculatorExpressions: { total: "30*30" } },
             { id: "puree-butter", label: "Масло сливочное", cells: { dish: "Картофельное пюре", perPortion: 10, portions: 30 }, calculatorExpressions: { total: "10*30" } },
@@ -155,10 +135,10 @@ function pilotWorks(courseIds, groupId) {
             formulas: [{ label: "Формула", value: "mбрутто = mнетто ÷ (1 − W ÷ 100)" }]
           },
           rows: [
-            { id: "soup-potato", label: "Картофель", cells: { dish: "Суп картофельный", net: 2500, waste: 20 }, calculatorExpressions: { gross: "2500/(1-20/100)" } },
-            { id: "soup-carrot", label: "Морковь", cells: { dish: "Суп картофельный", net: 500, waste: 20 }, calculatorExpressions: { gross: "500/(1-20/100)" } },
-            { id: "soup-onion", label: "Лук репчатый", cells: { dish: "Суп картофельный", net: 375, waste: 16 }, calculatorExpressions: { gross: "375/(1-16/100)" } },
-            { id: "soup-cabbage", label: "Капуста", cells: { dish: "Суп картофельный", net: 1250, waste: 10 }, calculatorExpressions: { gross: "1250/(1-10/100)" } },
+            { id: "soup-potato", label: "Картофель", cells: { dish: "Овощной суп", net: 2500, waste: 20 }, calculatorExpressions: { gross: "2500/(1-20/100)" } },
+            { id: "soup-carrot", label: "Морковь", cells: { dish: "Овощной суп", net: 500, waste: 20 }, calculatorExpressions: { gross: "500/(1-20/100)" } },
+            { id: "soup-onion", label: "Лук репчатый", cells: { dish: "Овощной суп", net: 375, waste: 16 }, calculatorExpressions: { gross: "375/(1-16/100)" } },
+            { id: "soup-cabbage", label: "Капуста", cells: { dish: "Овощной суп", net: 1250, waste: 10 }, calculatorExpressions: { gross: "1250/(1-10/100)" } },
             { id: "puree-potato", label: "Картофель", cells: { dish: "Картофельное пюре", net: 4800, waste: 20 }, calculatorExpressions: { gross: "4800/(1-20/100)" } }
           ],
           columns: [
@@ -221,25 +201,9 @@ function pilotWorks(courseIds, groupId) {
       instructions: "Распознайте шестнадцать пряностей, классифицируйте их, выберите правила применения и разберите контроль качества на производстве.",
       estimatedMinutes: 90, defaultDueAt: addDays(8),
       blocks: [
-        instruction("pz2-source", "Краткая теория и образцы", [
-          "Пряности — ароматические части растений: плоды и семена, кора, цветочные почки, листья, травы или корневища. Приправа — более широкое понятие: это может быть готовый продукт или смесь, которая меняет вкус блюда и иногда содержит соль, сахар, горчицу и другие компоненты.",
-          "Пряность распознают по форме, цвету, поверхности и характерному аромату. Неизвестный образец не пробуют. Точное количество и момент внесения определяют по рецептуре или технологической карте.",
-          "На производстве проверяют маркировку, срок годности, сухость, отсутствие плесени, вредителей и постороннего запаха. Пряности хранят в закрытой маркированной таре, в сухом тёмном месте, вдали от пара и резко пахнущих продуктов; отбирают чистой сухой ложкой."
-        ].join("\n\n"), {
-          keyPoints: [
-            { title: "Распознавание", text: "Форма и часть растения → цвет и поверхность → аромат." },
-            { title: "Применение", text: "Совместимость с продуктом → дозировка по рецептуре → момент внесения." },
-            { title: "Безопасность", text: "Маркировка → состояние продукта → хранение → чистый сухой инвентарь." }
-          ],
-          controlPoints: [
-            { title: "Приёмка", text: "Целая упаковка, читаемая маркировка, срок годности, характерные цвет и аромат." },
-            { title: "Бракераж", text: "Влага, плесень, вредители, затхлый или посторонний запах — основание изолировать продукт." },
-            { title: "Дозирование", text: "Только по рецептуре или ТК; не вносить «на глаз» и не сыпать из банки над паром." }
-          ],
-          images: sourceImages()
-        }),
+        instruction("pz2-source", "Пряности: теория и справочник", "Изучите правила, затем откройте карточки образцов. Справочник доступен при выполнении заданий.", spicesStudy(SPICES, SPICE_VISUALS)),
         {
-          id: "pz2-identification", type: "matching", title: "Определение пряностей по фотографии",
+          id: "pz2-identification", type: "matching", title: "Определение пряностей по изображениям",
           prompt: "Перетащите название к соответствующему образцу.", maxScore: 20, allowTargetReuse: false,
           leftItems: SPICES.map(([id], index) => ({ id, label: `Образец ${index + 1}`, ...SPICE_VISUALS[id] })),
           rightItems: SPICES.map(([id, label]) => ({ id: `${id}-name`, label })),
@@ -285,7 +249,7 @@ function pilotWorks(courseIds, groupId) {
           ],
           categories: [
             { id: "spice", label: "Пряность — ароматическая часть растения" },
-            { id: "seasoning", label: "Приправа — готовый продукт или смесь" }
+            { id: "seasoning", label: "Готовая приправа или вкусовая добавка" }
           ],
           hints: ["Посмотрите на состав: один ароматический растительный компонент или готовый продукт/смесь?"],
           privateKey: { assignments: {
@@ -330,7 +294,7 @@ function pilotWorks(courseIds, groupId) {
             { id: "mold", label: "Обнаружены влага и следы плесени" },
             { id: "steam", label: "Банку держат открытой над кипящей кастрюлей" },
             { id: "dry-spoon", label: "Пряность отбирают чистой сухой ложкой" },
-            { id: "unlabeled", label: "На производственной ёмкости нет названия и даты вскрытия" },
+            { id: "unlabeled", label: "На рабочей ёмкости нет названия и даты вскрытия; исходная упаковка и данные о вскрытии сохранены" },
             { id: "recipe-dose", label: "Количество сверяют с рецептурой или ТК" },
             { id: "dark-storage", label: "Закрытая тара стоит в сухом шкафу вдали от пара" },
             { id: "musty", label: "У продукта затхлый посторонний запах" }
@@ -377,29 +341,12 @@ function pilotWorks(courseIds, groupId) {
       instructions: "По рецептуре № 423 «Тефтели» пересчитайте нормы сырья и выход на 20 порций, затем оформите полный расчёт строки «Говядина».",
       estimatedMinutes: 90, defaultDueAt: addDays(9),
       blocks: [
-        instruction("pz3-source", "Исходная рецептура", "Л. Е. Голунова, «Сборник рецептур блюд и кулинарных изделий», 2003 год, рецептура № 423 «Тефтели», страница 261. Используйте II вариант, левую пару граф «брутто/нетто», вид мяса — говядина. Расчёт выполнить на 20 порций.", {
-          formulaCards: [{ label: "Коэффициент", value: "k = 20" }, { label: "Пересчёт", value: "m20 = m1 × 20" }],
-          keyPoints: [
-            { title: "Рецептура", text: "Сначала проверить номер, наименование блюда и выбранный вариант колонок." },
-            { title: "Нормы", text: "Не смешивать брутто, нетто, массу полуфабриката и выход готового блюда." },
-            { title: "Пересчёт", text: "Каждую исходную норму на одну порцию умножить на 20." }
-          ],
-          controlPoints: [
-            { title: "Единицы", text: "Все значения этой работы рассчитываются в граммах." },
-            { title: "Обратная проверка", text: "Итог на 20 порций разделить на 20 и получить исходную норму." }
-          ],
-          images: [
-            { src: "/assets/learning/practices/pz3/recipe-map.png", alt: "Схема чтения рецептуры: брутто, нетто и выход", caption: "Что читать в рецептуре" },
-            { src: "/assets/learning/practices/pz3/scaling-algorithm.png", alt: "Алгоритм пересчёта рецептуры на заданное количество порций", caption: "Алгоритм пересчёта" },
-            { src: "/assets/learning/practices/pz3/recipe-423-table.png", alt: "Фрагмент рабочей таблицы рецептуры номер 423", caption: "Рецептура № 423" },
-            { src: "/assets/learning/practices/pz3/recipe-423-technology.png", alt: "Опорная схема технологии приготовления тефтелей", caption: "Технологическая последовательность" }
-          ]
-        }),
+        instruction("pz3-source", "Сборник рецептур: чтение и расчёт", "Л. Е. Голунова, 2003. Рецептура № 423 «Тефтели», 2-й вариант с рисом, страница 261. Левая заполненная пара граф; говядина; самостоятельный расчёт на 20 порций.", recipeStudy()),
         {
           id: "pz3-recipe", type: "table", title: "Таблица 1. Пересчёт сырья на 20 порций",
           prompt: "Умножьте нормы на одну порцию на 20.", rowHeader: "Наименование сырья", maxScore: 35, autoGrade: true, calculator: true,
           worksheet: {
-            eyebrow: "Рецептура № 423", title: "Тефтели — II вариант, говядина",
+            eyebrow: "Рецептура № 423", title: "Тефтели – 2-й вариант с рисом, говядина",
             facts: [{ label: "Исходная норма", value: "1 порция" }, { label: "Требуется", value: "20 порций" }, { label: "Единица", value: "г" }],
             formulas: [{ label: "Формула", value: "m20 = m1 × 20" }]
           },

@@ -1,6 +1,6 @@
 import { attachmentApi, studentApi } from './api.js?v=1.1.3';
 import { AutosaveQueue } from './autosave.js?v=1.2.0';
-import { isValueMeaningful, mountTask } from './tasks.js?v=1.4.2';
+import { isValueMeaningful, mountTask } from './tasks.js?v=1.5.0';
 import {
   $, $$, asArray, confirmAction, errorText, escapeHtml, formatDate, fullName,
   initSession, logout, pick, renderEmpty, renderError, renderLoading, setBusy,
@@ -360,7 +360,7 @@ function renderWorkspace() {
       <div class="workspace-toolbar-actions"><button id="workspace-close" class="learning-button quiet" type="button">Закрыть</button>${canSubmit ? `<button id="submit-work" class="learning-button primary" type="button">${escapeHtml(submitLabel)}</button>` : ''}</div>
     </header>
     <div class="workspace-grid">
-      <nav class="step-rail" aria-label="Задания работы"><ol class="step-list">${state.blocks.map((block, index) => `<li><button type="button" class="step-button ${index === state.activeIndex ? 'is-active' : ''} ${(block.type === 'instruction' || isValueMeaningful(state.answers[block.id], block)) ? 'is-complete' : ''}" data-step-index="${index}" ${index === state.activeIndex ? 'aria-current="step"' : ''}><span class="step-number">${index + 1}</span><span class="step-copy"><strong>${escapeHtml(titleForBlock(block, index))}</strong><span>${blockIsRequired(block) ? 'Обязательное' : 'Можно пропустить'}</span></span></button></li>`).join('')}</ol></nav>
+      <nav class="step-rail" aria-label="Задания работы"><ol class="step-list">${state.blocks.map((block, index) => `<li><button type="button" class="step-button ${index === state.activeIndex ? 'is-active' : ''} ${(block.type === 'instruction' || isValueMeaningful(state.answers[block.id], block)) ? 'is-complete' : ''}" data-step-index="${index}" ${index === state.activeIndex ? 'aria-current="step"' : ''}><span class="step-number">${index + 1}</span><span class="step-copy"><strong>${escapeHtml(titleForBlock(block, index))}</strong><span>${block.type === 'instruction' ? 'Учебная опора' : (blockIsRequired(block) ? 'Обязательное' : 'Можно пропустить')}</span></span></button></li>`).join('')}</ol></nav>
       <div class="workspace-center">
         ${['needs_revision', 'changes_requested', 'returned'].includes(submission.status) ? `<div class="revision-panel"><strong>Работа возвращена на доработку</strong><p>${escapeHtml(feedback || 'Исправьте отмеченные пункты и отправьте работу повторно.')}</p></div>` : ''}
         ${state.conflict ? `<div class="conflict-panel" role="alert"><strong>Ответ изменён в другой вкладке</strong><p>Чтобы не перезаписать более свежую версию, обновите данные с сервера.</p><button id="resolve-conflict" class="learning-button secondary" type="button">Загрузить свежую версию</button></div>` : ''}

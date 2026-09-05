@@ -23,7 +23,7 @@ const {
   objectKey,
   sha256
 } = require("./files");
-const { PILOT_GROUP, PILOT_SUBJECTS, PILOT_CONTENT_REVISION, pilotWorks } = require("./pilot");
+const { PILOT_GROUP, PILOT_SUBJECTS, pilotWorks } = require("./pilot");
 
 const SESSION_HOURS = Number(process.env.LEARNING_SESSION_HOURS || 12);
 const LOGIN_FAILURE_LIMIT = Number(process.env.LEARNING_LOGIN_FAILURE_LIMIT || 5);
@@ -84,7 +84,7 @@ function parseJson(value, fallback = {}) {
 function pilotRevisionOf(version) {
   for (const block of version?.blocks || []) {
     const config = block.config || parseJson(block.config_json, {});
-    const revision = Number(config.pilotContentRevision || 0);
+    const revision = Number(block.pilotContentRevision || config.pilotContentRevision || 0);
     if (revision > 0) return revision;
   }
   return 0;
@@ -626,7 +626,7 @@ class LearningService {
       const detail = await this.repository.getTemplate(template.id, context.user.id);
       if (detail?.current_version_id) {
         version = await this.repository.getWorkVersion(detail.current_version_id, true);
-        if (pilotRevisionOf(version) < PILOT_CONTENT_REVISION) {
+        if (pilotRevisionOf(version) < pilotRevisionOf(definition)) {
           await this.saveTemplate(context, template.id, {
             ...definition,
             expectedRevision: Number(detail.draft_revision || 0)
