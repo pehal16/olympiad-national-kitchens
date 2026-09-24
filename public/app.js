@@ -275,6 +275,11 @@ function scrollToSection(section) {
   if (!section || section.classList.contains("hidden")) {
     return;
   }
+  if (section === elements.heroSection) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    closeNavDrawer();
+    return;
+  }
   section.scrollIntoView({ behavior: "smooth", block: "start" });
   closeNavDrawer();
 }

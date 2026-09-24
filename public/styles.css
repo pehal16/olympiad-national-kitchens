@@ -3873,6 +3873,10 @@ pre {
   scroll-margin-top: 100px;
 }
 
+#result-section {
+  scroll-margin-top: 90px;
+}
+
 .olympiad-page :is(button, a, input):focus-visible {
   outline: 3px solid #126f67;
   outline-offset: 3px;
