@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Сертификат участника — Национальные кухни мира</title>
+    <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
+    <link rel="stylesheet" href="/certificate.css?v=1.7.0-cert2" />
+  </head>
+  <body>
+    <header class="document-toolbar">
+      <a href="/" class="toolbar-back">← К результату</a>
+      <div>
+        <strong>Сертификат участника</strong>
+        <span>Горизонтальный лист A4 · неизменный макет</span>
+      </div>
+      <button id="certificate-save" type="button" disabled>Сохранить как PDF</button>
+    </header>
+
+    <main>
+      <div id="certificate-status" class="document-status" role="status">Загружаем сохранённый результат…</div>
+      <article id="certificate-sheet" class="certificate-sheet" aria-label="Сертификат участника" hidden>
+        <img class="certificate-art" src="/assets/olympiad/certificate/ornamental-frame-v1.png" alt="" aria-hidden="true" />
+        <header class="certificate-header">
+          <div class="certificate-crest"><img src="/brand-gkts-shield.jpg" alt="Герб Горловского колледжа технологий и сервиса" width="110" height="110" /></div>
+          <div class="certificate-brand-copy">
+            <strong>Горловский колледж<br />технологий и сервиса</strong>
+            <span>Знания · профессия · возможности</span>
+          </div>
+          <p class="certificate-motto">Вкус<br />объединяет<br />мир</p>
+        </header>
+        <div class="certificate-main">
+          <div class="certificate-title"><strong>СЕРТИФИКАТ</strong><span>УЧАСТНИКА</span></div>
+          <p class="certificate-event">Олимпиада «Национальные кухни мира»</p>
+          <p class="certificate-intro">Настоящим подтверждается, что</p>
+          <h1 id="certificate-name"></h1>
+          <p class="certificate-detail">принял(а) участие в онлайн-олимпиаде<br />«Национальные кухни мира»</p>
+        </div>
+        <div class="certificate-facts">
+          <div class="certificate-fact">
+            <span class="certificate-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5h12v10a6 6 0 0 1-12 0V5Z"/><path d="M10 8H6v4a4 4 0 0 0 4 4M22 8h4v4a4 4 0 0 1-4 4M16 21v5M11 27h10"/></svg></span>
+            <span>Результат</span><strong id="certificate-score"></strong>
+          </div>
+          <div class="certificate-fact">
+            <span class="certificate-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="10" r="4"/><path d="M8 26v-3a8 8 0 0 1 16 0v3M7 13a3 3 0 1 0-1 6M25 13a3 3 0 1 1 1 6"/></svg></span>
+            <span>Наставник</span><strong id="certificate-mentor"></strong>
+          </div>
+          <div class="certificate-fact">
+            <span class="certificate-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="7" width="22" height="20" rx="2"/><path d="M5 13h22M11 4v6M21 4v6M11 18h3M18 18h3M11 23h3"/></svg></span>
+            <span>Дата</span><strong id="certificate-date"></strong>
+          </div>
+          <div class="certificate-fact">
+            <span class="certificate-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h11l4 4v20H9V4Z"/><path d="M20 4v5h4M13 14h7M13 19h7M13 24h5"/></svg></span>
+            <span>Номер попытки</span><strong id="certificate-number"></strong>
+          </div>
+        </div>
+        <footer class="certificate-footer">
+          <span class="certificate-footer-left">Кулинария<br />открывает<br />границы</span>
+          <span class="certificate-pilot-label">Тестовый запуск · неофициальный результат</span>
+          <span class="certificate-footer-right">Больше, чем еда<br />Больше, чем знания</span>
+        </footer>
+      </article>
+    </main>
+    <script src="/certificate.js?v=1.7.0-cert5" defer></script>
+  </body>
+</html>

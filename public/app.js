@@ -65,11 +65,9 @@ const elements = {
   heroActionRules: document.getElementById("hero-action-rules"),
   heroLoadMessage: document.getElementById("hero-load-message"),
   heroRetry: document.getElementById("hero-retry"),
-  howSection: document.getElementById("how-section"),
-  howRules: document.getElementById("how-rules"),
+  rulesDetails: document.getElementById("rules-details"),
   heroTitle: document.getElementById("hero-title"),
   heroSubtitle: document.getElementById("hero-subtitle"),
-  tourMeta: document.getElementById("tour-meta"),
   journeyMap: document.getElementById("journey-map"),
   journeyStatus: document.getElementById("journey-status"),
   journeyProgressLabel: document.getElementById("journey-progress-label"),
@@ -137,6 +135,8 @@ const elements = {
   resultOverview: document.getElementById("result-overview"),
   resultNext: document.getElementById("result-next"),
   resultTours: document.getElementById("result-tours"),
+  certificateSection: document.getElementById("certificate-section"),
+  certificateOpen: document.getElementById("certificate-open"),
   appVersionLabel: document.getElementById("app-version-label"),
   examGuardOverlay: document.getElementById("exam-guard-overlay"),
   examGuardTitle: document.getElementById("exam-guard-title"),
@@ -185,7 +185,6 @@ function refreshNavigationState() {
   const prestartVisible = !elements.prestartSection.classList.contains("hidden");
 
   setButtonAvailability(elements.navRules, prestartVisible);
-  elements.howRules?.classList.toggle("hidden", !prestartVisible);
 
   setButtonAvailability(
     elements.navRegister,
@@ -282,6 +281,11 @@ function scrollToSection(section) {
   }
   section.scrollIntoView({ behavior: "smooth", block: "start" });
   closeNavDrawer();
+}
+
+function revealRules() {
+  if (elements.rulesDetails) elements.rulesDetails.open = true;
+  scrollToSection(elements.rulesDetails || elements.prestartSection);
 }
 
 function goBackOrHome() {
@@ -1026,45 +1030,11 @@ function formatDurationLabel(durationMs) {
   return `${minutes} мин`;
 }
 
-function fallbackDiplomaByScore(score) {
-  if (score >= 130) {
-    return "Диплом I степени";
-  }
-  if (score >= 110) {
-    return "Диплом II степени";
-  }
-  if (score >= 90) {
-    return "Диплом III степени";
-  }
-  return "Сертификат участника";
-}
-
-function getResultAwardTone(label, scoresVisible) {
-  if (!scoresVisible) {
-    return "neutral";
-  }
-
-  if (label.includes("I степени")) {
-    return "gold";
-  }
-  if (label.includes("II степени")) {
-    return "silver";
-  }
-  if (label.includes("III степени")) {
-    return "bronze";
-  }
-
-  return "neutral";
-}
-
 function renderResultOverview(summary, attempt, scoresVisible) {
   if (!elements.resultOverview) {
     return;
   }
 
-  const diplomaLabel = scoresVisible
-    ? attempt.diploma || fallbackDiplomaByScore(summary.totalFinalScore)
-    : "Результат передан организатору";
   const answeredCount = Math.max(0, Number(attempt.progress?.answeredCount) || 0);
   const totalQuestions = Math.max(0, Number(attempt.progress?.totalQuestions) || 0);
   const metrics = [
@@ -1077,9 +1047,9 @@ function renderResultOverview(summary, attempt, scoresVisible) {
     },
     {
       label: "Статус",
-      value: diplomaLabel,
+      value: "Участие подтверждено",
       hint: scoresVisible
-        ? "Статус рассчитан автоматически по итоговому баллу."
+        ? "Сертификат участника доступен ниже. Дипломы победителей оформляются отдельно."
         : "Статус участия уже зафиксирован в облаке."
     },
     {
@@ -1125,9 +1095,9 @@ function renderResultNextSteps(scoresVisible) {
 
   const nextSteps = scoresVisible
     ? [
-        "Результат уже сохранён в облаке и доступен организатору в админке.",
-        "Подробную раскладку по турам видит только организатор.",
-        "Можно закрыть окно или вернуться на главную страницу олимпиады."
+        "Результат сохранён и доступен организатору.",
+        "Сертификат участника можно распечатать или сохранить в PDF ниже.",
+        "Дипломы победителей оформляются отдельно после решения организатора."
       ]
     : [
         "Попытка завершена, результат сохранён в облаке.",
@@ -1885,16 +1855,6 @@ function renderHero() {
     const totalTours = Array.isArray(state.olympiad.tours) ? state.olympiad.tours.length : 0;
     elements.heroFormatBadge.textContent = `${state.olympiad.durationMinutes} минут · ${totalTours} туров · 38 заданий`;
   }
-  elements.tourMeta.innerHTML = "";
-
-  (state.olympiad.tours || []).forEach((tour) => {
-    const pill = document.createElement("div");
-    pill.className = "pill";
-    pill.textContent = `${tour.code} • ${tour.timeLimitMinutes} мин`;
-    elements.tourMeta.appendChild(pill);
-  });
-
-  renderJourneyMap();
 }
 
 function renderRules() {
@@ -2924,12 +2884,26 @@ function renderAttempt() {
       : "Ответить и далее";
 }
 
+function renderCertificate(attempt, scoresVisible) {
+  const score = attempt?.summary?.totalFinalScore;
+  const maxScore = attempt?.summary?.totalMaxScore;
+  const participant = attempt?.participant;
+  const available = Boolean(
+    attempt?.status !== "in_progress" &&
+    scoresVisible &&
+    Number.isFinite(score) &&
+    Number.isFinite(maxScore) &&
+    participant?.fullName &&
+    attempt?.finishedAt
+  );
+
+  elements.certificateSection.classList.toggle("hidden", !available);
+  elements.certificateOpen.disabled = !available;
+}
+
 function renderResult() {
   const summary = state.attempt.summary;
-  const scoresVisible = summary.totalFinalScore !== null;
-  const awardLabel = scoresVisible
-    ? state.attempt.diploma || fallbackDiplomaByScore(summary.totalFinalScore)
-    : "Итог сохранён";
+  const scoresVisible = Number.isFinite(summary.totalFinalScore);
   disableExamMode();
   elements.attemptSection.classList.add("hidden");
   elements.resultSection.classList.remove("hidden");
@@ -2942,8 +2916,8 @@ function renderResult() {
   }
 
   if (elements.resultAward) {
-    elements.resultAward.textContent = awardLabel;
-    elements.resultAward.className = `result-award ${getResultAwardTone(awardLabel, scoresVisible)}`;
+    elements.resultAward.textContent = scoresVisible ? "Сертификат участника" : "Итог сохранён";
+    elements.resultAward.className = "result-award neutral";
   }
 
   if (!scoresVisible) {
@@ -2953,11 +2927,12 @@ function renderResult() {
   } else {
     elements.resultTitle.textContent = `Ваш результат: ${summary.totalFinalScore} из ${summary.totalMaxScore}`;
     elements.resultSubtitle.textContent =
-      "Отправленные ответы зафиксированы автоматически. Подробный итог и решение комиссии доступны у организатора.";
+      "Ответы сохранены. Это тестовый результат; сертификат участника доступен ниже.";
   }
 
   renderResultOverview(summary, state.attempt, scoresVisible);
   renderResultNextSteps(scoresVisible);
+  renderCertificate(state.attempt, scoresVisible);
 
   (summary.tourScores || []).forEach((tour) => {
     const card = document.createElement("div");
@@ -3612,7 +3587,7 @@ async function init() {
   }
   elements.navBack.addEventListener("click", goBackOrHome);
   elements.navHome.addEventListener("click", () => scrollToSection(elements.heroSection));
-  elements.navRules.addEventListener("click", () => scrollToSection(elements.prestartSection));
+  elements.navRules.addEventListener("click", revealRules);
   elements.heroActionRegister.addEventListener("click", () => {
     if (state.attempt?.status === "in_progress") {
       scrollToSection(elements.attemptSection);
@@ -3623,8 +3598,7 @@ async function init() {
       (state.participant ? elements.startConsent : elements.fullName).focus({ preventScroll: true });
     }
   });
-  elements.heroActionRules.addEventListener("click", () => scrollToSection(elements.howSection));
-  elements.howRules.addEventListener("click", () => scrollToSection(elements.prestartSection));
+  elements.heroActionRules.addEventListener("click", revealRules);
   elements.navRegister.addEventListener("click", () => {
     if (elements.prestartSection.classList.contains("hidden")) {
       scrollToSection(elements.heroSection);
@@ -3653,6 +3627,10 @@ async function init() {
   elements.startAttempt.addEventListener("click", startAttempt);
   elements.submitAnswer.addEventListener("click", submitAnswer);
   elements.finishAttempt.addEventListener("click", finishAttempt);
+  elements.certificateOpen.addEventListener("click", () => {
+    if (elements.certificateSection.classList.contains("hidden")) return;
+    window.location.assign(`/certificate.html?attempt=${encodeURIComponent(state.attempt.id)}`);
+  });
   if (elements.examGuardReturn) {
     elements.examGuardReturn.addEventListener("click", restoreExamMode);
   }

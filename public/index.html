@@ -11,7 +11,7 @@
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <link rel="preload" as="image" href="/assets/olympiad/landing/hero-national-cuisines.webp" />
-    <link rel="stylesheet" href="/styles.css?v=1.7.0-landing8" />
+    <link rel="stylesheet" href="/styles.css?v=1.7.0-landing10" />
   </head>
   <body class="olympiad-page">
     <div class="ambient ambient-a"></div>
@@ -55,44 +55,12 @@
           <button id="hero-retry" class="button secondary hidden" type="button">Повторить загрузку</button>
           <div class="landing-hero-actions">
             <button id="hero-action-register" class="button primary" type="button" disabled>Загрузка олимпиады…</button>
-            <button id="hero-action-rules" class="landing-text-link" type="button">Как проходит олимпиада <span aria-hidden="true">→</span></button>
+            <button id="hero-action-rules" class="landing-text-link" type="button">Правила <span aria-hidden="true">→</span></button>
+            <a class="landing-demo-link" href="/visual-demo.html" aria-label="Открыть 3D-демо без баллов">3D-демо <span aria-hidden="true">↗</span></a>
           </div>
           <p id="hero-format-badge" class="landing-facts">45 минут <span>·</span> 5 туров <span>·</span> 38 заданий</p>
-          <p class="landing-save-note">Ответы сохраняются после подтверждения сервера.</p>
-          <p class="landing-pilot-note">Тестовый запуск: задания ещё проходят проверку. Результаты не являются официальными до утверждения организатором.</p>
+          <p class="landing-pilot-note">Тестовый запуск. Результаты неофициальны до утверждения организатором.</p>
         </div>
-      </section>
-
-      <section id="how-section" class="how-panel" aria-labelledby="how-title">
-        <div class="how-panel-head">
-          <h2 id="how-title">Как проходит олимпиада</h2>
-          <button id="how-rules" class="landing-text-link" type="button">Подробнее о правилах <span aria-hidden="true">→</span></button>
-        </div>
-        <div class="how-steps">
-          <article class="how-step"><span class="how-number">1</span><div><h3>Регистрация</h3><p>Укажите ФИО, учебное заведение и группу. Проверьте данные перед стартом.</p></div></article>
-          <article class="how-step"><span class="how-number">2</span><div><h3>Прохождение</h3><p>Выполните задания за установленное время. Следующий вопрос откроется после сохранения ответа.</p></div></article>
-          <article class="how-step"><span class="how-number">3</span><div><h3>Результат</h3><p>После завершения получите подтверждение приёма работы. Баллы публикуются по решению организатора.</p></div></article>
-        </div>
-        <div class="meta-row" id="tour-meta" aria-label="Лимиты туров"></div>
-        <a class="landing-demo-link" href="/visual-demo.html" aria-label="Открыть 3D-демо без баллов">3D-демо <span aria-hidden="true">↗</span></a>
-      </section>
-
-      <section class="card journey-panel">
-        <div class="section-row">
-          <h2>Этапы</h2>
-          <div id="journey-status" class="pill">Подготовка</div>
-        </div>
-        <div id="journey-map" class="journey-map"></div>
-        <div class="journey-progress-shell">
-          <div class="journey-progress-copy">
-            <strong id="journey-progress-label">Готовность: 0%</strong>
-            <span id="journey-progress-hint">Сохраните данные участника.</span>
-          </div>
-          <div class="progress-line journey-progress-line">
-            <span id="journey-progress-fill"></span>
-          </div>
-        </div>
-        <div id="install-message" class="message hidden"></div>
       </section>
 
       <section class="grid-two" id="prestart-section">
@@ -132,7 +100,7 @@
                 id="mentor-name"
                 type="text"
                 maxlength="160"
-                placeholder="ФИО наставника"
+                placeholder="ФИО наставника (если есть)"
               />
             </label>
             <button id="registration-submit" class="button primary" type="submit">Сохранить данные</button>
@@ -144,7 +112,10 @@
           <h2>Перед стартом</h2>
           <p class="section-intro">Подтвердите готовность и начните олимпиаду.</p>
           <p class="landing-pilot-note">Сейчас это проверка работы олимпиады, а не официальное проведение. Не используйте пробный балл как итог конкурса.</p>
-          <ul id="rules-list" class="flat-list"></ul>
+          <details id="rules-details" class="landing-rules-details">
+            <summary>Прочитать правила олимпиады</summary>
+            <ul id="rules-list" class="flat-list"></ul>
+          </details>
           <div class="start-disclaimer">
             <label class="consent-check">
               <input id="start-consent" type="checkbox" />
@@ -163,6 +134,7 @@
             <button id="start-attempt" class="button primary" disabled>Начать</button>
           </div>
           <div id="prestart-message" class="message hidden" role="status" aria-live="polite"></div>
+          <div id="install-message" class="message hidden"></div>
         </section>
       </section>
 
@@ -272,6 +244,15 @@
           <div id="result-next" class="result-next"></div>
           <div id="result-tours" class="result-grid"></div>
         </section>
+        <section id="certificate-section" class="certificate-section hidden" aria-labelledby="certificate-heading">
+          <div class="certificate-actions">
+            <div>
+              <h2 id="certificate-heading">Сертификат участника</h2>
+              <p>Отдельный горизонтальный документ A4. Его можно сохранить как PDF. Дипломы победителей оформляются отдельно.</p>
+            </div>
+            <button id="certificate-open" class="button primary" type="button">Открыть сертификат</button>
+          </div>
+        </section>
       </section>
 
       <footer class="footer-note">
@@ -298,6 +279,6 @@
       </section>
     </div>
 
-    <script src="/app.js?v=1.7.0-landing8"></script>
+    <script src="/app.js?v=1.7.0-landing10"></script>
   </body>
 </html>

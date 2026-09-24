@@ -1,10 +1,13 @@
-const CACHE_NAME = "national-kitchens-olympiad-v1-7-0-landing-8";
+const CACHE_NAME = "national-kitchens-olympiad-v1-7-0-landing-10";
 const PRECACHE_URLS = [
   "/",
   "/admin.html",
   "/content-admin.html",
-  "/styles.css?v=1.7.0-landing8",
-  "/app.js?v=1.7.0-landing8",
+  "/certificate.html",
+  "/styles.css?v=1.7.0-landing10",
+  "/certificate.css?v=1.7.0-cert2",
+  "/certificate.js?v=1.7.0-cert5",
+  "/app.js?v=1.7.0-landing10",
   "/admin.js?v=1.7.0-starts1",
   "/content-admin.js?v=1.7.0",
   "/assets/runtime/dish-scene-3d.js?v=1.7.0-photo3",
@@ -13,6 +16,7 @@ const PRECACHE_URLS = [
   "/icons/icon-512.png",
   "/brand-prof-tourism.png",
   "/brand-gkts-shield.jpg",
+  "/assets/olympiad/certificate/ornamental-frame-v1.png",
   "/assets/olympiad/landing/hero-national-cuisines.webp"
 ];
 
