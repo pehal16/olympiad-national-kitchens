@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1f8e73" />
+    <title>Демонстрация 3D-сборки • Национальные кухни мира</title>
+    <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
+    <link rel="stylesheet" href="/styles.css?v=1.7.0-visual3" />
+  </head>
+  <body class="visual-demo-page">
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+    <main class="shell visual-demo-shell">
+      <nav class="card nav-ribbon visual-demo-nav" aria-label="Навигация демонстрации">
+        <a class="button ghost" href="/">← Вернуться к олимпиаде</a>
+        <span class="network-badge online">Демонстрация • без баллов</span>
+      </nav>
+
+      <header class="card visual-demo-hero">
+        <div>
+          <div class="eyebrow">Интерактивная кухня</div>
+          <h1>Соберите блюдо в 3D</h1>
+          <p class="lead">Выбирайте карточки продуктов, вращайте блюдо мышью и сравнивайте визуальный результат с заявленной версией рецептуры.</p>
+          <ol class="visual-demo-steps" aria-label="Как работать с демонстрацией">
+            <li><span>1</span>Выберите продукты</li>
+            <li><span>2</span>Рассмотрите блюдо</li>
+            <li><span>3</span>Сверьте версию</li>
+          </ol>
+        </div>
+        <div class="visual-demo-tabs" role="tablist" aria-label="Выбор блюда">
+          <button id="demo-tab-margherita" class="visual-demo-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="demo-workbench" data-dish="margherita">Маргарита</button>
+          <button id="demo-tab-caesar" class="visual-demo-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-workbench" tabindex="-1" data-dish="caesar">Цезарь с курицей</button>
+        </div>
+      </header>
+
+      <section class="visual-demo-grid">
+        <section id="demo-workbench" class="card visual-demo-workbench" role="tabpanel" aria-labelledby="demo-tab-margherita demo-dish-title">
+          <div class="visual-demo-heading">
+            <div>
+              <div id="demo-variant" class="eyebrow"></div>
+              <h2 id="demo-dish-title"></h2>
+            </div>
+            <span id="demo-count" class="pill visual-demo-count" aria-live="polite">0 ингредиентов</span>
+          </div>
+
+          <div class="visual-demo-compose">
+            <div class="visual-demo-pantry">
+              <div class="visual-demo-section-label"><span>01</span> Выбор продуктов</div>
+              <div class="visual-demo-bank-head">
+                <div>
+                  <strong>Карточки ингредиентов</strong>
+                  <small>Нажмите на карточку, чтобы добавить продукт или убрать его.</small>
+                </div>
+                <button id="demo-clear" class="button ghost" type="button">Очистить</button>
+              </div>
+              <div id="demo-ingredients" class="visual-demo-ingredients"></div>
+            </div>
+
+            <div class="visual-demo-stage-panel">
+              <div class="visual-demo-section-label"><span>02</span> Сборка блюда</div>
+              <div id="demo-viewer" class="dish-viewer">
+                <div class="dish-viewer-stage">
+                  <div id="demo-fallback" class="dish-plate dish-fallback-plate"></div>
+                  <div id="demo-scene" class="dish-3d-host" aria-label="Интерактивная 3D-модель блюда"></div>
+                </div>
+                <div class="dish-viewer-toolbar">
+                  <span id="demo-scene-status" class="dish-viewer-status">3D загружается…</span>
+                  <div class="dish-viewer-controls">
+                    <button id="demo-rotate-left" class="dish-viewer-button" type="button" aria-label="Повернуть влево">↶</button>
+                    <button id="demo-rotate-right" class="dish-viewer-button" type="button" aria-label="Повернуть вправо">↷</button>
+                    <button id="demo-reset-view" class="dish-viewer-button dish-viewer-reset" type="button">Сбросить вид</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="card visual-demo-reference">
+          <div class="visual-demo-section-label"><span>03</span> Сверка версии</div>
+          <div class="eyebrow">Визуальный ориентир</div>
+          <h2>Заявленная версия</h2>
+          <figure>
+            <img id="demo-reference-image" src="" alt="" />
+            <figcaption>
+              <strong id="demo-reference-title"></strong>
+              <span id="demo-reference-note"></span>
+            </figcaption>
+          </figure>
+          <div class="visual-demo-facts">
+            <article><span>Формат</span><strong>3D + фотокарточки</strong></article>
+            <article><span>Управление</span><strong>мышь, касание, клавиатура</strong></article>
+            <article><span>Режим</span><strong>учебная демонстрация</strong></article>
+          </div>
+        </aside>
+      </section>
+    </main>
+    <script src="/visual-demo.js?v=1.7.0-visual3"></script>
+  </body>
+</html>

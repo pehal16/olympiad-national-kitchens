@@ -52,8 +52,18 @@ function parseBody(req, options = {}) {
   return new Promise((resolve, reject) => {
     const chunks = [];
     const maxBytes = Number(options.maxBytes || 8 * 1024 * 1024);
+    const declaredBytes = Number(req.headers?.["content-length"] || 0);
     let totalBytes = 0;
     let rejected = false;
+
+    if (maxBytes > 0 && Number.isFinite(declaredBytes) && declaredBytes > maxBytes) {
+      rejected = true;
+      const error = new Error("Тело запроса слишком большое.");
+      error.statusCode = 413;
+      reject(error);
+      req.destroy();
+      return;
+    }
 
     req.on("data", (chunk) => {
       if (rejected) {
@@ -81,6 +91,12 @@ function parseBody(req, options = {}) {
 
       try {
         const data = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+        if (!data || typeof data !== "object" || Array.isArray(data)) {
+          const shapeError = new Error("Тело запроса должно быть JSON-объектом.");
+          shapeError.statusCode = 400;
+          reject(shapeError);
+          return;
+        }
         resolve(data);
       } catch (error) {
         const parseError = new Error("Некорректный JSON в теле запроса.");
@@ -112,10 +128,10 @@ function safeNumber(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function shuffleArray(items) {
+function shuffleArray(items, random = Math.random) {
   const copy = Array.isArray(items) ? [...items] : [];
   for (let index = copy.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
+    const swapIndex = Math.floor(random() * (index + 1));
     [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
   }
   return copy;

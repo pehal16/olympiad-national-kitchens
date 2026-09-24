@@ -1,0 +1,25 @@
+{
+  "purpose": "Photoreal plated layers for independently selected ingredients in the two dish-assembly pilots",
+  "reviewedAt": "2026-09-23",
+  "assets": [
+    {
+      "file": "layers/pizza-base.webp",
+      "ingredient": "pizza_dough",
+      "dishVersion": "Traditional Neapolitan Margherita",
+      "review": "Accepted: overhead baked blistered pizza base with no toppings, plate or text; transparent exterior."
+    },
+    {
+      "file": "layers/pizza-tomato-sauce.webp",
+      "ingredient": "tomato_sauce",
+      "dishVersion": "Traditional Neapolitan Margherita",
+      "review": "Accepted: crushed red tomato spread only, with natural gaps and transparent exterior; no bowl or other ingredients."
+    },
+    {
+      "file": "layers/pizza-mozzarella.webp",
+      "ingredient": "mozzarella",
+      "dishVersion": "Traditional Neapolitan Margherita",
+      "review": "Accepted: irregular melted mozzarella patches with transparent gaps; no crust, sauce, plate or text."
+    }
+  ],
+  "limitations": "The salad currently uses inspected visual-v1 photographic ingredient cutouts and a small code-rendered dressing drizzle. Further bespoke plated layers can replace these when generation capacity is available."
+}

@@ -3,15 +3,16 @@
 const fs = require("fs");
 const path = require("path");
 const esbuild = require("esbuild");
+const { buildOlympiadVisualRuntime } = require("./build-olympiad-visual-runtime");
 
 const root = path.resolve(__dirname, "..");
 const outDir = path.join(root, "dist-cloudflare");
 const ydbStub = path.join(root, "src", "cloudflare", "ydb-store-stub.js");
 
-fs.rmSync(outDir, { recursive: true, force: true });
-fs.cpSync(path.join(root, "public"), outDir, { recursive: true });
-
 async function main() {
+  await buildOlympiadVisualRuntime();
+  fs.rmSync(outDir, { recursive: true, force: true });
+  fs.cpSync(path.join(root, "public"), outDir, { recursive: true });
   await esbuild.build({
     entryPoints: [path.join(root, "src", "cloudflare", "worker.js")],
     outfile: path.join(outDir, "_worker.js"),

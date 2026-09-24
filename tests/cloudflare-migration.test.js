@@ -9,6 +9,7 @@ test("Cloudflare deployment contract exposes Pages, D1, and Yandex Disk file sto
   const wrangler = fs.readFileSync(path.join(root, "wrangler.toml"), "utf8");
   const schema = fs.readFileSync(path.join(root, "migrations", "0001_cloudflare_initial.sql"), "utf8");
   const worker = fs.readFileSync(path.join(root, "src", "cloudflare", "worker.js"), "utf8");
+  const server = fs.readFileSync(path.join(root, "server.js"), "utf8");
   const store = fs.readFileSync(path.join(root, "src", "cloudflare-store.js"), "utf8");
   const workflow = fs.readFileSync(path.join(root, ".github", "workflows", "deploy-cloudflare.yml"), "utf8");
   const diskVerifier = fs.readFileSync(path.join(root, "scripts", "verify-yandex-disk-storage.js"), "utf8");
@@ -24,6 +25,8 @@ test("Cloudflare deployment contract exposes Pages, D1, and Yandex Disk file sto
   assert.match(schema, /CREATE TABLE IF NOT EXISTS pm01_voice_index/);
   assert.match(worker, /env\.ASSETS\.fetch/);
   assert.match(worker, /configureCloudflareStorage/);
+  assert.match(worker, /request\.body\.getReader\(\)/);
+  assert.doesNotMatch(worker, /request\.arrayBuffer\(\)/);
   assert.match(worker, /YANDEX_DISK_OAUTH_TOKEN/);
   assert.match(worker, /yandexDisk/);
   assert.match(store, /PM01_VOICE\.put/);
@@ -31,6 +34,15 @@ test("Cloudflare deployment contract exposes Pages, D1, and Yandex Disk file sto
   assert.match(store, /pm01-voice\/\$\{encodeURIComponent\(meta\.attemptId\)\}/);
   assert.match(workflow, /wrangler pages deploy dist-cloudflare/);
   assert.match(workflow, /pages secret put YANDEX_DISK_OAUTH_TOKEN/);
+  assert.match(workflow, /secrets\.ATTEMPT_ID_SECRET/);
+  assert.match(workflow, /pages secret put ATTEMPT_ID_SECRET/);
+  assert.match(workflow, /ATTEMPT_ID_SECRET must contain at least 32 characters/);
+  const identityStart = server.indexOf("function makeOlympiadAttemptIdentity");
+  const identityEnd = server.indexOf("\n}\n", identityStart) + 3;
+  const identityFunction = server.slice(identityStart, identityEnd);
+  assert.match(identityFunction, /settings\.attemptIdSecret/);
+  assert.doesNotMatch(identityFunction, /adminPassword/);
+  assert.match(server, /parseBody\(req, \{ maxBytes: 32 \* 1024 \}\)/);
   assert.match(workflow, /node scripts\/verify-yandex-disk-storage\.js/);
   assert.doesNotMatch(workflow, /wrangler r2 bucket create/);
   assert.match(diskVerifier, /uploadBuffer/);

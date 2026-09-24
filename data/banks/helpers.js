@@ -137,6 +137,53 @@ function makeIngredientMatrix(id, dishId, dishName, cuisine, cuisineGroup, ingre
   };
 }
 
+function makeDishAssembly(id, dishId, dishName, cuisine, cuisineGroup, ingredients, correctIds, meta = {}) {
+  return {
+    id,
+    type: "dish_assembly",
+    prompt: meta.prompt || `Соберите блюдо «${dishName}» из предложенных компонентов.`,
+    scenario: meta.scenario || "Перенесите подходящие компоненты на блюдо. Лишние оставьте в банке.",
+    note: meta.note || "За каждый лишний выбранный компонент начисляется штраф.",
+    maxScore: Number(meta.maxScore) || 5,
+    dishId,
+    dishLabel: dishName,
+    cuisine,
+    cuisineGroup,
+    recipeScope: meta.recipeScope || "",
+    metadata: buildQuestionMetadata(meta, {
+      taskKind: "dish_assembly",
+      theme: dishName,
+      estimatedSeconds: 110,
+      dishLabel: dishName,
+      cuisineLabel: cuisine
+    }),
+    dishVisual: {
+      baseImageUrl: meta.baseImageUrl || "",
+      baseImageAlt: meta.baseImageAlt || `Основа блюда «${dishName}»`,
+      variantLabel: meta.variantLabel || "",
+      sourceNote: meta.sourceNote || "",
+      renderMode: meta.renderMode || "",
+      modelPreset: meta.modelPreset || ""
+    },
+    items: ingredients.map((ingredient) => {
+      if (Array.isArray(ingredient)) {
+        return { id: ingredient[0], text: ingredient[1] };
+      }
+      return {
+        id: ingredient.id,
+        text: ingredient.text,
+        imageUrl: ingredient.imageUrl || "",
+        imageAlt: ingredient.imageAlt || ingredient.text || "",
+        layerImageUrl: ingredient.layerImageUrl || "",
+        model3d: ingredient.model3d && ingredient.model3d.kind
+          ? { kind: ingredient.model3d.kind }
+          : null
+      };
+    }),
+    correctIngredientIds: correctIds
+  };
+}
+
 function makeSequenceTask(id, dishId, dishName, cuisine, cuisineGroup, prompt, steps, distractors, meta = {}) {
   return {
     id,
@@ -270,6 +317,7 @@ module.exports = {
   makeSingleChoice,
   makeMatchBlock,
   makeIngredientMatrix,
+  makeDishAssembly,
   makeSequenceTask,
   makeBucketTask,
   makeLogicChoice,

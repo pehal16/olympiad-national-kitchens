@@ -9,8 +9,12 @@ const {
   loadAttemptSummaries,
   saveAttempts,
   upsertAttempt,
+  createAttemptAtomic,
+  updateAttemptWithRevision,
   loadAdminSessions,
   loadAttemptById,
+  appendAttemptEvent,
+  loadAttemptEvents,
   loadAdminSessionByToken,
   saveAdminSessions,
   loadContentDrafts,
@@ -32,6 +36,7 @@ const {
 } = require("./src/utils");
 const {
   scoreQuestion,
+  validateAnswerPayload,
   summarizeAttempt,
   diplomaByScore,
   compareAttemptsByRank
@@ -56,6 +61,7 @@ const { buildQuestionCatalog, buildQuestionBankSummary } = require("./src/questi
 const { createAttemptsCsv, saveExportFile } = require("./src/exporter");
 const { ensureFolder, uploadBuffer } = require("./src/yandex-disk");
 const { handleLearningApi } = require("./src/learning/api");
+const { validateOlympiadName } = require("./src/olympiad-profile");
 
 let fsModule = null;
 let pathModule = null;
@@ -243,14 +249,34 @@ function isOlympiadAvailable(olympiad) {
 }
 
 function validateParticipantProfile(payload) {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return {
+      valid: false,
+      message: "Данные участника должны быть переданы как JSON-объект."
+    };
+  }
   const rawGroupName = String(payload.groupName || "").trim();
+  const rawFullName = String(payload.fullName || "").trim();
+  const rawInstitution = String(payload.institution || "").trim();
+  const rawMentorName = String(payload.mentorName || "").trim();
+  if (
+    rawFullName.length > 160 ||
+    rawInstitution.length > 240 ||
+    rawGroupName.length > 120 ||
+    rawMentorName.length > 160
+  ) {
+    return {
+      valid: false,
+      message: "Проверьте данные участника: одно из полей превышает допустимую длину."
+    };
+  }
   const groupName = normalizeGroupName(rawGroupName);
   const profile = {
-    fullName: String(payload.fullName || "").trim(),
-    institution: String(payload.institution || "").trim(),
+    fullName: rawFullName,
+    institution: rawInstitution,
     groupName,
     groupNameOriginal: rawGroupName && rawGroupName !== groupName ? rawGroupName : "",
-    mentorName: String(payload.mentorName || "").trim()
+    mentorName: rawMentorName
   };
 
   if (!profile.fullName || !profile.institution || !profile.groupName) {
@@ -261,6 +287,15 @@ function validateParticipantProfile(payload) {
   }
 
   return { valid: true, profile };
+}
+
+function validateOlympiadParticipantProfile(payload) {
+  const validation = validateParticipantProfile(payload);
+  if (!validation.valid) return validation;
+  const name = validateOlympiadName(validation.profile.fullName);
+  if (!name.valid) return name;
+  validation.profile.fullName = name.fullName;
+  return validation;
 }
 
 function normalizeGroupLetters(value) {
@@ -488,7 +523,115 @@ function getTiming(attempt) {
   };
 }
 
+function makeOlympiadAttemptIdentity(olympiadId, participantSignature, settings) {
+  const secret = settings.attemptIdSecret ||
+    (settings.storageBackend === "file" ? `${olympiadId}:local-development-attempt-identity` : "");
+  if (!secret) {
+    throw new Error(
+      "ATTEMPT_ID_SECRET обязателен для серверного запуска олимпиады. Задайте отдельный стабильный секрет окружения."
+    );
+  }
+  if (settings.storageBackend !== "file" && secret.length < 32) {
+    throw new Error("ATTEMPT_ID_SECRET должен содержать не менее 32 символов.");
+  }
+  const digest = crypto
+    .createHmac("sha256", secret)
+    .update(`${olympiadId}|${participantSignature}`)
+    .digest("hex");
+  return {
+    attemptId: `attempt_${digest.slice(0, 32)}`,
+    routeSeed: `nk_route_${digest}`
+  };
+}
+
+function readAttemptAccessToken(req) {
+  return String(req.headers["x-attempt-token"] || "").trim();
+}
+
+function isAttemptAccessTokenShapeValid(token) {
+  return /^[A-Za-z0-9_-]{32,256}$/.test(String(token || ""));
+}
+
+function hashAttemptAccessToken(token) {
+  return crypto.createHash("sha256").update(String(token || "")).digest("base64url");
+}
+
+function hasAttemptAccess(req, attempt) {
+  const token = readAttemptAccessToken(req);
+  return Boolean(
+    attempt?.accessTokenHash &&
+    isAttemptAccessTokenShapeValid(token) &&
+    safeEqualText(hashAttemptAccessToken(token), attempt.accessTokenHash)
+  );
+}
+
+function sendAttemptAccessDenied(res) {
+  sendJson(res, 401, {
+    ok: false,
+    message:
+      "Сессия этой попытки не подтверждена. Откройте её на исходном устройстве или обратитесь к организатору для контролируемого восстановления."
+  });
+}
+
+const INTEGRITY_EVENT_TYPES = new Set([
+  "tab_hidden",
+  "window_blur",
+  "fullscreen_exit",
+  "fullscreen_required",
+  "guard_restored",
+  "page_hidden",
+  "capture_shortcut",
+  "clipboard_paste"
+]);
+const INTEGRITY_INCIDENT_TYPES = new Set([
+  "tab_hidden",
+  "window_blur",
+  "fullscreen_exit",
+  "page_hidden",
+  "capture_shortcut",
+  "clipboard_paste"
+]);
+
+function normalizeIntegrityEvent(body) {
+  const eventId = String(body.eventId || "").trim().slice(0, 128);
+  const eventType = String(body.eventType || "").trim();
+  if (!eventId || !INTEGRITY_EVENT_TYPES.has(eventType)) {
+    return null;
+  }
+
+  const occurredDate = new Date(body.occurredAt || Date.now());
+  return {
+    eventId,
+    eventType,
+    reason: String(body.reason || "").trim().slice(0, 400),
+    occurredAt: Number.isNaN(occurredDate.getTime()) ? nowIso() : occurredDate.toISOString(),
+    receivedAt: nowIso(),
+    questionId: String(body.questionId || "").trim().slice(0, 160),
+    visibilityState: String(body.visibilityState || "").trim().slice(0, 32),
+    fullscreen: Boolean(body.fullscreen),
+    clientIncidentCount: Math.max(0, Math.trunc(Number(body.clientIncidentCount) || 0))
+  };
+}
+
+function summarizeIntegrityEvents(events) {
+  const list = Array.isArray(events) ? events : [];
+  const incidents = list.filter((event) => INTEGRITY_INCIDENT_TYPES.has(event.eventType));
+  const countsByType = {};
+  incidents.forEach((event) => {
+    countsByType[event.eventType] = (countsByType[event.eventType] || 0) + 1;
+  });
+  return {
+    incidentCount: incidents.length,
+    eventCount: list.length,
+    countsByType,
+    lastEventAt: list.length ? list[list.length - 1].receivedAt || null : null
+  };
+}
+
 function finalizeAttempt(olympiad, attempt, reason = "finished") {
+  if (attempt && attempt.status !== "in_progress" && attempt.finishedAt && attempt.finalSummary) {
+    return attempt;
+  }
   const summary = summarizeAttempt(olympiad, attempt);
   attempt.status = reason === "expired" ? "expired" : "reviewed";
   attempt.finishedAt = nowIso();
@@ -564,12 +707,30 @@ async function normalizeAndPersistIfChanged(olympiad, attempt) {
     return attempt;
   }
 
+  const expectedRevision = Math.max(0, Number(attempt.stateRevision) || 0);
+  const beforeQuestionLog = JSON.parse(JSON.stringify(attempt.questionLog || {}));
   const before = JSON.stringify(attempt);
   const normalized = normalizeAttemptState(olympiad, attempt);
   const after = JSON.stringify(normalized);
 
   if (before !== after) {
-    await upsertAttempt(normalized);
+    const questionIds = new Set([
+      ...Object.keys(beforeQuestionLog),
+      ...Object.keys(normalized.questionLog || {})
+    ]);
+    const changedQuestionIds = [...questionIds].filter(
+      (questionId) =>
+        JSON.stringify(beforeQuestionLog[questionId] || null) !==
+        JSON.stringify(normalized.questionLog?.[questionId] || null)
+    );
+    normalized.stateRevision = expectedRevision + 1;
+    const saved = await updateAttemptWithRevision(normalized, expectedRevision, {
+      changedQuestionIds,
+      stateOnly: changedQuestionIds.length === 0
+    });
+    if (!saved) {
+      return (await loadAttemptById(attempt.id)) || normalized;
+    }
     invalidateAttemptCaches();
   }
 
@@ -621,9 +782,7 @@ function buildAttemptView(olympiad, attempt, settings) {
     stepStart: tour.stepStart,
     stepEnd: tour.stepEnd
   }));
-  const routeQuestions = (attempt.variant?.questions || []).map((question) =>
-    sanitizeQuestion(question, attempt)
-  );
+  const scoresVisible = attempt.status !== "in_progress" && settings.showParticipantScore;
 
   return {
     id: attempt.id,
@@ -632,6 +791,7 @@ function buildAttemptView(olympiad, attempt, settings) {
     startedAt: attempt.startedAt,
     finishedAt: attempt.finishedAt,
     expiresAt: attempt.expiresAt,
+    stateRevision: Math.max(0, Number(attempt.stateRevision) || 0),
     currentStepIndex: attempt.currentStepIndex,
     progress: buildProgress(attempt),
     timing: getTiming(attempt),
@@ -649,10 +809,10 @@ function buildAttemptView(olympiad, attempt, settings) {
     currentQuestion: sanitizeQuestion(currentQuestion, attempt),
     summary: {
       ...summary,
-      totalFinalScore: settings.showParticipantScore
-        ? summary.totalFinalScore
-        : null,
-      tourScores: settings.showParticipantScore
+      totalFinalScore: scoresVisible ? summary.totalFinalScore : null,
+      totalPenalty: scoresVisible ? summary.totalPenalty : null,
+      tieBreak: scoresVisible ? summary.tieBreak : null,
+      tourScores: scoresVisible
         ? summary.tourScores
         : summary.tourScores.map((tour) => ({
             tourId: tour.tourId,
@@ -665,7 +825,7 @@ function buildAttemptView(olympiad, attempt, settings) {
     },
     route: {
       tours: routeTours,
-      questions: routeQuestions
+      questionCount: questionCount(attempt)
     }
   };
 }
@@ -673,6 +833,7 @@ function buildAttemptView(olympiad, attempt, settings) {
 function buildAttemptPulse(olympiad, attempt, settings) {
   const currentTour = getCurrentTour(attempt);
   const summary = summarizeAttempt(olympiad, attempt);
+  const scoresVisible = attempt.status !== "in_progress" && settings.showParticipantScore;
 
   return {
     id: attempt.id,
@@ -680,6 +841,7 @@ function buildAttemptPulse(olympiad, attempt, settings) {
     startedAt: attempt.startedAt,
     finishedAt: attempt.finishedAt,
     expiresAt: attempt.expiresAt,
+    stateRevision: Math.max(0, Number(attempt.stateRevision) || 0),
     currentStepIndex: attempt.currentStepIndex,
     progress: buildProgress(attempt),
     timing: getTiming(attempt),
@@ -696,10 +858,23 @@ function buildAttemptPulse(olympiad, attempt, settings) {
     summary:
       attempt.status === "in_progress"
         ? null
-        : {
-            ...summary,
-            totalFinalScore: settings.showParticipantScore ? summary.totalFinalScore : null
-          }
+        : scoresVisible
+          ? summary
+          : {
+              totalFinalScore: null,
+              totalPenalty: null,
+              totalDurationMs: summary.totalDurationMs,
+              totalMaxScore: summary.totalMaxScore,
+              tourScores: summary.tourScores.map((tour) => ({
+                tourId: tour.tourId,
+                code: tour.code,
+                title: tour.title,
+                finalScore: null,
+                maxScore: tour.maxScore,
+                penalty: null
+              })),
+              tieBreak: null
+            }
   };
 }
 
@@ -723,6 +898,15 @@ function formatCorrectAnswer(question) {
   }
 
   if (question.type === "ingredient_matrix") {
+    return (question.correctIngredientIds || [])
+      .map((itemId) => {
+        const item = (question.items || []).find((entry) => entry.id === itemId);
+        return item ? item.text : itemId;
+      })
+      .join(", ");
+  }
+
+  if (question.type === "dish_assembly") {
     return (question.correctIngredientIds || [])
       .map((itemId) => {
         const item = (question.items || []).find((entry) => entry.id === itemId);
@@ -1924,7 +2108,7 @@ async function buildRankedAttempts(olympiad, settings, options = {}) {
   const exposeScores = options.forceScores || settings.showParticipantScore;
   const baseAttempts = options.attempts || currentOlympiadAttempts(await loadAttempts(), olympiad.id);
 
-  const attempts = baseAttempts
+  const prepared = baseAttempts
     .map((attempt) => {
       const normalized = normalizeAttemptState(olympiad, attempt);
       const summary = summarizeAttempt(olympiad, normalized);
@@ -1933,10 +2117,27 @@ async function buildRankedAttempts(olympiad, settings, options = {}) {
         summary,
         diploma: diplomaByScore(summary.totalFinalScore)
       };
-    })
+    });
+
+  const rankedCompleted = prepared
+    .filter((attempt) => attempt.status === "reviewed")
     .sort(compareAttemptsByRank)
-    .map((attempt, index) => ({
-      rank: index + 1,
+    .map((attempt, index, sorted) => {
+      const rank =
+        index > 0 && compareAttemptsByRank(attempt, sorted[index - 1]) === 0
+          ? sorted[index - 1]._assignedRank
+          : index + 1;
+      attempt._assignedRank = rank;
+      return { rank, _source: attempt };
+    });
+
+  const unranked = prepared
+    .filter((attempt) => attempt.status !== "reviewed")
+    .sort((left, right) => safeDateMs(right.startedAt) - safeDateMs(left.startedAt))
+    .map((attempt) => ({ rank: null, _source: attempt }));
+
+  return [...rankedCompleted, ...unranked].map(({ rank, _source: attempt }) => ({
+      rank,
       id: attempt.id,
       participant: attempt.participant,
       status: attempt.status,
@@ -1945,10 +2146,8 @@ async function buildRankedAttempts(olympiad, settings, options = {}) {
       summary: exposeScores
         ? attempt.summary
         : { ...attempt.summary, totalFinalScore: null },
-      diploma: attempt.diploma
+      diploma: attempt.status === "reviewed" ? attempt.diploma : ""
     }));
-
-  return attempts;
 }
 
 function safeDateMs(value) {
@@ -2733,6 +2932,14 @@ async function buildExportRows(olympiad) {
     });
 }
 
+function sanitizeAttemptForExport(attempt) {
+  if (!attempt || typeof attempt !== "object") {
+    return attempt;
+  }
+  const { accessTokenHash, ...safeAttempt } = attempt;
+  return safeAttempt;
+}
+
 async function uploadExportsToYandexDisk(olympiad, settings) {
   const disk = settings.yandexDiskIntegration || {};
   if (!disk.enabled || !disk.oauthToken) {
@@ -2751,7 +2958,7 @@ async function uploadExportsToYandexDisk(olympiad, settings) {
   const jsonFileName = `results_${timestamp}.json`;
   const csvContent = createAttemptsCsv(rows);
   const jsonContent = JSON.stringify(
-    currentOlympiadAttempts(allAttempts, olympiad.id),
+    currentOlympiadAttempts(allAttempts, olympiad.id).map(sanitizeAttemptForExport),
     null,
     2
   );
@@ -2799,6 +3006,7 @@ function serveStatic(req, res, pathname) {
     ".webmanifest": "application/manifest+json; charset=utf-8",
     ".ico": "image/x-icon",
     ".png": "image/png",
+    ".webp": "image/webp",
     ".jpg": "image/jpeg",
     ".jpeg": "image/jpeg",
     ".svg": "image/svg+xml"
@@ -3386,8 +3594,8 @@ async function handleApi(req, res, url, runtime = {}) {
 
   if (method === "POST" && pathname === "/api/public/register") {
     const olympiadData = await ensureOlympiad();
-    const body = await parseBody(req);
-    const validation = validateParticipantProfile(body);
+    const body = await parseBody(req, { maxBytes: 16 * 1024 });
+    const validation = validateOlympiadParticipantProfile(body);
     if (!validation.valid) {
       sendJson(res, 400, { ok: false, message: validation.message });
       return;
@@ -3399,7 +3607,7 @@ async function handleApi(req, res, url, runtime = {}) {
     }
 
     const signature = makeParticipantSignature(validation.profile);
-    const attempts = currentOlympiadAttempts(await loadAttempts(), olympiadData.id).filter(
+    const attempts = currentOlympiadAttempts(await loadAttemptSummaries(), olympiadData.id).filter(
       (attempt) => attempt.participantSignature === signature
     );
     const activeAttempt = attempts.find((attempt) => attempt.status === "in_progress");
@@ -3418,26 +3626,46 @@ async function handleApi(req, res, url, runtime = {}) {
 
   if (method === "POST" && pathname === "/api/public/attempts/start") {
     const olympiadData = await ensureOlympiad();
-    const body = await parseBody(req);
-    const validation = validateParticipantProfile(body.participant || body);
+    const body = await parseBody(req, { maxBytes: 16 * 1024 });
+    const validation = validateOlympiadParticipantProfile(body.participant || body);
     if (!validation.valid) {
       sendJson(res, 400, { ok: false, message: validation.message });
       return;
     }
 
+    if (!isOlympiadAvailable(olympiadData)) {
+      sendJson(res, 403, { ok: false, message: "Олимпиада сейчас недоступна." });
+      return;
+    }
+
+    const accessToken = readAttemptAccessToken(req);
+    if (!isAttemptAccessTokenShapeValid(accessToken)) {
+      sendJson(res, 400, {
+        ok: false,
+        message: "Не удалось создать защищённую сессию попытки. Обновите страницу и повторите старт."
+      });
+      return;
+    }
+
     const participantSignature = makeParticipantSignature(validation.profile);
-    const allAttempts = await loadAttempts();
-    const currentAttempts = currentOlympiadAttempts(allAttempts, olympiadData.id);
-    const activeAttempt = currentAttempts.find(
+    const currentAttempts = currentOlympiadAttempts(
+      await loadAttemptSummaries(),
+      olympiadData.id
+    );
+    const activeAttemptSummary = currentAttempts.find(
       (attempt) =>
         attempt.participantSignature === participantSignature &&
         attempt.status === "in_progress"
     );
 
-    if (activeAttempt) {
-      const normalized = normalizeAttemptState(olympiadData, activeAttempt);
-      await saveAttempt(allAttempts, normalized);
-      invalidateAttemptCaches();
+    if (activeAttemptSummary) {
+      const activeAttempt =
+        (await loadAttemptById(activeAttemptSummary.id)) || activeAttemptSummary;
+      if (!hasAttemptAccess(req, activeAttempt)) {
+        sendAttemptAccessDenied(res);
+        return;
+      }
+      const normalized = await normalizeAndPersistIfChanged(olympiadData, activeAttempt);
       sendJson(res, 200, {
         ok: true,
         data: buildAttemptView(olympiadData, normalized, settings)
@@ -3458,13 +3686,21 @@ async function handleApi(req, res, url, runtime = {}) {
       return;
     }
 
-    const variant = buildVariant(olympiadData);
+    const { attemptId, routeSeed } = makeOlympiadAttemptIdentity(
+      olympiadData.id,
+      participantSignature,
+      settings
+    );
+    const variant = buildVariant(olympiadData, { seed: routeSeed });
     const attempt = {
-      id: generateId("attempt"),
+      id: attemptId,
       olympiadId: olympiadData.id,
       schemaVersion: olympiadData.schemaVersion || 2,
       participant: validation.profile,
       participantSignature,
+      routeSeed,
+      accessTokenHash: hashAttemptAccessToken(accessToken),
+      stateRevision: 0,
       startedAt: nowIso(),
       expiresAt: new Date(
         Date.now() + olympiadData.durationMinutes * 60 * 1000
@@ -3486,8 +3722,27 @@ async function handleApi(req, res, url, runtime = {}) {
     };
 
     markQuestionPresented(attempt);
-    allAttempts.push(attempt);
-    await upsertAttempt(attempt);
+    const creation = await createAttemptAtomic(attempt);
+    if (!creation.created) {
+      const existing = creation.attempt || (await loadAttemptById(attempt.id));
+      if (!existing || existing.olympiadId !== olympiadData.id) {
+        sendJson(res, 409, {
+          ok: false,
+          message: "Не удалось согласовать одновременный старт. Повторите попытку."
+        });
+        return;
+      }
+      if (!hasAttemptAccess(req, existing)) {
+        sendAttemptAccessDenied(res);
+        return;
+      }
+      const normalized = await normalizeAndPersistIfChanged(olympiadData, existing);
+      sendJson(res, 200, {
+        ok: true,
+        data: buildAttemptView(olympiadData, normalized, settings)
+      });
+      return;
+    }
     invalidateAttemptCaches();
 
     sendJson(res, 201, {
@@ -3503,6 +3758,10 @@ async function handleApi(req, res, url, runtime = {}) {
     const attempt = await loadAttemptById(attemptId);
     if (!attempt || attempt.olympiadId !== olympiadData.id) {
       sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
+      return;
+    }
+    if (!hasAttemptAccess(req, attempt)) {
+      sendAttemptAccessDenied(res);
       return;
     }
 
@@ -3522,6 +3781,10 @@ async function handleApi(req, res, url, runtime = {}) {
       sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
       return;
     }
+    if (!hasAttemptAccess(req, attempt)) {
+      sendAttemptAccessDenied(res);
+      return;
+    }
 
     const normalized = await normalizeAndPersistIfChanged(olympiadData, attempt);
     sendJson(res, 200, {
@@ -3536,7 +3799,11 @@ async function handleApi(req, res, url, runtime = {}) {
     const attemptId = pathname.split("/")[4];
     const attempt = await loadAttemptById(attemptId);
     if (!attempt || attempt.olympiadId !== olympiadData.id) {
-      sendJson(res, 404, { ok: false, message: "РџРѕРїС‹С‚РєР° РЅРµ РЅР°Р№РґРµРЅР°." });
+      sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
+      return;
+    }
+    if (!hasAttemptAccess(req, attempt)) {
+      sendAttemptAccessDenied(res);
       return;
     }
 
@@ -3548,21 +3815,92 @@ async function handleApi(req, res, url, runtime = {}) {
     return;
   }
 
+  if (
+    (method === "GET" || method === "POST") &&
+    pathname.match(/^\/api\/public\/attempts\/[^/]+\/integrity$/)
+  ) {
+    const olympiadData = await ensureOlympiad();
+    const attemptId = pathname.split("/")[4];
+    const attempt = await loadAttemptById(attemptId);
+    if (!attempt || attempt.olympiadId !== olympiadData.id) {
+      sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
+      return;
+    }
+    if (!hasAttemptAccess(req, attempt)) {
+      sendAttemptAccessDenied(res);
+      return;
+    }
+
+    let events = await loadAttemptEvents(attemptId);
+    if (method === "POST") {
+      const finishedAtMs = attempt.finishedAt ? new Date(attempt.finishedAt).getTime() : 0;
+      if (
+        attempt.status !== "in_progress" &&
+        (!finishedAtMs || Date.now() - finishedAtMs > 2 * 60 * 1000)
+      ) {
+        sendJson(res, 409, {
+          ok: false,
+          message: "Журнал этой попытки уже закрыт."
+        });
+        return;
+      }
+      const body = await parseBody(req, { maxBytes: 16 * 1024 });
+      const event = normalizeIntegrityEvent(body);
+      if (!event) {
+        sendJson(res, 400, { ok: false, message: "Некорректное событие контроля." });
+        return;
+      }
+
+      if (
+        event.questionId &&
+        !(attempt.variant?.questions || []).some((question) => question.id === event.questionId)
+      ) {
+        event.questionId = "";
+      }
+      const appendResult = await appendAttemptEvent(attemptId, event, 250);
+      events = await loadAttemptEvents(attemptId);
+      if (
+        appendResult?.stored === false &&
+        !events.some((item) => item.eventId === event.eventId)
+      ) {
+        sendJson(res, 429, { ok: false, message: "Лимит событий контроля исчерпан." });
+        return;
+      }
+    }
+
+    sendJson(res, 200, {
+      ok: true,
+      data: {
+        summary: summarizeIntegrityEvents(events)
+      }
+    });
+    return;
+  }
+
   if (method === "POST" && pathname.match(/^\/api\/public\/attempts\/[^/]+\/answer$/)) {
     const olympiadData = await ensureOlympiad();
     const attemptId = pathname.split("/")[4];
-    const body = await parseBody(req);
     let attempt = await loadAttemptById(attemptId);
 
     if (!attempt || attempt.olympiadId !== olympiadData.id) {
       sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
       return;
     }
+    if (!hasAttemptAccess(req, attempt)) {
+      sendAttemptAccessDenied(res);
+      return;
+    }
+    const body = await parseBody(req, { maxBytes: 32 * 1024 });
 
-    attempt = normalizeAttemptState(olympiadData, attempt);
+    attempt = await normalizeAndPersistIfChanged(olympiadData, attempt);
     if (attempt.status !== "in_progress") {
-      await upsertAttempt(attempt);
-      invalidateAttemptCaches();
+      if (body.questionId && attempt.answers?.[body.questionId]) {
+        sendJson(res, 200, {
+          ok: true,
+          data: buildAttemptView(olympiadData, attempt, settings)
+        });
+        return;
+      }
       sendJson(res, 409, {
         ok: false,
         message: "Попытка уже завершена."
@@ -3572,17 +3910,27 @@ async function handleApi(req, res, url, runtime = {}) {
 
     const currentQuestion = getCurrentQuestion(attempt);
     if (!currentQuestion) {
+      const expectedRevision = Math.max(0, Number(attempt.stateRevision) || 0);
       const finalized = finalizeAttempt(olympiadData, attempt, "finished");
-      await upsertAttempt(finalized);
-      invalidateAttemptCaches();
+      finalized.stateRevision = expectedRevision + 1;
+      const saved = await updateAttemptWithRevision(finalized, expectedRevision, {
+        stateOnly: true
+      });
+      const persisted = saved ? finalized : (await loadAttemptById(attemptId)) || finalized;
+      if (saved) invalidateAttemptCaches();
       sendJson(res, 200, {
         ok: true,
-        data: buildAttemptView(olympiadData, finalized, settings)
+        data: buildAttemptView(olympiadData, persisted, settings)
       });
       return;
     }
 
-    if (body.questionId && body.questionId !== currentQuestion.id) {
+    if (!body.questionId) {
+      sendJson(res, 400, { ok: false, message: "Не указан идентификатор текущего задания." });
+      return;
+    }
+
+    if (body.questionId !== currentQuestion.id) {
       sendJson(res, 200, {
         ok: true,
         data: buildAttemptView(olympiadData, attempt, settings)
@@ -3590,6 +3938,16 @@ async function handleApi(req, res, url, runtime = {}) {
       return;
     }
 
+    if (!validateAnswerPayload(currentQuestion, body.answerPayload)) {
+      sendJson(res, 422, {
+        ok: false,
+        message: "Ответ содержит неизвестные элементы. Обновите страницу и повторите выбор."
+      });
+      return;
+    }
+
+    const expectedRevision = Math.max(0, Number(attempt.stateRevision) || 0);
+    const questionLogBeforeAnswer = JSON.parse(JSON.stringify(attempt.questionLog || {}));
     const result = scoreQuestion(currentQuestion, body.answerPayload);
     const logEntry = getQuestionLog(attempt, currentQuestion.id);
     const savedAt = nowIso();
@@ -3614,33 +3972,57 @@ async function handleApi(req, res, url, runtime = {}) {
     attempt._lastChangedQuestionId = currentQuestion.id;
 
     attempt.currentStepIndex += 1;
+    const changedQuestionIds = [currentQuestion.id];
     if (attempt.currentStepIndex >= questionCount(attempt)) {
       attempt = finalizeAttempt(olympiadData, attempt, "finished");
-      await upsertAttempt(attempt);
-      invalidateAttemptCaches();
-      sendJson(res, 200, {
-        ok: true,
-        data: buildAttemptView(olympiadData, attempt, settings)
+    } else {
+      const nextQuestion = getCurrentQuestion(attempt);
+      const previousTourId = currentQuestion.tourId;
+      if (nextQuestion && nextQuestion.tourId !== previousTourId) {
+        const previousTourState = getTourState(attempt, previousTourId);
+        if (previousTourState && !previousTourState.finishedAt) {
+          previousTourState.finishedAt = savedAt;
+        }
+        const nextTour = getCurrentTour(attempt);
+        if (nextTour) {
+          startTourIfNeeded(attempt, nextTour);
+        }
+      }
+      markQuestionPresented(attempt);
+      if (nextQuestion) changedQuestionIds.push(nextQuestion.id);
+      attempt = normalizeAttemptState(olympiadData, attempt);
+    }
+
+    for (const questionId of new Set([
+      ...Object.keys(questionLogBeforeAnswer),
+      ...Object.keys(attempt.questionLog || {})
+    ])) {
+      if (
+        JSON.stringify(questionLogBeforeAnswer[questionId] || null) !==
+        JSON.stringify(attempt.questionLog?.[questionId] || null)
+      ) {
+        changedQuestionIds.push(questionId);
+      }
+    }
+    attempt.stateRevision = expectedRevision + 1;
+    const saved = await updateAttemptWithRevision(attempt, expectedRevision, {
+      changedQuestionIds: [...new Set(changedQuestionIds)]
+    });
+    if (!saved) {
+      const latest = await loadAttemptById(attemptId);
+      if (latest?.answers?.[currentQuestion.id]) {
+        sendJson(res, 200, {
+          ok: true,
+          data: buildAttemptView(olympiadData, latest, settings)
+        });
+        return;
+      }
+      sendJson(res, 409, {
+        ok: false,
+        message: "Состояние попытки изменилось в другом окне. Обновите страницу."
       });
       return;
     }
-
-    const nextQuestion = getCurrentQuestion(attempt);
-    const previousTourId = currentQuestion.tourId;
-    if (nextQuestion && nextQuestion.tourId !== previousTourId) {
-      const previousTourState = getTourState(attempt, previousTourId);
-      if (previousTourState && !previousTourState.finishedAt) {
-        previousTourState.finishedAt = savedAt;
-      }
-      const nextTour = getCurrentTour(attempt);
-      if (nextTour) {
-        startTourIfNeeded(attempt, nextTour);
-      }
-    }
-
-    markQuestionPresented(attempt);
-    attempt = normalizeAttemptState(olympiadData, attempt);
-    await upsertAttempt(attempt);
     invalidateAttemptCaches();
 
     sendJson(res, 200, {
@@ -3659,10 +4041,46 @@ async function handleApi(req, res, url, runtime = {}) {
       sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
       return;
     }
+    if (!hasAttemptAccess(req, attempt)) {
+      sendAttemptAccessDenied(res);
+      return;
+    }
 
+    attempt = await normalizeAndPersistIfChanged(olympiadData, attempt);
+    if (attempt.status !== "in_progress") {
+      sendJson(res, 200, {
+        ok: true,
+        data: buildAttemptView(olympiadData, attempt, settings)
+      });
+      return;
+    }
+
+    const expectedRevision = Math.max(0, Number(attempt.stateRevision) || 0);
     attempt = finalizeAttempt(olympiadData, attempt, "finished");
-    await upsertAttempt(attempt);
-    invalidateAttemptCaches();
+    attempt.stateRevision = expectedRevision + 1;
+    const saved = await updateAttemptWithRevision(attempt, expectedRevision, {
+      stateOnly: true
+    });
+    if (!saved) {
+      const latest = await loadAttemptById(attemptId);
+      if (!latest || latest.olympiadId !== olympiadData.id) {
+        sendJson(res, 409, {
+          ok: false,
+          message: "Не удалось подтвердить актуальное состояние попытки. Повторите завершение."
+        });
+        return;
+      }
+      attempt = latest;
+      if (attempt.status === "in_progress") {
+        sendJson(res, 409, {
+          ok: false,
+          message: "Состояние попытки изменилось во время завершения. Повторите завершение."
+        });
+        return;
+      }
+    } else {
+      invalidateAttemptCaches();
+    }
     sendJson(res, 200, {
       ok: true,
       data: buildAttemptView(olympiadData, attempt, settings)
@@ -3988,7 +4406,11 @@ async function handleApi(req, res, url, runtime = {}) {
       const fileName = `pm01_results_${Date.now()}.json`;
       const filePath = saveExportFile(
         fileName,
-        JSON.stringify(currentOlympiadAttempts(await loadAttempts(), exam.id), null, 2)
+        JSON.stringify(
+          currentOlympiadAttempts(await loadAttempts(), exam.id).map(sanitizeAttemptForExport),
+          null,
+          2
+        )
       );
       sendJson(res, 200, { ok: true, data: { fileName, filePath } });
       return;
@@ -4198,6 +4620,7 @@ async function handleApi(req, res, url, runtime = {}) {
       }
 
       const summary = summarizeAttempt(olympiadData, attempt);
+      const integrityEvents = await loadAttemptEvents(attempt.id);
       const detailTours = (attempt.variant.tours || []).map((tour) => ({
         id: tour.id,
         code: tour.code,
@@ -4244,11 +4667,15 @@ async function handleApi(req, res, url, runtime = {}) {
             variantMeta: {
               issuedQuestionIds: attempt.variant.issuedQuestionIds,
               optionOrderLog: attempt.variant.optionOrderLog,
-              usedDishIds: attempt.variant.usedDishIds
-            }
+              usedDishIds: attempt.variant.usedDishIds,
+              seed: attempt.variant.seed || attempt.routeSeed || "",
+              blueprintVersion: attempt.variant.blueprintVersion || null
+            },
+            integritySummary: summarizeIntegrityEvents(integrityEvents)
           },
           summary,
-          tours: detailTours
+          tours: detailTours,
+          integrityEvents
         }
       });
       return;
@@ -4267,7 +4694,11 @@ async function handleApi(req, res, url, runtime = {}) {
       const fileName = `results_${Date.now()}.json`;
       const filePath = saveExportFile(
         fileName,
-        JSON.stringify(currentOlympiadAttempts(await loadAttempts(), olympiadData.id), null, 2)
+        JSON.stringify(
+          currentOlympiadAttempts(await loadAttempts(), olympiadData.id).map(sanitizeAttemptForExport),
+          null,
+          2
+        )
       );
       sendJson(res, 200, { ok: true, data: { fileName, filePath } });
       return;

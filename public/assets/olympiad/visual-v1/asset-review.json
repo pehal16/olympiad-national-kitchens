@@ -1,0 +1,66 @@
+{
+  "version": "visual-v1",
+  "createdAt": "2026-09-20",
+  "generationMethod": "OpenAI built-in imagegen",
+  "reviewMethod": "Each output was opened at full available detail and checked against the named recipe or ingredient before conversion to WebP.",
+  "dishSources": [
+    {
+      "asset": "dishes/margherita-avpn.webp",
+      "promptSummary": "Overhead editorial food photograph of a traditional Neapolitan Margherita with leopard-spotted cornicione, crushed tomato, irregular mozzarella, basil and olive oil; no extra toppings.",
+      "source": "https://www.pizzanapoletana.org/public/pdf/Disciplinare-2024-ITA.pdf",
+      "review": "Passed: required AVPN visual markers present; no sliced tomato, meat or non-classic garnish."
+    },
+    {
+      "asset": "dishes/caesar-russian-foodservice.webp",
+      "promptSummary": "Overhead restaurant photograph of the Russian foodservice chicken Caesar variant with romaine, grilled chicken, wheat croutons, parmesan, cherry tomato and light Caesar dressing.",
+      "sources": [
+        "https://shoko.ru/d/tsezar-s-kurinoy-grudkoy/",
+        "https://tekhnolog.com/2018/06/19/salat-tsezar-s-kuritsej-ttk2469/"
+      ],
+      "review": "Passed: named Russian restaurant variant is visible; no egg, bacon, cucumber or corn."
+    },
+    {
+      "asset": "dishes/caprese.webp",
+      "promptSummary": "Classic Caprese with tomato, mozzarella, basil and olive oil only.",
+      "source": "https://www.lacucinaitaliana.it/ricetta/antipasti/caprese/",
+      "review": "Passed: classic ingredients present; no lettuce, pesto, balsamic or olives."
+    },
+    {
+      "asset": "dishes/horiatiki.webp",
+      "promptSummary": "Traditional Greek Horiatiki with tomato, cucumber, onion, green pepper, dark olives, slab feta, olive oil and oregano.",
+      "source": "https://www.visitgreece.gr/en/experiences/gastronomy/recipes/greek-salad",
+      "review": "Passed: slab feta and traditional vegetables present; no lettuce or creamy dressing."
+    },
+    {
+      "asset": "dishes/ratatouille-byaldi.webp",
+      "promptSummary": "Restaurant-style confit byaldi with a precise spiral of eggplant, zucchini and tomato over pepper piperade.",
+      "source": "https://www.latimes.com/recipe/byaldi",
+      "review": "Passed: clearly represents the labeled confit byaldi presentation."
+    },
+    {
+      "asset": "dishes/tiramisu-le-beccherie.webp",
+      "promptSummary": "Round two-layer Tiramisu in the Le Beccherie style with savoiardi, coffee mascarpone cream and cocoa; no decorative garnish.",
+      "source": "https://www.lebeccherie.it/allegati/ricetta-storia-tiramisu-it.pdf",
+      "review": "Passed: two layers and cocoa finish present; no berries, mint, rosettes or chocolate shavings."
+    }
+  ],
+  "ingredientPromptTemplate": "Single isolated culinary ingredient, premium realistic studio food photography, clean transparent background, centered object, soft natural shadow, no text, no label, no utensils unless the ingredient itself requires a vessel.",
+  "ingredients": [
+    "basil.webp",
+    "boiled-egg.webp",
+    "caesar-dressing.webp",
+    "cherry-tomatoes.webp",
+    "croutons.webp",
+    "cucumber.webp",
+    "fresh-tomatoes.webp",
+    "grilled-chicken.webp",
+    "mozzarella.webp",
+    "olive-oil.webp",
+    "oregano.webp",
+    "parmesan.webp",
+    "pizza-dough.webp",
+    "romaine.webp",
+    "tomato-sauce.webp"
+  ],
+  "ingredientReview": "Passed: all 15 files are 512x512 WebP images with alpha transparency; the contact-sheet review found no labels, unrelated objects or ingredient mismatches."
+}

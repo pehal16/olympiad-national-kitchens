@@ -1,0 +1,53 @@
+{
+  "packageVersion": 1,
+  "olympiadId": "nk-2026-variant",
+  "contentRevision": "draft-to-be-approved",
+  "questions": [
+    {
+      "id": "dish-assembly-template-01",
+      "type": "dish_assembly",
+      "tourCode": "T3",
+      "publicationStatus": "draft",
+      "prompt": "Соберите указанное блюдо из предложенных компонентов.",
+      "scenario": "Перенесите подходящие карточки на блюдо. Лишние оставьте в банке.",
+      "note": "Черновой шаблон: преподаватель должен заменить все условные значения.",
+      "maxScore": 5,
+      "dishId": "to-be-provided",
+      "dishLabel": "Название блюда",
+      "cuisine": "to-be-provided",
+      "cuisineGroup": "to-be-provided",
+      "recipeScope": "russian_foodservice_variant",
+      "dishVisual": {
+        "baseImageUrl": "/assets/olympiad/to-be-provided/base.webp",
+        "baseImageAlt": "Основа блюда без добавленных компонентов",
+        "variantLabel": "Укажите точное название проверяемого варианта блюда",
+        "sourceNote": "Источник будет указан после методической проверки"
+      },
+      "items": [
+        {
+          "id": "component-01",
+          "text": "Компонент А",
+          "imageUrl": "/assets/olympiad/to-be-provided/card-01.webp",
+          "imageAlt": "Компонент А на нейтральном фоне",
+          "layerImageUrl": "/assets/olympiad/to-be-provided/layer-01.png"
+        },
+        {
+          "id": "component-02",
+          "text": "Компонент Б",
+          "imageUrl": "/assets/olympiad/to-be-provided/card-02.webp",
+          "imageAlt": "Компонент Б на нейтральном фоне",
+          "layerImageUrl": "/assets/olympiad/to-be-provided/layer-02.png"
+        }
+      ],
+      "correctIngredientIds": ["component-01"],
+      "metadata": {
+        "difficulty": "standard",
+        "estimatedSeconds": 90,
+        "sourceRefs": ["TO_BE_PROVIDED"],
+        "contentReviewStatus": "pending",
+        "keyReviewStatus": "pending",
+        "assetReviewStatus": "pending"
+      }
+    }
+  ]
+}

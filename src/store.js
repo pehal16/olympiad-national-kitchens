@@ -48,6 +48,7 @@ const CONTENT_DRAFTS_FILE = getPath().join(STORAGE_DIR, "content-drafts.json");
 const CONTENT_CUSTOM_FILE = getPath().join(STORAGE_DIR, "content-custom-questions.json");
 const PM01_VOICE_AUDIO_DIR = getPath().join(STORAGE_DIR, "pm01-voice-audio");
 const PM01_VOICE_AUDIO_INDEX_FILE = getPath().join(PM01_VOICE_AUDIO_DIR, "index.json");
+const ATTEMPT_EVENTS_FILE = getPath().join(STORAGE_DIR, "attempt-events.json");
 
 const STORAGE_BACKEND = String(
   process.env.STORAGE_BACKEND ||
@@ -108,6 +109,65 @@ function parseBoolean(value, fallback = false) {
   return fallback;
 }
 
+function normalizeStateRevision(value) {
+  const revision = Number(value);
+  return Number.isSafeInteger(revision) && revision >= 0 ? revision : 0;
+}
+
+function normalizeFileAttempt(attempt) {
+  if (!attempt) {
+    return null;
+  }
+  const normalized = {
+    ...attempt,
+    stateRevision: normalizeStateRevision(attempt.stateRevision),
+    accessTokenHash: attempt.accessTokenHash || null
+  };
+  delete normalized._lastChangedQuestionId;
+  return normalized;
+}
+
+function changedQuestionIds(options = {}) {
+  if (!Array.isArray(options.changedQuestionIds)) {
+    return null;
+  }
+  return [...new Set(options.changedQuestionIds.map(String).filter(Boolean))];
+}
+
+function mergeFileAttempt(current, candidate, options = {}) {
+  const next = {
+    ...current,
+    ...candidate,
+    accessTokenHash:
+      candidate.accessTokenHash === undefined
+        ? current.accessTokenHash || null
+        : candidate.accessTokenHash || null
+  };
+  const selectedQuestionIds = changedQuestionIds(options);
+
+  if (options.stateOnly) {
+    next.answers = current.answers || {};
+    next.questionLog = current.questionLog || {};
+  } else if (selectedQuestionIds) {
+    next.answers = { ...(current.answers || {}) };
+    next.questionLog = { ...(current.questionLog || {}) };
+    for (const questionId of selectedQuestionIds) {
+      if (Object.prototype.hasOwnProperty.call(candidate.answers || {}, questionId)) {
+        next.answers[questionId] = candidate.answers[questionId];
+      }
+      if (Object.prototype.hasOwnProperty.call(candidate.questionLog || {}, questionId)) {
+        next.questionLog[questionId] = candidate.questionLog[questionId];
+      }
+    }
+  } else {
+    next.answers = candidate.answers || current.answers || {};
+    next.questionLog = candidate.questionLog || current.questionLog || {};
+  }
+
+  delete next._lastChangedQuestionId;
+  return next;
+}
+
 function initFileStorage() {
   ensureDir(DATA_DIR);
   ensureDir(CONFIG_DIR);
@@ -119,6 +179,7 @@ function initFileStorage() {
   readJson(CONTENT_DRAFTS_FILE, {});
   readJson(CONTENT_CUSTOM_FILE, {});
   readJson(PM01_VOICE_AUDIO_INDEX_FILE, {});
+  readJson(ATTEMPT_EVENTS_FILE, []);
 }
 
 async function initStorage() {
@@ -171,6 +232,11 @@ function loadSettings() {
       cloudflareEnv?.ADMIN_PASSWORD ||
       process.env.ADMIN_PASSWORD ||
       settings.adminPassword ||
+      "",
+    attemptIdSecret:
+      cloudflareEnv?.ATTEMPT_ID_SECRET ||
+      process.env.ATTEMPT_ID_SECRET ||
+      settings.attemptIdSecret ||
       "",
     showParticipantScore: parseBoolean(
       process.env.SHOW_PARTICIPANT_SCORE,
@@ -225,7 +291,7 @@ async function loadAttempts() {
   if (backend === "ydb") {
     return getYdbStore().loadAttempts();
   }
-  return readJson(ATTEMPTS_FILE, []);
+  return readJson(ATTEMPTS_FILE, []).map(normalizeFileAttempt).filter(Boolean);
 }
 
 async function loadAttemptSummaries() {
@@ -236,7 +302,7 @@ async function loadAttemptSummaries() {
   if (backend === "ydb") {
     return getYdbStore().loadAttemptSummaries();
   }
-  return readJson(ATTEMPTS_FILE, []);
+  return readJson(ATTEMPTS_FILE, []).map(normalizeFileAttempt).filter(Boolean);
 }
 
 async function saveAttempts(attempts) {
@@ -249,28 +315,101 @@ async function saveAttempts(attempts) {
     await getYdbStore().saveAttempts(attempts);
     return;
   }
-  writeJson(ATTEMPTS_FILE, attempts);
+  writeJson(
+    ATTEMPTS_FILE,
+    (attempts || []).map(normalizeFileAttempt).filter(Boolean)
+  );
 }
 
-async function upsertAttempt(attempt) {
+async function upsertAttempt(attempt, options = {}) {
   const backend = getStorageBackend();
   if (backend === "cloudflare") {
-    await getCloudflareStore().upsertAttempt(attempt);
+    await getCloudflareStore().upsertAttempt(attempt, options);
     return;
   }
   if (backend === "ydb") {
-    await getYdbStore().upsertAttempt(attempt);
+    await getYdbStore().upsertAttempt(attempt, options);
     return;
   }
 
   const attempts = readJson(ATTEMPTS_FILE, []);
   const index = attempts.findIndex((item) => item.id === attempt.id);
   if (index >= 0) {
-    attempts[index] = attempt;
+    const current = normalizeFileAttempt(attempts[index]);
+    attempts[index] = normalizeFileAttempt({
+      ...mergeFileAttempt(current, attempt, options),
+      stateRevision: current.stateRevision + 1
+    });
   } else {
-    attempts.push(attempt);
+    attempts.push(normalizeFileAttempt({ ...attempt, stateRevision: 0 }));
   }
   writeJson(ATTEMPTS_FILE, attempts);
+}
+
+async function createAttemptAtomic(attempt) {
+  const backend = getStorageBackend();
+  if (backend === "cloudflare") {
+    return getCloudflareStore().createAttemptAtomic(attempt);
+  }
+  if (backend === "ydb") {
+    return getYdbStore().createAttemptAtomic(attempt);
+  }
+
+  if (!attempt || !attempt.id) {
+    return { created: false, attempt: null };
+  }
+  const attempts = readJson(ATTEMPTS_FILE, []);
+  const existing = attempts.find((item) => item.id === attempt.id);
+  if (existing) {
+    return { created: false, attempt: normalizeFileAttempt(existing) };
+  }
+
+  const stored = normalizeFileAttempt({ ...attempt, stateRevision: 0 });
+  attempts.push(stored);
+  writeJson(ATTEMPTS_FILE, attempts);
+  return { created: true, attempt: stored };
+}
+
+async function updateAttemptWithRevision(attempt, expectedRevision, options = {}) {
+  const backend = getStorageBackend();
+  if (backend === "cloudflare") {
+    return getCloudflareStore().updateAttemptWithRevision(
+      attempt,
+      expectedRevision,
+      options
+    );
+  }
+  if (backend === "ydb") {
+    return getYdbStore().updateAttemptWithRevision(attempt, expectedRevision, options);
+  }
+
+  if (!attempt || !attempt.id) {
+    return false;
+  }
+  const expected = normalizeStateRevision(expectedRevision);
+  if (Number(expectedRevision) !== expected) {
+    return false;
+  }
+
+  const attempts = readJson(ATTEMPTS_FILE, []);
+  const index = attempts.findIndex((item) => item.id === attempt.id);
+  if (index < 0) {
+    return false;
+  }
+
+  const current = normalizeFileAttempt(attempts[index]);
+  if (current.stateRevision !== expected) {
+    return false;
+  }
+
+  const stored = normalizeFileAttempt({
+    ...mergeFileAttempt(current, attempt, options),
+    stateRevision: expected + 1
+  });
+  attempts[index] = stored;
+  writeJson(ATTEMPTS_FILE, attempts);
+  attempt.stateRevision = stored.stateRevision;
+  return true;
 }
 
 async function loadAttemptById(attemptId) {
@@ -283,7 +422,7 @@ async function loadAttemptById(attemptId) {
   }
 
   const attempts = readJson(ATTEMPTS_FILE, []);
-  return attempts.find((item) => item.id === attemptId) || null;
+  return normalizeFileAttempt(attempts.find((item) => item.id === attemptId) || null);
 }
 
 async function loadAdminSessions() {
@@ -435,6 +574,50 @@ async function deleteContentCustomQuestion(questionId) {
   writeJson(CONTENT_CUSTOM_FILE, questions);
 }
 
+async function appendAttemptEvent(attemptId, event, maxEvents = 250) {
+  const backend = getStorageBackend();
+  if (backend === "cloudflare") {
+    return getCloudflareStore().appendAttemptEvent(attemptId, event, maxEvents);
+  }
+  if (backend === "ydb") {
+    return getYdbStore().appendAttemptEvent(attemptId, event, maxEvents);
+  }
+
+  const limit = Math.max(0, Math.trunc(Number(maxEvents) || 0));
+  if (!attemptId || !event?.eventId || limit === 0) {
+    return { stored: false };
+  }
+  const events = readJson(ATTEMPT_EVENTS_FILE, []);
+  const exists = events.some(
+    (item) => item.attemptId === attemptId && item.eventId === event.eventId
+  );
+  if (exists) {
+    return { stored: false };
+  }
+  const attemptEventCount = events.filter((item) => item.attemptId === attemptId).length;
+  if (attemptEventCount >= limit) {
+    return { stored: false };
+  }
+  const storedEvent = { ...event, attemptId };
+  events.push(storedEvent);
+  writeJson(ATTEMPT_EVENTS_FILE, events);
+  return { stored: true, event: storedEvent };
+}
+
+async function loadAttemptEvents(attemptId) {
+  const backend = getStorageBackend();
+  if (backend === "cloudflare") {
+    return getCloudflareStore().loadAttemptEvents(attemptId);
+  }
+  if (backend === "ydb") {
+    return getYdbStore().loadAttemptEvents(attemptId);
+  }
+
+  return readJson(ATTEMPT_EVENTS_FILE, [])
+    .filter((event) => event.attemptId === attemptId)
+    .sort((left, right) => String(left.receivedAt).localeCompare(String(right.receivedAt)));
+}
+
 function normalizeAudioMeta(meta) {
   return {
     id: String(meta.id || "").trim(),
@@ -517,7 +700,11 @@ module.exports = {
   loadAttemptSummaries,
   saveAttempts,
   upsertAttempt,
+  createAttemptAtomic,
+  updateAttemptWithRevision,
   loadAttemptById,
+  appendAttemptEvent,
+  loadAttemptEvents,
   loadAdminSessions,
   saveAdminSessions,
   loadAdminSessionByToken,

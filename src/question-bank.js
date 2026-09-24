@@ -28,6 +28,7 @@ const TYPE_LABELS = {
   single_choice: "Один правильный ответ",
   bucket_sort: "Распределение по группам",
   ingredient_matrix: "Состав блюда",
+  dish_assembly: "Визуальная сборка блюда",
   sequence_drag: "Последовательность действий",
   case_cluster: "Кейс-кластер"
 };
@@ -115,6 +116,11 @@ const TYPE_PROFILES = {
     interactive: true,
     studentAction: "Собери состав блюда",
     methodicalPurpose: "Проверяет понимание состава блюда и выбор технологически нужных компонентов."
+  },
+  dish_assembly: {
+    interactive: true,
+    studentAction: "Собери блюдо из карточек продуктов",
+    methodicalPurpose: "Проверяет распознавание состава блюда через визуальное действие с компонентами."
   },
   sequence_drag: {
     interactive: true,

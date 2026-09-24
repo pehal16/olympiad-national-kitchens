@@ -1,11 +1,12 @@
 {
   "name": "national-kitchens-olympiad",
-  "version": "1.6.92",
+  "version": "1.7.0",
   "author": "Постовит Д.А.",
   "description": "Автономная веб-олимпиада по национальным кухням",
   "main": "electron-main.js",
   "scripts": {
     "start": "node server.js",
+    "start:olympiad:timeweb": "node olympiad-server.js",
     "desktop:start": "electron .",
     "desktop:dist": "electron-builder --win portable",
     "test": "node --test",
@@ -17,13 +18,19 @@
     "generate:pm01-semi-finished": "python scripts/generate-pm01-semi-finished-assets.py",
     "build:cloudflare": "node scripts/build-cloudflare-pages.js",
     "verify:cloudflare": "node scripts/verify-pm01-production.js",
+    "load:olympiad": "node scripts/load-test-olympiad.js",
+    "verify:timeweb-local": "node scripts/verify-timeweb-local.js",
+    "backup:olympiad": "node scripts/backup-olympiad-sqlite.js",
+    "audit:variants": "node scripts/audit-olympiad-variants.js",
+    "build:olympiad-visuals": "node scripts/build-olympiad-visual-runtime.js",
     "cloudflare:export": "node scripts/export-cloudflare-migration.js",
     "cloudflare:import": "node scripts/import-cloudflare-migration.js"
   },
   "dependencies": {
     "@ydbjs/auth": "^6.2.1",
     "@ydbjs/core": "^6.1.0",
-    "@ydbjs/query": "^6.0.7"
+    "@ydbjs/query": "^6.0.7",
+    "three": "^0.186.0"
   },
   "engines": {
     "node": ">=22"

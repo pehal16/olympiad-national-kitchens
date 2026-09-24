@@ -50,14 +50,26 @@ class NodeLikeRequest {
     if (this.destroyed) {
       return;
     }
-    const buffer = Buffer.from(await this.request.arrayBuffer());
-    if (this.destroyed) {
+    if (!this.request.body) {
+      this.emit("end");
       return;
     }
-    if (buffer.length) {
-      this.emit("data", buffer);
+
+    const reader = this.request.body.getReader();
+    try {
+      while (!this.destroyed) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value?.byteLength) this.emit("data", Buffer.from(value));
+      }
+      if (this.destroyed) {
+        await reader.cancel().catch(() => {});
+        return;
+      }
+      this.emit("end");
+    } finally {
+      reader.releaseLock();
     }
-    this.emit("end");
   }
 }
 

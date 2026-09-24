@@ -1,7 +1,11 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { scoreQuestion, summarizeAttempt } = require("../src/scoring");
+const {
+  scoreQuestion,
+  validateAnswerPayload,
+  summarizeAttempt
+} = require("../src/scoring");
 
 test("scoreQuestion gives full points for correct single choice", () => {
   const question = {
@@ -35,9 +39,79 @@ test("scoreQuestion subtracts extra ingredients in matrix task", () => {
     }
   });
 
-  assert.equal(result.autoScore, 1);
-  assert.equal(result.finalScore, 1);
+  assert.equal(result.autoScore, 1.67);
+  assert.equal(result.finalScore, 1.67);
   assert.equal(result.penalty, 1);
+});
+
+test("scoreQuestion scales visual dish assembly and penalizes extra components", () => {
+  const question = {
+    type: "dish_assembly",
+    maxScore: 6,
+    correctIngredientIds: ["base", "sauce", "cheese"]
+  };
+
+  const result = scoreQuestion(question, {
+    selectedIngredientIds: ["base", "sauce", "extra"]
+  });
+
+  assert.equal(result.autoScore, 2);
+  assert.equal(result.finalScore, 2);
+  assert.equal(result.penalty, 1);
+});
+
+test("validateAnswerPayload rejects forged or duplicated visual item ids", () => {
+  const question = {
+    type: "dish_assembly",
+    items: [{ id: "base" }, { id: "sauce" }]
+  };
+
+  assert.equal(
+    validateAnswerPayload(question, { selectedIngredientIds: ["base", "sauce"] }),
+    true
+  );
+  assert.equal(
+    validateAnswerPayload(question, { selectedIngredientIds: ["base", "unknown"] }),
+    false
+  );
+  assert.equal(
+    validateAnswerPayload(question, { selectedIngredientIds: ["base", "base"] }),
+    false
+  );
+  assert.equal(
+    validateAnswerPayload(question, {
+      selectedIngredientIds: ["base"],
+      leakedCorrectAnswer: true
+    }),
+    false
+  );
+  assert.equal(validateAnswerPayload(question, { selectedIngredientIds: "base" }), false);
+  assert.equal(validateAnswerPayload(question, {}), true);
+});
+
+test("validateAnswerPayload accepts only canonical payload fields and container types", () => {
+  const single = {
+    type: "single_choice",
+    options: [{ id: "a" }, { id: "b" }]
+  };
+  const sequence = {
+    type: "sequence_drag",
+    items: [{ id: "a" }, { id: "b" }]
+  };
+  const buckets = {
+    type: "bucket_sort",
+    items: [{ id: "a" }, { id: "b" }],
+    buckets: [{ id: "left" }, { id: "right" }]
+  };
+
+  assert.equal(validateAnswerPayload(single, { selectedOptionId: "a" }), true);
+  assert.equal(validateAnswerPayload(single, { selectedOptionId: "a", score: 10 }), false);
+  assert.equal(validateAnswerPayload(sequence, { sequence: ["a", "b"] }), true);
+  assert.equal(validateAnswerPayload(sequence, { sequence: "a,b" }), false);
+  assert.equal(validateAnswerPayload(buckets, { buckets: { a: "left" } }), true);
+  assert.equal(validateAnswerPayload(buckets, { buckets: [] }), false);
+  assert.equal(validateAnswerPayload(buckets, { buckets: { a: "left" }, extra: true }), false);
+  assert.equal(validateAnswerPayload(sequence, []), false);
 });
 
 test("summarizeAttempt aggregates tour scores and penalties", () => {

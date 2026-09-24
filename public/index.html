@@ -3,23 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1f8e73" />
+    <meta name="theme-color" content="#0e756d" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Национальные кухни мира</title>
-    <link rel="manifest" href="/manifest.webmanifest?v=1.6.23" />
+    <link rel="manifest" href="/manifest.webmanifest?v=1.7.0" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css?v=1.6.23" />
+    <link rel="preload" as="image" href="/assets/olympiad/landing/hero-national-cuisines.webp" />
+    <link rel="stylesheet" href="/styles.css?v=1.7.0-landing6" />
   </head>
-  <body>
+  <body class="olympiad-page">
     <div class="ambient ambient-a"></div>
     <div class="ambient ambient-b"></div>
 
     <main class="shell">
-      <section id="nav-ribbon" class="card nav-ribbon">
+      <section id="nav-ribbon" class="nav-ribbon landing-nav" aria-label="Навигация олимпиады">
         <div class="nav-ribbon-head">
-          <div class="nav-ribbon-label">Навигация</div>
+          <div class="nav-ribbon-label">Национальные кухни мира</div>
           <button
             id="nav-menu-toggle"
             class="button ghost nav-ribbon-toggle"
@@ -29,150 +30,91 @@
           >Меню</button>
         </div>
         <div id="nav-drawer" class="nav-ribbon-drawer">
-          <div class="nav-ribbon-summary" aria-hidden="true">
-            <div class="nav-ribbon-title">Платформа</div>
-            <small>Регистрация, прохождение и результат в одном окне.</small>
+          <div class="landing-brand">
+            <img src="/brand-gkts-shield.jpg" alt="" width="44" height="44" />
+            <span>Горловский колледж <br />технологий и сервиса</span>
           </div>
-          <button id="nav-back" class="button ghost" type="button">Назад</button>
-          <button id="nav-home" class="button ghost" type="button">Главная</button>
+          <button id="nav-back" class="button ghost hidden" type="button">Назад</button>
+          <button id="nav-home" class="button ghost" type="button">Об олимпиаде</button>
+          <button id="nav-rules" class="button ghost" type="button">Правила</button>
           <button id="nav-register" class="button ghost" type="button">Регистрация</button>
           <button id="nav-attempt" class="button ghost" type="button">Текущий тур</button>
           <button id="nav-result" class="button ghost" type="button">Результат</button>
-          <div id="network-status" class="network-badge online">Онлайн</div>
+          <a class="button ghost landing-organizer" href="/admin.html">Организатор</a>
+          <div id="network-status" class="network-badge online" role="status" aria-live="polite">Подключение…</div>
           <button id="install-app" class="button primary hidden" type="button">Установить приложение</button>
-          <a class="button ghost" href="/admin.html">Кабинет организатора</a>
-          <a class="button primary pm01-entry-link" href="/pm01.html">Экзамен ПМ.01</a>
         </div>
       </section>
 
-      <section id="hero-section" class="card hero hero-intro">
-        <div class="hero-grid">
-          <div class="hero-copy">
-            <div class="eyebrow">Цифровая олимпиада</div>
-            <h1 id="hero-title">Национальные кухни мира</h1>
-            <p id="hero-subtitle" class="lead"></p>
-            <div id="hero-format-badge" class="game-badge hero-format-badge">Индивидуальный формат • 45 минут • 5 этапов</div>
-            <div class="hero-quick-row" aria-label="Короткие характеристики олимпиады">
-              <span class="hero-quick-pill">Индивидуальный маршрут</span>
-              <span class="hero-quick-pill">Один вопрос на экране</span>
-              <span class="hero-quick-pill">Автопроверка</span>
-              <span class="hero-quick-pill">Сохранение результата</span>
-            </div>
-            <div class="hero-feature-grid" aria-label="Ключевые возможности платформы">
-              <article class="hero-feature-card">
-                <span class="hero-feature-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M6 7.5C6 5.57 7.57 4 9.5 4h5C16.43 4 18 5.57 18 7.5v9A3.5 3.5 0 0 1 14.5 20h-5A3.5 3.5 0 0 1 6 16.5v-9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
-                    <path d="M9 8h6M9 11h6M9 14h3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                  </svg>
-                </span>
-                <div>
-                  <strong>Индивидуальный вариант</strong>
-                  <span>Свой набор заданий.</span>
-                </div>
-              </article>
-              <article class="hero-feature-card">
-                <span class="hero-feature-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M12 5v7l4 2.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                    <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8" />
-                  </svg>
-                </span>
-                <div>
-                  <strong>Пошаговый формат</strong>
-                  <span>Без возврата к предыдущим вопросам.</span>
-                </div>
-              </article>
-              <article class="hero-feature-card">
-                <span class="hero-feature-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M7.5 12.5 10.5 15.5 16.5 8.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                    <rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" stroke-width="1.8" />
-                  </svg>
-                </span>
-                <div>
-                  <strong>Автопроверка</strong>
-                  <span>Результат считается автоматически.</span>
-                </div>
-              </article>
-              <article class="hero-feature-card">
-                <span class="hero-feature-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M7 16.5A3.5 3.5 0 0 1 7 9.5a4.5 4.5 0 0 1 8.72-1.42A3.25 3.25 0 1 1 17.75 16.5H7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
-                    <path d="M12 9.5v5M12 14.5l-2-2M12 14.5l2-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                </span>
-                <div>
-                  <strong>Облачное сохранение</strong>
-                  <span>Данные доступны организатору.</span>
-                </div>
-              </article>
-            </div>
-            <div class="hero-actions">
-              <a class="button primary pm01-entry-link" href="/pm01.html">Экзамен ПМ.01</a>
-              <button id="hero-action-register" class="button primary" type="button">Начать</button>
-              <button id="hero-action-attempt" class="button secondary" type="button">Продолжить</button>
-              <button id="hero-action-result" class="button ghost" type="button">Результат</button>
-            </div>
+      <section id="hero-section" class="landing-hero" aria-labelledby="hero-title">
+        <div class="landing-hero-media" aria-hidden="true"></div>
+        <div class="landing-hero-copy">
+          <h1 id="hero-title">Национальные <br />кухни мира</h1>
+          <p id="hero-subtitle" class="lead">Индивидуальная олимпиада по технологии приготовления блюд национальных кухонь.</p>
+          <div id="hero-load-message" class="message hidden" role="alert"></div>
+          <button id="hero-retry" class="button secondary hidden" type="button">Повторить загрузку</button>
+          <div class="landing-hero-actions">
+            <button id="hero-action-register" class="button primary" type="button" disabled>Загрузка олимпиады…</button>
+            <button id="hero-action-rules" class="landing-text-link" type="button">Как проходит олимпиада <span aria-hidden="true">→</span></button>
           </div>
-          <aside class="hero-brand-panel" aria-label="Статус и фирменный блок олимпиады">
-            <div class="hero-dashboard-card">
-              <div class="hero-dashboard-top">
-                <span class="eyebrow">Статус</span>
-                <strong>Платформа готова</strong>
-                <p class="muted">Короткий путь от регистрации до результата.</p>
-              </div>
-              <div class="hero-status-grid">
-                <article class="hero-status-card">
-                  <span>Старт</span>
-                  <strong id="hero-stage-value">Готовность</strong>
-                  <small id="hero-stage-note">Заполните данные участника.</small>
-                </article>
-                <article class="hero-status-card">
-                  <span>Прогресс</span>
-                  <strong id="hero-progress-value">0%</strong>
-                  <small id="hero-progress-note">Появится после запуска.</small>
-                </article>
-                <article class="hero-status-card">
-                  <span>Сеть</span>
-                  <strong id="hero-sync-value">Онлайн</strong>
-                  <small id="hero-sync-note">Результаты сохраняются автоматически.</small>
-                </article>
-              </div>
-              <div class="hero-brand-strip">
-                <figure class="brand-mini-card">
-                  <img
-                    src="/brand-prof-tourism.png"
-                    alt="Профессионалитет 2024. Туризм и сфера услуг"
-                    loading="eager"
-                    decoding="async"
-                    fetchpriority="high"
-                  />
-                </figure>
-                <figure class="brand-mini-card">
-                  <img
-                    src="/brand-prof-2024.jpg"
-                    alt="Профессионалитет 2024"
-                    loading="eager"
-                    decoding="async"
-                    fetchpriority="high"
-                  />
-                </figure>
-                <figure class="brand-mini-card">
-                  <img
-                    src="/brand-gkts-shield.jpg"
-                    alt="Эмблема Горловского колледжа технологий и сервиса"
-                    loading="eager"
-                    decoding="async"
-                    fetchpriority="high"
-                  />
-                </figure>
-              </div>
-            </div>
-          </aside>
+          <p id="hero-format-badge" class="landing-facts">45 минут <span>·</span> 5 туров <span>·</span> 38 заданий</p>
+          <p class="landing-save-note">Ответы сохраняются после подтверждения сервера.</p>
+          <p class="landing-pilot-note">Тестовый запуск: задания ещё проходят проверку. Результаты не являются официальными до утверждения организатором.</p>
         </div>
-        <div class="exam-preflight-note"><strong>После старта включается защищённый режим.</strong> Работа продолжается в полноэкранном формате.</div>
-        <div class="meta-row" id="tour-meta"></div>
+      </section>
+
+      <section id="how-section" class="how-panel" aria-labelledby="how-title">
+        <div class="how-panel-head">
+          <h2 id="how-title">Как проходит олимпиада</h2>
+          <button id="how-rules" class="landing-text-link" type="button">Подробнее о правилах <span aria-hidden="true">→</span></button>
+        </div>
+        <div class="how-steps">
+          <article class="how-step"><span class="how-number">1</span><div><h3>Регистрация</h3><p>Укажите ФИО, учебное заведение и группу. Проверьте данные перед стартом.</p></div></article>
+          <article class="how-step"><span class="how-number">2</span><div><h3>Прохождение</h3><p>Выполните задания за установленное время. Следующий вопрос откроется после сохранения ответа.</p></div></article>
+          <article class="how-step"><span class="how-number">3</span><div><h3>Результат</h3><p>После завершения получите подтверждение приёма работы. Баллы публикуются по решению организатора.</p></div></article>
+        </div>
+        <div class="meta-row" id="tour-meta" aria-label="Лимиты туров"></div>
+      </section>
+
+      <section class="card culinary-showcase" aria-labelledby="culinary-showcase-title">
+        <div class="culinary-showcase-copy">
+          <div>
+            <div class="eyebrow">Визуальный формат</div>
+            <h2 id="culinary-showcase-title">Блюда, которые можно изучать глазами</h2>
+          </div>
+          <p>
+            В заданиях используются проверенные версии рецептур, предметные изображения
+            ингредиентов и интерактивная 3D-сборка. В каждом спорном случае версия блюда
+            называется прямо в условии.
+          </p>
+          <a class="button primary" href="/visual-demo.html">Открыть демонстрацию 3D-сборки</a>
+        </div>
+        <div class="culinary-gallery" aria-label="Галерея блюд олимпиады">
+          <figure class="culinary-tile culinary-tile-featured">
+            <img src="/assets/olympiad/visual-v1/dishes/margherita-avpn.webp" alt="Традиционная неаполитанская пицца Маргарита" loading="lazy" decoding="async" />
+            <figcaption><strong>Маргарита</strong><span>традиционная версия AVPN</span></figcaption>
+          </figure>
+          <figure class="culinary-tile">
+            <img src="/assets/olympiad/visual-v1/dishes/caesar-russian-foodservice.webp" alt="Салат Цезарь с курицей в российской ресторанной подаче" loading="lazy" decoding="async" />
+            <figcaption><strong>Цезарь</strong><span>российская ресторанная версия</span></figcaption>
+          </figure>
+          <figure class="culinary-tile">
+            <img src="/assets/olympiad/visual-v1/dishes/caprese.webp" alt="Классический итальянский салат Капрезе" loading="lazy" decoding="async" />
+            <figcaption><strong>Капрезе</strong><span>итальянская классика</span></figcaption>
+          </figure>
+          <figure class="culinary-tile">
+            <img src="/assets/olympiad/visual-v1/dishes/horiatiki.webp" alt="Греческий салат хориатики" loading="lazy" decoding="async" />
+            <figcaption><strong>Хориатики</strong><span>греческая традиция</span></figcaption>
+          </figure>
+          <figure class="culinary-tile">
+            <img src="/assets/olympiad/visual-v1/dishes/ratatouille-byaldi.webp" alt="Рататуй в ресторанной подаче конфи бьялди" loading="lazy" decoding="async" />
+            <figcaption><strong>Рататуй</strong><span>подача конфи бьялди</span></figcaption>
+          </figure>
+          <figure class="culinary-tile">
+            <img src="/assets/olympiad/visual-v1/dishes/tiramisu-le-beccherie.webp" alt="Классический тирамису по рецептуре Le Beccherie" loading="lazy" decoding="async" />
+            <figcaption><strong>Тирамису</strong><span>версия Le Beccherie</span></figcaption>
+          </figure>
+        </div>
       </section>
 
       <section class="card journey-panel">
@@ -200,14 +142,17 @@
           <form id="registration-form" class="form-stack">
             <label class="field">
               <span>ФИО</span>
-              <input id="full-name" type="text" placeholder="Иванов Иван Иванович" required />
+              <input id="full-name" type="text" maxlength="160" minlength="5" autocomplete="name" placeholder="Иванов Иван Иванович" aria-describedby="full-name-hint" required />
+              <small id="full-name-hint" class="muted">Укажите фамилию и имя полностью. Никнеймы и цифры не принимаются.</small>
             </label>
             <label class="field">
               <span>Организация</span>
               <input
                 id="institution"
                 type="text"
-                value="ГБПОУ «Горловский колледж технологий и сервиса»"
+                maxlength="240"
+                placeholder="Полное название учебного заведения"
+                autocomplete="organization"
                 required
               />
             </label>
@@ -216,6 +161,7 @@
               <input
                 id="group-name"
                 type="text"
+                maxlength="120"
                 placeholder="№4/П-24, 43.01.09 Повар, кондитер"
                 required
               />
@@ -225,23 +171,28 @@
               <input
                 id="mentor-name"
                 type="text"
+                maxlength="160"
                 placeholder="ФИО наставника"
               />
             </label>
-            <button class="button primary" type="submit">Сохранить</button>
+            <button id="registration-submit" class="button primary" type="submit">Сохранить данные</button>
           </form>
-          <div id="registration-message" class="message hidden"></div>
+          <div id="registration-message" class="message hidden" role="status" aria-live="polite"></div>
         </section>
 
         <section class="card">
           <h2>Перед стартом</h2>
           <p class="section-intro">Подтвердите готовность и начните олимпиаду.</p>
+          <p class="landing-pilot-note">Сейчас это проверка работы олимпиады, а не официальное проведение. Не используйте пробный балл как итог конкурса.</p>
           <ul id="rules-list" class="flat-list"></ul>
           <div class="start-disclaimer">
             <label class="consent-check">
               <input id="start-consent" type="checkbox" />
               <span>
-                Подтверждаю готовность пройти олимпиаду без отвлечений в течение 45 минут.
+                Я ознакомлен(а) с правилами: уход из вкладки, потеря фокуса и выход из
+                полноэкранного режима блокируют продолжение и фиксируются в журнале; таймер
+                при этом не останавливается. Попытки вставки текста и нажатие Print Screen
+                также записываются, если браузер передаёт это событие.
               </span>
             </label>
             <small id="start-consent-hint" class="muted">
@@ -250,10 +201,8 @@
           </div>
           <div class="actions prestart-actions">
             <button id="start-attempt" class="button primary" disabled>Начать</button>
-            <a class="button secondary" href="/admin.html">Кабинет организатора</a>
-            <a class="button secondary pm01-entry-link" href="/pm01.html">Открыть экзамен ПМ.01</a>
           </div>
-          <div id="prestart-message" class="message hidden"></div>
+          <div id="prestart-message" class="message hidden" role="status" aria-live="polite"></div>
         </section>
       </section>
 
@@ -310,7 +259,7 @@
           <div class="participant-mode-strip">
             <div id="participant-mode-badge" class="system-pill neutral">Режим: ожидание</div>
             <div id="participant-stage-badge" class="system-pill neutral">Шаг: старт не выполнен</div>
-            <div id="participant-exam-badge" class="system-pill neutral">Экзаменационный режим: ожидание</div>
+            <div id="participant-exam-badge" class="system-pill neutral">Защищённый режим олимпиады: ожидание</div>
             <div id="participant-stability-badge" class="system-pill neutral">Автосохранение готово</div>
           </div>
           <div id="question-transition-banner" class="transition-banner hidden"></div>
@@ -367,20 +316,20 @@
 
       <footer class="footer-note">
         <span>ГБПОУ "Горловский колледж технологий и сервиса"</span>
-        <small>Разработчик Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса" • Версия <span id="app-version-label">1.6.89</span></small>
+        <small>Разработчик Постовит Д.А. Преподаватель ГБПОУ "Горловский колледж технологий и сервиса" • Версия <span id="app-version-label">1.7.0</span></small>
       </footer>
     </main>
 
     <div id="exam-guard-overlay" class="exam-guard-overlay hidden" aria-live="assertive">
       <div class="exam-guard-backdrop"></div>
       <section class="exam-guard-card">
-        <div class="eyebrow">Экзаменационный режим</div>
+        <div class="eyebrow">Защищённый режим олимпиады</div>
         <h2 id="exam-guard-title">Олимпиада временно поставлена на контроль</h2>
         <p id="exam-guard-message" class="lead">
           Вернитесь в активное окно олимпиады и восстановите полноэкранный режим, чтобы продолжить.
         </p>
         <div class="exam-guard-meta">
-          <div id="exam-incidents-badge" class="pill">Срабатываний: 0</div>
+          <div id="exam-incidents-badge" class="pill">Зафиксировано событий: 0</div>
           <div class="pill">Копирование и контекстное меню отключены</div>
         </div>
         <div class="actions">
@@ -389,6 +338,6 @@
       </section>
     </div>
 
-    <script src="/app.js?v=1.6.23"></script>
+    <script src="/app.js?v=1.7.0-landing6"></script>
   </body>
 </html>

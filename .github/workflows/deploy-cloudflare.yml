@@ -29,6 +29,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+      ATTEMPT_ID_SECRET: ${{ secrets.ATTEMPT_ID_SECRET }}
       LEARNING_AUTH_SECRET: ${{ secrets.LEARNING_AUTH_SECRET }}
       LEARNING_BOOTSTRAP_SECRET: ${{ secrets.LEARNING_BOOTSTRAP_SECRET }}
       YANDEX_DISK_OAUTH_TOKEN: ${{ secrets.YANDEX_DISK_OAUTH_TOKEN }}
@@ -52,9 +53,14 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ] || \
-             [ -z "${ADMIN_PASSWORD:-}" ] || [ -z "${LEARNING_AUTH_SECRET:-}" ] || \
+             [ -z "${ADMIN_PASSWORD:-}" ] || [ -z "${ATTEMPT_ID_SECRET:-}" ] || \
+             [ -z "${LEARNING_AUTH_SECRET:-}" ] || \
              [ -z "${LEARNING_BOOTSTRAP_SECRET:-}" ] || [ -z "${YANDEX_DISK_OAUTH_TOKEN:-}" ]; then
-            echo "Set CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, ADMIN_PASSWORD, LEARNING_AUTH_SECRET, LEARNING_BOOTSTRAP_SECRET, and YANDEX_DISK_OAUTH_TOKEN repository secrets." >&2
+            echo "Set CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, ADMIN_PASSWORD, ATTEMPT_ID_SECRET, LEARNING_AUTH_SECRET, LEARNING_BOOTSTRAP_SECRET, and YANDEX_DISK_OAUTH_TOKEN repository secrets." >&2
+            exit 1
+          fi
+          if [ "${#ATTEMPT_ID_SECRET}" -lt 32 ]; then
+            echo "ATTEMPT_ID_SECRET must contain at least 32 characters." >&2
             exit 1
           fi
 
@@ -83,6 +89,7 @@ jobs:
         shell: bash
         run: |
           printf '%s' "$ADMIN_PASSWORD" | npx wrangler pages secret put ADMIN_PASSWORD --project-name "$CF_PAGES_PROJECT"
+          printf '%s' "$ATTEMPT_ID_SECRET" | npx wrangler pages secret put ATTEMPT_ID_SECRET --project-name "$CF_PAGES_PROJECT"
           printf '%s' "$LEARNING_AUTH_SECRET" | npx wrangler pages secret put LEARNING_AUTH_SECRET --project-name "$CF_PAGES_PROJECT"
           printf '%s' "$LEARNING_BOOTSTRAP_SECRET" | npx wrangler pages secret put LEARNING_BOOTSTRAP_SECRET --project-name "$CF_PAGES_PROJECT"
           printf '%s' "$YANDEX_DISK_OAUTH_TOKEN" | npx wrangler pages secret put YANDEX_DISK_OAUTH_TOKEN --project-name "$CF_PAGES_PROJECT"

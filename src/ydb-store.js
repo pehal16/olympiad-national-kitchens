@@ -8,6 +8,8 @@ const ATTEMPT_VARIANTS_TABLE =
   process.env.YDB_ATTEMPT_VARIANTS_TABLE || "olympiad_attempt_variants";
 const ATTEMPT_ANSWERS_TABLE =
   process.env.YDB_ATTEMPT_ANSWERS_TABLE || "olympiad_attempt_answers";
+const ATTEMPT_EVENTS_TABLE =
+  process.env.YDB_ATTEMPT_EVENTS_TABLE || "olympiad_attempt_events";
 const ADMIN_SESSIONS_TABLE = process.env.YDB_ADMIN_SESSIONS_TABLE || "admin_sessions";
 const CONTENT_DRAFTS_TABLE =
   process.env.YDB_CONTENT_DRAFTS_TABLE || "olympiad_content_drafts";
@@ -106,6 +108,16 @@ async function ensureSchema() {
           PRIMARY KEY (question_id)
         )
       `;
+      await sql`
+        CREATE TABLE IF NOT EXISTS ${identifier(ATTEMPT_EVENTS_TABLE)} (
+          attempt_id Utf8,
+          event_id Utf8,
+          payload_json Utf8,
+          occurred_at Utf8,
+          received_at Utf8,
+          PRIMARY KEY (attempt_id, event_id)
+        )
+      `;
     })();
   }
 
@@ -163,7 +175,12 @@ function parsePayloadRows(rows) {
   return rows
     .map((row) => {
       try {
-        return JSON.parse(row.payload_json);
+        const payload = JSON.parse(row.payload_json);
+        if (row.id && payload && payload.id === row.id) {
+          payload.stateRevision = Math.max(0, Number(payload.stateRevision) || 0);
+          payload.accessTokenHash = payload.accessTokenHash || null;
+        }
+        return payload;
       } catch (error) {
         return null;
       }
@@ -322,26 +339,50 @@ async function upsertAnswerRow(attemptId, questionId, payload) {
   `;
 }
 
-async function upsertAttemptAnswers(attempt) {
+function normalizeChangedQuestionIds(value) {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+
+  return [...new Set(value.map((questionId) => String(questionId || "").trim()).filter(Boolean))];
+}
+
+async function upsertAttemptAnswers(attempt, changedQuestionIds = null) {
   if (!attempt || !attempt.id) {
     return;
   }
 
   const answers = attempt.answers || {};
   const questionLog = attempt.questionLog || {};
+  const explicitQuestionIds = normalizeChangedQuestionIds(changedQuestionIds);
   const changedQuestionId = attempt._lastChangedQuestionId;
 
-  if (changedQuestionId && answers[changedQuestionId]) {
+  if (explicitQuestionIds) {
+    for (const questionId of explicitQuestionIds) {
+      await upsertAnswerRow(attempt.id, questionId, {
+        answer: Object.prototype.hasOwnProperty.call(answers, questionId)
+          ? answers[questionId]
+          : null,
+        log: Object.prototype.hasOwnProperty.call(questionLog, questionId)
+          ? questionLog[questionId]
+          : null
+      });
+    }
+    return;
+  }
+
+  if (changedQuestionId && (answers[changedQuestionId] || questionLog[changedQuestionId])) {
     await upsertAnswerRow(attempt.id, changedQuestionId, {
-      answer: answers[changedQuestionId],
+      answer: answers[changedQuestionId] || null,
       log: questionLog[changedQuestionId] || null
     });
     return;
   }
 
-  for (const [questionId, answer] of Object.entries(answers)) {
+  const questionIds = new Set([...Object.keys(answers), ...Object.keys(questionLog)]);
+  for (const questionId of questionIds) {
     await upsertAnswerRow(attempt.id, questionId, {
-      answer,
+      answer: answers[questionId] || null,
       log: questionLog[questionId] || null
     });
   }
@@ -423,7 +464,7 @@ async function saveAttempts(attempts) {
   }
 }
 
-async function upsertAttempt(attempt) {
+async function upsertAttempt(attempt, options = {}) {
   if (!attempt || !attempt.id) {
     return;
   }
@@ -433,12 +474,67 @@ async function upsertAttempt(attempt) {
     attempt._variantStored = true;
   }
 
-  if ((attempt.answers && Object.keys(attempt.answers).length) || attempt._lastChangedQuestionId) {
-    await upsertAttemptAnswers(attempt);
+  const changedQuestionIds = normalizeChangedQuestionIds(options.changedQuestionIds);
+  const shouldWriteAnswerRows = changedQuestionIds
+    ? changedQuestionIds.length > 0
+    : (
+        (attempt.answers && Object.keys(attempt.answers).length) ||
+        (attempt.questionLog && Object.keys(attempt.questionLog).length) ||
+        attempt._lastChangedQuestionId
+      );
+
+  if (!options.stateOnly && shouldWriteAnswerRows) {
+    await upsertAttemptAnswers(attempt, changedQuestionIds);
     attempt._answersStored = true;
   }
 
   await upsertRow(ATTEMPTS_TABLE, "id", attempt.id, cloneAttemptState(attempt));
+}
+
+// YDB remains a compatibility backend rather than the production olympiad store.
+// These read-before-write helpers preserve the shared storage contract in one
+// process, but they intentionally do not claim cross-process transactional CAS.
+async function createAttemptAtomic(attempt) {
+  if (!attempt || !attempt.id) {
+    return { created: false, attempt: null };
+  }
+
+  const existing = await loadAttemptById(attempt.id);
+  if (existing) {
+    return { created: false, attempt: existing };
+  }
+
+  if (!Number.isInteger(Number(attempt.stateRevision)) || Number(attempt.stateRevision) < 0) {
+    attempt.stateRevision = 0;
+  } else {
+    attempt.stateRevision = Number(attempt.stateRevision);
+  }
+  await upsertAttempt(attempt);
+  return { created: true, attempt };
+}
+
+async function updateAttemptWithRevision(attempt, expectedRevision, options = {}) {
+  if (!attempt || !attempt.id) {
+    return false;
+  }
+
+  const expected = Number(expectedRevision);
+  if (!Number.isInteger(expected) || expected < 0) {
+    return false;
+  }
+
+  const existing = await loadAttemptById(attempt.id);
+  if (!existing || Math.max(0, Number(existing.stateRevision) || 0) !== expected) {
+    return false;
+  }
+
+  attempt.stateRevision = expected + 1;
+  if (!attempt.accessTokenHash && existing.accessTokenHash) {
+    attempt.accessTokenHash = existing.accessTokenHash;
+  }
+
+  await upsertAttempt(attempt, options);
+  return true;
 }
 
 async function loadAttemptById(attemptId) {
@@ -452,6 +548,8 @@ async function loadAttemptById(attemptId) {
 
   try {
     const statePayload = JSON.parse(row.payload_json);
+    statePayload.stateRevision = Math.max(0, Number(statePayload.stateRevision) || 0);
+    statePayload.accessTokenHash = statePayload.accessTokenHash || null;
     if (statePayload.variant && statePayload.answers) {
       return statePayload;
     }
@@ -598,6 +696,49 @@ async function deleteContentCustomQuestion(questionId) {
   `;
 }
 
+async function appendAttemptEvent(attemptId, event, maxEvents = 250) {
+  const limit = Math.max(0, Math.trunc(Number(maxEvents) || 0));
+  if (!attemptId || !event?.eventId || limit === 0) {
+    return { stored: false };
+  }
+
+  // Compatibility fallback only: YDB is not the production olympiad backend,
+  // so this read-before-write limit is not a cross-process atomic guarantee.
+  const existing = await loadAttemptEvents(attemptId);
+  if (existing.some((item) => item.eventId === event.eventId) || existing.length >= limit) {
+    return { stored: false };
+  }
+
+  await ensureSchema();
+  const sql = await getSql();
+  const payload = { ...event, attemptId: String(attemptId) };
+  await sql`
+    UPSERT INTO ${identifier(ATTEMPT_EVENTS_TABLE)}
+      (attempt_id, event_id, payload_json, occurred_at, received_at)
+    VALUES (
+      ${String(attemptId)},
+      ${String(event.eventId)},
+      ${JSON.stringify(payload)},
+      ${String(event.occurredAt)},
+      ${String(event.receivedAt)}
+    )
+  `;
+  return { stored: true, event: payload };
+}
+
+async function loadAttemptEvents(attemptId) {
+  await ensureSchema();
+  const sql = await getSql();
+  const [rows = []] = await sql`
+    SELECT payload_json
+    FROM ${identifier(ATTEMPT_EVENTS_TABLE)}
+    WHERE attempt_id = ${String(attemptId)}
+  `;
+  return parsePayloadRows(rows).sort((left, right) =>
+    String(left.receivedAt).localeCompare(String(right.receivedAt))
+  );
+}
+
 async function savePm01VoiceAudio(meta, buffer) {
   await ensurePm01VoiceAudioSchema();
   const sql = await getSql();
@@ -641,7 +782,11 @@ module.exports = {
   loadAttemptSummaries,
   saveAttempts,
   upsertAttempt,
+  createAttemptAtomic,
+  updateAttemptWithRevision,
   loadAttemptById,
+  appendAttemptEvent,
+  loadAttemptEvents,
   loadAdminSessions,
   saveAdminSessions,
   loadAdminSessionByToken,

@@ -1,17 +1,19 @@
-const CACHE_NAME = "national-kitchens-olympiad-v1-6-88";
+const CACHE_NAME = "national-kitchens-olympiad-v1-7-0-landing-6";
 const PRECACHE_URLS = [
   "/",
   "/admin.html",
   "/content-admin.html",
-  "/styles.css?v=1.6.23",
-  "/app.js?v=1.6.23",
-  "/admin.js?v=1.6.23",
-  "/content-admin.js?v=1.6.23",
-  "/manifest.webmanifest?v=1.6.23",
+  "/styles.css?v=1.7.0-landing6",
+  "/app.js?v=1.7.0-landing6",
+  "/admin.js?v=1.7.0-starts1",
+  "/content-admin.js?v=1.7.0",
+  "/assets/runtime/dish-scene-3d.js?v=1.7.0-photo3",
+  "/manifest.webmanifest?v=1.7.0",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   "/brand-prof-tourism.png",
-  "/brand-gkts-shield.jpg"
+  "/brand-gkts-shield.jpg",
+  "/assets/olympiad/landing/hero-national-cuisines.webp"
 ];
 
 self.addEventListener("install", (event) => {

@@ -42,6 +42,8 @@ const elements = {
   statParticipants: document.getElementById("stat-participants"),
   statAttempts: document.getElementById("stat-attempts"),
   statCompleted: document.getElementById("stat-completed"),
+  recentStartsCount: document.getElementById("recent-starts-count"),
+  recentStartsList: document.getElementById("recent-starts-list"),
   backendBadge: document.getElementById("system-backend-badge"),
   diskBadge: document.getElementById("system-disk-badge"),
   diagVersion: document.getElementById("diag-version"),
@@ -243,7 +245,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    await navigator.serviceWorker.register("/sw.js?v=1.6.89");
+    await navigator.serviceWorker.register("/sw.js?v=1.7.0");
     const registration = await navigator.serviceWorker.getRegistration();
     if (registration) {
       registration.update().catch(() => {});
@@ -538,7 +540,7 @@ function renderAttempts(attempts) {
     row.dataset.attempt = attempt.id;
     row.tabIndex = 0;
     row.innerHTML = `
-      <td>${attempt.rank}</td>
+      <td>${attempt.rank ?? "—"}</td>
       <td>${escapeHtml(attempt.fullName)}<br /><span class="muted">${escapeHtml(attempt.institution || "")}</span></td>
       <td>${escapeHtml(attempt.groupName || "")}<br /><span class="muted">${escapeHtml(attempt.mentorName || "  ")}</span></td>
       <td>${escapeHtml(attempt.status)}</td>
@@ -574,6 +576,54 @@ function renderAttempts(attempts) {
 
   updateFilterMeta(adminState.attempts.length, attempts.length);
 }
+
+function renderRecentStarts(attempts) {
+  if (!elements.recentStartsList || !elements.recentStartsCount) return;
+  const ordered = [...attempts]
+    .filter((attempt) => attempt.startedAt)
+    .sort((left, right) => new Date(right.startedAt) - new Date(left.startedAt));
+  elements.recentStartsCount.textContent = `${ordered.length} ${ordered.length === 1 ? "старт" : "стартов"}`;
+  elements.recentStartsList.replaceChildren();
+  if (!ordered.length) {
+    const empty = document.createElement("div");
+    empty.className = "muted";
+    empty.textContent = "Пока никто не начал работу.";
+    elements.recentStartsList.appendChild(empty);
+    return;
+  }
+  ordered.slice(0, 8).forEach((attempt) => {
+    const row = document.createElement("article");
+    row.className = "recent-start-row";
+    const name = document.createElement("strong");
+    name.textContent = attempt.fullName || "Участник";
+    const meta = document.createElement("span");
+    meta.className = "muted";
+    meta.textContent = [attempt.groupName, attempt.institution, formatDateTime(attempt.startedAt)]
+      .filter(Boolean)
+      .join(" • ");
+    const status = document.createElement("span");
+    status.className = "pill";
+    status.textContent = attempt.status === "in_progress" ? "В работе" : "Завершена";
+    const details = document.createElement("button");
+    details.type = "button";
+    details.className = "button ghost";
+    details.textContent = "Карточка";
+    details.addEventListener("click", () => loadAttemptDetail(attempt.id));
+    row.append(name, meta, status, details);
+    elements.recentStartsList.appendChild(row);
+  });
+}
+
+const integrityEventLabels = {
+  tab_hidden: "Уход с вкладки",
+  window_blur: "Потеря фокуса",
+  fullscreen_exit: "Выход из полноэкранного режима",
+  fullscreen_required: "Полноэкранный режим не включён",
+  guard_restored: "Режим восстановлен",
+  page_hidden: "Страница скрыта или закрыта",
+  capture_shortcut: "Нажат Print Screen — снимок не подтверждён",
+  clipboard_paste: "Попытка вставки из буфера"
+};
 
 function applyAttemptFilters() {
   const filters = syncFiltersFromInputs();
@@ -784,6 +834,7 @@ async function loadSummary() {
 
 async function loadAttempts() {
   adminState.attempts = await adminApi("/api/admin/attempts");
+  renderRecentStarts(adminState.attempts);
   populateFilterControls();
   applyAttemptFilters();
 }
@@ -806,9 +857,33 @@ async function loadAttemptDetail(attemptId, options = {}) {
     <span class="muted">${escapeHtml(data.attempt.participant.mentorName || "  ")}</span><br />
     <span class="muted">: ${escapeHtml(data.attempt.status)}</span><br />
     <span class="muted">: ${summary.totalFinalScore} / ${summary.totalMaxScore}</span><br />
+    <span class="muted">События контроля: ${data.attempt.integritySummary?.incidentCount || 0}</span><br />
     <span class="muted"> : ${escapeHtml((data.attempt.variantMeta.issuedQuestionIds || []).join(", "))}</span>
   `;
   detail.appendChild(top);
+
+  if (Array.isArray(data.integrityEvents) && data.integrityEvents.length) {
+    const integrityCard = document.createElement("section");
+    integrityCard.className = "detail-card";
+    integrityCard.innerHTML = `
+      <h3>Журнал экзаменационного режима</h3>
+      <p class="muted">События являются сигналами для проверки и не изменяют балл автоматически.</p>
+      <div class="review-list">
+        ${data.integrityEvents
+          .map(
+            (event) => `
+              <div class="review-box">
+                <strong>${escapeHtml(integrityEventLabels[event.eventType] || event.eventType || "Событие")}</strong>
+                <div class="muted">${escapeHtml(event.receivedAt || event.occurredAt || "")}</div>
+                <div>${escapeHtml(event.reason || "Без пояснения")}</div>
+                ${event.questionId ? `<div class="muted">Вопрос: ${escapeHtml(event.questionId)}</div>` : ""}
+              </div>`
+          )
+          .join("")}
+      </div>
+    `;
+    detail.appendChild(integrityCard);
+  }
 
   data.tours.forEach((tour) => {
     const card = document.createElement("section");
