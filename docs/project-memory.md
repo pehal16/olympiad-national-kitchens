@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-26
 
-## T1 Photo Recognition — approved for pilot publication (2026-09-26)
+## T1 Photo Recognition — published and verified (2026-09-26)
 
 - Blueprint revision 3 replaces only T1 with «Узнай блюдо»: ten mandatory photo questions in a fixed source order for every participant; only answer options shuffle. Each question scores 2 or 0; T1 remains 20, the olympiad remains 150 points / 45 minutes / 38 questions.
 - Active order: croissant, ramen, khinkali, taco, tom yum, lasagna, nigiri sushi, pilaf, seafood paella, hot dog. The seven dishes reserved for a future 3D final are absent from T1 photos and all options. No changes to the current T2–T5 banks or scoring, registration, integrity guard, D1, PM01, learning, certificates, or hosting.
@@ -10,7 +10,8 @@ Last updated: 2026-09-26
 - Ten reviewed AI-generated images are local WebP assets, 1200×800, under neutral `t1-active-01.webp` … `10.webp` names. Neutral alt text; no answer-bearing public manifest or embedded prompt/EXIF. `sanitizeQuestion` explicitly exposes photo URL/alt, never private source IDs or keys. The image must load before answer controls are enabled; failure shows a readable message.
 - Fifteen inactive editorial reserve records are in `data/banks/tour1-reserve.js`, not imported into the active blueprint. Images/options require separate review before activation.
 - Chromium QA: all ten questions on desktop 1440×1000 and mobile viewport 390×844; server-confirmed advancement to T2, reciprocal 2/0 scores, persistence of confirmed answers after reload, selected-card visibility, contained images, no horizontal overflow. No ordinary-flow console errors. Reload requires a user gesture to restore fullscreen (two expected browser warnings). This is viewport emulation, not a physical-phone certification.
-- Verification: 135/135 full Node tests, 14/14 focused variant/photo tests; 10,000-seed audit has zero score mismatches and every active T1 at 100% exposure; Cloudflare build and local PM01 regression pass; SQLite rehearsal with 40 participants × ten answer rounds has no errors. The user explicitly requested publication on the main production site on 2026-09-26; deployment is pending verification. This remains a pilot, not approval for official contest results. Review and source notes: `docs/tour1-photo-review.md`.
+- Verification: 135/135 full Node tests, 14/14 focused variant/photo tests; 10,000-seed audit has zero score mismatches and every active T1 at 100% exposure; Cloudflare build and local PM01 regression pass; SQLite rehearsal with 40 participants × ten answer rounds has no errors. The user explicitly requested publication on the main production site on 2026-09-26. This remains a pilot, not approval for official contest results. Review and source notes: `docs/tour1-photo-review.md`.
+- Published code commit `b29be9e` in successful Cloudflare deployment run `36263668719`. Post-deployment read-only checks passed: main page uses `1.7.0-t1photo1`; JS/CSS/service worker match the local release after BOM/newline normalization; all ten WebP assets return HTTP 200 with exact matching SHA-256 hashes; the public olympiad API reports «Узнай блюдо», 150 points and 45 minutes. `npm.cmd run verify:cloudflare -- https://olympiad-gkts.pages.dev` passed after deployment. No production participants were created and no stored attempts were modified by verification. This documentation-only follow-up does not trigger the path-filtered deployment workflow.
 
 ## Current Baseline
 
