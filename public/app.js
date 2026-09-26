@@ -213,6 +213,7 @@ function refreshAttemptControls() {
   const hasCurrentAnswer = hasActiveQuestion
     ? hasMeaningfulAnswer(state.questionController.getAnswer?.())
     : false;
+  const isComplete = state.questionController?.isComplete?.() ?? hasCurrentAnswer;
   const hasQueuedAnswers = hasPendingAnswers();
   const isBusy = state.isSubmittingAnswer || state.isFinishingAttempt || state.pendingFlushInFlight;
   const isBlockedByGuard = attemptInProgress && state.examGuardActive;
@@ -224,7 +225,7 @@ function refreshAttemptControls() {
   }
 
   elements.submitAnswer.disabled =
-    !hasActiveQuestion || !hasCurrentAnswer || interactionLocked;
+    !hasActiveQuestion || !hasCurrentAnswer || !isComplete || interactionLocked;
   elements.finishAttempt.disabled = !attemptInProgress || interactionLocked;
 
   if (state.isSubmittingAnswer) {
@@ -265,7 +266,9 @@ function refreshAttemptControls() {
   }
 
   elements.submitAnswer.textContent =
-    state.attempt.progress.currentQuestionIndex >= state.attempt.progress.totalQuestions
+    state.attempt.currentQuestion?.interactionMode === "country_match"
+      ? "Подтвердить и далее"
+      : state.attempt.progress.currentQuestionIndex >= state.attempt.progress.totalQuestions
       ? "Ответить и завершить"
       : "Ответить и далее";
 }
@@ -589,6 +592,9 @@ function handleProtectedDragStart(event) {
   if (dragNode) {
     return;
   }
+
+  const countryDish = event.target?.closest?.(".t2-match .t2-dish");
+  if (countryDish && elements.questionBody.contains(countryDish)) return;
 
   event.preventDefault();
 }
@@ -1853,7 +1859,7 @@ function renderHero() {
   elements.heroSubtitle.textContent = state.olympiad.subtitle;
   if (elements.heroFormatBadge) {
     const totalTours = Array.isArray(state.olympiad.tours) ? state.olympiad.tours.length : 0;
-    elements.heroFormatBadge.textContent = `${state.olympiad.durationMinutes} минут · ${totalTours} туров · 38 заданий`;
+    elements.heroFormatBadge.textContent = `${state.olympiad.durationMinutes} минут · ${totalTours} туров · 41 задание`;
   }
 }
 
@@ -2828,7 +2834,7 @@ function renderQuestion(question) {
     hydratedQuestion.type
   );
   const interactionHint =
-    hydratedQuestion.type === "sequence_drag"
+    hydratedQuestion.interactionMode === "country_match" ? "" : hydratedQuestion.type === "sequence_drag"
       ? "Можно не только перетаскивать мышью, но и выбрать шаг кликом, а затем нажать на карточку."
       : isInteractive
         ? "Можно не только перетаскивать мышью, но и выбрать нужную зону кликом, а затем нажать на карточку."
@@ -2851,7 +2857,15 @@ function renderQuestion(question) {
   } else if (hydratedQuestion.type === "sequence_drag") {
     state.questionController = renderSequenceDrag(hydratedQuestion);
   } else if (hydratedQuestion.type === "bucket_sort") {
-    state.questionController = renderBucketController(hydratedQuestion);
+    if (hydratedQuestion.interactionMode === "country_match") {
+      state.questionController = window.T2CountryMatch.create({
+        mount: elements.questionBody, question: hydratedQuestion, attemptId: state.attempt.id,
+        onChange: (answer) => {
+          rememberDraft(hydratedQuestion.id, answer);
+          refreshAttemptControls(); updateExamCockpit();
+        }
+      });
+    } else state.questionController = renderBucketController(hydratedQuestion);
   } else if (
     hydratedQuestion.type === "ingredient_matrix" ||
     hydratedQuestion.type === "dish_assembly"
@@ -2871,6 +2885,7 @@ function renderAttempt() {
   const attempt = state.attempt;
   const currentTour = attempt.currentTour;
   const currentQuestion = attempt.currentQuestion;
+  elements.attemptSection.classList.toggle("is-t2", currentQuestion?.interactionMode === "country_match");
 
   renderParticipant();
   saveTimingSnapshot(attempt);
@@ -2886,16 +2901,22 @@ function renderAttempt() {
     (attempt.progress.currentQuestionIndex / Math.max(1, attempt.progress.totalQuestions)) * 100
   }%`;
   if (currentTour) {
-    elements.progressTour.textContent = currentQuestion?.imageUrl && currentTour.code === "T1"
+    elements.progressTour.textContent = currentQuestion?.interactionMode === "country_match"
+      ? `Задание ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`
+      : currentQuestion?.imageUrl && currentTour.code === "T1"
       ? `Вопрос ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`
       : `${currentTour.code} • вопрос ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`;
     elements.progressTourFill.style.width = `${
       (attempt.progress.tourQuestionIndex / Math.max(1, attempt.progress.tourQuestionCount)) * 100
     }%`;
-    elements.tourCode.textContent = currentQuestion?.imageUrl && currentTour.code === "T1"
+    elements.tourCode.textContent = currentQuestion?.interactionMode === "country_match"
+      ? "Тур 2 · Кухни мира"
+      : currentQuestion?.imageUrl && currentTour.code === "T1"
       ? "Тур 1 · Узнай блюдо" : currentTour.code;
-    elements.tourTitle.textContent = currentTour.title;
-    elements.tourDescription.textContent = currentTour.description || "";
+    elements.tourTitle.textContent = currentQuestion?.interactionMode === "country_match"
+      ? "Сопоставьте блюда со странами" : currentTour.title;
+    elements.tourDescription.textContent = currentQuestion?.interactionMode === "country_match"
+      ? "" : currentTour.description || "";
     elements.tourLimit.textContent = `${currentTour.timeLimitMinutes} минут`;
   } else {
     elements.progressTour.textContent = "Тур завершён";
@@ -2910,10 +2931,6 @@ function renderAttempt() {
   renderJourneyMap();
   refreshAttemptControls();
   updateExamCockpit();
-  elements.submitAnswer.textContent =
-    attempt.progress.currentQuestionIndex >= attempt.progress.totalQuestions
-      ? "Ответить и завершить"
-      : "Ответить и далее";
 }
 
 function renderCertificate(attempt, scoresVisible) {
@@ -3045,6 +3062,9 @@ function describeAttemptTransition(previousAttempt, nextAttempt) {
   const nextTourId = nextAttempt.currentTour.id;
 
   if (previousTourId && previousTourId !== nextTourId) {
+    if (previousAttempt.currentQuestion?.interactionMode === "country_match") {
+      return "Тур 2 завершён · Ответы сохранены";
+    }
     return `Старт ${nextAttempt.currentTour.code}: ${nextAttempt.currentTour.title}.`;
   }
 
@@ -3449,6 +3469,11 @@ async function submitAnswer() {
 
   const previousQuestionId = state.attempt.currentQuestion && state.attempt.currentQuestion.id;
   const answerPayload = state.questionController.getAnswer();
+  if (state.questionController.isComplete && !state.questionController.isComplete()) {
+    showMessage(elements.attemptMessage, "Сопоставьте все четыре блюда, затем подтвердите ответ.", "warning");
+    refreshAttemptControls();
+    return;
+  }
   if (!hasMeaningfulAnswer(answerPayload)) {
     showMessage(
       elements.attemptMessage,

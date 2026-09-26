@@ -152,6 +152,10 @@ function shuffleQuestion(question, random) {
     prepared.items = shuffleArray(prepared.items, random);
   }
 
+  if (prepared.interactionMode === "country_match") {
+    prepared.buckets = shuffleArray(prepared.buckets, random);
+  }
+
   return prepared;
 }
 
@@ -336,6 +340,15 @@ function validateQuestionStructure(question) {
     if (!hasExactMapping) {
       throw new Error(`Вопрос ${question.sourceId || question.id} имеет неполную карту распределения.`);
     }
+    if (question.interactionMode === "country_match") {
+      if (items.length !== 4 || buckets.length !== 4 || question.maxScore !== 4 ||
+          itemIds.size !== 4 || bucketIds.size !== 4 || new Set(Object.values(correctBuckets)).size !== 4 ||
+          new Set(question.dishIds || []).size !== 4 ||
+          items.some((item) => !/^\/assets\/olympiad\/tour2\/t2-active-\d{2}\.webp$/.test(item.imageUrl)) ||
+          buckets.some((bucket) => !/^\/assets\/olympiad\/flags\/[a-z]{2}\.svg$/.test(bucket.flagUrl))) {
+        throw new Error(`Вопрос ${question.sourceId || question.id} нарушает контракт T2: четыре уникальные пары, фото и флаги.`);
+      }
+    }
     return;
   }
 
@@ -499,6 +512,16 @@ function buildTour1(olympiad, random) {
 
 function buildTour2(olympiad, usedDishIds, random) {
   const tour = olympiad.tours.find((item) => item.id === "tour-2");
+  if (tour.generation.mode === "fixed_country_matches") {
+    const blocks = olympiad.questionBank.tour2Blocks;
+    if (blocks.length !== 5 || blocks.some((block, index) =>
+      block.id !== `T2-${String(index + 1).padStart(2, "0")}` || block.interactionMode !== "country_match") ||
+      new Set(blocks.flatMap((block) => block.dishIds || [])).size !== 20) {
+      throw new Error("T2 требует 5 фиксированных заданий и 20 уникальных блюд.");
+    }
+    blocks.forEach((block) => (block.dishIds || []).forEach((dishId) => usedDishIds.add(dishId)));
+    return { tour, questions: blocks };
+  }
   const blocks = chooseMostBalancedBlocks(
     olympiad.questionBank.tour2Blocks,
     tour.generation.selectCount,
@@ -733,6 +756,7 @@ function sanitizeQuestion(question, attempt) {
   return {
     id: question.id,
     type: question.type,
+    ...(question.interactionMode === "country_match" ? { interactionMode: "country_match" } : {}),
     prompt: question.prompt,
     ...(question.imageUrl ? { imageUrl: question.imageUrl, imageAlt: question.imageAlt } : {}),
     scenario: question.scenario || "",
@@ -777,7 +801,8 @@ function sanitizeQuestion(question, attempt) {
     buckets: Array.isArray(question.buckets)
       ? question.buckets.map((bucket) => ({
           id: bucket.id,
-          label: bucket.label
+          label: bucket.label,
+          ...(question.interactionMode === "country_match" ? { flagUrl: bucket.flagUrl } : {})
         }))
       : [],
     selectedBucketId:

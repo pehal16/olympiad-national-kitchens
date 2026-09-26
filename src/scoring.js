@@ -171,6 +171,7 @@ function validateAnswerPayload(question, answerPayload) {
     const entries = Object.entries(buckets);
     return (
       entries.length <= itemIds.size &&
+      (question.interactionMode !== "country_match" || new Set(entries.map(([, id]) => id)).size === entries.length) &&
       entries.every(
         ([itemId, bucketId]) => itemIds.has(String(itemId)) && bucketIds.has(String(bucketId))
       )
