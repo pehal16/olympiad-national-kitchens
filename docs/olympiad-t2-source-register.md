@@ -1,14 +1,43 @@
 # T2 «Кухни мира»: реестр источников и изображений
 
-Дата проверки всех источников и изображений: **2026-09-26**. Частный редакционный документ; не включать в публичные participant payloads.
+Источники и генерация: **2026-09-26**; итоговая проверка коррекции: **2026-09-26–27**. Частный редакционный документ; не включать в публичные participant payloads.
 
 ## Контракт
 
 Пять фиксированных заданий по четыре взаимно-однозначные пары. Все участники получают одинаковые задания, порядок заданий, ключи и оценивание; порядок карточек и стран перемешивается. За правильную пару — 1 балл, за неверную/пустую — 0; частичный ответ допустим при досрочном завершении; максимум T2 — 20. Связь блюда с национальной кухней не означает исключительное авторство или отсутствие региональных версий. Фото помогает узнать уже названное блюдо, но состав/цвет/подача фото не являются отдельным ключом оценки.
 
-Все двадцать изображений созданы встроенным image generation по прочитанному тексту первичных официальных источников. Фотографии с сайтов не скачивались и не копировались. Все финальные WebP открыты по отдельности и проверены глазами: узнаваемость, отсутствие текста/водяных знаков/флагов/географических подсказок и грубых артефактов, соответствие выбранному описанному варианту. Формат: 900×600 (3:2), WebP quality 84; названия нейтральные, EXIF/XMP и промпты в публичные файлы не вложены. Исходные генерации находятся вне репозитория. Перегенерация ни одного финального блюда не потребовалась. Концепт интерфейса — отдельная генерация, не входит в эти 20 фото и не служит кулинарным источником.
+Общий формат изображений: оригинальные AI-generated фотографии, 900×600 (3:2), WebP quality 84; нейтральные имена, без EXIF/XMP и промптов в публичных файлах. Фотографии источников не скачиваются и не копируются. Исходные генерации и браузерные QA-материалы находятся вне репозитория. Концепт интерфейса не служит кулинарным источником. Записи первоначального пакета ниже сохраняют историческую QA, а не разрешение использовать отклонённые блюда в текущем банке.
 
-## Источники и полные финальные промпты
+## Текущая коррекция узнаваемости · blueprint revision 5
+
+Основание: реальное пользовательское прохождение 2026-09-26. **Узнаваемость для обычного русскоязычного студента 16–20 лет важнее количества стран.** Повтор страны между заданиями допустим; внутри каждого задания — четыре разные страны. Это редакционный фильтр здравого смысла, не статистически доказанная известность всех блюд.
+
+| Задание | Активные пары в приватном исходном порядке | Номера изображений |
+| --- | --- | --- |
+| T2-01 | Тирамису → Италия; Рататуй → Франция; Венский шницель → Австрия; Фиш-энд-чипс → Великобритания | 01, 02, 03, 04 — без изменений |
+| T2-02 | Онигири → Япония; Бибимбап → Республика Корея; Фо → Вьетнам; Пад-тай → Таиланд | 05, 06, 07, 08 — без изменений |
+| T2-03 | Паштел-де-ната → Португалия; Гаспачо → Испания; Брюссельская вафля → Бельгия; Салат «Оливье» → Россия | 10, 11, 12, 21 |
+| T2-04 | Эклер → Франция; Пекинская утка → Китай; Суп харчо → Грузия; Гуляш → Венгрия | 22, 14, 23, 16 |
+| T2-05 | Крылышки баффало → США; Паста карбонара → Италия; Буррито → Мексика; Моти → Япония | 19, 24, 25, 26 |
+
+T2-01/T2-02 полностью сохранены: изображения, пары, исходный порядок, баллы и источники. У T2-04 изменён только содержательный заголовок на «От Европы до Азии» после замены Индии Францией. Новые фото получили новые URL 21–26; старые 01–20 не перезаписаны, чтобы не менять выданные исторические варианты. Нет миграции попыток. Новые попытки получают revision 5. T2 остаётся 5×4, 20 баллов / 6 минут; олимпиада — 41 вопрос, 150 баллов / 45 минут. Банки T1/T3–T5 и UX не переделываются.
+
+## Неактивные / отклонённые после пользовательского тестирования
+
+| Блюдо / вариант | Прежний asset | Причина исключения из новых попыток |
+| --- | --- | --- |
+| Карривурст | 09 | Слишком низкая узнаваемость у целевой аудитории. |
+| Баттер чикен | 13 | Слишком низкая узнаваемость у целевой аудитории. |
+| Poutine | 17 | Название оказалось незнакомым при реальном прохождении. |
+| Stroopwafel / Стропвафли | 18 | Название оказалось незнакомым при реальном прохождении. |
+| Köttbullar / Кёттбуллар | 20 | Название оказалось незнакомым при реальном прохождении. |
+| «Харчо», мегрельское ореховое мясное блюдо | 15 | Предыдущая ошибка: для генерации визуала выбрана не та разновидность kharcho; brief не отделял суп от густого мегрельского блюда. Участник воспринимал его как гуляш/тушёный фарш. Для нынешней карточки REJECT. |
+
+Источники, первоначальные промпты и сами assets сохранены ниже для истории и неизменяемых старых попыток. Это не активный резерв для автоматического возврата в T2. Новая карточка называется **«Суп харчо»**; источник и визуал именно soup version. Критерии REJECT: рагу; не виден бульон; фарш/гуляш/ореховая паста. Старый visual source Mingrelian Walnut Kharcho не использовался для новой генерации.
+
+## Первоначальный пакет revision 4: источники и полные промпты (история)
+
+Все первоначальные двадцать изображений были созданы по прочитанному тексту первичных официальных источников и открыты по отдельности; после первой визуальной проверки повторной генерации не было. Последующее пользовательское прохождение выявило описанные выше содержательные и визуальные проблемы. Историческое PASS в записях 09/13/15/17/18/20 не отменяет нового решения об исключении.
 
 ### 01 · T2-01 · Тирамису → Италия
 
@@ -364,21 +393,146 @@ Use case: photorealistic-natural. Create ONE original professional food photogra
 
 ## Дополнительные первичные уточнения
 
+Уточнения первоначального пакета ниже сохранены для истории; Стропвафли теперь неактивны.
+
 - Фо: [21 must-try Vietnamese dishes — Vietnam Tourism](https://vietnam.travel/node/195): отдельно подтверждает плоскую рисовую лапшу и тонкую говядину; используется для уточнения, не для копирования фото.
 - Стропвафли: [Dutch foods to try — I amsterdam](https://www.iamsterdam.com/en/see-and-do/restaurant-and-bars/dutch-foods-to-try): туристическая организация Amsterdam & Partners; две тонкие вафли с сиропной прослойкой.
 - Гуляш: [Que doit-on savoir à propos de la cuisine hongroise? — Visit Hungary](https://visithungary.com/fr/article/que-doit-on-savoir-a-propos-de-la-cuisine-hongroise-2): различение гуляша-супа и пёркёльта.
 
-## Решение по предложенной матрице
+## Первоначальное решение по матрице revision 4 (история, заменено коррекцией выше)
 
 Ни одна из 20 пар пользователя не заменена. Для харчо выбран подтверждённый GNTA мегрельский ореховый вариант, не рисовый суп. Для Buffalo wings выбран опубликованный официальным порталом Нью-Йорка запечённый вариант. Для гуляша — суп, для рататуя — нарезанное рагу, для вафли — прямоугольная брюссельская разновидность. Эти уточнения не меняют ключи стран. Нет пересечений с активными блюдами T1 и семью зарезервированными блюдами будущего T5; это проверяется тестом. Старые сохранённые попытки не пересоздаются и сохраняют старый выданный вариант.
 
+## Новые активные изображения revision 5: источник → brief → генерация → QA
+
+Проверка текстов и генерация: 2026-09-26. Шесть отдельных успешных вызовов встроенного image generation, без reference-фото и image-to-image. Генерация распределена между помощниками согласно Creative Production; источники, окончательные brief, интеграция и индивидуальная визуальная приёмка выполнены основным агентом. Production-board не был доступен через требуемый skill прямой вызов; использованы штатные результаты image generation. Ни одна чужая фотография не скачана. Исходники 1536×1024; экспорт без изменения содержимого в 900×600 WebP quality 84, только ресайз/сжатие. Все шесть оригиналов и все шесть конечных WebP открыты глазами.
+
+Внутренний тест без подписи: изображения не противоречат названиям; это проверка визуального соответствия, **не слепой эксперимент с реальными студентами** и не доказательство узнаваемости всей целевой аудиторией. Все шесть приняты с первой новой генерации. Суп харчо полностью создан заново относительно отвергнутого asset 15, но новая версия не потребовала дополнительного повтора после QA. У эклера композиция не буквально соблюдает просьбу оставить оба отрезанных конца: на тарелке одно целое изделие и один открытый срез. Это не меняет тип выпечки; принято как допустимая вариация подачи, не скрытая ошибка состава.
+
+### 21 · T2-03 · Салат «Оливье» → Россия
+
+- Dish ID: `olivier`.
+- Основной первичный источник: [«Москва гастрономическая», меню русской кухни — mos.ru](https://www.mos.ru/upload/documents/oiv/moskva_gastronomicheskaya.pdf). Прочитан индексированный текст раздела: русское меню, Люсьен Оливье и ресторан «Эрмитаж» в Москве; современная упрощённая версия с мясом/курицей/колбасой, овощами и майонезом. Прямое открытие PDF исследовательским web-инструментом вернуло ошибку; самостоятельная сверка всего оригинального PDF не подтверждена.
+- Дополнительный первичный авторский рецепт современной версии: [«Салат Оливье классический с колбасой» — Gastronom, Рита Пирко](https://www.gastronom.ru/recipe/amp/44760). Текст ингредиентов и приготовления прочитан полностью: картофель, морковь, варёная колбаса, яйца, солёный огурец, горошек, лук, майонез; небольшие кубики.
+- Подтверждённые признаки → visual brief: миска обычного современного салата; кубики картофеля/моркови/колбасы/яйца/огурца, отдельные горошины, немного лука, умеренная майонезная связка. Не историческая версия XIX века, не ресторанная деконструкция, без рябчиков/икры/морепродуктов/кукурузы. Источник mos.ru подтверждает связь с российским меню, не исключительное авторство России.
+- Узнаваемость: привычный салат в российских домашних застольях, столовых и магазинах; разумная редакционная вероятность знакомства с названием высокая, без заявления о статистическом охвате.
+- Asset: `public/assets/olympiad/tour2/t2-active-21.webp`, 69 850 bytes; flag `ru.svg`.
+- Генерация: `exec-32d2b2dd-7c8f-47e3-8395-08cf37a46ad4`.
+- QA: PASS — мелкие кубики, видимый горошек и майонез, цельная миска, без географических подсказок/текста; без подписи выглядит как выбранная современная версия салата. Повтор после QA: нет.
+
+```text
+Use case: photorealistic-natural. Create ONE original professional food photograph for an educational named-dish card, landscape 3:2. Light neutral stone table, unbranded simple ivory ceramic salad bowl, soft natural side window light, 40 degree camera angle, centered whole bowl, close enough to read at thumbnail size. Natural edible textures, not illustration or plastic. Subject: familiar modern Russian Olivier salad, small even cubes of boiled potato, carrot, cooked sausage, hard-boiled egg and pickled cucumber, whole green peas and a little finely chopped onion, lightly bound with mayonnaise so individual pieces remain visible. Neat generous mound in the bowl, no decorative deconstruction. No historical game birds, caviar, seafood, corn, lettuce leaves, garnish, other foods, utensils, people, hands, text, logos, watermark, packaging, flags or country clues. Do not copy a source photograph.
+```
+
+### 22 · T2-04 · Эклер → Франция
+
+- Dish ID: `eclair`.
+- Основной первичный источник: [«Les meilleurs desserts et pâtisseries à goûter en France» — France.fr](https://www.france.fr/fr/article/patisserie-francaise/). Прочитан раздел про éclair в пятёрке классических изделий: вытянутое заварное тесто, начинка, глазурь. Именно французская страница; англоязычный вариант не использовался вместо отсутствующего там раздела.
+- Дополнительная проверка формы/начинки: [Dark Chocolate Eclairs — King Arthur Baking](https://www.kingarthurbaking.com/recipes/dark-chocolate-eclairs-recipe). Прочитаны текст рецепта и пояснение о классическом ванильном кондитерском креме; продолговатые заварные оболочки с начинкой и шоколадом.
+- Признаки → visual brief: золотистое продолговатое заварное изделие, светлый ванильный крем, тёмная шоколадная глазурь; два изделия/части, один срез. Без фантазийного цвета, пончиков, фруктов, Парижа/надписей/флагов.
+- Узнаваемость: обычная кондитерская выпечка российских магазинов и кафе; название не требует знания редкой региональной кухни.
+- Asset: `public/assets/olympiad/tour2/t2-active-22.webp`, 54 920 bytes; существующий flag `fr.svg`.
+- Генерация: `exec-4f61797d-aaf4-466b-9433-cd72993756dd`.
+- QA: PASS — вытянутые заварные эклеры, крем виден в срезе, шоколадная глазурь, не пончик; композиционная оговорка описана выше. Повтор после QA: нет.
+
+```text
+Use case: photorealistic-natural. Create ONE original professional food photograph for an educational named-dish card, landscape 3:2. Light neutral stone table, unbranded simple ivory ceramic plate, soft natural side window light, 40 degree camera angle, centered entire plate, close enough to read at thumbnail size. Natural edible textures, not illustration or plastic. Subject: two classic elongated eclairs with golden baked choux pastry, filled with pale vanilla pastry cream and topped with a smooth dark chocolate glaze. One is whole; the other has a clean crosswise cut that exposes the cream-filled choux shell, with both pieces beside each other. Modest contemporary pastry presentation. Clearly long choux pastries, not round doughnuts, not a layered cake. No fantasy colors, sprinkles, fruit, piped external cream, fancy deconstruction, extra food, utensils, people, hands, text, Paris landmarks, logos, watermark, packaging, flags or country clues. Do not copy a source photograph.
+```
+
+### 23 · T2-04 · Суп харчо → Грузия
+
+- Dish ID: `kharcho` (стабильный private ID; подпись изменена с «Харчо» на «Суп харчо»).
+- Активный visual source: [«Суп харчо из говядины с рисом» — Gastronom](https://www.gastronom.ru/recipe/4632/sup-harcho-iz-govjadiny-s-risom). Прочитаны ингредиенты и приготовление именно супа: говядина/бульон, рис, лук, томатная паста, молотый орех как компонент, чеснок, пряности, кинза/базилик, кислая составляющая. Не Mingrelian Walnut Kharcho. Ссылка страницы на «Коллекцию рецептов» №1 (09), 2007 отмечена, но отдельный бумажный журнал не проверен.
+- Классическая дополнительная сверка: [В. В. Похлёбкин, «Национальные кухни наших народов», 1983, раздел «Харчо» — текстовая публикация](https://sheba.spb.ru/za/nacional-narod-1983.htm). Прочитан соответствующий раздел электронной транскрипции: суп на говядине с рисом, орехом, кислой основой и зеленью; допустим томатный вариант. Это сверка текста печатной рецептуры, не осмотр скана оригинальной страницы.
+- Признаки → visual brief: глубокая миска, красновато-коричневый жидкий бульон с просветами между ингредиентами, различимые рис и кусочки говядины, немного зелени; лук/молотый орех рассредоточены, а не ореховая паста. Не гуща из фарша, не гуляш и не тушёное мясо без жидкости.
+- Узнаваемость: знакомое русскоязычной аудитории название супа; точная подпись снижает неоднозначность по сравнению с общим «Харчо». Связь с грузинской кухней не является заявлением об исключительном происхождении каждой версии.
+- Asset: `public/assets/olympiad/tour2/t2-active-23.webp`, 93 886 bytes. Старый `t2-active-15.webp` не используется в новых T2, оставлен только для неизменяемых старых попыток.
+- Генерация: `exec-0c74b88b-bf03-4fc4-9b70-ad0a35c602e2` — полная новая генерация, не редактирование отвергнутого фото.
+- QA: PASS — жидкий бульон хорошо виден, рис отдельными зёрнами и натуральные кусочки говядины, глубокая миска, без вида фарша/пасты/рагу. Критические REJECT-условия проверены глазами на оригинале и WebP. Повтор после новой QA: нет.
+
+```text
+Use case: photorealistic-natural. Create ONE original professional food photograph for an educational named-dish card, landscape 3:2. Light neutral stone table, unbranded simple ivory deep ceramic soup bowl, soft natural side window light, 55 degree camera angle, entire bowl centered and visible, close enough to read at thumbnail size. Subject: kharcho SOUP made with beef and rice, the soup version, not Mingrelian walnut stew. A deep bowl full of reddish-brown beef broth with clearly visible liquid pools between ingredients, several naturally irregular cooked beef chunks, individual cooked white rice grains visible in the broth, a modest sprinkling of chopped cilantro and basil. Tomato paste gives a moderate warm red-brown tint; ground walnut and onion are dispersed seasoning, never a nut paste. The liquid broth must visually dominate and look unmistakably like spoonable soup even at small card size. Natural appetizing soup texture. Reject a stew, goulash, mince, meat sauce, dry beef, porridge, or thick paste appearance. No potatoes, carrot, sour cream, whole nuts, decorative garnish, extra foods, utensils, people, hands, text, logos, watermark, packaging, flags or country clues. Do not copy a source photograph.
+```
+
+### 24 · T2-05 · Паста карбонара → Италия
+
+- Dish ID: `carbonara`.
+- Основной первичный источник: [Pasta types: Italian formats and recipes — Italia.it](https://www.italia.it/en/italy/things-to-do/pasta-types-italian-formats-and-recipes). Прочитан раздел spaghetti/carbonara: Лацио, яйца, пекорино и гуанчале. Сторонние исторические утверждения страницы, не относящиеся к нашему блюду, не используются.
+- Дополнительный первичный рецепт: [Spaghetti alla carbonara — Barilla](https://www.barilla.com/it-it/ricette/tutte/spaghetti-alla-carbonara). Прочитаны ингредиенты и приготовление: желток, пекорино, гуанчале, чёрный перец, вода от пасты; эмульсия без сливок, смешивание не превращает яйцо в омлет.
+- Признаки → visual brief: отдельные нити спагетти, тонкое шелковистое желтоватое покрытие яйцо/сыр, подрумяненные мясные кусочки с жировыми слоями, немного тёртого сыра/перца. Без белой лужи сливок, грибов/помидоров/зелени/яйца сверху.
+- Узнаваемость: распространённое название пасты в городских кафе/доставке; «Паста» в подписи помогает участнику, не знакомому с составом рецепта.
+- Asset: `public/assets/olympiad/tour2/t2-active-24.webp`, 100 960 bytes; существующий flag `it.svg`.
+- Генерация: `exec-d3564262-c7fc-4cb9-863c-fe85f79fb73e`.
+- QA: PASS — спагетти с тонкой эмульсией, мясо, сыр и чёрный перец; не паста, залитая белыми сливками. Повтор после QA: нет.
+
+```text
+Use case: photorealistic-natural. Create ONE original professional food photograph for an educational named-dish card, landscape 3:2. Light neutral stone table, unbranded simple ivory ceramic pasta plate, soft natural side window light, 40 degree camera angle, entire plate centered and visible, close enough to read at thumbnail size. Subject: classic spaghetti carbonara, long distinct spaghetti strands lightly coated in a glossy warm pale-gold egg-and-pecorino emulsion, with browned guanciale pieces showing natural lean-and-fat layers, a small amount of finely grated pecorino and visible black pepper flecks. Natural casually twirled mound, appetizing edible texture. The sauce is a thin silky coating on individual strands, not a pool or blanket of white liquid cream. No cream sauce, milk, Alfredo appearance, mushrooms, tomatoes, herbs, basil, fried egg or raw egg yolk on top, other foods, utensils, people, hands, text, logos, watermark, packaging, flags or country clues. Do not copy a source photograph.
+```
+
+### 25 · T2-05 · Буррито → Мексика
+
+- Dish ID: `burrito`.
+- Основной первичный источник: [Gastronomía — Portal Gubernamental del Estado de Chihuahua](https://chihuahua.gob.mx/info/gastronomia). Прочитан текст раздела портала: burritos среди типичных блюд Чиуауа; мучная тортилья и начинки, включая говядину/свинину, фасоль, чили и сыр. В нашей версии выбраны говядина и фасоль; остальные перечисленные варианты не навязываются каждому буррито.
+- Признаки → visual brief: большая мягкая мучная тортилья, закрытая вокруг мяса/фасоли с подвёрнутыми концами, разрез на две половины показывает начинку. Не открытое тако и не твёрдая тако-ракушка; без неподтверждённых гарниров/рисовой начинки.
+- Узнаваемость: меню мексиканской/fast-casual кухни, доставка и массовая культура; у части аудитории знакомство может быть хуже, чем у Оливье/эклера — требует следующего реального пилота, а не обещания универсальной известности.
+- Asset: `public/assets/olympiad/tour2/t2-active-25.webp`, 76 562 bytes; новый flag `mx.svg`.
+- Генерация: `exec-ab84565f-b334-406a-8750-38760283481d`.
+- QA: PASS — закрытая мучная оболочка, два среза, говядина и фасоль; не открытая тортилья/тако. Повтор после QA: нет.
+
+```text
+Use case: photorealistic-natural. Create ONE original professional food photograph for an educational named-dish card, landscape 3:2. Light neutral stone table, unbranded simple ivory ceramic plate, soft natural side window light, 40 degree camera angle, entire plate centered and visible, close enough to read at thumbnail size. Subject: one generously filled burrito, a large soft flour tortilla with natural toasted brown spots rolled into a closed thick cylinder with tucked ends around a filling of tender cooked beef and beans. Cut the burrito cleanly across into two substantial halves, one cross-section facing the camera, with recognizable beef and beans inside and a continuous wrapped tortilla surrounding the filling. Neat casual modern food presentation, natural edible textures. Not an open wrap, not an open taco, not a hard taco shell, not a burger or sandwich. No rice, lettuce, corn, grated cheese, salsa bowl, additional foods, utensils, people, hands, text, logos, watermark, packaging, flags or country clues. Do not copy a source photograph.
+```
+
+### 26 · T2-05 · Моти → Япония
+
+- Dish ID: `mochi`.
+- Основной первичный источник: [Japanese desserts to try — JNTO](https://www.japan.travel/en/blog/japanese-desserts-to-try/). Прочитан раздел mochi/daifuku: мягкое изделие из клейкого риса; возможны анко и клубника. Дополнение: [Auspicious, nutritious and delicious — JNTO](https://www.japan.travel/en/gastronomy/article-auspicious-nutritious-and-delicious/) — прочитан текст о steamed/pounded mochigome и мягкой эластичной текстуре.
+- Выбранная разновидность до генерации: **ichigo daifuku**, десертные моти с пастой адзуки и клубникой. Подпись участнику — общее «Моти», не утверждение, что все моти имеют эту начинку.
+- Признаки → visual brief: мягкие округлые рисовые пирожные с матовой крахмальной поверхностью, естественные белый/нежно-розовый оттенки, два целых и разрез третьего; рисовая оболочка вокруг анко/клубники. Не макароны, данго на шпажке, пончики или шарики мороженого; без аниме/иероглифов/палочек.
+- Узнаваемость: современные десертные моти встречаются в магазинах/доставке и молодёжной гастрономической культуре; без количественного заявления об охвате. Возможны различия между населёнными пунктами.
+- Asset: `public/assets/olympiad/tour2/t2-active-26.webp`, 57 230 bytes; существующий flag `jp.svg`.
+- Генерация: `exec-f3a60117-3893-47d5-8671-04dc28ecef3c`.
+- QA: PASS — мягкая рисовая оболочка, матовая поверхность, видимая паста адзуки/клубника в разрезе; не макарон/мороженое. Повтор после QA: нет.
+
+```text
+Use case: photorealistic-natural. Create ONE original professional food photograph for an educational named-dish card, landscape 3:2. Light neutral stone table, unbranded simple ivory ceramic dessert plate, soft natural side window light, 40 degree camera angle, entire plate centered and visible, close enough to read at thumbnail size. Subject: three soft round dessert mochi in the daifuku style, made of smooth chewy glutinous-rice dough, gently flattened round shapes with a fine matte starch dusting. Natural ivory-white and very pale pink colors. Two are whole; the third is cut neatly into two halves to reveal a thin soft rice-dough skin surrounding dark red sweet azuki bean paste and a fresh strawberry center. Both cut halves stay on the plate. Modest contemporary dessert presentation, realistic pliable dough, not plastic perfect spheres. No macaron shells, layered biscuits, doughnut holes, skewered dango, ice cream scoops, glaze, sprinkles, anime, sticks, chopsticks, additional foods, people, hands, text, Japanese characters, logos, watermark, packaging, flags or country clues. Do not copy a source photograph.
+```
+
+## Коррекция revision 5: проверка и ограничения
+
+Новые фото приняты индивидуально на уровне оригиналов, оптимизированных WebP и реальных карточек браузера; источник → признаки → brief → точный фактически переданный prompt записаны выше. Шесть новых WebP — 453 408 bytes, двадцать текущих активных фото — 1 741 136 bytes. Все 20 прежних файлов и SVG сохранены без перезаписи. Нейтральные filenames, отсутствие EXIF/XMP и локальность флагов проверены тестами. Коррекция подготовлена локально; новая публикация не выполнялась и без отдельного запроса не запускается.
+
+Проверяемый поток: главная → синтетическая регистрация → существующий T1 → вступление T2 → все пять заданий с настоящим drag / кликами / касаниями → нейтральное подтверждение завершения. Следующий тур не дорабатывался; проверен лишь уже существующий переход.
+
+| Проверка текущей коррекции | Результат |
+| --- | --- |
+| Полный `npm.cmd test` | 141/141 PASS |
+| Focused scoring/variant/T2 | 23/23 PASS; все 16 частичных масок и 24 полные перестановки каждого задания |
+| `npm.cmd run build:cloudflare` | PASS |
+| `npm.cmd run audit:variants` | 10 000 вариантов, ноль расхождений баллов; каждое T2 в 100% вариантов |
+| `npm.cmd run verify:pm01 -- http://127.0.0.1:5762` | PASS; PM01 не изменён, 100 баллов, пять вариантов/модулей, закрытых ключей в public exam нет |
+| Браузер: page identity / не пустая страница / отсутствие error overlay | PASS; действующий локальный сайт «Национальные кухни мира» |
+| Console/pageerror, обычный поток | PASS; 0 ошибок и предупреждений во всех трёх проходах |
+| Drag-only / click-only / touch-only | Каждый проход: 5 заданий, 20 сопоставлений, ровно 5 POST ответов; подтверждённые серверные переходы |
+| Сохранённые ответы синтетических попыток | Три полных T2: [4,4,4,4,4], по 20 баллов, revision 5; сверены сохранённые баллы и независимый пересчёт |
+| Viewport 390×844 | Все 5 заданий пройдены; названия не обрезаны, 4 фото/4 флага каждого задания загружены; новые шесть фото проверены глазами в небольших карточках |
+| Mobile 320/360/375/390/430 | T2-01: две колонки, нет горизонтального overflow, активные цели ≥44×44; все задания проверены на 390 |
+| Keyboard / замещение / возврат / справка / picker cancel / double-click | PASS; состояние ответа не теряется, дубликата подтверждения нет |
+| Ошибка фото / reload / storage denial / чужой drag / досрочное завершение | PASS; текстовый fallback, вступление не повторяется, таймер не сбрасывается, memory fallback, отказ чужому drag, частичный ответ сохранён |
+| Privacy | Unit-проверка participant payload всех пяти T2 на 100 seeds плюс 14 реально полученных current-question payloads без закрытых ключей/всего variant |
+| Неизменность области вне правок | SHA-256 T2-01/02, их восьми фото и банков T1/T3–T5 совпадают с baseline; renderer, app, CSS и правила не изменены |
+
+Среда: установленный Chromium/Chrome через Playwright, desktop 1536×1024 (edge 1440×1000), touch-emulated 390×844; URL `http://127.0.0.1:5762`. **Browser plugin not available** — выбран разрешённый skill fallback обычного Playwright. Изолированный file backend, только вымышленные QA-участники; production D1/участники/ответы не трогались. Скриншоты, DOM snapshots и временные сценарии: `C:/Users/АМ/AppData/Local/Temp/olympiad-t2-content-qa/`, вне репозитория. Физический телефон/iOS/Safari и доступ из конкретных сетей РФ не проверены. Принудительные 404 в edge-тесте ожидаемо записаны отдельно, не маскируются как обычный здоровый поток. Реальный студенческий пилот и независимая методическая приёмка не заменяются этими проверками.
+
+Оставшийся риск сложности: **Бибимбап**, короткое название **Фо**, **Паштел-де-ната** могут оставаться недостаточно знакомыми обычному студенту. T2-01/T2-02 и Паштел-де-ната сохранены по прямому требованию пользователя. Не менять их тайно и не утверждать, что новая матрица прошла педагогическую приёмку реальной группой; нужны следующий пользовательский пилот и решение организатора. До следующего тура разработка не расширяется.
+
 ## Флаги: происхождение и лицензия
 
-Локальные SVG 4:3 из [flag-icons, tag v7.5.0](https://github.com/lipis/flag-icons/tree/v7.5.0/flags/4x3): it, fr, at, gb, jp, kr, vn, th, de, pt, es, be, in, cn, ge, hu, ca, nl, us, se. Прямые исходники: `https://raw.githubusercontent.com/lipis/flag-icons/v7.5.0/flags/4x3/<id>.svg`.
+Локальные SVG 4:3 из [flag-icons, tag v7.5.0](https://github.com/lipis/flag-icons/tree/v7.5.0/flags/4x3): первоначальные it, fr, at, gb, jp, kr, vn, th, de, pt, es, be, in, cn, ge, hu, ca, nl, us, se сохранены; для revision 5 добавлены ru и mx из того же тега. Прямые исходники: `https://raw.githubusercontent.com/lipis/flag-icons/v7.5.0/flags/4x3/<id>.svg`.
 
 Лицензия [MIT](https://github.com/lipis/flag-icons/blob/v7.5.0/LICENSE), Copyright (c) 2013 Panayiotis Lipiridis. Полный текст сохранён в `public/assets/olympiad/flags/LICENSE.txt`. Никаких emoji, CDN или внешних ссылок при работе олимпиады. SVG проходят проверку на script/foreignObject/внешние href и src. Подпись страны остаётся доступной текстом, флаг декоративный.
 
-## Итоговая техническая и UX-проверка
+## Техническая и UX-проверка первоначальной revision 4 (история)
 
 - Браузерный plugin не доступен в этой сессии; использован установленный Chromium через Playwright. Локальный URL `http://127.0.0.1:5762`, изолированные синтетические участники, не production. Скриншоты и временные QA-скрипты вне репозитория.
 - Desktop 1536×1024: все 5 заданий только настоящим drag-and-drop; повторный отдельный проход всех 5 только кликами. Mobile 390×844 с touch/coarse pointer: все 5 заданий только касаниями. В каждом проходе ровно 5 POST подтверждения и 20 сопоставлений; обычный поток без ошибок/предупреждений console и pageerror. На 320/360/375/390/430 px сетки по две колонки, нет горизонтального overflow, активные цели не меньше 44×44 px. После выбора блюда на телефоне панель стран находится в пределах viewport; ручной возврат прокруткой к странам не нужен.

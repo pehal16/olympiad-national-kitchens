@@ -2,6 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const { createHash } = require("node:crypto");
 const olympiad = require("../data/olympiad");
 const bank = require("../data/banks/tour2");
 const { buildVariant, sanitizeQuestion, validateQuestionStructure } = require("../src/variant");
@@ -10,21 +11,22 @@ const { createState } = require("../public/t2-country-match");
 const expected = [
   [["Тирамису", "it"], ["Рататуй", "fr"], ["Венский шницель", "at"], ["Фиш-энд-чипс", "gb"]],
   [["Онигири", "jp"], ["Бибимбап", "kr"], ["Фо", "vn"], ["Пад-тай", "th"]],
-  [["Карривурст", "de"], ["Паштел-де-ната", "pt"], ["Гаспачо", "es"], ["Брюссельская вафля", "be"]],
-  [["Баттер-чикен", "in"], ["Пекинская утка", "cn"], ["Харчо", "ge"], ["Гуляш", "hu"]],
-  [["Poutine", "ca"], ["Стропвафли", "nl"], ["Крылышки баффало", "us"], ["Кёттбуллар", "se"]]
+  [["Паштел-де-ната", "pt"], ["Гаспачо", "es"], ["Брюссельская вафля", "be"], ["Салат «Оливье»", "ru"]],
+  [["Эклер", "fr"], ["Пекинская утка", "cn"], ["Суп харчо", "ge"], ["Гуляш", "hu"]],
+  [["Крылышки баффало", "us"], ["Паста карбонара", "it"], ["Буррито", "mx"], ["Моти", "jp"]]
 ];
 test("T2 fixes five 4x4 tasks, twenty unique dishes, sources and local assets", () => {
   assert.equal(bank.length, 5);
   assert.equal(new Set(bank.flatMap((q) => q.dishIds)).size, 20);
   const register = fs.readFileSync(path.join(__dirname, "../docs/olympiad-t2-source-register.md"), "utf8");
-  assert.equal((register.match(/```text/g) || []).length, 20);
+  assert.equal((register.match(/```text/g) || []).length, 26);
   assert.match(register, /flag-icons.*v7\.5\.0/);
   const t1 = new Set(olympiad.questionBank.tour1Pools.flatMap((p) => p.questions.map((q) => q.dishId)));
   bank.forEach((q, index) => {
     assert.equal(q.id, `T2-${String(index + 1).padStart(2, "0")}`);
     assert.equal(q.interactionMode, "country_match");
     assert.equal(q.items.length, 4); assert.equal(q.buckets.length, 4);
+    assert.equal(new Set(q.buckets.map((bucket) => bucket.id)).size, 4);
     assert.equal(q.maxScore, 4);
     assert.deepEqual(q.items.map((item) => [item.text, q.correctBuckets[item.id]]), expected[index]);
     assert.doesNotThrow(() => validateQuestionStructure(q));
@@ -43,6 +45,53 @@ test("T2 fixes five 4x4 tasks, twenty unique dishes, sources and local assets", 
       assert.match(svg, /<svg/); assert.doesNotMatch(svg, /<script|<image|<foreignObject|(?:href|src)=["']https?:|onload/i);
     });
   });
+});
+test("T2 recognizability correction preserves T2-01/02, other banks and existing image URLs", () => {
+  const hash = (value) => createHash("sha256").update(value).digest("hex");
+  assert.equal(hash(JSON.stringify(bank.slice(0, 2))), "766729f87addf6adf01bbb86fa4a2d22dee204b5d74d99bf55aca65b89bfae12");
+  const firstEightImages = [
+    "7e81b54b804bc15d5a2389f4cf41b3c306d74839c9cfadb1e535a78519542bfb",
+    "1be49a00583d98cc0d42550035d88dee83fb021597278285f699023d94559f33",
+    "78b52f7e52b8accb46d0bfdc6302bad493a96acd675b8fbaec90a88f7db18ca3",
+    "945cd8d371fe469a09824b163956c926ae2ee54ca7be0ed6a9fb893e8504a1dc",
+    "0ec70a1cd2d25ccd107d4666f8fa6fac698a3bc3f0f37a8cc8e2e625980eb8fa",
+    "e5c316768f3160fca8e7a9b276aa5b29af72952fd555dec100db225fd4870c8a",
+    "815e505d4cc4085828634375e97bf074f1e3fd87309292df413722d440a6116e",
+    "b3f70a8b738a7c1a43ae6b1be3ab5f2d0dfa9ef4783dd059e27f32dc9e05f8e2"
+  ];
+  bank.slice(0, 2).flatMap((question) => question.items).forEach((item, index) => {
+    assert.equal(hash(fs.readFileSync(path.join(__dirname, "..", "public", item.imageUrl))), firstEightImages[index]);
+  });
+  const baseline = {
+    tour1: "b95c4c9fde6dff7c69436d6d53b9f0eb3723f450c54575c72ef4152e0e1784e9",
+    tour3: "683daa6a9306fe4589082b7cc2a4704f37d5ef3af6ac336afabf4549df2a2b6a",
+    tour4: "fffb37b0b58c0bdc78f9c3ee8d33ab667fcba3f7d2caebb933f60d33d66e1ed7",
+    tour5: "9e506a8267e5ff15b1518c7e5b26ceefe545504dd9b2f26cc4d9bffafd54cdb6"
+  };
+  for (const [name, checksum] of Object.entries(baseline)) {
+    assert.equal(hash(fs.readFileSync(path.join(__dirname, `../data/banks/${name}.js`), "utf8").replace(/\r\n/g, "\n")), checksum, name);
+  }
+  const activeDishIds = new Set(bank.flatMap((question) => question.dishIds));
+  for (const removed of ["currywurst", "butter_chicken", "poutine", "stroopwafels", "kottbullar"]) assert.equal(activeDishIds.has(removed), false);
+  for (const added of ["olivier", "eclair", "carbonara", "burrito", "mochi"]) assert.equal(activeDishIds.has(added), true);
+  const kharcho = bank[3].items.find((item) => item.dishId === "kharcho");
+  assert.equal(kharcho.text, "Суп харчо");
+  assert.equal(kharcho.imageUrl, "/assets/olympiad/tour2/t2-active-23.webp");
+  // Retired assets remain reachable for immutable historical variants, never overwritten.
+  for (const number of [9, 13, 15, 17, 18, 20]) {
+    const url = `/assets/olympiad/tour2/t2-active-${String(number).padStart(2, "0")}.webp`;
+    assert.equal(bank.some((question) => question.items.some((item) => item.imageUrl === url)), false);
+    assert.ok(fs.existsSync(path.join(__dirname, "..", "public", url)));
+  }
+  const countryOccurrences = bank.flatMap((q) => q.buckets.map((b) => b.id));
+  assert.ok(countryOccurrences.filter((id) => id === "it").length > 1);
+  assert.ok(countryOccurrences.filter((id) => id === "fr").length > 1);
+  assert.ok(countryOccurrences.filter((id) => id === "jp").length > 1);
+  const register = fs.readFileSync(path.join(__dirname, "../docs/olympiad-t2-source-register.md"), "utf8");
+  assert.match(register, /Узнаваемость.*важнее количества стран/);
+  assert.match(register, /Неактивные \/ отклонённые после пользовательского тестирования/);
+  assert.match(register, /Предыдущая ошибка:.*не та разновидность kharcho/);
+  assert.match(register, /https:\/\/www\.gastronom\.ru\/recipe\/4632\/sup-harcho-iz-govjadiny-s-risom/);
 });
 test("each correct match is exactly one point; partial and empty answers have no penalty", () => {
   const permutations = (ids) => ids.length ? ids.flatMap((id, i) => permutations(ids.filter((_, j) => i !== j)).map((tail) => [id, ...tail])) : [[]];
