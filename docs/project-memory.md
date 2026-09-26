@@ -2,6 +2,12 @@
 
 Last updated: 2026-09-27
 
+## Olympiad administrator credential rotation (2026-09-27)
+
+- The user explicitly confirmed resetting the main olympiad administrator password. `ADMIN_PASSWORD` was rotated in GitHub repository secrets and applied through successful Cloudflare workflow dispatch `36272918323`, deploying remote `main` commit `d889c0fa6ea741ea2f73f04abfca1904ec96a9db`. This redeployed the existing revision-4 olympiad; local revision-5 T2 correction `0251add` was not pushed or published. No participant records or answers were modified.
+- Production authentication checks pass: correct new password → HTTP 200; authenticated `/api/admin/session` → 200/active; anonymous session and incorrect password → 401. The required production `verify:cloudflare` also passes directly, keeping PM01 at 100 points and private key fields at zero. Existing stateless administrator tokens are signed using the administrator password, so users need a fresh login after rotation; no session-table deletion was needed.
+- A recoverable copy is stored only in ignored `storage/olympiad-admin-credential.json`, encrypted by Windows CurrentUser DPAPI. Never commit its contents or write the plaintext password into source/public documentation. Recovery requires the same Windows user and should only disclose the value when the user requests it. This is the olympiad organizer credential, not the separate learning-platform teacher credentials; those were not changed.
+
 ## T2 recognizability correction — prepared locally, not yet published (2026-09-26–27)
 
 - Blueprint revision 5 is a narrowly scoped content/image correction based on the user's manual T2 trial. **Recognizability to ordinary Russian-speaking 16–20-year-old students takes priority over global country diversity.** Countries may repeat across tasks; the four countries within each task must remain distinct. This is an editorial filter, not statistical evidence of universal familiarity.
