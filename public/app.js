@@ -1863,7 +1863,7 @@ function renderRules() {
     "После старта работает защищённый полноэкранный режим; таймер идёт непрерывно.",
     "Уход из вкладки, потеря фокуса и выход из полноэкранного режима блокируют интерфейс и записываются в серверный журнал.",
     "Запись в журнале рассматривает организатор; отдельное срабатывание само по себе не уменьшает балл.",
-    "У каждого участника индивидуальный вариант.",
+    "В первом туре все участники узнают одни и те же 10 блюд по фотографиям. Варианты ответов перемешиваются; остальные туры собираются индивидуально.",
     "Один вопрос на экране без возврата назад.",
     "Ответы проверяются автоматически.",
     "Итог фиксируется после завершения."
@@ -2070,7 +2070,35 @@ function createChip(item, questionId, handlers = {}) {
 
 function renderSingleChoice(question) {
   const wrapper = document.createElement("div");
-  wrapper.className = "options";
+  wrapper.className = question.imageUrl ? "options photo-options" : "options";
+  let photoLoaded = !question.imageUrl;
+  if (question.imageUrl) {
+    const figure = document.createElement("figure");
+    figure.className = "question-photo";
+    const image = document.createElement("img");
+    image.src = question.imageUrl;
+    image.alt = question.imageAlt;
+    image.width = 1200;
+    image.height = 800;
+    image.decoding = "async";
+    const failure = document.createElement("p");
+    failure.className = "message error hidden";
+    failure.textContent = "Фотография не загрузилась. Проверьте соединение и перезагрузите страницу до отправки ответа.";
+    image.addEventListener("error", () => {
+      photoLoaded = false;
+      failure.classList.remove("hidden");
+      wrapper.querySelectorAll("input").forEach((input) => { input.disabled = true; });
+      updateAnswerUi();
+    });
+    image.addEventListener("load", () => {
+      photoLoaded = true;
+      failure.classList.add("hidden");
+      wrapper.querySelectorAll("input").forEach((input) => { input.disabled = false; });
+      updateAnswerUi();
+    });
+    figure.append(image, failure);
+    elements.questionBody.appendChild(figure);
+  }
   const savedAnswer = question.savedAnswer ? question.savedAnswer.selectedOptionId : null;
 
   (question.options || []).forEach((option) => {
@@ -2081,6 +2109,7 @@ function renderSingleChoice(question) {
     input.type = "radio";
     input.name = question.id;
     input.value = option.id;
+    input.disabled = !photoLoaded;
     input.checked = savedAnswer === option.id;
 
     const text = document.createElement("span");
@@ -2102,7 +2131,7 @@ function renderSingleChoice(question) {
     getAnswer() {
       const selected = wrapper.querySelector(`input[name="${question.id}"]:checked`);
       return {
-        selectedOptionId: selected ? selected.value : null
+        selectedOptionId: photoLoaded && selected ? selected.value : null
       };
     }
   };
@@ -2857,11 +2886,14 @@ function renderAttempt() {
     (attempt.progress.currentQuestionIndex / Math.max(1, attempt.progress.totalQuestions)) * 100
   }%`;
   if (currentTour) {
-    elements.progressTour.textContent = `${currentTour.code} • вопрос ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`;
+    elements.progressTour.textContent = currentQuestion?.imageUrl && currentTour.code === "T1"
+      ? `Вопрос ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`
+      : `${currentTour.code} • вопрос ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`;
     elements.progressTourFill.style.width = `${
       (attempt.progress.tourQuestionIndex / Math.max(1, attempt.progress.tourQuestionCount)) * 100
     }%`;
-    elements.tourCode.textContent = currentTour.code;
+    elements.tourCode.textContent = currentQuestion?.imageUrl && currentTour.code === "T1"
+      ? "Тур 1 · Узнай блюдо" : currentTour.code;
     elements.tourTitle.textContent = currentTour.title;
     elements.tourDescription.textContent = currentTour.description || "";
     elements.tourLimit.textContent = `${currentTour.timeLimitMinutes} минут`;

@@ -1378,6 +1378,23 @@ body.exam-mode-active label {
   margin-top: 16px;
 }
 
+.question-photo { margin: 0 auto 20px; width: 100%; max-width: 720px; }
+.question-photo img {
+  display: block; width: 100%; height: auto; aspect-ratio: 3 / 2;
+  object-fit: contain; border-radius: 16px; background: #f4f1eb;
+}
+.photo-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.photo-options .option { min-height: 58px; min-width: 0; transition: border-color 150ms, background 150ms; }
+.photo-options .option:has(input:checked) {
+  border-color: var(--accent); background: rgba(31, 142, 115, 0.12);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.photo-options .option:focus-within { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (max-width: 480px) {
+  .photo-options { grid-template-columns: 1fr; }
+  .question-photo { margin-bottom: 16px; }
+}
+
 .option {
   display: flex;
   gap: 12px;

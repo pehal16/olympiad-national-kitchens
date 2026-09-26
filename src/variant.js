@@ -198,6 +198,17 @@ function assetPathRevealsAnswer(value) {
 }
 
 function validateQuestionMedia(question) {
+  if (question.imageUrl) {
+    if (!isLocalOlympiadAsset(question.imageUrl)) {
+      throw new Error(`Вопрос ${question.sourceId || question.id} содержит внешний или небезопасный путь изображения.`);
+    }
+    if (!String(question.imageAlt || "").trim()) {
+      throw new Error(`Вопрос ${question.sourceId || question.id} содержит изображение без alt-текста.`);
+    }
+    if (assetPathRevealsAnswer(question.imageUrl)) {
+      throw new Error(`Вопрос ${question.sourceId || question.id} содержит имя файла, раскрывающее ключ ответа.`);
+    }
+  }
   for (const item of question.items || []) {
     if (!isLocalOlympiadAsset(item.imageUrl) || !isLocalOlympiadAsset(item.layerImageUrl)) {
       throw new Error(`Вопрос ${question.sourceId || question.id} содержит внешний или небезопасный путь изображения.`);
@@ -460,6 +471,22 @@ function chooseMostBalancedBlocks(blocks, count, random) {
 
 function buildTour1(olympiad, random) {
   const tour = olympiad.tours.find((item) => item.id === "tour-1");
+  if (tour.generation.mode === "fixed_photo_questions") {
+    const questions = olympiad.questionBank.tour1Pools.flatMap((pool) => pool.active === true ? pool.questions : []);
+    if (questions.length !== 10 || questions.some((question, index) =>
+      question.id !== `T1-A${String(index + 1).padStart(2, "0")}` ||
+      question.type !== "single_choice" || question.maxScore !== 2 ||
+      question.options?.length !== 4 || question.options.filter((option) => option.isCorrect).length !== 1 ||
+      question.imageUrl !== `/assets/olympiad/tour1/t1-active-${String(index + 1).padStart(2, "0")}.webp` ||
+      question.imageAlt !== `Фотография блюда к вопросу ${index + 1}`
+    )) {
+      throw new Error("T1 должен содержать 10 фиксированных безопасных фото-вопросов по 2 балла.");
+    }
+    // Preserve the historical PRNG offset before T2: 10 pools of four + tour shuffle.
+    // Only T1 content/order changes; the following tour builders stay untouched.
+    for (let draw = 0; draw < 39; draw += 1) random();
+    return { tour, questions };
+  }
   const questions = olympiad.questionBank.tour1Pools
     .map((pool) => pickOne(pool.questions, random))
     .filter(Boolean);
@@ -707,6 +734,7 @@ function sanitizeQuestion(question, attempt) {
     id: question.id,
     type: question.type,
     prompt: question.prompt,
+    ...(question.imageUrl ? { imageUrl: question.imageUrl, imageAlt: question.imageAlt } : {}),
     scenario: question.scenario || "",
     note: question.note || "",
     maxScore: question.maxScore,
