@@ -6,7 +6,7 @@ const tour5Cases = require("./banks/tour5");
 
 module.exports = {
   schemaVersion: 2,
-  blueprintVersion: 7,
+  blueprintVersion: 8,
   id: "nk-2026-variant",
   slug: "national-kitchens-2026",
   title: "Национальные кухни мира",

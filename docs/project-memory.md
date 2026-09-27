@@ -2,6 +2,14 @@
 
 Last updated: 2026-09-27
 
+## T3 expanded spelling — blueprint 8 (2026-09-27)
+
+- The user requested more accepted spelling/word-order/number variants in every T3 dish, specifically «штудель яблочный». The private bank now has 194 explicit accepted forms versus 52 previously: 10 canonical, 81 Russian aliases/inflections, 27 English forms, 76 exact typo exceptions. Approved compound-name orders are explicit aliases, not arbitrary word shuffling or substring/semantic matching. The bounded OSA matcher and its edit budgets are unchanged. 104 negative forms guard close wrong dishes and isolated adjectives, including samosa/salsa inflections, «пряников», «сырков» and contradictory strudel fillings.
+- Only T3 answer policies and the new-variant blueprint number change; clues, photographs, dish identities/order, scores (30/8, total 150/45), participant UI, other tours, PM01, learning, proctoring and storage schemas stay unchanged. A content hash freezes every non-policy T3 field. Already issued variants retain their saved keys; stored answers/results are not rewritten or retroactively regraded. Expanded tolerances apply to new blueprint-8 attempts.
+- Local checks: 173/173 Node tests, Cloudflare build and read-only PM01 verifier pass. Tests cover every explicit form, all nine other dishes' complete form sets per question, typo/grammar examples, mixed scripts, partial names, multiple guesses, privacy and immutable historical policies.
+- Browser plugin is unavailable; the frontend-testing-debugging / Playwright skills used cached Chrome without dependency installation and isolated temporary file storage. Desktop 1440×1000 and touch-emulated 390×844 complete all ten T3 answers at 30/30 with ten POSTs each, including exactly «штудель яблочный». Saved texts and server scores were checked independently. Identity, nonblank rendering, overlay absence, keyboard/clear/reload, HTTP 422, image loading and widths 320/360/375/390/430 pass. Final rerun has zero errors/warnings; the first desktop rehearsal emitted two browser user-gesture fullscreen warnings after programmatic reload (no lost answers). No frontend/proctoring change was made to hide them. QA screenshots/scripts remain outside the repo under temporary `olympiad-t3-spelling-qa` / `olympiad-t3-qa` directories. Physical phones/Safari and final methodical approval are not verified.
+- Publication is pending the deployment workflow and read-only live check. No production test attempts, migrations or regrading were performed.
+
 ## T2 revision 6 and T3 blueprint 7 — published and verified (2026-09-27)
 
 - The user explicitly requested publishing both updated tours. Code commit `b5e37243d05e1bd60418eb131e2e0a4673a53fcf` was pushed to `main` and deployed successfully in Cloudflare workflow run `36322813759`. This supersedes the local-only publication status in the historical T2/T3 entries below. Production remains `https://olympiad-gkts.pages.dev`; no Timeweb/GitHub Pages cutover.

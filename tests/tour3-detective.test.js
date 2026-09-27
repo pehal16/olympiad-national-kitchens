@@ -7,7 +7,7 @@ const olympiad = require("../data/olympiad");
 const bank = require("../data/banks/tour3");
 const { buildVariant, sanitizeQuestion, validateQuestionStructure } = require("../src/variant");
 const { scoreQuestion, validateAnswerPayload } = require("../src/scoring");
-const { normalizeDetectiveAnswer, editDistance } = require("../src/detective-answer");
+const { normalizeDetectiveAnswer, editDistance, matchDetectiveAnswer } = require("../src/detective-answer");
 
 test("typed answer state stays bounded and requires two nonblank characters", () => {
   const { createState } = require("../public/t3-detective");
@@ -71,7 +71,10 @@ for (const q of bank) {
   test(`${q.id} wrong dishes, descriptions, multi-answer lists and emptiness are rejected`, () => {
     for (const text of [...q.answerPolicy.rejected, "", " ", "блюдо", "соус из авокадо", "десерт с сыром",
       `это ${q.answerPolicy.canonical}`, `${q.answerPolicy.canonical} или пирог`,
-      ...bank.filter((other) => other !== q).map((other) => other.answerPolicy.canonical)]) {
+      ...bank.filter((other) => other !== q).flatMap((other) => {
+        const p = other.answerPolicy;
+        return [p.canonical, ...p.aliases, ...p.english, ...p.misspellings];
+      })]) {
       assert.deepEqual(scoreQuestion(q, { text }), { autoScore: 0, finalScore: 0, penalty: 0 }, text);
     }
   });
@@ -85,6 +88,80 @@ test("bounded fuzzy spelling, compound required tokens, close wrong dishes", () 
   [[0,"сырки"],[1,"пряники"],[3,"салса"],[3,"сальса"],[3,"salsa"],[3,"samosa"],[5,"вишневый штрудель"],[5,"яблочный"],
     [6,"чиз"],[6,"cheese cake with berries"],[8,"соус гуакамоле"],[9,"фала"]]
     .forEach(([i, value]) => check(i, value, 0));
+});
+
+test("singular, plural, inflections and approved word orders work with bounded typos", () => {
+  const cases = [
+    [0, ["сырник", "сырников", "сырники творожные", "творожные сырнки", "сырник из творога"]],
+    [1, ["драник", "дерун", "драников", "драники картофельные", "картофельные дранки", "оладьи картофельные"]],
+    [2, ["шакшуки", "шакшуку", "шакшукой", "шакшукка"]],
+    [3, ["самсы", "самсу", "самсой", "самсами", "сомсы", "самсса"]],
+    [4, ["хумуса", "хумусом", "хуммусом", "хумсу"]],
+    [5, ["штудель яблочный", "яблочный штудель", "штрудель яблочный", "яблочные штрудели",
+      "штрудели яблочные", "штудели яблочные", "штрудель с яблоками", "штудель с яблоками", "штруделей", "apple strudels"]],
+    [6, ["чизкейки", "чизкейков", "чиз-кейки", "чизкйеки", "cheese cakes"]],
+    [7, ["начо", "начосы", "начозы", "nacho"]],
+    [8, ["гуакамолле", "гуакомоли", "гуакомолэ"]],
+    [9, ["фалафели", "фалафелей", "фалафелями", "фалафэли", "falafels"]]
+  ];
+  for (const [index, forms] of cases) {
+    for (const text of forms) assert.equal(scoreQuestion(bank[index], { text }).finalScore, 3, text);
+  }
+});
+
+test("expanded aliases never accept close foreign dishes, partial names or extra guesses", () => {
+  const cases = [
+    [0, ["сырок", "сырка", "сырков", "сырку", "сырком", "сырники блины", "творожные", "творожное",
+      "творожной", "творожных", "творожного", "творожным", "творожными"]],
+    [1, ["пряник", "пряника", "пряников", "пряниками", "оладьи", "картофельные"]],
+    [3, ["салсы", "салсу", "сальсой", "сальсами", "самосу", "самосами", "самосах", "samosas", "somosas", "salsas"]],
+    [5, ["штрудель вишневый", "штрудели вишневые", "мясные штрудели", "штрудели мясные", "штрудель с вишней",
+      "яблочные", "яблочный штрудель пирог", "штрудель или шарлотка", "apple pie", "apple tart"]],
+    [6, ["cheesesteak", "cheese steaks", "чизбургер", "торты"]],
+    [7, ["такос", "тако", "чипсы"]],
+    [8, ["авокадо", "соус гуакамоле"]],
+    [9, ["фала", "котлетки", "тефтельки"]]
+  ];
+  const falsePositives = cases.flatMap(([index, forms]) => forms
+    .filter((text) => scoreQuestion(bank[index], { text }).finalScore !== 0)
+    .map((text) => ({ dish: bank[index].dishId, text })));
+  assert.deepEqual(falsePositives, []);
+});
+
+test("new spelling policy does not mutate or upgrade an already-issued private key", () => {
+  const saved = {
+    canonical: "яблочный штрудель", aliases: ["штрудель"], english: ["apple strudel", "strudel"],
+    misspellings: ["штрудел", "яблочный штрудел"], rejected: ["вишневый штрудель", "пирог"]
+  };
+  const snapshot = JSON.stringify(saved);
+  assert.equal(matchDetectiveAnswer(saved, "штудель яблочный"), false);
+  assert.equal(matchDetectiveAnswer(bank[5].answerPolicy, "штудель яблочный"), true);
+  assert.equal(JSON.stringify(saved), snapshot);
+  const variant = buildVariant(olympiad, { seed: "spelling-policy-8" });
+  assert.equal(variant.blueprintVersion, 8);
+  const issued = variant.questions.find((q) => q.sourceId === bank[5].id);
+  assert.equal(matchDetectiveAnswer(issued.answerPolicy, "штудель яблочный"), true);
+});
+
+test("spelling revision preserves authored clues, images, dish identities, order and scores", () => {
+  const authored = JSON.stringify(bank.map(({ answerPolicy, ...question }) => question));
+  assert.equal(crypto.createHash("sha256").update(authored).digest("hex"),
+    "88f27bb75ab486681f2c60812f4c769837df75b08483b19c2cecb601d637c25d");
+});
+
+test("explicit forms contain no mixed-script shortcuts or contradictory deny entries", () => {
+  for (const q of bank) {
+    const p = q.answerPolicy;
+    const accepted = [p.canonical, ...p.aliases, ...p.english, ...p.misspellings].map(normalizeDetectiveAnswer);
+    assert.equal(new Set(accepted).size, accepted.length, q.dishId);
+    for (const form of accepted) {
+      assert.ok(form.length <= 120 && form.split(" ").every((word) => /^[а-я]+$|^[a-z]+$/.test(word)), form);
+      assert.equal(p.rejected.map(normalizeDetectiveAnswer).includes(form), false, form);
+    }
+    for (const text of ["cырники", "начосc", "чизкейкc", "шaкшука", "штрудель, шарлотка"]) {
+      assert.equal(scoreQuestion(q, { text }).finalScore, 0, text);
+    }
+  }
 });
 
 test("participant whitelist keeps every answer key, aliases and match code server-only", () => {
