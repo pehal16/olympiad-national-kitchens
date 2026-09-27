@@ -20,6 +20,8 @@ test("T2 fixes five 4x4 tasks, twenty unique dishes, sources and local assets", 
   assert.equal(new Set(bank.flatMap((q) => q.dishIds)).size, 20);
   const register = fs.readFileSync(path.join(__dirname, "../docs/olympiad-t2-source-register.md"), "utf8");
   assert.equal((register.match(/```text/g) || []).length, 26);
+  const visualReview = fs.readFileSync(path.join(__dirname, "../docs/olympiad-t2-visual-review.md"), "utf8");
+  assert.equal((visualReview.match(/```text/g) || []).length, 20);
   assert.match(register, /flag-icons.*v7\.5\.0/);
   const t1 = new Set(olympiad.questionBank.tour1Pools.flatMap((p) => p.questions.map((q) => q.dishId)));
   bank.forEach((q, index) => {
@@ -46,21 +48,15 @@ test("T2 fixes five 4x4 tasks, twenty unique dishes, sources and local assets", 
     });
   });
 });
-test("T2 recognizability correction preserves T2-01/02, other banks and existing image URLs", () => {
+test("T2 full visual review preserves all non-media content, other banks and historical assets", () => {
   const hash = (value) => createHash("sha256").update(value).digest("hex");
-  assert.equal(hash(JSON.stringify(bank.slice(0, 2))), "766729f87addf6adf01bbb86fa4a2d22dee204b5d74d99bf55aca65b89bfae12");
-  const firstEightImages = [
-    "7e81b54b804bc15d5a2389f4cf41b3c306d74839c9cfadb1e535a78519542bfb",
-    "1be49a00583d98cc0d42550035d88dee83fb021597278285f699023d94559f33",
-    "78b52f7e52b8accb46d0bfdc6302bad493a96acd675b8fbaec90a88f7db18ca3",
-    "945cd8d371fe469a09824b163956c926ae2ee54ca7be0ed6a9fb893e8504a1dc",
-    "0ec70a1cd2d25ccd107d4666f8fa6fac698a3bc3f0f37a8cc8e2e625980eb8fa",
-    "e5c316768f3160fca8e7a9b276aa5b29af72952fd555dec100db225fd4870c8a",
-    "815e505d4cc4085828634375e97bf074f1e3fd87309292df413722d440a6116e",
-    "b3f70a8b738a7c1a43ae6b1be3ab5f2d0dfa9ef4783dd059e27f32dc9e05f8e2"
-  ];
-  bank.slice(0, 2).flatMap((question) => question.items).forEach((item, index) => {
-    assert.equal(hash(fs.readFileSync(path.join(__dirname, "..", "public", item.imageUrl))), firstEightImages[index]);
+  // The later explicit request covers every image, including T2-01/02; keys/text stay frozen.
+  const nonMedia = bank.map((q) => ({ ...q, items: q.items.map(({ imageUrl, ...item }) => item) }));
+  assert.equal(hash(JSON.stringify(nonMedia)), "38b3ee7941029796770d8bb2f53c7e48f73f2722ef0aaba665ababd7903c34d3");
+  const historical = Array.from({ length: 26 }, (_, i) => fs.readFileSync(path.join(__dirname, `../public/assets/olympiad/tour2/t2-active-${String(i + 1).padStart(2, "0")}.webp`)));
+  assert.equal(hash(Buffer.concat(historical)), "5f41cb615758a78f44dd066fb5b4f43b8f3f4726d63b11faa0986bc4c9374caf");
+  bank.flatMap((q) => q.items).forEach((item, index) => {
+    assert.equal(item.imageUrl, `/assets/olympiad/tour2/t2-active-${index + 27}.webp`);
   });
   const baseline = {
     tour1: "b95c4c9fde6dff7c69436d6d53b9f0eb3723f450c54575c72ef4152e0e1784e9",
@@ -76,9 +72,9 @@ test("T2 recognizability correction preserves T2-01/02, other banks and existing
   for (const added of ["olivier", "eclair", "carbonara", "burrito", "mochi"]) assert.equal(activeDishIds.has(added), true);
   const kharcho = bank[3].items.find((item) => item.dishId === "kharcho");
   assert.equal(kharcho.text, "Суп харчо");
-  assert.equal(kharcho.imageUrl, "/assets/olympiad/tour2/t2-active-23.webp");
+  assert.equal(kharcho.imageUrl, "/assets/olympiad/tour2/t2-active-41.webp");
   // Retired assets remain reachable for immutable historical variants, never overwritten.
-  for (const number of [9, 13, 15, 17, 18, 20]) {
+  for (let number = 1; number <= 26; number += 1) {
     const url = `/assets/olympiad/tour2/t2-active-${String(number).padStart(2, "0")}.webp`;
     assert.equal(bank.some((question) => question.items.some((item) => item.imageUrl === url)), false);
     assert.ok(fs.existsSync(path.join(__dirname, "..", "public", url)));
