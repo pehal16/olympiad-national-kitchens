@@ -136,7 +136,7 @@
       visualRenderer?.dispose(); visualRenderer = null;
       if (layerMount) layerMount.parentElement.hidden = false;
       try {
-      sceneModule ||= import("/assets/runtime/dish-final-kitchen-3d.js?v=1.7.0-t5kitchen1");
+      sceneModule ||= import("/assets/runtime/dish-final-kitchen-3d.js?v=1.7.0-t5kitchen2");
         const module = await sceneModule;
         if (disposed || revision !== visualRevision) return;
         rendererMount.hidden = false;
@@ -146,7 +146,9 @@
         await mounted.setSelection(selectedItems());
         if (disposed || revision !== visualRevision || mounted !== visualRenderer) { mounted.dispose(); return; }
         layerMount.parentElement.hidden = true;
-        sceneNotice.textContent = "Поверните блюдо мышью или кнопками. На телефоне используйте кнопки.";
+        sceneNotice.textContent = dish.presentationVersion === 2 ?
+          "Поворачивайте блюдо мышью, пальцем или кнопками. Мышью можно также наклонить вид." :
+          "Поверните блюдо мышью или кнопками. На телефоне используйте кнопки.";
       } catch {
         if (!disposed && revision === visualRevision) showFallback();
       }

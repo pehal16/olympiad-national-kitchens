@@ -1,7 +1,9 @@
 import * as THREE from "three";
+import { buildKitchenModel, inspectPhoto } from "./final-kitchen-model.js";
 
 function disposeTree(root) {
   root.traverse(child => {
+    if (child.isInstancedMesh) child.dispose();
     child.geometry?.dispose();
     const materials = Array.isArray(child.material) ? child.material : [child.material];
     materials.forEach(material => material?.dispose());
@@ -33,28 +35,38 @@ function vessel(preset) {
 export function mountFinalKitchenScene(container, { dish, onContextLost } = {}) {
   if (!container || !dish) throw new Error("Scene configuration is missing.");
   const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(32, 1, .1, 40);
-  camera.position.set(0, 6.3, 5.2); camera.lookAt(0, .15, 0);
+  const volumetric = dish.presentationVersion === 2;
+  camera.position.set(...(volumetric ? [0, 5.3, 6.5] : [0, 6.3, 5.2])); camera.lookAt(0, volumetric ? .35 : .15, 0);
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("webgl2", { antialias: true, alpha: true, powerPreference: "low-power" });
   if (!context) throw new Error("WebGL2 is unavailable.");
   const renderer = new THREE.WebGLRenderer({ canvas, context, antialias: true, alpha: true, powerPreference: "low-power" });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.07;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = volumetric ? .93 : 1.07;
+  if (volumetric) { renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; }
   renderer.domElement.className = "t5-canvas"; renderer.domElement.setAttribute("aria-hidden", "true");
   renderer.domElement.style.touchAction = "pan-y"; container.append(renderer.domElement);
-  const stage = new THREE.Group(); stage.rotation.y = -.2; scene.add(stage); stage.add(vessel(dish.modelPreset));
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xb6c2bb, 2.3));
-  const light = new THREE.DirectionalLight(0xffffff, 2); light.position.set(-3, 7, 5); scene.add(light);
+  const stage = new THREE.Group(); stage.rotation.y = -.2; scene.add(stage);
+  const plate = vessel(dish.modelPreset); plate.traverse(child => { child.receiveShadow = true; }); stage.add(plate);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xb6c2bb, volumetric ? 1.8 : 2.3));
+  const light = new THREE.DirectionalLight(volumetric ? 0xfff9ee : 0xffffff, volumetric ? 3 : 2); light.position.set(-3, 7, 5); scene.add(light);
+  if (volumetric) {
+    light.castShadow = true; light.shadow.mapSize.set(1024, 1024); light.shadow.camera.left = -4; light.shadow.camera.right = 4;
+    light.shadow.camera.top = 4; light.shadow.camera.bottom = -4; light.shadow.bias = -.0005; light.shadow.normalBias = .025;
+    const fill = new THREE.DirectionalLight(0xe7efff, .8); fill.position.set(4, 4, -3); scene.add(fill);
+  }
   let food = new THREE.Group(); stage.add(food);
   let disposed = false, revision = 0, pointer = null, animationFrame = 0;
   const textures = new Map(), ownedTextures = new Set(), croppedTextures = new Map();
+  const photos = new Map(); let modelTextures = new Set();
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const loader = new THREE.TextureLoader();
   function texture(url) {
     if (!textures.has(url)) textures.set(url, loader.loadAsync(url).then(value => {
       value.colorSpace = THREE.SRGBColorSpace;
       value.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+      if (volumetric) photos.set(url, url.includes("/materials/") ? { materialSurface: true } : inspectPhoto(value.image));
       ownedTextures.add(value); if (disposed) value.dispose(); return value;
     }));
     return textures.get(url);
@@ -97,13 +109,16 @@ export function mountFinalKitchenScene(container, { dish, onContextLost } = {}) 
   }
   const contextLost = event => { event.preventDefault(); if (!disposed) onContextLost?.(); };
   function pointerDown(event) {
-    if (event.pointerType !== "mouse" || event.button !== 0) return;
-    pointer = { id: event.pointerId, x: event.clientX, rotation: stage.rotation.y };
+    if (!volumetric && event.pointerType !== "mouse") return;
+    if ((event.pointerType === "mouse" && event.button !== 0) || event.isPrimary === false) return;
+    pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, rotation: stage.rotation.y, tilt: stage.rotation.x };
     renderer.domElement.setPointerCapture?.(event.pointerId);
   }
   function pointerMove(event) {
     if (!pointer || pointer.id !== event.pointerId) return;
-    stage.rotation.y = pointer.rotation + (event.clientX - pointer.x) * .009; render();
+    stage.rotation.y = pointer.rotation + (event.clientX - pointer.x) * .009;
+    if (volumetric && event.pointerType !== "touch") stage.rotation.x = Math.max(-.4, Math.min(.8, pointer.tilt + (event.clientY - pointer.y) * .006));
+    render();
   }
   function pointerUp() { pointer = null; }
   canvas.addEventListener("webglcontextlost", contextLost);
@@ -117,21 +132,34 @@ export function mountFinalKitchenScene(container, { dish, onContextLost } = {}) 
       const selected = [...items].sort((a, b) => a.scene.level - b.scene.level);
       const base = dish.baseImageUrl ? await texture(dish.baseImageUrl) : null;
       const maps = await Promise.all(selected.map(item => texture(item.layerImageUrl)));
+      const surfaces = volumetric ? await Promise.all(Object.entries(dish.surfaceTextures || {}).map(async ([name, url]) =>
+        [name, { texture: await texture(url), photo: photos.get(url) }])) : [];
       if (disposed || current !== revision) return;
-      stage.remove(food); disposeTree(food); food = new THREE.Group(); stage.add(food);
-      if (base) addLayer(food, base, { width: 4.5, aspect: 1, x: 0, z: 0, level: -1, angle: 0 });
-      selected.forEach((item, index) => (item.scene.parts || [item.scene]).forEach(part => addLayer(food, maps[index], part)));
+      stage.remove(food); disposeTree(food); modelTextures.forEach(value => value.dispose()); modelTextures = new Set();
+      if (volumetric) {
+        const assets = new Map(selected.map((item, index) => [item.id, { texture: maps[index], photo: photos.get(item.layerImageUrl) }]));
+        surfaces.forEach(([name, asset]) => assets.set(`surface:${name}`, asset));
+        food = buildKitchenModel(dish, selected, assets, base ? { texture: base, photo: photos.get(dish.baseImageUrl) } : null, modelTextures);
+        canvas.dataset.phase = food.userData.phase; canvas.dataset.folded = String(food.userData.folded);
+        canvas.dataset.representedCount = String(food.userData.representedIds.length);
+      } else {
+        food = new THREE.Group();
+        if (base) addLayer(food, base, { width: 4.5, aspect: 1, x: 0, z: 0, level: -1, angle: 0 });
+        selected.forEach((item, index) => (item.scene.parts || [item.scene]).forEach(part => addLayer(food, maps[index], part)));
+      }
+      stage.add(food);
       enter(food);
     },
     rotateBy(delta) { stage.rotation.y += Number(delta) || 0; render(); },
-    resetView() { stage.rotation.y = -.2; render(); },
+    resetView() { stage.rotation.y = -.2; stage.rotation.x = 0; render(); },
     dispose() {
       if (disposed) return;
       disposed = true; revision++; cancelAnimationFrame(animationFrame); observer.disconnect();
       canvas.removeEventListener("webglcontextlost", contextLost);
       canvas.removeEventListener("pointerdown", pointerDown); canvas.removeEventListener("pointermove", pointerMove);
       canvas.removeEventListener("pointerup", pointerUp); canvas.removeEventListener("pointercancel", pointerUp);
-      disposeTree(scene); ownedTextures.forEach(value => value.dispose()); ownedTextures.clear(); textures.clear(); croppedTextures.clear();
+      disposeTree(scene); modelTextures.forEach(value => value.dispose()); ownedTextures.forEach(value => value.dispose()); ownedTextures.clear(); textures.clear(); croppedTextures.clear(); photos.clear();
+      light.shadow?.map?.dispose();
       renderer.dispose(); renderer.forceContextLoss?.(); canvas.remove();
     }
   };

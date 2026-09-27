@@ -1,0 +1,696 @@
+{
+  "schemaVersion": 1,
+  "generationMode": "native ImageGen, original generated material images; not photogrammetry",
+  "status": "local candidate; rendered realism and organizer acceptance remain separate from technical QA",
+  "items": [
+    {
+      "key": "reference",
+      "id": "philadelphia_roll:realism-reference",
+      "type": "original-photorealistic-photo-reference-not-3d",
+      "generatedPath": "C:/Users/АМ/.codex/generated_images/01a0df76-bfb5-7b22-a127-ac2acf5e1957/exec-29bb98ba-f84a-46c1-b0d9-8fbdca20cad7.png",
+      "generationId": "exec-29bb98ba-f84a-46c1-b0d9-8fbdca20cad7",
+      "exactPrompt": "Use case: photorealistic-natural. Generate ONE original restaurant-quality food photograph, landscape 3:2, not a collage, not a 3D rendering. Subject: exactly SIX freshly cut Philadelphia uramaki sushi pieces, arranged loosely in two staggered groups of three on a plain matte ivory flat ceramic plate against a clean pale neutral stone background. Camera three-quarter view from above at approximately 45 degrees, close enough to resolve food texture while the complete six-piece portion and plate remain visible with safe margins. Each piece is a softly rounded rectangular hand-rolled cross-section, naturally a little different in cut thickness and edges, never six identical manufactured cylinders. Correct food construction on the visible cuts: a modest off-white cream-cheese strip and two slender crisp cucumber batons in the center, a very thin dark nori wrapper around that filling, a restrained surrounding layer of individually visible short-grain cooked sushi rice, then a very THIN soft fresh orange-pink salmon slice draped around the exterior top and sides. Some individual exterior rice grains are visible near the lower edge. The salmon has delicate translucent moist muscle fibres and sparse slender irregular ivory fat chevrons; fat veins are subtle fine lines, never big white stripes or thick horizontal bands. The cheese is a modest fraction of the center, not a massive white core; cucumber remains clearly visible. Natural fresh sushi with minute cut irregularities, credible edible proportions, rice-grain detail and soft salmon edges. Soft neutral diffuse daylight, restrained realistic sheen, gentle contact shadows, natural color. No avocado, sesame, sauces, ginger, wasabi, garnish, utensils, hands, people, text, logos, flags, watermark, packaging, decorative props, interface, frame, cartoon styling, plastic sheen, identical repeated grains, exaggerated white salmon bands, floating pieces or impossible geometry. This is a real-looking PHOTO REFERENCE of the finished dish, not a claimed 3D asset. Do not copy the composition of any source photograph.",
+      "generationArguments": {
+        "transparent_background": false
+      },
+      "dimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "fileBytes": 2159603,
+      "pixelFormat": "Format24bppRgb",
+      "opaque": true,
+      "sourceUrls": [
+        "https://www.gastronom.ru/recipe/30992/roll-filadelfiya"
+      ],
+      "recipeFacts": [
+        "Рецепт JangarKumar: нори оборачивает сливочный сыр и плотные огуречные полоски; рис расположен снаружи нори.",
+        "Лосось нарезают тонкими пластами и накрывают ими верх и бока рулета перед нарезкой.",
+        "Выбрана заданная конкурсная версия с огурцом и свежим лососем; домашняя версия автора использует слабосолёную рыбу. Добавки вроде авокадо не обязательны и не включены."
+      ],
+      "visualReferences": [
+        {
+          "pageUrl": "https://www.gastronom.ru/recipe/30992/roll-filadelfiya",
+          "imageUrl": "https://images.gastronom.ru/OBUy-xH13O6GFu08ZMU3ICxvMYjIhPi6DOl_dfpWOFY/pr:recipe-cover-image/g:ce/rs:auto:0:0:0/L2Ntcy9hbGwtaW1hZ2VzL2VkYjA5MGNhLTc5MTAtNGU4Mi05ZGVjLTlkODE5ZmYxMjBjZi5qcGc.webp",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/.playwright-cli/page-2026-09-27T17-40-04-666Z.png",
+          "notes": "Лично просмотрено: готовые роллы с наружным лососем, внутренним рисом, тонкой линией нори, сливочным сыром и огурцом. Соевый соус, имбирь, васаби и посуда не переносятся.",
+          "personallyReopenedThisTask": true
+        },
+        {
+          "pageUrl": "https://www.gastronom.ru/recipe/30992/roll-filadelfiya",
+          "imageUrl": "https://images.gastronom.ru/AckceDOoqsS6Yr4yYmsDYDehkry3H-L89X-BAuKsKsE/pr:recipe-step-image/g:ce/rs:auto:0:0:0/L2Ntcy9hbGwtaW1hZ2VzLzM1M2FhOTZmLWMyMjMtNGUzMi05MWM0LWJmNzY1ZjBjN2ZmYi5qcGc.webp",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/.playwright-cli/page-2026-09-27T17-40-06-240Z.png",
+          "notes": "Лично просмотрено: плотный лосось с белыми жировыми прожилками, удаление костей; исходный кусок, не нарезанные strips.",
+          "personallyReopenedThisTask": true
+        },
+        {
+          "pageUrl": "https://www.gastronom.ru/recipe/30992/roll-filadelfiya",
+          "imageUrl": "https://images.gastronom.ru/ikL6oD2LyrISEl8aKY9GTMmBdxsP2NegWxYmVacn57g/pr:recipe-step-image/g:ce/rs:auto:0:0:0/L2Ntcy9hbGwtaW1hZ2VzLzkzMzhlZmFmLWYxNzAtNDU3NC04NTRlLTVkNGZkOTVmZjU1My5qcGc.webp",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/.playwright-cli/page-2026-09-27T17-47-33-660Z.png",
+          "notes": "Лично просмотрено: настоящие тонкие пластины лосося уложены на рисовую оболочку ролла, видны мягкие края и белые жировые прожилки; коврик и плёнка не переносятся.",
+          "personallyReopenedThisTask": true
+        }
+      ],
+      "inspection": {
+        "method": "view_image original local PNG + read-only System.Drawing dimensions and pixel-format inspection",
+        "notes": [
+          "Ровно шесть кусочков; две группы по три.",
+          "Естественно различающиеся края и толщины срезов, не повторяющиеся цилиндры.",
+          "Видны отдельные рисинки, тонкая внутренняя линия нори, огурец и умеренная доля сливочного сыра.",
+          "Тонкий внешний лосось с мелкими жировыми прожилками, без крупных белых полос.",
+          "Чистая нейтральная тарелка и светлый фон, мягкое освещение, никаких дополнительных продуктов или текста.",
+          "Передняя часть тарелки близко к краю кадра, однако шесть кусочков видны целиком."
+        ]
+      },
+      "qa": {
+        "pass": true,
+        "personallyViewed": true,
+        "correctPieceCount": true,
+        "correctUramakiLayers": true,
+        "naturalTexture": true,
+        "noPhysicalInvalidity": true,
+        "attempts": 1,
+        "limitations": [
+          "Это самостоятельный растровый фотоэталон; не законченная 3D-модель."
+        ]
+      },
+      "projectPath": "D:\\Кодекс\\olympiad-github-work\\docs\\assets\\t5\\philadelphia-photo-reference-v2.webp",
+      "publicUrl": null,
+      "outputBytes": 115544,
+      "outputSha256": "fcd5ebed8f960daeff41d251fca8174df3ab8e539190215f0b1f5ad39c523a70",
+      "exportWidth": 1200,
+      "exportHeight": 800,
+      "mainAgentViewedOriginal": true,
+      "exportMethod": "deterministic resize and WebP encoding only; original PNG preserved",
+      "userAccepted3D": false
+    },
+    {
+      "key": "salmon",
+      "id": "salmon:albedo-realism",
+      "type": "original-opaque-salmon-material-albedo-candidate",
+      "generatedPath": "C:/Users/АМ/.codex/generated_images/01a0df76-bfb5-7b22-a127-ac2acf5e1957/exec-d2d5db1e-5742-4b5c-bc7e-0959d7ac5719.png",
+      "generationId": "exec-d2d5db1e-5742-4b5c-bc7e-0959d7ac5719",
+      "exactPrompt": "Use case: photorealistic-natural, reusable material albedo texture. Generate ONE original seamless tileable square 1024 by 1024 pixel photorealistic macro ALBEDO TEXTURE of the interior cut surface of fresh RAW SALMON muscle, fully opaque, filling the entire image edge-to-edge. This is a flat surface material sample for a real 3D salmon surface, NOT a photograph of a fillet or a dish. Entire frame contains continuous orange-pink salmon flesh only, with naturally irregular fine moist muscle microfibres and sparse slender ivory-white fat chevrons curving through the muscle. Very fine realistic marbling with varied vein spacing, width and subtle branching; slender fat lines, not thick white stripes, not parallel horizontal bands, not graphic waves. Orange-pink flesh visually dominates; understated natural color variation and true fine fibrous detail, no plastic or painted appearance. Orthographic straight-on macro capture, perfectly neutral flat diffuse illumination, spatially uniform exposure and color, NO baked directional lighting, shadows, cast shadows, specular glints, bright highlights, reflections, vignette, gradient lighting or ambient occlusion. Seamless repeat in BOTH horizontal and vertical directions: opposite borders continue the same natural fine fibre and fat-vein pattern with no seam, border or isolated central motif, no obvious repeated stamp. No whole fish or fillet silhouette, no skin, no scales, no bones, no outer edges, no plate, no table, no background, no objects, no water droplets, no herbs, no text, no logo, no watermark, no frame, no transparency, no blank padding. Make only the surface color texture, no normal-map coloration or height-map appearance.",
+      "generationArguments": {
+        "transparent_background": false
+      },
+      "dimensions": {
+        "width": 1254,
+        "height": 1254,
+        "requestedWidth": 1024,
+        "requestedHeight": 1024
+      },
+      "fileBytes": 2758724,
+      "pixelFormat": "Format24bppRgb",
+      "opaque": true,
+      "sourceUrls": [
+        "https://www.gastronom.ru/recipe/30992/roll-filadelfiya"
+      ],
+      "recipeFacts": [
+        "Шаги 6–7: кожу, плёнки и кости удаляют; филе режут тонкими широкими пластами.",
+        "Реальные фото филе и покрытия рулета показывают оранжево-розовую мышечную поверхность с нерегулярными тонкими белыми прожилками."
+      ],
+      "visualReferences": [
+        {
+          "pageUrl": "https://www.gastronom.ru/recipe/30992/roll-filadelfiya",
+          "imageUrl": "https://images.gastronom.ru/AckceDOoqsS6Yr4yYmsDYDehkry3H-L89X-BAuKsKsE/pr:recipe-step-image/g:ce/rs:auto:0:0:0/L2Ntcy9hbGwtaW1hZ2VzLzM1M2FhOTZmLWMyMjMtNGUzMi05MWM0LWJmNzY1ZjBjN2ZmYi5qcGc.webp",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/.playwright-cli/page-2026-09-27T17-40-06-240Z.png",
+          "notes": "Лично просмотрено: плотный лосось с белыми жировыми прожилками, удаление костей; исходный кусок, не нарезанные strips.",
+          "personallyReopenedThisTask": true
+        },
+        {
+          "pageUrl": "https://www.gastronom.ru/recipe/30992/roll-filadelfiya",
+          "imageUrl": "https://images.gastronom.ru/ikL6oD2LyrISEl8aKY9GTMmBdxsP2NegWxYmVacn57g/pr:recipe-step-image/g:ce/rs:auto:0:0:0/L2Ntcy9hbGwtaW1hZ2VzLzkzMzhlZmFmLWYxNzAtNDU3NC04NTRlLTVkNGZkOTVmZjU1My5qcGc.webp",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/.playwright-cli/page-2026-09-27T17-47-33-660Z.png",
+          "notes": "Лично просмотрено: настоящие тонкие пластины лосося уложены на рисовую оболочку ролла, видны мягкие края и белые жировые прожилки; коврик и плёнка не переносятся.",
+          "personallyReopenedThisTask": true
+        }
+      ],
+      "inspection": {
+        "method": "view_image original local PNG + read-only System.Drawing dimensions, opacity and opposite-border comparison",
+        "notes": [
+          "Квадрат целиком заполнен фактурой сырого лосося, без контура филе, кожи, посуды или фона.",
+          "Оранжево-розовая ткань доминирует; мелкие волокна и неравномерные тонкие светлые прожилки вместо толстых горизонтальных белых полос.",
+          "Нет явно запечённых бликов, направленных теней или виньетки.",
+          "Поверхность выглядит ровно освещённой; натуральность и повторяемость следует дополнительно оценить в реальном 3D-материале.",
+          "Точное пиксельное совпадение противоположных краёв не подтверждено."
+        ],
+        "oppositeBorderMeanAbsoluteRGB": {
+          "horizontal": 9.594364699627857,
+          "vertical": 10.533492822966506
+        },
+        "exactPixelSeamlessVerified": false
+      },
+      "qa": {
+        "pass": true,
+        "personallyViewed": true,
+        "fullyOpaque": true,
+        "edgeToEdge": true,
+        "fineFatVeins": true,
+        "noWholeFishOutline": true,
+        "noBakedLightingObserved": true,
+        "noPhysicalInvalidity": true,
+        "attempts": 1,
+        "seamlessCertified": false,
+        "limitations": [
+          "Шов нужно проверить на повторённом материале; не утверждать, что безшовность математически подтверждена.",
+          "Оригинал 1254×1254; желаемый размер 1024×1024 инструмент не соблюдал."
+        ]
+      },
+      "projectPath": "D:\\Кодекс\\olympiad-github-work\\public\\assets\\olympiad\\tour5\\materials\\t5-v2-cb12a904224f.webp",
+      "publicUrl": "/assets/olympiad/tour5/materials/t5-v2-cb12a904224f.webp",
+      "outputBytes": 200102,
+      "outputSha256": "da448dc42f4a0ae33274a2ad62afc60fb59582ba7a7ecb6d74381aa6a2c82a82",
+      "exportWidth": 768,
+      "exportHeight": 768,
+      "mainAgentViewedOriginal": true,
+      "exportMethod": "deterministic resize and WebP encoding only; original PNG preserved",
+      "userAccepted3D": false
+    },
+    {
+      "key": "bun",
+      "id": "M01",
+      "ingredientKey": "sesame-bun-crust",
+      "assetType": "opaque-square-albedo",
+      "sourceUrls": [
+        "https://www.recipetineats.com/cheeseburger-recipe/"
+      ],
+      "sourceFacts": [
+        "Author prefers soft white burger buns with sesame seeds, typically around10cm wide. Cut face is toasted; round outer faces remain soft. Surface design preserves natural golden crust and small randomly scattered ivory sesame."
+      ],
+      "visualReferences": [
+        {
+          "pageUrl": "https://www.recipetineats.com/cheeseburger-recipe/",
+          "photoUrl": "https://www.recipetineats.com/tachyon/2022/08/Cheeseburger-ingredients_6.jpg",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/hot-references/burger-bun.png",
+          "observations": "Personally viewed real soft white sesame buns: warm golden outside, uneven subtle wrinkles/pores and naturally scattered small ivory seeds, no decorative stripes."
+        },
+        {
+          "pageUrl": "https://www.recipetineats.com/cheeseburger-recipe/",
+          "photoUrl": "https://www.recipetineats.com/tachyon/2022/08/Cheeseburger.jpg",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/hot-references/burger-finished.png",
+          "observations": "Personally viewed actual finished burger: softly rounded golden-brown bun crust with small ivory sesame and natural bake variation. Shape, filling and props are not embedded into the texture."
+        }
+      ],
+      "exactPrompt": "Use case: photorealistic-natural.\nAsset type: square opaque photographic albedo material texture for UV mapping onto a curved hamburger-bun mesh.\nPrimary request: an original high-detail surface-scan-style macro photograph of genuine baked sesame hamburger bun OUTER CRUST. The bread surface alone fills the entire square edge to edge, no silhouette, no boundary, no backdrop. Flat orthographic 90-degree surface view, all areas sharp and at the same scale, seamless tileable edges with matching color and detail statistics on opposing sides.\nMaterials: authentic soft white-bread bun crust, warm golden to medium toasted brown with restrained pale-gold local variation, very fine irregular pores and subtle tiny baked wrinkles; naturally uneven minute bake freckles. Scatter modestly a few dozen small ivory sesame seeds with random varied rotations, each roughly2–4mm at a realistic12cm material-swatch scale; seeds embedded slightly into the soft baked crust, sparse enough to leave most crust visible. Preserve natural food photography rather than CGI.\nLighting: neutral diffuse cross-polarized shadow-free light, no baked-in directional illumination, no vignette, no specular glare, no gradients caused by a round dome. True base-color/albedo look, the mesh will supply shape and lighting.\nConstraints: SINGLE continuous surface tile, square1:1, fully opaque. No full bun outline, edge, cut crumb, burger filling, plate, table, hands, props, text, watermark, logo, border or diagram. No stylized/cartoon/illustration look, plastic glaze, giant seeds, corrugated grooves, repeated wavy stripes, long parallel lines, regular grid, obvious stamped pattern, exaggerated holes or decorative scoring. Do not copy a source photograph.",
+      "generatedPath": "C:/Users/АМ/.codex/generated_images/01a0df77-3025-78e3-b338-bfdb0417c2c4/exec-50b46a1e-0180-4b9f-a207-91a4eb117993.png",
+      "transparentBackground": false,
+      "generationMethod": "built-in-native-imagegen",
+      "attempts": 1,
+      "retries": [],
+      "fileCheck": {
+        "path": "C:/Users/АМ/.codex/generated_images/01a0df77-3025-78e3-b338-bfdb0417c2c4/exec-50b46a1e-0180-4b9f-a207-91a4eb117993.png",
+        "bytes": 3059974,
+        "width": 1254,
+        "height": 1254,
+        "pixelFormat": "Format24bppRgb",
+        "cornerAlpha": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "opposingEdgeMeanAbsoluteRgbDifferenceHorizontal": 12.138,
+        "opposingEdgeMeanAbsoluteRgbDifferenceVertical": 15.852,
+        "exactMatchingLeftRightPixelPairs": 1,
+        "exactMatchingTopBottomPixelPairs": 0
+      },
+      "qa": {
+        "pass": true,
+        "personallyViewedOriginal": true,
+        "photorealisticSurface": true,
+        "edgeToEdge": true,
+        "opaque": true,
+        "notWholeBun": true,
+        "noProps": true,
+        "inspection": "Personally viewed native original: continuous warm golden/brown real baked crust, fine pores and subtle uneven bake detail, small naturally scattered sesame at believable scale. No bread silhouette, no background/plate, no wavy corrugated stripes, no cartoon illustration.",
+        "seamlessRequested": true,
+        "pixelIdenticalOpposingEdges": false,
+        "tiledVisualPreviewVerified": false,
+        "meshUvCheckRequired": true,
+        "note": "Opposing border differences are measured, not declared pixel-identical. A low-noise photographic pattern may tile acceptably, but actual UV seams and repeat visibility must be checked in the consuming 3D scene."
+      },
+      "projectPath": "D:\\Кодекс\\olympiad-github-work\\public\\assets\\olympiad\\tour5\\materials\\t5-v2-91d1606be706.webp",
+      "publicUrl": "/assets/olympiad/tour5/materials/t5-v2-91d1606be706.webp",
+      "outputBytes": 236486,
+      "outputSha256": "0ec251898f7814f18ae7ad8a553de87ffb120d8d45619daaaf3b4d26fcc4d329",
+      "exportWidth": 768,
+      "exportHeight": 768,
+      "mainAgentViewedOriginal": true,
+      "exportMethod": "deterministic resize and WebP encoding only; original PNG preserved",
+      "userAccepted3D": false
+    },
+    {
+      "key": "lavash",
+      "id": "M02",
+      "ingredientKey": "lavash-surface",
+      "assetType": "opaque-square-albedo",
+      "sourceUrls": [
+        "https://www.recipetineats.com/chicken-sharwama-middle-eastern/",
+        "https://www.gastronom.ru/recipe/61095/domashnij-tonkij-lavash-v-duhovke"
+      ],
+      "sourceFacts": [
+        "Authored shawarma uses flatbread for wrapping. Lavash author uses flour/water/salt, rolls dough to no more than1mm, bakes briefly without overbrowning and rests sheets to retain elasticity. Generated surface keeps pale wheat-beige dough with restrained shallow bubbles and irregular toast freckles."
+      ],
+      "visualReferences": [
+        {
+          "pageUrl": "https://www.gastronom.ru/recipe/61095/domashnij-tonkij-lavash-v-duhovke",
+          "photoUrl": "https://images.gastronom.ru/wbsLR3OTLujaZvHnx_sIa6l-Sh2ieyy0jTykGEY1BpE/pr:recipe-cover-image/g:ce/rs:auto:0:0:0/L2Ntcy9hbGwtaW1hZ2VzLzNhZGE5YWU2LTZjZGEtNGUwOS05ZGY4LWRjNmYyMDU1OTVjYi5qcGc.webp",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/hot-references/lavash-sheet-gastronom.png",
+          "observations": "Personally viewed full real lavash photo: creamy thin sheets, fine irregular light-brown toast freckles and shallow bubbles, supple surface rather than corrugated cardboard. Filled center and props excluded."
+        }
+      ],
+      "exactPrompt": "Use case: photorealistic-natural.\nAsset type: square opaque photographic albedo material texture for UV mapping onto a curved thin-lavash wrap mesh.\nPrimary request: an original high-detail surface-scan-style macro photograph of genuine thin baked wheat lavash flatbread surface. The bread surface alone fills the entire square edge to edge, no whole sheet silhouette, no bread edge, no backdrop. Flat orthographic90-degree surface view, all areas sharp and at the same scale, seamless tileable edges with matching color and detail statistics on opposing sides.\nMaterials: pale warm wheat-beige thin supple flatbread, fine matte floury microtexture, shallow irregular tiny air microblisters, scattered small toasted light-to-medium brown freckles of naturally varied irregular size and density. Most of the surface remains pale beige, the toasting is restrained and authentic, no black char. At a realistic12cm material-swatch scale, shallow bubbles are mostly1–4mm and toast freckles are mostly1–7mm, irregular rather than repeated. Almost flat material detail, without deep creases or heavy ridges. Preserve real edible baked-dough photography, not a 3D render.\nLighting: neutral diffuse cross-polarized shadow-free light, no baked-in directional shadows, no vignette, no shiny glaze, no perspective or strong brightness gradient. True base-color/albedo look, the mesh will supply shape and lighting.\nConstraints: SINGLE continuous surface tile, square1:1, fully opaque. No plate, table, filling, hands, utensils, props, text, watermark, logo, border, diagram or whole flatbread outline. No seeds, herbs, grill lines, baguette crust, scored loaf, thick fluffy pita, corn tortilla, corrugated cardboard, repeated wavy stripes, regular honeycomb/grid, heavy parallel wrinkles, plastic, cartoon or illustration. Do not copy a source photograph.",
+      "generatedPath": "C:/Users/АМ/.codex/generated_images/01a0df77-3025-78e3-b338-bfdb0417c2c4/exec-9bd85c55-e8c4-4c01-96ac-6c569de8393c.png",
+      "transparentBackground": false,
+      "generationMethod": "built-in-native-imagegen",
+      "attempts": 1,
+      "retries": [],
+      "fileCheck": {
+        "path": "C:/Users/АМ/.codex/generated_images/01a0df77-3025-78e3-b338-bfdb0417c2c4/exec-9bd85c55-e8c4-4c01-96ac-6c569de8393c.png",
+        "bytes": 2837818,
+        "width": 1254,
+        "height": 1254,
+        "pixelFormat": "Format24bppRgb",
+        "cornerAlpha": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "opposingEdgeMeanAbsoluteRgbDifferenceHorizontal": 10.312,
+        "opposingEdgeMeanAbsoluteRgbDifferenceVertical": 13.014,
+        "exactMatchingLeftRightPixelPairs": 0,
+        "exactMatchingTopBottomPixelPairs": 0
+      },
+      "qa": {
+        "pass": true,
+        "personallyViewedOriginal": true,
+        "photorealisticSurface": true,
+        "edgeToEdge": true,
+        "opaque": true,
+        "notWholeBread": true,
+        "noProps": true,
+        "inspection": "Personally viewed native original: continuous pale wheat-beige thin baked dough, tiny shallow irregular microblisters and natural fine brown toast freckles, no deep ridges or repeating stripes. No whole bread edge, no background/plate, no baguette/pita/corrugated cardboard, no cartoon illustration.",
+        "seamlessRequested": true,
+        "pixelIdenticalOpposingEdges": false,
+        "tiledVisualPreviewVerified": false,
+        "meshUvCheckRequired": true,
+        "note": "Opposing border differences are measured, not declared pixel-identical. Final seam/repeat acceptance remains a check on the real 3D mesh."
+      },
+      "projectPath": "D:\\Кодекс\\olympiad-github-work\\public\\assets\\olympiad\\tour5\\materials\\t5-v2-e7e3ce403255.webp",
+      "publicUrl": "/assets/olympiad/tour5/materials/t5-v2-e7e3ce403255.webp",
+      "outputBytes": 213054,
+      "outputSha256": "936f9a0628b17fc26bb7ae0eb37b781ab09b4b139d959dd63812088bd9569874",
+      "exportWidth": 768,
+      "exportHeight": 768,
+      "mainAgentViewedOriginal": true,
+      "exportMethod": "deterministic resize and WebP encoding only; original PNG preserved",
+      "userAccepted3D": false
+    },
+    {
+      "key": "rice",
+      "id": "sushi-rice-albedo",
+      "recipeVersion": "Freshly cooked and vinegared Japanese short-grain white sushi rice; not raw grain, long-grain rice or porridge.",
+      "sourceUrls": [
+        "https://www.justonecookbook.com/how-to-make-sushi-rice/",
+        "https://www.justonecookbook.com/vegetarian-sushi-rolls/"
+      ],
+      "sourceFacts": [
+        "Namiko Hirasawa Chen specifies Japanese short-grain white rice for sushi, cooked on the firm side and seasoned with vinegar.",
+        "Gently slicing/folding rather than stirring preserves grain shape and avoids mushiness.",
+        "The real food can naturally shine after fanning; for this shader's albedo, visible highlight lighting was deliberately suppressed rather than claiming real sushi rice is inherently dry or matte."
+      ],
+      "visualReferences": [
+        {
+          "pageUrl": "https://www.justonecookbook.com/how-to-make-sushi-rice/",
+          "photoUrl": "https://cdn.justonecookbook.com/spai/q_glossy%2Bret_img%2Bto_auto/www.justonecookbook.com/wp-content/uploads/2023/09/How-to-Make-Sushi-Rice-9.jpg",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/rice-cooked-surface-reference.png",
+          "personallyViewed": true,
+          "observations": "Cooked white short-grain rice transferred into a wooden hangiri and spread in another panel. Small softly irregular ovoid grains remain recognizable in natural clusters. All source container, hands and utensil props were excluded from the generated material."
+        },
+        {
+          "pageUrl": "https://www.justonecookbook.com/vegetarian-sushi-rolls/",
+          "photoUrl": "https://cdn.justonecookbook.com/spai/q_glossy%2Bret_img%2Bto_auto/www.justonecookbook.com/wp-content/uploads/2023/05/Vegetarian-Sushi-Rolls-13.jpg",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/nori-uncovered-sheet-reference.png",
+          "personallyViewed": true,
+          "observations": "Two real preparation photos show compact cooked white rice on a nori sheet and individual small irregular grains when spread. The real photo also has hands, tools and bamboo mat, all excluded."
+        }
+      ],
+      "excludedReference": {
+        "photoUrl": "https://cdn.justonecookbook.com/spai/q_glossy%2Bret_img%2Bto_auto/www.justonecookbook.com/wp-content/uploads/2022/03/How-to-Make-Sushi-Rice-step-by-step-13.jpg",
+        "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/rice-surface-reference.png",
+        "reason": "Personally viewed but shows uncooked rice in cooker water with kombu; not used as evidence for the cooked-rice surface despite the misleading nearby image description."
+      },
+      "selectedPath": "C:/Users/АМ/.codex/generated_images/01a0df76-4d9b-7c62-819b-cde780f9088f/exec-ce359449-d0fe-4fc8-b7bf-d2f1a63b95f9.png",
+      "dimensions": {
+        "width": 1254,
+        "height": 1254
+      },
+      "pixelFormat": "Format24bppRgb",
+      "opaque": true,
+      "fileBytes": 1827099,
+      "requestedSize": "1536 square in prompt; tool actually returned 1254 square. No source resizing was performed.",
+      "attempts": [
+        {
+          "attempt": 1,
+          "exactPrompt": "Use case: photorealistic-natural material albedo texture. Generate ONE original square opaque 1536 x 1536 edge-to-edge photographic macro material scan of freshly cooked Japanese short-grain white sushi rice, designed for the actual 3D surface of food, not a picture of a dish. Exactly perpendicular 90-degree orthographic overhead camera. A densely and gently packed, shallow continuous field of hundreds of small genuine plump short rice grains; short softly irregular ovoid shapes, softly touching and slightly overlapping in natural clusters, never identical smooth large capsules. The square depicts an approximately 8 by 8 cm patch with roughly 18 to 22 small grain lengths across its width. Off-white ivory, subtle natural translucent starch colour variation and microscopic uneven edible grain surface detail. Individual cooked grains retain their shape, neither uncooked rice nor porridge nor pearl beads. Rice covers absolutely every pixel, continuing past all four edges; no underlying surface can be seen. Seamless periodic tileable edges on both axes, no central focal arrangement, no repetitive aligned rows. Uniform cross-polarized diffuse scan lighting with flat neutral white balance, no directional illumination, no baked specular highlights, no baked cast shadows, no ambient-occlusion dark crevices, no vignette, no bright centre or edge gradients. Entire field sharply focused with consistent scale and colour across the square. This is an original realistic food PHOTO SCAN albedo material, not CGI, plastic, cartoon, illustration, a render, cutout, full dish, collage, grid or interface. No plate, bowl, border, outline, background, garnish, seaweed, sesame, sauce, table, packaging, hands, people, text, logo, watermark or country clues.",
+          "nativePath": "C:/Users/АМ/.codex/generated_images/01a0df76-4d9b-7c62-819b-cde780f9088f/exec-09610848-15ad-4fdf-9a48-cec7f298861c.png",
+          "referencedImagePaths": [],
+          "dimensions": {
+            "width": 1254,
+            "height": 1254
+          },
+          "fileBytes": 2007947,
+          "personallyViewed": true,
+          "accepted": false,
+          "issue": "Realistic grain shape and coverage but wet white specular flecks and warm crevice shadows remain baked into the photo; rejected as preferred albedo."
+        },
+        {
+          "attempt": 2,
+          "exactPrompt": "Edit this original generated material texture ONLY to remove all baked lighting, creating a genuine flat diffuse albedo map while preserving its realistic cooked Japanese short-grain rice shapes, grain positions, photographic food microtexture and dense edge-to-edge coverage. Remove every wet white specular sparkle and glossy patch on grain surfaces. Remove every warm tan shadow in grain gaps: the gaps must have the same pale neutral ivory colour family as the grains, not artificially dark ambient occlusion. Recover subtle neutral natural rice pigmentation and starch texture where highlights were, so the image stays photographic, not a blank drawing. All grains must appear softly matte with neutral off-white ivory base colour and only very low-contrast organic fine tonal variations. Use a strictly uniform cross-polarized diffuse material scan, no direct light, no shiny points, no directional shading, no strong grain-edge outlines, no contact shadows, no artificial glow. This is a shader's base-colour texture, NOT a lit food photograph: the runtime supplies ALL shape lighting and shine. Preserve the square full-frame opaque composition, small short irregular grains, close gentle natural packing, no background or props, no huge identical capsule grains, no CGI or cartoon. Output one square edge-to-edge opaque material texture with seamless tileable periodic edges on both axes; no border, text, watermark, plate, garnish or collage.",
+          "nativePath": "C:/Users/АМ/.codex/generated_images/01a0df76-4d9b-7c62-819b-cde780f9088f/exec-ce359449-d0fe-4fc8-b7bf-d2f1a63b95f9.png",
+          "referencedImagePaths": [
+            "C:/Users/АМ/.codex/generated_images/01a0df76-4d9b-7c62-819b-cde780f9088f/exec-09610848-15ad-4fdf-9a48-cec7f298861c.png"
+          ],
+          "dimensions": {
+            "width": 1254,
+            "height": 1254
+          },
+          "fileBytes": 1827099,
+          "personallyViewed": true,
+          "acceptedForTrialUV": true,
+          "qa": "Small irregular short grains retained. Wet specular highlights substantially removed, microtexture matte and softly neutral ivory. Whole image is rice with no props, border, background, vignette or central lighting hotspot. Light cream tone in grain gaps still remains; not certified as physically pure measured albedo."
+        }
+      ],
+      "seamQA": {
+        "browserUrl": "http://127.0.0.1:9177/",
+        "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/surfaces-repeat-qa.png",
+        "personallyViewed": true,
+        "method": "Unmodified native PNG repeated 2×2 in CSS, 300 px per tile, browser screenshot.",
+        "observation": "No gross border stripe or lighting gradient visible at this preview scale. Grain structures terminate/restart at boundaries; exact periodic continuity is not certified.",
+        "leftRightMeanRGBDifference": 11.897,
+        "topBottomMeanRGBDifference": 9.648,
+        "middleAdjacentMeanRGBDifference": 2.116,
+        "metricUnit": "Mean absolute difference per 8-bit RGB channel over one-pixel opposite edges; contextual middle adjacent column comparison.",
+        "perfectSeamless": false,
+        "finalRealMeshReview": "Pending root's UV/render check."
+      },
+      "projectPath": "D:\\Кодекс\\olympiad-github-work\\public\\assets\\olympiad\\tour5\\materials\\t5-v2-393f9cac3712.webp",
+      "publicUrl": "/assets/olympiad/tour5/materials/t5-v2-393f9cac3712.webp",
+      "outputBytes": 62028,
+      "outputSha256": "8c8b0167277edd3b51db292755e1bb7cbaf620f3d4007b7c2b609e07f28453ba",
+      "exportWidth": 768,
+      "exportHeight": 768,
+      "mainAgentViewedOriginal": true,
+      "exportMethod": "deterministic resize and WebP encoding only; original PNG preserved",
+      "userAccepted3D": false
+    },
+    {
+      "key": "nori",
+      "id": "nori-albedo",
+      "recipeVersion": "Plain dried roasted nori sheet; no seasoned/oily seaweed snack version.",
+      "sourceUrls": [
+        "https://www.justonecookbook.com/nori/",
+        "https://www.justonecookbook.com/vegetarian-sushi-rolls/"
+      ],
+      "sourceFacts": [
+        "Nori is edible laver dried into thin sheets; drying produces a dark green appearance.",
+        "The guide describes producing sheets by shredding and rack drying in a paper-like process.",
+        "The roll recipe places a nori sheet shiny side down. The diffuse albedo intentionally suppresses lighting gloss while preserving fine organic sheet pigmentation and fibre structure."
+      ],
+      "visualReferences": [
+        {
+          "pageUrl": "https://www.justonecookbook.com/nori/",
+          "photoUrl": "https://cdn.justonecookbook.com/spai/q_glossy%2Bret_img%2Bto_auto/www.justonecookbook.com/wp-content/uploads/2019/03/Yaki-nori-I.jpg",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/nori-surface-reference.png",
+          "personallyViewed": true,
+          "observations": "Actual photograph is packaged products, with dark rough green-black sheet visible only through a package window. Not claimed to be an unpackaged full-sheet macro. Packaging excluded from generation."
+        },
+        {
+          "pageUrl": "https://www.justonecookbook.com/nori/",
+          "photoUrl": "https://cdn.justonecookbook.com/spai/q_glossy%2Bret_img%2Bto_auto/www.justonecookbook.com/wp-content/uploads/2019/03/Yaki-nori-II.jpg",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/nori-sheet-surface-reference.png",
+          "personallyViewed": true,
+          "observations": "Actual photograph again mostly packaging; a lower transparent window reveals rough dark nori. Limited supporting reference, not a direct macro scan."
+        },
+        {
+          "pageUrl": "https://www.justonecookbook.com/vegetarian-sushi-rolls/",
+          "photoUrl": "https://cdn.justonecookbook.com/spai/q_glossy%2Bret_img%2Bto_auto/www.justonecookbook.com/wp-content/uploads/2023/05/Vegetarian-Sushi-Rolls-13.jpg",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/nori-uncovered-sheet-reference.png",
+          "personallyViewed": true,
+          "observations": "Genuine uncovered nori sheet visible around rice in left preparation panel: dark olive-black irregular finely pressed fibrous mottling rather than smooth plastic. Real lighting highlights are present in source; shader albedo removes them. Hands, rice, mat and tools not used in nori generation."
+        }
+      ],
+      "selectedPath": "C:/Users/АМ/.codex/generated_images/01a0df76-4d9b-7c62-819b-cde780f9088f/exec-5771ad30-25f5-436c-ad55-efe4b1c10abc.png",
+      "dimensions": {
+        "width": 1254,
+        "height": 1254
+      },
+      "pixelFormat": "Format24bppRgb",
+      "opaque": true,
+      "fileBytes": 3053528,
+      "requestedSize": "1536 square in prompt; tool actually returned 1254 square. No source resizing was performed.",
+      "attempts": [
+        {
+          "attempt": 1,
+          "exactPrompt": "Use case: photorealistic-natural material albedo texture. Generate ONE original square opaque 1536 x 1536 edge-to-edge photographic macro material scan of a genuine plain dried roasted nori seaweed sheet, designed for the actual 3D surface of food, not a picture of a whole dish. Exactly perpendicular 90-degree orthographic overhead camera. The entire square is the continuous matte dark green-black surface of one thin pressed seaweed sheet: subtle natural charcoal-black and deep olive-green mottling, fine irregular compressed seaweed fibres, minute uneven paper-like pressed flake texture and tiny organic speckles, authentic edible nori. The square depicts an approximately 8 by 8 cm patch of the sheet; microtexture is fine and randomly irregular, not giant leaves, thick rope fibres, cracks, leather grain or woven fabric. Dense opaque seaweed covers absolutely every pixel and continues beyond every edge; no sheet outline, underlying surface, tears or holes exposing a background. Seamless periodic tileable edges on both axes, without repeated motifs or a central feature. Uniform cross-polarized diffuse scan lighting with flat neutral white balance, no directional lighting, no baked specular highlights or oily shine, no baked cast shadows, no bright centre, vignette or edge gradients. Entire field sharply focused with consistent scale and colour across the square. This is an original realistic food PHOTO SCAN albedo material, not smooth plastic, CGI, charcoal stone, cartoon, illustration, a render, cutout, full dish, collage, grid or interface. No rice, plate, bowl, border, outline, background, garnish, sesame, sauce, table, packaging, hands, people, text, logo, watermark or country clues.",
+          "nativePath": "C:/Users/АМ/.codex/generated_images/01a0df76-4d9b-7c62-819b-cde780f9088f/exec-bd7c3ecb-6feb-4bce-9210-e51d66a198c2.png",
+          "referencedImagePaths": [],
+          "dimensions": {
+            "width": 1254,
+            "height": 1254
+          },
+          "fileBytes": 3610232,
+          "personallyViewed": true,
+          "accepted": false,
+          "issue": "Authentic rough dark green-black fibres but too many pale grey shiny wrinkle lines; rejected as preferred diffuse albedo."
+        },
+        {
+          "attempt": 2,
+          "exactPrompt": "Edit this original generated material texture ONLY to remove all baked lighting, creating a genuine flat diffuse albedo map while preserving the authentic fine pressed nori seaweed fibres, organic small-scale mottling and dense edge-to-edge photographic food structure. Remove ALL pale grey-white shiny lines and specular highlights following wrinkles and fibres. Remove deep black wrinkle cast shadows; replace both highlighted edges and shaded grooves with the same dark green-black matte nori pigmentation family. The whole surface must be low-contrast deep olive-charcoal, almost black, with subtle randomly irregular green-brown pigmentation and fine matte pressed fibre texture. Do not erase the microtexture, do not make it smooth plastic, leather, charcoal rock or fabric. No wet or oily shine, no silvery lines, no glossy crumpled foil, no directional shading or ambient-occlusion crevices. Use a strictly uniform cross-polarized diffuse material scan; this is the shader's base-colour texture, NOT a lit food photograph: the runtime supplies ALL shape lighting and shine. Preserve the square full-frame opaque fine-textured sheet surface continuing past all edges, no sheet outline or underlying background, no tears exposing another surface. Output one square edge-to-edge opaque material texture with seamless tileable periodic edges on both axes; no rice, borders, text, watermark, plate, props or collage.",
+          "nativePath": "C:/Users/АМ/.codex/generated_images/01a0df76-4d9b-7c62-819b-cde780f9088f/exec-5771ad30-25f5-436c-ad55-efe4b1c10abc.png",
+          "referencedImagePaths": [
+            "C:/Users/АМ/.codex/generated_images/01a0df76-4d9b-7c62-819b-cde780f9088f/exec-bd7c3ecb-6feb-4bce-9210-e51d66a198c2.png"
+          ],
+          "dimensions": {
+            "width": 1254,
+            "height": 1254
+          },
+          "fileBytes": 3053528,
+          "personallyViewed": true,
+          "acceptedForTrialUV": true,
+          "qa": "Silvery-white bright lines substantially suppressed, dark olive-charcoal mottled fine fibres retained. Dense full-frame opaque surface without rice, props, sheet outline, borders or exposed background; no central hotspot. Some fine dark relief-like contrast remains, so this is a generated diffuse candidate, not a certified measured physical albedo."
+        }
+      ],
+      "seamQA": {
+        "browserUrl": "http://127.0.0.1:9177/",
+        "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/surfaces-repeat-qa.png",
+        "personallyViewed": true,
+        "method": "Unmodified native PNG repeated 2×2 in CSS, 300 px per tile, browser screenshot.",
+        "observation": "No gross border stripe or lighting gradient visible at this preview scale. Opposite pixel edges do not match exactly; perfect periodic continuity is not certified.",
+        "leftRightMeanRGBDifference": 15.06,
+        "topBottomMeanRGBDifference": 13.758,
+        "middleAdjacentMeanRGBDifference": 7.315,
+        "metricUnit": "Mean absolute difference per 8-bit RGB channel over one-pixel opposite edges; contextual middle adjacent column comparison.",
+        "perfectSeamless": false,
+        "finalRealMeshReview": "Pending root's UV/render check."
+      },
+      "projectPath": "D:\\Кодекс\\olympiad-github-work\\public\\assets\\olympiad\\tour5\\materials\\t5-v2-f2cc363e7455.webp",
+      "publicUrl": "/assets/olympiad/tour5/materials/t5-v2-f2cc363e7455.webp",
+      "outputBytes": 229534,
+      "outputSha256": "a424bca21701131483a2de68ec3b7479674bdabd90a66518378580290505df91",
+      "exportWidth": 768,
+      "exportHeight": 768,
+      "mainAgentViewedOriginal": true,
+      "exportMethod": "deterministic resize and WebP encoding only; original PNG preserved",
+      "userAccepted3D": false
+    },
+    {
+      "key": "reference-shrimp",
+      "id": "philadelphia_roll:shrimp-alternative-reference",
+      "name": "Шесть кусочков uramaki с креветками вместо лосося",
+      "type": "original-photographic-alternative-composition-not-3d",
+      "generatedPath": "C:/Users/АМ/.codex/generated_images/01a0df76-bfb5-7b22-a127-ac2acf5e1957/exec-e68dd109-b5f6-42e6-ab2e-c7aa4fbae892.png",
+      "generationId": "exec-e68dd109-b5f6-42e6-ab2e-c7aa4fbae892",
+      "exactPrompt": "Use case: photorealistic-natural. Image 1 is a STYLE REFERENCE ONLY for our own photographic food lighting, plate and rice microtexture; DO NOT preserve the salmon geometry or make shrimp follow a salmon coating shape. Create ONE new original food PHOTO, landscape 3:2: exactly SIX small uramaki sushi pieces on the same simple matte ivory plate and pale neutral stone surface, loose two staggered groups of three, 45-degree three-quarter above camera, soft neutral daylight and gentle contact shadows. The sushi pieces are softly rectangular and individually slightly irregular, with separate cooked short-grain rice grains on the exterior, a very thin inner dark nori wrapper around modest cream cheese and 2-3 cucumber batons. NO salmon anywhere. Each piece has ONE SMALL WHOLE COOKED PEELED SHRIMP resting FLAT on its TOP, as a recognizable separate topping, NOT wrapped down the sides. Each shrimp is about 3 cm long on a sushi piece about 4.5 cm across. A naturally tapered gently open C-shaped body with a visibly thicker headless end and thinner tapered tail end, anatomically coherent segment boundaries, ivory-white opaque cooked flesh with pale pink-orange edges, fully peeled without legs, head, shell or tail fan. Shrimp lie flat horizontally on the tops at slightly different natural angles. Their bodies must not curl around the sushi circumference, must not coat or blanket the sides, must not become sliced crescent ribbons, rings, lobster parts or a substitute sheet of salmon. Side rice grains remain clearly visible and mostly uncovered. Natural credible food microtexture and subtle moist sheen, no six repeated manufactured shapes. All six pieces and every topping fully visible; equal restaurant photographic quality to the source salmon version, not a warning or a game result. No fish, sauces, sesame, garnish, avocado, herbs, utensils, hands, people, text, logos, flags, watermark, packaging, interface, frame, cartoon styling, CGI, plastic texture, floating food or impossible geometry.",
+      "generationArguments": {
+        "referenced_image_paths": [
+          "C:/Users/АМ/.codex/generated_images/01a0df76-bfb5-7b22-a127-ac2acf5e1957/exec-29bb98ba-f84a-46c1-b0d9-8fbdca20cad7.png"
+        ],
+        "transparent_background": false
+      },
+      "ownReferenceImage": {
+        "path": "C:/Users/АМ/.codex/generated_images/01a0df76-bfb5-7b22-a127-ac2acf5e1957/exec-29bb98ba-f84a-46c1-b0d9-8fbdca20cad7.png",
+        "role": "style-only photographic reference; personally opened before generation"
+      },
+      "dimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "fileBytes": 2046846,
+      "pixelFormat": "Format24bppRgb",
+      "opaque": true,
+      "sourceUrls": [
+        "https://www.gastronom.ru/recipe/30992/roll-filadelfiya",
+        "https://www.recipetineats.com/prawn-cocktail/"
+      ],
+      "sourceFacts": [
+        "Фиксированная версия Филадельфии содержит сливочный сыр и огурец внутри нори, рис снаружи и наружный лосось. Креветки являются альтернативным составом, а не подтверждением правильного конкурсного ответа.",
+        "Nagi Maehashi использует очищенные приготовленные креветки; фото до соуса подтверждает сегментированную плоть и естественную дугу.",
+        "Этот альтернативный состав специально сохраняет равное фотографическое качество, без сигналов правильности/ошибки."
+      ],
+      "visualReferences": [
+        {
+          "pageUrl": "https://www.gastronom.ru/recipe/30992/roll-filadelfiya",
+          "imageUrl": "https://images.gastronom.ru/OBUy-xH13O6GFu08ZMU3ICxvMYjIhPi6DOl_dfpWOFY/pr:recipe-cover-image/g:ce/rs:auto:0:0:0/L2Ntcy9hbGwtaW1hZ2VzL2VkYjA5MGNhLTc5MTAtNGU4Mi05ZGVjLTlkODE5ZmYxMjBjZi5qcGc.webp",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/.playwright-cli/page-2026-09-27T17-40-04-666Z.png",
+          "notes": "Лично просмотрено: готовые роллы с наружным лососем, внутренним рисом, тонкой линией нори, сливочным сыром и огурцом. Соевый соус, имбирь, васаби и посуда не переносятся.",
+          "personallyViewed": true
+        },
+        {
+          "pageUrl": "https://www.recipetineats.com/prawn-cocktail/",
+          "imageUrl": "https://www.recipetineats.com/tachyon/2016/12/Prawn-Cocktails-3.jpg",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/.playwright-cli/page-2026-09-27T18-04-49-859Z.png",
+          "notes": "Лично просмотрено: очищенные приготовленные креветки, бело-оранжевые сегменты, естественная дуга и хвостики; травы и миска не переносятся.",
+          "personallyViewed": true
+        }
+      ],
+      "attempts": [
+        {
+          "number": 1,
+          "generatedPath": "C:/Users/АМ/.codex/generated_images/01a0df76-bfb5-7b22-a127-ac2acf5e1957/exec-bda4286d-3de9-43f3-9df7-133908edbba2.png",
+          "exactPrompt": "Use case: precise-object-edit, photorealistic-natural food. Image 1 is our own generated photographic reference and the EDIT TARGET. Make ONE photographic alternative of the SAME six-piece sushi portion. Change ONLY the exterior seafood: remove ALL salmon completely from all six pieces and replace it with exactly one modest cooked peeled shrimp naturally resting on top of each piece. Keep the six-piece count, two loose staggered groups of three, pale neutral stone background, plain matte ivory plate, approximately 45-degree three-quarter-above viewpoint, soft neutral daylight, gentle contact shadows, natural camera rendering and equal restaurant-quality photography. Keep each existing cut naturally a little different, with individually visible short-grain cooked rice on the OUTSIDE, a very thin dark inner nori wrapper, modest off-white cream cheese and crisp cucumber batons INSIDE. Where salmon has been removed reveal real slightly irregular individual sushi-rice grains, not a smooth white shell. Each shrimp has a physically coherent gentle open C-shaped body, naturally articulated ivory-white cooked flesh with subtle pink-orange segment edges, cleanly peeled, no head, legs, shell or tail fan, small enough to rest securely on the sushi top. Natural slight shrimp size and orientation differences, no six identical cloned shapes; clearly recognizable as cooked shrimp, not a salmon slice, not a lobster or plasticky curled decoration. All six shrimp must sit on food and obey gravity, not hover. Preserve the original small-food proportions and microtextures; no cartoon, 3D render, plastic finish, stylized warning appearance or giant cream-cheese cores. No salmon anywhere, no other fish, avocado, sesame, sauces, garnish, ginger, wasabi, lemon, herbs, utensils, people, hands, text, logos, country symbols, watermark, packaging, red warning markers, game UI or frames. This is a standalone food PHOTO REFERENCE of an alternative ingredient composition, not a finished 3D model and not a reward screen.",
+          "generationArguments": {
+            "referenced_image_paths": [
+              "C:/Users/АМ/.codex/generated_images/01a0df76-bfb5-7b22-a127-ac2acf5e1957/exec-29bb98ba-f84a-46c1-b0d9-8fbdca20cad7.png"
+            ],
+            "transparent_background": false
+          },
+          "personallyViewed": true,
+          "selected": false,
+          "reasonRejected": "Креветки слишком повторяли геометрию лососевой обёртки и огибали боковые части роллов вместо небольшого отдельного топпинга."
+        },
+        {
+          "number": 2,
+          "generatedPath": "C:/Users/АМ/.codex/generated_images/01a0df76-bfb5-7b22-a127-ac2acf5e1957/exec-e68dd109-b5f6-42e6-ab2e-c7aa4fbae892.png",
+          "exactPrompt": "Use case: photorealistic-natural. Image 1 is a STYLE REFERENCE ONLY for our own photographic food lighting, plate and rice microtexture; DO NOT preserve the salmon geometry or make shrimp follow a salmon coating shape. Create ONE new original food PHOTO, landscape 3:2: exactly SIX small uramaki sushi pieces on the same simple matte ivory plate and pale neutral stone surface, loose two staggered groups of three, 45-degree three-quarter above camera, soft neutral daylight and gentle contact shadows. The sushi pieces are softly rectangular and individually slightly irregular, with separate cooked short-grain rice grains on the exterior, a very thin inner dark nori wrapper around modest cream cheese and 2-3 cucumber batons. NO salmon anywhere. Each piece has ONE SMALL WHOLE COOKED PEELED SHRIMP resting FLAT on its TOP, as a recognizable separate topping, NOT wrapped down the sides. Each shrimp is about 3 cm long on a sushi piece about 4.5 cm across. A naturally tapered gently open C-shaped body with a visibly thicker headless end and thinner tapered tail end, anatomically coherent segment boundaries, ivory-white opaque cooked flesh with pale pink-orange edges, fully peeled without legs, head, shell or tail fan. Shrimp lie flat horizontally on the tops at slightly different natural angles. Their bodies must not curl around the sushi circumference, must not coat or blanket the sides, must not become sliced crescent ribbons, rings, lobster parts or a substitute sheet of salmon. Side rice grains remain clearly visible and mostly uncovered. Natural credible food microtexture and subtle moist sheen, no six repeated manufactured shapes. All six pieces and every topping fully visible; equal restaurant photographic quality to the source salmon version, not a warning or a game result. No fish, sauces, sesame, garnish, avocado, herbs, utensils, hands, people, text, logos, flags, watermark, packaging, interface, frame, cartoon styling, CGI, plastic texture, floating food or impossible geometry.",
+          "personallyViewed": true,
+          "selected": true,
+          "correction": "Style anchor отделён от геометрии; креветки уменьшены и расположены отдельно на верхней части, боковой рис открыт."
+        }
+      ],
+      "inspection": {
+        "method": "view_image original PNG + read-only System.Drawing file/dimension/pixel-format inspection",
+        "notes": [
+          "Шесть самостоятельных кусочков с видимыми рисинками снаружи, внутренним нори, умеренным сыром и огурцом.",
+          "Лосось полностью отсутствует; шесть отдельных сегментированных C-образных приготовленных креветок.",
+          "Креветки лежат сверху; боковой рис большей частью открыт. В этом ракурсе задняя часть каждого топпинга частично скрыта.",
+          "Сохранены нейтральный свет, тарелка и равная натуральная фотообработка.",
+          "Нет соусов, кунжута, гарнира, красных предупреждений, UI, текста или выдуманных дополнительных ингредиентов."
+        ]
+      },
+      "qa": {
+        "pass": true,
+        "personallyViewed": true,
+        "nonempty": true,
+        "correctPieceCount": true,
+        "noSalmon": true,
+        "correctRiceNoriFilling": true,
+        "equalPhotoQuality": true,
+        "attempts": 2,
+        "coordinatorApprovalPending": true,
+        "limitations": [
+          "Фотоэталон альтернативного состава, не готовая 3D-модель, не reward и не проверка правильности ответа.",
+          "Попросил координатора отдельно подтвердить анатомию и посадку креветок; третья генерация без нового задания не допускается."
+        ]
+      },
+      "projectPath": "D:\\Кодекс\\olympiad-github-work\\docs\\assets\\t5\\philadelphia-photo-reference-shrimp-v2.webp",
+      "publicUrl": null,
+      "outputBytes": 107592,
+      "outputSha256": "9740b0e51c9cce02ed3d1027f64402bdf14dac6cfcf4fa40269b2daf3a50a3a1",
+      "exportWidth": 1200,
+      "exportHeight": 800,
+      "mainAgentViewedOriginal": true,
+      "exportMethod": "deterministic resize and WebP encoding only; original PNG preserved",
+      "userAccepted3D": false
+    },
+    {
+      "key": "reference-open",
+      "id": "philadelphia_roll:open-filling-stage-reference",
+      "name": "Открытая заготовка uramaki после переворота",
+      "type": "original-photographic-process-reference-not-3d",
+      "generatedPath": "C:/Users/АМ/.codex/generated_images/01a0df76-bfb5-7b22-a127-ac2acf5e1957/exec-3e2e369c-33d8-4ead-bb6e-2780d5edc900.png",
+      "generationId": "exec-3e2e369c-33d8-4ead-bb6e-2780d5edc900",
+      "exactPrompt": "Use case: photorealistic-natural. Create ONE original professional editorial food photograph, landscape 3:2, showing a technologically CORRECT OPEN URAMAKI preparation stage BEFORE rolling and AFTER the rice-covered nori has been flipped. On a clean pale neutral stone work surface lies a thin half-sheet rectangular dark nori sheet, flat and fully visible, approximately 18 by 10 cm. The cooked short-grain sushi rice layer is UNDERNEATH the nori, touching the surface; the Nori is facing UP. Thin irregular white rice grains peek out along the near and far long edges, enough to show that rice is beneath, NOT a slab and NOT a white layer covering the nori top. Across the center of the exposed dark nori, parallel to the long edge, lies ONE neatly squeezed narrow soft off-white cream-cheese road about 1 cm wide with natural slight piping ridges, and exactly THREE slender crisp cucumber batons running along the same road. The batons are long narrow green-skinned pale-green firm flesh, modest natural variation, no large seed core. Filling is restrained and low, not a huge frosting mound. Most of the dark slightly wrinkled matte nori top is visible around this central filling. The entire sheet remains OPEN FLAT and unrolled. There is NO fish and NO shrimp anywhere. Camera approximately 45 degrees from above, close but the complete rectangular assembly is visible with safe margins. Match the existing neutral food-card photographs: soft neutral side daylight, quiet light background, believable fine rice grains, slightly rippled nori texture, real fresh cucumber and soft cheese detail, gentle contact shadows and restrained sheen. Do not make rice ABOVE the nori in this filling stage; correct reverse-roll orientation is nori top, rice underside. No plate, mat, film, tool, piping bag, hands, people, extra ingredients, salmon, sesame, sauces, garnish, text, logo, flags, watermark, packaging, UI, game screenshot, frame, cartoon, CGI, plastic look, perfect cloned grains, floating food or impossible geometry. This is an original photographic process reference, not a finished 3D model or reward screen. Do not copy a source photograph.",
+      "generationArguments": {
+        "transparent_background": false
+      },
+      "dimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "fileBytes": 2548572,
+      "pixelFormat": "Format24bppRgb",
+      "opaque": true,
+      "sourceUrls": [
+        "https://www.gastronom.ru/recipe/30992/roll-filadelfiya"
+      ],
+      "sourceFacts": [
+        "Шаг 10: рис распределяют тонким слоем на нори. Шаг 11: заготовку переворачивают рисом вниз, начинку кладут на нори.",
+        "Сливочный сыр выдавливают продольной дорожкой; вдоль располагают тонкие огуречные брусочки.",
+        "Изображён именно второй, уже перевёрнутый этап — нори сверху и рис снизу, без рыбного внешнего слоя."
+      ],
+      "visualReferences": [
+        {
+          "pageUrl": "https://www.gastronom.ru/recipe/30992/roll-filadelfiya",
+          "imageUrl": "https://images.gastronom.ru/I7YZ_CQB6tTu7yS3BjgISnoXj8-rz5V47ygfZa62qvY/pr:recipe-step-image/g:ce/rs:auto:0:0:0/L2Ntcy9hbGwtaW1hZ2VzLzFiYjhlMjY2LTcwMDYtNGQzYy1iZDMzLWMyZmVjYTU3ZTM3Ni5qcGc.webp",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/.playwright-cli/page-2026-09-27T17-40-09-207Z.png",
+          "notes": "Лично просмотрено: тонкий слой сваренного короткозёрного риса на прямоугольном нори, отдельные неровные зерна, выступающий тонкий тёмный край. Коврик/плёнка/доска не переносятся.",
+          "personallyReopenedThisTask": true
+        },
+        {
+          "pageUrl": "https://www.gastronom.ru/recipe/30992/roll-filadelfiya",
+          "imageUrl": "https://images.gastronom.ru/HYku6Bv7hCZ_PsF-kR3XGHY365HWCwwEtAJrck0GR0Y/pr:recipe-step-image/g:ce/rs:auto:0:0:0/L2Ntcy9hbGwtaW1hZ2VzL2NhZWZiZmJiLTQ4MGEtNGE3Zi1hY2MyLTE5YmEzY2VhMTdmZC5qcGc.webp",
+          "screenshotPath": "C:/Users/АМ/AppData/Local/Temp/olympiad-t5-assets/.playwright-cli/page-2026-09-27T17-40-10-740Z.png",
+          "notes": "Лично просмотрено: после переворота нори вверх видны мягкая толстая полоска сливочного сыра и длинные огуречные батоны. Рис снаружи обеспечивает обратный ролл.",
+          "personallyReopenedThisTask": true
+        }
+      ],
+      "inspection": {
+        "method": "view_image original PNG + read-only System.Drawing file/dimension/pixel-format inspection",
+        "notes": [
+          "Открытый тонкий прямоугольник полностью виден.",
+          "Нори расположен сверху; мелкие рисинки нижнего слоя выступают по краям.",
+          "Одна узкая естественно выдавленная сырная дорожка и три тонких огуречных брусочка расположены вдоль центра.",
+          "Большая часть поверхности нори свободна, никакой рыбы/креветок нет.",
+          "Натуральная фактура нори, сыр мягкий и без чрезмерного объёма, светлый нейтральный фон, нет текста или инструментов.",
+          "Брусочки показаны последовательно вдоль дорожки, а не тремя параллельными полосками; состав и продольная ориентация соблюдены."
+        ]
+      },
+      "qa": {
+        "pass": true,
+        "personallyViewed": true,
+        "nonempty": true,
+        "correctFlipOrientation": true,
+        "noriTopRiceBottom": true,
+        "noFish": true,
+        "openFlatStage": true,
+        "naturalTexture": true,
+        "attempts": 1,
+        "limitations": [
+          "Самостоятельная фотографическая наглядность, не автоматически выдаваемый reward и не готовая 3D-модель."
+        ]
+      },
+      "projectPath": "D:\\Кодекс\\olympiad-github-work\\docs\\assets\\t5\\philadelphia-photo-reference-open-v2.webp",
+      "publicUrl": null,
+      "outputBytes": 190384,
+      "outputSha256": "4fe0dbe54c81afe665013b31c1530583d6e93d47a52655fc7006ab2dcdc8f5b7",
+      "exportWidth": 1200,
+      "exportHeight": 800,
+      "mainAgentViewedOriginal": true,
+      "exportMethod": "deterministic resize and WebP encoding only; original PNG preserved",
+      "userAccepted3D": false
+    }
+  ]
+}

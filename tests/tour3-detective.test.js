@@ -138,7 +138,7 @@ test("new spelling policy does not mutate or upgrade an already-issued private k
   assert.equal(matchDetectiveAnswer(bank[5].answerPolicy, "штудель яблочный"), true);
   assert.equal(JSON.stringify(saved), snapshot);
   const variant = buildVariant(olympiad, { seed: "spelling-policy-8" });
-  assert.equal(variant.blueprintVersion, 10);
+  assert.equal(variant.blueprintVersion, 11);
   const issued = variant.questions.find((q) => q.sourceId === bank[5].id);
   assert.equal(matchDetectiveAnswer(issued.answerPolicy, "штудель яблочный"), true);
 });

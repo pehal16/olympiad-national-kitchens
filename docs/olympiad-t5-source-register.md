@@ -12,7 +12,7 @@
 | Греческий салат | [RecipeTin Eats](https://www.recipetineats.com/greek-salad/), [Natasha’s Kitchen](https://natashaskitchen.com/greek-salad/) | Крупная свежая нарезка, фета; масло/орегано объединены |
 | «Цезарь» с курицей | [RecipeTin Eats](https://www.recipetineats.com/chicken-caesar-salad/) | Ромэн, курица, сухарики/пармезан, заправка; не версия с креветками |
 | Хачапури по-аджарски | [Georgia Travel / GNTA](https://georgia.travel/ship-and-sun-the-inspiration-for-ajarian-khachapuri), [Гастроном](https://www.gastronom.ru/recipe/4395/hachapuri-po-adzharski-s-suluguni) | Открытая лодочка, сыр, яйцо, небольшой кусочек масла |
-| Ролл «Филадельфия» | [Гастроном](https://www.gastronom.ru/recipe/30992/roll-filadelfiya) | Рис/нори, сливочный сыр, огурец, наружный лосось; условная плоская сборка |
+| Ролл «Филадельфия» | [Гастроном](https://www.gastronom.ru/recipe/30992/roll-filadelfiya) | Рис/нори, сливочный сыр, огурец, наружный лосось; историческая v1 — плоская сборка, локальная v2 — открытая/свёрнутая объёмная сцена, визуальная приёмка не завершена |
 
 Рецепты источников не подменяют фиксированные четыре модуля задания. Различия и причины выбора всех дистракторов описаны в [аудите содержания](olympiad-t5-content-audit.md).
 

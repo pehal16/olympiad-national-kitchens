@@ -305,7 +305,7 @@ function validateQuestionStructure(question) {
 
   if (question.type === "final_kitchen") {
     const expectedDishCounts = [3, 2, 2];
-    if (question.maxScore !== 16 || question.presentationVersion !== 1 ||
+    if (question.maxScore !== 16 || ![1, 2].includes(question.presentationVersion) ||
         !question.station?.title?.trim() || !expectedDishCounts[question.station.number - 1] ||
         question.dishes?.length !== expectedDishCounts[question.station.number - 1] ||
         new Set(question.dishes.map((dish) => dish.id)).size !== question.dishes.length) {
@@ -315,6 +315,13 @@ function validateQuestionStructure(question) {
     for (const dish of question.dishes) {
       const ids = new Set((dish.items || []).map((item) => item.id));
       const neutralMedia = (url) => /^\/assets\/olympiad\/tour5\/t5-v1-[a-f0-9]{12}\.webp$/.test(url || "");
+      const requiredSurfaces = dish.modelPreset === "roll" ? ["rice", "nori", "salmon"] :
+        ["burger", "wrap"].includes(dish.modelPreset) ? ["bread"] : [];
+      if (question.presentationVersion === 2 && (!dish.surfaceTextures || Object.keys(dish.surfaceTextures).some(key =>
+        !requiredSurfaces.includes(key) || !/^\/assets\/olympiad\/tour5\/materials\/t5-v2-[a-f0-9]{12}\.webp$/.test(dish.surfaceTextures[key])) ||
+        requiredSurfaces.some(key => !dish.surfaceTextures[key]))) {
+        throw new Error("Некорректный материал 3D-поверхности.");
+      }
       if (!dish.title?.trim() || !dish.cuisineLabel?.trim() || !dish.variantLabel?.trim() ||
           !presets.has(dish.modelPreset) || !neutralMedia(dish.previewUrl) || !dish.previewAlt?.trim() ||
           (dish.baseImageUrl && !neutralMedia(dish.baseImageUrl)) || dish.items?.length !== 8 || ids.size !== 8 ||
@@ -323,6 +330,7 @@ function validateQuestionStructure(question) {
             !item.text?.trim() || !item.imageAlt?.trim() || !neutralMedia(item.imageUrl) || !neutralMedia(item.layerImageUrl) ||
             !item.scene || !["level", "width", "aspect", "x", "z", "angle"].every((key) => Number.isFinite(item.scene[key])) ||
             item.scene.width <= 0 || item.scene.aspect <= 0 ||
+            (question.presentationVersion === 2 && !require("./final-kitchen-presentation").FORMS.has(item.scene.form)) ||
             (item.scene.parts && (!Array.isArray(item.scene.parts) || item.scene.parts.length !== 2 ||
               item.scene.parts.some(part => !["level", "width", "aspect", "x", "z", "angle"].every(key => Number.isFinite(part[key])) ||
                 part.width <= 0 || part.aspect <= 0 || !Array.isArray(part.crop) || part.crop.length !== 2 ||
@@ -867,9 +875,13 @@ function sanitizeQuestion(question, attempt) {
       globalIndex: question.globalIndex, station: { number: question.station.number, title: question.station.title },
       dishes: dish ? [] : question.dishes.map(preview),
       selectedDish: dish ? { ...preview(dish), variantLabel: dish.variantLabel, modelPreset: dish.modelPreset,
+        presentationVersion: question.presentationVersion,
+        ...(question.presentationVersion === 2 ? { surfaceTextures: Object.fromEntries(["rice", "nori", "salmon", "bread"]
+          .filter(key => dish.surfaceTextures[key]).map(key => [key, dish.surfaceTextures[key]])) } : {}),
         baseImageUrl: dish.baseImageUrl || "", items: dish.items.map((item) => ({ id: item.id, text: item.text,
           imageAlt: item.imageAlt, imageUrl: item.imageUrl, layerImageUrl: item.layerImageUrl,
           scene: { ...Object.fromEntries(["level", "width", "aspect", "x", "z", "angle"].map((key) => [key, item.scene[key]])),
+            ...(question.presentationVersion === 2 ? { form: item.scene.form } : {}),
             ...(item.scene.parts ? { parts: item.scene.parts.map(part => ({
               ...Object.fromEntries(["level", "width", "aspect", "x", "z", "angle"].map(key => [key, part[key]])),
               crop: [...part.crop]

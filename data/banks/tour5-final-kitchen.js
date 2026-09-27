@@ -2,11 +2,32 @@ const { createHash } = require("node:crypto");
 
 // Server bank. Only the explicit participant whitelist in variant.js is public.
 const assetUrl = (key) => `/assets/olympiad/tour5/t5-v1-${createHash("sha256").update(`final-kitchen-v1:${key}`).digest("hex").slice(0, 12)}.webp`;
+const surfaceUrl = key => `/assets/olympiad/tour5/materials/t5-v2-${createHash("sha256").update(`final-kitchen-surface-v2:${key}`).digest("hex").slice(0, 12)}.webp`;
+const surfaces = {
+  burger: { bread: surfaceUrl("bun") }, wrap: { bread: surfaceUrl("lavash") },
+  roll: { rice: surfaceUrl("rice"), nori: surfaceUrl("nori"), salmon: surfaceUrl("salmon") }
+};
+
+const forms = {
+  ham: "ham", basil: "basil", "pizza-tomato": "tomato-sauce", mushrooms: "mushrooms", "olive-oil": "oil",
+  pepperoni: "pepperoni", mozzarella: "mozzarella", pesto: "pesto", bacon: "bacon", "burger-bun": "bun",
+  "fish-patty": "breaded", "burger-vegetables": "burger-veg", "beef-patty": "beef", "onion-rings": "rings",
+  cheddar: "cheddar", "fried-egg": "egg", "sweet-chili": "chili", lavash: "flatbread", surimi: "surimi",
+  "wrap-vegetables": "vegetables", chicken: "chicken", salmon: "salmon", "white-sauce": "white-sauce", corn: "corn",
+  "salad-croutons": "croutons", feta: "feta", "greek-vegetables": "tomato-cucumber", "salad-corn": "corn",
+  "oil-oregano": "oil-herbs", "salad-chicken": "chicken", "onion-olives": "onion-olives", "mayo-dressing": "dressing",
+  "caesar-cucumber": "cucumber", romaine: "leaves", "caesar-shrimp": "shrimp", "caesar-chicken": "chicken",
+  "croutons-parmesan": "croutons-parmesan", "caesar-feta": "feta", "caesar-dressing": "dressing", "caesar-corn": "corn",
+  "boat-mushrooms": "mushrooms", "boat-cheese": "cheese", "boat-tomato": "tomato-sauce", "dough-boat": "boat",
+  butter: "butter", mince: "mince", "boat-egg": "egg", "boat-mayo": "dressing", eel: "eel", "rice-nori": "rice-sheet",
+  "roll-surimi": "surimi", "roll-salmon": "salmon", "cream-cheese": "cream", "roll-shrimp": "shrimp",
+  "roll-cucumber": "cucumber-sticks", tuna: "tuna"
+};
 
 function ingredient(key, text, level, width = 3.1, aspect = 1, x = 0, z = 0) {
   return { id: key, ingredientKey: key, text, imageAlt: text,
     imageUrl: assetUrl(key), layerImageUrl: assetUrl(key),
-    scene: { level, width, aspect, x, z, angle: 0,
+    scene: { level, width, aspect, x, z, angle: 0, form: forms[key],
       ...(key === "burger-bun" ? { parts: [
         { level: 0, width: 3.25, aspect: 2, x: 0, z: 0, angle: 0, crop: [0, .5] },
         { level: 8, width: 3.25, aspect: 2, x: -.5, z: -.65, angle: 0, crop: [.5, .5] }
@@ -14,7 +35,7 @@ function ingredient(key, text, level, width = 3.1, aspect = 1, x = 0, z = 0) {
 }
 function dish(id, title, cuisineLabel, modelPreset, variantLabel, components, keys) {
   return { id, dishId: id, title, cuisineLabel, previewUrl: assetUrl(`${id}:preview`),
-    previewAlt: title, variantLabel, modelPreset,
+    previewAlt: title, variantLabel, modelPreset, presentationVersion: 2, surfaceTextures: surfaces[modelPreset] || {},
     ...(modelPreset === "pizza" ? { baseImageUrl: assetUrl("pizza-base") } : {}),
     items: components, correctIngredientIds: keys };
 }
@@ -63,7 +84,7 @@ const dishes = [
       ingredient("boat-egg", "Яйцо", 4, 1.8), ingredient("boat-mayo", "Майонез", 5, 2.8)
     ], ["dough-boat", "boat-cheese", "boat-egg", "butter"]),
   dish("philadelphia_roll", "Ролл «Филадельфия»", "Японская кухня · современная версия", "roll",
-    "Версия олимпиады с огурцом; показана условная сборка слоёв.", [
+    "Версия олимпиады с огурцом. При выборе четырёх компонентов сборка сворачивается.", [
       ingredient("eel", "Угорь", 5, 3.1), ingredient("rice-nori", "Рис и нори", 0, 3.75),
       ingredient("roll-surimi", "Крабовые палочки", 3, 3), ingredient("roll-salmon", "Лосось", 5, 3.2),
       ingredient("cream-cheese", "Сливочный сыр", 2, 3.1), ingredient("roll-shrimp", "Креветки", 4, 3),
@@ -75,7 +96,7 @@ const stations = [
   { title: "Горячая сборка", dishes: dishes.slice(0, 3) },
   { title: "Свежая сборка", dishes: dishes.slice(3, 5) },
   { title: "Фирменная сборка", dishes: dishes.slice(5) }
-].map((station, index) => ({ id: `T5-station-${index + 1}`, type: "final_kitchen", presentationVersion: 1,
+].map((station, index) => ({ id: `T5-station-${index + 1}`, type: "final_kitchen", presentationVersion: 2,
   prompt: "Выберите блюдо и соберите его из четырёх компонентов.", maxScore: 16,
   station: { number: index + 1, title: station.title }, dishes: station.dishes }));
 
