@@ -111,6 +111,12 @@ function scoreQuestion(question, answerPayload) {
   }
 
   switch (question.type) {
+    case "final_kitchen": {
+      if (!validateAnswerPayload(question, answerPayload)) return { autoScore: 0, finalScore: 0, penalty: 0 };
+      const dish = question.dishes.find((entry) => entry.id === answerPayload.dishId);
+      const score = answerPayload.selectedIngredientIds.filter((id) => dish.correctIngredientIds.includes(id)).length * 4;
+      return { autoScore: score, finalScore: score, penalty: 0 };
+    }
     case "dish_detective": {
       const score = matchDetectiveAnswer(question.answerPolicy, answerPayload?.text) ? question.maxScore : 0;
       return { autoScore: score, finalScore: score, penalty: 0 };
@@ -149,6 +155,14 @@ function validateAnswerPayload(question, answerPayload) {
   const payload = answerPayload === null || answerPayload === undefined ? {} : answerPayload;
   if (!isPlainObject(payload)) return false;
   const itemIds = new Set((question.items || []).map((item) => String(item.id)));
+
+  if (question.type === "final_kitchen") {
+    if (!hasOnlyKeys(payload, ["dishId", "selectedIngredientIds"]) || typeof payload.dishId !== "string") return false;
+    const dish = question.dishes.find((entry) => entry.id === payload.dishId);
+    const selected = payload.selectedIngredientIds;
+    return Boolean(dish && Array.isArray(selected) && selected.length === 4 && new Set(selected).size === 4 &&
+      selected.every((id) => typeof id === "string" && dish.items.some((item) => item.id === id)));
+  }
 
   if (question.type === "dish_detective") {
     if (!hasOnlyKeys(payload, ["text"])) return false;

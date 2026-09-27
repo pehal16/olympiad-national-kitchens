@@ -297,6 +297,16 @@ When adding PM01 images:
 
 ## Deployment And Checks
 
+### T5 final kitchen — local implementation, 2026-09-27
+
+- Blueprint 10 uses `data/banks/tour5-final-kitchen.js`: 3 fixed stations, 3/2/2 dish choices, 7 dishes, 56 components; exactly 4 of 8, 4 points per suitable component, max 16/station and 48/T5, 15 minutes including intro. New total route is 36 questions / 150 points / 45 minutes.
+- Dish confirmation is server-fixed in `stationSelections` through revision CAS; issued variants are immutable. Old blueprint 9 / 45-question / 12-case T5 attempts still use their saved variant and grading. Do not replace the historical T5 bank.
+- Participant API only exposes current previews before selection, then selected dish's eight opaque-ID components; private grading keys stay server-side. Specific answer receipts resolve lost acknowledgements. Draft selection is not a saved answer.
+- New separate JS/CSS/Three.js runtime and 64 neutral WebPs support click/tap/keyboard/native mouse drag, rotation, reduced motion and photographic 2D fallback. Existing T1–4/PM01 banks and old visual assets are preserved.
+- 208 tests passed, Cloudflare bundle and local PM01 verification passed, 10,000 variant builds had no score mismatch. Main reviewed 7 scenes / 56 cards / 56 layers / 7 previews; desktop and 35 mobile width checks, full desktop/mobile routes, offline/retry/two-client/SW and lost-WebGL cases passed. See `docs/olympiad-t5-qa.md` and saved `docs/assets/t5/` evidence.
+- Source register: `docs/olympiad-t5-source-register.md` + complete asset provenance JSON; 56-component private matrix and distractor rationale: `docs/olympiad-t5-content-audit.md`.
+- **Not pushed or deployed in this task.** New local attempts use T5; production stays unchanged until explicit publication request. Before official competition, obtain teacher/pilot acceptance and resolve public GitHub access to private grading banks/docs. Participant sanitization does not make a public source repository secret.
+
 Useful commands:
 
 ```powershell

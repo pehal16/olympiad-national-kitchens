@@ -20,6 +20,12 @@ async function buildOlympiadVisualRuntime() {
     legalComments: "none",
     logLevel: "info"
   });
+  await esbuild.build({
+    entryPoints: [path.join(root, "src", "client", "final-kitchen-scene.js")],
+    outfile: path.join(root, "public", "assets", "runtime", "dish-final-kitchen-3d.js"),
+    bundle: true, platform: "browser", target: "es2020", format: "esm", minify: true,
+    legalComments: "none", logLevel: "info"
+  });
   return outfile;
 }
 

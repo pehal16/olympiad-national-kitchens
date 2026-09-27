@@ -24,6 +24,7 @@
   attemptAccessTokens: {},
   pendingStartToken: null,
   isSubmittingAnswer: false,
+  isSelectingDish: false,
   isFinishingAttempt: false,
   isStartingAttempt: false,
   deferredInstallPrompt: null,
@@ -215,13 +216,15 @@ function refreshAttemptControls() {
     : false;
   const isComplete = state.questionController?.isComplete?.() ?? hasCurrentAnswer;
   const hasQueuedAnswers = hasPendingAnswers();
-  const isBusy = state.isSubmittingAnswer || state.isFinishingAttempt || state.pendingFlushInFlight;
+  const isBusy = state.isSubmittingAnswer || state.isSelectingDish || state.isFinishingAttempt || state.pendingFlushInFlight;
   const isBlockedByGuard = attemptInProgress && state.examGuardActive;
   const interactionLocked = isBusy || isBlockedByGuard;
 
   if (elements.questionBody) {
     // T3 keeps the shared retry button inside its form, outside input-only locks.
-    elements.questionBody.inert = interactionLocked || (hasQueuedAnswers && state.attempt?.currentQuestion?.type !== "dish_detective" && state.attempt?.currentQuestion?.interactionMode !== "guest_order");
+    // A dialog remains in the shared form during dish confirmation; its own
+    // controls are locked without making the modal subtree inert.
+    elements.questionBody.inert = (interactionLocked && !state.isSelectingDish) || (hasQueuedAnswers && !["dish_detective", "final_kitchen"].includes(state.attempt?.currentQuestion?.type) && state.attempt?.currentQuestion?.interactionMode !== "guest_order");
     elements.questionBody.setAttribute("aria-busy", isBusy ? "true" : "false");
   }
   state.questionController?.setLocked?.(interactionLocked || hasQueuedAnswers);
@@ -268,7 +271,9 @@ function refreshAttemptControls() {
   }
 
   elements.submitAnswer.textContent =
-    state.attempt.currentQuestion?.interactionMode === "guest_order"
+    state.attempt.currentQuestion?.type === "final_kitchen"
+      ? "Подтвердить блюдо"
+      : state.attempt.currentQuestion?.interactionMode === "guest_order"
       ? "Подтвердить заказ"
       : state.attempt.currentQuestion?.type === "dish_detective"
       ? "Подтвердить ответ"
@@ -338,7 +343,7 @@ function setAttemptSaveStatus(message, type = "idle") {
 
   // In T4 a success badge refers to earlier server records, not to the new
   // unconfirmed selection currently sitting on the tray.
-  elements.attemptSaveStatus.textContent = state.attempt?.currentQuestion?.interactionMode === "guest_order" && type === "success"
+  elements.attemptSaveStatus.textContent = (state.attempt?.currentQuestion?.interactionMode === "guest_order" || state.attempt?.currentQuestion?.type === "final_kitchen") && type === "success"
     ? "Предыдущие ответы сохранены" : message;
   elements.attemptSaveStatus.className = `sync-badge ${type}`;
   setParticipantShellState();
@@ -429,6 +434,9 @@ function releaseExamGuard(message = "") {
   state.examGuardReason = "";
   updateExamGuardUi();
   refreshAttemptControls();
+  if (wasActive && state.attempt?.currentQuestion?.type === "final_kitchen") {
+    hideMessage(elements.attemptMessage);
+  }
   if (message) {
     setAttemptSaveStatus(message, "success");
     setAttemptSyncMeta(`Контроль восстановлен: ${formatDateTime(new Date())}`);
@@ -606,6 +614,8 @@ function handleProtectedDragStart(event) {
   if (countryDish && elements.questionBody.contains(countryDish)) return;
   const guestDish = event.target?.closest?.(".t4-order .t4-menu-select");
   if (guestDish && elements.questionBody.contains(guestDish) && state.attempt?.currentQuestion?.interactionMode === "guest_order") return;
+  const kitchenComponent = event.target?.closest?.(".t5-kitchen .t5-component");
+  if (kitchenComponent && elements.questionBody.contains(kitchenComponent) && state.attempt?.currentQuestion?.type === "final_kitchen") return;
 
   event.preventDefault();
 }
@@ -1872,7 +1882,7 @@ function renderHero() {
   elements.heroSubtitle.textContent = state.olympiad.subtitle;
   if (elements.heroFormatBadge) {
     const totalTours = Array.isArray(state.olympiad.tours) ? state.olympiad.tours.length : 0;
-    elements.heroFormatBadge.textContent = `${state.olympiad.durationMinutes} минут · ${totalTours} туров · 45 заданий`;
+    elements.heroFormatBadge.textContent = `${state.olympiad.durationMinutes} минут · ${totalTours} туров · ${state.olympiad.questionCount ?? 36} заданий`;
   }
 }
 
@@ -2865,7 +2875,54 @@ function renderQuestion(question) {
   void elements.questionCard.offsetWidth;
   elements.questionCard.classList.add("question-enter");
 
-  if (hydratedQuestion.type === "dish_detective") {
+  if (hydratedQuestion.type === "final_kitchen") {
+    state.questionController = window.T5FinalKitchen.create({
+      mount: elements.questionBody, question: hydratedQuestion, attemptId: state.attempt.id,
+      submitButton: elements.submitAnswer,
+      onPhase: (phase) => {
+        elements.attemptSection.classList.toggle("is-t5-intro", phase === "intro");
+        elements.attemptSection.classList.toggle("is-t5-choice", phase === "choice");
+      },
+      onChange: (answer) => {
+        rememberDraft(hydratedQuestion.id, answer);
+        if (!hasPendingAnswers() && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
+          setAttemptSaveStatus(answer.selectedIngredientIds?.length ? "Состав ещё не отправлен" : hydratedQuestion.selectedDish ? "Выберите компоненты" : "Выберите блюдо", "idle");
+          setAttemptSyncMeta("Черновик не является ответом. Запись подтверждает сервер.");
+        }
+        refreshAttemptControls(); updateExamCockpit();
+      },
+      lockDish: async (dishId) => {
+        if (state.isSelectingDish || state.examGuardActive) throw new Error("Вернитесь в защищённый режим и повторите подтверждение.");
+        const attemptId = state.attempt.id, questionId = hydratedQuestion.id;
+        state.isSelectingDish = true; refreshAttemptControls();
+        setAttemptSaveStatus("Подтверждаем выбор блюда…", "pending");
+        try {
+          const data = await requestWithRetry(() => api(`/api/public/attempts/${attemptId}/dish-selection`, {
+            method: "POST", body: JSON.stringify({ questionId, dishId })
+          }), { attempts: 2, pauseMs: 1000 });
+          if (state.attempt?.id === attemptId) {
+            applyAttemptState(data);
+            setAttemptSaveStatus("Выбор блюда закреплён. Соберите четыре компонента.", "idle");
+            setAttemptSyncMeta("Состав станет ответом только после подтверждения.");
+            elements.questionBody.querySelector(".t5-component")?.focus({ preventScroll: true });
+          }
+        } catch (error) {
+          // A response can be lost after the server has already fixed the dish.
+          // Resynchronize before inviting a retry or a second-tab replacement.
+          try {
+            const current = await api(`/api/public/attempts/${attemptId}/current`);
+            if (state.attempt?.id === attemptId && (current.currentQuestion?.id !== questionId || current.currentQuestion?.selectedDish)) {
+              applyAttemptState(current); return;
+            }
+          } catch { /* Preserve the choice dialog; no optimistic selection. */ }
+          setAttemptSaveStatus("Выбор не подтверждён. Повторите отправку.", "warning");
+          throw new Error(formatApiError(error));
+        } finally {
+          state.isSelectingDish = false; refreshAttemptControls();
+        }
+      }
+    });
+  } else if (hydratedQuestion.type === "dish_detective") {
     state.questionController = window.T3Detective.create({
       mount: elements.questionBody, question: hydratedQuestion, attemptId: state.attempt.id,
       submitButton: elements.submitAnswer,
@@ -2925,6 +2982,7 @@ function renderAttempt() {
   elements.attemptSection.classList.toggle("is-t2", currentQuestion?.interactionMode === "country_match");
   elements.attemptSection.classList.toggle("is-t3", currentQuestion?.type === "dish_detective");
   elements.attemptSection.classList.toggle("is-t4", currentQuestion?.interactionMode === "guest_order");
+  elements.attemptSection.classList.toggle("is-t5", currentQuestion?.type === "final_kitchen");
 
   renderParticipant();
   saveTimingSnapshot(attempt);
@@ -2940,7 +2998,9 @@ function renderAttempt() {
     (attempt.progress.currentQuestionIndex / Math.max(1, attempt.progress.totalQuestions)) * 100
   }%`;
   if (currentTour) {
-    elements.progressTour.textContent = currentQuestion?.interactionMode === "guest_order"
+    elements.progressTour.textContent = currentQuestion?.type === "final_kitchen"
+      ? `Станция ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`
+      : currentQuestion?.interactionMode === "guest_order"
       ? `Заказ ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`
       : currentQuestion?.type === "dish_detective" || currentQuestion?.interactionMode === "country_match"
       ? `Задание ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`
@@ -2954,13 +3014,17 @@ function renderAttempt() {
       ? "Тур 2 · Кухни мира"
       : currentQuestion?.imageUrl && currentTour.code === "T1"
       ? "Тур 1 · Узнай блюдо" : currentTour.code;
-    elements.tourTitle.textContent = currentQuestion?.interactionMode === "guest_order"
+    elements.tourTitle.textContent = currentQuestion?.type === "final_kitchen"
+      ? "Тур 5 · Финальная кухня"
+      : currentQuestion?.interactionMode === "guest_order"
       ? "Тур 4 · Собери заказ гостя"
       : currentQuestion?.type === "dish_detective"
       ? "Тур 3 · Кулинарный детектив"
       : currentQuestion?.interactionMode === "country_match"
       ? "Сопоставьте блюда со странами" : currentTour.title;
-    elements.tourDescription.textContent = currentQuestion?.type === "dish_detective"
+    elements.tourDescription.textContent = currentQuestion?.type === "final_kitchen"
+      ? ""
+      : currentQuestion?.type === "dish_detective"
       ? "Определите блюдо по подсказкам"
       : currentQuestion?.interactionMode === "country_match"
       ? "" : currentTour.description || "";
@@ -2998,6 +3062,9 @@ function renderCertificate(attempt, scoresVisible) {
 }
 
 function renderResult() {
+  if (state.attempt?.status !== "in_progress" && state.questionController?.isFinalKitchen) {
+    state.questionController.dispose(); state.questionController = null;
+  }
   const summary = state.attempt.summary;
   const scoresVisible = Number.isFinite(summary.totalFinalScore);
   disableExamMode();
@@ -3073,6 +3140,8 @@ function canSoftSyncAttempt(nextAttempt) {
   if (!currentQuestionId || currentQuestionId !== nextQuestionId) {
     return false;
   }
+  if (state.attempt.currentQuestion?.type === "final_kitchen" &&
+      state.attempt.currentQuestion.selectedDish?.id !== nextAttempt.currentQuestion?.selectedDish?.id) return false;
 
   if (
     state.attempt.progress.currentQuestionIndex !== nextAttempt.progress.currentQuestionIndex ||
@@ -3098,6 +3167,10 @@ function describeAttemptTransition(previousAttempt, nextAttempt) {
     previousAttempt.status === "in_progress" &&
     nextAttempt.status !== "in_progress"
   ) {
+    if (previousAttempt.currentQuestion?.type === "final_kitchen" &&
+        (nextAttempt.answerReceipt?.saved === false || nextAttempt.progress.answeredCount === previousAttempt.progress.answeredCount)) {
+      return "Маршрут завершён. Незавершённая сборка не записана; прежние ответы сохранены.";
+    }
     return "Маршрут завершен. Итог сохранен в облаке.";
   }
 
@@ -3126,6 +3199,7 @@ function describeAttemptTransition(previousAttempt, nextAttempt) {
   const nextQuestionIndex = nextAttempt.progress ? nextAttempt.progress.currentQuestionIndex : 0;
 
   if (previousQuestionIndex && previousQuestionIndex !== nextQuestionIndex) {
+    if (nextAttempt.currentQuestion?.type === "final_kitchen") return `Станция ${nextAttempt.progress.tourQuestionIndex} из 3.`;
     return `${nextAttempt.currentTour.code}: вопрос ${nextAttempt.progress.tourQuestionIndex} из ${nextAttempt.progress.tourQuestionCount}.`;
   }
 
@@ -3195,9 +3269,11 @@ function updateTimers() {
     state.syncingAfterTimeout = true;
     const selectedGuestDraft = state.attempt?.currentQuestion?.interactionMode === "guest_order" &&
       hasMeaningfulAnswer(state.questionController?.getAnswer?.()) && !state.isSubmittingAnswer && !state.isFinishingAttempt;
+    const completeKitchenDraft = state.attempt?.currentQuestion?.type === "final_kitchen" &&
+      state.questionController?.isComplete?.() && !state.isSubmittingAnswer && !state.isFinishingAttempt && !state.isSelectingDish;
     // Flush this exact scoped choice through the existing queue. Server deadlines
     // still decide acceptance; a rejected late choice must never be called saved.
-    (selectedGuestDraft ? submitAnswer() : syncAttempt(true)).finally(() => {
+    (selectedGuestDraft || completeKitchenDraft ? submitAnswer() : syncAttempt(true)).finally(() => {
       state.syncingAfterTimeout = false;
     });
   }
@@ -3221,6 +3297,7 @@ async function syncAttempt(silent = false) {
   if (
     !state.attempt ||
     state.isSubmittingAnswer ||
+    state.isSelectingDish ||
     state.isFinishingAttempt ||
     state.syncInFlight ||
     state.pendingFlushInFlight ||
@@ -3266,6 +3343,7 @@ async function performPendingAnswerFlush(options = {}) {
   state.pendingFlushInFlight = true;
   refreshAttemptControls();
   let lastSyncedAttempt = null;
+  const wasKitchen = state.attempt.currentQuestion?.type === "final_kitchen";
 
   try {
     while (state.pendingAnswerQueue.length) {
@@ -3302,7 +3380,7 @@ async function performPendingAnswerFlush(options = {}) {
     }
 
     setAttemptSaveStatus(lastSyncedAttempt?.answerReceipt?.saved === false
-      ? "Лимит времени истёк. Заказ не записан." : "Ответы сохранены в облаке",
+      ? wasKitchen ? "Лимит времени истёк. Блюдо не записано." : "Лимит времени истёк. Заказ не записан." : "Ответы сохранены в облаке",
       lastSyncedAttempt?.answerReceipt?.saved === false ? "warning" : "success");
     setAttemptSyncMeta(`Синхронизация завершена: ${formatDateTime(new Date())}`);
     return lastSyncedAttempt;
@@ -3312,15 +3390,17 @@ async function performPendingAnswerFlush(options = {}) {
 
     if (error.status === 409 && pendingItem) {
       try {
-        const current = await api(`/api/public/attempts/${state.attempt.id}/current`);
+        const receiptQuery = wasKitchen ? `?receiptQuestionId=${encodeURIComponent(pendingItem.questionId)}` : "";
+        const current = await api(`/api/public/attempts/${state.attempt.id}/current${receiptQuery}`);
         const pendingIsAlreadyPast =
           current.status !== "in_progress" ||
           current.currentQuestion?.id !== pendingItem.questionId;
         if (pendingIsAlreadyPast) {
+          const kitchenSaved = current.answerReceipt?.questionId === pendingItem.questionId && current.answerReceipt.saved === true;
           state.pendingAnswerQueue.shift();
           persistPendingAnswerQueue();
           applyAttemptState(current, { preserveQuestionRender: false });
-          setAttemptSaveStatus("Состояние синхронизировано", "success");
+          setAttemptSaveStatus(wasKitchen && !kitchenSaved ? "Блюдо не записано. Сервер завершил станцию." : "Состояние синхронизировано", wasKitchen && !kitchenSaved ? "warning" : "success");
           setAttemptSyncMeta("Сервер уже перешёл дальше; устаревший запрос удалён из очереди.");
           return current;
         }
@@ -3340,7 +3420,7 @@ async function performPendingAnswerFlush(options = {}) {
       options.blocking
         ? "Не удалось сохранить ответы перед завершением"
         : retriable
-          ? state.attempt?.currentQuestion?.interactionMode === "guest_order"
+          ? state.attempt?.currentQuestion?.interactionMode === "guest_order" || wasKitchen
             ? "Ответ ещё не сохранён. Проверьте связь и повторите отправку."
             : "Ответ принят, но облачная синхронизация временно задержалась"
           : "Ответ не сохранён: требуется действие участника",
@@ -3524,14 +3604,16 @@ async function startAttempt() {
 }
 
 async function submitAnswer() {
-  if (!state.attempt || !state.questionController || state.isSubmittingAnswer || state.isFinishingAttempt) {
+  if (!state.attempt || !state.questionController || state.isSelectingDish || state.isSubmittingAnswer || state.isFinishingAttempt) {
     return;
   }
 
   const previousQuestionId = state.attempt.currentQuestion && state.attempt.currentQuestion.id;
   const answerPayload = state.questionController.getAnswer();
   if (state.questionController.isComplete && !state.questionController.isComplete()) {
-    showMessage(elements.attemptMessage, state.attempt.currentQuestion?.type === "dish_detective"
+    showMessage(elements.attemptMessage, state.attempt.currentQuestion?.type === "final_kitchen"
+      ? "Выберите ровно четыре компонента, затем подтвердите блюдо."
+      : state.attempt.currentQuestion?.type === "dish_detective"
       ? "Введите название блюда: не менее двух символов."
       : state.attempt.currentQuestion?.interactionMode === "guest_order"
       ? "Выберите одно блюдо из меню, затем подтвердите заказ."
@@ -3576,8 +3658,8 @@ async function submitAnswer() {
       throw new Error("Сервер не подтвердил сохранение ответа. Повторите отправку.");
     }
     if (data.answerReceipt?.saved === false) {
-      setAttemptSaveStatus("Лимит времени истёк. Заказ не записан.", "warning");
-      setAttemptSyncMeta("Сервер подтвердил переход по таймеру, но не сохранение этого заказа.");
+      setAttemptSaveStatus(answerPayload.dishId ? "Лимит времени истёк. Блюдо не записано." : "Лимит времени истёк. Заказ не записан.", "warning");
+      setAttemptSyncMeta("Сервер подтвердил переход, но не сохранение этого ответа.");
       return;
     }
 
@@ -3601,13 +3683,14 @@ async function submitAnswer() {
 }
 
 async function finishAttempt() {
-  if (!state.attempt || state.isSubmittingAnswer || state.isFinishingAttempt) {
+  if (!state.attempt || state.isSelectingDish || state.isSubmittingAnswer || state.isFinishingAttempt) {
     return;
   }
 
-  const confirmed = window.confirm(
-    "Завершить олимпиаду досрочно? Текущий ответ будет сохранён, после завершения вернуться к заданиям нельзя."
-  );
+  const incompleteKitchen = state.attempt.currentQuestion?.type === "final_kitchen" && !state.questionController?.isComplete?.();
+  const confirmed = window.confirm(incompleteKitchen
+    ? "Завершить олимпиаду досрочно? Незавершённая сборка не будет засчитана. Прежние ответы сохранены; вернуться к заданиям нельзя."
+    : "Завершить олимпиаду досрочно? Текущий ответ будет отправлен на сервер, после завершения вернуться к заданиям нельзя.");
   if (!confirmed) {
     return;
   }
@@ -3624,7 +3707,8 @@ async function finishAttempt() {
     const currentQuestion = state.attempt.currentQuestion;
     if (currentQuestion && state.questionController?.getAnswer) {
       const answerPayload = state.questionController.getAnswer();
-      const answerIsMeaningful = hasMeaningfulAnswer(answerPayload);
+      const answerIsMeaningful = hasMeaningfulAnswer(answerPayload) &&
+        (currentQuestion.type !== "final_kitchen" || state.questionController.isComplete());
       const queuedAnswer = state.pendingAnswerQueue.find(
         (item) => item.questionId === currentQuestion.id
       );

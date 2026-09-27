@@ -46,7 +46,7 @@ test("T3 ten fixed dossiers, three clues, 30 points, no duplicate T1/T2/T5 entit
   for (let i = 0; i < 100; i += 1) {
     const v = buildVariant(olympiad, { seed: `detective-${i}` });
     assert.deepEqual(v.questions.filter((q) => q.tourCode === "T3").map((q) => q.sourceId), bank.map((q) => q.id));
-    assert.equal(v.questions.length, 45);
+    assert.equal(v.questions.length, 36);
     assert.equal(v.questions.reduce((sum, q) => sum + q.maxScore, 0), 150);
     assert.equal(v.tours.find((t) => t.code === "T3").timeLimitMinutes, 8);
     assert.equal(olympiad.durationMinutes, 45);
@@ -138,7 +138,7 @@ test("new spelling policy does not mutate or upgrade an already-issued private k
   assert.equal(matchDetectiveAnswer(bank[5].answerPolicy, "штудель яблочный"), true);
   assert.equal(JSON.stringify(saved), snapshot);
   const variant = buildVariant(olympiad, { seed: "spelling-policy-8" });
-  assert.equal(variant.blueprintVersion, 9);
+  assert.equal(variant.blueprintVersion, 10);
   const issued = variant.questions.find((q) => q.sourceId === bank[5].id);
   assert.equal(matchDetectiveAnswer(issued.answerPolicy, "штудель яблочный"), true);
 });

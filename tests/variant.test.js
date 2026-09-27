@@ -11,6 +11,7 @@ const {
 const { scoreQuestion, validateAnswerPayload } = require("../src/scoring");
 
 function correctAnswerFor(question) {
+  if (question.type === "final_kitchen") return { dishId: question.dishes[0].id, selectedIngredientIds: [...question.dishes[0].correctIngredientIds] };
   if (question.type === "dish_detective") return { text: question.answerPolicy.canonical };
   if (question.type === "single_choice") {
     return {
@@ -100,10 +101,10 @@ test("issued questions use opaque per-question ids without semantic answer hints
     const publicJson = JSON.stringify(publicQuestion);
 
     assert.match(publicQuestion.id, /^q_\d{20}$/);
-    publicQuestion.options.forEach((option) => assert.match(option.id, /^o_\d{20}$/));
-    publicQuestion.items.forEach((item) => assert.match(item.id, /^i_\d{20}$/));
-    publicQuestion.buckets.forEach((bucket) => assert.match(bucket.id, /^b_\d{20}$/));
-    publicQuestion.slots.forEach((slot) => assert.match(slot.id, /^s_\d{20}$/));
+    (publicQuestion.options || []).forEach((option) => assert.match(option.id, /^o_\d{20}$/));
+    (publicQuestion.items || []).forEach((item) => assert.match(item.id, /^i_\d{20}$/));
+    (publicQuestion.buckets || []).forEach((bucket) => assert.match(bucket.id, /^b_\d{20}$/));
+    (publicQuestion.slots || []).forEach((slot) => assert.match(slot.id, /^s_\d{20}$/));
     assert.doesNotMatch(publicJson, forbiddenHints);
     assert.equal(validateAnswerPayload(question, answer), true);
     assert.equal(scoreQuestion(question, answer).finalScore, question.maxScore);

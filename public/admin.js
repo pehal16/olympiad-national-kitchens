@@ -737,6 +737,13 @@ function formatAnswer(question, answer) {
   const itemMap = mapById(question.items);
   const optionMap = mapById(question.options);
 
+  if (question.type === "final_kitchen") {
+    const dish = (question.dishes || []).find((entry) => entry.id === answer.answerPayload.dishId);
+    if (!dish) return "Блюдо не найдено в выданном варианте";
+    const selected = new Set(answer.answerPayload.selectedIngredientIds || []);
+    return `${dish.title}\n${dish.items.filter((item) => selected.has(item.id)).map((item) => item.text).join(", ")}`;
+  }
+
   if (question.type === "single_choice") {
     return optionMap.get(answer.answerPayload.selectedOptionId)?.text || " ";
   }

@@ -30,7 +30,9 @@ for (const pool of olympiad.questionBank.tour1Pools || []) {
 for (const key of ["tour2Blocks", "tour3Matrices", "tour4Tasks"]) {
   for (const question of olympiad.questionBank[key] || []) sourceIds.push(question.id);
 }
-for (const cluster of olympiad.questionBank.tour5Cases || []) {
+if (olympiad.tours.find((tour) => tour.code === "T5")?.generation?.mode === "final_kitchen_stations") {
+  sourceIds.push(...olympiad.questionBank.tour5Stations.map((station) => station.id));
+} else for (const cluster of olympiad.questionBank.tour5Cases || []) {
   for (const question of cluster.questions || []) {
     sourceIds.push(`${cluster.id}-q${cluster.questions.indexOf(question) + 1}`);
   }

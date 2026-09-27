@@ -34,7 +34,7 @@ test("T4 eight fixed orders, 32 distinct menu positions, 32/10 within unchanged 
     });
   });
   const v = buildVariant(olympiad, { seed: "guest-contract" });
-  assert.equal(v.blueprintVersion, 9); assert.equal(v.questions.length, 45);
+  assert.equal(v.blueprintVersion, 10); assert.equal(v.questions.length, 36);
   assert.equal(v.questions.reduce((s, q) => s + q.maxScore, 0), 150);
   assert.equal(olympiad.durationMinutes, 45);
   assert.equal(v.tours.find((t) => t.code === "T4").timeLimitMinutes, 10);

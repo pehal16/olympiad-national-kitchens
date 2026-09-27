@@ -1,0 +1,27 @@
+{
+  "checks": [
+    "Desktop T4 -> T5 intro -> confirmed choice/reload -> three dishes -> 150/150 and certificate available",
+    "Mobile 390x844 full burger / Caesar / Philadelphia path: 48 T5 and 150 total",
+    "Keyboard Enter/Space/Tab; native drag -> scene; outside drop unchanged; remove; clear; incomplete submit disabled; draft reload",
+    "WebGL unavailable -> working 2D; reduced motion none; same four-component answer accepted",
+    "Real WebGL context loss preserves chosen ingredient and switches to 2D",
+    "Early incomplete finish: 102 prior points retained, T5=0",
+    "Lost answer acknowledgement -> retry/current reconciliation; one saved answer"
+  ],
+  "errors": [],
+  "screenshots": [
+    "C:\\Users\\АМ\\AppData\\Local\\Temp\\olympiad-t5-assets\\browser-qa\\t4-last-order.png",
+    "C:\\Users\\АМ\\AppData\\Local\\Temp\\olympiad-t5-assets\\browser-qa\\t5-intro.png",
+    "C:\\Users\\АМ\\AppData\\Local\\Temp\\olympiad-t5-assets\\browser-qa\\choice-station-1.png",
+    "C:\\Users\\АМ\\AppData\\Local\\Temp\\olympiad-t5-assets\\browser-qa\\choice-confirmation.png",
+    "C:\\Users\\АМ\\AppData\\Local\\Temp\\olympiad-t5-assets\\browser-qa\\choice-station-2.png",
+    "C:\\Users\\АМ\\AppData\\Local\\Temp\\olympiad-t5-assets\\browser-qa\\choice-station-3.png",
+    "C:\\Users\\АМ\\AppData\\Local\\Temp\\olympiad-t5-assets\\browser-qa\\result-150.png",
+    "C:\\Users\\АМ\\AppData\\Local\\Temp\\olympiad-t5-assets\\browser-qa\\mobile-flow-burger.png",
+    "C:\\Users\\АМ\\AppData\\Local\\Temp\\olympiad-t5-assets\\browser-qa\\mobile-flow-caesar_salad.png",
+    "C:\\Users\\АМ\\AppData\\Local\\Temp\\olympiad-t5-assets\\browser-qa\\mobile-flow-philadelphia_roll.png",
+    "C:\\Users\\АМ\\AppData\\Local\\Temp\\olympiad-t5-assets\\browser-qa\\mobile-result.png",
+    "C:\\Users\\АМ\\AppData\\Local\\Temp\\olympiad-t5-assets\\browser-qa\\fallback-reduced-motion.png",
+    "C:\\Users\\АМ\\AppData\\Local\\Temp\\olympiad-t5-assets\\browser-qa\\lost-webgl-context.png"
+  ]
+}

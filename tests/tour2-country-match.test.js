@@ -129,7 +129,7 @@ test("all seeds retain fixed T2 content, score and order but shuffle opaque card
   const countryOrders = new Set();
   for (let n = 0; n < 100; n += 1) {
     const v = buildVariant(olympiad, { seed: `t2-${n}` });
-    assert.equal(v.questions.length, 45); assert.equal(v.totalMaxScore, 150);
+    assert.equal(v.questions.length, 36); assert.equal(v.totalMaxScore, 150);
     assert.deepEqual(v.tours.map((t) => [t.code, t.maxScore, t.timeLimitMinutes]), [["T1",20,6],["T2",20,6],["T3",30,8],["T4",32,10],["T5",48,15]]);
     const issued = v.questions.filter((q) => q.tourCode === "T2");
     assert.deepEqual(issued.map((q) => q.sourceId), bank.map((q) => q.id));

@@ -196,7 +196,15 @@ function buildExportModel() {
           return formatSequenceTask(task);
         });
       } else if (tour.code === "T5") {
-        items = olympiad.questionBank.tour5Cases.map(formatCaseCluster);
+        items = tour.generation.mode === "final_kitchen_stations" ? olympiad.questionBank.tour5Stations.map((station) => ({
+          id: station.id, type: station.type, typeLabel: "Финальная кухня", prompt: station.station.title,
+          maxScore: station.maxScore, dishes: station.dishes.map((dish) => ({
+            id: dish.id, title: dish.title, cuisineLabel: dish.cuisineLabel, variantLabel: dish.variantLabel,
+            items: dish.items.map((item) => ({ id: item.id, text: item.text })),
+            key: { included: dish.items.filter((item) => dish.correctIngredientIds.includes(item.id)).map((item) => item.text),
+              excluded: dish.items.filter((item) => !dish.correctIngredientIds.includes(item.id)).map((item) => item.text) }
+          }))
+        })) : olympiad.questionBank.tour5Cases.map(formatCaseCluster);
       }
 
       return {
@@ -247,6 +255,15 @@ function buildMarkdown(model) {
     }
 
     for (const item of tour.items) {
+      if (item.type === "final_kitchen") {
+        lines.push(`### ${item.id}. ${item.prompt}`, "", `Баллы: ${item.maxScore}`, "");
+        for (const dish of item.dishes) {
+          lines.push(`#### ${dish.title}`, "", dish.variantLabel, "", "Компоненты:");
+          dish.items.forEach((component) => lines.push(`- ${component.text}`));
+          lines.push(`Ключ: ${dish.key.included.join("; ")}`, `Ложные: ${dish.key.excluded.join("; ")}`, "");
+        }
+        continue;
+      }
       if (item.type === "case_cluster") {
         lines.push(`### ${item.id}. ${item.dishLabel}`);
         lines.push("");

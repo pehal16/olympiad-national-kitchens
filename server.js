@@ -385,6 +385,8 @@ function attemptMatchesAccess(attempt, accessKey, participantSignature, mode) {
   return attempt.participantSignature === participantSignature;
 }
 
+const { lockStationDish, isLockedDishAnswer } = require("./src/final-kitchen");
+
 function getOlympiadPublicData(olympiad) {
   return {
     id: olympiad.id,
@@ -393,6 +395,7 @@ function getOlympiadPublicData(olympiad) {
     subtitle: olympiad.subtitle,
     description: olympiad.description,
     durationMinutes: olympiad.durationMinutes,
+    questionCount: olympiad.tours.find((tour) => tour.code === "T5")?.generation?.mode === "final_kitchen_stations" ? 36 : 45,
     startAt: olympiad.startAt,
     endAt: olympiad.endAt,
     registrationMode: olympiad.registrationMode,
@@ -881,6 +884,11 @@ function buildAttemptPulse(olympiad, attempt, settings) {
 function formatCorrectAnswer(question) {
   if (!question) {
     return "";
+  }
+
+  if (question.type === "final_kitchen") {
+    return question.dishes.map((dish) => `${dish.title}: ${dish.items.filter((item) => dish.correctIngredientIds.includes(item.id))
+      .map((item) => item.text).join(", ")}`).join("\n");
   }
 
   if (question.type === "single_choice") {
@@ -3787,9 +3795,19 @@ async function handleApi(req, res, url, runtime = {}) {
     }
 
     const normalized = await normalizeAndPersistIfChanged(olympiadData, attempt);
+    const receiptQuestionId = url.searchParams.get("receiptQuestionId");
+    const view = buildAttemptView(olympiadData, normalized, settings);
+    if (receiptQuestionId !== null) {
+      const issued = normalized.variant.questions.find(question => question.id === receiptQuestionId && question.type === "final_kitchen");
+      if (!issued) {
+        sendJson(res, 422, { ok: false, message: "Станция не принадлежит этой попытке." });
+        return;
+      }
+      view.answerReceipt = { questionId: receiptQuestionId, saved: Boolean(normalized.answers?.[receiptQuestionId]) };
+    }
     sendJson(res, 200, {
       ok: true,
-      data: buildAttemptView(olympiadData, normalized, settings)
+      data: view
     });
     return;
   }
@@ -3877,6 +3895,25 @@ async function handleApi(req, res, url, runtime = {}) {
     return;
   }
 
+  if (method === "POST" && pathname.match(/^\/api\/public\/attempts\/[^/]+\/dish-selection$/)) {
+    const olympiadData = await ensureOlympiad();
+    const attemptId = pathname.split("/")[4];
+    const attempt = await loadAttemptById(attemptId);
+    if (!attempt || attempt.olympiadId !== olympiadData.id) {
+      sendJson(res, 404, { ok: false, message: "Попытка не найдена." }); return;
+    }
+    if (!hasAttemptAccess(req, attempt)) { sendAttemptAccessDenied(res); return; }
+    const body = await parseBody(req, { maxBytes: 4 * 1024 });
+    const result = await lockStationDish(attempt, body, {
+      normalize: (stored) => normalizeAndPersistIfChanged(olympiadData, stored),
+      save: updateAttemptWithRevision, load: loadAttemptById, onSaved: invalidateAttemptCaches
+    });
+    sendJson(res, result.status, result.status === 200 ? {
+      ok: true, data: buildAttemptView(olympiadData, result.attempt, settings)
+    } : { ok: false, message: result.message });
+    return;
+  }
+
   if (method === "POST" && pathname.match(/^\/api\/public\/attempts\/[^/]+\/answer$/)) {
     const olympiadData = await ensureOlympiad();
     const attemptId = pathname.split("/")[4];
@@ -3895,7 +3932,7 @@ async function handleApi(req, res, url, runtime = {}) {
     const answerView = (stored) => {
       const view = buildAttemptView(olympiadData, stored, settings);
       const issued = stored.variant?.questions?.find((question) => question.id === body.questionId);
-      if (issued?.interactionMode === "guest_order") {
+      if (issued?.interactionMode === "guest_order" || issued?.type === "final_kitchen") {
         view.answerReceipt = { questionId: body.questionId, saved: Boolean(stored.answers?.[body.questionId]) };
       }
       return view;
@@ -3946,6 +3983,10 @@ async function handleApi(req, res, url, runtime = {}) {
       return;
     }
 
+    if (!isLockedDishAnswer(attempt, currentQuestion, body.answerPayload)) {
+      sendJson(res, 409, { ok: false, message: "Сначала подтвердите выбор блюда на этой станции." });
+      return;
+    }
     if (!validateAnswerPayload(currentQuestion, body.answerPayload)) {
       sendJson(res, 422, {
         ok: false,

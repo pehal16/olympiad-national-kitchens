@@ -75,6 +75,15 @@ function requireMappedIdentifier(mapping, value, question, fieldName) {
 }
 
 function remapQuestionIdentifiers(question, scope) {
+  if (question.type === "final_kitchen") {
+    const dishIds = makeIdentifierMap(question.dishes, "d", `${scope}:dishes`);
+    question.dishes = question.dishes.map((dish, index) => {
+      const ids = makeIdentifierMap(dish.items, "i", `${scope}:dish:${index}:items`);
+      return { ...dish, id: dishIds.get(dish.id),
+        items: dish.items.map((item) => ({ ...item, id: ids.get(item.id) })),
+        correctIngredientIds: dish.correctIngredientIds.map((id) => requireMappedIdentifier(ids, id, question, "correctIngredientIds")) };
+    });
+  }
   const optionIds = makeIdentifierMap(question.options, "o", `${scope}:options`);
   const itemIds = makeIdentifierMap(question.items, "i", `${scope}:items`);
   const bucketIds = makeIdentifierMap(question.buckets, "b", `${scope}:buckets`);
@@ -143,6 +152,11 @@ function remapQuestionIdentifiers(question, scope) {
 
 function shuffleQuestion(question, random) {
   const prepared = clone(question);
+  if (prepared.type === "final_kitchen") {
+    prepared.dishes = shuffleArray(prepared.dishes, random).map((dish) => ({
+      ...dish, items: shuffleArray(dish.items, random)
+    }));
+  }
 
   if (Array.isArray(prepared.options)) {
     prepared.options = shuffleArray(prepared.options, random);
@@ -288,6 +302,36 @@ function validateQuestionStructure(question) {
   }
 
   validateQuestionMedia(question);
+
+  if (question.type === "final_kitchen") {
+    const expectedDishCounts = [3, 2, 2];
+    if (question.maxScore !== 16 || question.presentationVersion !== 1 ||
+        !question.station?.title?.trim() || !expectedDishCounts[question.station.number - 1] ||
+        question.dishes?.length !== expectedDishCounts[question.station.number - 1] ||
+        new Set(question.dishes.map((dish) => dish.id)).size !== question.dishes.length) {
+      throw new Error("Нарушен контракт станции финальной кухни.");
+    }
+    const presets = new Set(["pizza", "burger", "wrap", "bowl", "boat", "roll"]);
+    for (const dish of question.dishes) {
+      const ids = new Set((dish.items || []).map((item) => item.id));
+      const neutralMedia = (url) => /^\/assets\/olympiad\/tour5\/t5-v1-[a-f0-9]{12}\.webp$/.test(url || "");
+      if (!dish.title?.trim() || !dish.cuisineLabel?.trim() || !dish.variantLabel?.trim() ||
+          !presets.has(dish.modelPreset) || !neutralMedia(dish.previewUrl) || !dish.previewAlt?.trim() ||
+          (dish.baseImageUrl && !neutralMedia(dish.baseImageUrl)) || dish.items?.length !== 8 || ids.size !== 8 ||
+          dish.correctIngredientIds?.length !== 4 || new Set(dish.correctIngredientIds).size !== 4 ||
+          !dish.correctIngredientIds.every((id) => ids.has(id)) || dish.items.some((item) =>
+            !item.text?.trim() || !item.imageAlt?.trim() || !neutralMedia(item.imageUrl) || !neutralMedia(item.layerImageUrl) ||
+            !item.scene || !["level", "width", "aspect", "x", "z", "angle"].every((key) => Number.isFinite(item.scene[key])) ||
+            item.scene.width <= 0 || item.scene.aspect <= 0 ||
+            (item.scene.parts && (!Array.isArray(item.scene.parts) || item.scene.parts.length !== 2 ||
+              item.scene.parts.some(part => !["level", "width", "aspect", "x", "z", "angle"].every(key => Number.isFinite(part[key])) ||
+                part.width <= 0 || part.aspect <= 0 || !Array.isArray(part.crop) || part.crop.length !== 2 ||
+                !part.crop.every(Number.isFinite) || part.crop[0] < 0 || part.crop[1] <= 0 || part.crop[0] + part.crop[1] > 1))))) {
+        throw new Error(`Нарушен контракт блюда финальной кухни: ${dish.id}.`);
+      }
+    }
+    return;
+  }
 
   if (question.type === "dish_detective") {
     const policy = question.answerPolicy;
@@ -646,6 +690,21 @@ function flattenCaseCluster(cluster) {
 
 function buildTour5(olympiad, usedDishIds, random) {
   const tour = olympiad.tours.find((item) => item.id === "tour-5");
+  if (tour.generation.mode === "final_kitchen_stations") {
+    const stations = olympiad.questionBank.tour5Stations;
+    if (stations?.length !== 3 || tour.maxScore !== 48 || tour.timeLimitMinutes !== 15 ||
+        stations.some((station, index) => station.station.number !== index + 1)) {
+      throw new Error("Финальная кухня требует три станции, 48 баллов и 15 минут.");
+    }
+    stations.forEach((station) => {
+      validateQuestionStructure(station);
+      station.dishes.forEach((dish) => {
+        if (usedDishIds.has(dish.dishId)) throw new Error("Блюдо финальной кухни повторено в другом туре.");
+        usedDishIds.add(dish.dishId);
+      });
+    });
+    return { tour, questions: clone(stations) };
+  }
   const pool = olympiad.questionBank.tour5Cases.filter(
     (item) => !usedDishIds.has(item.dishId)
   );
@@ -797,6 +856,26 @@ function sanitizeQuestion(question, attempt) {
   }
 
   const answer = attempt.answers && attempt.answers[question.id];
+
+  if (question.type === "final_kitchen") {
+    const dish = question.dishes.find((entry) => entry.id === attempt.stationSelections?.[question.id]?.dishId);
+    const preview = (entry) => ({ id: entry.id, title: entry.title, cuisineLabel: entry.cuisineLabel,
+      previewUrl: entry.previewUrl, previewAlt: entry.previewAlt });
+    return { id: question.id, type: question.type, presentationVersion: question.presentationVersion,
+      prompt: question.prompt, maxScore: question.maxScore, tourId: question.tourId, tourCode: question.tourCode,
+      tourTitle: question.tourTitle, tourOrder: question.tourOrder, sequenceInTour: question.sequenceInTour,
+      globalIndex: question.globalIndex, station: { number: question.station.number, title: question.station.title },
+      dishes: dish ? [] : question.dishes.map(preview),
+      selectedDish: dish ? { ...preview(dish), variantLabel: dish.variantLabel, modelPreset: dish.modelPreset,
+        baseImageUrl: dish.baseImageUrl || "", items: dish.items.map((item) => ({ id: item.id, text: item.text,
+          imageAlt: item.imageAlt, imageUrl: item.imageUrl, layerImageUrl: item.layerImageUrl,
+          scene: { ...Object.fromEntries(["level", "width", "aspect", "x", "z", "angle"].map((key) => [key, item.scene[key]])),
+            ...(item.scene.parts ? { parts: item.scene.parts.map(part => ({
+              ...Object.fromEntries(["level", "width", "aspect", "x", "z", "angle"].map(key => [key, part[key]])),
+              crop: [...part.crop]
+            })) } : {}) } })) } : null,
+      savedAnswer: answer ? answer.answerPayload : null };
+  }
 
   return {
     id: question.id,

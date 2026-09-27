@@ -1,0 +1,8 @@
+{
+  "checks": [
+    "Offline dish confirmation leaves choice unlocked, no optimistic assembly; recovered connection allows retry",
+    "Two simultaneous browser clients confirm different dishes: both reconcile to the single server-fixed dish",
+    "Active service worker controls page after reload; current T5 script/CSS cached, no API response in cache"
+  ],
+  "errors": []
+}

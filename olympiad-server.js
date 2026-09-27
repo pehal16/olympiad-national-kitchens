@@ -5,7 +5,7 @@ const path = require("node:path");
 const { createSqliteD1 } = require("./src/sqlite-d1");
 
 const STATIC_FILES = new Set([
-  "/", "/index.html", "/app.js", "/t2-country-match.js", "/t3-detective.js", "/t4-guest-order.js", "/styles.css", "/admin.html", "/admin.js",
+  "/", "/index.html", "/app.js", "/t2-country-match.js", "/t3-detective.js", "/t4-guest-order.js", "/t5-final-kitchen.js", "/t5-final-kitchen.css", "/styles.css", "/admin.html", "/admin.js",
   "/content-admin.html", "/content-admin.js", "/visual-demo.html",
   "/visual-demo.js", "/sw.js", "/manifest.webmanifest",
   "/brand-prof-tourism.png", "/brand-prof-2024.jpg", "/brand-gkts-shield.jpg"
@@ -15,7 +15,7 @@ function isOlympiadApi(pathname) {
   return pathname === "/api/public/olympiad" ||
     pathname === "/api/public/register" ||
     pathname === "/api/public/attempts/start" ||
-    /^\/api\/public\/attempts\/[^/]+(?:\/(?:current|pulse|answer|finish|integrity))?$/.test(pathname) ||
+    /^\/api\/public\/attempts\/[^/]+(?:\/(?:current|pulse|answer|dish-selection|finish|integrity))?$/.test(pathname) ||
     pathname === "/api/admin/login" ||
     pathname === "/api/admin/session" ||
     pathname === "/api/admin/summary" ||

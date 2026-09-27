@@ -3,10 +3,11 @@ const tour2Blocks = require("./banks/tour2");
 const tour3Matrices = require("./banks/tour3");
 const tour4Tasks = require("./banks/tour4");
 const tour5Cases = require("./banks/tour5");
+const tour5Stations = require("./banks/tour5-final-kitchen");
 
 module.exports = {
   schemaVersion: 2,
-  blueprintVersion: 9,
+  blueprintVersion: 10,
   id: "nk-2026-variant",
   slug: "national-kitchens-2026",
   title: "Национальные кухни мира",
@@ -34,7 +35,7 @@ module.exports = {
       "Индивидуальное выполнение; закрытые задания и краткий ввод названия блюда в T3; проверка автоматическая.",
     antiCheatPrinciples: [
       "Индивидуальная автоматическая сборка варианта перед стартом попытки.",
-      "Фиксированные задания T1–T4; перемешивание карточек T2, вариантов ответа и кейсов T5.",
+      "Фиксированные задания T1–T4; перемешивание вариантов ответа, карточек и компонентов T5.",
       "Один вопрос на экран и отсутствие возврата к предыдущим вопросам.",
       "Отдельный журнал выданных ID, порядка ответов и времени по вопросам.",
       "Запрет на повтор одной и той же логики блюда в турах 2–5 внутри варианта."
@@ -104,15 +105,13 @@ module.exports = {
       id: "tour-5",
       code: "T5",
       order: 5,
-      title: "Практические кейсы",
+      title: "Финальная кухня",
       description:
-        "Три практических кейса по четырём вопросам, завершающих олимпиаду.",
+        "Три станции: выберите блюдо и соберите четыре компонента из восьми. До 16 баллов за станцию, без штрафов.",
       timeLimitMinutes: 15,
       maxScore: 48,
       generation: {
-        mode: "case_clusters",
-        selectCount: 3,
-        differentCuisineGroups: true
+        mode: "final_kitchen_stations"
       }
     }
   ],
@@ -121,6 +120,7 @@ module.exports = {
     tour2Blocks,
     tour3Matrices,
     tour4Tasks,
-    tour5Cases
+    tour5Cases,
+    tour5Stations
   }
 };

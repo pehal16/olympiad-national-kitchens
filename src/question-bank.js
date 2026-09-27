@@ -29,6 +29,7 @@ const TYPE_LABELS = {
   bucket_sort: "Распределение по группам",
   ingredient_matrix: "Состав блюда",
   dish_assembly: "Визуальная сборка блюда",
+  final_kitchen: "Финальная кухня · станция",
   dish_detective: "Кулинарный детектив",
   sequence_drag: "Последовательность действий",
   case_cluster: "Кейс-кластер"
@@ -103,6 +104,11 @@ const TOUR_PROFILES = {
 };
 
 const TYPE_PROFILES = {
+  final_kitchen: {
+    interactive: true,
+    studentAction: "Выбери блюдо и собери четыре компонента",
+    methodicalPurpose: "Проверяет состав заданной версии блюда; порядок добавления не оценивается."
+  },
   dish_detective: {
     interactive: true,
     studentAction: "Введи название блюда",
@@ -196,7 +202,10 @@ function getTourMap(olympiad) {
 }
 
 function buildBaseMetadata(question, tour, extra = {}) {
-  const tourProfile = TOUR_PROFILES[tour.code] || TOUR_PROFILES.T1;
+  const tourProfile = question.type === "final_kitchen" ? {
+    ...TOUR_PROFILES.T5, theme: "Состав версии блюда", focus: "распознавание состава по четырём компонентным группам",
+    estimatedTimeSec: 300, pkFocus: ["понимание состава указанной версии блюда", "различение подходящих и посторонних компонентов"]
+  } : TOUR_PROFILES[tour.code] || TOUR_PROFILES.T1;
   const typeProfile = question.interactionMode === "guest_order" ? {
     interactive: true, studentAction: "Выбери блюдо и подтверди заказ",
     methodicalPurpose: "Проверяет сопоставление всех условий заказа с описанной версией блюда, а не догадку по фото."
@@ -394,7 +403,18 @@ function buildQuestionCatalog(olympiad, customQuestionsMap = {}) {
     );
   });
 
-  (olympiad.questionBank.tour5Cases || []).forEach((cluster, clusterIndex) => {
+  if (tours.get("T5")?.generation?.mode === "final_kitchen_stations") {
+    (olympiad.questionBank.tour5Stations || []).forEach((station, index) => {
+      const record = normalizeQuestionRecord(station, tours.get("T5"), {
+        sourceKind: "kitchen_station", orderInSource: index + 1, poolTitle: station.station.title
+      });
+      records.push({ ...record, station: { ...station.station }, dishes: station.dishes.map((dish) => ({
+        id: dish.id, title: dish.title, cuisineLabel: dish.cuisineLabel, variantLabel: dish.variantLabel,
+        items: dish.items.map((item) => ({ id: item.id, text: item.text, imageUrl: item.imageUrl })),
+        correctIngredientIds: [...dish.correctIngredientIds]
+      })), itemCount: station.dishes.reduce((sum, dish) => sum + dish.items.length, 0) });
+    });
+  } else (olympiad.questionBank.tour5Cases || []).forEach((cluster, clusterIndex) => {
     const tour = tours.get("T5");
     (cluster.questions || []).forEach((question, questionIndex) => {
       records.push(
