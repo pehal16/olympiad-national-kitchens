@@ -2,6 +2,14 @@
 
 Last updated: 2026-09-27
 
+## T2 revision 6 and T3 blueprint 7 — published and verified (2026-09-27)
+
+- The user explicitly requested publishing both updated tours. Code commit `b5e37243d05e1bd60418eb131e2e0a4673a53fcf` was pushed to `main` and deployed successfully in Cloudflare workflow run `36322813759`. This supersedes the local-only publication status in the historical T2/T3 entries below. Production remains `https://olympiad-gkts.pages.dev`; no Timeweb/GitHub Pages cutover.
+- Read-only post-deployment verification: all twenty active T2 photos (27–46), ten T3 photos and the RU/MX flags return HTTP 200 with exact matching SHA-256 hashes. Five client files (app, styles, T2/T3 controllers and SW) match the local release after BOM/newline normalization. The landing loads `t3detective1` and displays 45 questions; public API reports T2 «Кухни мира» 20/6, T3 «Кулинарный детектив» 30/8, total 150 points / 45 minutes.
+- Full Node suite 168/168 and Cloudflare build pass locally and CI succeeds. Required `npm.cmd run verify:cloudflare -- https://olympiad-gkts.pages.dev` passes directly without a transport shim: PM01 remains 5 variants / 5 modules / 100 points, zero exposed private-key fields.
+- Production Chrome CLI smoke checks at desktop 1440×1000 and touch-emulated 390×844 pass page identity, meaningful first-screen rendering, no framework overlay, loaded visible images, no horizontal overflow and zero console errors/warnings. Rules expand and registration CTA focuses the name field. Browser plugin is unavailable; cached Playwright CLI was used on Windows without installing dependencies. Screenshots and read-only asset-verifier receipts stay outside the repo under the temporary `olympiad-publish-20260927` QA directory.
+- Production QA did not create participants or start/answer/finish attempts. No stored attempt/result migration or reset was performed: already issued variants retain their old questions/images; new attempts receive the new T2/T3. Full tour-answer flows remain the previously verified isolated synthetic rehearsals, not a claim of newly performed live D1 student submissions. RF-network access, physical phones/Safari and final organizer methodical approval remain unverified; pilot labels stay visible. This documentation-only follow-up does not trigger the path-filtered deployment workflow.
+
 ## T3 culinary detective — blueprint 7 prepared locally, not published (2026-09-27)
 
 - T3 is now «Кулинарный детектив»: ten fixed ordered dossiers, three source-checked clues, a typed dish name, 3/0 points without penalties; 30 points / 8 minutes. Reading the intro counts toward the same server timer. The whole olympiad now has 45 questions / 150 points / 45 minutes, superseding the historical 41-question notes below. T1/T2/T4/T5 content and scores remain unchanged; local T2 revision 6 is preserved.
