@@ -75,16 +75,16 @@ const TOUR_PROFILES = {
     ]
   },
   T4: {
-    theme: "Технологические действия и дефекты",
-    focus: "последовательность действий, причины дефектов и способы исправления",
-    studentAction: "Выбери правильное действие или порядок шагов",
+    theme: "Выбор блюда по заказу гостя",
+    focus: "сопоставление состава, формы и способа приготовления с пожеланиями гостя",
+    studentAction: "Выбери одно блюдо из меню и подтверди заказ",
     difficulty: "standard",
     difficultyLabel: "Повышенный уровень",
-    estimatedTimeSec: 95,
+    estimatedTimeSec: 75,
     okCodes: ["ОК 01", "ОК 02"],
     pkFocus: [
-      "технология приготовления",
-      "предупреждение и исправление дефектов"
+      "понимание состава и кулинарных признаков блюда",
+      "чтение и выполнение заказа гостя"
     ]
   },
   T5: {
@@ -197,7 +197,10 @@ function getTourMap(olympiad) {
 
 function buildBaseMetadata(question, tour, extra = {}) {
   const tourProfile = TOUR_PROFILES[tour.code] || TOUR_PROFILES.T1;
-  const typeProfile = TYPE_PROFILES[question.type] || TYPE_PROFILES.single_choice;
+  const typeProfile = question.interactionMode === "guest_order" ? {
+    interactive: true, studentAction: "Выбери блюдо и подтверди заказ",
+    methodicalPurpose: "Проверяет сопоставление всех условий заказа с описанной версией блюда, а не догадку по фото."
+  } : TYPE_PROFILES[question.type] || TYPE_PROFILES.single_choice;
   const dishLabel = question.dishLabel || extra.caseTitle || extra.poolTitle || "";
   const topic = dishLabel || tourProfile.theme;
   const theme = extra.poolTitle || tourProfile.theme;
@@ -225,7 +228,7 @@ function buildBaseMetadata(question, tour, extra = {}) {
 function normalizeQuestionRecord(question, tour, extra = {}) {
   const metadata = buildBaseMetadata(question, tour, extra);
   const dishLabel = question.dishLabel || extra.caseTitle || "";
-  const typeLabel = TYPE_LABELS[question.type] || question.type;
+  const typeLabel = question.interactionMode === "guest_order" ? "Заказ гостя" : TYPE_LABELS[question.type] || question.type;
   const cuisine = question.cuisine || extra.cuisine || "mixed";
   const cuisineGroup = question.cuisineGroup || extra.cuisineGroup || "general";
   const options = Array.isArray(question.options) ? question.options : [];
@@ -246,7 +249,7 @@ function normalizeQuestionRecord(question, tour, extra = {}) {
     tourTitle: tour.title,
     type: question.type,
     typeLabel,
-    interactive: Boolean(TYPE_PROFILES[question.type]?.interactive),
+    interactive: question.interactionMode === "guest_order" || Boolean(TYPE_PROFILES[question.type]?.interactive),
     cuisine,
     cuisineLabel: CUISINE_LABELS[cuisine] || cuisine,
     cuisineGroup,

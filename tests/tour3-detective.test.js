@@ -138,7 +138,7 @@ test("new spelling policy does not mutate or upgrade an already-issued private k
   assert.equal(matchDetectiveAnswer(bank[5].answerPolicy, "штудель яблочный"), true);
   assert.equal(JSON.stringify(saved), snapshot);
   const variant = buildVariant(olympiad, { seed: "spelling-policy-8" });
-  assert.equal(variant.blueprintVersion, 8);
+  assert.equal(variant.blueprintVersion, 9);
   const issued = variant.questions.find((q) => q.sourceId === bank[5].id);
   assert.equal(matchDetectiveAnswer(issued.answerPolicy, "штудель яблочный"), true);
 });
@@ -195,7 +195,7 @@ test("all unrelated banks and legacy T3 remain byte-identical to baseline", () =
   const expected = {
     tour1: "b95c4c9fde6dff7c69436d6d53b9f0eb3723f450c54575c72ef4152e0e1784e9",
     "tour3-legacy": "683daa6a9306fe4589082b7cc2a4704f37d5ef3af6ac336afabf4549df2a2b6a",
-    tour4: "fffb37b0b58c0bdc78f9c3ee8d33ab667fcba3f7d2caebb933f60d33d66e1ed7",
+    "tour4-legacy": "fffb37b0b58c0bdc78f9c3ee8d33ab667fcba3f7d2caebb933f60d33d66e1ed7",
     tour5: "9e506a8267e5ff15b1518c7e5b26ceefe545504dd9b2f26cc4d9bffafd54cdb6"
   };
   for (const [name, checksum] of Object.entries(expected)) {

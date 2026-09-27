@@ -213,7 +213,7 @@ function validateQuestionMedia(question) {
       throw new Error(`Вопрос ${question.sourceId || question.id} содержит имя файла, раскрывающее ключ ответа.`);
     }
   }
-  for (const item of question.items || []) {
+  for (const item of [...(question.items || []), ...(question.interactionMode === "guest_order" ? question.options || [] : [])]) {
     if (!isLocalOlympiadAsset(item.imageUrl) || !isLocalOlympiadAsset(item.layerImageUrl)) {
       throw new Error(`Вопрос ${question.sourceId || question.id} содержит внешний или небезопасный путь изображения.`);
     }
@@ -308,6 +308,13 @@ function validateQuestionStructure(question) {
     const correctCount = options.filter((option) => option.isCorrect).length;
     if (options.length < 2 || correctCount !== 1) {
       throw new Error(`Вопрос ${question.sourceId || question.id} имеет некорректные варианты ответа.`);
+    }
+    if (question.interactionMode === "guest_order" && (options.length !== 4 || question.maxScore !== 4 ||
+        question.presentationVersion !== 1 || !question.guestOrder?.text || !question.guestOrder?.style ||
+        new Set(options.map((option) => option.id)).size !== 4 ||
+        options.some((option) => !option.text?.trim() || !option.description?.trim() ||
+          !/^\/assets\/olympiad\/tour4\/t4-menu-v1-[a-f0-9]{12}\.webp$/.test(option.imageUrl)))) {
+      throw new Error(`Вопрос ${question.sourceId || question.id} нарушает контракт заказа гостя.`);
     }
     return;
   }
@@ -593,6 +600,18 @@ function buildTour3(olympiad, usedDishIds, random) {
 
 function buildTour4(olympiad, usedDishIds, random) {
   const tour = olympiad.tours.find((item) => item.id === "tour-4");
+  if (tour.generation.mode === "fixed_guest_orders") {
+    const bank = olympiad.questionBank.tour4Tasks;
+    const menuIds = bank.flatMap((question) => (question.options || []).map((option) => option.menuDishId));
+    if (bank.length !== 8 || tour.generation.selectCount !== 8 || new Set(menuIds).size !== 32 ||
+        menuIds.some((id) => !id || usedDishIds.has(id)) || bank.some((question, index) =>
+          question.id !== `T4-${String(index + 1).padStart(2, "0")}` || question.type !== "single_choice" ||
+          question.interactionMode !== "guest_order" || question.guestOrder?.number !== index + 1)) {
+      throw new Error("Тур 4 должен содержать восемь фиксированных заказов и 32 неповторяющиеся позиции меню.");
+    }
+    menuIds.forEach((id) => usedDishIds.add(id));
+    return { tour, questions: bank };
+  }
   const pool = olympiad.questionBank.tour4Tasks.filter(
     (item) => !usedDishIds.has(item.dishId)
   );
@@ -782,7 +801,11 @@ function sanitizeQuestion(question, attempt) {
   return {
     id: question.id,
     type: question.type,
-    ...(question.interactionMode === "country_match" ? { interactionMode: "country_match" } : {}),
+    ...(["country_match", "guest_order"].includes(question.interactionMode) ? { interactionMode: question.interactionMode } : {}),
+    ...(question.interactionMode === "guest_order" ? {
+      presentationVersion: question.presentationVersion,
+      guestOrder: { number: question.guestOrder.number, style: question.guestOrder.style, text: question.guestOrder.text }
+    } : {}),
     prompt: question.prompt,
     ...(question.type === "dish_detective" ? {
       clues: question.clues.map(({ label, text }) => ({ label, text }))
@@ -808,7 +831,10 @@ function sanitizeQuestion(question, attempt) {
     options: Array.isArray(question.options)
       ? question.options.map((option) => ({
           id: option.id,
-          text: option.text
+          text: option.text,
+          ...(question.interactionMode === "guest_order" ? {
+            description: option.description, imageUrl: option.imageUrl, imageAlt: option.imageAlt
+          } : {})
         }))
       : [],
     items: Array.isArray(question.items)

@@ -3892,12 +3892,20 @@ async function handleApi(req, res, url, runtime = {}) {
     }
     const body = await parseBody(req, { maxBytes: 32 * 1024 });
 
+    const answerView = (stored) => {
+      const view = buildAttemptView(olympiadData, stored, settings);
+      const issued = stored.variant?.questions?.find((question) => question.id === body.questionId);
+      if (issued?.interactionMode === "guest_order") {
+        view.answerReceipt = { questionId: body.questionId, saved: Boolean(stored.answers?.[body.questionId]) };
+      }
+      return view;
+    };
     attempt = await normalizeAndPersistIfChanged(olympiadData, attempt);
     if (attempt.status !== "in_progress") {
       if (body.questionId && attempt.answers?.[body.questionId]) {
         sendJson(res, 200, {
           ok: true,
-          data: buildAttemptView(olympiadData, attempt, settings)
+          data: answerView(attempt)
         });
         return;
       }
@@ -3920,7 +3928,7 @@ async function handleApi(req, res, url, runtime = {}) {
       if (saved) invalidateAttemptCaches();
       sendJson(res, 200, {
         ok: true,
-        data: buildAttemptView(olympiadData, persisted, settings)
+        data: answerView(persisted)
       });
       return;
     }
@@ -3933,7 +3941,7 @@ async function handleApi(req, res, url, runtime = {}) {
     if (body.questionId !== currentQuestion.id) {
       sendJson(res, 200, {
         ok: true,
-        data: buildAttemptView(olympiadData, attempt, settings)
+        data: answerView(attempt)
       });
       return;
     }
@@ -4013,7 +4021,7 @@ async function handleApi(req, res, url, runtime = {}) {
       if (latest?.answers?.[currentQuestion.id]) {
         sendJson(res, 200, {
           ok: true,
-          data: buildAttemptView(olympiadData, latest, settings)
+          data: answerView(latest)
         });
         return;
       }
@@ -4027,7 +4035,7 @@ async function handleApi(req, res, url, runtime = {}) {
 
     sendJson(res, 200, {
       ok: true,
-      data: buildAttemptView(olympiadData, attempt, settings)
+      data: answerView(attempt)
     });
     return;
   }

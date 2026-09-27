@@ -60,7 +60,7 @@ test("T2 full visual review preserves all non-media content, other banks and his
   });
   const baseline = {
     tour1: "b95c4c9fde6dff7c69436d6d53b9f0eb3723f450c54575c72ef4152e0e1784e9",
-    tour4: "fffb37b0b58c0bdc78f9c3ee8d33ab667fcba3f7d2caebb933f60d33d66e1ed7",
+    "tour4-legacy": "fffb37b0b58c0bdc78f9c3ee8d33ab667fcba3f7d2caebb933f60d33d66e1ed7",
     tour5: "9e506a8267e5ff15b1518c7e5b26ceefe545504dd9b2f26cc4d9bffafd54cdb6"
   };
   for (const [name, checksum] of Object.entries(baseline)) {

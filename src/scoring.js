@@ -159,6 +159,7 @@ function validateAnswerPayload(question, answerPayload) {
   if (question.type === "single_choice") {
     if (!hasOnlyKeys(payload, ["selectedOptionId"])) return false;
     const selected = payload.selectedOptionId;
+    if (question.interactionMode === "guest_order" && selected !== undefined && selected !== null && typeof selected !== "string") return false;
     const optionIds = new Set((question.options || []).map((option) => String(option.id)));
     return selected === null || selected === undefined || selected === "" || optionIds.has(String(selected));
   }

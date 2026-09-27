@@ -221,7 +221,7 @@ function refreshAttemptControls() {
 
   if (elements.questionBody) {
     // T3 keeps the shared retry button inside its form, outside input-only locks.
-    elements.questionBody.inert = interactionLocked || (hasQueuedAnswers && state.attempt?.currentQuestion?.type !== "dish_detective");
+    elements.questionBody.inert = interactionLocked || (hasQueuedAnswers && state.attempt?.currentQuestion?.type !== "dish_detective" && state.attempt?.currentQuestion?.interactionMode !== "guest_order");
     elements.questionBody.setAttribute("aria-busy", isBusy ? "true" : "false");
   }
   state.questionController?.setLocked?.(interactionLocked || hasQueuedAnswers);
@@ -268,7 +268,9 @@ function refreshAttemptControls() {
   }
 
   elements.submitAnswer.textContent =
-    state.attempt.currentQuestion?.type === "dish_detective"
+    state.attempt.currentQuestion?.interactionMode === "guest_order"
+      ? "Подтвердить заказ"
+      : state.attempt.currentQuestion?.type === "dish_detective"
       ? "Подтвердить ответ"
       : state.attempt.currentQuestion?.interactionMode === "country_match"
       ? "Подтвердить и далее"
@@ -334,7 +336,10 @@ function setAttemptSaveStatus(message, type = "idle") {
     return;
   }
 
-  elements.attemptSaveStatus.textContent = message;
+  // In T4 a success badge refers to earlier server records, not to the new
+  // unconfirmed selection currently sitting on the tray.
+  elements.attemptSaveStatus.textContent = state.attempt?.currentQuestion?.interactionMode === "guest_order" && type === "success"
+    ? "Предыдущие ответы сохранены" : message;
   elements.attemptSaveStatus.className = `sync-badge ${type}`;
   setParticipantShellState();
   updateExamCockpit();
@@ -599,6 +604,8 @@ function handleProtectedDragStart(event) {
 
   const countryDish = event.target?.closest?.(".t2-match .t2-dish");
   if (countryDish && elements.questionBody.contains(countryDish)) return;
+  const guestDish = event.target?.closest?.(".t4-order .t4-menu-select");
+  if (guestDish && elements.questionBody.contains(guestDish) && state.attempt?.currentQuestion?.interactionMode === "guest_order") return;
 
   event.preventDefault();
 }
@@ -2868,6 +2875,20 @@ function renderQuestion(question) {
         refreshAttemptControls(); updateExamCockpit();
       }
     });
+  } else if (hydratedQuestion.interactionMode === "guest_order") {
+    state.questionController = window.T4GuestOrder.create({
+      mount: elements.questionBody, question: hydratedQuestion, attemptId: state.attempt.id,
+      submitButton: elements.submitAnswer,
+      onPhase: (intro) => elements.attemptSection.classList.toggle("is-t4-intro", intro),
+      onChange: (answer) => {
+        rememberDraft(hydratedQuestion.id, answer);
+        if (!hasPendingAnswers() && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
+          setAttemptSaveStatus(answer.selectedOptionId ? "Заказ ещё не отправлен" : "Выберите блюдо", "idle");
+          setAttemptSyncMeta("Текущий выбор станет ответом после подтверждения сервером.");
+        }
+        refreshAttemptControls(); updateExamCockpit();
+      }
+    });
   } else if (hydratedQuestion.type === "single_choice") {
     state.questionController = renderSingleChoice(hydratedQuestion);
   } else if (hydratedQuestion.type === "sequence_drag") {
@@ -2903,6 +2924,7 @@ function renderAttempt() {
   const currentQuestion = attempt.currentQuestion;
   elements.attemptSection.classList.toggle("is-t2", currentQuestion?.interactionMode === "country_match");
   elements.attemptSection.classList.toggle("is-t3", currentQuestion?.type === "dish_detective");
+  elements.attemptSection.classList.toggle("is-t4", currentQuestion?.interactionMode === "guest_order");
 
   renderParticipant();
   saveTimingSnapshot(attempt);
@@ -2918,7 +2940,9 @@ function renderAttempt() {
     (attempt.progress.currentQuestionIndex / Math.max(1, attempt.progress.totalQuestions)) * 100
   }%`;
   if (currentTour) {
-    elements.progressTour.textContent = currentQuestion?.type === "dish_detective" || currentQuestion?.interactionMode === "country_match"
+    elements.progressTour.textContent = currentQuestion?.interactionMode === "guest_order"
+      ? `Заказ ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`
+      : currentQuestion?.type === "dish_detective" || currentQuestion?.interactionMode === "country_match"
       ? `Задание ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`
       : currentQuestion?.imageUrl && currentTour.code === "T1"
       ? `Вопрос ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`
@@ -2930,7 +2954,9 @@ function renderAttempt() {
       ? "Тур 2 · Кухни мира"
       : currentQuestion?.imageUrl && currentTour.code === "T1"
       ? "Тур 1 · Узнай блюдо" : currentTour.code;
-    elements.tourTitle.textContent = currentQuestion?.type === "dish_detective"
+    elements.tourTitle.textContent = currentQuestion?.interactionMode === "guest_order"
+      ? "Тур 4 · Собери заказ гостя"
+      : currentQuestion?.type === "dish_detective"
       ? "Тур 3 · Кулинарный детектив"
       : currentQuestion?.interactionMode === "country_match"
       ? "Сопоставьте блюда со странами" : currentTour.title;
@@ -3086,6 +3112,12 @@ function describeAttemptTransition(previousAttempt, nextAttempt) {
     if (previousAttempt.currentQuestion?.interactionMode === "country_match") {
       return "Тур 2 завершён · Ответы сохранены";
     }
+    if (previousAttempt.currentQuestion?.interactionMode === "guest_order") {
+      if (nextAttempt.answerReceipt?.saved === false || nextAttempt.progress.answeredCount === previousAttempt.progress.answeredCount) {
+        return "Время тура 4 истекло. Переходим к туру 5.";
+      }
+      return "Тур 4 завершён. Ответы сохранены";
+    }
     return `Старт ${nextAttempt.currentTour.code}: ${nextAttempt.currentTour.title}.`;
   }
 
@@ -3161,7 +3193,11 @@ function updateTimers() {
 
   if ((totalRemaining === 0 || tourRemaining === 0) && !state.syncingAfterTimeout) {
     state.syncingAfterTimeout = true;
-    syncAttempt(true).finally(() => {
+    const selectedGuestDraft = state.attempt?.currentQuestion?.interactionMode === "guest_order" &&
+      hasMeaningfulAnswer(state.questionController?.getAnswer?.()) && !state.isSubmittingAnswer && !state.isFinishingAttempt;
+    // Flush this exact scoped choice through the existing queue. Server deadlines
+    // still decide acceptance; a rejected late choice must never be called saved.
+    (selectedGuestDraft ? submitAnswer() : syncAttempt(true)).finally(() => {
       state.syncingAfterTimeout = false;
     });
   }
@@ -3265,7 +3301,9 @@ async function performPendingAnswerFlush(options = {}) {
       }
     }
 
-    setAttemptSaveStatus("Ответы сохранены в облаке", "success");
+    setAttemptSaveStatus(lastSyncedAttempt?.answerReceipt?.saved === false
+      ? "Лимит времени истёк. Заказ не записан." : "Ответы сохранены в облаке",
+      lastSyncedAttempt?.answerReceipt?.saved === false ? "warning" : "success");
     setAttemptSyncMeta(`Синхронизация завершена: ${formatDateTime(new Date())}`);
     return lastSyncedAttempt;
   } catch (caughtError) {
@@ -3302,7 +3340,9 @@ async function performPendingAnswerFlush(options = {}) {
       options.blocking
         ? "Не удалось сохранить ответы перед завершением"
         : retriable
-          ? "Ответ принят, но облачная синхронизация временно задержалась"
+          ? state.attempt?.currentQuestion?.interactionMode === "guest_order"
+            ? "Ответ ещё не сохранён. Проверьте связь и повторите отправку."
+            : "Ответ принят, но облачная синхронизация временно задержалась"
           : "Ответ не сохранён: требуется действие участника",
       options.blocking || !retriable ? "error" : "warning"
     );
@@ -3493,6 +3533,8 @@ async function submitAnswer() {
   if (state.questionController.isComplete && !state.questionController.isComplete()) {
     showMessage(elements.attemptMessage, state.attempt.currentQuestion?.type === "dish_detective"
       ? "Введите название блюда: не менее двух символов."
+      : state.attempt.currentQuestion?.interactionMode === "guest_order"
+      ? "Выберите одно блюдо из меню, затем подтвердите заказ."
       : "Сопоставьте все четыре блюда, затем подтвердите ответ.", "warning");
     refreshAttemptControls();
     return;
@@ -3532,6 +3574,11 @@ async function submitAnswer() {
     const data = await flushPendingAnswers({ blocking: true });
     if (!data || hasPendingAnswers()) {
       throw new Error("Сервер не подтвердил сохранение ответа. Повторите отправку.");
+    }
+    if (data.answerReceipt?.saved === false) {
+      setAttemptSaveStatus("Лимит времени истёк. Заказ не записан.", "warning");
+      setAttemptSyncMeta("Сервер подтвердил переход по таймеру, но не сохранение этого заказа.");
+      return;
     }
 
     if (data && data.status === "in_progress") {

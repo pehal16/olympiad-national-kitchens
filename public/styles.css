@@ -3971,6 +3971,128 @@ pre {
 }
 
 /* T3 only: one calm, keyboard-friendly dossier. Other tours retain their layout. */
+/* T4: a guest receipt, equal menu cards and a non-sticky tray. */
+#attempt-section.is-t4 { width: 100%; max-width: 1120px; margin: 0 auto; color: #202b2a; }
+#attempt-section.is-t4 > .card { background: #fff; box-shadow: none; backdrop-filter: none; }
+#attempt-section.is-t4 .dashboard-head { justify-content: center; padding: 12px; }
+#attempt-section.is-t4 .dashboard-head > div:first-child,
+#attempt-section.is-t4 .exam-cockpit, #attempt-section.is-t4 .participant-mode-strip,
+#attempt-section.is-t4 #progress-global, #attempt-section.is-t4 .progress-bars,
+#attempt-section.is-t4 #tour-code, #attempt-section.is-t4 #tour-limit,
+#attempt-section.is-t4 #question-prompt, #attempt-section.is-t4 .question-meta { display: none; }
+#attempt-section.is-t4 #question-transition-banner { display: none; }
+#attempt-section.is-t4 .timer-stack { display: flex; gap: 12px; }
+#attempt-section.is-t4 .timer-box { min-width: 0; display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #f7f9f8; border: 1px solid #d7dfde; border-radius: 8px; box-shadow: none; }
+#attempt-section.is-t4 .timer-box span { color: #394a46; font-size: 13px; }
+#attempt-section.is-t4 .timer-box strong { color: #15826f; font-size: 24px; }
+#attempt-section.is-t4 > .card:last-child { padding: 16px 0; border: 0; }
+#attempt-section.is-t4 .progress-meta { justify-content: center; margin: 0; }
+#attempt-section.is-t4 #progress-tour { background: transparent; color: #5c6965; padding: 0; font-size: 14px; }
+#attempt-section.is-t4 .tour-head { margin: 10px 0 20px; display: block; text-align: center; }
+#attempt-section.is-t4 #tour-title { font: bold 34px/1.2 Georgia, serif; margin: 0 0 8px; }
+#attempt-section.is-t4 #tour-description { font-size: 15px; margin: 0; }
+#attempt-section.is-t4 .question-card { padding: 20px; border: 1px solid #d7dfde; border-radius: 12px; background: #fff; box-shadow: none; }
+#attempt-section.is-t4 .question-enter { animation: t4-question-in 200ms ease both; }
+#attempt-section.is-t4 .button:hover { transform: none; }
+#attempt-section.is-t4.is-t4-intro #submit-answer { display: none; }
+.t4-order { min-width: 0; }
+.t4-order [hidden] { display: none !important; }
+.t4-order button { font: inherit; min-height: 44px; color: inherit; touch-action: manipulation; cursor: pointer; overflow-wrap: anywhere; -webkit-tap-highlight-color: transparent; }
+.t4-order button:disabled { cursor: default; opacity: .65; }
+.t4-order :is(button, [tabindex]):focus-visible { outline: 3px solid #15826f; outline-offset: 3px; }
+.t4-order h3 { margin: 0; font: bold 22px/1.3 Georgia, serif; }
+.t4-receipt { border: 1px solid #d7dfde; border-left: 4px solid #15826f; border-radius: 8px; background: #f8faf9; padding: 14px 18px; }
+.t4-receipt-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.t4-receipt-style { margin: 5px 0; color: #4b6259; font-size: 13px; }
+.t4-wish { margin: 7px 0 0; font-size: 18px; line-height: 1.5; overflow-wrap: anywhere; }
+.t4-menu-heading { color: #52665d; font-size: 14px; margin: 18px 0 10px; }
+.t4-menu { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
+.t4-menu-card { min-width: 0; display: flex; flex-direction: column; border: 2px solid #dce4df; border-radius: 10px; background: #fff; transition: border-color 180ms, box-shadow 180ms; }
+.t4-menu-card.is-selected { border-color: #15826f; box-shadow: 0 0 0 2px #15826f18; }
+.t4-menu-select { display: flex; flex: 1; flex-direction: column; width: 100%; padding: 7px; border: 0; background: transparent; border-radius: 8px; text-align: left; transition: background-color 150ms; }
+.t4-menu-select:hover { background: #f7faf8; }
+.t4-menu-select[draggable="true"] { cursor: grab; }
+.t4-menu-select.is-dragging { opacity: .55; cursor: grabbing; }
+.t4-photo { display: grid; place-items: center; width: 100%; aspect-ratio: 3 / 2; border-radius: 6px; overflow: hidden; background: #f3f0ea; }
+.t4-photo img, .t4-tray-photo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.t4-photo-missing { font-size: 13px; line-height: 1.4; color: #52665d; padding: 10px; }
+.t4-menu-title { display: block; font-weight: 700; font-size: 16px; line-height: 1.3; padding: 10px 4px 5px; }
+.t4-menu-description { display: block; color: #4e6059; font-size: 14px; line-height: 1.45; padding: 0 4px 7px; }
+.t4-secondary { border: 1px solid #d7dfde; border-radius: 6px; background: #fff; padding: 8px 12px; color: #126b5c !important; transition: background-color 150ms, border-color 150ms; }
+.t4-secondary:hover { background: #eff7f3; border-color: #8db4a5; }
+.t4-zoom { margin: 0 7px 7px; font-size: 12px !important; }
+.t4-tray { margin-top: 18px; border: 1px dashed #a5bdb2; border-radius: 10px; background: #f8faf9; padding: 16px 18px; transition: border-color 150ms, background-color 150ms; }
+.t4-tray.is-over { border: 1px solid #15826f; background: #eaf5ef; }
+.t4-tray-selection { min-height: 62px; display: flex; align-items: center; gap: 14px; margin: 10px 0 0; }
+.t4-tray-photo { display: grid; place-items: center; width: 84px; flex: 0 0 84px; aspect-ratio: 3 / 2; border-radius: 6px; overflow: hidden; background: #f3f0ea; }
+.t4-tray-name { overflow-wrap: anywhere; }
+.t4-empty { margin: 0; color: #65716d; }
+.t4-hint { color: #65716d; font-size: 13px; line-height: 1.5; margin: 6px 0 0; }
+.t4-status { color: #4b6259; font-size: 13px; line-height: 1.5; margin: 8px 0 0; }
+.t4-tray-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 12px; }
+#attempt-section.is-t4 #submit-answer { min-height: 48px; border-radius: 6px; background: #15826f; color: #fff; box-shadow: none; font-size: 16px; }
+#attempt-section.is-t4 .action-deck { margin-top: 8px; }
+#attempt-section.is-t4 .action-deck > .actions { justify-content: center; margin-top: 8px; }
+#attempt-section.is-t4 #finish-attempt { min-height: 44px; border: 0; background: transparent; box-shadow: none; color: #42665b; text-decoration: underline; font-size: 13px; }
+#attempt-section.is-t4 .sync-strip { gap: 8px; margin-top: 6px; font-size: 12px; }
+#attempt-section.is-t4 #attempt-sync-meta { font-size: 12px; }
+.t4-intro h3 { font-size: 28px; }
+.t4-facts { color: #15826f; font-weight: 700; line-height: 1.5; }
+.t4-rules { padding-left: 22px; line-height: 1.6; }
+.t4-rules li + li { margin-top: 8px; }
+.t4-start { margin-top: 20px; }
+.t4-dialog { width: min(90vw, 900px); max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); overflow: auto; margin: auto; padding: 20px; border: 1px solid #d7dfde; border-radius: 12px; background: #fff; color: #202b2a; box-shadow: 0 12px 60px #142c2940; }
+.t4-dialog::backdrop { background: #10282199; }
+.t4-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.t4-zoom-photo { display: grid; place-items: center; background: #f3f0ea; border-radius: 8px; }
+.t4-zoom-photo img { display: block; width: 100%; max-height: 70dvh; object-fit: contain; }
+.t4-drag-ghost { position: fixed; top: -1000px; left: -1000px; width: 220px; padding: 8px; border-radius: 10px; background: white; box-shadow: 0 12px 28px #142c2940; }
+.t4-drag-ghost strong { display: block; padding: 8px 2px; }
+.t4-selection-enter { animation: t4-selection-in 180ms ease both; }
+@keyframes t4-selection-in { from { opacity: .65; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@keyframes t4-question-in { from { opacity: .65; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (min-width: 901px) {
+  .t4-tray { display: grid; grid-template-columns: 210px minmax(0, 1fr) auto; gap: 6px 16px; align-items: center; }
+  .t4-tray > h3 { grid-column: 1; grid-row: 1; }
+  .t4-tray > .t4-hint { grid-column: 1; grid-row: 2; margin: 0; }
+  .t4-tray-selection { grid-column: 2; grid-row: 1 / 3; margin: 0; }
+  .t4-status { grid-column: 2; grid-row: 3; margin: 0; }
+  .t4-tray-actions { grid-column: 3; grid-row: 1 / 4; margin: 0; }
+}
+@media (max-width: 900px) { .t4-menu { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  #attempt-section.is-t4 .dashboard-head { padding: 8px; }
+  #attempt-section.is-t4 .timer-stack { width: 100%; gap: 6px; }
+  #attempt-section.is-t4 .timer-box { flex: 1; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px; }
+  #attempt-section.is-t4 .timer-box span { font-size: 11px; }
+  #attempt-section.is-t4 .timer-box strong { font-size: 21px; }
+  #attempt-section.is-t4 .tour-head { margin: 8px 0 12px; text-align: left; }
+  #attempt-section.is-t4 #tour-title { font-size: 24px; }
+  #attempt-section.is-t4 #tour-description { font-size: 13px; }
+  #attempt-section.is-t4 #progress-tour { font-size: 12px; }
+  #attempt-section.is-t4 .question-card { padding: 10px; }
+  .t4-receipt { padding: 10px; }
+  .t4-receipt-head { flex-wrap: wrap; gap: 8px; }
+  .t4-receipt h3 { font-size: 21px; }
+  .t4-help { font-size: 13px !important; }
+  .t4-wish { font-size: 16px; line-height: 1.45; }
+  .t4-menu { gap: 8px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9em), 1fr)); }
+  .t4-menu-title { font-size: 14px; padding: 8px 0 5px; }
+  .t4-menu-description { font-size: 13px; padding: 0 0 5px; }
+  .t4-menu-select { padding: 5px; }
+  .t4-zoom { margin: 0 5px 5px; padding: 8px 4px; }
+  .t4-tray { padding: 12px; }
+  .t4-tray-actions { flex-wrap: wrap; justify-content: stretch; gap: 8px; }
+  #attempt-section.is-t4 #submit-answer { flex: 1; min-width: 0; padding: 10px 12px; font-size: 14px; }
+  .t4-dialog { padding: 12px; }
+  .t4-dialog-head { flex-wrap: wrap; gap: 8px; }
+  #attempt-section.is-t4 .sync-strip { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 350px) { .t4-menu { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) {
+  #attempt-section.is-t4 .question-enter, .t4-order *, .t4-order *::before, .t4-order *::after { animation: none !important; transition: none !important; }
+}
+/* T4 styling is scoped below; no legacy tour selectors are changed. */
 #attempt-section.is-t3 { width: 100%; max-width: 960px; margin: 0 auto; color: #202b2a; font-family: Arial, sans-serif; }
 #attempt-section.is-t3 .button:hover { transform: none; }
 #attempt-section.is-t3 > .card { box-shadow: none; background: #fff; backdrop-filter: none; }
