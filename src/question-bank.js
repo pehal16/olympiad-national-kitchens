@@ -29,6 +29,7 @@ const TYPE_LABELS = {
   bucket_sort: "Распределение по группам",
   ingredient_matrix: "Состав блюда",
   dish_assembly: "Визуальная сборка блюда",
+  dish_detective: "Кулинарный детектив",
   sequence_drag: "Последовательность действий",
   case_cluster: "Кейс-кластер"
 };
@@ -61,15 +62,15 @@ const TOUR_PROFILES = {
     ]
   },
   T3: {
-    theme: "Подбор сырья и состава блюда",
-    focus: "выбор правильных ингредиентов и отсечение лишних компонентов",
-    studentAction: "Выбери продукты, которые входят в блюдо",
+    theme: "Распознавание блюда по кулинарным признакам",
+    focus: "сопоставление основы, структуры и способа приготовления",
+    studentAction: "Определи блюдо и введи его название",
     difficulty: "standard",
     difficultyLabel: "Повышенный уровень",
-    estimatedTimeSec: 105,
+    estimatedTimeSec: 48,
     okCodes: ["ОК 01", "ОК 02"],
     pkFocus: [
-      "подбор сырья и ингредиентов",
+      "анализ характерных признаков блюда",
       "понимание базовой рецептуры блюда"
     ]
   },
@@ -102,6 +103,11 @@ const TOUR_PROFILES = {
 };
 
 const TYPE_PROFILES = {
+  dish_detective: {
+    interactive: true,
+    studentAction: "Введи название блюда",
+    methodicalPurpose: "Проверяет узнавание блюда по трём признакам без готовых вариантов ответа."
+  },
   single_choice: {
     interactive: false,
     studentAction: "Выбери правильный ответ",

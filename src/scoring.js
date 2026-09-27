@@ -1,3 +1,5 @@
+const { matchDetectiveAnswer } = require("./detective-answer");
+
 function ratioScore(correctCount, totalCount, maxScore) {
   if (!totalCount) {
     return 0;
@@ -109,6 +111,10 @@ function scoreQuestion(question, answerPayload) {
   }
 
   switch (question.type) {
+    case "dish_detective": {
+      const score = matchDetectiveAnswer(question.answerPolicy, answerPayload?.text) ? question.maxScore : 0;
+      return { autoScore: score, finalScore: score, penalty: 0 };
+    }
     case "single_choice":
       return scoreSingleChoice(question, answerPayload);
     case "sequence_drag":
@@ -143,6 +149,12 @@ function validateAnswerPayload(question, answerPayload) {
   const payload = answerPayload === null || answerPayload === undefined ? {} : answerPayload;
   if (!isPlainObject(payload)) return false;
   const itemIds = new Set((question.items || []).map((item) => String(item.id)));
+
+  if (question.type === "dish_detective") {
+    if (!hasOnlyKeys(payload, ["text"])) return false;
+    return payload.text === undefined || (typeof payload.text === "string" &&
+      payload.text.length <= 120 && !/[\x00-\x1f\x7f\u200b-\u200f\u202a-\u202e\u2066-\u2069]/.test(payload.text));
+  }
 
   if (question.type === "single_choice") {
     if (!hasOnlyKeys(payload, ["selectedOptionId"])) return false;

@@ -41,7 +41,7 @@ test("different seeds preserve T1 source order, score contracts, and safe opaque
     const issued = variant.questions.filter((q) => q.tourCode === "T1");
     assert.deepEqual(issued.map((q) => q.sourceId), questions.map((q) => q.id));
     assert.deepEqual(variant.tours.map((tour) => [tour.code, tour.questionCount, tour.maxScore]), [
-      ["T1", 10, 20], ["T2", 5, 20], ["T3", 6, 30], ["T4", 8, 32], ["T5", 12, 48]
+      ["T1", 10, 20], ["T2", 5, 20], ["T3", 10, 30], ["T4", 8, 32], ["T5", 12, 48]
     ]);
     assert.equal(variant.questions.reduce((sum, q) => sum + q.maxScore, 0), 150);
     assert.equal(variant.totalMaxScore, 150);

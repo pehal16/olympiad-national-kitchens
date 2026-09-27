@@ -220,9 +220,11 @@ function refreshAttemptControls() {
   const interactionLocked = isBusy || isBlockedByGuard;
 
   if (elements.questionBody) {
-    elements.questionBody.inert = interactionLocked || hasQueuedAnswers;
+    // T3 keeps the shared retry button inside its form, outside input-only locks.
+    elements.questionBody.inert = interactionLocked || (hasQueuedAnswers && state.attempt?.currentQuestion?.type !== "dish_detective");
     elements.questionBody.setAttribute("aria-busy", isBusy ? "true" : "false");
   }
+  state.questionController?.setLocked?.(interactionLocked || hasQueuedAnswers);
 
   elements.submitAnswer.disabled =
     !hasActiveQuestion || !hasCurrentAnswer || !isComplete || interactionLocked;
@@ -266,7 +268,9 @@ function refreshAttemptControls() {
   }
 
   elements.submitAnswer.textContent =
-    state.attempt.currentQuestion?.interactionMode === "country_match"
+    state.attempt.currentQuestion?.type === "dish_detective"
+      ? "Подтвердить ответ"
+      : state.attempt.currentQuestion?.interactionMode === "country_match"
       ? "Подтвердить и далее"
       : state.attempt.progress.currentQuestionIndex >= state.attempt.progress.totalQuestions
       ? "Ответить и завершить"
@@ -888,6 +892,8 @@ function hasMeaningfulAnswer(answer) {
   if (!answer) {
     return false;
   }
+
+  if (typeof answer.text === "string" && answer.text.trim()) return true;
 
   if (typeof answer.selectedOptionId === "string" && answer.selectedOptionId.trim()) {
     return true;
@@ -1859,7 +1865,7 @@ function renderHero() {
   elements.heroSubtitle.textContent = state.olympiad.subtitle;
   if (elements.heroFormatBadge) {
     const totalTours = Array.isArray(state.olympiad.tours) ? state.olympiad.tours.length : 0;
-    elements.heroFormatBadge.textContent = `${state.olympiad.durationMinutes} минут · ${totalTours} туров · 41 задание`;
+    elements.heroFormatBadge.textContent = `${state.olympiad.durationMinutes} минут · ${totalTours} туров · 45 заданий`;
   }
 }
 
@@ -2852,7 +2858,17 @@ function renderQuestion(question) {
   void elements.questionCard.offsetWidth;
   elements.questionCard.classList.add("question-enter");
 
-  if (hydratedQuestion.type === "single_choice") {
+  if (hydratedQuestion.type === "dish_detective") {
+    state.questionController = window.T3Detective.create({
+      mount: elements.questionBody, question: hydratedQuestion, attemptId: state.attempt.id,
+      submitButton: elements.submitAnswer,
+      onPhase: (intro) => elements.attemptSection.classList.toggle("is-t3-intro", intro),
+      onChange: (answer) => {
+        rememberDraft(hydratedQuestion.id, answer);
+        refreshAttemptControls(); updateExamCockpit();
+      }
+    });
+  } else if (hydratedQuestion.type === "single_choice") {
     state.questionController = renderSingleChoice(hydratedQuestion);
   } else if (hydratedQuestion.type === "sequence_drag") {
     state.questionController = renderSequenceDrag(hydratedQuestion);
@@ -2886,6 +2902,7 @@ function renderAttempt() {
   const currentTour = attempt.currentTour;
   const currentQuestion = attempt.currentQuestion;
   elements.attemptSection.classList.toggle("is-t2", currentQuestion?.interactionMode === "country_match");
+  elements.attemptSection.classList.toggle("is-t3", currentQuestion?.type === "dish_detective");
 
   renderParticipant();
   saveTimingSnapshot(attempt);
@@ -2901,7 +2918,7 @@ function renderAttempt() {
     (attempt.progress.currentQuestionIndex / Math.max(1, attempt.progress.totalQuestions)) * 100
   }%`;
   if (currentTour) {
-    elements.progressTour.textContent = currentQuestion?.interactionMode === "country_match"
+    elements.progressTour.textContent = currentQuestion?.type === "dish_detective" || currentQuestion?.interactionMode === "country_match"
       ? `Задание ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`
       : currentQuestion?.imageUrl && currentTour.code === "T1"
       ? `Вопрос ${attempt.progress.tourQuestionIndex} из ${attempt.progress.tourQuestionCount}`
@@ -2913,9 +2930,13 @@ function renderAttempt() {
       ? "Тур 2 · Кухни мира"
       : currentQuestion?.imageUrl && currentTour.code === "T1"
       ? "Тур 1 · Узнай блюдо" : currentTour.code;
-    elements.tourTitle.textContent = currentQuestion?.interactionMode === "country_match"
+    elements.tourTitle.textContent = currentQuestion?.type === "dish_detective"
+      ? "Тур 3 · Кулинарный детектив"
+      : currentQuestion?.interactionMode === "country_match"
       ? "Сопоставьте блюда со странами" : currentTour.title;
-    elements.tourDescription.textContent = currentQuestion?.interactionMode === "country_match"
+    elements.tourDescription.textContent = currentQuestion?.type === "dish_detective"
+      ? "Определите блюдо по подсказкам"
+      : currentQuestion?.interactionMode === "country_match"
       ? "" : currentTour.description || "";
     elements.tourLimit.textContent = `${currentTour.timeLimitMinutes} минут`;
   } else {
@@ -3470,7 +3491,9 @@ async function submitAnswer() {
   const previousQuestionId = state.attempt.currentQuestion && state.attempt.currentQuestion.id;
   const answerPayload = state.questionController.getAnswer();
   if (state.questionController.isComplete && !state.questionController.isComplete()) {
-    showMessage(elements.attemptMessage, "Сопоставьте все четыре блюда, затем подтвердите ответ.", "warning");
+    showMessage(elements.attemptMessage, state.attempt.currentQuestion?.type === "dish_detective"
+      ? "Введите название блюда: не менее двух символов."
+      : "Сопоставьте все четыре блюда, затем подтвердите ответ.", "warning");
     refreshAttemptControls();
     return;
   }

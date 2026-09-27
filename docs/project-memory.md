@@ -2,6 +2,14 @@
 
 Last updated: 2026-09-27
 
+## T3 culinary detective — blueprint 7 prepared locally, not published (2026-09-27)
+
+- T3 is now «Кулинарный детектив»: ten fixed ordered dossiers, three source-checked clues, a typed dish name, 3/0 points without penalties; 30 points / 8 minutes. Reading the intro counts toward the same server timer. The whole olympiad now has 45 questions / 150 points / 45 minutes, superseding the historical 41-question notes below. T1/T2/T4/T5 content and scores remain unchanged; local T2 revision 6 is preserved.
+- Server-only `src/detective-answer.js` normalizes spelling and accepts documented Russian aliases, English forms, explicit typos and bounded token-level OSA edits. Known close wrong dishes are denied before fuzzy. No keys/matcher are sent in participant JSON/JS. Old issued variants remain immutable; original T3 is retained byte-identically in `tour3-legacy.js` with existing ingredient/3D checking.
+- Ten own neutral `t3-case-01.webp` … `10.webp` depict ingredients/preparation, not full finished dishes. Each used textual sources and ≥2 actually viewed real photos (22 total); all originals/optimized assets were inspected. Falafel was regenerated once for excessively coarse chickpeas. See `docs/olympiad-t3-source-register.md` and `docs/olympiad-t3-answer-policy.md` for actual prompts, sources, variants, decisions and limits.
+- Native intro/dossier UI retains shared timers, anti-cheat and answer queue. Real Chrome desktop/mobile 390×844 complete ten-answer runs scored exactly 24/30 each, with no JS errors; widths 320/360/375/390/430, Tab/Enter/IME, draft reload, HTTP 422, failed-image fallback and network retry were checked. A physical Android/iOS keyboard was not tested; viewport shrink was simulated. Full evidence and limitations: `docs/olympiad-t3-qa.md`.
+- Checks: full suite 168/168, scoring/variant/T3 44/44; audit 10 000 variants, 0 score mismatches, T3 always fixed; Cloudflare build and local PM01 regression PASS. No production writes or deployment. Needs student pilot, particularly less familiar dishes; technical PASS is not final methodical acceptance.
+
 ## T2 full visual review — revision 6 prepared locally, not published (2026-09-27)
 
 - The latest user explicitly requested online study of real dishes and editing **every** T2 image. This supersedes revision 5's restriction on changing T2-01/T2-02 photographs, but not its recipe choices, questions, keys or scoring. All twenty active images were visually inspected before editing; primary recipe/tourism sources and actual photographs were reviewed per dish. Unavailable sources and auxiliary recipe differences are recorded candidly in `docs/olympiad-t2-visual-review.md`.

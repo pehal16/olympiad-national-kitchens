@@ -11,6 +11,7 @@ const {
 const { scoreQuestion, validateAnswerPayload } = require("../src/scoring");
 
 function correctAnswerFor(question) {
+  if (question.type === "dish_detective") return { text: question.answerPolicy.canonical };
   if (question.type === "single_choice") {
     return {
       selectedOptionId: question.options.find((option) => option.isCorrect).id
@@ -228,7 +229,7 @@ test("sanitizeQuestion preserves visual media but removes the dish key", () => {
 });
 
 test("source-backed 3D dish assemblies are valid and keep answer keys private", () => {
-  const visualQuestions = olympiad.questionBank.tour3Matrices.filter(
+  const visualQuestions = require("../data/banks/tour3-legacy").filter(
     (question) => question.type === "dish_assembly"
   );
 
@@ -244,7 +245,7 @@ test("source-backed 3D dish assemblies are valid and keep answer keys private", 
 });
 
 test("3D dish validation rejects partial or unknown model coverage", () => {
-  const source = olympiad.questionBank.tour3Matrices.find((question) => question.id === "T3-13");
+  const source = require("../data/banks/tour3-legacy").find((question) => question.id === "T3-13");
   const broken = structuredClone(source);
   broken.items[0].model3d = { kind: "unsupported_model" };
 

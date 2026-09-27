@@ -289,6 +289,20 @@ function validateQuestionStructure(question) {
 
   validateQuestionMedia(question);
 
+  if (question.type === "dish_detective") {
+    const policy = question.answerPolicy;
+    if (question.maxScore !== 3 || question.clues?.length !== 3 ||
+        !question.clues.every((clue) => typeof clue.label === "string" && clue.label.trim() &&
+          typeof clue.text === "string" && clue.text.trim()) ||
+        !/^\/assets\/olympiad\/tour3\/t3-case-\d{2}\.webp$/.test(question.imageUrl || "") ||
+        typeof policy?.canonical !== "string" || !policy.canonical.trim() ||
+        !["aliases", "english", "misspellings", "rejected"].every((key) =>
+          Array.isArray(policy[key]) && policy[key].every((value) => typeof value === "string" && value.trim()))) {
+      throw new Error(`Вопрос ${question.sourceId || question.id} нарушает контракт кулинарного детектива.`);
+    }
+    return;
+  }
+
   if (question.type === "single_choice") {
     const options = Array.isArray(question.options) ? question.options : [];
     const correctCount = options.filter((option) => option.isCorrect).length;
@@ -539,6 +553,18 @@ function buildTour2(olympiad, usedDishIds, random) {
 
 function buildTour3(olympiad, usedDishIds, random) {
   const tour = olympiad.tours.find((item) => item.id === "tour-3");
+  if (tour.generation.mode === "fixed_detective_questions") {
+    const questions = olympiad.questionBank.tour3Matrices;
+    const reserved = new Set(["margherita", "burger", "shawarma", "doner", "greek_salad", "caesar", "adjarian_khachapuri", "philadelphia_roll"]);
+    const tour1DishIds = new Set((olympiad.questionBank.tour1Pools || []).flatMap((pool) => pool.questions || []).map((question) => question.dishId));
+    if (questions.length !== 10 || tour.generation.selectCount !== 10 ||
+        new Set(questions.map((question) => question.dishId)).size !== 10 ||
+        questions.some((question) => usedDishIds.has(question.dishId) || tour1DishIds.has(question.dishId) || reserved.has(question.dishId))) {
+      throw new Error("Тур 3 должен содержать десять фиксированных неповторяющихся досье.");
+    }
+    questions.forEach((question) => usedDishIds.add(question.dishId));
+    return { tour, questions };
+  }
   const pool = olympiad.questionBank.tour3Matrices.filter(
     (item) => !usedDishIds.has(item.dishId)
   );
@@ -758,6 +784,9 @@ function sanitizeQuestion(question, attempt) {
     type: question.type,
     ...(question.interactionMode === "country_match" ? { interactionMode: "country_match" } : {}),
     prompt: question.prompt,
+    ...(question.type === "dish_detective" ? {
+      clues: question.clues.map(({ label, text }) => ({ label, text }))
+    } : {}),
     ...(question.imageUrl ? { imageUrl: question.imageUrl, imageAlt: question.imageAlt } : {}),
     scenario: question.scenario || "",
     note: question.note || "",

@@ -60,7 +60,6 @@ test("T2 full visual review preserves all non-media content, other banks and his
   });
   const baseline = {
     tour1: "b95c4c9fde6dff7c69436d6d53b9f0eb3723f450c54575c72ef4152e0e1784e9",
-    tour3: "683daa6a9306fe4589082b7cc2a4704f37d5ef3af6ac336afabf4549df2a2b6a",
     tour4: "fffb37b0b58c0bdc78f9c3ee8d33ab667fcba3f7d2caebb933f60d33d66e1ed7",
     tour5: "9e506a8267e5ff15b1518c7e5b26ceefe545504dd9b2f26cc4d9bffafd54cdb6"
   };
@@ -130,7 +129,7 @@ test("all seeds retain fixed T2 content, score and order but shuffle opaque card
   const countryOrders = new Set();
   for (let n = 0; n < 100; n += 1) {
     const v = buildVariant(olympiad, { seed: `t2-${n}` });
-    assert.equal(v.questions.length, 41); assert.equal(v.totalMaxScore, 150);
+    assert.equal(v.questions.length, 45); assert.equal(v.totalMaxScore, 150);
     assert.deepEqual(v.tours.map((t) => [t.code, t.maxScore, t.timeLimitMinutes]), [["T1",20,6],["T2",20,6],["T3",30,8],["T4",32,10],["T5",48,15]]);
     const issued = v.questions.filter((q) => q.tourCode === "T2");
     assert.deepEqual(issued.map((q) => q.sourceId), bank.map((q) => q.id));
