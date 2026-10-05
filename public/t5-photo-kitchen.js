@@ -13,7 +13,7 @@
     let selected = new Set();
     try { if (incoming?.dishId === dish.id) selected = new Set(model.selection(dish, incoming.selectedIngredientIds || []).map(item => item.id)); } catch { /* Ignore malformed local drafts. */ }
     const route = model.recipeStages(dish);
-    let stage = selected.size === 4 && route.includes(stored?.stage) && model.key(stored.selectedIngredientIds || []) === model.key([...selected]) ? stored.stage : 'select';
+    let stage = selected.size === 4 && route.includes(stored?.stage) && Array.isArray(stored?.selectedIngredientIds) && model.key(stored.selectedIngredientIds) === model.key([...selected]) ? stored.stage : 'select';
     let layout = stored?.layout === 'turned' ? 'turned' : 'balanced';
     let started = question.sequenceInTour !== 1 || seen.has(introKey) || read(introKey) === true;
     const el = (tag, className, text) => { const node = doc.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = text; return node; };
