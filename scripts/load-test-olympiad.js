@@ -92,6 +92,9 @@ async function request(operation, path, options = {}) {
 
 function emptyValidAnswer(question) {
   if (!question) return {};
+  if (question.type === "final_kitchen" && question.presentationVersion === 4) return {
+    dishId: question.selectedDish.id, selectedIngredientIds: question.selectedDish.items.slice(0,4).map(item=>item.id)
+  };
   if (question.type === "single_choice") return { selectedOptionId: null };
   if (question.type === "sequence_drag") return { sequence: [] };
   if (question.type === "bucket_sort" || question.type === "ingredient_matrix") {

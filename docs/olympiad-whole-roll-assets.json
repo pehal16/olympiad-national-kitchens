@@ -1,0 +1,47 @@
+{
+  "generatedWith": "built-in image_gen",
+  "scope": "local no-score demo only; user acceptance and volumetric model pending",
+  "export": "WebP format encoding only; dimensions/alpha preserved; no food retouch or background removal",
+  "assets": [
+    {
+      "native": "storage/t5-whole-roll/native/whole-roll-v1.png",
+      "nativeSha256": "248a05ba44c3bd46514e181c058fbe798b352561fde1b60cf0dd4688bcbaa204",
+      "public": "public/assets/olympiad/visual-v4/philadelphia/whole-roll-v1.webp",
+      "publicSha256": "e5270bae60d1cde92eaf58a3ea0eea25693102569bc13ea8c56b5cdc950258dd",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "bytes": 269536,
+      "prompt": "Use case: photorealistic-natural\nAsset type: culinary olympiad reference asset for reconstruction of a true volumetric 3D food model\nPrimary request: ONE WHOLE UNCUT Philadelphia-style sushi roll with cucumber, the familiar Russian restaurant version. One long intact salmon-wrapped sushi log, about 18 cm long and 4.5 cm thick, horizontal axis running diagonally across the frame. It is NOT a single sliced bite and NOT a row of sushi pieces. The whole continuous roll has natural slightly rounded rectangular cross-section. Thin overlapping orange raw salmon sheets with realistic pale fat striations cover the full length of the outside. At the nearer natural open end see a compact white sushi-rice layer, a thin dark nori layer, white cream cheese and a single green cucumber baton running longitudinally inside. The far end is also a natural end of this one long roll.\nScene/backdrop: genuinely transparent alpha background, isolated object, no plate, no props, no garnish, no background surface, no cast shadow outside the object.\nStyle/medium: high resolution realistic food product photography, fine moist rice grains, delicate fish fibers, natural restrained sheen, real food rather than plastic or illustration.\nComposition/framing: upper three-quarter camera approximately 30 degrees above the side, show the ENTIRE long roll including both ends, full length and clear substantial depth, generous margin around the object. Long roll occupies about 75% of image width.\nLighting: soft neutral diffuse studio lighting, no dramatic directional shadow, no glare.\nConstraints: exactly one connected intact long roll. No slicing, no knife cuts, no score marks dividing it into portions, no separate pieces, no seams that look like cuts through the roll, no sushi platter, no chopsticks, no hands, no text, no labels, no watermark. No flat illustration, no cartoon, no inflated pillow shape. Preserve actual alpha.",
+      "review": "One intact long uncut log, continuous salmon outside, near-end rice/nori/cream cheese/cucumber. Whole silhouette inspected in native source and WebP. Alpha inspected on actual cream UI: no diffuse halo. Raster, not geometry."
+    },
+    {
+      "native": "storage/t5-whole-roll/native/makisu-v1.png",
+      "nativeSha256": "9ec0319f90df8c7fdba02bd65e14bbf78470e7b2b5970ed798bb1bf2fb5d0479",
+      "public": "public/assets/olympiad/visual-v4/philadelphia/makisu-v1.webp",
+      "publicSha256": "8d89c79a021113a664bfa713d963e76ec165a31609749213abfdc1b76f97bd24",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "bytes": 284800,
+      "prompt": "Use case: photorealistic-natural\nAsset type: preparation surface for culinary olympiad sushi assembly\nPrimary request: one empty natural bamboo makisu sushi rolling mat, rectangular about 24 by 24 cm, seen exactly from overhead. Closely spaced fine smooth pale honey-colored bamboo slats with subtle natural grain and five thin white cotton binding threads. Lay perfectly flat, no hands, no roll, no ingredients, no food, no utensils, no text, no plate. Mat fills 85% of square composition, all edges visible.\nBackground: genuine transparent alpha outside the clean rectangular mat, no surface and no surrounding shadow or glow.\nStyle: real studio product photography, understated authentic bamboo texture, even soft neutral light. No illustration, no fake 3D cartoon.",
+      "review": "Empty flat rectangular bamboo rolling mat with five white bindings, no extra food. Native/encoded exports individually inspected; alpha on actual UI clean."
+    }
+  ],
+  "nonSelectedEdits": [
+    {
+      "receipt": "storage/t5-whole-roll/whole-roll-alpha-v2-receipt.json",
+      "reason": "Not selected. Initial raw-image halo was RGB in alpha=0 pixels; original retained."
+    }
+  ],
+  "modelTrial": {
+    "service": "https://microsoft-trellis-2.hf.space/",
+    "resolution": 1024,
+    "decimationTarget": 100000,
+    "textureSize": 2048,
+    "outcome": "Correct whole-roll source uploaded through documented UI and visible in inspected full-page screenshot. Generate returned a generic visible error; no GLB. Error reason unverified; do not call this a quota or authentication diagnosis.",
+    "evidence": "C:/Users/АМ/AppData/Local/Temp/olympiad-visual-return-20261004/trellis-whole-settled.png"
+  }
+}

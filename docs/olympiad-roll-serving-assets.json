@@ -1,0 +1,103 @@
+{
+  "tool": "image_gen.imagegen",
+  "date": "2026-10-05",
+  "purpose": "Final cutting and serving, authorized by the latest user instruction; whole during assembly.",
+  "assets": [
+    {
+      "name": "sliced-sample",
+      "inputImage": "public/assets/olympiad/visual-v5/philadelphia/served.webp",
+      "prompt": "Use case: precise-object-edit\nAsset type: final serving-stage photograph for the existing interactive Philadelphia roll lesson.\nInput image: exact edit target. Preserve the pale cream stone worktop, the full oval speckled ceramic plate, natural soft daylight, three-quarter overhead camera, scale and photographic textures.\nPrimary request: the long assembled Philadelphia roll is NOW CUT into eight equal bite-sized pieces and served in a single gently diagonal straight row, with small clearly visible 3 mm gaps between pieces. The roll was whole during assembly; this is ONLY the final serving stage. Each piece retains thin natural salmon covering its top and sides, rice outside, a thin nori ring around soft white cream cheese and three modest green cucumber batons. The left end piece can show the same correct cheese and cucumber cross-section as the reference; do not invent a different filling. Keep all eight pieces fully on the plate, not a giant uncut log and not just one cut piece.\nConstraints: exactly the same selected food ingredients as the input, natural irregular moist rice grains and delicate salmon fibres, no extra fish inside, no garnish, sesame, avocado, sauces, hands, knife, graphics, text or logos. Realistic editorial food photograph, not plastic or cartoon food.",
+      "reviewStatus": "inspected-pending-user-acceptance",
+      "reviewNote": "Eight sliced pieces; cheese/cucumber within nori, salmon outside; fully on plate.",
+      "generatorFileName": "exec-e64737c0-5316-4542-b0e3-d0dcc36fbaef.png",
+      "nativeFile": "storage/t5-roll-serving-v6/native/sliced-sample.png",
+      "nativeSha256": "9b48eb5ef61014f082d95ad0be0026d770cf2ab6b288c14b0cab88db62f190d6",
+      "webpSha256": "9b80c2c64bf1c70e167d582c6d56a4719ee7217543f528929da1bb3a44cddaf3",
+      "imageUrl": "/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "sliced-salmon",
+      "inputImage": "public/assets/olympiad/visual-v5/philadelphia/plate-salmon.webp",
+      "prompt": "Use case: precise-object-edit\nAsset type: final serving-stage photograph for an interactive sushi roll composition comparison.\nInput image: exact edit target. Keep the exact directly overhead camera, pale warm stone worktop, full oval speckled ceramic plate, outer salmon ingredient identity, natural lighting, size and textures.\nPrimary request: CUT the existing long roll into eight equal bite-sized segments; keep them in one straight left-to-right row in exactly the same position, separated by narrow 3 mm gaps across the entire rice and outer covering. The cuts must be clear real full-depth crosswise cuts, not merely decorative grooves in a whole log. Preserve the overall width and depth of the reference.\nInterior constraint: the camera is strictly directly overhead and the pieces remain side by side, not stood upright or rotated. Only the salmon tops and rice edges are visible. Do NOT reveal cut-face filling contents at either end or between segments; no invented green cucumber, cream cheese or other filling colour. These exterior views will be shared by sets whose inside fillings differ, so exact inside ingredients must stay out of view.\nConstraints: no added ingredients, salmon on a tuna/eel/shrimp/surimi version, garnish, sesame, sauces, utensils, hands, knife, labels, text or logos. Keep authentic moist short-grain rice and natural salmon texture; no cartoon styling, fake plastic highlights or 3D render.",
+      "reviewStatus": "inspected-pending-user-acceptance",
+      "reviewNote": "Eight full-depth sliced segments; correct outer product, overhead framing, no distinct invented filling or garnish.",
+      "generatorFileName": "exec-ba53c18c-1f9d-44ef-8bf4-8b87b4cce6c7.png",
+      "nativeFile": "storage/t5-roll-serving-v6/native/sliced-salmon.png",
+      "nativeSha256": "e70cd43590b98758c2fb481836cb0d36e05b7993e3ce9c71a6c8de747f5a15cd",
+      "webpSha256": "cdf6eb8f1aa70af474de749935549f97180b37252493b8f07b4923661cba5dd4",
+      "imageUrl": "/assets/olympiad/visual-v6/philadelphia/sliced-salmon.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "sliced-tuna",
+      "inputImage": "public/assets/olympiad/visual-v5/philadelphia/plate-tuna.webp",
+      "prompt": "Use case: precise-object-edit\nAsset type: final serving-stage photograph for an interactive sushi roll composition comparison.\nInput image: exact edit target. Keep the exact directly overhead camera, pale warm stone worktop, full oval speckled ceramic plate, outer tuna ingredient identity, natural lighting, size and textures.\nPrimary request: CUT the existing long roll into eight equal bite-sized segments; keep them in one straight left-to-right row in exactly the same position, separated by narrow 3 mm gaps across the entire rice and outer covering. The cuts must be clear real full-depth crosswise cuts, not merely decorative grooves in a whole log. Preserve the overall width and depth of the reference.\nInterior constraint: the camera is strictly directly overhead and the pieces remain side by side, not stood upright or rotated. Only the tuna tops and rice edges are visible. Do NOT reveal cut-face filling contents at either end or between segments; no invented green cucumber, cream cheese or other filling colour. These exterior views will be shared by sets whose inside fillings differ, so exact inside ingredients must stay out of view.\nConstraints: no added ingredients, salmon on a tuna/eel/shrimp/surimi version, garnish, sesame, sauces, utensils, hands, knife, labels, text or logos. Keep authentic moist short-grain rice and natural tuna texture; no cartoon styling, fake plastic highlights or 3D render.",
+      "reviewStatus": "inspected-pending-user-acceptance",
+      "reviewNote": "Eight full-depth sliced segments; correct outer product, overhead framing, no distinct invented filling or garnish.",
+      "generatorFileName": "exec-9c7f1a00-edb2-402d-bb58-8634a418bd28.png",
+      "nativeFile": "storage/t5-roll-serving-v6/native/sliced-tuna.png",
+      "nativeSha256": "6ed052fc2c27cf6f84ab4e885a2dd3c9026085f7fcd95e4b2452f9aebb090ae9",
+      "webpSha256": "75efd8e954c290293e3b1a47cfaee930dbddff502ad492964344adabc9e313bb",
+      "imageUrl": "/assets/olympiad/visual-v6/philadelphia/sliced-tuna.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "sliced-eel",
+      "inputImage": "public/assets/olympiad/visual-v5/philadelphia/plate-eel.webp",
+      "prompt": "Use case: precise-object-edit\nAsset type: final serving-stage photograph for an interactive sushi roll composition comparison.\nInput image: exact edit target. Keep the exact directly overhead camera, pale warm stone worktop, full oval speckled ceramic plate, outer eel ingredient identity, natural lighting, size and textures.\nPrimary request: CUT the existing long roll into eight equal bite-sized segments; keep them in one straight left-to-right row in exactly the same position, separated by narrow 3 mm gaps across the entire rice and outer covering. The cuts must be clear real full-depth crosswise cuts, not merely decorative grooves in a whole log. Preserve the overall width and depth of the reference.\nInterior constraint: the camera is strictly directly overhead and the pieces remain side by side, not stood upright or rotated. Only the eel tops and rice edges are visible. Do NOT reveal cut-face filling contents at either end or between segments; no invented green cucumber, cream cheese or other filling colour. These exterior views will be shared by sets whose inside fillings differ, so exact inside ingredients must stay out of view.\nConstraints: no added ingredients, salmon on a tuna/eel/shrimp/surimi version, garnish, sesame, sauces, utensils, hands, knife, labels, text or logos. Keep authentic moist short-grain rice and natural eel texture; no cartoon styling, fake plastic highlights or 3D render.",
+      "reviewStatus": "inspected-pending-user-acceptance",
+      "reviewNote": "Eight full-depth sliced segments; correct outer product, overhead framing, no distinct invented filling or garnish.",
+      "generatorFileName": "exec-7a2b598a-a477-4a19-85fc-da30b7c7bf52.png",
+      "nativeFile": "storage/t5-roll-serving-v6/native/sliced-eel.png",
+      "nativeSha256": "ec5469556bbeb4f6f9cfa4fb1087a1b9aa2f7861cca626868c0ea014c74a07cf",
+      "webpSha256": "6a59faa4397088508869c91dc0bc3266ec54ab0d618421aa447026d7ec1dc43a",
+      "imageUrl": "/assets/olympiad/visual-v6/philadelphia/sliced-eel.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "sliced-shrimp",
+      "inputImage": "public/assets/olympiad/visual-v5/philadelphia/plate-shrimp.webp",
+      "prompt": "Use case: precise-object-edit\nAsset type: final serving-stage photograph for an interactive sushi roll composition comparison.\nInput image: exact edit target. Keep the exact directly overhead camera, pale warm stone worktop, full oval speckled ceramic plate, outer shrimp ingredient identity, natural lighting, size and textures.\nPrimary request: CUT the existing long roll into eight equal bite-sized segments; keep them in one straight left-to-right row in exactly the same position, separated by narrow 3 mm gaps across the entire rice and outer covering. The cuts must be clear real full-depth crosswise cuts, not merely decorative grooves in a whole log. Preserve the overall width and depth of the reference.\nInterior constraint: the camera is strictly directly overhead and the pieces remain side by side, not stood upright or rotated. Only the shrimp tops and rice edges are visible. Do NOT reveal cut-face filling contents at either end or between segments; no invented green cucumber, cream cheese or other filling colour. These exterior views will be shared by sets whose inside fillings differ, so exact inside ingredients must stay out of view.\nConstraints: no added ingredients, salmon on a tuna/eel/shrimp/surimi version, garnish, sesame, sauces, utensils, hands, knife, labels, text or logos. Keep authentic moist short-grain rice and natural shrimp texture; no cartoon styling, fake plastic highlights or 3D render.",
+      "reviewStatus": "inspected-pending-user-acceptance",
+      "reviewNote": "Eight full-depth sliced segments; correct outer product, overhead framing, no distinct invented filling or garnish.",
+      "generatorFileName": "exec-3a121b67-b8f1-4494-9046-4b1610d83bb9.png",
+      "nativeFile": "storage/t5-roll-serving-v6/native/sliced-shrimp.png",
+      "nativeSha256": "bc90663be5399b6a69a6bec3d3a43dc27cbfb8f359266ce7721aa96dc64bdbce",
+      "webpSha256": "057a43db6245350c76faaf51117c3375d1221f9eaf8fbb79d9e0152f67141245",
+      "imageUrl": "/assets/olympiad/visual-v6/philadelphia/sliced-shrimp.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "sliced-surimi",
+      "inputImage": "public/assets/olympiad/visual-v5/philadelphia/plate-surimi.webp",
+      "prompt": "Use case: precise-object-edit\nAsset type: final serving-stage photograph for an interactive sushi roll composition comparison.\nInput image: exact edit target. Keep the exact directly overhead camera, pale warm stone worktop, full oval speckled ceramic plate, outer surimi ingredient identity, natural lighting, size and textures.\nPrimary request: CUT the existing long roll into eight equal bite-sized segments; keep them in one straight left-to-right row in exactly the same position, separated by narrow 3 mm gaps across the entire rice and outer covering. The cuts must be clear real full-depth crosswise cuts, not merely decorative grooves in a whole log. Preserve the overall width and depth of the reference.\nInterior constraint: the camera is strictly directly overhead and the pieces remain side by side, not stood upright or rotated. Only the surimi tops and rice edges are visible. Do NOT reveal cut-face filling contents at either end or between segments; no invented green cucumber, cream cheese or other filling colour. These exterior views will be shared by sets whose inside fillings differ, so exact inside ingredients must stay out of view.\nConstraints: no added ingredients, salmon on a tuna/eel/shrimp/surimi version, garnish, sesame, sauces, utensils, hands, knife, labels, text or logos. Keep authentic moist short-grain rice and natural surimi texture; no cartoon styling, fake plastic highlights or 3D render.",
+      "reviewStatus": "inspected-pending-user-acceptance",
+      "reviewNote": "Eight full-depth sliced segments; correct outer product, overhead framing, no distinct invented filling or garnish.",
+      "generatorFileName": "exec-66650358-c111-47d5-ade0-d79e998f9101.png",
+      "nativeFile": "storage/t5-roll-serving-v6/native/sliced-surimi.png",
+      "nativeSha256": "4563fceedee544468579a0dfabdd54e1153d475b60adaf0c9f737993c89024bd",
+      "webpSha256": "0b972c2696f8e16594cb1f4449640dea647c11e86503f0ffc7b3e0e937a5139f",
+      "imageUrl": "/assets/olympiad/visual-v6/philadelphia/sliced-surimi.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    }
+  ]
+}

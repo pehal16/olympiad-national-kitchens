@@ -10,7 +10,8 @@ const THREE = require("three");
 const bank = require("../data/banks/tour5-final-kitchen");
 const { FORMS, planAssembly } = require("../src/final-kitchen-presentation");
 const { buildVariant, sanitizeQuestion, validateQuestionStructure } = require("../src/variant");
-const olympiad = require("../data/olympiad");
+const olympiad = structuredClone(require("../data/olympiad"));
+olympiad.questionBank.tour5Stations = structuredClone(bank);
 
 function choices(items, n) { return n ? items.flatMap((item, i) => choices(items.slice(i + 1), n - 1).map(rest => [item, ...rest])) : [[]]; }
 

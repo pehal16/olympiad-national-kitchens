@@ -1,0 +1,555 @@
+{
+  "tool": "image_gen.imagegen",
+  "assets": [
+    {
+      "name": "rice",
+      "prompt": "Use case: photorealistic-natural\nAsset type: main preparation-stage photograph for an interactive culinary lesson on a whole Philadelphia sushi roll with cucumber, Russian restaurant version.\nSubject: a clean pale honey bamboo makisu sushi mat tightly wrapped in clear cling film lies on a pale warm cream matte kitchen worktop. At the centre one HALF sheet of nori approximately 20 cm wide by 10 cm deep, long side left-to-right. On the nori a thin uniform layer of real cooked seasoned short-grain sushi rice with fine irregular moist grains, not giant grains or a mashed slab. Rice extends 1.5 cm beyond the nearer nori edge; leave a thin uncovered dark nori strip along the farther edge. NO FILLING YET: absolutely no fish, salmon, cream cheese, cucumber, seafood, garnish, seeds or sauce. This is only the rice-distribution stage before turning the sheet over.\nPhotography: genuine natural close food photography, directly overhead (not a 3D render), tasteful high-end culinary editorial detail, neutral soft daylight, subtle physical contact shadows, authentic rice and seaweed texture. No exaggerated gloss, artificial repetitive patterns or cartoon styling.\nComposition: square canvas, mat fills 88% of width, half-sheet fills about 70% of width and 38% of height, centred. Consistent clean worktop background #f3eee4; all mat edges visible. No hands, utensils, containers, text, graphics or plate. All objects have real thickness but camera looks directly down. No transparency needed. Keep food practical and understated.",
+      "nativeSha256": "21cdfb3774c44b762419b512e41e3d46d65ecd84c9850b9e008451c463f3cdec",
+      "webpSha256": "b337fd1c1110aa554ce54b2c9a4e16250fb5041654f6571d410500e9b4d2874b",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/rice.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-94030d2d-235e-4a89-9638-ac28647f873f.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/rice.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "flipped",
+      "prompt": "Edit this exact preparation photograph to show the NEXT stage of making a rice-out whole Philadelphia roll. Keep camera, scale, lighting, bamboo mat wrapped with cling film and cream worktop EXACTLY fixed. Turn ONLY the nori-and-rice sheet over: cooked rice is now underneath touching the plastic-wrapped mat, the complete dark textured nori surface faces upwards. Thin white rice can be visible only at the outer edge from UNDERNEATH, not on top. The nori is the same long horizontal half-sheet in the same lower-centre position. No filling yet, no cheese, cucumber, salmon or other foods. Natural genuine food photograph, no 3D render, no hands, no text. This is the bare nori-up stage after flipping, before placing filling ON NORI.",
+      "nativeSha256": "054815e7c73de17714292d33b9ae72c04db3147f70a2c6b47ff152d0210bfd2d",
+      "webpSha256": "c3293765238cbfbec52fe71f07a900f30250e90dd9dfc7b6b4dcaf16c7a26619",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/flipped.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-648d4b41-e0f5-4976-adfe-17c712bdf40e.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/flipped.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "filling",
+      "prompt": "Edit this exact nori-up preparation photograph to the filling stage. Keep bamboo mat, plastic wrap, backdrop, camera, sheet scale and position exactly registered. Cooked rice must remain UNDER the dark nori. Add ONLY a modest soft piped irregular ribbon of white cream cheese and THREE very fine long cucumber batons beside it, horizontally across the nearer-middle of the exposed dark nori, about one third from the bottom edge. Cheese should look soft, spreadable, moist and realistically piped, NOT rigid white blocks. Cucumber should be narrow green-skinned fine strips, not thick logs. Both rest directly ON THE DARK NORI. Most of the nori remains visible above and below. Absolutely NO SALMON, NO fish of any kind, no orange ingredient. Do not move the rice to the top. No hands or utensils or text. Authentic natural food photograph of a practical amount of filling for one thin whole roll.",
+      "nativeSha256": "b291021b1fdafd10f172fb9d77d3345056beeb65ce2d1411ccc28f5b4e745ecc",
+      "webpSha256": "0759b8f047236e4e4dffb01d6e1801b909ec2020ee335291b25f9308dcfd18ba",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/filling.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-4988b756-1654-4d7e-b42e-c1be6cfc5823.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/filling.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "rolling",
+      "prompt": "Edit this exact preparation photograph to the halfway-rolling stage. Keep same overhead camera and fixed cream worktop, same bamboo makisu wrapped in clear cling film. Lift and curl the NEAR (bottom) edge of the bamboo mat upward to fold the near edge of the nori/rice OVER the cheese and cucumber, forming the first turn of ONE long horizontal whole sushi roll. The curved mat occupies the lower-centre as a believable rounded bamboo curl, its individual slats following the curve; rice-out first fold is partly visible beyond its upper edge, the farther part of the dark nori sheet remains flat visible behind. Cheese and cucumber are now concealed inside the fold. This is in-progress rolling, not a loose sheet and not an already served roll. Absolutely no salmon or any orange fish anywhere. No cutting, no sliced pieces, no hands, no text, no tools. Natural authentic food photography, true physical folding of a bamboo mat.",
+      "nativeSha256": "d2c4e7b41ad02fbc30b1a2fc47c1c12d6ad611723e9910187f9aacf82dd86d85",
+      "webpSha256": "fe1f72110e650518b229b7a0ca996b540e916de1623032c8889e32aba5aaa754",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/rolling.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-d92b7759-3b2b-4dbd-a122-1aac92536c1d.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/rolling.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "rolled",
+      "prompt": "Edit this exact midway-rolling photo to the state AFTER fully rolling and opening out the makisu again. Keep overhead camera, cream worktop, lighting, bamboo mat with clear cling film and total mat boundaries fixed. The mat is now completely flat again. Replace the folded sheet and curled mat foreground with ONE long uncut horizontal rice-out sushi roll, around 20 cm long and 4 cm thick, centred at the same lower-centre region. Its outer surface consists ONLY of real small moist irregular white sushi rice grains. The nori is INSIDE the cylinder around the cream cheese and cucumber filling. Any tiny natural exposed ends may contain dark nori around white cream cheese and green cucumber, absolutely NO orange fish inside. Whole cylindrical log, no slice lines or portions. No salmon on the outside yet. No sesame, sauce, garnish, hands, tools or labels. Authentic close culinary photograph, visible real thickness with restrained soft contact shadow.",
+      "nativeSha256": "2682b78d456b3592f5efa959fd49de3472958f031b6c4298d60ac52ffd6a53e1",
+      "webpSha256": "455b46776bd0e44cb3a9958b281b8900c47ee47360e79087cd7140f658a5313d",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/rolled.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-4fdcb3a2-0549-497e-9aa9-6f2d2b024817.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/rolled.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "covered",
+      "prompt": "Edit this exact rice-out whole sushi roll photograph to the OUTSIDE salmon-covering stage. Keep the same overhead camera, whole horizontal roll position and scale, bamboo mat wrapped with transparent cling film, lighting and cream worktop. Cover the already rolled rice cylinder from ABOVE with several extremely thin broad slices of natural pink-orange lightly salted salmon, draped over the TOP and BOTH LONG SIDES. This is an outer skin, not fish filling. The edges softly conform to the cylinder; only a narrow lower fringe of white rice and a small exposed end may remain visible. Fish has beautiful fine irregular ivory fat marbling, real delicate moist flesh, restrained sheen, subtle irregular slice edges. Avoid perfectly repeated diagonal stripes, artificial ribbing, giant segments, salmon sashimi blocks or orange plastic. Keep ONE 20cm whole long uncut roll, no cutting marks, no separate bites. Filling remains only cheese and cucumber within nori within rice. No garnish, seeds, sauces, hands or labels. Authentic premium food photography, not a CGI render.",
+      "nativeSha256": "edcd9e1166456655abeae06e9b44564c24c68c1f35a0f980dff36b13dc9beac7",
+      "webpSha256": "60657b8f02cae75a4e02a47bdf500daea999cabb7c30a79b2ee358f04db0b8ad",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/covered.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-913f8038-a720-40bb-b0b4-51d25a812369.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/covered.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "served-draft",
+      "prompt": "Show this exact whole long uncut Philadelphia sushi roll in its finished premium natural photographic presentation. Transfer the ONE complete 20cm long roll to a simple ivory ceramic oval restaurant plate on the same warm cream worktop; REMOVE bamboo mat and cling film. Camera is a modest three-quarter overhead angle, about 55 degrees elevation, to show the cylindrical volume and the left NATURAL untrimmed end. Same ingredients: thin salmon sheets cover the OUTSIDE TOP AND BOTH LONG SIDES; white rice layer below; thin dark nori around a modest creamy white cheese and fine green cucumber filling. NO salmon INSIDE the end. Rice not too thick. No slicing, no cut marks, no separate rounds. Whole log in one piece. Salmon fine irregular fat marbling and uneven delicate flesh texture, NO ribbed plastic or repeated perfect stripes, gentle moisture not wet mirror gloss. Natural restrained warm daylight and real shadows, Michelin-quality authentic food photography, not 3D render, tasteful close framing with the roll occupying 68% canvas width and the whole ceramic plate visible. No garnish, sauce, chopsticks, hands, text or graphics. Square image.",
+      "accepted": false,
+      "reason": "Too many cucumber batons in exposed end; cheese almost hidden; plate edge cropped",
+      "nativeSha256": "f94cf3976eab1e1f09cccfd112cb85e88f1fc0b1eb503a9eb038134449a18bcb",
+      "generatorFileName": "exec-ffdc7e88-33cf-4c30-8f43-fe71bac433af.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/served-draft.png",
+      "reviewStatus": "rejected"
+    },
+    {
+      "name": "served",
+      "prompt": "Refine this photo preserving the SAME one whole uncut long roll and its outer thin salmon covering. Correct ONLY the exposed LEFT natural end: inside the thin dark nori there should be one substantial soft creamy white cream-cheese region occupying about HALF the interior beside THREE slender green cucumber batons occupying the other half. No fish inside, no other fillings, no big cucumber pile. White rice surrounds the nori; salmon covers the outer top and sides. Also pull the camera back slightly so the ENTIRE ivory oval plate is visible with 7% cream worktop margin on every side. Keep premium genuine natural food photography, real subtle irregular salmon texture. No slicing, separate bites, hands, garnish or text.",
+      "nativeSha256": "dfa307a94f5a48c381023896985a7d3ca6ea8e1e6a782db1575e15778d073ae4",
+      "webpSha256": "c82fd5788997949b4999190619c1796c15056a1e9611b2c499fb48bc4e4afd8e",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/served.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-940d874e-89b8-4d96-bbde-d74f680261f2.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/served.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "card-cheese",
+      "prompt": "Photorealistic natural culinary ingredient card. ONLY a modest soft white cream-cheese mound on a small simple ivory ceramic saucer, a gentle spatula sweep showing spreadable creamy texture and soft folds. No solid cheese cubes, no hard blocks, no yellow cheese, no decoration. Shot directly overhead on warm pale cream matte worktop #f3eee4 with restrained soft daylight and real contact shadows, entire saucer visible and centred within square image with 12% empty margin. Creamy white product should be clearly recognisable at thumbnail size. Authentic high-end food photography, NOT CGI, not cartoon, no labels, hands, utensils, other products or text.",
+      "nativeSha256": "dc0086e140658a8b5819fbaf1a1130069bc5ca9894c9977c2f61e533ef4deda0",
+      "webpSha256": "e26933362bcc67dccf8e46297c54bd46c196cec70c229328555073969b5aef27",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/card-cheese.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-42bd7a1c-0e12-4a26-98b3-48fa9fdda53b.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/card-cheese.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "card-cucumber",
+      "prompt": "Photorealistic natural culinary ingredient card. ONLY fresh cucumber prepared for sushi: THREE slender long green-skinned cucumber batons beside a small natural cucumber section on a simple ivory ceramic saucer. Show watery pale green interior, dark natural peel, tiny subtle seed texture, slender practical batons not giant sticks. Directly overhead on warm pale cream matte worktop #f3eee4, soft daylight, restrained real moist sheen and contact shadows. Entire saucer centred with 12% margin, square canvas. Natural high-end food photograph, NOT CGI, plastic or cartoon. No herbs, text, labels, hands, utensils or other foods.",
+      "nativeSha256": "56f3e230413b4886a62794ae1438d5098a2e69563b291915ad96ac9ae0e342b8",
+      "webpSha256": "36af0ab1d34158d792b4b256ea9f4a43b00717cb140483fd078b70bf170f9202",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/card-cucumber.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-47c30749-66ff-46cb-8591-555bc814b6be.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/card-cucumber.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "card-salmon",
+      "prompt": "Photorealistic natural culinary ingredient card. ONLY three THIN BROAD slices of lightly salted salmon, overlapped loosely on a simple ivory ceramic saucer, suitable to drape over the OUTSIDE of a whole Philadelphia sushi roll. Fine irregular ivory fat marbling in pink-orange flesh, naturally tapering thin edges, restrained moist sheen; NOT thick sashimi blocks, triangles, steak, skin or ribbed plastic. Directly overhead, warm pale cream matte worktop #f3eee4, soft natural daylight and real shadows. Entire saucer centred with 12% margin, square canvas. Authentic high-end food photography, NOT CGI or cartoon. No herbs, lemon, sauce, seeds, labels, text, hands or utensils.",
+      "nativeSha256": "b14ad611be05bfa55253ef318661692934ef5e4cca3da5f942b8e5aa0417c762",
+      "webpSha256": "cfd031b834af525a952e171fedcafb2bac551dbb03bc1c09557bf2a550b588ba",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/card-salmon.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-e63a4cc7-cd38-41e5-957b-30cab13a34d6.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/card-salmon.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "card-rice-nori",
+      "prompt": "Photorealistic natural high-end culinary ingredient card, directly overhead, warm pale cream matte worktop #f3eee4, restrained natural soft daylight with real shadows. Simple ivory ceramic saucer, ENTIRE saucer centred in square image with 10% empty margin. Real authentic food texture, no CGI, cartoon, synthetic plastic look, labels, hands, utensils, garnish, text or unrelated foods. The only products are cooked seasoned short-grain sushi rice in a very small ivory bowl next to ONE dark green-black HALF sheet of dry nori lying flat. A modest bowl with individual small sticky irregular translucent-white rice grains, not mashed or giant grains. Nori is clearly a thin rectangular half sheet with subtle crinkled fibrous texture. This is a mise-en-place ingredient portrait before assembly; do not put rice or any filling on the nori yet. No fish, cucumber or cheese.",
+      "nativeSha256": "924c0dc070a5ca9d633d11a9250d532b9e14ea62e2629b0098bbd9af0e13af2e",
+      "webpSha256": "2ffa1ea0cd0dae9a7b566b2f04a37cc8179d29ad57a4239cb7bad28cfbd9e7db",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/card-rice-nori.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-928ee3ae-7271-49e9-b11a-68610262f62e.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/card-rice-nori.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "card-shrimp",
+      "prompt": "Photorealistic natural high-end culinary ingredient card, directly overhead, warm pale cream matte worktop #f3eee4, restrained natural soft daylight with real shadows. Simple ivory ceramic saucer, ENTIRE saucer centred in square image with 10% empty margin. Real authentic food texture, no CGI, cartoon, synthetic plastic look, labels, hands, utensils, garnish, text or unrelated foods. The only product is FIVE cooked peeled shrimp, gently curled, pale natural coral and ivory meat with subtle segments. Tails REMOVED, no shell, no head. Loosely arranged on the saucer. Not tempura or deep fried, no sauce. Appetising authentic moist shrimp texture, modest sheen, not toy-like or orange plastic.",
+      "nativeSha256": "825cbcdc4fca2391e3bfff9dc64d8efc18131807ca70d4e5637d7000ecce94cf",
+      "webpSha256": "8401261c15eb16d92b7d0f198b58f088bedc9885d8a36cfb06d9927da7d32c84",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/card-shrimp.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-0be92443-cd11-4a31-b3f2-dcce08ae2d07.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/card-shrimp.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "card-tuna",
+      "prompt": "Photorealistic natural high-end culinary ingredient card, directly overhead, warm pale cream matte worktop #f3eee4, restrained natural soft daylight with real shadows. Simple ivory ceramic saucer, ENTIRE saucer centred in square image with 10% empty margin. Real authentic food texture, no CGI, cartoon, synthetic plastic look, labels, hands, utensils, garnish, text or unrelated foods. The only product is THREE thin broad slices of fresh red tuna, loosely overlapped on saucer. Deep natural burgundy-pink red flesh with very subtle muscle fibre, moist satin sheen, delicate irregular edges. No salmon orange-white marbling, not steak, not thick cubes, no skin.",
+      "nativeSha256": "8ff80d5fe485f204baacf85e98de7457d0657b7e527b3f063bd982b7687080c2",
+      "webpSha256": "aedc5da33d697bcad375f2322a72ec017c1c0af59aefce517294b2b55acdd264",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/card-tuna.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-4c27ab49-4353-460f-9e7a-c62dcc9b4575.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/card-tuna.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "card-eel",
+      "prompt": "Photorealistic natural high-end culinary ingredient card, directly overhead, warm pale cream matte worktop #f3eee4, restrained natural soft daylight with real shadows. Simple ivory ceramic saucer, ENTIRE saucer centred in square image with 10% empty margin. Real authentic food texture, no CGI, cartoon, synthetic plastic look, labels, hands, utensils, garnish, text or unrelated foods. The only product is THREE short grilled eel fillet strips, browned surface with natural uneven caramelisation and very restrained glaze, pale flaky interior at a natural edge. Recognisable cooked Japanese unagi fillet, not raw fish or salmon, not sausages, not perfectly striped rendered cubes. Loose side-by-side arrangement on saucer.",
+      "nativeSha256": "2c4e173851572f438f73270d44a7d72369bb301736b7173990cd5f03fc1bbaea",
+      "webpSha256": "b2a483b1896f94477cbb2bb6bb318b716446513e7de7231707e02b3d289dda5f",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/card-eel.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-0c5daf0c-de9c-460f-a60a-d61145b9c350.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/card-eel.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "card-surimi",
+      "prompt": "Photorealistic natural high-end culinary ingredient card, directly overhead, warm pale cream matte worktop #f3eee4, restrained natural soft daylight with real shadows. Simple ivory ceramic saucer, ENTIRE saucer centred in square image with 10% empty margin. Real authentic food texture, no CGI, cartoon, synthetic plastic look, labels, hands, utensils, garnish, text or unrelated foods. The only product is FOUR unwrapped surimi imitation crab sticks, recognisable white fish-protein inner flesh and thin orange-red outer coating, fine fibrous moist layered texture visible at ends. Loose arrangement on saucer. No wrappers, no real crab legs, no shells, no sauce. Not plastic toy cylinders.",
+      "nativeSha256": "fc88ebb0d8fbd420c0418c1d6dede3036fac85752ed4a3933b58c8210da84a09",
+      "webpSha256": "a69e8a21073c6af84d4c0df48b581982ea9367007fa474afaa46972933b15075",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/card-surimi.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-c035a29d-85d7-43e2-a957-9ec8e0004a85.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/card-surimi.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "filling-cheese",
+      "prompt": "Photorealistic natural food cutout for an interactive sushi assembly. A thin long soft piped ribbon of real white spreadable cream cheese, natural irregular soft folds, NOT hard blocks. ONLY this food, isolated on a genuinely TRANSPARENT background, soft realistic contact shadow only immediately under food, no surface, plate, rice, nori, bowl, hand, text or other product. Directly overhead, neutral soft daylight from upper left, genuine high-end culinary photograph NOT CGI, cartoon, toy or illustration. Square canvas 1254px, food lies horizontally left to right in a slim strip centred vertically exactly at 50% height, occupies 68% canvas width and at most 9% canvas height. Keep all food inside canvas with ample transparent space, no crop. Fine real food texture, practical modest quantity for one roll. Do not enlarge into giant chunks.",
+      "nativeSha256": "943f6920cef6df7fa79d928aead55332b09231bf4f8812feed55c0ef70d32c46",
+      "webpSha256": "fbdea1c04748de5d61d3a5b331f7991a1ec34e5d965e033ee00e8ce00ff9ee4f",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/filling-cheese.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": true,
+      "generatorFileName": "exec-c16cbe34-e897-4b56-a345-bd35a3955580.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/filling-cheese.png",
+      "reviewStatus": "inspected-pending-user-acceptance",
+      "alphaBoundingBox": [
+        63,
+        52,
+        1198,
+        973
+      ]
+    },
+    {
+      "name": "filling-cucumber",
+      "prompt": "Photorealistic natural food cutout for an interactive sushi assembly. THREE slender long green-skinned cucumber batons, pale green watery interior, natural tiny seeds and dark peel, stacked closely as one long thin row. ONLY this food, isolated on a genuinely TRANSPARENT background, soft realistic contact shadow only immediately under food, no surface, plate, rice, nori, bowl, hand, text or other product. Directly overhead, neutral soft daylight from upper left, genuine high-end culinary photograph NOT CGI, cartoon, toy or illustration. Square canvas 1254px, food lies horizontally left to right in a slim strip centred vertically exactly at 50% height, occupies 68% canvas width and at most 9% canvas height. Keep all food inside canvas with ample transparent space, no crop. Fine real food texture, practical modest quantity for one roll. Do not enlarge into giant chunks.",
+      "nativeSha256": "d3051db5fd34d78cc40552238b9de526f38c76a3b1da747fa04a923fcc234a60",
+      "webpSha256": "544971875e822ef06906f68636927892dcee2020eb2b671c2e30bdbf93ff9d00",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/filling-cucumber.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": true,
+      "generatorFileName": "exec-69ea914b-d6ba-413b-9b7e-8d88c6d67ff7.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/filling-cucumber.png",
+      "reviewStatus": "inspected-pending-user-acceptance",
+      "alphaBoundingBox": [
+        55,
+        21,
+        1240,
+        1212
+      ]
+    },
+    {
+      "name": "filling-shrimp",
+      "prompt": "Photorealistic natural food cutout for an interactive sushi assembly. Five peeled cooked shrimp, tails removed, natural ivory and light coral, lined up horizontally as one long thin row, no shells or breading. ONLY this food, isolated on a genuinely TRANSPARENT background, soft realistic contact shadow only immediately under food, no surface, plate, rice, nori, bowl, hand, text or other product. Directly overhead, neutral soft daylight from upper left, genuine high-end culinary photograph NOT CGI, cartoon, toy or illustration. Square canvas 1254px, food lies horizontally left to right in a slim strip centred vertically exactly at 50% height, occupies 68% canvas width and at most 9% canvas height. Keep all food inside canvas with ample transparent space, no crop. Fine real food texture, practical modest quantity for one roll. Do not enlarge into giant chunks.",
+      "nativeSha256": "f0b9634aefd527ce5ea71093dafc24a9e7f6e88933c6282f387d76b30bef5ff1",
+      "webpSha256": "74cc77aa4204cdfed9a4db1bd6931d8db5d7266dc49a692ededa00c44741954f",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/filling-shrimp.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": true,
+      "generatorFileName": "exec-5f4c09da-3c7e-4a69-b615-58dec6a95142.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/filling-shrimp.png",
+      "reviewStatus": "inspected-pending-user-acceptance",
+      "alphaBoundingBox": [
+        29,
+        21,
+        1234,
+        1214
+      ]
+    },
+    {
+      "name": "filling-tuna",
+      "prompt": "Photorealistic natural food cutout for an interactive sushi assembly. Two long thin strips of natural burgundy-red tuna flesh, subtle muscle fibres and moist satin finish, arranged end to end as one long filling row, no salmon marbling. ONLY this food, isolated on a genuinely TRANSPARENT background, soft realistic contact shadow only immediately under food, no surface, plate, rice, nori, bowl, hand, text or other product. Directly overhead, neutral soft daylight from upper left, genuine high-end culinary photograph NOT CGI, cartoon, toy or illustration. Square canvas 1254px, food lies horizontally left to right in a slim strip centred vertically exactly at 50% height, occupies 68% canvas width and at most 9% canvas height. Keep all food inside canvas with ample transparent space, no crop. Fine real food texture, practical modest quantity for one roll. Do not enlarge into giant chunks.",
+      "nativeSha256": "d7d3203563c9d5a180163d85d57fcb478c44db40771cb89dd039aacfe4737160",
+      "webpSha256": "481bc42f4a58c4a2797071ca358298575b15778deb4cec910468d15b7814d6fc",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/filling-tuna.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": true,
+      "generatorFileName": "exec-5abf8acc-a215-4111-94ba-e72901c5c991.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/filling-tuna.png",
+      "reviewStatus": "inspected-pending-user-acceptance",
+      "alphaBoundingBox": [
+        47,
+        21,
+        1224,
+        1182
+      ]
+    },
+    {
+      "name": "filling-eel",
+      "prompt": "Photorealistic natural food cutout for an interactive sushi assembly. Two long narrow grilled eel strips, natural uneven brown caramelisation, pale tender meat at edge, lined end to end as one thin filling row. ONLY this food, isolated on a genuinely TRANSPARENT background, soft realistic contact shadow only immediately under food, no surface, plate, rice, nori, bowl, hand, text or other product. Directly overhead, neutral soft daylight from upper left, genuine high-end culinary photograph NOT CGI, cartoon, toy or illustration. Square canvas 1254px, food lies horizontally left to right in a slim strip centred vertically exactly at 50% height, occupies 68% canvas width and at most 9% canvas height. Keep all food inside canvas with ample transparent space, no crop. Fine real food texture, practical modest quantity for one roll. Do not enlarge into giant chunks.",
+      "nativeSha256": "bb84854eda73f8b8cd36e08dfcef6d43d83effe11fc0731c5458154ae173670b",
+      "webpSha256": "fb09e13b4f9cdea96869ef4d499865fbcfca746f97d1714d5debdb7abf023eec",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/filling-eel.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": true,
+      "generatorFileName": "exec-0ee08b01-bead-4b4b-9217-3fe80403af71.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/filling-eel.png",
+      "reviewStatus": "inspected-pending-user-acceptance",
+      "alphaBoundingBox": [
+        31,
+        21,
+        1225,
+        1254
+      ]
+    },
+    {
+      "name": "filling-surimi",
+      "prompt": "Photorealistic natural food cutout for an interactive sushi assembly. Two natural unwrapped imitation crab sticks, white fibrous interior and thin red-orange coating, aligned end to end as one thin horizontal row. ONLY this food, isolated on a genuinely TRANSPARENT background, soft realistic contact shadow only immediately under food, no surface, plate, rice, nori, bowl, hand, text or other product. Directly overhead, neutral soft daylight from upper left, genuine high-end culinary photograph NOT CGI, cartoon, toy or illustration. Square canvas 1254px, food lies horizontally left to right in a slim strip centred vertically exactly at 50% height, occupies 68% canvas width and at most 9% canvas height. Keep all food inside canvas with ample transparent space, no crop. Fine real food texture, practical modest quantity for one roll. Do not enlarge into giant chunks.",
+      "nativeSha256": "b40c872c7793c9089ba8e9e1eda4e674a27d07d80b2dadeed2362d730d2881df",
+      "webpSha256": "5f5c91e10280c407a985b2765b486c63913090488b028f93aa67f00d5b070591",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/filling-surimi.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": true,
+      "generatorFileName": "exec-c2f88e33-b10c-4b1b-b381-9fd7fbe75c89.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/filling-surimi.png",
+      "reviewStatus": "inspected-pending-user-acceptance",
+      "alphaBoundingBox": [
+        85,
+        103,
+        1234,
+        1182
+      ]
+    },
+    {
+      "name": "cover-rice",
+      "prompt": "Edit this exact rice-out whole sushi roll photo for a culinary COMPARISON VARIANT (not necessarily Philadelphia). Preserve fixed directly overhead camera, lighting, cream worktop, bamboo makisu wrapped in transparent cling film, and ONE whole 20cm long horizontal uncut roll at the identical position and scale. NO outer coating at all, only a real white rice-out sushi roll. Remove tiny green cucumber sticking from ends; ends must be naturally tucked, rice and a narrow dark nori edge only, interior hidden by overhead view. Any inner ingredients are completely hidden, do not invent cucumber, cheese or fish in ends. Keep one complete long log, never sliced rounds, no cut marks. Real fine moist rice grains, authentic high-end natural food photography, no CGI, plastic shine, cartoon shapes, labels, hands, text, sauces or garnish. All mat edges visible.",
+      "nativeSha256": "f5c4321417dc7c80e603b6d4109d75b22661bf6f63f9eeb4c2f2cc8933d8c5e1",
+      "webpSha256": "b8465568228538fd57995b2710a9a7f4f0e15fe35522b18d8758841a238c4de5",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/cover-rice.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-46d38bb8-ed48-4599-bccf-8f609eeaa94d.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/cover-rice.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "cover-salmon",
+      "prompt": "Edit this exact rice-out whole sushi roll photo for a culinary COMPARISON VARIANT (not necessarily Philadelphia). Preserve fixed directly overhead camera, lighting, cream worktop, bamboo makisu wrapped in transparent cling film, and ONE whole 20cm long horizontal uncut roll at the identical position and scale. Cover the already rolled rice cylinder with THIN pink-orange lightly salted salmon sheets over TOP AND BOTH LONG SIDES, fine irregular ivory marbling, delicate edges. Outer salmon, not filling. Hide filling at ends with natural tucked rice edge; no green or cheese protruding. Any inner ingredients are completely hidden, do not invent cucumber, cheese or fish in ends. Keep one complete long log, never sliced rounds, no cut marks. Real fine moist rice grains, authentic high-end natural food photography, no CGI, plastic shine, cartoon shapes, labels, hands, text, sauces or garnish. All mat edges visible.",
+      "nativeSha256": "6ee6c4e91ad9f6d97dc7e3765a24bc598a11492c400439b88c43a498b566da2f",
+      "webpSha256": "1f6c1aaa92028b6b3c621309e8c127c3f9d60c6964625e4d6efd4c045ee3eb29",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/cover-salmon.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-21064717-8485-47f3-991d-c20c6d02c681.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/cover-salmon.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "cover-tuna",
+      "prompt": "Edit this exact rice-out whole sushi roll photo for a culinary COMPARISON VARIANT (not necessarily Philadelphia). Preserve fixed directly overhead camera, lighting, cream worktop, bamboo makisu wrapped in transparent cling film, and ONE whole 20cm long horizontal uncut roll at the identical position and scale. Cover the already rolled rice cylinder with THIN broad burgundy-red tuna slices draped over TOP AND BOTH LONG SIDES. Real deep red tuna flesh, subtle muscle fibres, NO salmon orange or salmon marbling. Interior hidden at naturally tucked ends. Any inner ingredients are completely hidden, do not invent cucumber, cheese or fish in ends. Keep one complete long log, never sliced rounds, no cut marks. Real fine moist rice grains, authentic high-end natural food photography, no CGI, plastic shine, cartoon shapes, labels, hands, text, sauces or garnish. All mat edges visible.",
+      "nativeSha256": "c4422560f79809e87cce053baf21e18fb2c4931138acc0d3e67a50ead185d53b",
+      "webpSha256": "b9f4c33d6b559b9b08cfe17107f87b520108fb584bfb9caf509a4255f38479fb",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/cover-tuna.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-f7abe0f4-ae9d-40ee-a613-903ded47846f.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/cover-tuna.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "cover-eel",
+      "prompt": "Edit this exact rice-out whole sushi roll photo for a culinary COMPARISON VARIANT (not necessarily Philadelphia). Preserve fixed directly overhead camera, lighting, cream worktop, bamboo makisu wrapped in transparent cling film, and ONE whole 20cm long horizontal uncut roll at the identical position and scale. Place THREE long narrow grilled eel fillets lengthwise on TOP of the already rolled whole rice cylinder, browned caramelised flesh, pale tender meat at natural edges, very restrained glaze. White rice visible along sides. No salmon or seeds. Interior hidden at naturally tucked ends. Any inner ingredients are completely hidden, do not invent cucumber, cheese or fish in ends. Keep one complete long log, never sliced rounds, no cut marks. Real fine moist rice grains, authentic high-end natural food photography, no CGI, plastic shine, cartoon shapes, labels, hands, text, sauces or garnish. All mat edges visible.",
+      "nativeSha256": "3f58c6a39f15ef976ff554c5163162e04f0d3647d2026883c463015c9e4df57c",
+      "webpSha256": "a6223eb678d91ea07122ddeb619c756c29ab02af74162d9272964236a52cd366",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/cover-eel.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-1b41cf9f-6490-48f9-a8e0-3cb9683753f8.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/cover-eel.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "cover-shrimp",
+      "prompt": "Edit this exact rice-out whole sushi roll photo for a culinary COMPARISON VARIANT (not necessarily Philadelphia). Preserve fixed directly overhead camera, lighting, cream worktop, bamboo makisu wrapped in transparent cling film, and ONE whole 20cm long horizontal uncut roll at the identical position and scale. Cover TOP of the already rolled whole rice cylinder with FIVE BUTTERFLIED cooked peeled shrimp, spread open and overlapping slightly along its whole length. Shrimp ivory and light coral, no heads, tails removed, no tempura or sauce. White rice visible on long sides. Interior hidden at naturally tucked ends. Any inner ingredients are completely hidden, do not invent cucumber, cheese or fish in ends. Keep one complete long log, never sliced rounds, no cut marks. Real fine moist rice grains, authentic high-end natural food photography, no CGI, plastic shine, cartoon shapes, labels, hands, text, sauces or garnish. All mat edges visible.",
+      "nativeSha256": "deebb390a7ccd27f4e3932d066d54ed39890e8b6f29aec97ee82c2873e9d60f0",
+      "webpSha256": "97f0131473bb4295d9d6e9d997f424a14ac33a1d580d48adc4117353aeec4659",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/cover-shrimp.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-cd90d3fd-f604-4eff-ab76-1b5a3b29686e.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/cover-shrimp.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "cover-surimi",
+      "prompt": "Edit this exact rice-out whole sushi roll photo for a culinary COMPARISON VARIANT (not necessarily Philadelphia). Preserve fixed directly overhead camera, lighting, cream worktop, bamboo makisu wrapped in transparent cling film, and ONE whole 20cm long horizontal uncut roll at the identical position and scale. Place thin unwrapped imitation-crab surimi strips LENGTHWISE along the TOP of the already rolled whole rice cylinder, red-orange thin coating and fine fibrous white flesh, not real crab legs. White rice visible on long sides. No salmon. Interior hidden at naturally tucked ends. Any inner ingredients are completely hidden, do not invent cucumber, cheese or fish in ends. Keep one complete long log, never sliced rounds, no cut marks. Real fine moist rice grains, authentic high-end natural food photography, no CGI, plastic shine, cartoon shapes, labels, hands, text, sauces or garnish. All mat edges visible.",
+      "nativeSha256": "1232ed60ba18348f42e198def9bf9b98bef9c204ec125aa15fff519624bb0676",
+      "webpSha256": "ef4ca1fbbbacaad2eba7d46228a89e9df6025c904cf6d85869a4c7b724303d44",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/cover-surimi.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-5bc7504b-1868-4e16-b142-9f2327351c33.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/cover-surimi.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "plate-rice",
+      "prompt": "Edit the supplied EXACT whole sushi-roll comparison variant into a finished presentation. Preserve its SAME selected outer topping, colours, texture and ONE long whole 20cm uncut horizontal log. Move it from the bamboo mat to the centre of a simple horizontal ivory ceramic OVAL PLATE on a warm pale cream matte worktop. REMOVE all bamboo and cling film. Camera DIRECTLY OVERHEAD; therefore inner filling must NOT be visible at ends, only natural outer topping, rice, possible tiny nori edge. Do NOT add any ingredients or toppings, cucumber, cheese, salmon, garnish or sesame not visible in the supplied roll. No cutting, slicing or separated bites. Plate COMPLETELY visible, occupies 82% canvas width, roll about 65%; at least 9% worktop margin on every side. Premium authentic natural food photography, soft daylight, genuine natural texture and contact shadow. No hands, tools, sauces, words or graphics. Square image.",
+      "nativeSha256": "4cf2237ff244c480f8424a39cbffae98c2ce863da16ba86863ae88a2def7f4be",
+      "webpSha256": "aa277ab77d3ef060ccece25cec3a9dc32c9c12f4a9cb27196f49630dde4e0b90",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/plate-rice.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-410ec6f4-aba0-4338-a47b-8e8e0567d0f8.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/plate-rice.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "plate-salmon",
+      "prompt": "Edit the supplied EXACT whole sushi-roll comparison variant into a finished presentation. Preserve its SAME selected outer topping, colours, texture and ONE long whole 20cm uncut horizontal log. Move it from the bamboo mat to the centre of a simple horizontal ivory ceramic OVAL PLATE on a warm pale cream matte worktop. REMOVE all bamboo and cling film. Camera DIRECTLY OVERHEAD; therefore inner filling must NOT be visible at ends, only natural outer topping, rice, possible tiny nori edge. Do NOT add any ingredients or toppings, cucumber, cheese, salmon, garnish or sesame not visible in the supplied roll. No cutting, slicing or separated bites. Plate COMPLETELY visible, occupies 82% canvas width, roll about 65%; at least 9% worktop margin on every side. Premium authentic natural food photography, soft daylight, genuine natural texture and contact shadow. No hands, tools, sauces, words or graphics. Square image.",
+      "nativeSha256": "eecaf80fbd8459c762b8f543a73a0b1b0717cd0a639dae2a9ec306359cfb8940",
+      "webpSha256": "de1d2cb9547c29b66c41326cf01607830e29217da08df19a50c386422cf1e024",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/plate-salmon.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-ea1f8a5f-2dc9-4cc6-9fea-76b79cdce996.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/plate-salmon.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "plate-tuna",
+      "prompt": "Edit the supplied EXACT whole sushi-roll comparison variant into a finished presentation. Preserve its SAME selected outer topping, colours, texture and ONE long whole 20cm uncut horizontal log. Move it from the bamboo mat to the centre of a simple horizontal ivory ceramic OVAL PLATE on a warm pale cream matte worktop. REMOVE all bamboo and cling film. Camera DIRECTLY OVERHEAD; therefore inner filling must NOT be visible at ends, only natural outer topping, rice, possible tiny nori edge. Do NOT add any ingredients or toppings, cucumber, cheese, salmon, garnish or sesame not visible in the supplied roll. No cutting, slicing or separated bites. Plate COMPLETELY visible, occupies 82% canvas width, roll about 65%; at least 9% worktop margin on every side. Premium authentic natural food photography, soft daylight, genuine natural texture and contact shadow. No hands, tools, sauces, words or graphics. Square image.",
+      "nativeSha256": "aa4bd48ce72992987e50cccc17f1e8589571568df54016a595f8cd121a378121",
+      "webpSha256": "57563a72101958fdca8dbad648507359e24c3a4de3802c9215b4f14015319132",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/plate-tuna.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-b6bffc00-2ddb-4f4e-84cf-2e97b54df975.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/plate-tuna.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "plate-eel",
+      "prompt": "Edit the supplied EXACT whole sushi-roll comparison variant into a finished presentation. Preserve its SAME selected outer topping, colours, texture and ONE long whole 20cm uncut horizontal log. Move it from the bamboo mat to the centre of a simple horizontal ivory ceramic OVAL PLATE on a warm pale cream matte worktop. REMOVE all bamboo and cling film. Camera DIRECTLY OVERHEAD; therefore inner filling must NOT be visible at ends, only natural outer topping, rice, possible tiny nori edge. Do NOT add any ingredients or toppings, cucumber, cheese, salmon, garnish or sesame not visible in the supplied roll. No cutting, slicing or separated bites. Plate COMPLETELY visible, occupies 82% canvas width, roll about 65%; at least 9% worktop margin on every side. Premium authentic natural food photography, soft daylight, genuine natural texture and contact shadow. No hands, tools, sauces, words or graphics. Square image.",
+      "nativeSha256": "2a8da6554bba9e33441a0db9ff819690026e336feb3a5487c132585adfa98987",
+      "webpSha256": "b8f0dd56c091eda36cc6b00386b73bf0b87634e33b1a6eea044c306f262f0cf0",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/plate-eel.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-9de80c9a-cc78-4c69-9e91-dccf066f3716.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/plate-eel.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "plate-shrimp",
+      "prompt": "Edit the supplied EXACT whole sushi-roll comparison variant into a finished presentation. Preserve its SAME selected outer topping, colours, texture and ONE long whole 20cm uncut horizontal log. Move it from the bamboo mat to the centre of a simple horizontal ivory ceramic OVAL PLATE on a warm pale cream matte worktop. REMOVE all bamboo and cling film. Camera DIRECTLY OVERHEAD; therefore inner filling must NOT be visible at ends, only natural outer topping, rice, possible tiny nori edge. Do NOT add any ingredients or toppings, cucumber, cheese, salmon, garnish or sesame not visible in the supplied roll. No cutting, slicing or separated bites. Plate COMPLETELY visible, occupies 82% canvas width, roll about 65%; at least 9% worktop margin on every side. Premium authentic natural food photography, soft daylight, genuine natural texture and contact shadow. No hands, tools, sauces, words or graphics. Square image.",
+      "nativeSha256": "18cd65fca80cbe5986b6dbe433f3df5652f2227c8f958247c7aa5bfafd0da84b",
+      "webpSha256": "268ab3d0b16a09de75ba899c9afa0fa24155c8ca94435adddf3dc50e700b8fc1",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/plate-shrimp.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-f2459535-cdd4-475c-b5da-be29aa63efc5.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/plate-shrimp.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    },
+    {
+      "name": "plate-surimi",
+      "prompt": "Edit the supplied EXACT whole sushi-roll comparison variant into a finished presentation. Preserve its SAME selected outer topping, colours, texture and ONE long whole 20cm uncut horizontal log. Move it from the bamboo mat to the centre of a simple horizontal ivory ceramic OVAL PLATE on a warm pale cream matte worktop. REMOVE all bamboo and cling film. Camera DIRECTLY OVERHEAD; therefore inner filling must NOT be visible at ends, only natural outer topping, rice, possible tiny nori edge. Do NOT add any ingredients or toppings, cucumber, cheese, salmon, garnish or sesame not visible in the supplied roll. No cutting, slicing or separated bites. Plate COMPLETELY visible, occupies 82% canvas width, roll about 65%; at least 9% worktop margin on every side. Premium authentic natural food photography, soft daylight, genuine natural texture and contact shadow. No hands, tools, sauces, words or graphics. Square image.",
+      "nativeSha256": "9a7cc90e7dcd433fb30a6d311ea0e8a79c2f3838792f290c88559a76f9ca109d",
+      "webpSha256": "a03d7e310f93d4ae7b3d777e0cda9fb142962ecc3244425a8748ade9892e1b9b",
+      "imageUrl": "/assets/olympiad/visual-v5/philadelphia/plate-surimi.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "transparent": false,
+      "generatorFileName": "exec-e775cdae-9562-46ad-a4d2-36590bd2f45f.png",
+      "nativeFile": "storage/t5-roll-technique-v5/native/plate-surimi.png",
+      "reviewStatus": "inspected-pending-user-acceptance"
+    }
+  ],
+  "reviewDate": "2026-10-05",
+  "export": {
+    "format": "WebP",
+    "quality": 94,
+    "geometryEdits": false,
+    "publishedCount": 0,
+    "publicCandidateCount": 33,
+    "totalCandidateBytes": 8248028
+  }
+}

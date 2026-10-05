@@ -272,6 +272,26 @@ test("D1 olympiad attempt storage enforces its concurrency contract", async (t) 
     assert.equal(persisted.questionLog.q1.marker, "stored-log");
   });
 
+  await t.test("50 concurrent photo-v4 attempts preserve each fixed dish and scoring with duplicate writes", async () => {
+    const { buildVariant } = require('../src/variant'), { scoreQuestion } = require('../src/scoring');
+    const olympiad = require('../data/olympiad');
+    const issued = Array.from({length:50},(_,index)=>makeAttempt('photo-50-'+index,'photo-'+index,{status:'in_progress',variant:buildVariant(olympiad,{seed:'photo-50-'+index})}));
+    const created = await Promise.all(issued.map(attempt=>createAttemptAtomic(attempt)));
+    assert.equal(created.length,50);
+    for(let dishIndex=0;dishIndex<3;dishIndex++) {
+      const writes=await Promise.all(issued.map(async original=>{
+        const current=await loadAttemptById(original.id),question=current.variant.questions.filter(q=>q.type==='final_kitchen')[dishIndex],dish=question.dishes[0];
+        const payload={dishId:dish.id,selectedIngredientIds:dish.correctIngredientIds},scores=scoreQuestion(question,payload);
+        const candidate={...current,stateRevision:current.stateRevision+1,answers:{...current.answers,[question.id]:{answerPayload:payload,...scores}},questionLog:{...current.questionLog,[question.id]:{questionId:question.id,score:scores.finalScore}}};
+        const results=await Promise.all([updateAttemptWithRevision(candidate,current.stateRevision,{changedQuestionIds:[question.id]}),updateAttemptWithRevision(candidate,current.stateRevision,{changedQuestionIds:[question.id]})]);
+        assert.equal(results.filter(Boolean).length,1);return true;
+      }));
+      assert.equal(writes.length,50);
+    }
+    const saved=await Promise.all(issued.map(attempt=>loadAttemptById(attempt.id)));
+    for(const attempt of saved){assert.equal(attempt.stateRevision,3);assert.equal(Object.keys(attempt.answers).length,3);assert.equal(Object.values(attempt.answers).reduce((sum,a)=>sum+a.finalScore,0),48);assert.equal(attempt.variant.blueprintVersion,13);assert.deepEqual(attempt.variant.questions.filter(q=>q.type==='final_kitchen').map(q=>q.dishes[0].photo.kind),['pizza','greek','roll']);}
+  });
+
   await t.test("attempt events are idempotent and stop at the per-attempt cap", async () => {
     const event = (eventId, second) => ({
       eventId,

@@ -1,0 +1,1021 @@
+{
+  "tool": "image_gen.imagegen",
+  "purpose": "Exact selected fillings on final cut surfaces, no 3D",
+  "assets": [
+    {
+      "name": "sliced-01",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "cucumber",
+        "salmon"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "cheese",
+        "cucumber"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: final serving-stage photograph for the existing interactive Philadelphia roll lesson.\nInput image: exact edit target. Preserve the pale cream stone worktop, the full oval speckled ceramic plate, natural soft daylight, three-quarter overhead camera, scale and photographic textures.\nPrimary request: the long assembled Philadelphia roll is NOW CUT into eight equal bite-sized pieces and served in a single gently diagonal straight row, with small clearly visible 3 mm gaps between pieces. The roll was whole during assembly; this is ONLY the final serving stage. Each piece retains thin natural salmon covering its top and sides, rice outside, a thin nori ring around soft white cream cheese and three modest green cucumber batons. The left end piece can show the same correct cheese and cucumber cross-section as the reference; do not invent a different filling. Keep all eight pieces fully on the plate, not a giant uncut log and not just one cut piece.\nConstraints: exactly the same selected food ingredients as the input, natural irregular moist rice grains and delicate salmon fibres, no extra fish inside, no garnish, sesame, avocado, sauces, hands, knife, graphics, text or logos. Realistic editorial food photograph, not plastic or cartoon food.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "sliced-sample.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-01.png",
+      "nativeSha256": "9b48eb5ef61014f082d95ad0be0026d770cf2ab6b288c14b0cab88db62f190d6",
+      "webpSha256": "eb8483a389517cf1dfa6a2ea10d312a867a826249429d8ec812df76accc903ad",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-01.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Reused original native result, already inspected; current WebP personally viewed again: eight pieces with only cream cheese and cucumber inside nori; rice and salmon outside; full coherent plate, natural textures."
+      }
+    },
+    {
+      "name": "sliced-02",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "cucumber",
+        "shrimp"
+      ],
+      "outer": "shrimp",
+      "fillings": [
+        "cheese",
+        "cucumber"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; soft ivory cream cheese with a matte creamy interior; crisp green cucumber batons with pale moist seeded flesh and dark-green skin; fully cooked shrimp, pale opaque flesh edged in soft pink.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with butterflied cooked shrimp laid snugly over the upper rice surface, no tails or shells.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY soft ivory cream cheese with a matte creamy interior AND crisp green cucumber batons with pale moist seeded flesh and dark-green skin. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer shrimp never appears inside.\nCRITICAL absent foods: NO salmon, tuna, eel, surimi.   NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-af568ca7-e706-4dcb-854c-e37af46e14db.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-02.png",
+      "nativeSha256": "2660f576ed610268ecb49925f74bb09d10d9d9058acf8c52f187a51813b4a3e0",
+      "webpSha256": "c568f3af7286939d5804e06794c388f0a1c6c70a54d8c8ae77fbca2370a0550c",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-02.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Native individually viewed: eight slices, cooked shrimp outside the rice, thin inner nori, only cream cheese and green cucumber inside the visible front cuts; no salmon/tuna/eel/surimi, garnish or text. Natural textures and coherent plate preserved."
+      }
+    },
+    {
+      "name": "sliced-03",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "cucumber",
+        "tuna"
+      ],
+      "outer": "tuna",
+      "fillings": [
+        "cheese",
+        "cucumber"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; soft ivory cream cheese with a matte creamy interior; crisp green cucumber batons with pale moist seeded flesh and dark-green skin; raw lean deep-red tuna with a dense smooth cut surface.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw lean deep-red tuna with a dense smooth cut surface covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY soft ivory cream cheese with a matte creamy interior AND crisp green cucumber batons with pale moist seeded flesh and dark-green skin. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer tuna never appears inside.\nCRITICAL absent foods: NO salmon, shrimp, eel, surimi.   NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-1ee2d390-f3e3-44d9-850b-0c1242067a1c.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-03.png",
+      "nativeSha256": "4750f4f90d97d2b060678537fa23882a42356056b1f8792ccccdc6dbfb99cb17",
+      "webpSha256": "7a8ce35f2b5367d166256e03c10edf6aadaf2ef7e1b581e562244572c2caeb6b",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-03.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Native individually viewed: eight slices; tuna outside rice, thin nori encloses only cheese and cucumber in visible cut ends; no unselected foods, text or garnish. Natural coherent plate and textures."
+      }
+    },
+    {
+      "name": "sliced-04",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "cucumber",
+        "eel"
+      ],
+      "outer": "eel",
+      "fillings": [
+        "cheese",
+        "cucumber"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; soft ivory cream cheese with a matte creamy interior; crisp green cucumber batons with pale moist seeded flesh and dark-green skin; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin cooked eel fillet strips covering the upper and side rice surfaces, brown skin and subtle glaze.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY soft ivory cream cheese with a matte creamy interior AND crisp green cucumber batons with pale moist seeded flesh and dark-green skin. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer eel never appears inside.\nCRITICAL absent foods: NO salmon, shrimp, tuna, surimi.   NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-a96ab51c-b6e9-46fd-baf0-bf0af30fa57b.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-04.png",
+      "nativeSha256": "922b75de13c85c27f26930832922d57e163ad99cf761677d3c6c49beba59f0aa",
+      "webpSha256": "1ef8b79358e73d8e881ca4a47863e78f8f41e68656f0865b27703ff242501acd",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-04.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Native individually viewed: eight slices; eel outside rice, thin nori encloses only cheese and cucumber in visible cut ends; no unselected foods, text or garnish. Natural coherent plate and textures."
+      }
+    },
+    {
+      "name": "sliced-05",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "cucumber",
+        "surimi"
+      ],
+      "outer": "surimi",
+      "fillings": [
+        "cheese",
+        "cucumber"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; soft ivory cream cheese with a matte creamy interior; crisp green cucumber batons with pale moist seeded flesh and dark-green skin; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin flattened red-white surimi strips snugly covering the top and sides, no unselected fish.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY soft ivory cream cheese with a matte creamy interior AND crisp green cucumber batons with pale moist seeded flesh and dark-green skin. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer surimi never appears inside.\nCRITICAL absent foods: NO salmon, shrimp, tuna, eel.   NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-d2dead2b-31f6-4ae0-9b3a-38b20e406cfc.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-05.png",
+      "nativeSha256": "46c40ae6c3c924fde530db17a61f46741e8f97f08a4141b199cff4e3536104d5",
+      "webpSha256": "d936d992c4e7b101d6149bfb6ebceb456f5713ec6bbbfb5fbc7abaf6e1884cd0",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-05.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Native individually viewed: eight slices; surimi outside rice, thin nori encloses only cheese and cucumber in visible cut ends; no unselected foods, text or garnish. Natural coherent plate and textures."
+      }
+    },
+    {
+      "name": "sliced-06",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "salmon",
+        "shrimp"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "cheese",
+        "shrimp"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; soft ivory cream cheese with a matte creamy interior; raw orange salmon with delicate pale fat lines; fully cooked shrimp, pale opaque flesh edged in soft pink.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw orange salmon with delicate pale fat lines covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY soft ivory cream cheese with a matte creamy interior AND fully cooked shrimp, pale opaque flesh edged in soft pink. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer salmon never appears inside.\nCRITICAL absent foods: NO cucumber, tuna, eel, surimi.  NO green cucumber or other green ingredients anywhere. \nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-6b43205a-25be-4c30-9fcf-13a5030d38d8.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-06.png",
+      "nativeSha256": "2f7de3621c367bd484bf1129d23534f39fb11346eeeccc41ec8acf08031211e9",
+      "webpSha256": "bef19e4f122035024613c8b2de472f9b260e73b5246ef89987cb04ad8064eafd",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-06.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Native individually viewed: eight slices; salmon outside rice, thin nori encloses only cheese and shrimp in visible cut ends; no unselected foods, text or garnish. Natural coherent plate and textures."
+      }
+    },
+    {
+      "name": "sliced-07",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "salmon",
+        "tuna"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "cheese",
+        "tuna"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; soft ivory cream cheese with a matte creamy interior; raw orange salmon with delicate pale fat lines; raw lean deep-red tuna with a dense smooth cut surface.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw orange salmon with delicate pale fat lines covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY soft ivory cream cheese with a matte creamy interior AND raw lean deep-red tuna with a dense smooth cut surface. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer salmon never appears inside.\nCRITICAL absent foods: NO cucumber, shrimp, eel, surimi.  NO green cucumber or other green ingredients anywhere. \nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-3dc10c95-7598-4515-9024-0aa41470cfc2.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-07.png",
+      "nativeSha256": "b6683911b677cb70e4dcb0b4cb6aca5d8f883dd005148a43f5bcc8e092a3fe07",
+      "webpSha256": "e5648b00638304de17a723c1a609bbb18be797453879e982f9a3105ca3f3c72c",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-07.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Viewed individually at native resolution; salmon outside, exact selected cheese and red tuna inside; no cucumber or unselected garnish; coherent eight slices."
+      }
+    },
+    {
+      "name": "sliced-08",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "salmon",
+        "eel"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "cheese",
+        "eel"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; soft ivory cream cheese with a matte creamy interior; raw orange salmon with delicate pale fat lines; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw orange salmon with delicate pale fat lines covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY soft ivory cream cheese with a matte creamy interior AND cooked brown eel with ivory flaked flesh and a thin brown glazed exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer salmon never appears inside.\nCRITICAL absent foods: NO cucumber, shrimp, tuna, surimi.  NO green cucumber or other green ingredients anywhere. \nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-2b18b9f4-0282-4d8b-89a8-428e586cb81f.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-08.png",
+      "nativeSha256": "d054f0c62e97e80831b4c5b80e60e8f964a1b4c1d1dfba61ab4dfd5287a36754",
+      "webpSha256": "d9f2d4a4da7d6bdfc88241229ff9c8e97ee4a1aba80e28aca77dab0f9d79bbf2",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-08.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Viewed individually at native resolution; salmon outside, exact selected cheese and cooked eel inside; no cucumber or unselected garnish; coherent eight slices."
+      }
+    },
+    {
+      "name": "sliced-09",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "salmon",
+        "surimi"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "cheese",
+        "surimi"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; soft ivory cream cheese with a matte creamy interior; raw orange salmon with delicate pale fat lines; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw orange salmon with delicate pale fat lines covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY soft ivory cream cheese with a matte creamy interior AND surimi sticks with white opaque flesh and a thin red exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer salmon never appears inside.\nCRITICAL absent foods: NO cucumber, shrimp, tuna, eel.  NO green cucumber or other green ingredients anywhere. \nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-6650642f-0cb2-4359-ad9b-9b773f8ea740.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-09.png",
+      "nativeSha256": "a191d89471d04f9da6ae203e69c1d110a2915706435abd4c306d1f88f193dd3a",
+      "webpSha256": "2c9482d6640b9c4b63bdcd7a57366aed638bd565d661555c1acd6f8ec44bdf6f",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-09.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually viewed native image; exact selected fillings and outside fish, eight coherent pieces, no unselected cucumber or garnish."
+      }
+    },
+    {
+      "name": "sliced-10",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "shrimp",
+        "tuna"
+      ],
+      "outer": "tuna",
+      "fillings": [
+        "cheese",
+        "shrimp"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; soft ivory cream cheese with a matte creamy interior; fully cooked shrimp, pale opaque flesh edged in soft pink; raw lean deep-red tuna with a dense smooth cut surface.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw lean deep-red tuna with a dense smooth cut surface covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY soft ivory cream cheese with a matte creamy interior AND fully cooked shrimp, pale opaque flesh edged in soft pink. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer tuna never appears inside.\nCRITICAL absent foods: NO cucumber, salmon, eel, surimi.  NO green cucumber or other green ingredients anywhere. NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-eb625671-5318-46f5-a223-f2af36e7162f.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-10.png",
+      "nativeSha256": "cf5b38bcb5c5799e467e012e1dbdf0cd3597f479519744355fe5e3543545fd34",
+      "webpSha256": "fce8e9abf0c47968d49e9ff73893a2f37db9b11237f1c67b1431df401dc0ab0a",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-10.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually viewed native image; exact selected fillings and outside fish, eight coherent pieces, no unselected cucumber or garnish."
+      }
+    },
+    {
+      "name": "sliced-11",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "shrimp",
+        "eel"
+      ],
+      "outer": "eel",
+      "fillings": [
+        "cheese",
+        "shrimp"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; soft ivory cream cheese with a matte creamy interior; fully cooked shrimp, pale opaque flesh edged in soft pink; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin cooked eel fillet strips covering the upper and side rice surfaces, brown skin and subtle glaze.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY soft ivory cream cheese with a matte creamy interior AND fully cooked shrimp, pale opaque flesh edged in soft pink. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer eel never appears inside.\nCRITICAL absent foods: NO cucumber, salmon, tuna, surimi.  NO green cucumber or other green ingredients anywhere. NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-9f982678-0892-46ea-b828-f5c747c217b2.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-11.png",
+      "nativeSha256": "16592d949c74e4abbbe2e02e7afe92dc56e9e8d58c16739b19986adab3721eba",
+      "webpSha256": "a41d55f2c0b50b46ec49536a6d4e34ba8c2daee4a31e27a60e9c8cf15061eb87",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-11.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Native photograph individually inspected: correct exterior, selected cheese plus shrimp or surimi inside, rice outside nori; no cucumber, extra garnish or unselected fish."
+      }
+    },
+    {
+      "name": "sliced-12",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "shrimp",
+        "surimi"
+      ],
+      "outer": "shrimp",
+      "fillings": [
+        "cheese",
+        "surimi"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; soft ivory cream cheese with a matte creamy interior; fully cooked shrimp, pale opaque flesh edged in soft pink; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with butterflied cooked shrimp laid snugly over the upper rice surface, no tails or shells.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY soft ivory cream cheese with a matte creamy interior AND surimi sticks with white opaque flesh and a thin red exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer shrimp never appears inside.\nCRITICAL absent foods: NO cucumber, salmon, tuna, eel.  NO green cucumber or other green ingredients anywhere. NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-057c46ad-46bf-43c8-a459-31a14b0fb82d.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-12.png",
+      "nativeSha256": "e838c28ef651aeeabd902783e923aaf4459488714a8a4466fba5ed8bf71ad0c0",
+      "webpSha256": "83dd3402dc4bf794cb9a1e17f69f4883f1b6726ab092731f903502dccd8943df",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-12.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Native photograph individually inspected: correct exterior, selected cheese plus shrimp or surimi inside, rice outside nori; no cucumber, extra garnish or unselected fish."
+      }
+    },
+    {
+      "name": "sliced-13",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "tuna",
+        "eel"
+      ],
+      "outer": "tuna",
+      "fillings": [
+        "cheese",
+        "eel"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; soft ivory cream cheese with a matte creamy interior; raw lean deep-red tuna with a dense smooth cut surface; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw lean deep-red tuna with a dense smooth cut surface covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY soft ivory cream cheese with a matte creamy interior AND cooked brown eel with ivory flaked flesh and a thin brown glazed exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer tuna never appears inside.\nCRITICAL absent foods: NO cucumber, salmon, shrimp, surimi.  NO green cucumber or other green ingredients anywhere. NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-ac405867-0cea-4537-a011-231e4904665d.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-13.png",
+      "nativeSha256": "4e5ccc768db2f291539d8911177919fcdbfc18ad4556a99e0e89f9f9be620f01",
+      "webpSha256": "529e34a4b0e7eca5b651627ae10f37b91060de94316788cdddf2d31036681245",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-13.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually viewed native photograph; dark red tuna outside, selected cheese and eel or surimi inside, no cucumber or unselected salmon. All eight pieces have matching contents."
+      }
+    },
+    {
+      "name": "sliced-14",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "tuna",
+        "surimi"
+      ],
+      "outer": "tuna",
+      "fillings": [
+        "cheese",
+        "surimi"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; soft ivory cream cheese with a matte creamy interior; raw lean deep-red tuna with a dense smooth cut surface; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw lean deep-red tuna with a dense smooth cut surface covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY soft ivory cream cheese with a matte creamy interior AND surimi sticks with white opaque flesh and a thin red exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer tuna never appears inside.\nCRITICAL absent foods: NO cucumber, salmon, shrimp, eel.  NO green cucumber or other green ingredients anywhere. NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-899cf0cf-fd8c-4de9-ba77-0000ea0fbd79.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-14.png",
+      "nativeSha256": "984a0639ecf5cc95c5ac5b9c29b0bbdcceb8979e9dc42c1d280211038f2da04d",
+      "webpSha256": "11b25ec2ad9228873680bbee1b673f19748a5b4dd10bc8a7c875ebb512fb6ce1",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-14.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually viewed native photograph; dark red tuna outside, selected cheese and eel or surimi inside, no cucumber or unselected salmon. All eight pieces have matching contents."
+      }
+    },
+    {
+      "name": "sliced-15",
+      "selected": [
+        "rice-nori",
+        "cheese",
+        "eel",
+        "surimi"
+      ],
+      "outer": "eel",
+      "fillings": [
+        "cheese",
+        "surimi"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; soft ivory cream cheese with a matte creamy interior; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin cooked eel fillet strips covering the upper and side rice surfaces, brown skin and subtle glaze.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY soft ivory cream cheese with a matte creamy interior AND surimi sticks with white opaque flesh and a thin red exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer eel never appears inside.\nCRITICAL absent foods: NO cucumber, salmon, shrimp, tuna.  NO green cucumber or other green ingredients anywhere. NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-4f7c817e-c9e3-4bff-aeed-619e637b8efe.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-15.png",
+      "nativeSha256": "e505c2740395d6d73bd108b4fcd14465de6674145aa3587ab8b800af8708de0b",
+      "webpSha256": "cdb56ad34a8ffda4a9612bba326291a73a1acb4603039b1366bb87217ef43059",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-15.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually viewed native photograph: selected exterior and both fillings, consistent cuts. Case 16 has cucumber and shrimp without cream cheese; no unselected ingredients."
+      }
+    },
+    {
+      "name": "sliced-16",
+      "selected": [
+        "rice-nori",
+        "cucumber",
+        "salmon",
+        "shrimp"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "cucumber",
+        "shrimp"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; crisp green cucumber batons with pale moist seeded flesh and dark-green skin; raw orange salmon with delicate pale fat lines; fully cooked shrimp, pale opaque flesh edged in soft pink.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw orange salmon with delicate pale fat lines covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY crisp green cucumber batons with pale moist seeded flesh and dark-green skin AND fully cooked shrimp, pale opaque flesh edged in soft pink. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer salmon never appears inside.\nCRITICAL absent foods: NO cheese, tuna, eel, surimi. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese.  \nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-5d3b4ad6-20f4-4d38-9b4f-695839fd4939.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-16.png",
+      "nativeSha256": "308ed3dcdd14ecb7f71a2526226c00e044643472d32c3f767a17667473ecc798",
+      "webpSha256": "eb8d3c775d2963e7f9c70e2a0ebd8ae82d91e05a18c621e6028ebe1af79988d5",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-16.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually viewed native photograph: selected exterior and both fillings, consistent cuts. Case 16 has cucumber and shrimp without cream cheese; no unselected ingredients."
+      }
+    },
+    {
+      "name": "sliced-17",
+      "selected": [
+        "rice-nori",
+        "cucumber",
+        "salmon",
+        "tuna"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "cucumber",
+        "tuna"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; crisp green cucumber batons with pale moist seeded flesh and dark-green skin; raw orange salmon with delicate pale fat lines; raw lean deep-red tuna with a dense smooth cut surface.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw orange salmon with delicate pale fat lines covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY crisp green cucumber batons with pale moist seeded flesh and dark-green skin AND raw lean deep-red tuna with a dense smooth cut surface. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer salmon never appears inside.\nCRITICAL absent foods: NO cheese, shrimp, eel, surimi. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese.  \nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-bce3403b-6369-424d-9996-3e991ff4ee8e.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-17.png",
+      "nativeSha256": "fa04d437e7266bb94081fe35ac7b316f151eaf729f6de4fa84a9473e5539a6cd",
+      "webpSha256": "3b84d565410715a8cd94326442e20c28074f6639bd05f5f702708ad23476ddf2",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-17.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Native photograph individually viewed: salmon outside, cucumber plus red tuna or brown cooked eel inside. Cream cheese is absent as required; nori and rice are correctly positioned."
+      }
+    },
+    {
+      "name": "sliced-18",
+      "selected": [
+        "rice-nori",
+        "cucumber",
+        "salmon",
+        "eel"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "cucumber",
+        "eel"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; crisp green cucumber batons with pale moist seeded flesh and dark-green skin; raw orange salmon with delicate pale fat lines; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw orange salmon with delicate pale fat lines covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY crisp green cucumber batons with pale moist seeded flesh and dark-green skin AND cooked brown eel with ivory flaked flesh and a thin brown glazed exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer salmon never appears inside.\nCRITICAL absent foods: NO cheese, shrimp, tuna, surimi. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese.  \nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-37fe142c-a01f-4eed-8586-f16757e9ae5e.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-18.png",
+      "nativeSha256": "8d74493c6f029dbee78defa3ffb3a2a2361e33fd260030309536b1cedfcd2324",
+      "webpSha256": "b954f4a63c0999d92a30a6bd176601fe899b11ade56c318b39f0f4c5ac297f02",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-18.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Native photograph individually viewed: salmon outside, cucumber plus red tuna or brown cooked eel inside. Cream cheese is absent as required; nori and rice are correctly positioned."
+      }
+    },
+    {
+      "name": "sliced-19",
+      "selected": [
+        "rice-nori",
+        "cucumber",
+        "salmon",
+        "surimi"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "cucumber",
+        "surimi"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; crisp green cucumber batons with pale moist seeded flesh and dark-green skin; raw orange salmon with delicate pale fat lines; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw orange salmon with delicate pale fat lines covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY crisp green cucumber batons with pale moist seeded flesh and dark-green skin AND surimi sticks with white opaque flesh and a thin red exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer salmon never appears inside.\nCRITICAL absent foods: NO cheese, shrimp, tuna, eel. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese.  \nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-3eb463b9-8aca-400e-ac37-362f2cbb6a0e.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-19.png",
+      "nativeSha256": "0b8571c1aa119485a26d927ed06b0145f40cbdea0e459d732bd018fb9f80b544",
+      "webpSha256": "93bce0f4af2495604d5c5cc552dd0a6ed4948e860a7d485cb369eb68771ed078",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-19.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Viewed native image individually: exact selected cucumber and surimi or shrimp inside nori, selected exterior, rice outside; no cheese or other unselected ingredients."
+      }
+    },
+    {
+      "name": "sliced-20",
+      "selected": [
+        "rice-nori",
+        "cucumber",
+        "shrimp",
+        "tuna"
+      ],
+      "outer": "tuna",
+      "fillings": [
+        "cucumber",
+        "shrimp"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; crisp green cucumber batons with pale moist seeded flesh and dark-green skin; fully cooked shrimp, pale opaque flesh edged in soft pink; raw lean deep-red tuna with a dense smooth cut surface.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw lean deep-red tuna with a dense smooth cut surface covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY crisp green cucumber batons with pale moist seeded flesh and dark-green skin AND fully cooked shrimp, pale opaque flesh edged in soft pink. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer tuna never appears inside.\nCRITICAL absent foods: NO cheese, salmon, eel, surimi. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese.  NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-86312eb9-47c2-4e13-80a6-5be33f20adfd.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-20.png",
+      "nativeSha256": "5e2ab0dceaff7d69eaeaf55b1fbedb0c1e988b2ac0544e7c01b1ddae1cda1693",
+      "webpSha256": "f4ce54e40b07223d2aa56a5c4be6ddb891103535f97403ed19aa65efdc389015",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-20.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Viewed native image individually: exact selected cucumber and surimi or shrimp inside nori, selected exterior, rice outside; no cheese or other unselected ingredients."
+      }
+    },
+    {
+      "name": "sliced-21",
+      "selected": [
+        "rice-nori",
+        "cucumber",
+        "shrimp",
+        "eel"
+      ],
+      "outer": "eel",
+      "fillings": [
+        "cucumber",
+        "shrimp"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; crisp green cucumber batons with pale moist seeded flesh and dark-green skin; fully cooked shrimp, pale opaque flesh edged in soft pink; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin cooked eel fillet strips covering the upper and side rice surfaces, brown skin and subtle glaze.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY crisp green cucumber batons with pale moist seeded flesh and dark-green skin AND fully cooked shrimp, pale opaque flesh edged in soft pink. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer eel never appears inside.\nCRITICAL absent foods: NO cheese, salmon, tuna, surimi. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese.  NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-80f10d42-5e7f-4aac-bc98-e7a17d8ab821.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-21.png",
+      "nativeSha256": "5b46cc08b89e3f09798f7dd4b958f09997c290648e50fdc48e32f42841a760ab",
+      "webpSha256": "32d0e2a1dbdda175189cde4fa2233fe29391271b3944ac2f49d7f9b3bc7f7b90",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-21.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually inspected native image: exact selected cucumber and shrimp or surimi in every visible cut, correct eel or shrimp exterior. No cream cheese or unselected salmon."
+      }
+    },
+    {
+      "name": "sliced-22",
+      "selected": [
+        "rice-nori",
+        "cucumber",
+        "shrimp",
+        "surimi"
+      ],
+      "outer": "shrimp",
+      "fillings": [
+        "cucumber",
+        "surimi"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; crisp green cucumber batons with pale moist seeded flesh and dark-green skin; fully cooked shrimp, pale opaque flesh edged in soft pink; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with butterflied cooked shrimp laid snugly over the upper rice surface, no tails or shells.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY crisp green cucumber batons with pale moist seeded flesh and dark-green skin AND surimi sticks with white opaque flesh and a thin red exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer shrimp never appears inside.\nCRITICAL absent foods: NO cheese, salmon, tuna, eel. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese.  NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-c8dae842-ad0b-45dc-b01d-357a8c7b546a.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-22.png",
+      "nativeSha256": "0d21bbfa50d914885f731e6b968b71881830c822ad0c40947048f270145a53f7",
+      "webpSha256": "1e99bd342f75cb4654822a07fe65af9d04a4fc24078eb4684c434e4ba77a55b0",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-22.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually inspected native image: exact selected cucumber and shrimp or surimi in every visible cut, correct eel or shrimp exterior. No cream cheese or unselected salmon."
+      }
+    },
+    {
+      "name": "sliced-23",
+      "selected": [
+        "rice-nori",
+        "cucumber",
+        "tuna",
+        "eel"
+      ],
+      "outer": "tuna",
+      "fillings": [
+        "cucumber",
+        "eel"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; crisp green cucumber batons with pale moist seeded flesh and dark-green skin; raw lean deep-red tuna with a dense smooth cut surface; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw lean deep-red tuna with a dense smooth cut surface covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY crisp green cucumber batons with pale moist seeded flesh and dark-green skin AND cooked brown eel with ivory flaked flesh and a thin brown glazed exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer tuna never appears inside.\nCRITICAL absent foods: NO cheese, salmon, shrimp, surimi. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese.  NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-c9cc2995-3863-4484-8e99-7d80a7fa3c52.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-23.png",
+      "nativeSha256": "d8d7e8830185b508563866537b07bc4cbf41f85619187a227365f42aa1b88bd5",
+      "webpSha256": "f908c5cc95862b27efb1a15cdeebf8e46d593b0b2ff0b9e65c2323b1287f1b7c",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-23.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually viewed native photograph: cucumber plus cooked eel or surimi inside, red tuna outside; no cream cheese, salmon or garnish; all pieces belong to the same composition."
+      }
+    },
+    {
+      "name": "sliced-24",
+      "selected": [
+        "rice-nori",
+        "cucumber",
+        "tuna",
+        "surimi"
+      ],
+      "outer": "tuna",
+      "fillings": [
+        "cucumber",
+        "surimi"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; crisp green cucumber batons with pale moist seeded flesh and dark-green skin; raw lean deep-red tuna with a dense smooth cut surface; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw lean deep-red tuna with a dense smooth cut surface covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY crisp green cucumber batons with pale moist seeded flesh and dark-green skin AND surimi sticks with white opaque flesh and a thin red exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer tuna never appears inside.\nCRITICAL absent foods: NO cheese, salmon, shrimp, eel. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese.  NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-0b1b5aaa-a9f8-4104-8cc1-f2beabfa96a4.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-24.png",
+      "nativeSha256": "25be0593d56aad9ce0824a9407363f98be828d902b96948176b5d2a2a27864d1",
+      "webpSha256": "19de3d4a0f2ae958eb7fd7ced3efcf038659263e50389de7aedd74a4f7068f51",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-24.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually viewed native photograph: cucumber plus cooked eel or surimi inside, red tuna outside; no cream cheese, salmon or garnish; all pieces belong to the same composition."
+      }
+    },
+    {
+      "name": "sliced-25",
+      "selected": [
+        "rice-nori",
+        "cucumber",
+        "eel",
+        "surimi"
+      ],
+      "outer": "eel",
+      "fillings": [
+        "cucumber",
+        "surimi"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; crisp green cucumber batons with pale moist seeded flesh and dark-green skin; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin cooked eel fillet strips covering the upper and side rice surfaces, brown skin and subtle glaze.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY crisp green cucumber batons with pale moist seeded flesh and dark-green skin AND surimi sticks with white opaque flesh and a thin red exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer eel never appears inside.\nCRITICAL absent foods: NO cheese, salmon, shrimp, tuna. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese.  NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-3b9861cc-1315-4584-9730-863a1532e6fc.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-25.png",
+      "nativeSha256": "0d5d4723f81993fda70573d8e9634f69ae2886ed68ea33ea512010e5279e5a82",
+      "webpSha256": "ca52b2597390a2b9b8836258ac8fd865be845bf85452c73524abde81ead4a87a",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-25.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually viewed native image: exact selected cucumber/surimi with eel outside or shrimp/tuna with salmon outside; no cream cheese or unselected greens. Consistent eight-piece composition."
+      }
+    },
+    {
+      "name": "sliced-26",
+      "selected": [
+        "rice-nori",
+        "salmon",
+        "shrimp",
+        "tuna"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "shrimp",
+        "tuna"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; raw orange salmon with delicate pale fat lines; fully cooked shrimp, pale opaque flesh edged in soft pink; raw lean deep-red tuna with a dense smooth cut surface.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw orange salmon with delicate pale fat lines covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY fully cooked shrimp, pale opaque flesh edged in soft pink AND raw lean deep-red tuna with a dense smooth cut surface. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer salmon never appears inside.\nCRITICAL absent foods: NO cheese, cucumber, eel, surimi. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese. NO green cucumber or other green ingredients anywhere. \nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-ea9a07bb-f540-40a0-8966-d3d7f5a1be1d.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-26.png",
+      "nativeSha256": "990f4507cab3aaccc1ba07065adcca6196d0090bce0e5286b0590db7eb9781a1",
+      "webpSha256": "df1311284a6954f84354ea795b866e56d8e6d9e3616b78fee46aac2f58bf0e80",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-26.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually viewed native image: exact selected cucumber/surimi with eel outside or shrimp/tuna with salmon outside; no cream cheese or unselected greens. Consistent eight-piece composition."
+      }
+    },
+    {
+      "name": "sliced-27",
+      "selected": [
+        "rice-nori",
+        "salmon",
+        "shrimp",
+        "eel"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "shrimp",
+        "eel"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; raw orange salmon with delicate pale fat lines; fully cooked shrimp, pale opaque flesh edged in soft pink; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw orange salmon with delicate pale fat lines covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY fully cooked shrimp, pale opaque flesh edged in soft pink AND cooked brown eel with ivory flaked flesh and a thin brown glazed exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer salmon never appears inside.\nCRITICAL absent foods: NO cheese, cucumber, tuna, surimi. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese. NO green cucumber or other green ingredients anywhere. \nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-f725a63f-ba0a-43dd-9377-f323816eeb88.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-27.png",
+      "nativeSha256": "8757b7c79c47e52c340f4cba7803db07c42988acc76172670c77a67b74c5365d",
+      "webpSha256": "d7ad3c3ad1b786030fa38cb62780c410b7368de67fd4f921fec1e2799a72e74b",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-27.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Native image individually viewed: salmon covers outside rice; only shrimp plus cooked eel or surimi inside nori. No cream cheese, cucumber or unselected garnish; eight matching pieces."
+      }
+    },
+    {
+      "name": "sliced-28",
+      "selected": [
+        "rice-nori",
+        "salmon",
+        "shrimp",
+        "surimi"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "shrimp",
+        "surimi"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; raw orange salmon with delicate pale fat lines; fully cooked shrimp, pale opaque flesh edged in soft pink; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw orange salmon with delicate pale fat lines covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY fully cooked shrimp, pale opaque flesh edged in soft pink AND surimi sticks with white opaque flesh and a thin red exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer salmon never appears inside.\nCRITICAL absent foods: NO cheese, cucumber, tuna, eel. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese. NO green cucumber or other green ingredients anywhere. \nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-d888527c-146c-451b-a1d2-3dc9fa8dccc9.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-28.png",
+      "nativeSha256": "bf57d088b7452a89fc238f7bf5500f92552a655b3ab0934916c18c59dcfb8ef8",
+      "webpSha256": "50f2776756c979f4b97b02e569d1a13655c525ea3cd2ee4a310338f57ca7df36",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-28.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Native image individually viewed: salmon covers outside rice; only shrimp plus cooked eel or surimi inside nori. No cream cheese, cucumber or unselected garnish; eight matching pieces."
+      }
+    },
+    {
+      "name": "sliced-29",
+      "selected": [
+        "rice-nori",
+        "salmon",
+        "tuna",
+        "eel"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "tuna",
+        "eel"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; raw orange salmon with delicate pale fat lines; raw lean deep-red tuna with a dense smooth cut surface; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw orange salmon with delicate pale fat lines covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY raw lean deep-red tuna with a dense smooth cut surface AND cooked brown eel with ivory flaked flesh and a thin brown glazed exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer salmon never appears inside.\nCRITICAL absent foods: NO cheese, cucumber, shrimp, surimi. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese. NO green cucumber or other green ingredients anywhere. \nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-5477d75d-ccbf-46b3-91e1-8e6a3420afae.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-29.png",
+      "nativeSha256": "41234cdbfd0bb2c000732f5be49866429a7e933584b55038ca3415ccdad80190",
+      "webpSha256": "fffcfa7a35bf00b6a57b77c17587fcab4adc7d4560e4dc81296a138f4d1f2c63",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-29.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Native photograph individually viewed: salmon outside, exact selected tuna plus cooked eel or surimi inside; no cream cheese, cucumber or garnish. Coherent eight cut pieces."
+      }
+    },
+    {
+      "name": "sliced-30",
+      "selected": [
+        "rice-nori",
+        "salmon",
+        "tuna",
+        "surimi"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "tuna",
+        "surimi"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; raw orange salmon with delicate pale fat lines; raw lean deep-red tuna with a dense smooth cut surface; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw orange salmon with delicate pale fat lines covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY raw lean deep-red tuna with a dense smooth cut surface AND surimi sticks with white opaque flesh and a thin red exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer salmon never appears inside.\nCRITICAL absent foods: NO cheese, cucumber, shrimp, eel. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese. NO green cucumber or other green ingredients anywhere. \nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-584c263c-ece3-4983-a310-d0d423719e32.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-30.png",
+      "nativeSha256": "2130c4c4e7d2aec29814c08a616c8790d8d0fa4cfb74aa0c6d2db3685399b3e5",
+      "webpSha256": "c4a89c0fc2ad8ed0768426581c68b7f8dca789f156d8e10d2052ec594ab00622",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-30.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Native photograph individually viewed: salmon outside, exact selected tuna plus cooked eel or surimi inside; no cream cheese, cucumber or garnish. Coherent eight cut pieces."
+      }
+    },
+    {
+      "name": "sliced-31",
+      "selected": [
+        "rice-nori",
+        "salmon",
+        "eel",
+        "surimi"
+      ],
+      "outer": "salmon",
+      "fillings": [
+        "eel",
+        "surimi"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; raw orange salmon with delicate pale fat lines; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw orange salmon with delicate pale fat lines covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY cooked brown eel with ivory flaked flesh and a thin brown glazed exterior AND surimi sticks with white opaque flesh and a thin red exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer salmon never appears inside.\nCRITICAL absent foods: NO cheese, cucumber, shrimp, tuna. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese. NO green cucumber or other green ingredients anywhere. \nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-693a32d8-689e-4168-971c-74f3de21df48.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-31.png",
+      "nativeSha256": "c37e64a5d80c65c876f6ccabc3720b751800d5448211263548cf33b1b9af2406",
+      "webpSha256": "c718a15af47080f99428c192d99f69afc3e083072270b5d78d669d6fde7c16d4",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-31.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Viewed native image individually: only eel/surimi or shrimp/eel in cut core, salmon or tuna outside. No cheese, cucumber, unselected garnish or rice within filling core."
+      }
+    },
+    {
+      "name": "sliced-32",
+      "selected": [
+        "rice-nori",
+        "shrimp",
+        "tuna",
+        "eel"
+      ],
+      "outer": "tuna",
+      "fillings": [
+        "shrimp",
+        "eel"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; fully cooked shrimp, pale opaque flesh edged in soft pink; raw lean deep-red tuna with a dense smooth cut surface; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw lean deep-red tuna with a dense smooth cut surface covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY fully cooked shrimp, pale opaque flesh edged in soft pink AND cooked brown eel with ivory flaked flesh and a thin brown glazed exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer tuna never appears inside.\nCRITICAL absent foods: NO cheese, cucumber, salmon, surimi. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese. NO green cucumber or other green ingredients anywhere. NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-4b14b827-b38a-4520-be6a-1aef301c4023.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-32.png",
+      "nativeSha256": "d1cd599661d4a1054626c5f059ee8ef7842455b9aacfc1dee0728f4614df02fd",
+      "webpSha256": "c232968b874d32da49d9216cd50cce206b507ad733b60313bb0c72c739882961",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-32.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Viewed native image individually: only eel/surimi or shrimp/eel in cut core, salmon or tuna outside. No cheese, cucumber, unselected garnish or rice within filling core."
+      }
+    },
+    {
+      "name": "sliced-33",
+      "selected": [
+        "rice-nori",
+        "shrimp",
+        "tuna",
+        "surimi"
+      ],
+      "outer": "tuna",
+      "fillings": [
+        "shrimp",
+        "surimi"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; fully cooked shrimp, pale opaque flesh edged in soft pink; raw lean deep-red tuna with a dense smooth cut surface; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw lean deep-red tuna with a dense smooth cut surface covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY fully cooked shrimp, pale opaque flesh edged in soft pink AND surimi sticks with white opaque flesh and a thin red exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer tuna never appears inside.\nCRITICAL absent foods: NO cheese, cucumber, salmon, eel. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese. NO green cucumber or other green ingredients anywhere. NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-ccde9674-25f8-4bae-98d2-f74c3abeb3e5.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-33.png",
+      "nativeSha256": "23b1490d74397d3ad4f7486ddab135f4aac542c12cdd3d27750b6049596d5a6f",
+      "webpSha256": "3c62a175affaecee11501cdbce33e6ac31d4719005b5e63ac3ed66f32c9a4cf7",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-33.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually viewed native image: shrimp plus red-white surimi inside, correct tuna or eel outside rice; no unselected cheese, cucumber, salmon or garnish. Eight coherent slices."
+      }
+    },
+    {
+      "name": "sliced-34",
+      "selected": [
+        "rice-nori",
+        "shrimp",
+        "eel",
+        "surimi"
+      ],
+      "outer": "eel",
+      "fillings": [
+        "shrimp",
+        "surimi"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; fully cooked shrimp, pale opaque flesh edged in soft pink; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin cooked eel fillet strips covering the upper and side rice surfaces, brown skin and subtle glaze.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY fully cooked shrimp, pale opaque flesh edged in soft pink AND surimi sticks with white opaque flesh and a thin red exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer eel never appears inside.\nCRITICAL absent foods: NO cheese, cucumber, salmon, tuna. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese. NO green cucumber or other green ingredients anywhere. NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-ad1bbc13-0fdf-4a3a-86c2-68182fcf71ae.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-34.png",
+      "nativeSha256": "67580595320de52eef987203d2067c2c9b700e881fc4f30c83f58ef5794bbad2",
+      "webpSha256": "1154f32c1972b26feebe8aa0a6bdcd9c4dc8babe2e2e02443c5ea3996484c565",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-34.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually viewed native image: shrimp plus red-white surimi inside, correct tuna or eel outside rice; no unselected cheese, cucumber, salmon or garnish. Eight coherent slices."
+      }
+    },
+    {
+      "name": "sliced-35",
+      "selected": [
+        "rice-nori",
+        "tuna",
+        "eel",
+        "surimi"
+      ],
+      "outer": "tuna",
+      "fillings": [
+        "eel",
+        "surimi"
+      ],
+      "prompt": "Use case: precise-object-edit\nAsset type: exact selected roll composition for a college culinary olympiad.\nInput: our own generated eight-piece sliced Philadelphia image. Preserve the whole warm cream oval plate, pale stone background, square canvas, natural soft daylight and diagonal row of EIGHT same-sized pieces. Same elegant restrained photographic style. Change ONLY the food composition as specified.\nSelected four groups exactly: sushi rice+nori; raw lean deep-red tuna with a dense smooth cut surface; cooked brown eel with ivory flaked flesh and a thin brown glazed exterior; surimi sticks with white opaque flesh and a thin red exterior.\nExterior: realistic short-grain white sushi rice on the OUTSIDE of a thin dark nori ring, with thin natural slices of raw lean deep-red tuna with a dense smooth cut surface covering the top and sides over the white rice.\nInterior of EVERY slice, enclosed INSIDE the thin nori ring: ONLY cooked brown eel with ivory flaked flesh and a thin brown glazed exterior AND surimi sticks with white opaque flesh and a thin red exterior. Both selected filling components must be clearly identifiable on the front-facing cut end and the other visible cut surfaces. Show the first two pieces slightly staggered to expose their genuine cross-sections; retain a coherent row, not an exploded diagram. No rice inside the filling core; no loose separate garnish. Filling is placed within nori; outer tuna never appears inside.\nCRITICAL absent foods: NO cheese, cucumber, salmon, shrimp. NO white cream cheese blobs anywhere; pale cooked shrimp, surimi or eel flesh are solid fibrous flesh, not cheese. NO green cucumber or other green ingredients anywhere. NO orange salmon anywhere.\nNo sesame, sauces, wasabi, ginger, leaves, garnish, chopsticks, text, logos, hands or extra foods. Natural moist cut textures, real nori thickness and individually visible rice grains, not CGI, plastic, cartoon, or perfect repeated patterns. All eight pieces belong to ONE roll with the same exact contents.",
+      "inputImage": "public/assets/olympiad/visual-v6/philadelphia/sliced-sample.webp",
+      "generatorFileName": "exec-414011dc-d485-4e11-a515-871918c67c38.png",
+      "nativeFile": "storage/t5-roll-exact-v9/native/sliced-35.png",
+      "nativeSha256": "10769811f743854eb0e11542b2a0c24bd22569630695cf4738775c8f70c75ca6",
+      "webpSha256": "058f77c56fb54b0589d46b298841dca95010f4a5950c0474654c88d700bfeedc",
+      "imageUrl": "/assets/olympiad/visual-v9/philadelphia/sliced-35.webp",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "review": {
+        "status": "accepted",
+        "inspection": "Individually viewed native photograph: only cooked eel and surimi inside nori, red tuna outside rice. No cheese, cucumber, salmon or shrimp; eight matching slices."
+      }
+    }
+  ]
+}

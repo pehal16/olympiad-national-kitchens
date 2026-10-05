@@ -1,0 +1,1182 @@
+{
+  "version": 4,
+  "assetCount": 196,
+  "assets": [
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/c54782c8ac94061c3b870784.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/card-dough.webp",
+      "sha256": "c54782c8ac94061c3b870784cf82e16f12f17a0425c6b8f4cc9b19ad28499105",
+      "bytes": 466914
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/5750ad8c8b19a1a06a261dad.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/shaped.webp",
+      "sha256": "5750ad8c8b19a1a06a261dadb897afae05ce5d17c28b71747c8b84c2ae76efd6",
+      "bytes": 579418
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/e4e1efe5585c970eec62015f.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/card-tomato-oil.webp",
+      "sha256": "e4e1efe5585c970eec62015fe70b853fdf49b5370aba8a116e68416308ce648e",
+      "bytes": 357222
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/0e1b7424b945ec4f807f5333.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/layer-tomato.webp",
+      "sha256": "0e1b7424b945ec4f807f53338fbbeff6cf3c68c0e894ab09b335d94d553f444f",
+      "bytes": 393048
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/06d0a602ccde3b7fd0ed5072.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/card-mozzarella.webp",
+      "sha256": "06d0a602ccde3b7fd0ed5072a84c9005121654d1aaa665f19858d8881a04f110",
+      "bytes": 284502
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/10807268146232c258511bc2.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/layer-mozzarella.webp",
+      "sha256": "10807268146232c258511bc2e98cab2954f08784ad2c2ffbd63f07870d80b9b8",
+      "bytes": 170206
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/22a44d006e0db616aa691c52.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/card-basil.webp",
+      "sha256": "22a44d006e0db616aa691c52765d37d17af04549c6a63458f0748d58d2dd209d",
+      "bytes": 345662
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/77d3900d67e970d4406b517a.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/layer-basil.webp",
+      "sha256": "77d3900d67e970d4406b517a74480a9f6582cc706d36674c959b3075fdb82f62",
+      "bytes": 168230
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/7b8da139573f89431de3c6a5.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/card-cheddar.webp",
+      "sha256": "7b8da139573f89431de3c6a581730692d35c79140341021aeba0e16509424d48",
+      "bytes": 352474
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/519a1c4f387853bd56117ce6.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/layer-cheddar.webp",
+      "sha256": "519a1c4f387853bd56117ce61fc39ab5b785ad26ab9b3d3810e0599c3ad4229b",
+      "bytes": 421858
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/790c9f28e2afffaf2bb31ff0.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/card-cucumber.webp",
+      "sha256": "790c9f28e2afffaf2bb31ff086f7b420573476bee58cfbe336c5cddea4ab7adc",
+      "bytes": 342294
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/d367958a1d4b4fb42864cc6c.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/layer-cucumber.webp",
+      "sha256": "d367958a1d4b4fb42864cc6cb5ee81f366e8302ef875755476d826051acac5c6",
+      "bytes": 264768
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/ac84aa43c6d0c5ffdeb72a3e.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/card-egg.webp",
+      "sha256": "ac84aa43c6d0c5ffdeb72a3ec5c31e7b29506c981402b9d7b9abee90cfa7d30e",
+      "bytes": 253180
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/53c7a312f6bc8d350da083f7.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/layer-egg.webp",
+      "sha256": "53c7a312f6bc8d350da083f7713229547d9d7368af8e7e3f1e2ebddff6e573b7",
+      "bytes": 196678
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/85c434ec83c02869107688e5.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/card-chicken.webp",
+      "sha256": "85c434ec83c02869107688e5a01af3587ea9057b8687afafc55448354f4cf665",
+      "bytes": 381856
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/75beedcbc1e5957a8272249d.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/layer-chicken.webp",
+      "sha256": "75beedcbc1e5957a8272249d1aca6058bb364e774d0cb45fe3e98ce8b4181c7e",
+      "bytes": 265416
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/f9975fcd20610ce8c698a9f6.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/layer-oil.webp",
+      "sha256": "f9975fcd20610ce8c698a9f6884d4ae2e6c8e1ee79c0f791726540b50748e040",
+      "bytes": 160590
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/40d0331e32ced98b858ec60f.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-01.webp",
+      "sha256": "40d0331e32ced98b858ec60f71922aaa21d94c24edd7615153f9c8e04aaf5b65",
+      "bytes": 471196
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/cdf463ab38bb1c7f9719deb4.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-02.webp",
+      "sha256": "cdf463ab38bb1c7f9719deb4dd2ecfd69dd8fb360e1e92da68bebd57a5a8e7e1",
+      "bytes": 441928
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/36bb981d6ae5559e42fcf677.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-03.webp",
+      "sha256": "36bb981d6ae5559e42fcf677acee70b3b47ae78e84b3bd43bd6360f818288d84",
+      "bytes": 438994
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/cdcb1302048c84bc1fcb59ab.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-04.webp",
+      "sha256": "cdcb1302048c84bc1fcb59ab16b6484f9690396b0b7d33635e34928e93f23baa",
+      "bytes": 435108
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/4e9c75ade070ad1b33b903c7.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-05.webp",
+      "sha256": "4e9c75ade070ad1b33b903c7c264d2250f03d64da6c7f7e97b707a26ee78f253",
+      "bytes": 446302
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/1a79a14f1d2ecd40ef7ff1ab.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-06.webp",
+      "sha256": "1a79a14f1d2ecd40ef7ff1ab45ecbe3cfa6eeeec3f7dac418ce63c286f3d0760",
+      "bytes": 454698
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/28054d4471362cbf9cd2a660.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-07.webp",
+      "sha256": "28054d4471362cbf9cd2a660e5b9677b3b02f901eccfe21c6734a3488b67d4a6",
+      "bytes": 466634
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/923100f9eba78b0e05f826be.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-08.webp",
+      "sha256": "923100f9eba78b0e05f826bec248782f33ec79a731d2f9cd6ee911d0f1ade736",
+      "bytes": 454634
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/49cf58712e97e4e9121d659a.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-09.webp",
+      "sha256": "49cf58712e97e4e9121d659a2da2e10d9faf64ed665d4cc3d498f7859dae8dd8",
+      "bytes": 466294
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/dada2d651def9eccf64416fe.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-10.webp",
+      "sha256": "dada2d651def9eccf64416fe15dc5b38f296a5529cb7a977ed9f03e5bc593fc6",
+      "bytes": 454074
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/f3ae89fcdb958e338bc0ab52.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-11.webp",
+      "sha256": "f3ae89fcdb958e338bc0ab52641095006e8cbf9d546a6d7969929f62eb3a7fde",
+      "bytes": 450594
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/af3c053d75f3829c9f854695.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-12.webp",
+      "sha256": "af3c053d75f3829c9f85469512a9275272ef74703a4c809fa563873f53a9e612",
+      "bytes": 477010
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/9e9d47c3fcb0ea09d195a1ff.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-13.webp",
+      "sha256": "9e9d47c3fcb0ea09d195a1ff1b193993eea595ad6bad717f9237d2281b8695dd",
+      "bytes": 459778
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/24807ebbc0b5ce9624fbcd47.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-14.webp",
+      "sha256": "24807ebbc0b5ce9624fbcd47cc8590a6b7404e36486294c19893ac6f2c7a8fbf",
+      "bytes": 463768
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/1190eff91bdb01589ae26b64.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-15.webp",
+      "sha256": "1190eff91bdb01589ae26b649b1b99932b74ba834f875b0997671b3ae4824369",
+      "bytes": 455234
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/ab8438e3238a3d876e297f68.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-16.webp",
+      "sha256": "ab8438e3238a3d876e297f68b71ac565c1a04ffc0e3e4fc0fa631abe602144ce",
+      "bytes": 414832
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/71c580401ed1ec879e45ff06.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-17.webp",
+      "sha256": "71c580401ed1ec879e45ff0629c8f6169d714c1f0f6db70ce41ed56c01a1075d",
+      "bytes": 443692
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/ba48207ecf65c6fd616056bf.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-18.webp",
+      "sha256": "ba48207ecf65c6fd616056bf582c8fb3b484984eb4d8cd213d806935fdaefe64",
+      "bytes": 424432
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/33c425ab73a11e223b188162.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-19.webp",
+      "sha256": "33c425ab73a11e223b188162890c032c818951a7ce080a94e469973c1ecdf169",
+      "bytes": 430726
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/3858ef570ab50758cb48bded.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-20.webp",
+      "sha256": "3858ef570ab50758cb48bdedf7a6826c206691eafc2ba8a70be2f096590fdeaf",
+      "bytes": 452482
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/b4b46b68e41a00ba69d19640.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-21.webp",
+      "sha256": "b4b46b68e41a00ba69d19640cc94198392049f563c9e4adf44d30aea0d4f5e01",
+      "bytes": 430264
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/62e6607d3b0bffbe5866a7fe.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-22.webp",
+      "sha256": "62e6607d3b0bffbe5866a7fe68115c78acc124d8c539b13112fdda0d835b01c8",
+      "bytes": 415992
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/1dbfa1d2394cb037f209ea14.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-23.webp",
+      "sha256": "1dbfa1d2394cb037f209ea142b3d61487167ede6803383ec4f264055a4ebac23",
+      "bytes": 393022
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/da661d1bc1658799afc0acfd.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-24.webp",
+      "sha256": "da661d1bc1658799afc0acfd32b472e4fee00be38c31e6c354afa475b4850fe2",
+      "bytes": 441788
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/d0db445ad9088313789eb0c0.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-25.webp",
+      "sha256": "d0db445ad9088313789eb0c0f6cec5cf71c5825bbec97db84cd603c41f9b48a8",
+      "bytes": 423734
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/5e539227d90e683cf603fbb9.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-26.webp",
+      "sha256": "5e539227d90e683cf603fbb926e26e5658931b215023519f3840c0d57ab0c0c9",
+      "bytes": 461880
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/5515db7561fcdca62bc4f73b.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-27.webp",
+      "sha256": "5515db7561fcdca62bc4f73b5b91f873e375d3b5a911b7411dbc01d8f2bb291f",
+      "bytes": 459486
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/c37b199b2814fffc9cd0f145.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-28.webp",
+      "sha256": "c37b199b2814fffc9cd0f14517b72e9f566881125a2639f838c44e2b9a59e622",
+      "bytes": 465002
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/135a1a09e034e44c936b9f2e.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-29.webp",
+      "sha256": "135a1a09e034e44c936b9f2e2b3b8e90a02d0698549017954f538f0727f96ef9",
+      "bytes": 465998
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/9573423cf0ad571c28a69002.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-30.webp",
+      "sha256": "9573423cf0ad571c28a690027fb8eba39b74d9119d773d0ce86ea2a96a6bf566",
+      "bytes": 465356
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/dbd94971a318e0105db363ad.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-31.webp",
+      "sha256": "dbd94971a318e0105db363adb11e3c27b02d592deacc8b0e97e64365097222c5",
+      "bytes": 448620
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/b62b92f7e09780687474330f.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-32.webp",
+      "sha256": "b62b92f7e09780687474330ff46c2372be8c8b3dc48dfe15c31fa65203d2ca5a",
+      "bytes": 428462
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/c212c71b31349a30501a092f.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-33.webp",
+      "sha256": "c212c71b31349a30501a092fa314a3333153eb9f7c13033b32dfbb0ac45bb164",
+      "bytes": 440532
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/b87b3bebbbbf3664eb29621d.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-34.webp",
+      "sha256": "b87b3bebbbbf3664eb29621d6b4efe11b2285919ec11333c29b3968c6aa42502",
+      "bytes": 450552
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/81eb8ae87b36447624fec0a2.webp",
+      "source": "public/assets/olympiad/visual-v7/margherita/baked-35.webp",
+      "sha256": "81eb8ae87b36447624fec0a21b01120d3601c98a9ddb270be2e1a8619cf81509",
+      "bytes": 453374
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/9ef7f459501a02dd331e3414.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/card-vegetables.webp",
+      "sha256": "9ef7f459501a02dd331e341470cd50b31635764aec8d4727ddd7cadb42366556",
+      "bytes": 376784
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/b2c3839750e52bb752c27e4c.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/layer-vegetables.webp",
+      "sha256": "b2c3839750e52bb752c27e4c1d2b047e0a73e1f33c50c94237a4f56df9a9bf8d",
+      "bytes": 444984
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/68152307e79233d6cf69a2fd.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/card-onion-olives.webp",
+      "sha256": "68152307e79233d6cf69a2fd938ef25805ea5f7000e202a5fab8de79a02645e6",
+      "bytes": 309248
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/ca2bccdd4cb21368f54c7548.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/layer-onion-olives.webp",
+      "sha256": "ca2bccdd4cb21368f54c7548cc79c2bee35f9f12f8e5e039f2e5737c0ea5fb07",
+      "bytes": 236136
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/125aeb6f27d61890c8f1af26.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/card-feta.webp",
+      "sha256": "125aeb6f27d61890c8f1af267e345c3f4828cb1aea227703c492bfdd0c3e423d",
+      "bytes": 369334
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/084bca697683cf57c0e751f0.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/layer-feta.webp",
+      "sha256": "084bca697683cf57c0e751f040f3c400948812b8b93a66d96d1eff532661fdbc",
+      "bytes": 92520
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/4ddaa4617858ea66bdd10297.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/card-oil-oregano.webp",
+      "sha256": "4ddaa4617858ea66bdd10297943039fa9ad4fe6bde08cec80c43e094b797863d",
+      "bytes": 397298
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/59d49242e0dde2661f8eb3ec.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/layer-oil-oregano.webp",
+      "sha256": "59d49242e0dde2661f8eb3ec9b9bb85abc48fd115b70a845feb0e9d1b4d7a65b",
+      "bytes": 328296
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/f8f075ee7e99a82cd5d19bf3.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/card-corn.webp",
+      "sha256": "f8f075ee7e99a82cd5d19bf3e501a9822c87baed72b0c73f9a7c1148aa3d6396",
+      "bytes": 328264
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/1f89fdb454d4925377cb8e0c.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/layer-corn.webp",
+      "sha256": "1f89fdb454d4925377cb8e0c66fa59957248ecef29a78fc3981f6161ea92a3c2",
+      "bytes": 307472
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/a8d9014b2c1be213fce680b3.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/card-chicken.webp",
+      "sha256": "a8d9014b2c1be213fce680b33179d691b91f2b27c5a5dee48c13a27608ce5df7",
+      "bytes": 362822
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/5881b96ce8259013987f0ed9.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/layer-chicken.webp",
+      "sha256": "5881b96ce8259013987f0ed911952df2cfbda0519bbd6aabc5facf0944c83fd8",
+      "bytes": 304766
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/1a817059bd144b427847253f.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/card-croutons.webp",
+      "sha256": "1a817059bd144b427847253fc79b24bd54c7fff7368c78cec547856171b8b732",
+      "bytes": 412100
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/0e7439efde8a9bd8cd3ca674.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/layer-croutons.webp",
+      "sha256": "0e7439efde8a9bd8cd3ca6748bb49ce570f0ad0585551de9a571ab1a18ecf7e0",
+      "bytes": 264684
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/f216c9c40f85ce0a07cb3f94.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/card-mayonnaise.webp",
+      "sha256": "f216c9c40f85ce0a07cb3f949f682092f4223c9ccf8cbc3c1921ab05cd9f1330",
+      "bytes": 294930
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/59b6e7e0a05a636296846f67.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/layer-mayonnaise.webp",
+      "sha256": "59b6e7e0a05a636296846f6726432f4eb1b3da70a650545a71468695d97b9af1",
+      "bytes": 83674
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/482c50a12e48ff8866715fee.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/bowl.webp",
+      "sha256": "482c50a12e48ff8866715feea36656bba55769ec1d773e9ebb86d8217408ac14",
+      "bytes": 261006
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/6aad7b5c766293d552299676.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-01.webp",
+      "sha256": "6aad7b5c766293d552299676a17078e775cf849578ab230c42af83a916b2aede",
+      "bytes": 449392
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/e841aae9db8c4c796aad93cd.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-02.webp",
+      "sha256": "e841aae9db8c4c796aad93cd1026978a777942faff82cb19a78d40eec1dfb558",
+      "bytes": 334550
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/28f763919b3c1e83ed8365e4.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-03.webp",
+      "sha256": "28f763919b3c1e83ed8365e46dc62e48e57522921a091c595281b0ffe681023d",
+      "bytes": 385766
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/03f63a4a513f77f27f3981c5.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-04.webp",
+      "sha256": "03f63a4a513f77f27f3981c58cf0d690505d1050c4e605ec893eb56482f9930c",
+      "bytes": 340592
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/1501b0515aec399366119dd2.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-05.webp",
+      "sha256": "1501b0515aec399366119dd2510d261cb1cb61db3f757496b02987a402ceffb6",
+      "bytes": 349668
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/4b08269b09faebb1093f45eb.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-06.webp",
+      "sha256": "4b08269b09faebb1093f45eb1d079d98fa1e5c85c74796e51239443b5cf0b0a3",
+      "bytes": 359210
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/54bc891fd2846852791e3689.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-07.webp",
+      "sha256": "54bc891fd2846852791e3689590133b21ab58fb656da66a990b0ae8dd5852ccc",
+      "bytes": 398510
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/d1084ecd08b4e558d8f21fa8.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-08.webp",
+      "sha256": "d1084ecd08b4e558d8f21fa851171e19dd713dc95131c3a8cf6ee80ed3610f2b",
+      "bytes": 398634
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/7e507cedc36a39978041e3a7.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-09.webp",
+      "sha256": "7e507cedc36a39978041e3a7d9a576fee1e2fe1273d2cc0aca4717ff2efbaab3",
+      "bytes": 399790
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/cfe1f020aca0c3fcbdaab21f.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-10.webp",
+      "sha256": "cfe1f020aca0c3fcbdaab21fb00996ae1a51b5e29bc9200f0f6b574a8b399161",
+      "bytes": 379302
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/da4e5cd98f904db3e95c2dd4.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-11.webp",
+      "sha256": "da4e5cd98f904db3e95c2dd41c861d044eb11913a44393c14c432dcbe3fa1923",
+      "bytes": 412018
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/54ba52a56d9e2c1b65e212a5.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-12.webp",
+      "sha256": "54ba52a56d9e2c1b65e212a5a515e2e5f0065ad0dd0929dea24e8e633944e9ee",
+      "bytes": 348164
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/efb9e986c6d5764172a5922f.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-13.webp",
+      "sha256": "efb9e986c6d5764172a5922f639b1e84156236dca6905c9a3c2db75784382f27",
+      "bytes": 411834
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/72840633d7d5dc8a2354b02c.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-14.webp",
+      "sha256": "72840633d7d5dc8a2354b02c2d9ce65d09ab43d82f9c7a4c5176e134eb2bc81c",
+      "bytes": 379830
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/e42feefb62453a63348c9f7d.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-15.webp",
+      "sha256": "e42feefb62453a63348c9f7de4d69b07548222dcbb7d5a39913c238f954111ed",
+      "bytes": 368780
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/fcf22cfef662505eb2326e21.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-16.webp",
+      "sha256": "fcf22cfef662505eb2326e2143d68797d0e83892e5516fe9ec3759204b5c9ef5",
+      "bytes": 395724
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/fb27172d153c83966eedfe44.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-17.webp",
+      "sha256": "fb27172d153c83966eedfe4474ae249d714d4eca3e85d95dddce49b67c702009",
+      "bytes": 411634
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/2826dd8c282322bb87583df5.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-18.webp",
+      "sha256": "2826dd8c282322bb87583df5593ad9f7e41554349955b44b71b43347001d1d91",
+      "bytes": 387164
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/bc413a13d5cb4d040429e922.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-19.webp",
+      "sha256": "bc413a13d5cb4d040429e9223934680e41e49119fdf730056b671ab98df1490f",
+      "bytes": 374242
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/23e055e8b17480c8f1a5cc16.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-20.webp",
+      "sha256": "23e055e8b17480c8f1a5cc16fc4859dea4058099a5e020cbfad80611bd820c6a",
+      "bytes": 398382
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/0c6619bd9bd4473c0bde18b3.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-21.webp",
+      "sha256": "0c6619bd9bd4473c0bde18b3e8907b0d867904977f87bab2fb8d05fa2d6036ef",
+      "bytes": 375896
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/5e6caa358387b7e959804d71.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-22.webp",
+      "sha256": "5e6caa358387b7e959804d710eee12a75b211de1f47453c9b82aae257aadcf75",
+      "bytes": 322750
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/a846049ade4821a706c7d3a3.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-23.webp",
+      "sha256": "a846049ade4821a706c7d3a3d641cc99f0a0ddc37fa7269ad647c468d4511e2a",
+      "bytes": 388268
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/e8a5bb6f70903c248a38e9b9.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-24.webp",
+      "sha256": "e8a5bb6f70903c248a38e9b938fe1b106188abc29b24cc888f9fc248030be65a",
+      "bytes": 397310
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/ea2c578cf06f36c864f3ba68.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-25.webp",
+      "sha256": "ea2c578cf06f36c864f3ba68d6da374fddb53550bbcd57b36a516a1e620d4bd2",
+      "bytes": 345172
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/d2ce220e301cb13e0c0e173b.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-26.webp",
+      "sha256": "d2ce220e301cb13e0c0e173b29448e7daed46881820e1d4c2ebe9196239e5325",
+      "bytes": 395830
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/15d051b399528b195f72640c.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-27.webp",
+      "sha256": "15d051b399528b195f72640c91e5b4211137d5dd7569ef3850c4b3570e29a8f1",
+      "bytes": 420998
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/10bc567b758db38580236a9a.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-28.webp",
+      "sha256": "10bc567b758db38580236a9ae86f319f19a9387d1e43cd8467871c90d751e0ee",
+      "bytes": 369082
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/6cbc284e50ce1f061440b3bc.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-29.webp",
+      "sha256": "6cbc284e50ce1f061440b3bc869936d59e2b8c1d71c62fc6218851cc2a7120f9",
+      "bytes": 464384
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/ad825eb306c90a16a347f466.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-30.webp",
+      "sha256": "ad825eb306c90a16a347f4667a29cc8c0387049adf22401a19874e05d5f63aaf",
+      "bytes": 397744
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/2dbedbcafdb8b36ff78b7878.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-31.webp",
+      "sha256": "2dbedbcafdb8b36ff78b7878afdacdb682eeb43c1b54bc641e01e3cc42ffe0aa",
+      "bytes": 402128
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/1fcd47e0aa7551e2e0bf3d61.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-32.webp",
+      "sha256": "1fcd47e0aa7551e2e0bf3d610b8df32dba6bfa6b5566e74a11023c6f66200ee9",
+      "bytes": 362154
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/aeaf9b76332176e0f9208b45.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-33.webp",
+      "sha256": "aeaf9b76332176e0f9208b45570b4900cab8b957fd4aa615d24108ea5615e73d",
+      "bytes": 365278
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/5f9034a18872ac7e512e2193.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-34.webp",
+      "sha256": "5f9034a18872ac7e512e219334798b9a402d2b13b4a2cab9c435161292b16f94",
+      "bytes": 390840
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/a7d5a0364ad4bd644e6f47b8.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-35.webp",
+      "sha256": "a7d5a0364ad4bd644e6f47b86c8acacea6666299ba09eb4448ab9e8dc2d9ccf6",
+      "bytes": 428324
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/aedf3187c029a144c4d3a479.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-36.webp",
+      "sha256": "aedf3187c029a144c4d3a4797b0b1b40324b41ce4de6fb7ab4f0c3bb2b3ae5b3",
+      "bytes": 371818
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/a2d405563b2caed5310832d0.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-37.webp",
+      "sha256": "a2d405563b2caed5310832d04e2e8aab00b22084ba8f617eff78bb3c1af9300c",
+      "bytes": 433454
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/0670c210d6f2a27a290c6520.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-38.webp",
+      "sha256": "0670c210d6f2a27a290c6520da12cb81cde1021524cd07b536ab806998a77db6",
+      "bytes": 425764
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/08d234c6414d2ee66119070a.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-39.webp",
+      "sha256": "08d234c6414d2ee66119070a9f516a3d077aa8ac165fab88c2eeb60b677621d1",
+      "bytes": 411258
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/35527e10a58b7d63ec618c05.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-40.webp",
+      "sha256": "35527e10a58b7d63ec618c0594a563f27dd7d4deb49842aa98c45694b4e5a677",
+      "bytes": 405132
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/6a59155575fa6d9495337c78.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-41.webp",
+      "sha256": "6a59155575fa6d9495337c78bd643d165f0ac1d648a57fa05b3f149565c81676",
+      "bytes": 345740
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/1f4de2a40d199864f665e7de.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-42.webp",
+      "sha256": "1f4de2a40d199864f665e7de140fcf9f9956fb15566aac6a985f7b9d47a7ffe9",
+      "bytes": 344114
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/2c27bf38ccac4360396a0947.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-43.webp",
+      "sha256": "2c27bf38ccac4360396a09471ed0a01b89a86074fccc47c4c090d37a10fe401f",
+      "bytes": 349948
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/43ee115ad3c432a57d9a10a1.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-44.webp",
+      "sha256": "43ee115ad3c432a57d9a10a1554eff7ba1a1d5f806e10e1696f7c84b04fbce06",
+      "bytes": 367384
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/96e883ee5ab73233ace563ae.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-45.webp",
+      "sha256": "96e883ee5ab73233ace563ae25cc4541e6abbe9b273f98bfbb44f75f5579fe05",
+      "bytes": 413216
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/fa7fb651118598091f84e6d0.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-46.webp",
+      "sha256": "fa7fb651118598091f84e6d04237a66c59b881205b5f2dc895c5e78047d481a7",
+      "bytes": 389588
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/d120610504e8347384ade200.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-47.webp",
+      "sha256": "d120610504e8347384ade200583905784b1fbee1c5d6f9a2c16032f43b352729",
+      "bytes": 411528
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/9ca3d0c4c63621033ffd3bd5.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-48.webp",
+      "sha256": "9ca3d0c4c63621033ffd3bd50875ac5f412088363469b83187dd5ee1e6613f7e",
+      "bytes": 373608
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/0191798b5c7fd33eab7c013b.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-49.webp",
+      "sha256": "0191798b5c7fd33eab7c013baa1086bd22a80e66e470a0bc2668a7443d668258",
+      "bytes": 429172
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/5fe81dc258043da9425e1cc0.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-50.webp",
+      "sha256": "5fe81dc258043da9425e1cc0d50964caa6d6d0c33a6c7ff6e4f7f6e83f73cfdc",
+      "bytes": 432702
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/25f3b004014580617703a6f0.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-51.webp",
+      "sha256": "25f3b004014580617703a6f0cf20db7cdb8e1e0e319dbadcac67085b152513d1",
+      "bytes": 436458
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/0a16a52a7fd14ea895ecf660.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-52.webp",
+      "sha256": "0a16a52a7fd14ea895ecf6600e858f4d6609cbb472be096e5a5c72e279258d48",
+      "bytes": 390702
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/9993794183edfdce383e7dfd.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-53.webp",
+      "sha256": "9993794183edfdce383e7dfd11183da2d3155d045348d6296b48e92acb79e2c7",
+      "bytes": 390332
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/5a0b49f5fcc2bd1615e59103.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-54.webp",
+      "sha256": "5a0b49f5fcc2bd1615e591038bc5c89647285872385241e61feaf16d2f2fec81",
+      "bytes": 391900
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/a8280d8effeeb7ee58a6e467.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-55.webp",
+      "sha256": "a8280d8effeeb7ee58a6e467ddbea97e52a6a32a608f9fcf09f8ade5f97f84da",
+      "bytes": 416438
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/48746aa993c18b2a6116225e.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-56.webp",
+      "sha256": "48746aa993c18b2a6116225e7fdef75cdff6cd993f9d764078c6e86c12100c1c",
+      "bytes": 367264
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/e5b36e356253e59d79abebd1.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-57.webp",
+      "sha256": "e5b36e356253e59d79abebd138c64413a615c8a224be9d37f9a3d2646fa2ee69",
+      "bytes": 351858
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/c3b41a7eba153a5e16876d6d.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-58.webp",
+      "sha256": "c3b41a7eba153a5e16876d6d6b15309aeeca6a8a0b68c756b038c39c00ff2572",
+      "bytes": 274300
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/ec3cd4d7b591cac1ba8f70e2.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-59.webp",
+      "sha256": "ec3cd4d7b591cac1ba8f70e2cfe1426c751bbcc3e9427748b900fca93ca3e0dc",
+      "bytes": 442638
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/e6e4de8306afb7994c4d3040.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-60.webp",
+      "sha256": "e6e4de8306afb7994c4d3040f613be4dfa60fb45575a4e3c73a5b3786a638bc2",
+      "bytes": 383156
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/d72a93be4841e89f7562a3a4.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-61.webp",
+      "sha256": "d72a93be4841e89f7562a3a4fcdc49a8efa0562c81f9923bf0f2d98b3cc2cedb",
+      "bytes": 360642
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/923230a38fb2bf2ab64e50f7.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-62.webp",
+      "sha256": "923230a38fb2bf2ab64e50f7437d0545e4054003f6e91ea34960e9a6e7d4fd60",
+      "bytes": 404392
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/de85be255b449b90efadd1c1.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-63.webp",
+      "sha256": "de85be255b449b90efadd1c1146ecbce296111ba68010f3ce9b7c70ebff2c09e",
+      "bytes": 310290
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/8efd3e3ca8c9c01e9eeeafd8.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-64.webp",
+      "sha256": "8efd3e3ca8c9c01e9eeeafd8fefb41f13c4ad7a54d76c982b90642df00d0a33b",
+      "bytes": 316696
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/b56134a33e737fbc1964dd97.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-65.webp",
+      "sha256": "b56134a33e737fbc1964dd976b7744bdab4062ad9d682a4fcdec077d5e2f8bdc",
+      "bytes": 377038
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/20e193d4a9d51add54b17864.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-66.webp",
+      "sha256": "20e193d4a9d51add54b1786462e4bcc1e3e6014122c56fa62ac9abee7e108655",
+      "bytes": 438532
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/85db2d0f265b9ec6a33b74c5.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-67.webp",
+      "sha256": "85db2d0f265b9ec6a33b74c5f2744356d51478df5550ef679e04deb9ebaced7a",
+      "bytes": 372578
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/bcf6d4fef18667d30b03b52d.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-68.webp",
+      "sha256": "bcf6d4fef18667d30b03b52d230b0477a3ba782a56d753b6c66ec23537430228",
+      "bytes": 414178
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/8345db83ab7765fa71929b9d.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-69.webp",
+      "sha256": "8345db83ab7765fa71929b9df00ca37fa3b25fdf20d43d1f245aca9552bface4",
+      "bytes": 383808
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/2c2aae283d4cbe9d6e16d900.webp",
+      "source": "public/assets/olympiad/visual-v8/greek/served-70.webp",
+      "sha256": "2c2aae283d4cbe9d6e16d900b77457c68a6082c172fa800deeb6954c5dff7412",
+      "bytes": 347272
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/2ffa1ea0cd0dae9a7b566b2f.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/card-rice-nori.webp",
+      "sha256": "2ffa1ea0cd0dae9a7b566b2f04a37cc8179d29ad57a4239cb7bad28cfbd9e7db",
+      "bytes": 309756
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/e26933362bcc67dccf8e4629.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/card-cheese.webp",
+      "sha256": "e26933362bcc67dccf8e46297c54bd46c196cec70c229328555073969b5aef27",
+      "bytes": 195012
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/fbdea1c04748de5d61d3a5b3.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/filling-cheese.webp",
+      "sha256": "fbdea1c04748de5d61d3a5b331f7991a1ec34e5d965e033ee00e8ce00ff9ee4f",
+      "bytes": 73312
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/36af0ab1d34158d792b4b256.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/card-cucumber.webp",
+      "sha256": "36af0ab1d34158d792b4b256ea9f4a43b00717cb140483fd078b70bf170f9202",
+      "bytes": 214736
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/544971875e822ef06906f686.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/filling-cucumber.webp",
+      "sha256": "544971875e822ef06906f68636927892dcee2020eb2b671c2e30bdbf93ff9d00",
+      "bytes": 115704
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/cfd031b834af525a952e171f.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/card-salmon.webp",
+      "sha256": "cfd031b834af525a952e171fedcafb2bac551dbb03bc1c09557bf2a550b588ba",
+      "bytes": 338382
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/8401261c15eb16d92b7d0f19.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/card-shrimp.webp",
+      "sha256": "8401261c15eb16d92b7d0f198b58f088bedc9885d8a36cfb06d9927da7d32c84",
+      "bytes": 227920
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/74cc77aa4204cdfed9a4db1b.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/filling-shrimp.webp",
+      "sha256": "74cc77aa4204cdfed9a4db1bd6931d8db5d7266dc49a692ededa00c44741954f",
+      "bytes": 162364
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/aedc5da33d697bcad375f232.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/card-tuna.webp",
+      "sha256": "aedc5da33d697bcad375f2322a72ec017c1c0af59aefce517294b2b55acdd264",
+      "bytes": 315954
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/481bc42f4a58c4a2797071ca.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/filling-tuna.webp",
+      "sha256": "481bc42f4a58c4a2797071ca358298575b15778deb4cec910468d15b7814d6fc",
+      "bytes": 82320
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/b2a483b1896f94477cbb2bb6.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/card-eel.webp",
+      "sha256": "b2a483b1896f94477cbb2bb6bb318b716446513e7de7231707e02b3d289dda5f",
+      "bytes": 332006
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/fb09e13b4f9cdea96869ef4d.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/filling-eel.webp",
+      "sha256": "fb09e13b4f9cdea96869ef4d499865fbcfca746f97d1714d5debdb7abf023eec",
+      "bytes": 111394
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/a69e8a21073c6af84d4c0df4.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/card-surimi.webp",
+      "sha256": "a69e8a21073c6af84d4c0df48b581982ea9367007fa474afaa46972933b15075",
+      "bytes": 259714
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/5f5c91e10280c407a985b276.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/filling-surimi.webp",
+      "sha256": "5f5c91e10280c407a985b2765b486c63913090488b028f93aa67f00d5b070591",
+      "bytes": 96706
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/b337fd1c1110aa554ce54b2c.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/rice.webp",
+      "sha256": "b337fd1c1110aa554ce54b2c9a4e16250fb5041654f6571d410500e9b4d2874b",
+      "bytes": 364382
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/c3293765238cbfbec52fe71f.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/flipped.webp",
+      "sha256": "c3293765238cbfbec52fe71f07a900f30250e90dd9dfc7b6b4dcaf16c7a26619",
+      "bytes": 426282
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/b8465568228538fd57995b27.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/cover-rice.webp",
+      "sha256": "b8465568228538fd57995b2710a9a7f4f0e15fe35522b18d8758841a238c4de5",
+      "bytes": 284276
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/1f6c1aaa92028b6b3c621309.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/cover-salmon.webp",
+      "sha256": "1f6c1aaa92028b6b3c621309e8c127c3f9d60c6964625e4d6efd4c045ee3eb29",
+      "bytes": 306834
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/97f0131473bb4295d9d6e9d9.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/cover-shrimp.webp",
+      "sha256": "97f0131473bb4295d9d6e9d997f424a14ac33a1d580d48adc4117353aeec4659",
+      "bytes": 290856
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/b9f4c33d6b559b9b08cfe171.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/cover-tuna.webp",
+      "sha256": "b9f4c33d6b559b9b08cfe17107f87b520108fb584bfb9caf509a4255f38479fb",
+      "bytes": 302002
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/a6223eb678d91ea07122ddeb.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/cover-eel.webp",
+      "sha256": "a6223eb678d91ea07122ddeb619c756c29ab02af74162d9272964236a52cd366",
+      "bytes": 326736
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/ef4ca1fbbbacaad2eba7d462.webp",
+      "source": "public/assets/olympiad/visual-v5/philadelphia/cover-surimi.webp",
+      "sha256": "ef4ca1fbbbacaad2eba7d46228a89e9df6025c904cf6d85869a4c7b724303d44",
+      "bytes": 295070
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/eb8483a389517cf1dfa6a2ea.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-01.webp",
+      "sha256": "eb8483a389517cf1dfa6a2ea10d312a867a826249429d8ec812df76accc903ad",
+      "bytes": 149190
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/c568f3af7286939d5804e067.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-02.webp",
+      "sha256": "c568f3af7286939d5804e06794c388f0a1c6c70a54d8c8ae77fbca2370a0550c",
+      "bytes": 140250
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/7a8ce35f2b5367d166256e03.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-03.webp",
+      "sha256": "7a8ce35f2b5367d166256e03c10edf6aadaf2ef7e1b581e562244572c2caeb6b",
+      "bytes": 142156
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/1ef8b79358e73d8e881ca4a4.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-04.webp",
+      "sha256": "1ef8b79358e73d8e881ca4a47863e78f8f41e68656f0865b27703ff242501acd",
+      "bytes": 164672
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/d936d992c4e7b101d6149bfb.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-05.webp",
+      "sha256": "d936d992c4e7b101d6149bfb6ebceb456f5713ec6bbbfb5fbc7abaf6e1884cd0",
+      "bytes": 147360
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/bef19e4f122035024613c8b2.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-06.webp",
+      "sha256": "bef19e4f122035024613c8b2de472f9b260e73b5246ef89987cb04ad8064eafd",
+      "bytes": 133056
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/e5648b00638304de17a723c1.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-07.webp",
+      "sha256": "e5648b00638304de17a723c1a609bbb18be797453879e982f9a3105ca3f3c72c",
+      "bytes": 147206
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/d9f2d4a4da7d6bdfc8824122.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-08.webp",
+      "sha256": "d9f2d4a4da7d6bdfc88241229ff9c8e97ee4a1aba80e28aca77dab0f9d79bbf2",
+      "bytes": 136342
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/2c9482d6640b9c4b63bdcd7a.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-09.webp",
+      "sha256": "2c9482d6640b9c4b63bdcd7a57366aed638bd565d661555c1acd6f8ec44bdf6f",
+      "bytes": 134872
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/fce8e9abf0c47968d49e9ff7.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-10.webp",
+      "sha256": "fce8e9abf0c47968d49e9ff73893a2f37db9b11237f1c67b1431df401dc0ab0a",
+      "bytes": 146220
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/a41d55f2c0b50b46ec49536a.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-11.webp",
+      "sha256": "a41d55f2c0b50b46ec49536a6d4e34ba8c2daee4a31e27a60e9c8cf15061eb87",
+      "bytes": 161106
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/83dd3402dc4bf794cb9a1e17.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-12.webp",
+      "sha256": "83dd3402dc4bf794cb9a1e17f69f4883f1b6726ab092731f903502dccd8943df",
+      "bytes": 146342
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/529e34a4b0e7eca5b651627a.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-13.webp",
+      "sha256": "529e34a4b0e7eca5b651627ae10f37b91060de94316788cdddf2d31036681245",
+      "bytes": 148370
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/11b25ec2ad9228873680bbee.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-14.webp",
+      "sha256": "11b25ec2ad9228873680bbee1b673f19748a5b4dd10bc8a7c875ebb512fb6ce1",
+      "bytes": 150728
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/cdb56ad34a8ffda4a9612bba.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-15.webp",
+      "sha256": "cdb56ad34a8ffda4a9612bba326291a73a1acb4603039b1366bb87217ef43059",
+      "bytes": 156938
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/eb8d3c775d2963e7f9c70e2a.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-16.webp",
+      "sha256": "eb8d3c775d2963e7f9c70e2a0ebd8ae82d91e05a18c621e6028ebe1af79988d5",
+      "bytes": 143940
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/3b84d565410715a8cd943264.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-17.webp",
+      "sha256": "3b84d565410715a8cd94326442e20c28074f6639bd05f5f702708ad23476ddf2",
+      "bytes": 139910
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/b954f4a63c0999d92a30a6bd.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-18.webp",
+      "sha256": "b954f4a63c0999d92a30a6bd176601fe899b11ade56c318b39f0f4c5ac297f02",
+      "bytes": 140738
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/93bce0f4af2495604d5c5cc5.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-19.webp",
+      "sha256": "93bce0f4af2495604d5c5cc552dd0a6ed4948e860a7d485cb369eb68771ed078",
+      "bytes": 136266
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/f4ce54e40b07223d2aa56a5c.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-20.webp",
+      "sha256": "f4ce54e40b07223d2aa56a5c4be6ddb891103535f97403ed19aa65efdc389015",
+      "bytes": 140272
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/32d0e2a1dbdda175189cde4f.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-21.webp",
+      "sha256": "32d0e2a1dbdda175189cde4fa2233fe29391271b3944ac2f49d7f9b3bc7f7b90",
+      "bytes": 160726
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/1e99bd342f75cb4654822a07.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-22.webp",
+      "sha256": "1e99bd342f75cb4654822a07fe65af9d04a4fc24078eb4684c434e4ba77a55b0",
+      "bytes": 141912
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/f908c5cc95862b27efb1a15c.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-23.webp",
+      "sha256": "f908c5cc95862b27efb1a15cdeebf8e46d593b0b2ff0b9e65c2323b1287f1b7c",
+      "bytes": 151276
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/19de3d4a0f2ae958eb7fd7ce.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-24.webp",
+      "sha256": "19de3d4a0f2ae958eb7fd7ced3efcf038659263e50389de7aedd74a4f7068f51",
+      "bytes": 148736
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/ca52b2597390a2b9b8836258.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-25.webp",
+      "sha256": "ca52b2597390a2b9b8836258ac8fd865be845bf85452c73524abde81ead4a87a",
+      "bytes": 165198
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/df1311284a6954f84354ea79.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-26.webp",
+      "sha256": "df1311284a6954f84354ea795b866e56d8e6d9e3616b78fee46aac2f58bf0e80",
+      "bytes": 147154
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/d7ad3c3ad1b786030fa38cb6.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-27.webp",
+      "sha256": "d7ad3c3ad1b786030fa38cb62780c410b7368de67fd4f921fec1e2799a72e74b",
+      "bytes": 141542
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/50f2776756c979f4b97b02e5.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-28.webp",
+      "sha256": "50f2776756c979f4b97b02e569d1a13655c525ea3cd2ee4a310338f57ca7df36",
+      "bytes": 136200
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/fffcfa7a35bf00b6a57b77c1.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-29.webp",
+      "sha256": "fffcfa7a35bf00b6a57b77c17587fcab4adc7d4560e4dc81296a138f4d1f2c63",
+      "bytes": 145090
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/c4a89c0fc2ad8ed076842658.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-30.webp",
+      "sha256": "c4a89c0fc2ad8ed0768426581c68b7f8dca789f156d8e10d2052ec594ab00622",
+      "bytes": 143818
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/c718a15af47080f99428c192.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-31.webp",
+      "sha256": "c718a15af47080f99428c192d99f69afc3e083072270b5d78d669d6fde7c16d4",
+      "bytes": 136596
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/c232968b874d32da49d9216c.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-32.webp",
+      "sha256": "c232968b874d32da49d9216cd50cce206b507ad733b60313bb0c72c739882961",
+      "bytes": 149454
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/3c62a175affaecee11501cdb.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-33.webp",
+      "sha256": "3c62a175affaecee11501cdbce33e6ac31d4719005b5e63ac3ed66f32c9a4cf7",
+      "bytes": 148586
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/1154f32c1972b26feebe8aa0.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-34.webp",
+      "sha256": "1154f32c1972b26feebe8aa0a6bdcd9c4dc8babe2e2e02443c5ea3996484c565",
+      "bytes": 162690
+    },
+    {
+      "imageUrl": "/assets/olympiad/tour5/photo-v4/058f77c56fb54b0589d46b29.webp",
+      "source": "public/assets/olympiad/visual-v9/philadelphia/sliced-35.webp",
+      "sha256": "058f77c56fb54b0589d46b298841dca95010f4a5950c0474654c88d700bfeedc",
+      "bytes": 152956
+    }
+  ]
+}

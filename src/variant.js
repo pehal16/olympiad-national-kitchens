@@ -305,6 +305,7 @@ function validateQuestionStructure(question) {
 
   if (question.type === "final_kitchen") {
     const expectedDishCounts = [3, 2, 2];
+    if (question.presentationVersion === 4) return require("./t5-photo-contract").validatePhotoQuestion(question);
     if (question.maxScore !== 16 || ![1, 2].includes(question.presentationVersion) ||
         !question.station?.title?.trim() || !expectedDishCounts[question.station.number - 1] ||
         question.dishes?.length !== expectedDishCounts[question.station.number - 1] ||
@@ -867,6 +868,13 @@ function sanitizeQuestion(question, attempt) {
 
   if (question.type === "final_kitchen") {
     const dish = question.dishes.find((entry) => entry.id === attempt.stationSelections?.[question.id]?.dishId);
+    if (question.presentationVersion === 4) return {
+      id: question.id, type: question.type, presentationVersion: 4, prompt: question.prompt, maxScore: question.maxScore,
+      tourId: question.tourId, tourCode: question.tourCode, tourTitle: question.tourTitle, tourOrder: question.tourOrder,
+      sequenceInTour: question.sequenceInTour, globalIndex: question.globalIndex,
+      station: { number: question.station.number, title: question.station.title }, dishes: [],
+      selectedDish: require("./t5-photo-contract").sanitizePhotoDish(question.dishes[0]), savedAnswer: answer ? answer.answerPayload : null
+    };
     const preview = (entry) => ({ id: entry.id, title: entry.title, cuisineLabel: entry.cuisineLabel,
       previewUrl: entry.previewUrl, previewAlt: entry.previewAlt });
     return { id: question.id, type: question.type, presentationVersion: question.presentationVersion,

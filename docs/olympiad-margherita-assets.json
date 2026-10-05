@@ -1,0 +1,940 @@
+{
+  "status": "local-demo-review",
+  "generator": "built-in ImageGen",
+  "export": "WebP quality 94, same canvas, original transparency preserved; no food editing",
+  "source": "https://www.pizzanapoletana.org/it/ricetta_pizza_napoletana",
+  "assets": [
+    {
+      "name": "baked-01",
+      "prompt": "Use case: precise-object-edit\nAsset type: main finished Margherita food photograph, the visual master for all selected-composition pizza variants.\nEdit the existing own Margherita image. Preserve realistic Neapolitan pizza anatomy and directly overhead framing. Use a pale warm cream stone worktop and a plain cream ceramic plate, both fully visible. One whole round baked pizza fills about 76% of the square canvas, plate fills 90%, centred. Thin centre, moderately raised irregular golden cornicione, fine small brown blisters, very few dark spots, no huge burnt black rim. Real tomato pulp base with restrained olive-oil sheen; five or six irregular pools of melted white fior di latte mozzarella, four or five small gently wilted dark-green basil leaves. Natural understated food photography, soft daylight, true delicate bread and cheese texture. Do not add cheddar, cucumber, chicken, egg, grated garnish, herbs, olives, extra sauce, utensils, captions, hands, graphics or logos. Do not cut the pizza: whole finished serving. Not a 3D render, not glossy plastic food, not a perfectly symmetric pie.",
+      "review": "Inspected individually in native image output; correct ingredient identity and natural overhead food appearance.",
+      "generatorFileName": "exec-510fc6a2-309e-4fb9-a4e9-6c287a135e24.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-01.png",
+      "nativeSha256": "c748cba7c88d658354b31869de3e2b41d886bbf9238483c0d55876c33aed0017",
+      "webpSha256": "40d0331e32ced98b858ec60f71922aaa21d94c24edd7615153f9c8e04aaf5b65",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-01.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "shaped",
+      "prompt": "Use case: photorealistic-natural\nAsset type: food photograph for the existing culinary olympiad. Square canvas. Natural editorial food photography, fine irregular realistic texture, restrained soft daylight. Cream stone worktop, pale warm neutral palette matching the accepted Philadelphia demo. No text, labels, logos, utensils, hands, garnish or extra ingredients. Entire subject visible with margin; not cartoon, plastic or a CGI render.\nSubject: only one raw pizza dough disc on the cream stone worktop, directly overhead, centred and occupying exactly about 76% of canvas diameter. Hand-stretched gently irregular circle, very thin flat centre, small uncompressed raw rim, fine minimal flour dust. No plate or board, absolutely no tomatoes, cheese, oil, basil, vegetables or filling yet. No roller or hand.",
+      "review": "Inspected individually in native image output; correct ingredient identity and natural overhead food appearance.",
+      "generatorFileName": "exec-4d5ee109-dd5b-4d7b-8018-d10f1275574d.png",
+      "nativeFile": "storage/t5-margherita-v7/native/shaped.png",
+      "nativeSha256": "bea1280f6f42efb529e81b686fe391bafc0f3746b2135fa2d9b1c873fe5c8b97",
+      "webpSha256": "5750ad8c8b19a1a06a261dadb897afae05ce5d17c28b71747c8b84c2ae76efd6",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/shaped.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "card-dough",
+      "prompt": "Use case: photorealistic-natural\nAsset type: food photograph for the existing culinary olympiad. Square canvas. Natural editorial food photography, fine irregular realistic texture, restrained soft daylight. Cream stone worktop, pale warm neutral palette matching the accepted Philadelphia demo. No text, labels, logos, utensils, hands, garnish or extra ingredients. Entire subject visible with margin; not cartoon, plastic or a CGI render.\nDirectly overhead close food portrait, subject centred and occupying about 68% of canvas; entire small plate visible.\nSubject: One small rested smooth pale pizza dough ball, flour-water-salt-yeast dough, no fillings, sitting on a small cream ceramic plate. Light fine flour dust, not a huge bread loaf.",
+      "review": "Inspected individually in native image output; correct ingredient identity and natural overhead food appearance.",
+      "generatorFileName": "exec-a9d020c8-47f9-4279-a574-9d8b372c2749.png",
+      "nativeFile": "storage/t5-margherita-v7/native/card-dough.png",
+      "nativeSha256": "d2a0bcb9e130144368042beaeabc44a88cbf29aff72d0aa10a72162e21f47be1",
+      "webpSha256": "c54782c8ac94061c3b870784cf82e16f12f17a0425c6b8f4cc9b19ad28499105",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/card-dough.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "card-tomato-oil",
+      "prompt": "Use case: photorealistic-natural\nAsset type: food photograph for the existing culinary olympiad. Square canvas. Natural editorial food photography, fine irregular realistic texture, restrained soft daylight. Cream stone worktop, pale warm neutral palette matching the accepted Philadelphia demo. No text, labels, logos, utensils, hands, garnish or extra ingredients. Entire subject visible with margin; not cartoon, plastic or a CGI render.\nDirectly overhead close food portrait, subject centred and occupying about 68% of canvas; entire small plate visible.\nSubject: A small cream bowl of uncooked hand-crushed peeled red tomatoes, slightly coarse with small soft pulp chunks, plus a separate small clear glass of golden extra virgin olive oil next to the bowl. No leaves or whole fresh tomatoes. They are two ingredients in one selection card, kept separate until applied.",
+      "review": "Inspected individually in native image output; correct ingredient identity and natural overhead food appearance.",
+      "generatorFileName": "exec-09e1f187-f2eb-4fd4-81ec-9deb6e0105d6.png",
+      "nativeFile": "storage/t5-margherita-v7/native/card-tomato-oil.png",
+      "nativeSha256": "fa9d055fcf56609c1f0f4d6c97a75ea5c0b5d0e9998e79d59beae5c73cdd2c3b",
+      "webpSha256": "e4e1efe5585c970eec62015fe70b853fdf49b5370aba8a116e68416308ce648e",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/card-tomato-oil.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "card-mozzarella",
+      "prompt": "Use case: photorealistic-natural\nAsset type: food photograph for the existing culinary olympiad. Square canvas. Natural editorial food photography, fine irregular realistic texture, restrained soft daylight. Cream stone worktop, pale warm neutral palette matching the accepted Philadelphia demo. No text, labels, logos, utensils, hands, garnish or extra ingredients. Entire subject visible with margin; not cartoon, plastic or a CGI render.\nDirectly overhead close food portrait, subject centred and occupying about 68% of canvas; entire small plate visible.\nSubject: Four irregular fresh white mozzarella fior di latte strips/pieces, moist and soft, on a small cream ceramic plate. Not yellow hard cheese, not perfectly round pearls.",
+      "review": "Inspected individually in native image output; correct ingredient identity and natural overhead food appearance.",
+      "generatorFileName": "exec-52c64f53-2318-4b4a-bf65-72f99d06eebd.png",
+      "nativeFile": "storage/t5-margherita-v7/native/card-mozzarella.png",
+      "nativeSha256": "9b9bd33dd14875dd9f2ee9de87c437407412690c6de093125cac871a9c570160",
+      "webpSha256": "06d0a602ccde3b7fd0ed5072a84c9005121654d1aaa665f19858d8881a04f110",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/card-mozzarella.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "card-basil",
+      "prompt": "Use case: photorealistic-natural\nAsset type: food photograph for the existing culinary olympiad. Square canvas. Natural editorial food photography, fine irregular realistic texture, restrained soft daylight. Cream stone worktop, pale warm neutral palette matching the accepted Philadelphia demo. No text, labels, logos, utensils, hands, garnish or extra ingredients. Entire subject visible with margin; not cartoon, plastic or a CGI render.\nDirectly overhead close food portrait, subject centred and occupying about 68% of canvas; entire small plate visible.\nSubject: A few small natural fresh basil leaves, green, rounded oval and slightly cupped, on a small cream ceramic plate. No stem bush, no parsley or spinach.",
+      "review": "Inspected individually in native image output; correct ingredient identity and natural overhead food appearance.",
+      "generatorFileName": "exec-e4a3201d-93d6-40f6-bc97-ad5449344fd1.png",
+      "nativeFile": "storage/t5-margherita-v7/native/card-basil.png",
+      "nativeSha256": "3360c69309a5a74343cf4276aec59b7a71e069f4e00577aa13ebb543cdad3339",
+      "webpSha256": "22a44d006e0db616aa691c52765d37d17af04549c6a63458f0748d58d2dd209d",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/card-basil.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "card-cheddar",
+      "prompt": "Use case: photorealistic-natural\nAsset type: food photograph for the existing culinary olympiad. Square canvas. Natural editorial food photography, fine irregular realistic texture, restrained soft daylight. Cream stone worktop, pale warm neutral palette matching the accepted Philadelphia demo. No text, labels, logos, utensils, hands, garnish or extra ingredients. Entire subject visible with margin; not cartoon, plastic or a CGI render.\nDirectly overhead close food portrait, subject centred and occupying about 68% of canvas; entire small plate visible.\nSubject: A small handful of yellow-orange hard cheddar cheese coarsely grated into irregular thin shreds on a small cream ceramic plate. No mozzarella.",
+      "review": "Native viewed individually: expected product only, correct raw/cooked identity, natural textures; transparent layers require composition check in browser.",
+      "generatorFileName": "exec-3ece755c-9801-4303-8135-cb17f75b4b79.png",
+      "nativeFile": "storage/t5-margherita-v7/native/card-cheddar.png",
+      "nativeSha256": "fb0019b4c48519bb687357a3d1a1f5403c042d6e8c89b319f64ecce22b496410",
+      "webpSha256": "7b8da139573f89431de3c6a581730692d35c79140341021aeba0e16509424d48",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/card-cheddar.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "card-cucumber",
+      "prompt": "Use case: photorealistic-natural\nAsset type: food photograph for the existing culinary olympiad. Square canvas. Natural editorial food photography, fine irregular realistic texture, restrained soft daylight. Cream stone worktop, pale warm neutral palette matching the accepted Philadelphia demo. No text, labels, logos, utensils, hands, garnish or extra ingredients. Entire subject visible with margin; not cartoon, plastic or a CGI render.\nDirectly overhead close food portrait, subject centred and occupying about 68% of canvas; entire small plate visible.\nSubject: Six realistic thin cucumber rounds with dark green skin, pale moist inside and natural seed pattern on a small cream plate.",
+      "review": "Native viewed individually: expected product only, correct raw/cooked identity, natural textures; transparent layers require composition check in browser.",
+      "generatorFileName": "exec-86b2ef35-d60d-49f3-ad7a-7174e7137b5c.png",
+      "nativeFile": "storage/t5-margherita-v7/native/card-cucumber.png",
+      "nativeSha256": "01491c65ca20e91439953f3f41a7ccef7370100de3aaaa8accb6cad18765f2f5",
+      "webpSha256": "790c9f28e2afffaf2bb31ff086f7b420573476bee58cfbe336c5cddea4ab7adc",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/card-cucumber.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "card-egg",
+      "prompt": "Use case: photorealistic-natural\nAsset type: food photograph for the existing culinary olympiad. Square canvas. Natural editorial food photography, fine irregular realistic texture, restrained soft daylight. Cream stone worktop, pale warm neutral palette matching the accepted Philadelphia demo. No text, labels, logos, utensils, hands, garnish or extra ingredients. Entire subject visible with margin; not cartoon, plastic or a CGI render.\nDirectly overhead close food portrait, subject centred and occupying about 68% of canvas; entire small plate visible.\nSubject: One peeled hard-boiled chicken egg cut into five thin oval slices, white edges and opaque soft yellow centres, on a small cream plate. No raw egg.",
+      "review": "Native viewed individually: expected product only, correct raw/cooked identity, natural textures; transparent layers require composition check in browser.",
+      "generatorFileName": "exec-0d428173-7519-48c1-8282-3abcc19e9c94.png",
+      "nativeFile": "storage/t5-margherita-v7/native/card-egg.png",
+      "nativeSha256": "89af252ff881211cae7fb7eb7830dbad342daf4217520a6f5909c7ae8db7b055",
+      "webpSha256": "ac84aa43c6d0c5ffdeb72a3ec5c31e7b29506c981402b9d7b9abee90cfa7d30e",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/card-egg.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "card-chicken",
+      "prompt": "Use case: photorealistic-natural\nAsset type: food photograph for the existing culinary olympiad. Square canvas. Natural editorial food photography, fine irregular realistic texture, restrained soft daylight. Cream stone worktop, pale warm neutral palette matching the accepted Philadelphia demo. No text, labels, logos, utensils, hands, garnish or extra ingredients. Entire subject visible with margin; not cartoon, plastic or a CGI render.\nDirectly overhead close food portrait, subject centred and occupying about 68% of canvas; entire small plate visible.\nSubject: Six small irregular slices of cooked grilled chicken breast, pale fibres with fine browned edges, on a small cream plate. Natural meat, no sauce, vegetables or skin.",
+      "review": "Native viewed individually: expected product only, correct raw/cooked identity, natural textures; transparent layers require composition check in browser.",
+      "generatorFileName": "exec-6c203f86-0e94-4e48-9d61-bfeca5f6832b.png",
+      "nativeFile": "storage/t5-margherita-v7/native/card-chicken.png",
+      "nativeSha256": "89ae35e5aa557bb732121075abf656289fe79661a7c3c01d68703166725753df",
+      "webpSha256": "85c434ec83c02869107688e5a01af3587ea9057b8687afafc55448354f4cf665",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/card-chicken.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "layer-tomato",
+      "prompt": "Use case: photorealistic-natural. Asset: one square transparent photographic ingredient overlay for a pizza preparation preview. Orthographic directly overhead. Real food texture, soft natural daylight from upper left. True alpha transparent background, no plate, support, dough, countertop, text or garnish. Components centred, entire group contained inside a circle 64% of canvas diameter with a wide transparent margin. No fake checkerboard, no cartoon, no CGI. Do not add any other food. Subject: a thin roughly circular spread of moist coarsely crushed peeled red tomatoes, pulp and tiny seeds visible, irregular natural edge; the disc diameter 65% of canvas. No oil, herbs, white cheese, utensil or base.",
+      "review": "Native viewed individually: expected product only, correct raw/cooked identity, natural textures; transparent layers require composition check in browser.",
+      "generatorFileName": "exec-59623fd3-266b-4517-a65b-f5757bedb9c9.png",
+      "nativeFile": "storage/t5-margherita-v7/native/layer-tomato.png",
+      "nativeSha256": "c3970cdd3a3371e24e10ed592632f98cd9998da5057421b0cb58554fa806b78f",
+      "webpSha256": "0e1b7424b945ec4f807f53338fbbeff6cf3c68c0e894ab09b335d94d553f444f",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/layer-tomato.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "layer-mozzarella",
+      "prompt": "Use case: photorealistic-natural. Asset: one square transparent photographic ingredient overlay for a pizza preparation preview. Orthographic directly overhead. Real food texture, soft natural daylight from upper left. True alpha transparent background, no plate, support, dough, countertop, text or garnish. Components centred, entire group contained inside a circle 64% of canvas diameter with a wide transparent margin. No fake checkerboard, no cartoon, no CGI. Do not add any other food. Subject: seven separate irregular strips of raw fresh white fior-di-latte mozzarella, moist soft torn edges, naturally scattered without overlap across the circular area. Not melted yet. Each small strip less than 14% of canvas. No other food.",
+      "review": "Native viewed individually: expected product only, correct raw/cooked identity, natural textures; transparent layers require composition check in browser.",
+      "generatorFileName": "exec-bb7376e8-0629-4288-a0a7-aa8e9d8a8125.png",
+      "nativeFile": "storage/t5-margherita-v7/native/layer-mozzarella.png",
+      "nativeSha256": "a3e465afca8d15326c205e707c4c544cd83cdf646c3fd8217795e8def9420d53",
+      "webpSha256": "10807268146232c258511bc2e98cab2954f08784ad2c2ffbd63f07870d80b9b8",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/layer-mozzarella.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "layer-basil",
+      "prompt": "Use case: photorealistic-natural. Asset: one square transparent photographic ingredient overlay for a pizza preparation preview. Orthographic directly overhead. Real food texture, soft natural daylight from upper left. True alpha transparent background, no plate, support, dough, countertop, text or garnish. Components centred, entire group contained inside a circle 64% of canvas diameter with a wide transparent margin. No fake checkerboard, no cartoon, no CGI. Do not add any other food. Subject: Five small fresh basil leaves, each no longer than 13% of canvas, spread loosely across the central circular area with space between, green leaf veins and moist natural texture, not chopped.",
+      "review": "Native viewed individually: expected product only, correct raw/cooked identity, natural textures; transparent layers require composition check in browser.",
+      "generatorFileName": "exec-2b9b65e5-7bad-4aa1-9275-10cbbbd5aedf.png",
+      "nativeFile": "storage/t5-margherita-v7/native/layer-basil.png",
+      "nativeSha256": "1353cc781425e6dde1b302d33a91a1fa855723dc09b9519c32e4c6061f917bed",
+      "webpSha256": "77d3900d67e970d4406b517a74480a9f6582cc706d36674c959b3075fdb82f62",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/layer-basil.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "layer-cheddar",
+      "prompt": "Use case: photorealistic-natural. Asset: one square transparent photographic ingredient overlay for a pizza preparation preview. Orthographic directly overhead. Real food texture, soft natural daylight from upper left. True alpha transparent background, no plate, support, dough, countertop, text or garnish. Components centred, entire group contained inside a circle 64% of canvas diameter with a wide transparent margin. No fake checkerboard, no cartoon, no CGI. Do not add any other food. Subject: Small irregular shreds of raw yellow-orange cheddar distributed sparsely across the central circular area, not one dense pile, no white cheese.",
+      "review": "Native viewed individually: expected product only, correct raw/cooked identity, natural textures; transparent layers require composition check in browser.",
+      "generatorFileName": "exec-d6688a1a-ddea-4f42-988c-9a15485fdaad.png",
+      "nativeFile": "storage/t5-margherita-v7/native/layer-cheddar.png",
+      "nativeSha256": "146b8d2f65ce54715f79a7026a8b7999d91b939a33036b906265aff43a03d6a4",
+      "webpSha256": "519a1c4f387853bd56117ce61fc39ab5b785ad26ab9b3d3810e0599c3ad4229b",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/layer-cheddar.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "layer-cucumber",
+      "prompt": "Use case: photorealistic-natural. Asset: one square transparent photographic ingredient overlay for a pizza preparation preview. Orthographic directly overhead. Real food texture, soft natural daylight from upper left. True alpha transparent background, no plate, support, dough, countertop, text or garnish. Components centred, entire group contained inside a circle 64% of canvas diameter with a wide transparent margin. No fake checkerboard, no cartoon, no CGI. Do not add any other food. Subject: Six thin raw cucumber rounds, each under 14% of canvas, dark green skin, watery pale centres with real seeds, spread loosely without overlap across the central circular area.",
+      "review": "Native viewed individually: expected product only, correct raw/cooked identity, natural textures; transparent layers require composition check in browser.",
+      "generatorFileName": "exec-e64fb03c-3d53-4503-b41f-2d7284e90c12.png",
+      "nativeFile": "storage/t5-margherita-v7/native/layer-cucumber.png",
+      "nativeSha256": "cfc1fab83e92857919274816669aa3283720bc71ab2242289e687fdec569627b",
+      "webpSha256": "d367958a1d4b4fb42864cc6cb5ee81f366e8302ef875755476d826051acac5c6",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/layer-cucumber.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "layer-egg",
+      "prompt": "Use case: photorealistic-natural. Asset: one square transparent photographic ingredient overlay for a pizza preparation preview. Orthographic directly overhead. Real food texture, soft natural daylight from upper left. True alpha transparent background, no plate, support, dough, countertop, text or garnish. Components centred, entire group contained inside a circle 64% of canvas diameter with a wide transparent margin. No fake checkerboard, no cartoon, no CGI. Do not add any other food. Subject: Five small hard-boiled egg slices, each under 14% of canvas, opaque yellow yolks and white edges, spread with space across the circular area.",
+      "review": "Native viewed individually: expected product only, correct raw/cooked identity, natural textures; transparent layers require composition check in browser.",
+      "generatorFileName": "exec-d28a27be-16d8-42dc-8545-d496dd343992.png",
+      "nativeFile": "storage/t5-margherita-v7/native/layer-egg.png",
+      "nativeSha256": "0b2269ac573bfa5da62f802bff627ffe80daf06d58e177555c4b4b45e42e9458",
+      "webpSha256": "53c7a312f6bc8d350da083f7713229547d9d7368af8e7e3f1e2ebddff6e573b7",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/layer-egg.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "layer-chicken",
+      "prompt": "Use case: photorealistic-natural. Asset: one square transparent photographic ingredient overlay for a pizza preparation preview. Orthographic directly overhead. Real food texture, soft natural daylight from upper left. True alpha transparent background, no plate, support, dough, countertop, text or garnish. Components centred, entire group contained inside a circle 64% of canvas diameter with a wide transparent margin. No fake checkerboard, no cartoon, no CGI. Do not add any other food. Subject: Six small slices of already grilled chicken breast, pale fibres and browned edges, each under 15% of canvas, evenly scattered in the central circular area.",
+      "review": "Native viewed individually: expected product only, correct raw/cooked identity, natural textures; transparent layers require composition check in browser.",
+      "generatorFileName": "exec-9c864b0c-e8e0-4834-8cc1-5295a00f0a9a.png",
+      "nativeFile": "storage/t5-margherita-v7/native/layer-chicken.png",
+      "nativeSha256": "37211c7e53926a34381d593b6a9504b92c76616ac40b2daac08829837a6d4ea1",
+      "webpSha256": "75beedcbc1e5957a8272249d1aca6058bb364e774d0cb45fe3e98ce8b4181c7e",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/layer-chicken.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "layer-oil",
+      "prompt": "Use case: photorealistic-natural. Asset: one square transparent photographic ingredient overlay for a pizza preparation preview. Orthographic directly overhead. Real food texture, soft natural daylight from upper left. True alpha transparent background, no plate, support, dough, countertop, text or garnish. Components centred, entire group contained inside a circle 64% of canvas diameter with a wide transparent margin. No fake checkerboard, no cartoon, no CGI. Do not add any other food. Subject: Only a very fine incomplete spiral of golden olive oil droplets, realistic transparent pale gold reflections. Thin irregular droplet trail, not a rope or cheese. Plenty of transparent space, to lay over tomato pulp and toppings. No food or background.",
+      "review": "Native viewed individually: expected product only, correct raw/cooked identity, natural textures; transparent layers require composition check in browser.",
+      "generatorFileName": "exec-49b6e676-adb9-4547-95cc-5cbd1db8be2b.png",
+      "nativeFile": "storage/t5-margherita-v7/native/layer-oil.png",
+      "nativeSha256": "d54279e1ae19c629d5bc0184593aee1998e280ace5c4c9ea2f921bc00de2fac3",
+      "webpSha256": "f9975fcd20610ce8c698a9f6884d4ae2e6c8e1ee79c0f791726540b50748e040",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/layer-oil.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-02",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: crushed peeled red tomatoes and a restrained extra virgin olive oil sheen; soft melted white mozzarella in irregular small pools; melted yellow-orange cheddar, distinct from white mozzarella. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: basil, cucumber, egg, chicken. Tomatoes under the selected toppings; oil is a subtle sheen, not a visible yellow rope. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "tomato-oil",
+        "mozzarella",
+        "cheddar"
+      ],
+      "review": "Individually viewed native: only the selected toppings are present, browned dough and exact baked cheese/meat/vegetable identities; no unselected basil or cheese.",
+      "generatorFileName": "exec-218077ac-224e-49fb-bf72-86a5a275614a.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-02.png",
+      "nativeSha256": "eaac3f638b7d6b415d08e65c1423e8b0547857d221fad3b757e70e24ad4721d6",
+      "webpSha256": "cdf463ab38bb1c7f9719deb4dd2ecfd69dd8fb360e1e92da68bebd57a5a8e7e1",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-02.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-03",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: crushed peeled red tomatoes and a restrained extra virgin olive oil sheen; soft melted white mozzarella in irregular small pools; six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: basil, cheddar, egg, chicken. Tomatoes under the selected toppings; oil is a subtle sheen, not a visible yellow rope. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "tomato-oil",
+        "mozzarella",
+        "cucumber"
+      ],
+      "review": "Individually viewed native: only the selected toppings are present, browned dough and exact baked cheese/meat/vegetable identities; no unselected basil or cheese.",
+      "generatorFileName": "exec-89c4ab1f-1612-4976-833b-b1be9278c5b0.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-03.png",
+      "nativeSha256": "b2fbc5289742c073757584d2d5c79cb3bd5bea163e408dcbe0e0c88e450fddbc",
+      "webpSha256": "36bb981d6ae5559e42fcf677acee70b3b47ae78e84b3bd43bd6360f818288d84",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-03.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-04",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: crushed peeled red tomatoes and a restrained extra virgin olive oil sheen; soft melted white mozzarella in irregular small pools; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: basil, cheddar, cucumber, chicken. Tomatoes under the selected toppings; oil is a subtle sheen, not a visible yellow rope. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "tomato-oil",
+        "mozzarella",
+        "egg"
+      ],
+      "review": "Individually viewed native: only the selected toppings are present, browned dough and exact baked cheese/meat/vegetable identities; no unselected basil or cheese.",
+      "generatorFileName": "exec-e7d94a8b-af44-40ed-9ed4-cb3bc324c1fb.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-04.png",
+      "nativeSha256": "f457dd4e4c747bc3f8d48c0d313b11babf5719b48f36040ea1518f3454f1924d",
+      "webpSha256": "cdcb1302048c84bc1fcb59ab16b6484f9690396b0b7d33635e34928e93f23baa",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-04.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-05",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: crushed peeled red tomatoes and a restrained extra virgin olive oil sheen; soft melted white mozzarella in irregular small pools; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: basil, cheddar, cucumber, egg. Tomatoes under the selected toppings; oil is a subtle sheen, not a visible yellow rope. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "tomato-oil",
+        "mozzarella",
+        "chicken"
+      ],
+      "review": "Individually viewed native: only the selected toppings are present, browned dough and exact baked cheese/meat/vegetable identities; no unselected basil or cheese.",
+      "generatorFileName": "exec-5a7b308c-4e51-4956-b57e-86d7fac7a05e.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-05.png",
+      "nativeSha256": "10b2c48141c45ab4c7156d54267858150d613f3d0680299509d231663b2981e0",
+      "webpSha256": "4e9c75ade070ad1b33b903c7c264d2250f03d64da6c7f7e97b707a26ee78f253",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-05.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-06",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: crushed peeled red tomatoes and a restrained extra virgin olive oil sheen; five small basil leaves, lightly wilted by the bake, recognizably green; melted yellow-orange cheddar, distinct from white mozzarella. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: mozzarella, cucumber, egg, chicken. Tomatoes under the selected toppings; oil is a subtle sheen, not a visible yellow rope. No white cheese. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "tomato-oil",
+        "basil",
+        "cheddar"
+      ],
+      "review": "Individually viewed native: only the selected toppings are present, browned dough and exact baked cheese/meat/vegetable identities; no unselected basil or cheese.",
+      "generatorFileName": "exec-aa9547ca-276e-46db-b07d-1d3cf22281a0.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-06.png",
+      "nativeSha256": "c94cf14805ba8e87bb94ad752decb6cc1d4fc535b2d15eb300e4322926d61507",
+      "webpSha256": "1a79a14f1d2ecd40ef7ff1ab45ecbe3cfa6eeeec3f7dac418ce63c286f3d0760",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-06.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-07",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: crushed peeled red tomatoes and a restrained extra virgin olive oil sheen; five small basil leaves, lightly wilted by the bake, recognizably green; six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: mozzarella, cheddar, egg, chicken. Tomatoes under the selected toppings; oil is a subtle sheen, not a visible yellow rope. No white cheese. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "tomato-oil",
+        "basil",
+        "cucumber"
+      ],
+      "review": "Individually viewed native: only the selected toppings are present, browned dough and exact baked cheese/meat/vegetable identities; no unselected basil or cheese.",
+      "generatorFileName": "exec-a65db705-3a63-4642-992d-1865b19cbdd2.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-07.png",
+      "nativeSha256": "cedc3ec855119951f8b529f29d93425520abdf798f4f69280c0688595a90992f",
+      "webpSha256": "28054d4471362cbf9cd2a660e5b9677b3b02f901eccfe21c6734a3488b67d4a6",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-07.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-08",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: crushed peeled red tomatoes and a restrained extra virgin olive oil sheen; five small basil leaves, lightly wilted by the bake, recognizably green; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: mozzarella, cheddar, cucumber, chicken. Tomatoes under the selected toppings; oil is a subtle sheen, not a visible yellow rope. No white cheese. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "tomato-oil",
+        "basil",
+        "egg"
+      ],
+      "review": "Native inspected individually: exact selected tomato/cheese/vegetable/egg/chicken composition; no unselected toppings; whole baked base and plate visible.",
+      "generatorFileName": "exec-2056756f-f80a-4b97-bd1e-f1af9977eb63.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-08.png",
+      "nativeSha256": "89ec34932fede1b9d180fea31aff836fbc80dcf9769aea286c71c3f08c33b97b",
+      "webpSha256": "923100f9eba78b0e05f826bec248782f33ec79a731d2f9cd6ee911d0f1ade736",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-08.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-09",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: crushed peeled red tomatoes and a restrained extra virgin olive oil sheen; five small basil leaves, lightly wilted by the bake, recognizably green; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: mozzarella, cheddar, cucumber, egg. Tomatoes under the selected toppings; oil is a subtle sheen, not a visible yellow rope. No white cheese. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "tomato-oil",
+        "basil",
+        "chicken"
+      ],
+      "review": "Native inspected individually: exact selected tomato/cheese/vegetable/egg/chicken composition; no unselected toppings; whole baked base and plate visible.",
+      "generatorFileName": "exec-1c79b586-0ac9-4014-bc7e-bb1eca945f3e.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-09.png",
+      "nativeSha256": "ea85916075c5bdc8bcd35cd20850140e833fb71b3a15aba9c3193add4731ccdc",
+      "webpSha256": "49cf58712e97e4e9121d659a2da2e10d9faf64ed665d4cc3d498f7859dae8dd8",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-09.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-10",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: crushed peeled red tomatoes and a restrained extra virgin olive oil sheen; melted yellow-orange cheddar, distinct from white mozzarella; six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: mozzarella, basil, egg, chicken. Tomatoes under the selected toppings; oil is a subtle sheen, not a visible yellow rope. No white cheese. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "tomato-oil",
+        "cheddar",
+        "cucumber"
+      ],
+      "review": "Native inspected individually: exact selected tomato/cheese/vegetable/egg/chicken composition; no unselected toppings; whole baked base and plate visible.",
+      "generatorFileName": "exec-efffb757-4987-4c54-a02e-708abe376ba3.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-10.png",
+      "nativeSha256": "bf01fce585b57652b7673a71cb152c0b60e36f849953f762471b649011e4fb84",
+      "webpSha256": "dada2d651def9eccf64416fe15dc5b38f296a5529cb7a977ed9f03e5bc593fc6",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-10.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-11",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: crushed peeled red tomatoes and a restrained extra virgin olive oil sheen; melted yellow-orange cheddar, distinct from white mozzarella; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: mozzarella, basil, cucumber, chicken. Tomatoes under the selected toppings; oil is a subtle sheen, not a visible yellow rope. No white cheese. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "tomato-oil",
+        "cheddar",
+        "egg"
+      ],
+      "review": "Native inspected individually: exact selected tomato/cheese/vegetable/egg/chicken composition; no unselected toppings; whole baked base and plate visible.",
+      "generatorFileName": "exec-07647ae0-fef6-4aca-beb5-a39a2145db88.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-11.png",
+      "nativeSha256": "eb2b343731e9f094e7b5ddce4fb40b5eb2e2b68b47b7ed3d4fdef5cf5ddca063",
+      "webpSha256": "f3ae89fcdb958e338bc0ab52641095006e8cbf9d546a6d7969929f62eb3a7fde",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-11.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-12",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: crushed peeled red tomatoes and a restrained extra virgin olive oil sheen; melted yellow-orange cheddar, distinct from white mozzarella; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: mozzarella, basil, cucumber, egg. Tomatoes under the selected toppings; oil is a subtle sheen, not a visible yellow rope. No white cheese. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "tomato-oil",
+        "cheddar",
+        "chicken"
+      ],
+      "review": "Native inspected individually: exact selected tomato/cheese/vegetable/egg/chicken composition; no unselected toppings; whole baked base and plate visible.",
+      "generatorFileName": "exec-cdde7255-ecfe-4b66-8384-3c5b04bf4150.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-12.png",
+      "nativeSha256": "6c81c85287dd10d8e56288c867b7fa9090800134935985f62f75c8ecaacfe0c5",
+      "webpSha256": "af3c053d75f3829c9f85469512a9275272ef74703a4c809fa563873f53a9e612",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-12.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-13",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: crushed peeled red tomatoes and a restrained extra virgin olive oil sheen; six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: mozzarella, basil, cheddar, chicken. Tomatoes under the selected toppings; oil is a subtle sheen, not a visible yellow rope. No white cheese. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "tomato-oil",
+        "cucumber",
+        "egg"
+      ],
+      "review": "Native inspected individually: exact selected tomato/cheese/vegetable/egg/chicken composition; no unselected toppings; whole baked base and plate visible.",
+      "generatorFileName": "exec-726a536a-4de6-4ab0-ab98-7b434ddfe551.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-13.png",
+      "nativeSha256": "12c20ac24f211c468ea0d32953db42eac5639b425050254b2b4d5684a4efd3e0",
+      "webpSha256": "9e9d47c3fcb0ea09d195a1ff1b193993eea595ad6bad717f9237d2281b8695dd",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-13.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-14",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: crushed peeled red tomatoes and a restrained extra virgin olive oil sheen; six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: mozzarella, basil, cheddar, egg. Tomatoes under the selected toppings; oil is a subtle sheen, not a visible yellow rope. No white cheese. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "tomato-oil",
+        "cucumber",
+        "chicken"
+      ],
+      "review": "Native inspected individually: only the declared three toppings on baked dough; tomato absent where not selected, no invented sauce or unselected oil/herbs.",
+      "generatorFileName": "exec-9e298270-6dd0-41c6-935f-8cdcef915e0d.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-14.png",
+      "nativeSha256": "3542ec1daec0a408df917f2e77feadd47e22a9c692bb7350708fdc0f6ba877f5",
+      "webpSha256": "24807ebbc0b5ce9624fbcd47cc8590a6b7404e36486294c19893ac6f2c7a8fbf",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-14.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-15",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: crushed peeled red tomatoes and a restrained extra virgin olive oil sheen; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: mozzarella, basil, cheddar, cucumber. Tomatoes under the selected toppings; oil is a subtle sheen, not a visible yellow rope. No white cheese. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "tomato-oil",
+        "egg",
+        "chicken"
+      ],
+      "review": "Native inspected individually: only the declared three toppings on baked dough; tomato absent where not selected, no invented sauce or unselected oil/herbs.",
+      "generatorFileName": "exec-4d3e1497-588b-48ba-a6db-f2c350df6d48.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-15.png",
+      "nativeSha256": "778c08d853c7425c6048b5cbe2a1bbef26e3adfe16111f49baac7c0cad60aa4e",
+      "webpSha256": "1190eff91bdb01589ae26b649b1b99932b74ba834f875b0997671b3ae4824369",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-15.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-16",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: soft melted white mozzarella in irregular small pools; five small basil leaves, lightly wilted by the bake, recognizably green; melted yellow-orange cheddar, distinct from white mozzarella. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, cucumber, egg, chicken. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "mozzarella",
+        "basil",
+        "cheddar"
+      ],
+      "review": "Native inspected individually: only the declared three toppings on baked dough; tomato absent where not selected, no invented sauce or unselected oil/herbs.",
+      "generatorFileName": "exec-85014966-e394-4fc9-a7fe-fd4a497e492f.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-16.png",
+      "nativeSha256": "caf96439316bf995418b78ec9968235c68a76f11f3f54e8c297da6ac43253d65",
+      "webpSha256": "ab8438e3238a3d876e297f68b71ac565c1a04ffc0e3e4fc0fa631abe602144ce",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-16.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-17",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: soft melted white mozzarella in irregular small pools; five small basil leaves, lightly wilted by the bake, recognizably green; six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, cheddar, egg, chicken. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "mozzarella",
+        "basil",
+        "cucumber"
+      ],
+      "review": "Native inspected individually: only the declared three toppings on baked dough; tomato absent where not selected, no invented sauce or unselected oil/herbs.",
+      "generatorFileName": "exec-66021ce2-6098-4b13-986b-132d182c375b.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-17.png",
+      "nativeSha256": "432f958622780c136164bb7aafac7f2b8079f3b0d92fb4fdadce5bfda491f9f1",
+      "webpSha256": "71c580401ed1ec879e45ff0629c8f6169d714c1f0f6db70ce41ed56c01a1075d",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-17.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-18",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: soft melted white mozzarella in irregular small pools; five small basil leaves, lightly wilted by the bake, recognizably green; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, cheddar, cucumber, chicken. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "mozzarella",
+        "basil",
+        "egg"
+      ],
+      "review": "Native inspected individually: only the declared three toppings on baked dough; tomato absent where not selected, no invented sauce or unselected oil/herbs.",
+      "generatorFileName": "exec-1bc9e99f-8fc4-475b-a9a5-4fc4d7381aea.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-18.png",
+      "nativeSha256": "9da60d172186337dc8a240648c25d6eef337cd174cbacf358732f139b3154e11",
+      "webpSha256": "ba48207ecf65c6fd616056bf582c8fb3b484984eb4d8cd213d806935fdaefe64",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-18.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-19",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: soft melted white mozzarella in irregular small pools; five small basil leaves, lightly wilted by the bake, recognizably green; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, cheddar, cucumber, egg. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "mozzarella",
+        "basil",
+        "chicken"
+      ],
+      "review": "Native inspected individually: only the declared three toppings on baked dough; tomato absent where not selected, no invented sauce or unselected oil/herbs.",
+      "generatorFileName": "exec-52f4f234-c809-4a5d-9cdc-5aaf936195d3.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-19.png",
+      "nativeSha256": "a2962a1aa6b71e2c0e1f2abe21c6691962655c1a0fbfe7dfe57b8f885b40c09f",
+      "webpSha256": "33c425ab73a11e223b188162890c032c818951a7ce080a94e469973c1ecdf169",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-19.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-20",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: soft melted white mozzarella in irregular small pools; melted yellow-orange cheddar, distinct from white mozzarella; six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, basil, egg, chicken. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "mozzarella",
+        "cheddar",
+        "cucumber"
+      ],
+      "review": "Native inspected individually: melted white mozzarella and orange cheddar only where selected, recognisable cucumber/egg/chicken, no tomato or extra herb garnish.",
+      "generatorFileName": "exec-bf7a7f6a-ba9b-47e2-bdb7-ee07b29337dc.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-20.png",
+      "nativeSha256": "e40776b0a5be1fca46dece0973a14ce47426ee9cf09b830ee005d151971f764f",
+      "webpSha256": "3858ef570ab50758cb48bdedf7a6826c206691eafc2ba8a70be2f096590fdeaf",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-20.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-21",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: soft melted white mozzarella in irregular small pools; melted yellow-orange cheddar, distinct from white mozzarella; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, basil, cucumber, chicken. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "mozzarella",
+        "cheddar",
+        "egg"
+      ],
+      "review": "Native inspected individually: melted white mozzarella and orange cheddar only where selected, recognisable cucumber/egg/chicken, no tomato or extra herb garnish.",
+      "generatorFileName": "exec-12bfc4dc-d8b4-4adc-afd0-c613f57d88c3.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-21.png",
+      "nativeSha256": "dac6b63ffec43f5d73eecef787035a4fb85c155884d885661a35da255bb74d40",
+      "webpSha256": "b4b46b68e41a00ba69d19640cc94198392049f563c9e4adf44d30aea0d4f5e01",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-21.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-22",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: soft melted white mozzarella in irregular small pools; melted yellow-orange cheddar, distinct from white mozzarella; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, basil, cucumber, egg. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "mozzarella",
+        "cheddar",
+        "chicken"
+      ],
+      "review": "Native inspected individually: melted white mozzarella and orange cheddar only where selected, recognisable cucumber/egg/chicken, no tomato or extra herb garnish.",
+      "generatorFileName": "exec-1eac8c6e-5519-48b4-81c0-8bbcc2c2655f.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-22.png",
+      "nativeSha256": "8d7727940dd9e0158e4db137a0f44d0d5f04a4aeb0a506390f69c0d0bf11729a",
+      "webpSha256": "62e6607d3b0bffbe5866a7fe68115c78acc124d8c539b13112fdda0d835b01c8",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-22.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-23",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: soft melted white mozzarella in irregular small pools; six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, basil, cheddar, chicken. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "mozzarella",
+        "cucumber",
+        "egg"
+      ],
+      "review": "Native inspected individually: melted white mozzarella and orange cheddar only where selected, recognisable cucumber/egg/chicken, no tomato or extra herb garnish.",
+      "generatorFileName": "exec-fc930a20-d41b-4f55-9f3a-20fe33998182.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-23.png",
+      "nativeSha256": "9d95aba599f2a25761b011af1061393d26e5ef3202372ca1d6d58dfa4dede56c",
+      "webpSha256": "1dbfa1d2394cb037f209ea142b3d61487167ede6803383ec4f264055a4ebac23",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-23.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-24",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: soft melted white mozzarella in irregular small pools; six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, basil, cheddar, egg. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "mozzarella",
+        "cucumber",
+        "chicken"
+      ],
+      "review": "Native inspected individually: melted white mozzarella and orange cheddar only where selected, recognisable cucumber/egg/chicken, no tomato or extra herb garnish.",
+      "generatorFileName": "exec-5f84d6e5-f293-46e6-9771-7923a335780b.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-24.png",
+      "nativeSha256": "1521eea194150ddc695681e9da3bf6e3671dbc22dd59504e34c29db3d4142fad",
+      "webpSha256": "da661d1bc1658799afc0acfd32b472e4fee00be38c31e6c354afa475b4850fe2",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-24.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-25",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: soft melted white mozzarella in irregular small pools; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, basil, cheddar, cucumber. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "mozzarella",
+        "egg",
+        "chicken"
+      ],
+      "review": "Native inspected individually: melted white mozzarella and orange cheddar only where selected, recognisable cucumber/egg/chicken, no tomato or extra herb garnish.",
+      "generatorFileName": "exec-0bc47db1-aca2-4aa4-b5b2-e71663dc8f3e.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-25.png",
+      "nativeSha256": "2ecd7f19e04ae6166eedb202b8246a0e42496bc61da3e1c78c2483b8da7ee488",
+      "webpSha256": "d0db445ad9088313789eb0c0f6cec5cf71c5825bbec97db84cd603c41f9b48a8",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-25.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-26",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: five small basil leaves, lightly wilted by the bake, recognizably green; melted yellow-orange cheddar, distinct from white mozzarella; six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, mozzarella, egg, chicken. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No white cheese. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "basil",
+        "cheddar",
+        "cucumber"
+      ],
+      "review": "Native inspected individually: no tomato, no white mozzarella; orange cheddar only where selected; exact three toppings on plain baked dough with the full plate visible.",
+      "generatorFileName": "exec-b25e965d-4d44-454b-99a8-07784392c646.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-26.png",
+      "nativeSha256": "3190c63a8634cead4d63db5f8779b2d24239bd2fa38e12fea3baa3762045623f",
+      "webpSha256": "5e539227d90e683cf603fbb926e26e5658931b215023519f3840c0d57ab0c0c9",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-26.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-27",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: five small basil leaves, lightly wilted by the bake, recognizably green; melted yellow-orange cheddar, distinct from white mozzarella; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, mozzarella, cucumber, chicken. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No white cheese. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "basil",
+        "cheddar",
+        "egg"
+      ],
+      "review": "Native inspected individually: no tomato, no white mozzarella; orange cheddar only where selected; exact three toppings on plain baked dough with the full plate visible.",
+      "generatorFileName": "exec-94fda7b4-c800-46ad-bb1d-e14a0e2cef22.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-27.png",
+      "nativeSha256": "cb1655cc81a727074cac256719b210876382631ccd4f6f062c7691d30f4d3491",
+      "webpSha256": "5515db7561fcdca62bc4f73b5b91f873e375d3b5a911b7411dbc01d8f2bb291f",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-27.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-28",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: five small basil leaves, lightly wilted by the bake, recognizably green; melted yellow-orange cheddar, distinct from white mozzarella; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, mozzarella, cucumber, egg. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No white cheese. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "basil",
+        "cheddar",
+        "chicken"
+      ],
+      "review": "Native inspected individually: no tomato, no white mozzarella; orange cheddar only where selected; exact three toppings on plain baked dough with the full plate visible.",
+      "generatorFileName": "exec-f48475db-43c5-4a82-b16b-6f0aa0e0ee20.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-28.png",
+      "nativeSha256": "b497957f22c4da716a2f5b4814843d9785d0f1c968663772248ed208ac30eb59",
+      "webpSha256": "c37b199b2814fffc9cd0f14517b72e9f566881125a2639f838c44e2b9a59e622",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-28.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-29",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: five small basil leaves, lightly wilted by the bake, recognizably green; six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, mozzarella, cheddar, chicken. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No white cheese. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "basil",
+        "cucumber",
+        "egg"
+      ],
+      "review": "Native inspected individually: no tomato, no white mozzarella; orange cheddar only where selected; exact three toppings on plain baked dough with the full plate visible.",
+      "generatorFileName": "exec-e70a01f1-731f-46bd-9228-812c5471943e.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-29.png",
+      "nativeSha256": "7243a25c8854d4e6836c6f8aa7afdb9199ee8970b3fd1560258470bcd7eb93da",
+      "webpSha256": "135a1a09e034e44c936b9f2e2b3b8e90a02d0698549017954f538f0727f96ef9",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-29.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-30",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: five small basil leaves, lightly wilted by the bake, recognizably green; six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, mozzarella, cheddar, egg. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No white cheese. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "basil",
+        "cucumber",
+        "chicken"
+      ],
+      "review": "Native inspected individually: no tomato, no white mozzarella; orange cheddar only where selected; exact three toppings on plain baked dough with the full plate visible.",
+      "generatorFileName": "exec-ede91bca-42ba-4711-a0ee-f0f2ce0e1c5c.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-30.png",
+      "nativeSha256": "a57f4766d42a67282b51801dfe3d6862efc3386e0a6838eabd906f629e558b52",
+      "webpSha256": "9573423cf0ad571c28a690027fb8eba39b74d9119d773d0ce86ea2a96a6bf566",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-30.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-31",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: five small basil leaves, lightly wilted by the bake, recognizably green; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, mozzarella, cheddar, cucumber. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No white cheese. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "basil",
+        "egg",
+        "chicken"
+      ],
+      "review": "Native inspected individually: no tomato, no white mozzarella; orange cheddar only where selected; exact three toppings on plain baked dough with the full plate visible.",
+      "generatorFileName": "exec-c5c0ff7d-70c3-4e29-998d-97883c84f8ea.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-31.png",
+      "nativeSha256": "f12036685856ad094701e15a5a458210d5baedecc7f34cc85a3664664c3d05e5",
+      "webpSha256": "dbd94971a318e0105db363adb11e3c27b02d592deacc8b0e97e64365097222c5",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-31.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-32",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: melted yellow-orange cheddar, distinct from white mozzarella; six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, mozzarella, basil, chicken. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No white cheese. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "cheddar",
+        "cucumber",
+        "egg"
+      ],
+      "review": "Native inspected individually: exact selected cheddar/cucumber/egg/chicken identity; no unselected cheese, basil, tomato sauce or added oil; natural whole baked pizza.",
+      "generatorFileName": "exec-5082f2ea-a2be-4654-aa42-8d2b261300a1.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-32.png",
+      "nativeSha256": "f241e15262cbab12d828166045348a342ffbfe3111e52a29553571f5046aaa45",
+      "webpSha256": "b62b92f7e09780687474330ff46c2372be8c8b3dc48dfe15c31fa65203d2ca5a",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-32.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-33",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: melted yellow-orange cheddar, distinct from white mozzarella; six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, mozzarella, basil, egg. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No white cheese. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "cheddar",
+        "cucumber",
+        "chicken"
+      ],
+      "review": "Native inspected individually: exact selected cheddar/cucumber/egg/chicken identity; no unselected cheese, basil, tomato sauce or added oil; natural whole baked pizza.",
+      "generatorFileName": "exec-14dffd93-5b3a-4b15-8198-63d9ebe7a9fb.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-33.png",
+      "nativeSha256": "53faa304edc80ecd026fe07595038894b8b09bd8b22f46e5a4c0b0ec2d6f2c3f",
+      "webpSha256": "c212c71b31349a30501a092fa314a3333153eb9f7c13033b32dfbb0ac45bb164",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-33.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-34",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: melted yellow-orange cheddar, distinct from white mozzarella; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, mozzarella, basil, cucumber. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No white cheese. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "cheddar",
+        "egg",
+        "chicken"
+      ],
+      "review": "Native inspected individually: exact selected cheddar/cucumber/egg/chicken identity; no unselected cheese, basil, tomato sauce or added oil; natural whole baked pizza.",
+      "generatorFileName": "exec-7cf53e10-6962-4874-b7ae-e2f2f5e1b222.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-34.png",
+      "nativeSha256": "75e1c08220fe6a152e3a70934a82d90f6de1ed1e8e0c41d74c08b8ead9924f4f",
+      "webpSha256": "b87b3bebbbbf3664eb29621d6b4efe11b2285919ec11333c29b3968c6aa42502",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-34.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "name": "baked-35",
+      "prompt": "Use case: photorealistic-natural. Edit this supplied full natural pizza photograph for a culinary choice exercise. Preserve the entire round naturally browned raised crust, plate, cream stone worktop, overhead camera and soft daylight, natural handmade food photography. Square image. Keep the whole pizza and whole plate in frame. Replace the entire topping surface with EXACTLY these selected foods: six thin cucumber rounds, dark green edges and pale natural seed centres, slightly softened by the bake; five small slices of hard-boiled egg with opaque yellow yolks and white edges, warmed and lightly baked; six small already-grilled chicken breast slices with pale fibres and browned edges, warmed by the bake. Spread modest topping quantities naturally across the centre; toppings visibly distinguishable. Do not add unselected food. Completely REMOVE these absent toppings: tomato-oil, mozzarella, basil, cheddar. No red tomato sauce, no olive oil added, no white sauce or other substitute sauce. Exposed surface is plain tan baked bread wherever selected toppings do not cover it. No white cheese. No green herb garnish. The pizza is fully baked, not raw. No extra grated parmesan, pepper, decorative parsley, utensils, hands, text or labels. No CGI or cartoon shapes. This is an intentionally changed composition, not necessarily traditional Margherita.",
+      "selected": [
+        "dough",
+        "cucumber",
+        "egg",
+        "chicken"
+      ],
+      "review": "Native inspected individually: exact selected cheddar/cucumber/egg/chicken identity; no unselected cheese, basil, tomato sauce or added oil; natural whole baked pizza.",
+      "generatorFileName": "exec-4b0d896d-72e6-46c0-9dff-9540ea1077b4.png",
+      "nativeFile": "storage/t5-margherita-v7/native/baked-35.png",
+      "nativeSha256": "933e212e32931944c4a4325705a7839ce6415079d8a4ffd6ca4538fdc7fdb270",
+      "webpSha256": "81eb8ae87b36447624fec0a21b01120d3601c98a9ddb270be2e1a8619cf81509",
+      "imageUrl": "/assets/olympiad/visual-v7/margherita/baked-35.webp",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    }
+  ]
+}

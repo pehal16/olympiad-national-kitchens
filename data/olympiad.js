@@ -3,11 +3,11 @@ const tour2Blocks = require("./banks/tour2");
 const tour3Matrices = require("./banks/tour3");
 const tour4Tasks = require("./banks/tour4");
 const tour5Cases = require("./banks/tour5");
-const tour5Stations = require("./banks/tour5-final-kitchen");
+const tour5Stations = require("./banks/tour5-photo-kitchen");
 
 module.exports = {
   schemaVersion: 2,
-  blueprintVersion: 11,
+  blueprintVersion: 13,
   id: "nk-2026-variant",
   slug: "national-kitchens-2026",
   title: "Национальные кухни мира",
@@ -107,7 +107,7 @@ module.exports = {
       order: 5,
       title: "Финальная кухня",
       description:
-        "Три станции: выберите блюдо и соберите четыре компонента из восьми. До 16 баллов за станцию, без штрафов.",
+        "Маргарита, греческий салат и Филадельфия: выберите четыре компонента из восьми и соберите каждое блюдо. До 16 баллов за блюдо, без штрафов.",
       timeLimitMinutes: 15,
       maxScore: 48,
       generation: {

@@ -2887,7 +2887,7 @@ function renderQuestion(question) {
         rememberDraft(hydratedQuestion.id, answer);
         if (!hasPendingAnswers() && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
           setAttemptSaveStatus(answer.selectedIngredientIds?.length ? "Состав ещё не отправлен" : hydratedQuestion.selectedDish ? "Выберите компоненты" : "Выберите блюдо", "idle");
-          setAttemptSyncMeta("Черновик не является ответом. Запись подтверждает сервер.");
+          setAttemptSyncMeta(hydratedQuestion.presentationVersion === 4 ? "Сохраните ответ кнопкой «Подтвердить блюдо»." : "Черновик не является ответом. Запись подтверждает сервер.");
         }
         refreshAttemptControls(); updateExamCockpit();
       },

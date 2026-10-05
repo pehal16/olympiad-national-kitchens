@@ -1,0 +1,935 @@
+[
+  {
+    "id": "dish-pizza",
+    "title": "Пицца «Маргарита»",
+    "cuisineLabel": "Италия",
+    "variantLabel": "Классическая версия с моцареллой",
+    "items": [
+      {
+        "id": "component-f422a041aa813032",
+        "text": "Тесто для пиццы",
+        "imageAlt": "Тесто для пиццы",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/c54782c8ac94061c3b870784.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/5750ad8c8b19a1a06a261dad.webp",
+        "visual": {
+          "token": "f422a041aa813032",
+          "role": "basis",
+          "scale": 1,
+          "order": 7
+        }
+      },
+      {
+        "id": "component-c1dd310dfd6cc040",
+        "text": "Томаты и оливковое масло",
+        "imageAlt": "Томаты и оливковое масло",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/e4e1efe5585c970eec62015f.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/0e1b7424b945ec4f807f5333.webp",
+        "visual": {
+          "token": "c1dd310dfd6cc040",
+          "role": "sauce",
+          "scale": 0.84,
+          "order": 4
+        }
+      },
+      {
+        "id": "component-46463b4e94a11c4b",
+        "text": "Моцарелла",
+        "imageAlt": "Моцарелла",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/06d0a602ccde3b7fd0ed5072.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/10807268146232c258511bc2.webp",
+        "visual": {
+          "token": "46463b4e94a11c4b",
+          "role": "top",
+          "scale": 0.78,
+          "order": 1
+        }
+      },
+      {
+        "id": "component-0df12daac60c53b0",
+        "text": "Базилик",
+        "imageAlt": "Базилик",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/22a44d006e0db616aa691c52.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/77d3900d67e970d4406b517a.webp",
+        "visual": {
+          "token": "0df12daac60c53b0",
+          "role": "top",
+          "scale": 0.78,
+          "order": 0
+        }
+      },
+      {
+        "id": "component-db6090e3d96b6b14",
+        "text": "Чеддер",
+        "imageAlt": "Чеддер",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/7b8da139573f89431de3c6a5.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/519a1c4f387853bd56117ce6.webp",
+        "visual": {
+          "token": "db6090e3d96b6b14",
+          "role": "top",
+          "scale": 0.78,
+          "order": 6
+        }
+      },
+      {
+        "id": "component-cb5996d5838fe927",
+        "text": "Огурец",
+        "imageAlt": "Огурец",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/790c9f28e2afffaf2bb31ff0.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/d367958a1d4b4fb42864cc6c.webp",
+        "visual": {
+          "token": "cb5996d5838fe927",
+          "role": "top",
+          "scale": 0.78,
+          "order": 5
+        }
+      },
+      {
+        "id": "component-b9e5952ad954b8eb",
+        "text": "Варёное яйцо",
+        "imageAlt": "Варёное яйцо",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/ac84aa43c6d0c5ffdeb72a3e.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/53c7a312f6bc8d350da083f7.webp",
+        "visual": {
+          "token": "b9e5952ad954b8eb",
+          "role": "top",
+          "scale": 0.78,
+          "order": 3
+        }
+      },
+      {
+        "id": "component-a75a6d83e4387028",
+        "text": "Курица гриль",
+        "imageAlt": "Курица гриль",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/85c434ec83c02869107688e5.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/75beedcbc1e5957a8272249d.webp",
+        "visual": {
+          "token": "a75a6d83e4387028",
+          "role": "top",
+          "scale": 0.78,
+          "order": 2
+        }
+      }
+    ],
+    "photo": {
+      "kind": "pizza",
+      "frames": {
+        "shaped": "/assets/olympiad/tour5/photo-v4/5750ad8c8b19a1a06a261dad.webp",
+        "oil": "/assets/olympiad/tour5/photo-v4/f9975fcd20610ce8c698a9f6.webp"
+      },
+      "finals": [
+        {
+          "key": "0df12daac60c53b0+46463b4e94a11c4b+a75a6d83e4387028+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/33c425ab73a11e223b188162.webp"
+        },
+        {
+          "key": "0df12daac60c53b0+46463b4e94a11c4b+b9e5952ad954b8eb+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/ba48207ecf65c6fd616056bf.webp"
+        },
+        {
+          "key": "0df12daac60c53b0+46463b4e94a11c4b+c1dd310dfd6cc040+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/40d0331e32ced98b858ec60f.webp"
+        },
+        {
+          "key": "0df12daac60c53b0+46463b4e94a11c4b+cb5996d5838fe927+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/71c580401ed1ec879e45ff06.webp"
+        },
+        {
+          "key": "0df12daac60c53b0+46463b4e94a11c4b+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/ab8438e3238a3d876e297f68.webp"
+        },
+        {
+          "key": "0df12daac60c53b0+a75a6d83e4387028+b9e5952ad954b8eb+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/dbd94971a318e0105db363ad.webp"
+        },
+        {
+          "key": "0df12daac60c53b0+a75a6d83e4387028+c1dd310dfd6cc040+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/49cf58712e97e4e9121d659a.webp"
+        },
+        {
+          "key": "0df12daac60c53b0+a75a6d83e4387028+cb5996d5838fe927+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/9573423cf0ad571c28a69002.webp"
+        },
+        {
+          "key": "0df12daac60c53b0+a75a6d83e4387028+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/c37b199b2814fffc9cd0f145.webp"
+        },
+        {
+          "key": "0df12daac60c53b0+b9e5952ad954b8eb+c1dd310dfd6cc040+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/923100f9eba78b0e05f826be.webp"
+        },
+        {
+          "key": "0df12daac60c53b0+b9e5952ad954b8eb+cb5996d5838fe927+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/135a1a09e034e44c936b9f2e.webp"
+        },
+        {
+          "key": "0df12daac60c53b0+b9e5952ad954b8eb+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/5515db7561fcdca62bc4f73b.webp"
+        },
+        {
+          "key": "0df12daac60c53b0+c1dd310dfd6cc040+cb5996d5838fe927+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/28054d4471362cbf9cd2a660.webp"
+        },
+        {
+          "key": "0df12daac60c53b0+c1dd310dfd6cc040+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/1a79a14f1d2ecd40ef7ff1ab.webp"
+        },
+        {
+          "key": "0df12daac60c53b0+cb5996d5838fe927+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/5e539227d90e683cf603fbb9.webp"
+        },
+        {
+          "key": "46463b4e94a11c4b+a75a6d83e4387028+b9e5952ad954b8eb+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/d0db445ad9088313789eb0c0.webp"
+        },
+        {
+          "key": "46463b4e94a11c4b+a75a6d83e4387028+c1dd310dfd6cc040+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/4e9c75ade070ad1b33b903c7.webp"
+        },
+        {
+          "key": "46463b4e94a11c4b+a75a6d83e4387028+cb5996d5838fe927+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/da661d1bc1658799afc0acfd.webp"
+        },
+        {
+          "key": "46463b4e94a11c4b+a75a6d83e4387028+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/62e6607d3b0bffbe5866a7fe.webp"
+        },
+        {
+          "key": "46463b4e94a11c4b+b9e5952ad954b8eb+c1dd310dfd6cc040+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/cdcb1302048c84bc1fcb59ab.webp"
+        },
+        {
+          "key": "46463b4e94a11c4b+b9e5952ad954b8eb+cb5996d5838fe927+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/1dbfa1d2394cb037f209ea14.webp"
+        },
+        {
+          "key": "46463b4e94a11c4b+b9e5952ad954b8eb+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/b4b46b68e41a00ba69d19640.webp"
+        },
+        {
+          "key": "46463b4e94a11c4b+c1dd310dfd6cc040+cb5996d5838fe927+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/36bb981d6ae5559e42fcf677.webp"
+        },
+        {
+          "key": "46463b4e94a11c4b+c1dd310dfd6cc040+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/cdf463ab38bb1c7f9719deb4.webp"
+        },
+        {
+          "key": "46463b4e94a11c4b+cb5996d5838fe927+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/3858ef570ab50758cb48bded.webp"
+        },
+        {
+          "key": "a75a6d83e4387028+b9e5952ad954b8eb+c1dd310dfd6cc040+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/1190eff91bdb01589ae26b64.webp"
+        },
+        {
+          "key": "a75a6d83e4387028+b9e5952ad954b8eb+cb5996d5838fe927+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/81eb8ae87b36447624fec0a2.webp"
+        },
+        {
+          "key": "a75a6d83e4387028+b9e5952ad954b8eb+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/b87b3bebbbbf3664eb29621d.webp"
+        },
+        {
+          "key": "a75a6d83e4387028+c1dd310dfd6cc040+cb5996d5838fe927+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/24807ebbc0b5ce9624fbcd47.webp"
+        },
+        {
+          "key": "a75a6d83e4387028+c1dd310dfd6cc040+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/af3c053d75f3829c9f854695.webp"
+        },
+        {
+          "key": "a75a6d83e4387028+cb5996d5838fe927+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/c212c71b31349a30501a092f.webp"
+        },
+        {
+          "key": "b9e5952ad954b8eb+c1dd310dfd6cc040+cb5996d5838fe927+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/9e9d47c3fcb0ea09d195a1ff.webp"
+        },
+        {
+          "key": "b9e5952ad954b8eb+c1dd310dfd6cc040+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/f3ae89fcdb958e338bc0ab52.webp"
+        },
+        {
+          "key": "b9e5952ad954b8eb+cb5996d5838fe927+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/b62b92f7e09780687474330f.webp"
+        },
+        {
+          "key": "c1dd310dfd6cc040+cb5996d5838fe927+db6090e3d96b6b14+f422a041aa813032",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/dada2d651def9eccf64416fe.webp"
+        }
+      ]
+    }
+  },
+  {
+    "id": "dish-greek",
+    "title": "Греческий салат",
+    "cuisineLabel": "Греция",
+    "variantLabel": "Версия без сладкого перца и уксуса",
+    "items": [
+      {
+        "id": "component-6420669104ccef06",
+        "text": "Томаты и огурец",
+        "imageAlt": "Томаты и огурец",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/9ef7f459501a02dd331e3414.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/b2c3839750e52bb752c27e4c.webp",
+        "visual": {
+          "token": "6420669104ccef06",
+          "role": "base",
+          "scale": 0.9,
+          "order": 2
+        }
+      },
+      {
+        "id": "component-851f63aeded7bdb1",
+        "text": "Красный лук и оливки",
+        "imageAlt": "Красный лук и оливки",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/68152307e79233d6cf69a2fd.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/ca2bccdd4cb21368f54c7548.webp",
+        "visual": {
+          "token": "851f63aeded7bdb1",
+          "role": "base",
+          "scale": 0.83,
+          "order": 4
+        }
+      },
+      {
+        "id": "component-3788fd8dbe7d753c",
+        "text": "Фета",
+        "imageAlt": "Фета",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/125aeb6f27d61890c8f1af26.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/084bca697683cf57c0e751f0.webp",
+        "visual": {
+          "token": "3788fd8dbe7d753c",
+          "role": "top",
+          "scale": 0.67,
+          "order": 1
+        }
+      },
+      {
+        "id": "component-b49e50aa84d2d205",
+        "text": "Оливковое масло и орегано",
+        "imageAlt": "Оливковое масло и орегано",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/4ddaa4617858ea66bdd10297.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/59d49242e0dde2661f8eb3ec.webp",
+        "visual": {
+          "token": "b49e50aa84d2d205",
+          "role": "dressing",
+          "scale": 0.75,
+          "order": 6
+        }
+      },
+      {
+        "id": "component-0214f0394af333b5",
+        "text": "Кукуруза",
+        "imageAlt": "Кукуруза",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/f8f075ee7e99a82cd5d19bf3.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/1f89fdb454d4925377cb8e0c.webp",
+        "visual": {
+          "token": "0214f0394af333b5",
+          "role": "base",
+          "scale": 0.65,
+          "order": 0
+        }
+      },
+      {
+        "id": "component-cdb3ecc17761a1ee",
+        "text": "Курица гриль",
+        "imageAlt": "Курица гриль",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/a8d9014b2c1be213fce680b3.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/5881b96ce8259013987f0ed9.webp",
+        "visual": {
+          "token": "cdb3ecc17761a1ee",
+          "role": "base",
+          "scale": 0.72,
+          "order": 7
+        }
+      },
+      {
+        "id": "component-98641ff74d8ef9a4",
+        "text": "Сухарики",
+        "imageAlt": "Сухарики",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/1a817059bd144b427847253f.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/0e7439efde8a9bd8cd3ca674.webp",
+        "visual": {
+          "token": "98641ff74d8ef9a4",
+          "role": "top",
+          "scale": 0.65,
+          "order": 5
+        }
+      },
+      {
+        "id": "component-6f256d28b8ea43fc",
+        "text": "Майонезная заправка",
+        "imageAlt": "Майонезная заправка",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/f216c9c40f85ce0a07cb3f94.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/59b6e7e0a05a636296846f67.webp",
+        "visual": {
+          "token": "6f256d28b8ea43fc",
+          "role": "dressing",
+          "scale": 0.6,
+          "order": 3
+        }
+      }
+    ],
+    "photo": {
+      "kind": "greek",
+      "frames": {
+        "bowl": "/assets/olympiad/tour5/photo-v4/482c50a12e48ff8866715fee.webp"
+      },
+      "finals": [
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+6420669104ccef06+6f256d28b8ea43fc",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/5e6caa358387b7e959804d71.webp"
+        },
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+6420669104ccef06+851f63aeded7bdb1",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/e841aae9db8c4c796aad93cd.webp"
+        },
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+6420669104ccef06+98641ff74d8ef9a4",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/0c6619bd9bd4473c0bde18b3.webp"
+        },
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+6420669104ccef06+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/fcf22cfef662505eb2326e21.webp"
+        },
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+6420669104ccef06+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/23e055e8b17480c8f1a5cc16.webp"
+        },
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+6f256d28b8ea43fc+851f63aeded7bdb1",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/1f4de2a40d199864f665e7de.webp"
+        },
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+6f256d28b8ea43fc+98641ff74d8ef9a4",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/8efd3e3ca8c9c01e9eeeafd8.webp"
+        },
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+6f256d28b8ea43fc+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/c3b41a7eba153a5e16876d6d.webp"
+        },
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+6f256d28b8ea43fc+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/de85be255b449b90efadd1c1.webp"
+        },
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+851f63aeded7bdb1+98641ff74d8ef9a4",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/6a59155575fa6d9495337c78.webp"
+        },
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+851f63aeded7bdb1+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/aedf3187c029a144c4d3a479.webp"
+        },
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+851f63aeded7bdb1+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/35527e10a58b7d63ec618c05.webp"
+        },
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+98641ff74d8ef9a4+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/e5b36e356253e59d79abebd1.webp"
+        },
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/923230a38fb2bf2ab64e50f7.webp"
+        },
+        {
+          "key": "0214f0394af333b5+3788fd8dbe7d753c+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/48746aa993c18b2a6116225e.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6420669104ccef06+6f256d28b8ea43fc+851f63aeded7bdb1",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/54ba52a56d9e2c1b65e212a5.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6420669104ccef06+6f256d28b8ea43fc+98641ff74d8ef9a4",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/5f9034a18872ac7e512e2193.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6420669104ccef06+6f256d28b8ea43fc+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/10bc567b758db38580236a9a.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6420669104ccef06+6f256d28b8ea43fc+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/aeaf9b76332176e0f9208b45.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6420669104ccef06+851f63aeded7bdb1+98641ff74d8ef9a4",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/da4e5cd98f904db3e95c2dd4.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6420669104ccef06+851f63aeded7bdb1+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/4b08269b09faebb1093f45eb.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6420669104ccef06+851f63aeded7bdb1+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/cfe1f020aca0c3fcbdaab21f.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6420669104ccef06+98641ff74d8ef9a4+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/15d051b399528b195f72640c.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6420669104ccef06+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/1fcd47e0aa7551e2e0bf3d61.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6420669104ccef06+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/d2ce220e301cb13e0c0e173b.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6f256d28b8ea43fc+851f63aeded7bdb1+98641ff74d8ef9a4",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/5a0b49f5fcc2bd1615e59103.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6f256d28b8ea43fc+851f63aeded7bdb1+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/9ca3d0c4c63621033ffd3bd5.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6f256d28b8ea43fc+851f63aeded7bdb1+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/9993794183edfdce383e7dfd.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6f256d28b8ea43fc+98641ff74d8ef9a4+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/bcf6d4fef18667d30b03b52d.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6f256d28b8ea43fc+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/2c2aae283d4cbe9d6e16d900.webp"
+        },
+        {
+          "key": "0214f0394af333b5+6f256d28b8ea43fc+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/85db2d0f265b9ec6a33b74c5.webp"
+        },
+        {
+          "key": "0214f0394af333b5+851f63aeded7bdb1+98641ff74d8ef9a4+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/d120610504e8347384ade200.webp"
+        },
+        {
+          "key": "0214f0394af333b5+851f63aeded7bdb1+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/0a16a52a7fd14ea895ecf660.webp"
+        },
+        {
+          "key": "0214f0394af333b5+851f63aeded7bdb1+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/fa7fb651118598091f84e6d0.webp"
+        },
+        {
+          "key": "0214f0394af333b5+98641ff74d8ef9a4+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/20e193d4a9d51add54b17864.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6420669104ccef06+6f256d28b8ea43fc+851f63aeded7bdb1",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/1501b0515aec399366119dd2.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6420669104ccef06+6f256d28b8ea43fc+98641ff74d8ef9a4",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/ea2c578cf06f36c864f3ba68.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6420669104ccef06+6f256d28b8ea43fc+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/bc413a13d5cb4d040429e922.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6420669104ccef06+6f256d28b8ea43fc+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/e8a5bb6f70903c248a38e9b9.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6420669104ccef06+851f63aeded7bdb1+98641ff74d8ef9a4",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/03f63a4a513f77f27f3981c5.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6420669104ccef06+851f63aeded7bdb1+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/6aad7b5c766293d552299676.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6420669104ccef06+851f63aeded7bdb1+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/28f763919b3c1e83ed8365e4.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6420669104ccef06+98641ff74d8ef9a4+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/2826dd8c282322bb87583df5.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6420669104ccef06+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/a846049ade4821a706c7d3a3.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6420669104ccef06+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/fb27172d153c83966eedfe44.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6f256d28b8ea43fc+851f63aeded7bdb1+98641ff74d8ef9a4",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/96e883ee5ab73233ace563ae.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6f256d28b8ea43fc+851f63aeded7bdb1+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/08d234c6414d2ee66119070a.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6f256d28b8ea43fc+851f63aeded7bdb1+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/43ee115ad3c432a57d9a10a1.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6f256d28b8ea43fc+98641ff74d8ef9a4+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/d72a93be4841e89f7562a3a4.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6f256d28b8ea43fc+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/b56134a33e737fbc1964dd97.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+6f256d28b8ea43fc+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/e6e4de8306afb7994c4d3040.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+851f63aeded7bdb1+98641ff74d8ef9a4+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/0670c210d6f2a27a290c6520.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+851f63aeded7bdb1+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/2c27bf38ccac4360396a0947.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+851f63aeded7bdb1+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/a2d405563b2caed5310832d0.webp"
+        },
+        {
+          "key": "3788fd8dbe7d753c+98641ff74d8ef9a4+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/ec3cd4d7b591cac1ba8f70e2.webp"
+        },
+        {
+          "key": "6420669104ccef06+6f256d28b8ea43fc+851f63aeded7bdb1+98641ff74d8ef9a4",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/e42feefb62453a63348c9f7d.webp"
+        },
+        {
+          "key": "6420669104ccef06+6f256d28b8ea43fc+851f63aeded7bdb1+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/7e507cedc36a39978041e3a7.webp"
+        },
+        {
+          "key": "6420669104ccef06+6f256d28b8ea43fc+851f63aeded7bdb1+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/72840633d7d5dc8a2354b02c.webp"
+        },
+        {
+          "key": "6420669104ccef06+6f256d28b8ea43fc+98641ff74d8ef9a4+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/2dbedbcafdb8b36ff78b7878.webp"
+        },
+        {
+          "key": "6420669104ccef06+6f256d28b8ea43fc+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/a7d5a0364ad4bd644e6f47b8.webp"
+        },
+        {
+          "key": "6420669104ccef06+6f256d28b8ea43fc+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/ad825eb306c90a16a347f466.webp"
+        },
+        {
+          "key": "6420669104ccef06+851f63aeded7bdb1+98641ff74d8ef9a4+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/d1084ecd08b4e558d8f21fa8.webp"
+        },
+        {
+          "key": "6420669104ccef06+851f63aeded7bdb1+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/efb9e986c6d5764172a5922f.webp"
+        },
+        {
+          "key": "6420669104ccef06+851f63aeded7bdb1+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/54bc891fd2846852791e3689.webp"
+        },
+        {
+          "key": "6420669104ccef06+98641ff74d8ef9a4+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/6cbc284e50ce1f061440b3bc.webp"
+        },
+        {
+          "key": "6f256d28b8ea43fc+851f63aeded7bdb1+98641ff74d8ef9a4+b49e50aa84d2d205",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/25f3b004014580617703a6f0.webp"
+        },
+        {
+          "key": "6f256d28b8ea43fc+851f63aeded7bdb1+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/a8280d8effeeb7ee58a6e467.webp"
+        },
+        {
+          "key": "6f256d28b8ea43fc+851f63aeded7bdb1+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/5fe81dc258043da9425e1cc0.webp"
+        },
+        {
+          "key": "6f256d28b8ea43fc+98641ff74d8ef9a4+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/8345db83ab7765fa71929b9d.webp"
+        },
+        {
+          "key": "851f63aeded7bdb1+98641ff74d8ef9a4+b49e50aa84d2d205+cdb3ecc17761a1ee",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/0191798b5c7fd33eab7c013b.webp"
+        }
+      ]
+    }
+  },
+  {
+    "id": "dish-roll",
+    "title": "Ролл «Филадельфия»",
+    "cuisineLabel": "Ресторанная кухня",
+    "variantLabel": "Ресторанная версия с огурцом",
+    "items": [
+      {
+        "id": "component-6fc29783707c160d",
+        "text": "Рис и нори",
+        "imageAlt": "Рис и нори",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/2ffa1ea0cd0dae9a7b566b2f.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/2ffa1ea0cd0dae9a7b566b2f.webp",
+        "visual": {
+          "token": "6fc29783707c160d",
+          "role": "basis",
+          "scale": 1,
+          "order": 2
+        }
+      },
+      {
+        "id": "component-810958791ad4bd30",
+        "text": "Сливочный сыр",
+        "imageAlt": "Сливочный сыр",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/e26933362bcc67dccf8e4629.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/fbdea1c04748de5d61d3a5b3.webp",
+        "visual": {
+          "token": "810958791ad4bd30",
+          "role": "filling",
+          "scale": 1,
+          "order": 3
+        }
+      },
+      {
+        "id": "component-554adbc8e560fe56",
+        "text": "Огурец",
+        "imageAlt": "Огурец",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/36af0ab1d34158d792b4b256.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/544971875e822ef06906f686.webp",
+        "visual": {
+          "token": "554adbc8e560fe56",
+          "role": "filling",
+          "scale": 1,
+          "order": 1
+        }
+      },
+      {
+        "id": "component-14738acc4c3df530",
+        "text": "Лосось",
+        "imageAlt": "Лосось",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/cfd031b834af525a952e171f.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/cfd031b834af525a952e171f.webp",
+        "visual": {
+          "token": "14738acc4c3df530",
+          "role": "cover",
+          "scale": 1,
+          "priority": 0,
+          "order": 0
+        }
+      },
+      {
+        "id": "component-bceddd1a849af329",
+        "text": "Креветки",
+        "imageAlt": "Креветки",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/8401261c15eb16d92b7d0f19.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/74cc77aa4204cdfed9a4db1b.webp",
+        "visual": {
+          "token": "bceddd1a849af329",
+          "role": "cover",
+          "scale": 1,
+          "priority": 3,
+          "order": 6
+        }
+      },
+      {
+        "id": "component-d7ad8bdb48c35e92",
+        "text": "Тунец",
+        "imageAlt": "Тунец",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/aedc5da33d697bcad375f232.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/481bc42f4a58c4a2797071ca.webp",
+        "visual": {
+          "token": "d7ad8bdb48c35e92",
+          "role": "cover",
+          "scale": 1,
+          "priority": 1,
+          "order": 7
+        }
+      },
+      {
+        "id": "component-92d41f086181bca3",
+        "text": "Угорь",
+        "imageAlt": "Угорь",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/b2a483b1896f94477cbb2bb6.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/fb09e13b4f9cdea96869ef4d.webp",
+        "visual": {
+          "token": "92d41f086181bca3",
+          "role": "cover",
+          "scale": 1,
+          "priority": 2,
+          "order": 4
+        }
+      },
+      {
+        "id": "component-a5bde2a13a8538d9",
+        "text": "Крабовые палочки",
+        "imageAlt": "Крабовые палочки",
+        "imageUrl": "/assets/olympiad/tour5/photo-v4/a69e8a21073c6af84d4c0df4.webp",
+        "layerImageUrl": "/assets/olympiad/tour5/photo-v4/5f5c91e10280c407a985b276.webp",
+        "visual": {
+          "token": "a5bde2a13a8538d9",
+          "role": "cover",
+          "scale": 1,
+          "priority": 4,
+          "order": 5
+        }
+      }
+    ],
+    "photo": {
+      "kind": "roll",
+      "frames": {
+        "rice": "/assets/olympiad/tour5/photo-v4/b337fd1c1110aa554ce54b2c.webp",
+        "flipped": "/assets/olympiad/tour5/photo-v4/c3293765238cbfbec52fe71f.webp",
+        "rolled": "/assets/olympiad/tour5/photo-v4/b8465568228538fd57995b27.webp",
+        "14738acc4c3df530": "/assets/olympiad/tour5/photo-v4/1f6c1aaa92028b6b3c621309.webp",
+        "bceddd1a849af329": "/assets/olympiad/tour5/photo-v4/97f0131473bb4295d9d6e9d9.webp",
+        "d7ad8bdb48c35e92": "/assets/olympiad/tour5/photo-v4/b9f4c33d6b559b9b08cfe171.webp",
+        "92d41f086181bca3": "/assets/olympiad/tour5/photo-v4/a6223eb678d91ea07122ddeb.webp",
+        "a5bde2a13a8538d9": "/assets/olympiad/tour5/photo-v4/ef4ca1fbbbacaad2eba7d462.webp"
+      },
+      "finals": [
+        {
+          "key": "14738acc4c3df530+554adbc8e560fe56+6fc29783707c160d+810958791ad4bd30",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/eb8483a389517cf1dfa6a2ea.webp"
+        },
+        {
+          "key": "14738acc4c3df530+554adbc8e560fe56+6fc29783707c160d+92d41f086181bca3",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/b954f4a63c0999d92a30a6bd.webp"
+        },
+        {
+          "key": "14738acc4c3df530+554adbc8e560fe56+6fc29783707c160d+a5bde2a13a8538d9",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/93bce0f4af2495604d5c5cc5.webp"
+        },
+        {
+          "key": "14738acc4c3df530+554adbc8e560fe56+6fc29783707c160d+bceddd1a849af329",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/eb8d3c775d2963e7f9c70e2a.webp"
+        },
+        {
+          "key": "14738acc4c3df530+554adbc8e560fe56+6fc29783707c160d+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/3b84d565410715a8cd943264.webp"
+        },
+        {
+          "key": "14738acc4c3df530+6fc29783707c160d+810958791ad4bd30+92d41f086181bca3",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/d9f2d4a4da7d6bdfc8824122.webp"
+        },
+        {
+          "key": "14738acc4c3df530+6fc29783707c160d+810958791ad4bd30+a5bde2a13a8538d9",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/2c9482d6640b9c4b63bdcd7a.webp"
+        },
+        {
+          "key": "14738acc4c3df530+6fc29783707c160d+810958791ad4bd30+bceddd1a849af329",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/bef19e4f122035024613c8b2.webp"
+        },
+        {
+          "key": "14738acc4c3df530+6fc29783707c160d+810958791ad4bd30+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/e5648b00638304de17a723c1.webp"
+        },
+        {
+          "key": "14738acc4c3df530+6fc29783707c160d+92d41f086181bca3+a5bde2a13a8538d9",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/c718a15af47080f99428c192.webp"
+        },
+        {
+          "key": "14738acc4c3df530+6fc29783707c160d+92d41f086181bca3+bceddd1a849af329",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/d7ad3c3ad1b786030fa38cb6.webp"
+        },
+        {
+          "key": "14738acc4c3df530+6fc29783707c160d+92d41f086181bca3+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/fffcfa7a35bf00b6a57b77c1.webp"
+        },
+        {
+          "key": "14738acc4c3df530+6fc29783707c160d+a5bde2a13a8538d9+bceddd1a849af329",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/50f2776756c979f4b97b02e5.webp"
+        },
+        {
+          "key": "14738acc4c3df530+6fc29783707c160d+a5bde2a13a8538d9+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/c4a89c0fc2ad8ed076842658.webp"
+        },
+        {
+          "key": "14738acc4c3df530+6fc29783707c160d+bceddd1a849af329+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/df1311284a6954f84354ea79.webp"
+        },
+        {
+          "key": "554adbc8e560fe56+6fc29783707c160d+810958791ad4bd30+92d41f086181bca3",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/1ef8b79358e73d8e881ca4a4.webp"
+        },
+        {
+          "key": "554adbc8e560fe56+6fc29783707c160d+810958791ad4bd30+a5bde2a13a8538d9",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/d936d992c4e7b101d6149bfb.webp"
+        },
+        {
+          "key": "554adbc8e560fe56+6fc29783707c160d+810958791ad4bd30+bceddd1a849af329",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/c568f3af7286939d5804e067.webp"
+        },
+        {
+          "key": "554adbc8e560fe56+6fc29783707c160d+810958791ad4bd30+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/7a8ce35f2b5367d166256e03.webp"
+        },
+        {
+          "key": "554adbc8e560fe56+6fc29783707c160d+92d41f086181bca3+a5bde2a13a8538d9",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/ca52b2597390a2b9b8836258.webp"
+        },
+        {
+          "key": "554adbc8e560fe56+6fc29783707c160d+92d41f086181bca3+bceddd1a849af329",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/32d0e2a1dbdda175189cde4f.webp"
+        },
+        {
+          "key": "554adbc8e560fe56+6fc29783707c160d+92d41f086181bca3+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/f908c5cc95862b27efb1a15c.webp"
+        },
+        {
+          "key": "554adbc8e560fe56+6fc29783707c160d+a5bde2a13a8538d9+bceddd1a849af329",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/1e99bd342f75cb4654822a07.webp"
+        },
+        {
+          "key": "554adbc8e560fe56+6fc29783707c160d+a5bde2a13a8538d9+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/19de3d4a0f2ae958eb7fd7ce.webp"
+        },
+        {
+          "key": "554adbc8e560fe56+6fc29783707c160d+bceddd1a849af329+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/f4ce54e40b07223d2aa56a5c.webp"
+        },
+        {
+          "key": "6fc29783707c160d+810958791ad4bd30+92d41f086181bca3+a5bde2a13a8538d9",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/cdb56ad34a8ffda4a9612bba.webp"
+        },
+        {
+          "key": "6fc29783707c160d+810958791ad4bd30+92d41f086181bca3+bceddd1a849af329",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/a41d55f2c0b50b46ec49536a.webp"
+        },
+        {
+          "key": "6fc29783707c160d+810958791ad4bd30+92d41f086181bca3+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/529e34a4b0e7eca5b651627a.webp"
+        },
+        {
+          "key": "6fc29783707c160d+810958791ad4bd30+a5bde2a13a8538d9+bceddd1a849af329",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/83dd3402dc4bf794cb9a1e17.webp"
+        },
+        {
+          "key": "6fc29783707c160d+810958791ad4bd30+a5bde2a13a8538d9+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/11b25ec2ad9228873680bbee.webp"
+        },
+        {
+          "key": "6fc29783707c160d+810958791ad4bd30+bceddd1a849af329+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/fce8e9abf0c47968d49e9ff7.webp"
+        },
+        {
+          "key": "6fc29783707c160d+92d41f086181bca3+a5bde2a13a8538d9+bceddd1a849af329",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/1154f32c1972b26feebe8aa0.webp"
+        },
+        {
+          "key": "6fc29783707c160d+92d41f086181bca3+a5bde2a13a8538d9+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/058f77c56fb54b0589d46b29.webp"
+        },
+        {
+          "key": "6fc29783707c160d+92d41f086181bca3+bceddd1a849af329+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/c232968b874d32da49d9216c.webp"
+        },
+        {
+          "key": "6fc29783707c160d+a5bde2a13a8538d9+bceddd1a849af329+d7ad8bdb48c35e92",
+          "imageUrl": "/assets/olympiad/tour5/photo-v4/3c62a175affaecee11501cdb.webp"
+        }
+      ]
+    }
+  }
+]

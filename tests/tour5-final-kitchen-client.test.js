@@ -41,7 +41,8 @@ test("T5 two-half bun descriptor is participant-safe and cannot carry hidden key
   assert.equal(bun.scene.parts.length, 2);
   bun.scene.parts[0].crop = [-1, .5];
   assert.throws(() => validateQuestionStructure(bank[0]));
-  const question = buildVariant(olympiad, { seed: "parts-private" }).questions.find(q => q.type === "final_kitchen");
+  const legacy = structuredClone(olympiad); legacy.questionBank.tour5Stations = structuredClone(require("../data/banks/tour5-final-kitchen"));
+  const question = buildVariant(legacy, { seed: "parts-private" }).questions.find(q => q.type === "final_kitchen");
   const burger = question.dishes.find(d => d.dishId === "burger");
   const safe = sanitizeQuestion(question, { answers: {}, stationSelections: { [question.id]: { dishId: burger.id } } });
   const parts = safe.selectedDish.items.find(item => item.scene.parts)?.scene.parts;

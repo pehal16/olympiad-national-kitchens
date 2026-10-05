@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1f8e73" />
-    <title>Демонстрация 3D-сборки • Национальные кухни мира</title>
+    <title>Интерактивная сборка блюд • Национальные кухни мира</title>
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="/styles.css?v=1.7.0-visual3" />
+    <link rel="stylesheet" href="/styles.css?v=1.7.0-greek1" />
   </head>
   <body class="visual-demo-page">
     <div class="ambient ambient-a"></div>
@@ -20,8 +20,8 @@
       <header class="card visual-demo-hero">
         <div>
           <div class="eyebrow">Интерактивная кухня</div>
-          <h1>Соберите блюдо в 3D</h1>
-          <p class="lead">Выбирайте карточки продуктов, вращайте блюдо мышью и сравнивайте визуальный результат с заявленной версией рецептуры.</p>
+          <h1 id="demo-main-title">Соберите блюдо</h1>
+          <p id="demo-main-lead" class="lead">Выбирайте карточки продуктов, вращайте блюдо мышью и сравнивайте визуальный результат с заявленной версией рецептуры.</p>
           <ol class="visual-demo-steps" aria-label="Как работать с демонстрацией">
             <li><span>1</span>Выберите продукты</li>
             <li><span>2</span>Рассмотрите блюдо</li>
@@ -31,6 +31,8 @@
         <div class="visual-demo-tabs" role="tablist" aria-label="Выбор блюда">
           <button id="demo-tab-margherita" class="visual-demo-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="demo-workbench" data-dish="margherita">Маргарита</button>
           <button id="demo-tab-caesar" class="visual-demo-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-workbench" tabindex="-1" data-dish="caesar">Цезарь с курицей</button>
+          <button id="demo-tab-philadelphia" class="visual-demo-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-workbench" tabindex="-1" data-dish="philadelphia">Филадельфия</button>
+          <button id="demo-tab-greek" class="visual-demo-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-workbench" tabindex="-1" data-dish="greek">Греческий салат</button>
         </div>
       </header>
 
@@ -50,7 +52,7 @@
               <div class="visual-demo-bank-head">
                 <div>
                   <strong>Карточки ингредиентов</strong>
-                  <small>Нажмите на карточку, чтобы добавить продукт или убрать его.</small>
+                  <small id="demo-pantry-hint">Нажмите на карточку, чтобы добавить продукт или убрать его.</small>
                 </div>
                 <button id="demo-clear" class="button ghost" type="button">Очистить</button>
               </div>
@@ -63,6 +65,8 @@
                 <div class="dish-viewer-stage">
                   <div id="demo-fallback" class="dish-plate dish-fallback-plate"></div>
                   <div id="demo-scene" class="dish-3d-host" aria-label="Интерактивная 3D-модель блюда"></div>
+                  <div id="demo-scene-message" class="visual-demo-scene-message" role="status" hidden></div>
+                  <button id="demo-mat-handle" class="roll-mat-handle" type="button" hidden aria-label="Потянуть край коврика вверх, чтобы свернуть ролл">↑ Потянуть коврик</button>
                 </div>
                 <div class="dish-viewer-toolbar">
                   <span id="demo-scene-status" class="dish-viewer-status">3D загружается…</span>
@@ -71,6 +75,87 @@
                     <button id="demo-rotate-right" class="dish-viewer-button" type="button" aria-label="Повернуть вправо">↷</button>
                     <button id="demo-reset-view" class="dish-viewer-button dish-viewer-reset" type="button">Сбросить вид</button>
                   </div>
+                </div>
+              </div>
+              <div id="demo-selected" class="visual-demo-selected" aria-label="Выбранные компоненты" hidden></div>
+              <div id="demo-roll-workflow" class="visual-demo-roll-workflow" hidden>
+                <ol class="visual-demo-roll-steps" aria-label="Этапы приготовления ролла">
+                  <li data-roll-step="select"><span>1</span>Продукты</li>
+                  <li data-roll-step="rice"><span>2</span>Рис</li>
+                  <li data-roll-step="flipped"><span>3</span>Переворот</li>
+                  <li data-roll-step="filling"><span>4</span>Начинка</li>
+                  <li data-roll-step="rolled"><span>5</span>Сворачивание</li>
+                  <li data-roll-step="covered"><span>6</span>Покрытие</li>
+                  <li data-roll-step="served"><span>7</span>Нарезка и подача</li>
+                </ol>
+                <p id="demo-roll-roles" class="roll-technique-roles" hidden></p>
+                <div class="roll-operation-panel">
+                  <div class="roll-operation-heading"><strong id="demo-roll-operation-title">Следующий шаг</strong><span id="demo-roll-operation-step">Подготовка</span></div>
+                  <p id="demo-roll-hint" class="visual-demo-roll-hint" aria-live="polite"></p>
+                  <button id="demo-roll-next" class="button primary roll-next-button" type="button" aria-describedby="demo-roll-hint" disabled>Выберите 4 продукта</button>
+                </div>
+                <p id="demo-roll-review" class="roll-composition-review" role="status" hidden></p>
+                <div id="demo-roll-progress" class="roll-gesture-progress" hidden><progress max="100" value="0" aria-label="Сворачивание коврика"></progress><span>Потяните край коврика вверх</span></div>
+                <div id="demo-roll-presentation" class="roll-presentation" hidden aria-label="Композиция подачи">
+                  <span>Композиция</span>
+                  <button type="button" data-roll-presentation="straight" aria-pressed="false">Прямая</button>
+                  <button type="button" data-roll-presentation="diagonal" aria-pressed="true">Диагональная</button>
+                </div>
+                <div class="visual-demo-roll-actions">
+                  <button id="demo-roll-edit" class="button ghost" type="button" hidden>Изменить состав</button>
+                  <button id="demo-roll-other" class="button ghost" type="button">Другой состав</button>
+                  <button id="demo-roll-reverse" class="button ghost" type="button" hidden>Поменять местами начинку</button>
+                </div>
+              </div>
+              <div id="demo-pizza-workflow" class="visual-demo-roll-workflow" hidden>
+                <ol class="visual-demo-roll-steps" aria-label="Этапы приготовления пиццы">
+                  <li data-pizza-step="select"><span>1</span>Продукты</li>
+                  <li data-pizza-step="shaped"><span>2</span>Основа</li>
+                  <li data-pizza-step="sauced"><span>3</span>Томаты</li>
+                  <li data-pizza-step="topped"><span>4</span>Начинка</li>
+                  <li data-pizza-step="served"><span>5</span>Выпечка и подача</li>
+                </ol>
+                <div class="roll-operation-panel">
+                  <div class="roll-operation-heading"><strong id="demo-pizza-operation-title">Следующий шаг</strong><span id="demo-pizza-operation-step">Подготовка</span></div>
+                  <p id="demo-pizza-hint" class="visual-demo-roll-hint" aria-live="polite"></p>
+                  <button id="demo-pizza-next" class="button primary roll-next-button" type="button" aria-describedby="demo-pizza-hint" disabled>Выберите 4 продукта</button>
+                </div>
+                <div id="demo-pizza-progress" class="pizza-bake-progress" role="status" hidden><span>Выпекаем и готовим подачу…</span><i aria-hidden="true"></i></div>
+                <p id="demo-pizza-review" class="roll-composition-review" role="status" hidden></p>
+                <div id="demo-pizza-layout" class="roll-presentation" hidden aria-label="Расположение продуктов и ракурс подачи">
+                  <span>Композиция</span>
+                  <button type="button" data-pizza-layout="balanced" aria-pressed="true">Первая</button>
+                  <button type="button" data-pizza-layout="turned" aria-pressed="false">Другая</button>
+                </div>
+                <div class="visual-demo-roll-actions">
+                  <button id="demo-pizza-edit" class="button ghost" type="button" hidden>Изменить состав</button>
+                  <button id="demo-pizza-other" class="button ghost" type="button">Другой состав</button>
+                </div>
+              </div>
+              <div id="demo-greek-workflow" class="visual-demo-roll-workflow" hidden>
+                <ol class="visual-demo-roll-steps" aria-label="Этапы сборки салата">
+                  <li data-greek-step="select"><span>1</span>Продукты</li>
+                  <li data-greek-step="base"><span>2</span>Основа</li>
+                  <li data-greek-step="topped"><span>3</span>Верхние компоненты</li>
+                  <li data-greek-step="dressed"><span>4</span>Заправка</li>
+                  <li data-greek-step="served"><span>5</span>Подача</li>
+                </ol>
+                <p id="demo-greek-reserved" class="roll-technique-roles" hidden></p>
+                <div class="roll-operation-panel">
+                  <div class="roll-operation-heading"><strong id="demo-greek-operation-title">Следующий шаг</strong><span id="demo-greek-operation-step">Подготовка</span></div>
+                  <p id="demo-greek-hint" class="visual-demo-roll-hint" aria-live="polite"></p>
+                  <button id="demo-greek-next" class="button primary roll-next-button" type="button" aria-describedby="demo-greek-hint" disabled>Выберите 4 продукта</button>
+                </div>
+                <div id="demo-greek-progress" class="pizza-bake-progress" role="status" hidden><span>Готовим подачу…</span><i aria-hidden="true"></i></div>
+                <p id="demo-greek-review" class="roll-composition-review" role="status" hidden></p>
+                <div id="demo-greek-layout" class="roll-presentation" hidden aria-label="Расположение продуктов и ракурс подачи">
+                  <span>Композиция</span>
+                  <button type="button" data-greek-layout="balanced" aria-pressed="true">Первая</button>
+                  <button type="button" data-greek-layout="turned" aria-pressed="false">Другая</button>
+                </div>
+                <div class="visual-demo-roll-actions">
+                  <button id="demo-greek-edit" class="button ghost" type="button" hidden>Изменить состав</button>
+                  <button id="demo-greek-other" class="button ghost" type="button">Другой состав</button>
                 </div>
               </div>
             </div>
@@ -89,13 +174,14 @@
             </figcaption>
           </figure>
           <div class="visual-demo-facts">
-            <article><span>Формат</span><strong>3D + фотокарточки</strong></article>
+            <article><span>Формат</span><strong id="demo-format">3D + фотокарточки</strong></article>
             <article><span>Управление</span><strong>мышь, касание, клавиатура</strong></article>
             <article><span>Режим</span><strong>учебная демонстрация</strong></article>
           </div>
+          <p id="demo-photo-note" class="visual-demo-photo-note" hidden>Фото на объёмной тарелке: можно вращать подачу и слегка наклонять её сверху. Продукты здесь — фотографические слои.</p>
         </aside>
       </section>
     </main>
-    <script src="/visual-demo.js?v=1.7.0-visual3"></script>
+    <script type="module" src="/visual-demo.js?v=1.7.0-greek1"></script>
   </body>
 </html>

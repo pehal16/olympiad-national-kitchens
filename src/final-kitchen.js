@@ -36,6 +36,9 @@ async function lockStationDish(attempt, body, persistence) {
 }
 
 function isLockedDishAnswer(attempt, question, payload) {
+  if (question.type === "final_kitchen" && question.presentationVersion === 4) {
+    return question.dishes.length === 1 && question.dishes[0].id === payload?.dishId;
+  }
   return question.type !== "final_kitchen" || Boolean(attempt.stationSelections?.[question.id]?.dishId &&
     attempt.stationSelections[question.id].dishId === payload?.dishId);
 }
