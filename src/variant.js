@@ -347,7 +347,7 @@ function validateQuestionStructure(question) {
     if (question.maxScore !== 3 || question.clues?.length !== 3 ||
         !question.clues.every((clue) => typeof clue.label === "string" && clue.label.trim() &&
           typeof clue.text === "string" && clue.text.trim()) ||
-        !/^\/assets\/olympiad\/tour3\/t3-case-\d{2}\.webp$/.test(question.imageUrl || "") ||
+        !/^\/assets\/olympiad\/tour3\/t3-case-\d{2}(?:-v[2-9]\d*)?\.webp$/.test(question.imageUrl || "") ||
         typeof policy?.canonical !== "string" || !policy.canonical.trim() ||
         !["aliases", "english", "misspellings", "rejected"].every((key) =>
           Array.isArray(policy[key]) && policy[key].every((value) => typeof value === "string" && value.trim()))) {
@@ -366,7 +366,7 @@ function validateQuestionStructure(question) {
         question.presentationVersion !== 1 || !question.guestOrder?.text || !question.guestOrder?.style ||
         new Set(options.map((option) => option.id)).size !== 4 ||
         options.some((option) => !option.text?.trim() || !option.description?.trim() ||
-          !/^\/assets\/olympiad\/tour4\/t4-menu-v1-[a-f0-9]{12}\.webp$/.test(option.imageUrl)))) {
+          !/^\/assets\/olympiad\/tour4\/t4-(?:menu-v1|plate-v2)-[a-f0-9]{12}\.webp$/.test(option.imageUrl)))) {
       throw new Error(`Вопрос ${question.sourceId || question.id} нарушает контракт заказа гостя.`);
     }
     return;
@@ -870,6 +870,7 @@ function sanitizeQuestion(question, attempt) {
     const dish = question.dishes.find((entry) => entry.id === attempt.stationSelections?.[question.id]?.dishId);
     if (question.presentationVersion === 4) return {
       id: question.id, type: question.type, presentationVersion: 4, prompt: question.prompt, maxScore: question.maxScore,
+      guestServiceEnabled: question.guestServiceEnabled === true,
       tourId: question.tourId, tourCode: question.tourCode, tourTitle: question.tourTitle, tourOrder: question.tourOrder,
       sequenceInTour: question.sequenceInTour, globalIndex: question.globalIndex,
       station: { number: question.station.number, title: question.station.title }, dishes: [],

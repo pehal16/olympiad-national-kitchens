@@ -219,19 +219,21 @@ function refreshAttemptControls() {
   const isBusy = state.isSubmittingAnswer || state.isSelectingDish || state.isFinishingAttempt || state.pendingFlushInFlight;
   const isBlockedByGuard = attemptInProgress && state.examGuardActive;
   const interactionLocked = isBusy || isBlockedByGuard;
+  const dishServiceOpen = window.T5DishService?.isOpen() === true;
+  window.T5DishService?.setLocked(interactionLocked);
 
   if (elements.questionBody) {
     // T3 keeps the shared retry button inside its form, outside input-only locks.
     // A dialog remains in the shared form during dish confirmation; its own
     // controls are locked without making the modal subtree inert.
-    elements.questionBody.inert = (interactionLocked && !state.isSelectingDish) || (hasQueuedAnswers && !["dish_detective", "final_kitchen"].includes(state.attempt?.currentQuestion?.type) && state.attempt?.currentQuestion?.interactionMode !== "guest_order");
+    elements.questionBody.inert = dishServiceOpen || (interactionLocked && !state.isSelectingDish) || (hasQueuedAnswers && !["dish_detective", "final_kitchen"].includes(state.attempt?.currentQuestion?.type) && state.attempt?.currentQuestion?.interactionMode !== "guest_order");
     elements.questionBody.setAttribute("aria-busy", isBusy ? "true" : "false");
   }
-  state.questionController?.setLocked?.(interactionLocked || hasQueuedAnswers);
+  state.questionController?.setLocked?.(dishServiceOpen || interactionLocked || hasQueuedAnswers);
 
   elements.submitAnswer.disabled =
-    !hasActiveQuestion || !hasCurrentAnswer || !isComplete || interactionLocked;
-  elements.finishAttempt.disabled = !attemptInProgress || interactionLocked;
+    !hasActiveQuestion || !hasCurrentAnswer || !isComplete || interactionLocked || dishServiceOpen;
+  elements.finishAttempt.disabled = !attemptInProgress || interactionLocked || dishServiceOpen;
 
   if (state.isSubmittingAnswer) {
     elements.submitAnswer.textContent = "Сохранение ответа...";
@@ -272,7 +274,7 @@ function refreshAttemptControls() {
 
   elements.submitAnswer.textContent =
     state.attempt.currentQuestion?.type === "final_kitchen"
-      ? "Подтвердить блюдо"
+      ? "Подать"
       : state.attempt.currentQuestion?.interactionMode === "guest_order"
       ? "Подтвердить заказ"
       : state.attempt.currentQuestion?.type === "dish_detective"
@@ -2911,7 +2913,7 @@ function renderQuestion(question) {
         rememberDraft(hydratedQuestion.id, answer);
         if (!hasPendingAnswers() && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
           setAttemptSaveStatus(answer.selectedIngredientIds?.length ? "Состав ещё не отправлен" : hydratedQuestion.selectedDish ? "Выберите компоненты" : "Выберите блюдо", "idle");
-          setAttemptSyncMeta(hydratedQuestion.presentationVersion === 4 ? "Сохраните ответ кнопкой «Подтвердить блюдо»." : "Черновик не является ответом. Запись подтверждает сервер.");
+          setAttemptSyncMeta(hydratedQuestion.presentationVersion === 4 ? "Завершите сборку и нажмите «Подать»." : "Черновик не является ответом. Запись подтверждает сервер.");
         }
         refreshAttemptControls(); updateExamCockpit();
       },
@@ -3239,6 +3241,11 @@ function applyAttemptState(attempt, options = {}) {
     : describeAttemptTransition(previousAttempt, attempt);
   state.attempt = attempt;
   if (attempt?.id) state.activeAttemptId = attempt.id;
+  window.T5DishService?.sync(attempt, () => {
+    refreshAttemptControls();
+    if (state.attempt?.status === 'in_progress') elements.questionBody.querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
+    else elements.certificateOpen?.focus({ preventScroll: true });
+  });
   attachPendingQueue(attempt);
   attachIntegrityQueue(attempt);
   if (!attempt) {
@@ -3253,6 +3260,7 @@ function applyAttemptState(attempt, options = {}) {
       saveTimingSnapshot(attempt);
       setParticipantShellState();
       updateJourneyProgress();
+      refreshAttemptControls();
       return;
     }
     renderAttempt();
@@ -3653,7 +3661,7 @@ async function submitAnswer() {
   const answerPayload = state.questionController.getAnswer();
   if (state.questionController.isComplete && !state.questionController.isComplete()) {
     showMessage(elements.attemptMessage, state.attempt.currentQuestion?.type === "final_kitchen"
-      ? "Выберите ровно четыре компонента, затем подтвердите блюдо."
+      ? "Выберите ровно четыре компонента, завершите сборку и нажмите «Подать»."
       : state.attempt.currentQuestion?.type === "dish_detective"
       ? "Введите название блюда: не менее двух символов."
       : state.attempt.currentQuestion?.interactionMode === "guest_order"

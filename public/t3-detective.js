@@ -18,7 +18,14 @@
     const write = (key, value) => { try { win.localStorage.setItem(key, value); } catch { /* Memory-only draft remains usable. */ } };
     const model = createState(question.savedAnswer || { text: read(draftKey) || "" });
     let started = question.sequenceInTour !== 1 || introSeen.has(introKey) || read(introKey) === "seen" || Boolean(question.savedAnswer);
-    let input, clear;
+    let input, clear, locked = true, focusPending = true, disposed = false;
+    function focusAnswer() {
+      if (disposed || locked || !input?.isConnected || input.disabled || input.closest('[inert]')) return;
+      if (focusPending) {
+        input.focus({ preventScroll: true });
+        focusPending = doc.activeElement !== input;
+      }
+    }
     const placeholder = doc.createComment("shared submit button location");
     submitButton.before(placeholder);
     const originalType = submitButton.getAttribute("type");
@@ -87,6 +94,8 @@
       actions.append(submitButton, clear);
       form.append(label, input, hint, actions);
       shell.append(scene, form);
+      focusPending = true;
+      focusAnswer();
     }
     win.visualViewport?.addEventListener("resize", viewportChanged);
     if (started) renderActivity();
@@ -103,8 +112,7 @@
       start.addEventListener("click", () => {
         started = true; introSeen.add(introKey); write(introKey, "seen");
         shell.classList.remove("t3-intro"); renderActivity();
-        // Do not open the virtual keyboard unexpectedly on a phone.
-        if (!win.matchMedia("(max-width: 600px)").matches) input.focus({ preventScroll: true });
+        focusAnswer();
         onChange(model.getAnswer());
       });
       shell.append(element("p", "t3-intro-kicker", "Перед началом"), element("h3", "", "Правила тура"),
@@ -114,11 +122,15 @@
     return {
       getAnswer: () => started ? model.getAnswer() : {},
       isComplete: () => started && model.isComplete(),
-      setLocked(locked) {
+      setLocked(value) {
+        if (locked !== Boolean(value)) focusPending = true;
+        locked = Boolean(value);
         if (input) input.disabled = locked;
         if (clear) clear.disabled = locked;
+        focusAnswer();
       },
       dispose() {
+        disposed = true;
         win.visualViewport?.removeEventListener("resize", viewportChanged);
         placeholder.replaceWith(submitButton);
         if (originalType === null) submitButton.removeAttribute("type"); else submitButton.setAttribute("type", originalType);

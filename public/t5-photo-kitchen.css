@@ -49,10 +49,6 @@ body:has(.t5-photo-kitchen) #attempt-section.is-t5 #tour-title { font-size:28px;
 .t5-photo-primary:hover:not(:disabled) { background:#1c6344; }
 .t5-photo-primary:disabled { background:#dce5d6; border-color:#d3dfca; color:#6b7e6e; }
 .t5-photo-operation .t5-photo-primary { width:100%; }
-.t5-photo-layout { display:flex; align-items:center; flex-wrap:wrap; gap:7px; padding-top:12px; }
-.t5-photo-layout .t5-photo-small { margin:0 4px 0 0; }
-.t5-photo-layout-button { border:1px solid #ccd9c5; background:transparent; color:#4c6a50; border-radius:8px; padding:10px 12px; font-size:12px; min-height:44px; }
-.t5-photo-layout-button[aria-pressed=true] { background:#e0ecd8; border-color:#8aac80; }
 .t5-photo-footer { padding:18px 24px; border-top:1px solid #dedfd2; display:flex; justify-content:flex-end; align-items:center; gap:16px; }
 .t5-photo-footer #submit-answer { border:1px solid #247552!important; border-radius:12px!important; background:#247552!important; color:#fff!important; padding:16px 24px!important; min-height:60px!important; font:600 15px/1.35 Arial,sans-serif!important; cursor:pointer; }
 .t5-photo-footer #submit-answer:hover:not(:disabled) { background:#1c6344!important; }

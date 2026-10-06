@@ -4250,13 +4250,13 @@ pre {
 .t4-order button:disabled { cursor: default; opacity: .65; }
 .t4-order :is(button, [tabindex]):focus-visible { outline: 3px solid #15826f; outline-offset: 3px; }
 .t4-order h3 { margin: 0; font: bold 22px/1.3 Georgia, serif; }
-.t4-receipt { border: 1px solid #d7dfde; border-left: 4px solid #15826f; border-radius: 8px; background: #f8faf9; padding: 14px 18px; }
+.t4-receipt { border: 1px solid #d7dfde; border-left: 4px solid #15826f; border-radius: 18px; background: #f8faf9; padding: 20px 24px; }
 .t4-receipt-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .t4-receipt-style { margin: 5px 0; color: #4b6259; font-size: 13px; }
 .t4-wish { margin: 7px 0 0; font-size: 18px; line-height: 1.5; overflow-wrap: anywhere; }
 .t4-menu-heading { color: #52665d; font-size: 14px; margin: 18px 0 10px; }
-.t4-menu { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
-.t4-menu-card { min-width: 0; display: flex; flex-direction: column; border: 2px solid #dce4df; border-radius: 10px; background: #fff; transition: border-color 180ms, box-shadow 180ms; }
+.t4-menu { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
+.t4-menu-card { min-width: 0; display: flex; flex-direction: column; border: 2px solid #dce4df; border-radius: 18px; overflow:hidden; background: #fff; transition: border-color 180ms, box-shadow 180ms; }
 .t4-menu-card.is-selected { border-color: #15826f; box-shadow: 0 0 0 2px #15826f18; }
 .t4-menu-select { display: flex; flex: 1; flex-direction: column; width: 100%; padding: 7px; border: 0; background: transparent; border-radius: 8px; text-align: left; transition: background-color 150ms; }
 .t4-menu-select:hover { background: #f7faf8; }

@@ -34,7 +34,7 @@ test("T4 eight fixed orders, 32 distinct menu positions, 32/10 within unchanged 
     });
   });
   const v = buildVariant(olympiad, { seed: "guest-contract" });
-  assert.equal(v.blueprintVersion, 13); assert.equal(v.questions.length, 36);
+  assert.equal(v.blueprintVersion, 14); assert.equal(v.questions.length, 36);
   assert.equal(v.questions.reduce((s, q) => s + q.maxScore, 0), 150);
   assert.equal(olympiad.durationMinutes, 45);
   assert.equal(v.tours.find((t) => t.code === "T4").timeLimitMinutes, 10);
@@ -130,7 +130,7 @@ test("old T4 technology snapshot stays byte-identical and legacy issued variants
   buildVariant(olympiad, { seed: "fresh-new-t4" }); assert.equal(JSON.stringify(saved), before);
 });
 
-test("all 32 T4 photographs are separate 900x600 WebP files with no EXIF/XMP", () => {
+test("all 32 T4 photographs are distinct landscape WebP files with no EXIF/XMP", () => {
   const seen = new Set();
   bank.flatMap((q) => q.options).forEach((o) => {
     const bytes = fs.readFileSync(path.join(__dirname, "../public", o.imageUrl));
@@ -138,8 +138,8 @@ test("all 32 T4 photographs are separate 900x600 WebP files with no EXIF/XMP", (
     // Sharp's opaque still-image WebP uses a lossy VP8 frame; read its actual
     // coded dimensions rather than trusting the export script or filename.
     assert.equal(bytes.toString("ascii", 12, 16), "VP8 ");
-    assert.equal(bytes.readUInt16LE(26) & 0x3fff, 900);
-    assert.equal(bytes.readUInt16LE(28) & 0x3fff, 600);
+    const width = bytes.readUInt16LE(26) & 0x3fff, height = bytes.readUInt16LE(28) & 0x3fff;
+    assert.ok((width === 900 && height === 600) || (width === 1200 && height === 800));
     assert.ok(bytes.length > 15000 && bytes.length < 200000, o.text);
     assert.doesNotMatch(bytes.toString("latin1"), /EXIF|XMP /);
     const hash = crypto.createHash("sha256").update(bytes).digest("hex"); assert.equal(seen.has(hash), false); seen.add(hash);

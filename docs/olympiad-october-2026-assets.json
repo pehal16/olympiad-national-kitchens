@@ -1,0 +1,182 @@
+{
+  "date": "2026-10-06",
+  "conversion": "Pillow: proportional resize and WebP conversion only. Native originals retained locally, signed order PDF is not published.",
+  "assets": [
+    {
+      "id": "beef_stroganoff_ingredients",
+      "path": "public/assets/olympiad/tour3/t3-case-08-v3.webp",
+      "imageUrl": "/assets/olympiad/tour3/t3-case-08-v3.webp",
+      "bytes": 164740,
+      "sha256": "ea126d8e3c93e60453d0104db19f52a09753e73a1482764c2e69146e81e80db3",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 1,
+      "mode": "generate",
+      "prompt": "Use case: photorealistic-natural. Create a single landscape 3:2 food ingredient still-life photograph for a cooking exam. On light neutral stone in soft daylight, arrange an off-white bowl of thin RAW red beef strips, another bowl of sliced raw onions, a small ramekin of thick white sour cream, a small bowl of white flour, and an EMPTY frying pan with its entire handle within frame. Natural real ingredients and ceramic texture, editorial food photography, 40-degree elevated camera, all objects fully visible with comfortable margins. This is mise en place for beef Stroganoff, not a cooked dish. No mushrooms, no garnishes, no extra sauces, no cooked food, no people, hands, text, logos, collage, or CGI.",
+      "review": "Экспорт лично просмотрен: блюдо и сопровождение соответствуют описанию, естественные текстуры; текста и логотипов нет."
+    },
+    {
+      "id": "borsch",
+      "path": "public/assets/olympiad/tour4/t4-plate-v2-12c457572062.webp",
+      "imageUrl": "/assets/olympiad/tour4/t4-plate-v2-12c457572062.webp",
+      "bytes": 183502,
+      "sha256": "12c4575720627b9266bd3765b85ddd8992c734219876a7b45f5d48637fb88152",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 1,
+      "mode": "generate",
+      "prompt": "Use case: photorealistic-natural. Single landscape 3:2 editorial food photograph for a cooking exam. A deep simple off-white ceramic bowl of hot red borsch on pale neutral stone, beetroot strips, shredded cabbage, potato cubes and small beef chunks visible in rich red broth; a modest dollop of white sour cream in center. Two slices of bread served alongside on the stone. Entire bowl and bread fully visible with margins, camera elevated about 40 degrees, soft natural daylight, realistic natural food texture, subtle steam. No decorative herbs, people, hands, text, logos, collage or CGI.",
+      "review": "Экспорт лично просмотрен: блюдо и сопровождение соответствуют описанию, естественные текстуры; текста и логотипов нет."
+    },
+    {
+      "id": "mushroom_cream_soup",
+      "path": "public/assets/olympiad/tour4/t4-plate-v2-1c3b3ae30b0e.webp",
+      "imageUrl": "/assets/olympiad/tour4/t4-plate-v2-1c3b3ae30b0e.webp",
+      "bytes": 156284,
+      "sha256": "1c3b3ae30b0ebdf33000079811c52331e7cf1ea739eb9e10bc56a4fa19e8e27b",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 1,
+      "mode": "generate",
+      "prompt": "Use case: photorealistic-natural. Single landscape 3:2 editorial food photograph for a cooking exam. A deep simple off-white ceramic bowl of smooth thick beige champignon cream soup, a few cooked champignon slices on its surface. Two small toast slices served alongside on pale neutral stone. Entire bowl and toast fully visible with comfortable margins, elevated 40-degree camera, soft natural daylight, realistic natural food and ceramic texture. The soup is creamy and homogeneous, no potato chunks or other vegetables. No decorative herbs, people, hands, text, logos, collage or CGI.",
+      "review": "Экспорт лично просмотрен: блюдо и сопровождение соответствуют описанию, естественные текстуры; текста и логотипов нет."
+    },
+    {
+      "id": "sweet_sour_chicken",
+      "path": "public/assets/olympiad/tour4/t4-plate-v2-0909c9cc84db.webp",
+      "imageUrl": "/assets/olympiad/tour4/t4-plate-v2-0909c9cc84db.webp",
+      "bytes": 151874,
+      "sha256": "0909c9cc84db8f7a8f93c8ab0b32c56bef0d4adb41349b3805fc81000de0d392",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 1,
+      "mode": "generate",
+      "prompt": "Use case: photorealistic-natural. Single landscape 3:2 editorial food photograph for a cooking exam. Simple off-white round ceramic plate on pale neutral stone. One portion of cooked chicken pieces with pineapple chunks and red and green sweet peppers in glossy red-orange sweet-and-sour sauce; a distinct separate mound of white rice on the SAME plate beside the chicken. Entire plate fully within frame with comfortable margins, elevated camera about 40 degrees, soft natural daylight, realistic food and ceramic texture, natural appetizing appearance. No other side dishes, no decorative herbs, people, hands, text, logos, collage or CGI.",
+      "review": "Экспорт лично просмотрен: блюдо и сопровождение соответствуют описанию, естественные текстуры; текста и логотипов нет."
+    },
+    {
+      "id": "chicken_teriyaki",
+      "path": "public/assets/olympiad/tour4/t4-plate-v2-0864553493a0.webp",
+      "imageUrl": "/assets/olympiad/tour4/t4-plate-v2-0864553493a0.webp",
+      "bytes": 184006,
+      "sha256": "0864553493a0f8500dbb6a3ba7c8b1d3e114b4dffbb869c1b35cb407340ddace",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 1,
+      "mode": "generate",
+      "prompt": "Use case: photorealistic-natural.\nAsset type: educational food photograph of a complete cafe main-course serving.\nPrimary request: A realistic complete plated serving of chicken teriyaki with white rice. Pieces of boneless chicken breast fillet, cut into substantial bite-size slices, visibly coated in a dark brown glossy soy-based teriyaki glaze. The cut surfaces show cooked white chicken meat, not breading. The sauce is dark caramel brown with subtle sheen, not a red sweet-and-sour sauce.\nScene/backdrop: matte pale gray-beige lightly textured cafe tabletop, a round plain off-white ceramic plate. Soft neutral daylight from upper left, no props in frame.\nComposition/framing: landscape 3:2 photograph, close view from a natural elevated 45-degree food photography angle, entire plate visible with a modest margin. The chicken fills one half of the plate, a neat rounded mound of cooked white rice on the other half, a small restrained garnish of slender blanched green vegetables at the edge. Balanced appetizing complete main-course serving, not a bare plate of meat.\nStyle/medium: high quality completely photorealistic restaurant menu food photography. Genuine chicken fibres, separate natural rice grains, subtle sauce shine, realistic vegetables and ceramic texture.\nConstraints: only this one complete dish, absolutely no pineapple, no fruit, no citrus pieces, no noodles, no breading, no nuggets, no seafood. Chicken must clearly be boneless fillet portions under dark soy glaze, accompanied by white rice. No text, logos, numbers, labels, hands or watermark; no illustration, no CGI, no collage, no utensils.",
+      "review": "Экспорт лично просмотрен: блюдо и сопровождение соответствуют описанию, естественные текстуры; текста и логотипов нет."
+    },
+    {
+      "id": "grilled_salmon",
+      "path": "public/assets/olympiad/tour4/t4-plate-v2-57dd6e265079.webp",
+      "imageUrl": "/assets/olympiad/tour4/t4-plate-v2-57dd6e265079.webp",
+      "bytes": 184706,
+      "sha256": "57dd6e265079ce054ea0ee3592b115ffbf8c979d388e5da3a576b01ac83b26c9",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 1,
+      "mode": "generate",
+      "prompt": "Use case: photorealistic-natural.\nAsset type: educational restaurant food photograph of a complete grilled salmon main course.\nPrimary request: A generous whole cooked salmon fillet grilled on a grill, with unmistakable dark diagonal grill marks on its golden-pink surface. The salmon remains clearly a single whole thick fillet, with natural flaky cooked salmon texture. Beside it on the same plate are several small peeled boiled potatoes and a restrained portion of green vegetables such as green beans and broccoli. Elegant yet ordinary complete cafe meal.\nScene/backdrop: a plain round off-white ceramic plate on a pale gray-beige lightly textured tabletop, soft neutral daylight.\nComposition/framing: wide landscape 3:2; elevated 45-degree food photography view, the entire plate and a small margin of table visible. Salmon is prominent in the foreground with potato and vegetables alongside, balanced complete plate with realistic portions.\nStyle/medium: high-quality completely photorealistic restaurant menu food photography, natural light, genuine cooked fish flakes and appetizing warm salmon color, realistic vegetable texture, subtle plate shadows.\nConstraints: the salmon is grilled with clearly visible grill marks and no sauce coating. No dark soy glaze, no teriyaki sauce, no breading, no batter, no deep frying, no rice, no noodles, no pineapple or fruit. No text, labels, logos, cutlery, people or watermark. No CGI, no illustration, no collage.",
+      "review": "Экспорт лично просмотрен: блюдо и сопровождение соответствуют описанию, естественные текстуры; текста и логотипов нет."
+    },
+    {
+      "id": "battered_squid",
+      "path": "public/assets/olympiad/tour4/t4-plate-v2-31968f18e57b.webp",
+      "imageUrl": "/assets/olympiad/tour4/t4-plate-v2-31968f18e57b.webp",
+      "bytes": 159068,
+      "sha256": "31968f18e57b05ffa44f47a5440c24b9ec06f6231bab6888de0237ec9d90cfe3",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 1,
+      "mode": "generate",
+      "prompt": "Use case: photorealistic-natural.\nAsset type: educational restaurant food photograph of a complete plated calamari starter.\nPrimary request: An appetizing realistic cafe plate of battered squid rings. Every main food piece is unmistakably a squid ring: circular or oval closed rings with open centers, visible thick cooked white squid under a thin crisp light golden batter coating. A generous neat pile of these rings, no shrimp shapes. A small separate white ramekin of creamy dipping sauce sits on the same plate, with one lemon wedge and a small parsley garnish.\nScene/backdrop: pale gray-beige lightly textured restaurant tabletop and a round plain off-white ceramic plate, natural soft daylight.\nComposition/framing: landscape 3:2 photograph, realistic elevated 45-degree food photography angle; entire plate visible with a small margin of tabletop. Ring-shaped squid pieces are prominent and easy to distinguish in the foreground. Balanced complete restaurant starter plating with the sauce in its own ramekin, a lemon wedge and parsley at one edge.\nStyle/medium: high quality completely photorealistic food photography, genuine light crispy batter texture, natural squid ring cross-sections, realistic lemon and sauce.\nConstraints: squid rings only, no shrimp, no prawns, no salmon, no whole fish, no tentacles, no chunky breaded nuggets, no onion rings. Each ring is a thick white squid ring under light golden batter; several cut edges subtly reveal the white squid rather than onion layers. No rice, no noodles, no chips, no side vegetables that obscure the rings. No text, labels, logos, hands, utensils or watermark. No CGI, illustration or collage.",
+      "review": "Экспорт лично просмотрен: блюдо и сопровождение соответствуют описанию, естественные текстуры; текста и логотипов нет."
+    },
+    {
+      "id": "pork_shashlik",
+      "path": "public/assets/olympiad/tour4/t4-plate-v2-39dfcd894196.webp",
+      "imageUrl": "/assets/olympiad/tour4/t4-plate-v2-39dfcd894196.webp",
+      "bytes": 185414,
+      "sha256": "39dfcd894196ced1002cad4368510198fbb8c017dc62566d3ed1311f8c8416c1",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 1,
+      "mode": "generate",
+      "prompt": "Use case: photorealistic-natural.\nAsset type: educational restaurant food photograph of a complete pork shashlik serving.\nPrimary request: A realistic complete plated pork shashlik serving: exactly six substantial whole pieces of grilled pork, threaded as three pieces on each of two flat metal skewers. Each individual pork piece has a clear separate natural irregular cube shape, browned edges and juicy whole-muscle meat texture; the meat is absolutely not minced or shaped into cylinders.\nAccompaniments: several pieces of thin soft lavash flatbread, fresh red tomato wedges, fresh cucumber slices and a small cluster of thin red onion half-rings on the same plate. Do not add other garnishes. These accompaniments will be identical for a second minced-meat kebab option, so keep them visually restrained and clearly separate from the meat.\nScene/backdrop: plain round off-white ceramic plate on a pale gray-beige lightly textured stone cafe tabletop, soft neutral daylight from upper left.\nComposition/framing: wide 3:2 landscape, elevated 45-degree food photography angle; two skewers diagonally across the foreground, bread and tomato/cucumber/onion arranged alongside behind the meat, entire plate visible with a modest margin of table. All six pork chunks clearly visible and separated enough to read their individual whole-meat shapes.\nStyle/medium: high quality completely photorealistic restaurant menu food photograph. Real grilled pork fibres, subtle char and moist browned edges, natural soft thin lavash folds, realistic fresh vegetables and metal skewer texture.\nConstraints: exactly two metal skewers, three pork chunks per skewer; no minced meat, no sausage-like meat, no chicken, no fish, no rice, no noodles, no fries, no sauces, no extra vegetables. No text, labels, logos, people, hands or watermark. No illustration, CGI or collage.",
+      "review": "Экспорт лично просмотрен: блюдо и сопровождение соответствуют описанию, естественные текстуры; текста и логотипов нет."
+    },
+    {
+      "id": "lyulya_kebab",
+      "path": "public/assets/olympiad/tour4/t4-plate-v2-2c0b46023f6d.webp",
+      "imageUrl": "/assets/olympiad/tour4/t4-plate-v2-2c0b46023f6d.webp",
+      "bytes": 184352,
+      "sha256": "2c0b46023f6d6e5f419b174ade84ff78703be4611bbb2887cb4012810efb56be",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 1,
+      "mode": "edit",
+      "prompt": "Use case: precise-object-edit.\nAsset type: educational restaurant food photograph of a complete lyulya-kebab serving paired with a shashlik photograph.\nInput image: the supplied plated shashlik photograph is the edit target. Preserve the same plate, stone tabletop, crop, camera angle, lighting and shadows. Preserve the exact lavash flatbread, tomato wedges, cucumber slices and red onion half-rings in the exact same locations and quantities.\nPrimary request: Change only the meat on the two metal skewers. Remove all six individual pork cubes and replace them with exactly two elongated grilled lyulya-kebab shapes, one continuous minced-meat kebab on each existing metal skewer. Each kebab is a long hand-formed cylinder of cohesive minced meat with a clearly visible homogeneous finely chopped meat texture and a browned char-grilled exterior, with slightly irregular handcrafted edges. The form must be continuous along the skewer, not a chain of meat cubes, not whole-muscle steak and not a factory sausage casing. The two kebabs lie parallel diagonally across the foreground where the skewers are.\nStyle/medium: completely photorealistic high-quality food photography with realistic finely minced meat structure, natural browned and slightly charred surface.\nConstraints: exactly two elongated continuous minced-meat kebabs on two flat metal skewers; no separate meat chunks left, no cubes, no chicken, fish, sausage casing, sauce, rice or noodles. All accompaniments and scene details remain unchanged. No text, labels, logos, people, hands or watermark. No CGI, illustration or collage.",
+      "review": "Экспорт лично просмотрен: блюдо и сопровождение соответствуют описанию, естественные текстуры; текста и логотипов нет."
+    },
+    {
+      "id": "guest-pleased-v1",
+      "path": "public/assets/olympiad/tour5/service/guest-pleased-v1.webp",
+      "imageUrl": "/assets/olympiad/tour5/service/guest-pleased-v1.webp",
+      "bytes": 82594,
+      "sha256": "5c3b0ec5a6d833723d0270d3d20d8133ea93510983da2500c31b9117f491f59f",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 1,
+      "mode": "generate",
+      "prompt": "Use case: photorealistic-natural.\nAsset type: restaurant guest reaction photograph for an educational cooking competition website.\nPrimary request: A realistic editorial lifestyle photograph of a pleased adult restaurant guest, approximately 30 years old, seated at a table in a modern cozy cafe. He wears a simple light cream shirt with no logos. His natural friendly smile expresses that his order has just arrived. His eyes look slightly downward toward the lower foreground. Calm, respectful, believable customer moment.\nScene/backdrop: a tasteful contemporary cafe, warm natural window light, soft out-of-focus wooden furnishings and a little greenery in the background.\nComposition/framing: wide 3:2 landscape photograph; guest upper body, entire head and face, shoulders, and a portion of a clean wooden table are visible. Head does not touch the frame edge. Both hands resting naturally on the table, with anatomically correct hands and five fingers where visible. The lower foreground table remains clear and empty, because the actual student-selected food photograph is displayed separately in the interface.\nStyle/medium: completely photorealistic high quality hospitality editorial photography, natural skin texture, realistic fabric and wood, gentle depth of field.\nConstraints: single fictional adult guest, no other prominent people; absolutely no food, no dishes, no plates, no cups, no cutlery on the table; no text, no logos, no watermark. No exaggerated grin, no caricature, no CGI, no illustration. Warm neutral colors. Keep the smile modest and natural.",
+      "review": "Один и тот же взрослый гость: улыбка либо мягкое недоумение. Блюдо показывается отдельным точным снимком сохранённого состава."
+    },
+    {
+      "id": "guest-puzzled-v1",
+      "path": "public/assets/olympiad/tour5/service/guest-puzzled-v1.webp",
+      "imageUrl": "/assets/olympiad/tour5/service/guest-puzzled-v1.webp",
+      "bytes": 79916,
+      "sha256": "eef0fd878978d349e063fe6112c204780cac3f5202563a5916de07334eba8e56",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 1,
+      "mode": "edit",
+      "prompt": "Use case: identity-preserve.\nAsset type: alternate restaurant guest reaction photograph for an educational cooking competition website.\nInput image: the supplied photograph is the edit target. Preserve the same fictional adult man and his recognizable face, hair, skin, cream shirt, seated pose, hands, cafe setting, table, lighting, camera position, crop, and photo realism.\nPrimary request: Change only the man's facial expression from smiling to mild puzzled surprise at an unexpected order. His eyebrows rise slightly, the forehead has a very subtle natural crease, and the smile is replaced with a neutral gently closed mouth. His eyes keep looking slightly down toward the order. The expression is restrained, kind, respectful, and easy to recognize as a little confused, not angry or disappointed harshly.\nConstraints: all other details stay unchanged; same wide 3:2 composition, head and face fully visible, same two natural hands on the clean empty table; no food, plates, dishes, cups, cutlery, lettering, logos or watermark. No ridicule, no exaggerated expression, no aggression, no cartoon, no CGI.",
+      "review": "Один и тот же взрослый гость: улыбка либо мягкое недоумение. Блюдо показывается отдельным точным снимком сохранённого состава."
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const { URL } = require("url");
 const packageInfo = require("./package.json");
+const { buildDishService } = require("./src/dish-service");
 const {
   initStorage,
   loadOlympiad,
@@ -796,6 +797,8 @@ function buildAttemptView(olympiad, attempt, settings) {
     expiresAt: attempt.expiresAt,
     stateRevision: Math.max(0, Number(attempt.stateRevision) || 0),
     currentStepIndex: attempt.currentStepIndex,
+    certificateOrder: olympiad.certificateOrder || null,
+    dishService: buildDishService(attempt),
     progress: buildProgress(attempt),
     timing: getTiming(attempt),
     currentTour: currentTour

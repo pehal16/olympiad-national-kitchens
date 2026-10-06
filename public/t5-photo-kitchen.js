@@ -14,7 +14,7 @@
     try { if (incoming?.dishId === dish.id) selected = new Set(model.selection(dish, incoming.selectedIngredientIds || []).map(item => item.id)); } catch { /* Ignore malformed local drafts. */ }
     const route = model.recipeStages(dish);
     let stage = selected.size === 4 && route.includes(stored?.stage) && Array.isArray(stored?.selectedIngredientIds) && model.key(stored.selectedIngredientIds) === model.key([...selected]) ? stored.stage : 'select';
-    let layout = stored?.layout === 'turned' ? 'turned' : 'balanced';
+    let layout = 'balanced';
     let started = question.sequenceInTour !== 1 || seen.has(introKey) || read(introKey) === true;
     const el = (tag, className, text) => { const node = doc.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = text; return node; };
     const on = (target, event, fn) => target.addEventListener(event, fn, { signal: listeners.signal });
@@ -25,7 +25,7 @@
     const intro = el('section','t5-photo-intro'), workbench = el('section','t5-photo-workbench');
     intro.append(el('div','t5-photo-eyebrow','Тур 5 · Финальная кухня'),el('h3','','Три блюда. Ваша сборка.'),el('p','t5-photo-lead','«Маргарита» → греческий салат → «Филадельфия»'));
     const rules = el('ul','t5-photo-rules');
-    ['Для каждого блюда выберите 4 компонента из 8 и выполните сборку.','Правильный компонент — 4 балла. Максимум — 16 за блюдо и 48 за тур. Порядок добавления и композиция не оцениваются.','Состав можно менять до подтверждения. После подтверждения переходите к следующему блюду.','На тур отведено 15 минут. Таймер уже идёт.'].forEach(text => rules.append(el('li','',text)));
+    ['Для каждого блюда выберите 4 компонента из 8 и выполните сборку.','Правильный компонент — 4 балла. Максимум — 16 за блюдо и 48 за тур. Порядок выбора продуктов не влияет на баллы.','Состав можно менять до нажатия «Подать». После подачи переходите к следующему блюду.','На тур отведено 15 минут. Таймер уже идёт.'].forEach(text => rules.append(el('li','',text)));
     intro.append(rules,button('Перейти к сборке','t5-photo-primary',()=>{ if(locked)return; started=true;seen.add(introKey);write(introKey,true);update();cards.values().next().value?.focus(); }));
     const head = el('header','t5-photo-heading'), heading = el('div');
     heading.append(el('div','t5-photo-eyebrow',`Блюдо ${question.station.number} из 3 · ${dish.cuisineLabel}`),el('h3','',dish.title),el('p','t5-photo-version',dish.variantLabel));
@@ -42,11 +42,9 @@
     const operation = el('div','t5-photo-operation'), operationLabel = el('span','t5-photo-small'), next = button('','t5-photo-primary',()=>{if(locked || selected.size!==4 || stage==='served')return;stage=model.nextStage(dish,selected,stage);changed();});
     const edit = button('Изменить состав','t5-photo-text-button',()=>{if(locked)return;stage='select';changed();cards.values().next().value?.focus();});
     operation.append(operationLabel,next);
-    const layoutControls = el('div','t5-photo-layout');layoutControls.setAttribute('aria-label','Композиция');layoutControls.append(el('span','t5-photo-small','Композиция'));
-    ['balanced','turned'].forEach((value,index)=>{ const control=button(index?'С поворотом':'Основная','t5-photo-layout-button',()=>{if(locked)return;layout=value;changed();});control.dataset.layout=value;layoutControls.append(control); });
-    panel.append(scene,mediaNotice,list,stepbar,operation,layoutControls,edit);
+    panel.append(scene,mediaNotice,list,stepbar,operation,edit);
     compose.append(pantry,panel);workbench.append(compose);
-    const footer=el('div','t5-photo-footer'), draftNotice=el('p','t5-photo-small');draftNotice.hidden=true;footer.append(draftNotice,submitButton);workbench.append(footer);submitButton.textContent='Подтвердить блюдо';
+    const footer=el('div','t5-photo-footer'), draftNotice=el('p','t5-photo-small');draftNotice.hidden=true;footer.append(draftNotice,submitButton);workbench.append(footer);submitButton.textContent='Подать';
     shell.append(intro,workbench);
     const answer = () => ({dishId:dish.id,selectedIngredientIds:[...selected]});
     function persist(){write(scope,{...answer(),stage,layout});draftNotice.hidden=!storageFailed;draftNotice.textContent='Черновик сохраняется до закрытия этой страницы.';}
@@ -58,9 +56,8 @@
       steps.forEach((node,index)=>{const current=index===route.indexOf(stage);node.classList.toggle('is-done',index<route.indexOf(stage));if(current)node.setAttribute('aria-current','step');else node.removeAttribute('aria-current');});
       const ready=selected.size===4;next.hidden=stage==='served';next.disabled=locked||!ready;next.textContent=stage==='served'?'':ready?model.operations[dish.photo.kind][route.indexOf(stage)]:'Выберите 4 продукта';
       operationLabel.textContent=!ready?'Выбор компонентов':stage==='served'?'Сборка завершена':`Шаг ${route.indexOf(stage)+1} из ${route.length-1}`;
-      edit.hidden=stage==='select';layoutControls.hidden=stage==='select';
+      edit.hidden=stage==='select';
       controls.forEach(control=>{if(control!==next)control.disabled=locked;});
-      layoutControls.querySelectorAll('button').forEach(control=>control.setAttribute('aria-pressed',String(control.dataset.layout===layout)));
       submitButton.hidden=!started;submitButton.disabled=locked||!ready||stage!=='served';
     }
     function decode(url){

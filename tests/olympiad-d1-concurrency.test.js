@@ -289,7 +289,7 @@ test("D1 olympiad attempt storage enforces its concurrency contract", async (t) 
       assert.equal(writes.length,50);
     }
     const saved=await Promise.all(issued.map(attempt=>loadAttemptById(attempt.id)));
-    for(const attempt of saved){assert.equal(attempt.stateRevision,3);assert.equal(Object.keys(attempt.answers).length,3);assert.equal(Object.values(attempt.answers).reduce((sum,a)=>sum+a.finalScore,0),48);assert.equal(attempt.variant.blueprintVersion,13);assert.deepEqual(attempt.variant.questions.filter(q=>q.type==='final_kitchen').map(q=>q.dishes[0].photo.kind),['pizza','greek','roll']);}
+    for(const attempt of saved){assert.equal(attempt.stateRevision,3);assert.equal(Object.keys(attempt.answers).length,3);assert.equal(Object.values(attempt.answers).reduce((sum,a)=>sum+a.finalScore,0),48);assert.equal(attempt.variant.blueprintVersion,14);assert.deepEqual(attempt.variant.questions.filter(q=>q.type==='final_kitchen').map(q=>q.dishes[0].photo.kind),['pizza','greek','roll']);}
   });
 
   await t.test("attempt events are idempotent and stop at the per-attempt cap", async () => {

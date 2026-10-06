@@ -1,0 +1,20 @@
+.t5-service-overlay { position:fixed; inset:0; z-index:1300; display:grid; place-items:center; padding:24px; background:#122d24db; backdrop-filter:blur(8px); color:#203a32; }
+.t5-service-card { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); width:min(940px,100%); max-height:calc(100dvh - 48px); overflow:auto; border-radius:26px; background:#fbfaf6; box-shadow:0 30px 100px #0004; }
+.t5-service-portrait { position:relative; margin:0; min-height:380px; overflow:hidden; }
+.t5-service-guest { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:52% center; }
+.t5-service-copy { padding:28px 32px; text-align:center; }
+.t5-service-eyebrow { margin:0 0 10px; font:700 11px/1.4 Arial,sans-serif; letter-spacing:1.6px; text-transform:uppercase; color:#5c7864; }
+.t5-service-copy h2 { margin:0 0 10px; font:600 clamp(25px,3vw,34px)/1.15 Georgia,serif; }
+.t5-service-message { font-size:14px; line-height:1.5; color:#566e60; margin:0 0 14px; }
+.t5-service-plate { width:min(250px,100%); aspect-ratio:1; margin:0 auto; border-radius:20px; overflow:hidden; background:#f3eee4; }
+.t5-service-plate img { display:block; width:100%; height:100%; object-fit:contain; }
+.t5-service-plate.is-tray { display:grid; grid-template-columns:1fr 1fr; padding:10px; }
+.t5-service-dish { font:600 20px/1.3 Georgia,serif; margin:14px 0 6px; }
+.t5-service-composition { font-size:12px; line-height:1.5; color:#647667; margin:0; }
+.t5-service-saved { margin:14px 0 2px; font-size:12px; font-weight:600; color:#2c704e; }
+.t5-service-clock { margin:0 0 16px; font-size:11px; color:#687667; }
+.t5-service-copy .t5-photo-primary { width:100%; }
+.t5-service-copy .t5-photo-primary:focus-visible { outline:3px solid #8cbfa4; outline-offset:4px; }
+.t5-service-overlay [hidden] { display:none; }
+.t5-service-open .exam-transition-toast { display:none; }
+@media(max-width:650px) { .t5-service-overlay { padding:12px; }.t5-service-card { grid-template-columns:1fr; max-height:calc(100dvh - 24px); border-radius:20px; }.t5-service-portrait { height:180px; min-height:180px; }.t5-service-guest { object-position:50% 34%; }.t5-service-copy { padding:22px 20px; }.t5-service-plate { width:210px; } }

@@ -90,15 +90,20 @@
       return;
     }
 
+    const order = attempt.certificateOrder;
+    if (!order?.number || !/^\d{4}-\d{2}-\d{2}$/.test(order.date || "") || Number.isNaN(Date.parse(order.date))) {
+      fail("Реквизиты приказа не настроены. Обратитесь к организатору олимпиады.");
+      return;
+    }
     fields.name.textContent = participant.fullName;
     fields.name.classList.toggle("long-name", participant.fullName.length > 32);
     fields.score.textContent = `${score} из ${maxScore} баллов`;
     fields.mentor.textContent = participant.mentorName || "—";
     fields.mentor.style.fontSize = `${participant.mentorName?.length > 70 ? 12 : participant.mentorName?.length > 35 ? 15 : 19}px`;
     fields.date.textContent = new Intl.DateTimeFormat("ru-RU", {
-      day: "numeric", month: "long", year: "numeric"
-    }).format(finishedAt);
-    fields.number.textContent = `НК-${String(attempt.id).replace(/^attempt_/, "").slice(0, 12).toUpperCase()}`;
+      day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC"
+    }).format(new Date(order.date));
+    fields.number.textContent = `№ ${order.number}`;
 
     sheet.hidden = false;
     fitParticipantName();

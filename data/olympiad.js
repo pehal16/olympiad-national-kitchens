@@ -7,9 +7,10 @@ const tour5Stations = require("./banks/tour5-photo-kitchen");
 
 module.exports = {
   schemaVersion: 2,
-  blueprintVersion: 13,
+  blueprintVersion: 14,
   id: "nk-2026-variant",
   slug: "national-kitchens-2026",
+  certificateOrder: { number: "199", date: "2026-10-05" },
   title: "Национальные кухни мира",
   subtitle: "Индивидуальная олимпиада по технологии приготовления блюд национальных кухонь",
   description:

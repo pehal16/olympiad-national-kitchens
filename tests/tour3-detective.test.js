@@ -26,7 +26,7 @@ test("T3 ten fixed dossiers, three clues, 30 points, no duplicate T1/T2/T5 entit
   const otherIds = new Set([
     ...olympiad.questionBank.tour1Pools.flatMap((p) => p.questions.map((q) => q.dishId)),
     ...olympiad.questionBank.tour2Blocks.flatMap((q) => q.dishIds),
-    ...olympiad.questionBank.tour5Cases.map((q) => q.dishId)
+    ...olympiad.questionBank.tour5Stations.flatMap((q) => q.dishes.map(dish => dish.dishId))
   ]);
   // T1's active photo bank has no dishId: also compare its actual answer text.
   const activeTour1Names = olympiad.questionBank.tour1Pools.flatMap((pool) =>
@@ -83,7 +83,7 @@ for (const q of bank) {
 test("bounded fuzzy spelling, compound required tokens, close wrong dishes", () => {
   const check = (index, value, score) => assert.equal(scoreQuestion(bank[index], { text: value }).finalScore, score, value);
   [[0,"сырнки"],[1,"дранки"],[2,"шакшуак"],[3,"самса"],[4,"хумсу"],
-    [5,"яблочный штруедль"],[6,"чизкйек"],[7,"начсо"],[8,"гуакамлоэ"],[9,"фалафлеь"]]
+    [5,"яблочный штруедль"],[6,"чизкйек"],[7,"бефстроганоф"],[8,"гуакамлоэ"],[9,"фалафлеь"]]
     .forEach(([i, value]) => check(i, value, 3));
   [[0,"сырки"],[1,"пряники"],[3,"салса"],[3,"сальса"],[3,"salsa"],[3,"samosa"],[5,"вишневый штрудель"],[5,"яблочный"],
     [6,"чиз"],[6,"cheese cake with berries"],[8,"соус гуакамоле"],[9,"фала"]]
@@ -100,7 +100,7 @@ test("singular, plural, inflections and approved word orders work with bounded t
     [5, ["штудель яблочный", "яблочный штудель", "штрудель яблочный", "яблочные штрудели",
       "штрудели яблочные", "штудели яблочные", "штрудель с яблоками", "штудель с яблоками", "штруделей", "apple strudels"]],
     [6, ["чизкейки", "чизкейков", "чиз-кейки", "чизкйеки", "cheese cakes"]],
-    [7, ["начо", "начосы", "начозы", "nacho"]],
+    [7, ["беф строганов", "говядина по-строгановски", "бефстроганов из говядины", "beef stroganoff"]],
     [8, ["гуакамолле", "гуакомоли", "гуакомолэ"]],
     [9, ["фалафели", "фалафелей", "фалафелями", "фалафэли", "falafels"]]
   ];
@@ -138,15 +138,31 @@ test("new spelling policy does not mutate or upgrade an already-issued private k
   assert.equal(matchDetectiveAnswer(bank[5].answerPolicy, "штудель яблочный"), true);
   assert.equal(JSON.stringify(saved), snapshot);
   const variant = buildVariant(olympiad, { seed: "spelling-policy-8" });
-  assert.equal(variant.blueprintVersion, 13);
+  assert.equal(variant.blueprintVersion, 14);
   const issued = variant.questions.find((q) => q.sourceId === bank[5].id);
   assert.equal(matchDetectiveAnswer(issued.answerPolicy, "штудель яблочный"), true);
 });
 
-test("spelling revision preserves authored clues, images, dish identities, order and scores", () => {
-  const authored = JSON.stringify(bank.map(({ answerPolicy, ...question }) => question));
+test("T3 replacement preserves the other nine authored dossiers", () => {
+  const authored = JSON.stringify(bank.filter((q, index) => index !== 7).map(({ answerPolicy, ...question }) => question));
   assert.equal(crypto.createHash("sha256").update(authored).digest("hex"),
-    "88f27bb75ab486681f2c60812f4c769837df75b08483b19c2cecb601d637c25d");
+    "ff94d13e6fc1c877716c476a2260160b71e04029f0f00bd279098b0945aa5edf");
+});
+
+test("replacing nachos never changes the answer key or illustration of an issued dossier", () => {
+  const historical = { ...structuredClone(bank[7]), dishId: "nachos",
+    imageUrl: "/assets/olympiad/tour3/t3-case-08.webp",
+    clues: [{ label:"Основа",text:"Кукурузная тортилья" },{ label:"Структура",text:"Хрустящая закуска" },
+      { label:"Подача",text:"Подают с расплавленным сыром или сырным соусом" }],
+    answerPolicy: { canonical:"начос",aliases:["начо"],english:["nachos","nacho"],
+      misspellings:["начас","начосс","начосы","начоз","начозы","начсо"],rejected:["чипсы","сухарики","буррито","тако","тортилья"] } };
+  const snapshot = JSON.stringify(historical);
+  assert.doesNotThrow(() => validateQuestionStructure(historical));
+  assert.equal(scoreQuestion(historical,{text:"начос"}).finalScore,3);
+  assert.equal(scoreQuestion(historical,{text:"бефстроганов"}).finalScore,0);
+  assert.equal(scoreQuestion(bank[7],{text:"начос"}).finalScore,0);
+  assert.equal(scoreQuestion(bank[7],{text:"бефстроганов"}).finalScore,3);
+  assert.equal(JSON.stringify(historical),snapshot);
 });
 
 test("explicit forms contain no mixed-script shortcuts or contradictory deny entries", () => {
