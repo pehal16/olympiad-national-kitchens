@@ -16,3 +16,6 @@ dist-cloudflare/
 *.log
 *.zip
 .codex_backup_*/
+output/story/
+output/playwright/
+.playwright-cli/

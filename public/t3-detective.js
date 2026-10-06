@@ -9,7 +9,7 @@
       isComplete: () => text.trim().length >= 2
     };
   }
-  function create({ mount, question, attemptId, submitButton, onChange, onPhase }) {
+  function create({ mount, question, attemptId, submitButton, onChange, onPhase, inlineIntro = false }) {
     const doc = mount.ownerDocument;
     const win = doc.defaultView;
     const introKey = `nko_t3_intro_v1_${attemptId}`;
@@ -17,7 +17,7 @@
     const read = (key) => { try { return win.localStorage.getItem(key); } catch { return null; } };
     const write = (key, value) => { try { win.localStorage.setItem(key, value); } catch { /* Memory-only draft remains usable. */ } };
     const model = createState(question.savedAnswer || { text: read(draftKey) || "" });
-    let started = question.sequenceInTour !== 1 || introSeen.has(introKey) || read(introKey) === "seen" || Boolean(question.savedAnswer);
+    let started = inlineIntro || question.sequenceInTour !== 1 || introSeen.has(introKey) || read(introKey) === "seen" || Boolean(question.savedAnswer);
     let input, clear, locked = true, focusPending = true, disposed = false;
     function focusAnswer() {
       if (disposed || locked || !input?.isConnected || input.disabled || input.closest('[inert]')) return;

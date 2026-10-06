@@ -15,7 +15,7 @@
     const route = model.recipeStages(dish);
     let stage = selected.size === 4 && route.includes(stored?.stage) && Array.isArray(stored?.selectedIngredientIds) && model.key(stored.selectedIngredientIds) === model.key([...selected]) ? stored.stage : 'select';
     let layout = 'balanced';
-    let started = question.sequenceInTour !== 1 || seen.has(introKey) || read(introKey) === true;
+    let started = options.inlineIntro || question.sequenceInTour !== 1 || seen.has(introKey) || read(introKey) === true;
     const el = (tag, className, text) => { const node = doc.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = text; return node; };
     const on = (target, event, fn) => target.addEventListener(event, fn, { signal: listeners.signal });
     const button = (text, className, fn) => { const node = el('button', className, text); node.type = 'button'; if (fn) on(node, 'click', fn); controls.push(node); return node; };

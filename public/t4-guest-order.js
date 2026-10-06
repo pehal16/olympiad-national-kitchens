@@ -19,7 +19,7 @@
       isComplete: () => selectedOptionId !== null
     };
   }
-  function create({ mount, question, attemptId, submitButton, onChange, onPhase }) {
+  function create({ mount, question, attemptId, submitButton, onChange, onPhase, inlineIntro = false }) {
     const doc = mount.ownerDocument, win = doc.defaultView;
     const version = question.presentationVersion;
     const scope = `${attemptId}_${version}`;
@@ -32,7 +32,7 @@
     try { stored = JSON.parse(read(draftKey)); } catch { stored = null; }
     const initial = question.savedAnswer || stored || memoryDrafts.get(draftKey);
     const model = createState(question, initial);
-    let started = question.sequenceInTour !== 1 || introSeen.has(introKey) || read(introKey) === "seen" || model.isComplete();
+    let started = inlineIntro || question.sequenceInTour !== 1 || introSeen.has(introKey) || read(introKey) === "seen" || model.isComplete();
     const element = (tag, className, text) => {
       const node = doc.createElement(tag);
       if (className) node.className = className;

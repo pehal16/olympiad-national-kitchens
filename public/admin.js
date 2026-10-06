@@ -22,6 +22,32 @@
 
 const PANEL_REFRESH_MS = 15000;
 
+async function loadStoryRuns() {
+  const mount=document.getElementById('story-run-admin');
+  if(!mount)return;
+  const runs=await adminApi('/api/admin/story-runs');
+  const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
+  if(!mount.dataset.ready){
+    mount.append(el('h2','Ресторан путешествий: дни проведения'),el('p','Вход открыт весь выбранный день по Москве. Каждая попытка получает 45 минут. Итоги открываются отдельно после закрытия входа и завершения всех попыток.'));
+    const form=el('form'),label=el('label','Дата проведения по Москве '),date=el('input');date.type='date';date.required=true;label.append(date);
+    const create=el('button','Создать день');create.className='button primary';create.type='submit';
+    const message=el('p');message.className='story-run-message';message.setAttribute('role','status');message.id='story-run-message';
+    form.append(label,create);form.addEventListener('submit',async event=>{event.preventDefault();create.disabled=true;try{await adminApi('/api/admin/story-runs',{method:'POST',body:JSON.stringify({date:date.value})});message.textContent='Проведение создано. Дата и версии закреплены.';await loadStoryRuns();}catch(error){message.textContent=error.message;}finally{create.disabled=false;}});
+    const list=el('div');list.id='story-run-list';mount.append(form,message,list);mount.dataset.ready='true';
+  }
+  const list=document.getElementById('story-run-list');list.replaceChildren();
+  if(!runs.length)list.append(el('p','Дата ещё не назначена. Новые сценарные попытки закрыты.'));
+  for(const run of runs){
+    const row=el('article');row.className='story-run-row';row.append(el('h3',`${run.date} · Москва`),el('p',`Начато: ${run.started}. Завершено: ${run.completed}. Активно: ${run.active}. ${run.publishedAt?'Итоги опубликованы':run.entryOpen?'Вход открыт':run.stopped?'Новые старты остановлены':'Вход закрыт или ещё не открыт'}.`));
+    const actions=el('div');actions.className='story-run-actions';
+    async function action(path,method,body,button){button.disabled=true;try{await adminApi(path,{method,...(body?{body:JSON.stringify(body)}:{})});document.getElementById('story-run-message').textContent='Изменение сохранено.';await loadStoryRuns();}catch(error){document.getElementById('story-run-message').textContent=error.message;button.disabled=false;}}
+    const stop=el('button',run.stopped?'Возобновить новые старты':'Остановить новые старты');stop.className='button secondary';stop.type='button';stop.disabled=Boolean(run.publishedAt);stop.addEventListener('click',()=>action(`/api/admin/story-runs/${run.id}`,'PATCH',{stopped:!run.stopped},stop));
+    const decoration=el('button',run.decorationsDisabled?'Включить оформление':'Отключить оформление');decoration.className='button secondary';decoration.type='button';decoration.addEventListener('click',()=>action(`/api/admin/story-runs/${run.id}`,'PATCH',{decorationsDisabled:!run.decorationsDisabled},decoration));
+    const publish=el('button',run.publishedAt?'Опубликовано':'Опубликовать итоги');publish.type='button';publish.className='button primary';publish.disabled=Boolean(run.publishedAt)||Date.now()<Date.parse(run.entryEndsAt)||run.active>0;publish.addEventListener('click',()=>action(`/api/admin/story-runs/${run.id}/publish`,'POST',null,publish));
+    actions.append(stop,decoration,publish);row.append(actions);list.append(row);
+  }
+}
+
 const elements = {
   navRibbon: document.getElementById("admin-nav-ribbon"),
   navMenuToggle: document.getElementById("admin-nav-menu-toggle"),
@@ -940,6 +966,7 @@ async function refreshPanel(options = {}) {
   const selectedAttemptId = adminState.selectedAttemptId;
 
   try {
+    await loadStoryRuns();
     await loadSummary();
     await loadAttempts();
 

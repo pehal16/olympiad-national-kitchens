@@ -10,6 +10,21 @@ database_id = "4c30c9ab-0c53-4b8a-865a-7c9078d48c2f"
 migrations_dir = "migrations"
 
 [vars]
+STORY_ENABLED = "true"
 STORAGE_BACKEND = "cloudflare"
 LEARNING_ENABLED = "true"
 LEARNING_PILOT_GROUP_CODE = "1-ПК-24Б"
+
+# CI replaces this safe placeholder with the dedicated preview D1 UUID.
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "olympiad-gkts-story-preview-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[env.preview.vars]
+STORY_ENABLED = "true"
+STORAGE_BACKEND = "cloudflare"
+LEARNING_ENABLED = "false"
+LEARNING_PILOT_GROUP_CODE = "1-ПК-24Б"
+YANDEX_DISK_ENABLED = "false"

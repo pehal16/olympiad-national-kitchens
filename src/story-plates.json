@@ -1,0 +1,338 @@
+[
+  {
+    "id": "T1-A01",
+    "title": "Круассан",
+    "source": "/assets/olympiad/tour1/t1-active-01.webp",
+    "description": "Круассан — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/T1-A01.webp"
+  },
+  {
+    "id": "T1-A02",
+    "title": "Рамен",
+    "source": "/assets/olympiad/tour1/t1-active-02.webp",
+    "description": "Рамен — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/T1-A02.webp"
+  },
+  {
+    "id": "T1-A03",
+    "title": "Хинкали",
+    "source": "/assets/olympiad/tour1/t1-active-03.webp",
+    "description": "Хинкали — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/T1-A03.webp"
+  },
+  {
+    "id": "T1-A04",
+    "title": "Тако",
+    "source": "/assets/olympiad/tour1/t1-active-04.webp",
+    "description": "Тако — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/T1-A04.webp"
+  },
+  {
+    "id": "T1-A05",
+    "title": "Том-ям",
+    "source": "/assets/olympiad/tour1/t1-active-05.webp",
+    "description": "Том-ям — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/T1-A05.webp"
+  },
+  {
+    "id": "T1-A06",
+    "title": "Лазанья",
+    "source": "/assets/olympiad/tour1/t1-active-06.webp",
+    "description": "Лазанья — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/T1-A06.webp"
+  },
+  {
+    "id": "T1-A07",
+    "title": "Суши",
+    "source": "/assets/olympiad/tour1/t1-active-07.webp",
+    "description": "Суши — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/T1-A07.webp"
+  },
+  {
+    "id": "T1-A08",
+    "title": "Плов",
+    "source": "/assets/olympiad/tour1/t1-active-08.webp",
+    "description": "Плов — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/T1-A08.webp"
+  },
+  {
+    "id": "T1-A09",
+    "title": "Паэлья",
+    "source": "/assets/olympiad/tour1/t1-active-09.webp",
+    "description": "Паэлья — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/T1-A09.webp"
+  },
+  {
+    "id": "T1-A10",
+    "title": "Хот-дог",
+    "source": "/assets/olympiad/tour1/t1-active-10.webp",
+    "description": "Хот-дог — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/T1-A10.webp"
+  },
+  {
+    "id": "fish_and_chips",
+    "title": "Фиш-энд-чипс",
+    "source": "/assets/olympiad/tour2/t2-active-30.webp",
+    "description": "Фиш-энд-чипс — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/fish_and_chips.webp"
+  },
+  {
+    "id": "tiramisu",
+    "title": "Тирамису",
+    "source": "/assets/olympiad/tour2/t2-active-27.webp",
+    "description": "Тирамису — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/tiramisu.webp"
+  },
+  {
+    "id": "wiener_schnitzel",
+    "title": "Венский шницель",
+    "source": "/assets/olympiad/tour2/t2-active-29.webp",
+    "description": "Венский шницель — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/wiener_schnitzel.webp"
+  },
+  {
+    "id": "ratatouille",
+    "title": "Рататуй",
+    "source": "/assets/olympiad/tour2/t2-active-28.webp",
+    "description": "Рататуй — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/ratatouille.webp"
+  },
+  {
+    "id": "onigiri",
+    "title": "Онигири",
+    "source": "/assets/olympiad/tour2/t2-active-31.webp",
+    "description": "Онигири — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/onigiri.webp"
+  },
+  {
+    "id": "pho",
+    "title": "Фо",
+    "source": "/assets/olympiad/tour2/t2-active-33.webp",
+    "description": "Фо — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/pho.webp"
+  },
+  {
+    "id": "bibimbap",
+    "title": "Бибимбап",
+    "source": "/assets/olympiad/tour2/t2-active-32.webp",
+    "description": "Бибимбап — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/bibimbap.webp"
+  },
+  {
+    "id": "pad_thai",
+    "title": "Пад-тай",
+    "source": "/assets/olympiad/tour2/t2-active-34.webp",
+    "description": "Пад-тай — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/pad_thai.webp"
+  },
+  {
+    "id": "olivier",
+    "title": "Салат «Оливье»",
+    "source": "/assets/olympiad/tour2/t2-active-38.webp",
+    "description": "Салат «Оливье» — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/olivier.webp"
+  },
+  {
+    "id": "gazpacho",
+    "title": "Гаспачо",
+    "source": "/assets/olympiad/tour2/t2-active-36.webp",
+    "description": "Гаспачо — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/gazpacho.webp"
+  },
+  {
+    "id": "pastel_de_nata",
+    "title": "Паштел-де-ната",
+    "source": "/assets/olympiad/tour2/t2-active-35.webp",
+    "description": "Паштел-де-ната — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/pastel_de_nata.webp"
+  },
+  {
+    "id": "brussels_waffle",
+    "title": "Брюссельская вафля",
+    "source": "/assets/olympiad/tour2/t2-active-37.webp",
+    "description": "Брюссельская вафля — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/brussels_waffle.webp"
+  },
+  {
+    "id": "goulash",
+    "title": "Гуляш",
+    "source": "/assets/olympiad/tour2/t2-active-42.webp",
+    "description": "Гуляш — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/goulash.webp"
+  },
+  {
+    "id": "peking_duck",
+    "title": "Пекинская утка",
+    "source": "/assets/olympiad/tour2/t2-active-40.webp",
+    "description": "Пекинская утка — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/peking_duck.webp"
+  },
+  {
+    "id": "eclair",
+    "title": "Эклер",
+    "source": "/assets/olympiad/tour2/t2-active-39.webp",
+    "description": "Эклер — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/eclair.webp"
+  },
+  {
+    "id": "kharcho",
+    "title": "Суп харчо",
+    "source": "/assets/olympiad/tour2/t2-active-41.webp",
+    "description": "Суп харчо — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/kharcho.webp"
+  },
+  {
+    "id": "burrito",
+    "title": "Буррито",
+    "source": "/assets/olympiad/tour2/t2-active-45.webp",
+    "description": "Буррито — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/burrito.webp"
+  },
+  {
+    "id": "mochi",
+    "title": "Моти",
+    "source": "/assets/olympiad/tour2/t2-active-46.webp",
+    "description": "Моти — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/mochi.webp"
+  },
+  {
+    "id": "buffalo_wings",
+    "title": "Крылышки баффало",
+    "source": "/assets/olympiad/tour2/t2-active-43.webp",
+    "description": "Крылышки баффало — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/buffalo_wings.webp"
+  },
+  {
+    "id": "carbonara",
+    "title": "Паста карбонара",
+    "source": "/assets/olympiad/tour2/t2-active-44.webp",
+    "description": "Паста карбонара — версия проверенной фотографии текущего банка",
+    "imageUrl": "/assets/olympiad/story/v1/plates/carbonara.webp"
+  },
+  {
+    "id": "syrniki",
+    "title": "сырники",
+    "source": "docs/olympiad-t3-source-register.md",
+    "description": "Творог; Небольшие порции в виде лепёшек; Обычно обжаривают на сковороде",
+    "imageUrl": "/assets/olympiad/story/v1/plates/syrniki.webp"
+  },
+  {
+    "id": "draniki",
+    "title": "драники",
+    "source": "docs/olympiad-t3-source-register.md",
+    "description": "Тёртый сырой картофель; Небольшие плоские порции; Обжаривают на сковороде",
+    "imageUrl": "/assets/olympiad/story/v1/plates/draniki.webp"
+  },
+  {
+    "id": "shakshuka",
+    "title": "шакшука",
+    "source": "docs/olympiad-t3-source-register.md",
+    "description": "Томатно-овощной соус; Яйца готовят целыми, не взбивая; Часто подают прямо в сковороде",
+    "imageUrl": "/assets/olympiad/story/v1/plates/shakshuka.webp"
+  },
+  {
+    "id": "samsa",
+    "title": "самса",
+    "source": "docs/olympiad-t3-source-register.md",
+    "description": "Сочная начинка — мясо с луком; Закрытое изделие часто формуют треугольником; Традиционный вариант выпекают на стенке тандыра",
+    "imageUrl": "/assets/olympiad/story/v1/plates/samsa.webp"
+  },
+  {
+    "id": "hummus",
+    "title": "хумус",
+    "source": "docs/olympiad-t3-source-register.md",
+    "description": "Нут; Густая однородная паста; В состав входит тахини — кунжутная паста",
+    "imageUrl": "/assets/olympiad/story/v1/plates/hummus.webp"
+  },
+  {
+    "id": "apple_strudel",
+    "title": "яблочный штрудель",
+    "source": "docs/olympiad-t3-source-register.md",
+    "description": "В классическом варианте — тонкое вытяжное тесто; Яблоки; Сворачивают с начинкой и выпекают",
+    "imageUrl": "/assets/olympiad/story/v1/plates/apple_strudel.webp"
+  },
+  {
+    "id": "cheesecake",
+    "title": "чизкейк",
+    "source": "docs/olympiad-t3-source-register.md",
+    "description": "Десерт; Сливочный или творожный сыр; Отдельная основа, часто из крошки печенья",
+    "imageUrl": "/assets/olympiad/story/v1/plates/cheesecake.webp"
+  },
+  {
+    "id": "beef_stroganoff",
+    "title": "бефстроганов",
+    "source": "docs/olympiad-t3-source-register.md",
+    "description": "Говядина, нарезанная тонкими полосками; В этой версии — сметанный соус с луком; Мясо быстро обжаривают и доводят до готовности в соусе",
+    "imageUrl": "/assets/olympiad/story/v1/plates/beef_stroganoff.webp"
+  },
+  {
+    "id": "guacamole",
+    "title": "гуакамоле",
+    "source": "docs/olympiad-t3-source-register.md",
+    "description": "Авокадо; Густой соус или паста; Закуска или дополнение к другим блюдам",
+    "imageUrl": "/assets/olympiad/story/v1/plates/guacamole.webp"
+  },
+  {
+    "id": "falafel",
+    "title": "фалафель",
+    "source": "docs/olympiad-t3-source-register.md",
+    "description": "Измельчённые бобовые, чаще нут; Небольшие шарики или котлетки; Обычно жарят во фритюре",
+    "imageUrl": "/assets/olympiad/story/v1/plates/falafel.webp"
+  },
+  {
+    "id": "borsch",
+    "title": "Борщ с говядиной и сметаной",
+    "source": "/assets/olympiad/tour4/t4-plate-v2-12c457572062.webp",
+    "description": "Горячий суп со свёклой, капустой, картофелем и кусочками говядины; сметана и хлеб для подачи.",
+    "imageUrl": "/assets/olympiad/story/v1/plates/borsch.webp"
+  },
+  {
+    "id": "quesadilla",
+    "title": "Кесадилья с сыром",
+    "source": "/assets/olympiad/tour4/t4-menu-v1-c2b17f804e93.webp",
+    "description": "Тонкая тортилья с расплавленным сыром внутри, подрумяненная на сковороде.",
+    "imageUrl": "/assets/olympiad/story/v1/plates/quesadilla.webp"
+  },
+  {
+    "id": "sweet_sour_chicken",
+    "title": "Курица в кисло-сладком соусе с рисом",
+    "source": "/assets/olympiad/tour4/t4-plate-v2-0909c9cc84db.webp",
+    "description": "Кусочки курицы с ананасом и сладким перцем в кисло-сладком соусе; гарнир — белый рис.",
+    "imageUrl": "/assets/olympiad/story/v1/plates/sweet_sour_chicken.webp"
+  },
+  {
+    "id": "pork_shashlik",
+    "title": "Шашлык из свинины с лавашом",
+    "source": "/assets/olympiad/tour4/t4-plate-v2-39dfcd894196.webp",
+    "description": "Цельные обжаренные кусочки свинины на металлических шампурах; лаваш, томат, огурец и красный лук.",
+    "imageUrl": "/assets/olympiad/story/v1/plates/pork_shashlik.webp"
+  },
+  {
+    "id": "grilled_salmon",
+    "title": "Лосось на гриле с картофелем",
+    "source": "/assets/olympiad/tour4/t4-plate-v2-57dd6e265079.webp",
+    "description": "Целое филе лосося со следами решётки, отварным картофелем и зелёными овощами; без кляра.",
+    "imageUrl": "/assets/olympiad/story/v1/plates/grilled_salmon.webp"
+  },
+  {
+    "id": "mushroom_risotto",
+    "title": "Ризотто с грибами",
+    "source": "/assets/olympiad/tour4/t4-menu-v1-638c0a7eb419.webp",
+    "description": "Кремовое блюдо из риса с грибами, подаётся горячим, без мясной начинки.",
+    "imageUrl": "/assets/olympiad/story/v1/plates/mushroom_risotto.webp"
+  },
+  {
+    "id": "thin_blini",
+    "title": "Тонкие блины с вареньем",
+    "source": "/assets/olympiad/tour4/t4-menu-v1-a10f479e6bc2.webp",
+    "description": "Тонкие гибкие блины со сковороды, сложенные или свёрнутые; ягодное варенье отдельно.",
+    "imageUrl": "/assets/olympiad/story/v1/plates/thin_blini.webp"
+  },
+  {
+    "id": "fudgy_brownie",
+    "title": "Шоколадный брауни",
+    "source": "/assets/olympiad/tour4/t4-menu-v1-64d018af2c9b.webp",
+    "description": "Шоколадный десерт с плотной влажной серединой, которая не вытекает при разрезании.",
+    "imageUrl": "/assets/olympiad/story/v1/plates/fudgy_brownie.webp"
+  }
+]

@@ -1,0 +1,1225 @@
+{
+  "storyVersion": 1,
+  "assetVersion": 1,
+  "generatedAt": "2026-10-06",
+  "method": "Native ImageGen; proportional WebP conversion only; alpha retained. No Python editing/compositing/background removal. Originals retained locally in Codex generated_images.",
+  "sources": [
+    "data/banks/tour1.js",
+    "data/banks/tour2.js",
+    "data/banks/tour3.js",
+    "data/banks/tour4-guest-order.js",
+    "docs/olympiad-t4-content-audit.md",
+    "docs/olympiad-t5-photo-fairness.md",
+    "docs/olympiad-october-2026-assets.json"
+  ],
+  "assets": [
+    {
+      "id": "T1-A01",
+      "title": "Круассан",
+      "output": "public/assets/olympiad/story/v1/plates/T1-A01.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 100024,
+      "sha256": "6a18c169df5cd157fde8ca04a5e0f4a565af0984733bf5b0bb7e84f1a074e4a9",
+      "original": "exec-f6da581b-6f76-4e68-8af1-06a8ac564355.png",
+      "originalSha256": "a38b994b43b56a24d2ea457c7dbe7315c09f214ca85cab1d414c03fc47637670",
+      "reference": "/assets/olympiad/tour1/t1-active-01.webp",
+      "prompt": "Using supplied photograph as recipe/composition reference, generate a NEW photorealistic catalog cutout of a small restaurant tasting portion: A single small classic plain butter croissant, visible flaky layers, golden crust, no filling no toppings. Match actual food ingredients and textures in reference. One compact simple white ceramic plate or indicated bowl, camera 35 degrees above tabletop, entire vessel and food fully visible, generous transparent margin, consistent soft warm natural daylight from upper left, no utensils, no hand, no lettering, no extra ingredients, no table surface, genuinely transparent background alpha, no checkerboard pixels. 1200x800 landscape. Native realistic food photograph, not drawing or 3D render.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "T1-A02",
+      "title": "Рамен",
+      "output": "public/assets/olympiad/story/v1/plates/T1-A02.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 162500,
+      "sha256": "8f64b560550ba60bd9d15e079b0ace119c72b453e304234bacb7e1c64b6601e2",
+      "original": "exec-9ab17620-db88-42b4-bc2a-5fcaba50e493.png",
+      "originalSha256": "ac5c1399a15ca3748a8ed39323d80c4e0a8f943e244c16373d045e437ed8f4b6",
+      "reference": "/assets/olympiad/tour1/t1-active-02.webp",
+      "prompt": "Using supplied photograph as recipe/composition reference, generate a NEW photorealistic catalog cutout of a small restaurant tasting portion: A small tasting bowl of Japanese ramen, wheat noodles in amber broth, one chashu pork slice, HALF soft boiled egg, scallions and a small piece of nori, faithfully the reference food. Match actual food ingredients and textures in reference. One compact simple white ceramic plate or indicated bowl, camera 35 degrees above tabletop, entire vessel and food fully visible, generous transparent margin, consistent soft warm natural daylight from upper left, no utensils, no hand, no lettering, no extra ingredients, no table surface, genuinely transparent background alpha, no checkerboard pixels. 1200x800 landscape. Native realistic food photograph, not drawing or 3D render.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "T1-A03",
+      "title": "Хинкали",
+      "output": "public/assets/olympiad/story/v1/plates/T1-A03.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 76328,
+      "sha256": "640ca83bb081bd9d08121c5b3aa99339b790100fe400972cdfbb3e360a73bcd2",
+      "original": "exec-a3ae3d96-39d8-40fa-9923-386efeee7d4f.png",
+      "originalSha256": "05ab36ab57722cfbdb31944260a19865dd37d927a65d1aad051e961068c37aba",
+      "reference": "/assets/olympiad/tour1/t1-active-03.webp",
+      "prompt": "Using supplied photograph as recipe/composition reference, generate a NEW photorealistic catalog cutout of a small restaurant tasting portion: Two small Georgian boiled khinkali with natural pleated dough and pinched top, no sauces, no garnish. Match actual food ingredients and textures in reference. One compact simple white ceramic plate or indicated bowl, camera 35 degrees above tabletop, entire vessel and food fully visible, generous transparent margin, consistent soft warm natural daylight from upper left, no utensils, no hand, no lettering, no extra ingredients, no table surface, genuinely transparent background alpha, no checkerboard pixels. 1200x800 landscape. Native realistic food photograph, not drawing or 3D render.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "T1-A04",
+      "title": "Тако",
+      "output": "public/assets/olympiad/story/v1/plates/T1-A04.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 167124,
+      "sha256": "e8d0085859fbdd85f19384f1b2c71466991ab1d0dedddfc46c37ab30b2a0eff0",
+      "original": "exec-b39b6397-13ac-4fc0-bedd-5e4a963ee748.png",
+      "originalSha256": "9a0f3b149774cc8f63fc9c20982a2b8ddcc6e862756b3ccf8b2d89783e8f24d0",
+      "reference": "/assets/olympiad/tour1/t1-active-04.webp",
+      "prompt": "Photorealistic food catalog cutout, realistic restaurant tasting portion. One SMALL clearly FOLDED soft corn tortilla taco shaped like a U with two sides standing up around grilled beef filling. Chopped white onion, cilantro, red salsa only. Taco MUST BE folded in half, not flat tostada. It rests naturally on side on one white ceramic tasting plate. MATCH the original reference folded taco shape. Camera 35 degrees above tabletop, natural warm light upper left, entire compact white plate visible, clean genuine alpha transparency outside plate, no tabletop or backdrop, no glow, no cast shadow, no vignette, no people/text/extraingredients, 1200x800. Use reference for culinary version, not copying huge portions. Must be real photographic food, not cartoon or 3D.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "T1-A05",
+      "title": "Том-ям",
+      "output": "public/assets/olympiad/story/v1/plates/T1-A05.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 141676,
+      "sha256": "922f072ca9b03822e31576a672b4ecb69fb87d83d760085cae0161e501ac15a5",
+      "original": "exec-64971777-69b4-47fb-a542-194abf4e6e36.png",
+      "originalSha256": "d9b9ed84568b9928cf7ea3cbade0cd20a61e3e72dc5b41ff44976457163682da",
+      "reference": "/assets/olympiad/tour1/t1-active-05.webp",
+      "prompt": "Create a NEW realistic food photography cutout for a restaurant tasting table, based faithfully on supplied dish photograph. A miniature bowl of Thai tom yum kung: reddish clear spicy broth, two shrimp, mushroom slices, visible short lemongrass pieces and makrut lime leaves, small cilantro accent. No noodles, no rice. One compact white ceramic plate or indicated bowl. Small tasting portion. Camera 35 degrees above table, centered, whole plate within frame. Consistent natural warm light from upper left. GENUINE alpha transparency outside dish and vessel with tight clean edges, NO opaque backdrop, NO glow, NO black or white vignette, NO artificial background shadows, no text/hands/cutlery/extra ingredients. 1200x800 landscape. Not illustration or 3D.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "T1-A06",
+      "title": "Лазанья",
+      "output": "public/assets/olympiad/story/v1/plates/T1-A06.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 151672,
+      "sha256": "03a945da44571b180074b9c81d8c817f824b2b8aef2b7785f417f5fe6ef82bc3",
+      "original": "exec-b51a5ae4-9e64-41a1-be43-20a036d56b64.png",
+      "originalSha256": "1060a23c9eae5be3674860645b18a45924106b334c920b625d39300b4a9546f3",
+      "reference": "/assets/olympiad/tour1/t1-active-06.webp",
+      "prompt": "Create a NEW realistic food photography cutout for a restaurant tasting table, based faithfully on supplied dish photograph. A small neat cut square of traditional meat lasagna with visible layered pasta sheets, meat tomato ragù, pale bechamel, browned cheese crust and a tiny amount of parsley, exactly like supplied reference. One compact white ceramic plate or indicated bowl. Small tasting portion. Camera 35 degrees above table, centered, whole plate within frame. Consistent natural warm light from upper left. GENUINE alpha transparency outside dish and vessel with tight clean edges, NO opaque backdrop, NO glow, NO black or white vignette, NO artificial background shadows, no text/hands/cutlery/extra ingredients. 1200x800 landscape. Not illustration or 3D.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "T1-A07",
+      "title": "Суши",
+      "output": "public/assets/olympiad/story/v1/plates/T1-A07.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 137094,
+      "sha256": "c3c51897af7f8e9621210876100e3d1b85e3a11448a8a905b3e58cdbcfc6b279",
+      "original": "exec-63b8281e-07ae-43ff-adae-f66383c41f79.png",
+      "originalSha256": "a0b6df2ebc45b82356684da9627ae498e4d253896c5d37db0fe57fe391679dd7",
+      "reference": "/assets/olympiad/tour1/t1-active-07.webp",
+      "prompt": "Create a NEW realistic food photography cutout for a restaurant tasting table, based faithfully on supplied dish photograph. Two sushi nigiri, one salmon and one tuna, each a natural compact oval of rice with a raw fish slice on top. No rolls, no cucumber, no fried ingredients. One compact white ceramic plate or indicated bowl. Small tasting portion. Camera 35 degrees above table, centered, whole plate within frame. Consistent natural warm light from upper left. GENUINE alpha transparency outside dish and vessel with tight clean edges, NO opaque backdrop, NO glow, NO black or white vignette, NO artificial background shadows, no text/hands/cutlery/extra ingredients. 1200x800 landscape. Not illustration or 3D.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "T1-A08",
+      "title": "Плов",
+      "output": "public/assets/olympiad/story/v1/plates/T1-A08.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 181166,
+      "sha256": "59ca2747cdf5cee30f1451bc3e99fb11b260a8f8ea6f3686634f1d1db883ff00",
+      "original": "exec-e8df12b2-8040-481f-8980-102500a8abcc.png",
+      "originalSha256": "2932066b3b46c61980b8837a498ab434e3414cefb3f62efe1475624a6ba1b6bd",
+      "reference": "/assets/olympiad/tour1/t1-active-08.webp",
+      "prompt": "Create a NEW realistic food photography cutout for a restaurant tasting table, based faithfully on supplied dish photograph. A small tasting mound of Uzbek meat pilaf, separate golden rice grains, carrot strips, two browned meat pieces and one small roasted garlic clove, based on reference. No green peas, no ketchup. One compact white ceramic plate or indicated bowl. Small tasting portion. Camera 35 degrees above table, centered, whole plate within frame. Consistent natural warm light from upper left. GENUINE alpha transparency outside dish and vessel with tight clean edges, NO opaque backdrop, NO glow, NO black or white vignette, NO artificial background shadows, no text/hands/cutlery/extra ingredients. 1200x800 landscape. Not illustration or 3D.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "T1-A09",
+      "title": "Паэлья",
+      "output": "public/assets/olympiad/story/v1/plates/T1-A09.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 206572,
+      "sha256": "aba286864512f3a2ac03a70167b8890896063abc95a4b668f5362a9cc8754f39",
+      "original": "exec-f8f5206a-85fe-4cd6-a537-562a57f947b0.png",
+      "originalSha256": "b696630686ba2b5760d0a5411e4297c1a9213ea9a6163b894358461ba944f9e6",
+      "reference": "/assets/olympiad/tour1/t1-active-09.webp",
+      "prompt": "Photorealistic food catalog cutout, realistic restaurant tasting portion. A small tasting portion of seafood paella with separate golden saffron rice, two mussels in shell, one shrimp, red pepper and a few green peas, one tiny lemon wedge, matching reference. White shallow plate rather than huge communal pan. Camera 35 degrees above tabletop, natural warm light upper left, entire compact white plate visible, clean genuine alpha transparency outside plate, no tabletop or backdrop, no glow, no cast shadow, no vignette, no people/text/extraingredients, 1200x800. Use reference for culinary version, not copying huge portions. Must be real photographic food, not cartoon or 3D.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "T1-A10",
+      "title": "Хот-дог",
+      "output": "public/assets/olympiad/story/v1/plates/T1-A10.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 151402,
+      "sha256": "92acc292a672282e93bd1fe8be59012322cbc6b8083f3af20468f62403704c4e",
+      "original": "exec-bb5eb252-0002-45cf-b404-2e364a836122.png",
+      "originalSha256": "fec78d445bc81d1782dc91075c851d2fc277cfc2efba9bc5c18066a1a0a6b046",
+      "reference": "/assets/olympiad/tour1/t1-active-10.webp",
+      "prompt": "Photorealistic food catalog cutout, realistic restaurant tasting portion. A miniature hot dog: golden soft bun, grilled sausage, sauerkraut, sauteed onion, grain mustard and tiny chive, matching reference. No ketchup, no cheese. Camera 35 degrees above tabletop, natural warm light upper left, entire compact white plate visible, clean genuine alpha transparency outside plate, no tabletop or backdrop, no glow, no cast shadow, no vignette, no people/text/extraingredients, 1200x800. Use reference for culinary version, not copying huge portions. Must be real photographic food, not cartoon or 3D.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "fish_and_chips",
+      "title": "Фиш-энд-чипс",
+      "output": "public/assets/olympiad/story/v1/plates/fish_and_chips.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 174424,
+      "sha256": "abfd8a164fc30e53d5e5289f522b0de34cf9332e89b228be8c04ef63fb685e70",
+      "original": "exec-22047499-8da5-4c3d-9b1f-77f53ec1f0b6.png",
+      "originalSha256": "50e22decd9c68007ccfb578f00c2e1077299ab91a9f1582dcbe19afe01e22d3a",
+      "reference": "/assets/olympiad/tour2/t2-active-30.webp",
+      "prompt": "Generate a photorealistic restaurant tasting-portion cutout faithfully matching the supplied dish recipe and reference texture. A small battered white fish fillet portion and FIVE thick golden potato chips, no peas and no sauces. One compact white ceramic plate/bowl. Warm natural daylight upper left, same 35-degree overhead angle, entire vessel visible and centered, 1200x800. Genuine transparent alpha outside vessel, tight clean natural edges, NO vignette/glow/background/utensils/text/hands, no extra foods, not illustration or 3D render.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "tiramisu",
+      "title": "Тирамису",
+      "output": "public/assets/olympiad/story/v1/plates/tiramisu.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 170964,
+      "sha256": "05e4befe0b7d5452fd7a49aec1a1a09416c0ad42f3a3a937efcc861ee27305da",
+      "original": "exec-73b38a21-f1da-4472-98ef-5a8435acc346.png",
+      "originalSha256": "d70d0a70979dcb83d7e1bf759b4243dc76e3585c1886f5bbb869734601e73d75",
+      "reference": "/assets/olympiad/tour2/t2-active-27.webp",
+      "prompt": "Generate a photorealistic restaurant tasting-portion cutout faithfully matching the supplied dish recipe and reference texture. One miniature square of tiramisu showing coffee-soaked ladyfinger layers and mascarpone cream, plain cocoa powder on top, no strawberries or cherries. One compact white ceramic plate/bowl. Warm natural daylight upper left, same 35-degree overhead angle, entire vessel visible and centered, 1200x800. Genuine transparent alpha outside vessel, tight clean natural edges, NO vignette/glow/background/utensils/text/hands, no extra foods, not illustration or 3D render.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "wiener_schnitzel",
+      "title": "Венский шницель",
+      "output": "public/assets/olympiad/story/v1/plates/wiener_schnitzel.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 201440,
+      "sha256": "eb6df64694d3162c93a680f3571b5b3c2a703c25d762b9c4fe3b030096535d3d",
+      "original": "exec-8b8b593f-aa51-4e5f-bdeb-24a0207ec405.png",
+      "originalSha256": "1944291ae087737c15f5892481fbb1d020018eff0c33092a3291a485f570427d",
+      "reference": "/assets/olympiad/tour2/t2-active-29.webp",
+      "prompt": "Generate a photorealistic restaurant tasting-portion cutout faithfully matching the supplied dish recipe and reference texture. One small flat Austrian veal schnitzel in finely crumbed golden breading, one thin lemon slice, no sauce or vegetables. One compact white ceramic plate/bowl. Warm natural daylight upper left, same 35-degree overhead angle, entire vessel visible and centered, 1200x800. Genuine transparent alpha outside vessel, tight clean natural edges, NO vignette/glow/background/utensils/text/hands, no extra foods, not illustration or 3D render.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "ratatouille",
+      "title": "Рататуй",
+      "output": "public/assets/olympiad/story/v1/plates/ratatouille.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 222000,
+      "sha256": "e378ad7b528246289f6d0e292bf3d1c502b7d2c9a9c8a63bcaab3f602b6a731b",
+      "original": "exec-b9724615-0f73-4707-aa99-6502689f9810.png",
+      "originalSha256": "d0264a7ab1f16b558c16672a489e91dd24ad856a9942f57b1e6fb15324559aaf",
+      "reference": "/assets/olympiad/tour2/t2-active-28.webp",
+      "prompt": "Generate a photorealistic restaurant tasting-portion cutout faithfully matching the supplied dish recipe and reference texture. A small bowl of CHUNKY traditional ratatouille stew: cooked diced eggplant, zucchini, tomato, bell pepper and onion. NOT layered circular confit byaldi, no cheese, no meat. One compact white ceramic plate/bowl. Warm natural daylight upper left, same 35-degree overhead angle, entire vessel visible and centered, 1200x800. Genuine transparent alpha outside vessel, tight clean natural edges, NO vignette/glow/background/utensils/text/hands, no extra foods, not illustration or 3D render.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "onigiri",
+      "title": "Онигири",
+      "output": "public/assets/olympiad/story/v1/plates/onigiri.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 63200,
+      "sha256": "f928559fbed8dd3a822928db93c0e3e9c23ae0f286a7d543b03b5bb5f3478e35",
+      "original": "exec-e0ce20a6-a328-46d0-a229-deaded482605.png",
+      "originalSha256": "e45f58ecc2eb8a5cd4768dd7030664cb89946e47acdb6c38655f653fcf73e174",
+      "reference": "/assets/olympiad/tour2/t2-active-31.webp",
+      "prompt": "Photorealistic restaurant tasting serving isolated on a TRUE transparent background. Use the reference to identify this exact recipe; create a NEW small elegant serving. One small triangular Japanese onigiri, individual visible short rice grains, narrow black nori strip folded around the base. No fillings showing, no sauce. White ceramic shallow bowl or plate, entire vessel in frame, natural modest portion. Three-quarter overhead view 35 degrees, consistent soft daylight from upper left. Real food textures, no cartoon, no oversized portions, no extra side dishes, no text, no hands, no table, no background, no opaque shadow rectangle. Fine contact shadow only within alpha. 1200x800 landscape composition.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "pho",
+      "title": "Фо",
+      "output": "public/assets/olympiad/story/v1/plates/pho.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 158804,
+      "sha256": "905a5d0bb1e88283d9eb3f54333b092d7ce8d6b3adba81a6430105eb45b6ef8c",
+      "original": "exec-2035942b-f33b-492a-bf9c-3e85e07e945e.png",
+      "originalSha256": "22dc94c0f250e2b48248d1e4c18662c64570bcb740efca67bd05157ff45415b8",
+      "reference": "/assets/olympiad/tour2/t2-active-33.webp",
+      "prompt": "Photorealistic restaurant tasting serving isolated on a TRUE transparent background. Use the reference to identify this exact recipe; create a NEW small elegant serving. A tasting bowl of Vietnamese pho: clear amber beef broth, clearly visible flat white rice noodles, three thin slices of cooked beef, scallion and cilantro. No egg, no pork, no chili garnish. White ceramic shallow bowl or plate, entire vessel in frame, natural modest portion. Three-quarter overhead view 35 degrees, consistent soft daylight from upper left. Real food textures, no cartoon, no oversized portions, no extra side dishes, no text, no hands, no table, no background, no opaque shadow rectangle. Fine contact shadow only within alpha. 1200x800 landscape composition.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "bibimbap",
+      "title": "Бибимбап",
+      "output": "public/assets/olympiad/story/v1/plates/bibimbap.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 197856,
+      "sha256": "68693523099dccb464eefc0250205010efe6afcebd697974551631dea594189b",
+      "original": "exec-31760fb3-f13b-44e7-b477-5f82bbb776db.png",
+      "originalSha256": "6df32001fae6f3d39b9114dc18c5b3e92105fb36178bf1fa52abdfa30d1100d6",
+      "reference": "/assets/olympiad/tour2/t2-active-32.webp",
+      "prompt": "Photorealistic restaurant tasting serving isolated on a TRUE transparent background. Use the reference to identify this exact recipe; create a NEW small elegant serving. Small Korean bibimbap bowl with white rice bottom, separate tidy sections of cooked beef, spinach, bean sprouts, zucchini and mushrooms; one small sunny-side egg in center and a dab of red gochujang. Preserve ingredient sections. White ceramic shallow bowl or plate, entire vessel in frame, natural modest portion. Three-quarter overhead view 35 degrees, consistent soft daylight from upper left. Real food textures, no cartoon, no oversized portions, no extra side dishes, no text, no hands, no table, no background, no opaque shadow rectangle. Fine contact shadow only within alpha. 1200x800 landscape composition.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "pad_thai",
+      "title": "Пад-тай",
+      "output": "public/assets/olympiad/story/v1/plates/pad_thai.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 173774,
+      "sha256": "9b95e70bf427303f3a605372482c82d79cc5a707305b321fd824f2e3a2335fdc",
+      "original": "exec-f31b1cac-e690-4133-b2c5-a651ac3df511.png",
+      "originalSha256": "ee5a7b09d7b3b81049b89a656890cf0b8e8e8631ef63acc48f365e9c360c3b5f",
+      "reference": "/assets/olympiad/tour2/t2-active-34.webp",
+      "prompt": "Photorealistic restaurant tasting serving isolated on a TRUE transparent background. Use the reference to identify this exact recipe; create a NEW small elegant serving. Thai pad thai tasting portion: clearly visible flat rice noodles, two cooked shrimp, bits of scrambled egg, bean sprouts, chives, crushed peanuts and a small lime wedge. Must look like noodles, not rice. White ceramic shallow bowl or plate, entire vessel in frame, natural modest portion. Three-quarter overhead view 35 degrees, consistent soft daylight from upper left. Real food textures, no cartoon, no oversized portions, no extra side dishes, no text, no hands, no table, no background, no opaque shadow rectangle. Fine contact shadow only within alpha. 1200x800 landscape composition.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "olivier",
+      "title": "Салат «Оливье»",
+      "output": "public/assets/olympiad/story/v1/plates/olivier.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 135462,
+      "sha256": "fee0a5292a544b8f2595c979862aa3f9406590c12b57993be6ea868f2a61abb3",
+      "original": "exec-f1ab65fa-640e-41d2-8c2a-db5355accdae.png",
+      "originalSha256": "698e20474a1bf111016abcdb9e0d51737b3c3fbee3e60e7a49acb493c9e823e4",
+      "reference": "/assets/olympiad/tour2/t2-active-38.webp",
+      "prompt": "Generate a realistic restaurant degustation portion from this checked reference recipe. Russian contemporary Olivier potato salad: small diced cooked potato, carrot, egg, pickled cucumber, cooked pink sausage, green peas and mayonnaise. Compact natural mound in a shallow small white bowl, no parsley crown. Isolate ENTIRE white ceramic vessel and food on TRUE transparent alpha background, 35-degree three-quarter overhead, soft daylight upper left, landscape, modest natural portion and real textures. No text, table, hands, background, cartoon, extra ingredients, or opaque shadow rectangle.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "gazpacho",
+      "title": "Гаспачо",
+      "output": "public/assets/olympiad/story/v1/plates/gazpacho.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 162434,
+      "sha256": "ea9dd3cd3eb331725676ca2e8489ec5992b3e35355c32fc1bc39c74b9aa32b71",
+      "original": "exec-a5132955-da64-49ef-b2d0-613b3d17f9e0.png",
+      "originalSha256": "db34ca7d09b3718e799040fba44a232c1fa1ec6f253a763de028711d8869a743",
+      "reference": "/assets/olympiad/tour2/t2-active-36.webp",
+      "prompt": "Generate a realistic restaurant degustation portion from this checked reference recipe. Spanish gazpacho: small bowl of smooth red cold tomato soup, tiny diced cucumber and tomato in center. No cream, no croutons, no meat. Isolate ENTIRE white ceramic vessel and food on TRUE transparent alpha background, 35-degree three-quarter overhead, soft daylight upper left, landscape, modest natural portion and real textures. No text, table, hands, background, cartoon, extra ingredients, or opaque shadow rectangle.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "pastel_de_nata",
+      "title": "Паштел-де-ната",
+      "output": "public/assets/olympiad/story/v1/plates/pastel_de_nata.webp",
+      "dimensions": [
+        1200,
+        799
+      ],
+      "mode": "RGBA",
+      "bytes": 138888,
+      "sha256": "270ee1af0cee5468330c2f27252a7574cb7d3533bfdca8a89a725200c88b9642",
+      "original": "exec-1aaa0ad3-3aac-482a-81a2-3bdd4740abc7.png",
+      "originalSha256": "1133d93bd6b94bea70b72f9590df9ff871725f6c96c539fd55951e041a132da7",
+      "reference": "/assets/olympiad/tour2/t2-active-35.webp",
+      "prompt": "Generate a realistic restaurant degustation portion from this checked reference recipe. Portuguese pastel de nata: ONE small round puff pastry custard tart, golden flaky layered shell, creamy yellow custard top with dark brown blistered spots. No fruit or cream. Isolate ENTIRE white ceramic vessel and food on TRUE transparent alpha background, 35-degree three-quarter overhead, soft daylight upper left, landscape, modest natural portion and real textures. No text, table, hands, background, cartoon, extra ingredients, or opaque shadow rectangle.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "brussels_waffle",
+      "title": "Брюссельская вафля",
+      "output": "public/assets/olympiad/story/v1/plates/brussels_waffle.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 220358,
+      "sha256": "506aa23b2088068a8b3dffd41efb89f5905fd6b03e69284531dc1d52a521a15f",
+      "original": "exec-ee8d92de-250b-4322-b7d8-efe98a65db60.png",
+      "originalSha256": "1a0fa149897cfa414963027261b75325f55be59f970e9b773597440168596d08",
+      "reference": "/assets/olympiad/tour2/t2-active-37.webp",
+      "prompt": "Generate a realistic restaurant degustation portion from this checked reference recipe. Belgian Brussels waffle: small rectangular airy waffle, clean square deep pockets, lightly dusted with powdered sugar. No cream, fruit or sauce. Isolate ENTIRE white ceramic vessel and food on TRUE transparent alpha background, 35-degree three-quarter overhead, soft daylight upper left, landscape, modest natural portion and real textures. No text, table, hands, background, cartoon, extra ingredients, or opaque shadow rectangle.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "goulash",
+      "title": "Гуляш",
+      "output": "public/assets/olympiad/story/v1/plates/goulash.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 170340,
+      "sha256": "8112199f441147465692d0bafae945564a5c34e2137afd925355b262cae623f1",
+      "original": "exec-a64ddbd3-0465-415d-87b2-47f6a52db506.png",
+      "originalSha256": "e28cccbbd41d80283d094e3f345f9e119c56c861eced0680ff63811e3ac912f9",
+      "reference": "/assets/olympiad/tour2/t2-active-42.webp",
+      "prompt": "Photorealistic small restaurant tasting serving, exact checked reference recipe. Hungarian goulash soup tasting bowl, paprika red broth, small beef chunks, potato, carrot, green pepper. Match soup reference, not thick gravy. TRUE transparent background; entire modest white ceramic vessel fully visible. Consistent three-quarter overhead 35 degree view, soft daylight from upper left, lifelike edible textures. No text, hands, table, background, extra garnishes, extra sides, cartoon or opaque shadow rectangle.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "peking_duck",
+      "title": "Пекинская утка",
+      "output": "public/assets/olympiad/story/v1/plates/peking_duck.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 192022,
+      "sha256": "f6e05c2bd7e83c4d0f61825be4869ed3e63b2842b02f92798a13436e04d98ddb",
+      "original": "exec-fa25e718-75ff-491e-9351-d131f0ce0735.png",
+      "originalSha256": "2c76ada6335ec3598aff40b500eb65fce3010a2883990af56247055d10c07ef2",
+      "reference": "/assets/olympiad/tour2/t2-active-40.webp",
+      "prompt": "Photorealistic small restaurant tasting serving, exact checked reference recipe. Chinese Peking duck, three thin slices of cooked duck with lacquered crisp brown skin, arranged simply on small white plate. No pancakes, fruit or sauce. TRUE transparent background; entire modest white ceramic vessel fully visible. Consistent three-quarter overhead 35 degree view, soft daylight from upper left, lifelike edible textures. No text, hands, table, background, extra garnishes, extra sides, cartoon or opaque shadow rectangle.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "eclair",
+      "title": "Эклер",
+      "output": "public/assets/olympiad/story/v1/plates/eclair.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 107508,
+      "sha256": "4b24bbb0c44d46a138bacce4c4985eb33436a196d5568859dc5494bb6a6129cd",
+      "original": "exec-c27250b2-9275-401d-b187-7f4a97225f79.png",
+      "originalSha256": "530999348a451403512155d8052cec17dd22f95596ba23c55aef1930cc75df67",
+      "reference": "/assets/olympiad/tour2/t2-active-39.webp",
+      "prompt": "Photorealistic small restaurant tasting serving, exact checked reference recipe. One miniature French éclair with dark chocolate glaze, cut end reveals pale vanilla custard, golden choux shell. TRUE transparent background; entire modest white ceramic vessel fully visible. Consistent three-quarter overhead 35 degree view, soft daylight from upper left, lifelike edible textures. No text, hands, table, background, extra garnishes, extra sides, cartoon or opaque shadow rectangle.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "kharcho",
+      "title": "Суп харчо",
+      "output": "public/assets/olympiad/story/v1/plates/kharcho.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 165024,
+      "sha256": "8d6cb5d05c0c1d4a13116dfbc1cb7b90ea3fef85278d175a088c87658542bc84",
+      "original": "exec-20562e9c-5007-41d5-979c-7473f09b3460.png",
+      "originalSha256": "08901e1b8e91cfdc03a8518efb1d027f2aa599fa7c59d212b2e52a68385ad28d",
+      "reference": "/assets/olympiad/tour2/t2-active-41.webp",
+      "prompt": "Photorealistic small restaurant tasting serving, exact checked reference recipe. Georgian kharcho small soup bowl: red brown beef broth with rice, beef chunks and a few coriander leaves, no potatoes. TRUE transparent background; entire modest white ceramic vessel fully visible. Consistent three-quarter overhead 35 degree view, soft daylight from upper left, lifelike edible textures. No text, hands, table, background, extra garnishes, extra sides, cartoon or opaque shadow rectangle.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "burrito",
+      "title": "Буррито",
+      "output": "public/assets/olympiad/story/v1/plates/burrito.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 146130,
+      "sha256": "fe8543062a088916efd24e5aa7a446eb3ee3b10cec5b1c7f400be0ddadd76eef",
+      "original": "exec-d8d3f052-0718-489f-acd8-a52ad9d6c9e0.png",
+      "originalSha256": "752ee464d8026d358030138ab77c71f378f929581d89d9b184f9fcaf471f61d3",
+      "reference": "/assets/olympiad/tour2/t2-active-45.webp",
+      "prompt": "Photorealistic small restaurant tasting serving, exact checked reference recipe. One small wheat tortilla burrito cut into TWO halves, filling only beef and black beans as reference. Not sushi, no rice or cheese. TRUE transparent background; entire modest white ceramic vessel fully visible. Consistent three-quarter overhead 35 degree view, soft daylight from upper left, lifelike edible textures. No text, hands, table, background, extra garnishes, extra sides, cartoon or opaque shadow rectangle.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "mochi",
+      "title": "Моти",
+      "output": "public/assets/olympiad/story/v1/plates/mochi.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 104402,
+      "sha256": "01328221e8b8e13d57667e3cac6f8dcb9b026702e98c4d82ac5041ba447b3bd8",
+      "original": "exec-79f7ef59-8618-4782-8186-a239aaa62a21.png",
+      "originalSha256": "32fa7e05a2800eb81ffd2901498b45eba7b5ea7fa551127e56a629c157b5e185",
+      "reference": "/assets/olympiad/tour2/t2-active-46.webp",
+      "prompt": "Photorealistic small restaurant tasting serving, exact checked reference recipe. Japanese strawberry daifuku mochi, ONE whole white soft rice cake and ONE half showing a strawberry wrapped in dark red bean paste. Light starch dusting. TRUE transparent background; entire modest white ceramic vessel fully visible. Consistent three-quarter overhead 35 degree view, soft daylight from upper left, lifelike edible textures. No text, hands, table, background, extra garnishes, extra sides, cartoon or opaque shadow rectangle.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "buffalo_wings",
+      "title": "Крылышки баффало",
+      "output": "public/assets/olympiad/story/v1/plates/buffalo_wings.webp",
+      "dimensions": [
+        1200,
+        799
+      ],
+      "mode": "RGBA",
+      "bytes": 181000,
+      "sha256": "b096644d3e966dfa700189a839591ecb919e8dbe1e6611fe0f8a5b289cc59084",
+      "original": "exec-0f30ee33-df22-4ea8-9c6b-3aa8aba7c0ec.png",
+      "originalSha256": "aa0a0252968b92dd05c702d616a0305feeb583dbdeee48752c1bdede6bcefef4",
+      "reference": "/assets/olympiad/tour2/t2-active-43.webp",
+      "prompt": "Photorealistic small restaurant tasting serving, exact checked reference recipe. Two small cooked chicken buffalo wing pieces, shiny orange red hot sauce coating and natural slightly charred skin. No celery or dip. TRUE transparent background; entire modest white ceramic vessel fully visible. Consistent three-quarter overhead 35 degree view, soft daylight from upper left, lifelike edible textures. No text, hands, table, background, extra garnishes, extra sides, cartoon or opaque shadow rectangle.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "carbonara",
+      "title": "Паста карбонара",
+      "output": "public/assets/olympiad/story/v1/plates/carbonara.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 174640,
+      "sha256": "4ff8575f757f6eb091e4b74e385afa8fbf9470ce64e5469fcfb44dc477903fe0",
+      "original": "exec-d083b7f7-88d2-424c-beec-ae620746a5e5.png",
+      "originalSha256": "badbd4789aafdd1e28d021c3b7e7ea62accbd66e7776e777a931e9411eefc8cd",
+      "reference": "/assets/olympiad/tour2/t2-active-44.webp",
+      "prompt": "Photorealistic small restaurant tasting serving, exact checked reference recipe. A small tasting nest of spaghetti carbonara: spaghetti, small crisp guanciale pieces, egg and pecorino sauce, black pepper. No cream puddles or parsley. TRUE transparent background; entire modest white ceramic vessel fully visible. Consistent three-quarter overhead 35 degree view, soft daylight from upper left, lifelike edible textures. No text, hands, table, background, extra garnishes, extra sides, cartoon or opaque shadow rectangle.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "syrniki",
+      "title": "сырники",
+      "output": "public/assets/olympiad/story/v1/plates/syrniki.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 178162,
+      "sha256": "a4bb2cff55cdeffdd46771b4b025335ffdf4948e0ad442fa39c0c866052467fe",
+      "original": "exec-1418b85a-d2e4-4371-863b-70d40e3f2c08.png",
+      "originalSha256": "7f653b2eb36958323643f59b882fe7561ebba7707439650eadbecd17a53eb76d",
+      "reference": "docs/olympiad-t3-source-register.md",
+      "prompt": "Create an original lifelike restaurant tasting serving on TRUE transparent alpha background. Recipe from existing olympiad clues: Творог; Небольшие порции в виде лепёшек; Обычно обжаривают на сковороде. Exact finished food: Two Russian syrniki, small thick round cottage-cheese pancakes with golden browned tops and pale curd sides, not thin crepes. No berries or sauces. Entire small white ceramic plate or bowl in frame, natural realistic textures, 35 degree three-quarter overhead, consistent soft upper-left daylight, landscape, no table, text, hands, background, cartoon, or extra foods.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "draniki",
+      "title": "драники",
+      "output": "public/assets/olympiad/story/v1/plates/draniki.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 208522,
+      "sha256": "cef7406e1c22131bce10dae08387a1986373b97a0448d85958c97c0ca904fcdd",
+      "original": "exec-7638bb96-fec9-4bb1-b31e-3867a549efae.png",
+      "originalSha256": "133bb2d4fdaa8c30cc9440492e0ea981f03398f74668b94e96078303b658553b",
+      "reference": "docs/olympiad-t3-source-register.md",
+      "prompt": "Create an original lifelike restaurant tasting serving on TRUE transparent alpha background. Recipe from existing olympiad clues: Тёртый сырой картофель; Небольшие плоские порции; Обжаривают на сковороде. Exact finished food: Two Belarusian draniki, thin flattened finely grated raw potato pancakes, uneven golden brown crisp surface and irregular rounded edges. Not hash brown sticks or croquettes. Entire small white ceramic plate or bowl in frame, natural realistic textures, 35 degree three-quarter overhead, consistent soft upper-left daylight, landscape, no table, text, hands, background, cartoon, or extra foods.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "shakshuka",
+      "title": "шакшука",
+      "output": "public/assets/olympiad/story/v1/plates/shakshuka.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 190770,
+      "sha256": "6b345d2061e840121b849cd90d78f21a5cc8f594bb8de3823714887329156887",
+      "original": "exec-dc2cf9f6-b422-4a85-9614-892d6f99116f.png",
+      "originalSha256": "56bd32901bbf35a11276216d0849d9eeb94edfb5b8bd826ebec2db936b581e90",
+      "reference": "docs/olympiad-t3-source-register.md",
+      "prompt": "Create an original lifelike restaurant tasting serving on TRUE transparent alpha background. Recipe from existing olympiad clues: Томатно-овощной соус; Яйца готовят целыми, не взбивая; Часто подают прямо в сковороде. Exact finished food: Small tasting portion of shakshuka: one poached egg with white set and yellow yolk nested in thick red tomato and diced red pepper stew, tiny shallow white bowl, no cheese or bread. Entire small white ceramic plate or bowl in frame, natural realistic textures, 35 degree three-quarter overhead, consistent soft upper-left daylight, landscape, no table, text, hands, background, cartoon, or extra foods.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "samsa",
+      "title": "самса",
+      "output": "public/assets/olympiad/story/v1/plates/samsa.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 180432,
+      "sha256": "97befcc6ac1aab7866a54fe4e0ed4adcb2c6785009b577e05540cfdad9333438",
+      "original": "exec-63e0f081-dd81-4608-a624-f33de789d810.png",
+      "originalSha256": "344a9f1d208439fd5dd8fb4deb233d214ae8f14156cfd4a5a02e2ae709d417a5",
+      "reference": "docs/olympiad-t3-source-register.md",
+      "prompt": "Create an original lifelike restaurant tasting serving on TRUE transparent alpha background. Recipe from existing olympiad clues: Сочная начинка — мясо с луком; Закрытое изделие часто формуют треугольником; Традиционный вариант выпекают на стенке тандыра. Exact finished food: One Uzbek samsa, closed triangular baked pastry with naturally blistered golden shell. ONE cut half alongside reveals cooked minced meat and onion. No sesame or garnish. Entire small white ceramic plate or bowl in frame, natural realistic textures, 35 degree three-quarter overhead, consistent soft upper-left daylight, landscape, no table, text, hands, background, cartoon, or extra foods.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "hummus",
+      "title": "хумус",
+      "output": "public/assets/olympiad/story/v1/plates/hummus.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 108938,
+      "sha256": "b25efabc33c24f811f231248ee388161fb85533e4b3f5a2083fb2985c3e7bb8e",
+      "original": "exec-2b228cff-902e-4d9e-9dcc-0082aa746a14.png",
+      "originalSha256": "cc076c5c55d8ad0142b05f61d26bc95fcb9d55b13eacc5a3821e89e7114b93c6",
+      "reference": "docs/olympiad-t3-source-register.md",
+      "prompt": "Create an original lifelike restaurant tasting serving on TRUE transparent alpha background. Recipe from existing olympiad clues: Нут; Густая однородная паста; В состав входит тахини — кунжутная паста. Exact finished food: Small shallow bowl of hummus, pale beige smooth chickpea and tahini paste, gentle spoon swirl with a few whole chickpeas, tiny olive oil center. No paprika or greenery. Entire small white ceramic plate or bowl in frame, natural realistic textures, 35 degree three-quarter overhead, consistent soft upper-left daylight, landscape, no table, text, hands, background, cartoon, or extra foods.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "apple_strudel",
+      "title": "яблочный штрудель",
+      "output": "public/assets/olympiad/story/v1/plates/apple_strudel.webp",
+      "dimensions": [
+        1068,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 201232,
+      "sha256": "ce60fc1fd766032fa3d212ce061fb6a86dedd3ef6cea120ad64e7b326f7421a6",
+      "original": "exec-ea56baf6-cf2a-4af7-9798-945b03f4bf65.png",
+      "originalSha256": "a977f285d62d51e19bb6ffcdd08bbe566858058d67c020bc6b9a6c0b5bc9393d",
+      "reference": "docs/olympiad-t3-source-register.md",
+      "prompt": "Create original lifelike finished food for an olympiad restaurant tasting table. Current bank recipe clues: В классическом варианте — тонкое вытяжное тесто; Яблоки; Сворачивают с начинкой и выпекают. Exact small portion: Two thin slices of classic Austrian apple strudel: fine flaky stretched dough rolled around cooked apple slices and raisins, lightly powdered sugar, visible rolled pastry layers. No cream or ice cream. Isolate entire small white ceramic vessel and food on TRUE transparent alpha background, realistic natural food and texture, soft upper-left daylight, three-quarter overhead 35 degree angle, landscape. No extra sides or ingredients, no hands, text, table, background, cartoon or opaque shadows.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "cheesecake",
+      "title": "чизкейк",
+      "output": "public/assets/olympiad/story/v1/plates/cheesecake.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 104844,
+      "sha256": "48a7b54542bbfd01ee7d109c765287ab09f821eb8a6f204249b65efe354a722e",
+      "original": "exec-3b7e42c1-0197-49f7-b703-33449919be09.png",
+      "originalSha256": "77b30841a8afcb39a08c00c02901089a4e09750b7ab3b3bc9cf10ed807c7f806",
+      "reference": "docs/olympiad-t3-source-register.md",
+      "prompt": "Create original lifelike finished food for an olympiad restaurant tasting table. Current bank recipe clues: Десерт; Сливочный или творожный сыр; Отдельная основа, часто из крошки печенья. Exact small portion: One small cheesecake wedge, creamy pale ivory cream-cheese filling, separate golden brown biscuit crumb base, plain top, no strawberry or chocolate sauce. Isolate entire small white ceramic vessel and food on TRUE transparent alpha background, realistic natural food and texture, soft upper-left daylight, three-quarter overhead 35 degree angle, landscape. No extra sides or ingredients, no hands, text, table, background, cartoon or opaque shadows.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "beef_stroganoff",
+      "title": "бефстроганов",
+      "output": "public/assets/olympiad/story/v1/plates/beef_stroganoff.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 131302,
+      "sha256": "eed2147bd0be3fc2a91f1879eb54b471d58d31d199024f1cde96e61fde5866b4",
+      "original": "exec-27cb80cb-8e3d-43b8-974b-2132121a78d1.png",
+      "originalSha256": "d451e8da396b5dea5232e7bd0d9fda7aac16f2c914df8ae068c4ba97d91bafe5",
+      "reference": "docs/olympiad-t3-source-register.md",
+      "prompt": "Create original lifelike finished food for an olympiad restaurant tasting table. Current bank recipe clues: Говядина, нарезанная тонкими полосками; В этой версии — сметанный соус с луком; Мясо быстро обжаривают и доводят до готовности в соусе. Exact small portion: A small tasting portion of beef Stroganoff: narrow thin cooked beef strips and sauteed onion in sour-cream sauce, creamy tan color. No rice, potato, mushrooms or greenery. Isolate entire small white ceramic vessel and food on TRUE transparent alpha background, realistic natural food and texture, soft upper-left daylight, three-quarter overhead 35 degree angle, landscape. No extra sides or ingredients, no hands, text, table, background, cartoon or opaque shadows.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "guacamole",
+      "title": "гуакамоле",
+      "output": "public/assets/olympiad/story/v1/plates/guacamole.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 143602,
+      "sha256": "1cf4148bf138181ebb8323047a58b3e4b855425c93df5f04f8cc613f435e9e4a",
+      "original": "exec-22a916bf-9688-4d37-8044-a6400badd036.png",
+      "originalSha256": "5e6a789a2da2181ea345b484d1ae84a91be98f2264a22c6e9cc03bd73f9b800e",
+      "reference": "docs/olympiad-t3-source-register.md",
+      "prompt": "Create original lifelike finished food for an olympiad restaurant tasting table. Current bank recipe clues: Авокадо; Густой соус или паста; Закуска или дополнение к другим блюдам. Exact small portion: Small bowl of guacamole, chunky avocado mashed into a thick green dip with tiny white onion and cilantro flecks. No whole avocado, no chips, no tomato decoration. Isolate entire small white ceramic vessel and food on TRUE transparent alpha background, realistic natural food and texture, soft upper-left daylight, three-quarter overhead 35 degree angle, landscape. No extra sides or ingredients, no hands, text, table, background, cartoon or opaque shadows.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "falafel",
+      "title": "фалафель",
+      "output": "public/assets/olympiad/story/v1/plates/falafel.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 168220,
+      "sha256": "69173958ee3d297937045d47468c2990de9cd6cb7e5fa05b9cd5ca00c365c842",
+      "original": "exec-4ac07d58-a230-4e18-801f-ea6acf884a96.png",
+      "originalSha256": "41785bb9ea289e89389052efc0afe051fb642fca5bf8e16ef418ec1b2d6132d3",
+      "reference": "docs/olympiad-t3-source-register.md",
+      "prompt": "Create original lifelike finished food for an olympiad restaurant tasting table. Current bank recipe clues: Измельчённые бобовые, чаще нут; Небольшие шарики или котлетки; Обычно жарят во фритюре. Exact small portion: Two chickpea falafel balls, golden rough crisp exterior; one half cut shows pale green beige ground chickpea and herb interior. No sauce, salad or pita. Isolate entire small white ceramic vessel and food on TRUE transparent alpha background, realistic natural food and texture, soft upper-left daylight, three-quarter overhead 35 degree angle, landscape. No extra sides or ingredients, no hands, text, table, background, cartoon or opaque shadows.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "table-guest",
+      "title": "table-guest",
+      "output": "public/assets/olympiad/story/v1/scenes/table-guest.webp",
+      "dimensions": [
+        1200,
+        400
+      ],
+      "mode": "RGB",
+      "bytes": 98000,
+      "sha256": "07b39ba397140f1517d5a01665763fca24c4747551d08140b5911b77ad16d949",
+      "original": "exec-3a101fbc-c105-4f71-b9e0-deed2ed1ab0f.png",
+      "originalSha256": "fb14394c990c17d90c0e0becc3806bdeb3ff85b3c769180c67a286512d866666",
+      "reference": "public/assets/olympiad/story/v1/scenes/neutral.webp",
+      "prompt": "Using the SAME man and SAME restaurant as this reference, create a realistic extra WIDE panoramic restaurant photograph. Man in white linen shirt seated in LEFT QUARTER of the frame, torso and face fully visible, looking pleasantly downward at the empty tabletop immediately in front of him. Long uninterrupted pale warm marble dining table extends across entire frame and fills lower 45 percent; right THREE QUARTERS above table show restaurant background. Fine natural daytime window light from left, green plants, mint upholstered seating, warm wood, lifelike proportions. Camera at same angle as reference but much wider, landscape 3:1 panoramic framing. EMPTY table with NO FOOD, NO plates, no text. His face occupies at most 10 percent of frame width. Designed to receive small 2D tasting plate overlays across tabletop, never giant food relative to person. Keep table horizon level, no perspective vanishing tabletop shrinking into distance.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Same guest, restaurant, camera and daylight. No feedback about correctness. Scene inspected individually."
+      }
+    },
+    {
+      "id": "borsch",
+      "title": "Борщ с говядиной и сметаной",
+      "output": "public/assets/olympiad/story/v1/plates/borsch.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 121608,
+      "sha256": "7291d7d6494505e190e3b9ea7356969a02df95adcf42f4dc2b4d5f4e40cff91c",
+      "original": "exec-94835389-6785-4ce7-98b2-2af21a281eab.png",
+      "originalSha256": "24e16b0cc1c654cc3b2b9665345d917025504ea068a047e16a6a8b10ef2f36a6",
+      "reference": "/assets/olympiad/tour4/t4-plate-v2-12c457572062.webp",
+      "prompt": "Use reference to create exactly this dish version, scaled down into a realistic tasting portion: Borscht small bowl: deep beet-red broth, cabbage, potato, small beef pieces, spoon of sour cream. ONE small slice of bread placed on same small saucer, all inside plate outline. Photograph entire modest white ceramic plate or bowl on TRUE transparent alpha background, no table, all items fully within frame. Natural realistic edible textures and correct modest proportions, three-quarter overhead 35 degree angle, consistent soft upper-left daylight, landscape, no cartoon, text, hands, extra foods or opaque shadows.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "quesadilla",
+      "title": "Кесадилья с сыром",
+      "output": "public/assets/olympiad/story/v1/plates/quesadilla.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 112806,
+      "sha256": "920904ac79e208dc68f24bbf3f5aec541e734c7241ef412053ac66dd16755b43",
+      "original": "exec-21071f02-5b70-45ad-a6c7-e2e7e4818cc1.png",
+      "originalSha256": "6c3331bd6f196c133186e98d08c04553ec20d6b89c326cd3898fcd9b0c68c0fd",
+      "reference": "/assets/olympiad/tour4/t4-menu-v1-c2b17f804e93.webp",
+      "prompt": "Use reference to create exactly this dish version, scaled down into a realistic tasting portion: Cheese quesadilla tasting plate: two triangular wedges of thin toasted flour tortilla, visible melted pale cheese inside, no meat, lettuce or sauce. Photograph entire modest white ceramic plate or bowl on TRUE transparent alpha background, no table, all items fully within frame. Natural realistic edible textures and correct modest proportions, three-quarter overhead 35 degree angle, consistent soft upper-left daylight, landscape, no cartoon, text, hands, extra foods or opaque shadows.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "sweet_sour_chicken",
+      "title": "Курица в кисло-сладком соусе с рисом",
+      "output": "public/assets/olympiad/story/v1/plates/sweet_sour_chicken.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 108128,
+      "sha256": "3f86853339f82f6754725b66e312e1097005d7814194c7a06c95c43cf1a6a785",
+      "original": "exec-9d5fc4ab-0b54-4733-b8ad-becc0c608024.png",
+      "originalSha256": "aef86fbdb94572f2fdadfb619c27b7957429d6f8e4c7736edf41b8a802b83409",
+      "reference": "/assets/olympiad/tour4/t4-plate-v2-0909c9cc84db.webp",
+      "prompt": "Use reference to create exactly this dish version, scaled down into a realistic tasting portion: Sweet and sour chicken tasting plate: three chicken chunks, pineapple cubes, red and green bell pepper in glossy orange red sauce, small mound of white rice alongside. Photograph entire modest white ceramic plate or bowl on TRUE transparent alpha background, no table, all items fully within frame. Natural realistic edible textures and correct modest proportions, three-quarter overhead 35 degree angle, consistent soft upper-left daylight, landscape, no cartoon, text, hands, extra foods or opaque shadows.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "pork_shashlik",
+      "title": "Шашлык из свинины с лавашом",
+      "output": "public/assets/olympiad/story/v1/plates/pork_shashlik.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 152794,
+      "sha256": "1fbce39df55921a5ba910eb396eb4902f6946da951874bde2c9a7e2f017842e1",
+      "original": "exec-a0115284-58e9-460b-b013-47fc8087069f.png",
+      "originalSha256": "61be860b5b81f68c07463bf3860b37890f386c85259ef5851d119d68de796ced",
+      "reference": "/assets/olympiad/tour4/t4-plate-v2-39dfcd894196.webp",
+      "prompt": "Use reference to create exactly this dish version, scaled down into a realistic tasting portion: Pork shashlik tasting plate: ONE short METAL skewer with three grilled pork cubes, folded small lavash, tomato wedge, two cucumber slices, two red onion rings. Metal skewer fully visible and fits frame, do not use wooden stick. Photograph entire modest white ceramic plate or bowl on TRUE transparent alpha background, no table, all items fully within frame. Natural realistic edible textures and correct modest proportions, three-quarter overhead 35 degree angle, consistent soft upper-left daylight, landscape, no cartoon, text, hands, extra foods or opaque shadows.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "grilled_salmon",
+      "title": "Лосось на гриле с картофелем",
+      "output": "public/assets/olympiad/story/v1/plates/grilled_salmon.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 153138,
+      "sha256": "cc89fcb278ee1717f275a7eccf2d870484a189f9626ab31d4874aef48f56a308",
+      "original": "exec-509cb36b-ce9a-45cd-be29-90886c53cb86.png",
+      "originalSha256": "8c8593a7c4daec3a4547007f6a3d2f633f62b5ad288b80052402be961c1e0b6d",
+      "reference": "/assets/olympiad/tour4/t4-plate-v2-57dd6e265079.webp",
+      "prompt": "Use reference to create exactly this dish version, scaled down into a realistic tasting portion: Small grilled salmon fillet with clear grill marks, two small boiled potatoes and modest broccoli and green beans. No batter, cream sauce or large sides. Photograph entire modest white ceramic plate or bowl on TRUE transparent alpha background, no table, all items fully within frame. Natural realistic edible textures and correct modest proportions, three-quarter overhead 35 degree angle, consistent soft upper-left daylight, landscape, no cartoon, text, hands, extra foods or opaque shadows.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "mushroom_risotto",
+      "title": "Ризотто с грибами",
+      "output": "public/assets/olympiad/story/v1/plates/mushroom_risotto.webp",
+      "dimensions": [
+        1200,
+        799
+      ],
+      "mode": "RGBA",
+      "bytes": 105076,
+      "sha256": "bee93e31da3d1b76072d404b86cdf9a87d4585a92a0e70e105645851a861299d",
+      "original": "exec-0186f25d-6e9d-4ff0-80ec-18fbf9a8bb62.png",
+      "originalSha256": "c4635ba0e51673b5103b782d4d8292c9ee6b7ca30f741dc06b39854feedee8d4",
+      "reference": "/assets/olympiad/tour4/t4-menu-v1-638c0a7eb419.webp",
+      "prompt": "Use reference to create exactly this dish version, scaled down into a realistic tasting portion: Small bowl of mushroom risotto, moist creamy rice with distinct short rice grains and sauteed mushroom slices, no meat and no garnish. Photograph entire modest white ceramic plate or bowl on TRUE transparent alpha background, no table, all items fully within frame. Natural realistic edible textures and correct modest proportions, three-quarter overhead 35 degree angle, consistent soft upper-left daylight, landscape, no cartoon, text, hands, extra foods or opaque shadows.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "thin_blini",
+      "title": "Тонкие блины с вареньем",
+      "output": "public/assets/olympiad/story/v1/plates/thin_blini.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGBA",
+      "bytes": 135206,
+      "sha256": "63dfa14fd3f196fad8621db26653f71b6cc7c2160999c2b8c82dc1b26e6e8b3c",
+      "original": "exec-c89cf0fe-bddd-4525-aabd-cb839c42def0.png",
+      "originalSha256": "b6410ed58cb467afe9536ad1459829dc9519fb1ef5262fcee20c783bb61e9276",
+      "reference": "/assets/olympiad/tour4/t4-menu-v1-a10f479e6bc2.webp",
+      "prompt": "Use reference to create exactly this dish version, scaled down into a realistic tasting portion: Two small thin flexible Russian blini pancakes, one folded triangle and one rolled, small ramekin of berry jam alongside ON same white plate. Not thick pancakes. Photograph entire modest white ceramic plate or bowl on TRUE transparent alpha background, no table, all items fully within frame. Natural realistic edible textures and correct modest proportions, three-quarter overhead 35 degree angle, consistent soft upper-left daylight, landscape, no cartoon, text, hands, extra foods or opaque shadows.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "fudgy_brownie",
+      "title": "Шоколадный брауни",
+      "output": "public/assets/olympiad/story/v1/plates/fudgy_brownie.webp",
+      "dimensions": [
+        1200,
+        799
+      ],
+      "mode": "RGBA",
+      "bytes": 102442,
+      "sha256": "0fc7af03f909e6d3c2f42dbce07c2e1f21c82e4a9c4ad95f98a1ed4987a55f4f",
+      "original": "exec-3c26675f-c2e6-49c4-b168-bfc9276976eb.png",
+      "originalSha256": "10e54f206692940f9136b0dbe8a6f3e132649369d488c546c5ab133527541793",
+      "reference": "/assets/olympiad/tour4/t4-menu-v1-64d018af2c9b.webp",
+      "prompt": "Use reference to create exactly this dish version, scaled down into a realistic tasting portion: ONE small chocolate brownie square, cracked thin chocolate top, dense moist crumb inside, not molten chocolate center. No ice cream, berries or cream. Photograph entire modest white ceramic plate or bowl on TRUE transparent alpha background, no table, all items fully within frame. Natural realistic edible textures and correct modest proportions, three-quarter overhead 35 degree angle, consistent soft upper-left daylight, landscape, no cartoon, text, hands, extra foods or opaque shadows.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
+      }
+    },
+    {
+      "id": "neutral",
+      "title": "neutral",
+      "output": "public/assets/olympiad/story/v1/scenes/neutral.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGB",
+      "bytes": 113266,
+      "sha256": "16929acb9827e59e278802a610396da62ed4680987fc9a080daade003f2302dc",
+      "original": "exec-4aa8a88e-f7c0-4060-b05e-1a76218ecba3.png",
+      "originalSha256": "49121456411c105b9e2940b6244b1ae804ad26257388af4c9a8a80289a08da75",
+      "reference": null,
+      "prompt": null,
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Same guest, restaurant, camera and daylight. No feedback about correctness. Scene inspected individually."
+      }
+    },
+    {
+      "id": "table",
+      "title": "table",
+      "output": "public/assets/olympiad/story/v1/scenes/table.webp",
+      "dimensions": [
+        1800,
+        800
+      ],
+      "mode": "RGB",
+      "bytes": 194860,
+      "sha256": "729651d999b8efbe35ccfda6f62a2e0ce1bace77909abb0bec8a58df82a6ecf7",
+      "original": "exec-4956d958-2f02-41a0-8718-aa66fe7b72a5.png",
+      "originalSha256": "94d3c7c9dffa8bcf665fafb0234205bde8ec6081bc68e4ac40817434e27ba6ff",
+      "reference": null,
+      "prompt": null,
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Same guest, restaurant, camera and daylight. No feedback about correctness. Scene inspected individually."
+      }
+    },
+    {
+      "id": "arrival",
+      "title": "arrival",
+      "output": "public/assets/olympiad/story/v1/scenes/arrival.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGB",
+      "bytes": 112046,
+      "sha256": "177edab9b8fc0b053a7ebf0c8066e215ae9723912ab0fb7cc6063b776f56e923",
+      "original": "exec-8c752dd4-acf4-4a13-a7de-120d593fef6c.png",
+      "originalSha256": "82842182ac7a45c7909caae25ccd3a6f70715fe12930e4785ab43c468ec3c0a6",
+      "reference": null,
+      "prompt": null,
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Same guest, restaurant, camera and daylight. No feedback about correctness. Scene inspected individually."
+      }
+    },
+    {
+      "id": "album",
+      "title": "album",
+      "output": "public/assets/olympiad/story/v1/scenes/album.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGB",
+      "bytes": 131020,
+      "sha256": "59839f21b4f982c4b71ad6d440db26062355bd18743f44123126fb9840a8447c",
+      "original": "exec-8f8ea1a6-9dab-4bd8-a7a9-6d2901433b05.png",
+      "originalSha256": "b0108fc5ac5fe0932974eefca24b437efabddcb068461034d53b68c9664e28b7",
+      "reference": null,
+      "prompt": "Photorealistic production scene for college olympiad. Preserve EXACT reference man's identity, wavy dark hair, white linen shirt, green-seat restaurant, marble table, warm daylight from left. The guest is seated, calmly opening a brown leather gastronomic photo album on the table. Pages show neutral indistinct travel food snapshots with NO recognizable culinary answers and NO readable text. Close natural mid-shot, keep same face white shirt restaurant daylight. Landscape 1200x800, no UI, no logo.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Same guest, restaurant, camera and daylight. No feedback about correctness. Scene inspected individually."
+      }
+    },
+    {
+      "id": "map",
+      "title": "map",
+      "output": "public/assets/olympiad/story/v1/scenes/map.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGB",
+      "bytes": 139514,
+      "sha256": "cc11981e5f5ccef2c490b304c148109d295577695ae2f0c2b24076bfda5b5cc0",
+      "original": "exec-a6211939-f8b9-4305-8553-4a648e164813.png",
+      "originalSha256": "b71055aaf7d3971774618bb62d70f22c3d9f63c44178ff7f17f914f73a72e768",
+      "reference": null,
+      "prompt": "Photorealistic production scene for college olympiad. Preserve EXACT reference man's identity, wavy dark hair, white linen shirt, green-seat restaurant, marble table, warm daylight from left. Seated same guest has the open brown leather album on the left beside a paper world map without labels. He gently gestures at the map. No flags, no cuisine/dish names or recognizable foods. Neutral attentive face, natural scale, same scene. Landscape 1200x800, no UI, no logo.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Same guest, restaurant, camera and daylight. No feedback about correctness. Scene inspected individually."
+      }
+    },
+    {
+      "id": "notes",
+      "title": "notes",
+      "output": "public/assets/olympiad/story/v1/scenes/notes.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGB",
+      "bytes": 121676,
+      "sha256": "0949f9246d3f945417a570cf3393c7edc85037d600e3a29efc783e307383c1e2",
+      "original": "exec-043758d2-c3fb-448c-a47e-2f95d91450e1.png",
+      "originalSha256": "c164702ff9c2a97a2357613eb4b51a8109211a5b860d07e93d5b3b0f694c4323",
+      "reference": null,
+      "prompt": "Photorealistic production scene for college olympiad. Preserve EXACT reference man's identity, wavy dark hair, white linen shirt, green-seat restaurant, marble table, warm daylight from left. Seated same guest slides an open paper notebook with indistinct handwritten scribbles to the viewer. A folded unlabeled map serves as bookmark, leather album lies beside it. No recognizable food or legible text. Neutral attentive expression. Landscape 1200x800, no UI, no logo.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Same guest, restaurant, camera and daylight. No feedback about correctness. Scene inspected individually."
+      }
+    },
+    {
+      "id": "orders",
+      "title": "orders",
+      "output": "public/assets/olympiad/story/v1/scenes/orders.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGB",
+      "bytes": 116552,
+      "sha256": "523c321348b4df4c41e2f9d99d8031003d0bd0a65cada42c553f5a3c42a6d3ec",
+      "original": "exec-0c2be6d6-9694-4d1c-8455-133569c46a84.png",
+      "originalSha256": "a4dfffd22e42386c0b35c79249ae2267ff3d84edd576b0b5609a47d61b985aec",
+      "reference": null,
+      "prompt": "Photorealistic production scene for college olympiad. Preserve EXACT reference man's identity, wavy dark hair, white linen shirt, green-seat restaurant, marble table, warm daylight from left. Seated same guest arranges a small set of blank restaurant order slips beside the same notebook and leather album. Neutral interested expression. No food or dishes, no readable text, same light and camera. Landscape 1200x800, no UI, no logo.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Same guest, restaurant, camera and daylight. No feedback about correctness. Scene inspected individually."
+      }
+    },
+    {
+      "id": "waiting",
+      "title": "waiting",
+      "output": "public/assets/olympiad/story/v1/scenes/waiting.webp",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "mode": "RGB",
+      "bytes": 116096,
+      "sha256": "1c5f7af1a02d78432a7fc1803f3f4da5a3d5592e85beb04980cbc6799b6563b3",
+      "original": "exec-61a7469b-33ae-4063-8d58-370698fcf3a9.png",
+      "originalSha256": "a8f4871b0d058ce4c1400077fe5d41c499a55fed996de19da20a8adcfe9161e4",
+      "reference": null,
+      "prompt": "Photorealistic production scene for college olympiad. Preserve EXACT reference man's identity, wavy dark hair, white linen shirt, green-seat restaurant, marble table, warm daylight from left. Seated same guest closes his brown leather gastronomic album on the empty marble table, hands resting on its cover. Calm neutral attentive face, NO smile, NO surprised expression. No food, no readable text. Same restaurant camera light and scale. Landscape 1200x800, no UI, no logo.",
+      "inspection": {
+        "nativeIndividuallyViewed": true,
+        "accepted": true,
+        "notes": "Same guest, restaurant, camera and daylight. No feedback about correctness. Scene inspected individually."
+      }
+    }
+  ],
+  "reuse": [
+    "public/assets/olympiad/tour5/service/plates/pizza-served-v3.webp",
+    "public/assets/olympiad/tour5/service/plates/greek-served-v3.webp",
+    "public/assets/olympiad/tour5/service/plates/roll-served-v3.webp"
+  ],
+  "rejected": [
+    {
+      "id": "T1-A04-first-candidate",
+      "reason": "Open/flat tortilla did not match the folded taco photograph. Replaced with individually inspected folded-taco generation; original retained locally."
+    }
+  ]
+}

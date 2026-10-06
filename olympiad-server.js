@@ -5,7 +5,7 @@ const path = require("node:path");
 const { createSqliteD1 } = require("./src/sqlite-d1");
 
 const STATIC_FILES = new Set([
-  "/", "/index.html", "/app.js", "/t2-country-match.js", "/t3-detective.js", "/t4-guest-order.js", "/t5-final-kitchen.js", "/t5-final-kitchen.css", "/styles.css", "/admin.html", "/admin.js",
+  "/", "/olympiad-story.js", "/olympiad-story.css", "/t5-photo-model.js", "/t5-photo-kitchen.js", "/t5-photo-kitchen.css", "/t5-dish-service.js", "/t5-dish-service.css", "/certificate.html", "/certificate.js", "/certificate.css", "/index.html", "/app.js", "/t2-country-match.js", "/t3-detective.js", "/t4-guest-order.js", "/t5-final-kitchen.js", "/t5-final-kitchen.css", "/styles.css", "/admin.html", "/admin.js",
   "/content-admin.html", "/content-admin.js", "/visual-demo.html",
   "/visual-demo.js", "/sw.js", "/manifest.webmanifest",
   "/brand-prof-tourism.png", "/brand-prof-2024.jpg", "/brand-gkts-shield.jpg"
@@ -15,7 +15,8 @@ function isOlympiadApi(pathname) {
   return pathname === "/api/public/olympiad" ||
     pathname === "/api/public/register" ||
     pathname === "/api/public/attempts/start" ||
-    /^\/api\/public\/attempts\/[^/]+(?:\/(?:current|pulse|answer|dish-selection|finish|integrity))?$/.test(pathname) ||
+    /^\/api\/public\/attempts\/[^/]+(?:\/(?:story-result|current|pulse|answer|dish-selection|finish|integrity))?$/.test(pathname) ||
+    pathname.startsWith("/api/admin/story-runs") ||
     pathname === "/api/admin/login" ||
     pathname === "/api/admin/session" ||
     pathname === "/api/admin/summary" ||
@@ -64,7 +65,7 @@ function createOlympiadServer(options = {}) {
 
   const db = createSqliteD1(dbPath);
   const { configureCloudflareStorage } = require("./src/store");
-  configureCloudflareStorage({ DB: db, ADMIN_PASSWORD: adminPassword, ATTEMPT_ID_SECRET: attemptIdSecret });
+  configureCloudflareStorage({ STORY_ENABLED:options.storyEnabled, DB: db, ADMIN_PASSWORD: adminPassword, ATTEMPT_ID_SECRET: attemptIdSecret });
   const { handleApi, serveStatic } = require("./server");
   const appVersion = require("./package.json").version;
 

@@ -33,14 +33,14 @@
     };
   }
 
-  function create({ mount, question, attemptId, onChange }) {
+  function create({ mount, question, attemptId, onChange, inlineIntro = false }) {
     const doc = mount.ownerDocument;
     const win = doc.defaultView;
     const model = createState(question, question.savedAnswer);
     const key = `nko_t2_intro_v1_${attemptId}`;
     let seen = introSeen.has(key);
     try { seen ||= win.localStorage.getItem(key) === "seen"; } catch { /* Memory fallback. */ }
-    let started = seen || question.sequenceInTour !== 1 || model.isComplete() || Object.keys(model.placements).length > 0;
+    let started = inlineIntro || seen || question.sequenceInTour !== 1 || model.isComplete() || Object.keys(model.placements).length > 0;
     let selected = null;
     let dragging = null;
     const shell = doc.createElement("section");

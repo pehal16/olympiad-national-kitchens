@@ -61,6 +61,7 @@ let ydbStore = null;
 
 function configureCloudflareStorage(env) {
   cloudflareEnv = env || cloudflareEnv || null;
+  require('./story-runs').configureStoryStorage(cloudflareEnv);
   if (cloudflareEnv && (!process.env.STORAGE_BACKEND || process.env.STORAGE_BACKEND === "file")) {
     process.env.STORAGE_BACKEND = "cloudflare";
   }
@@ -365,6 +366,10 @@ async function createAttemptAtomic(attempt) {
   }
 
   const stored = normalizeFileAttempt({ ...attempt, stateRevision: 0 });
+  if(attempt.storyRunId) {
+    const runs=readJson(getPath().join(STORAGE_DIR,'story-runs.json'),[]);
+    if(!require('./story-runs').entryOpen(runs.find(r=>r.id===attempt.storyRunId))) return {created:false,attempt:null,entryClosed:true};
+  }
   attempts.push(stored);
   writeJson(ATTEMPTS_FILE, attempts);
   return { created: true, attempt: stored };
@@ -415,14 +420,14 @@ async function updateAttemptWithRevision(attempt, expectedRevision, options = {}
 async function loadAttemptById(attemptId) {
   const backend = getStorageBackend();
   if (backend === "cloudflare") {
-    return getCloudflareStore().loadAttemptById(attemptId);
+    return require('./story-runs').hydrate(await getCloudflareStore().loadAttemptById(attemptId));
   }
   if (backend === "ydb") {
     return getYdbStore().loadAttemptById(attemptId);
   }
 
   const attempts = readJson(ATTEMPTS_FILE, []);
-  return normalizeFileAttempt(attempts.find((item) => item.id === attemptId) || null);
+  return require('./story-runs').hydrate(normalizeFileAttempt(attempts.find((item) => item.id === attemptId) || null));
 }
 
 async function loadAdminSessions() {

@@ -7,7 +7,8 @@ const { DatabaseSync, backup } = require("node:sqlite");
 const MIGRATIONS = [
   "0001_cloudflare_initial.sql",
   "0006_olympiad_integrity_events.sql",
-  "0007_olympiad_attempt_concurrency.sql"
+  "0007_olympiad_attempt_concurrency.sql",
+  "0008_olympiad_story_runs.sql"
 ];
 
 function createSqliteD1(filename) {

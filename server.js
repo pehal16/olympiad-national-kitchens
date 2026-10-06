@@ -2,6 +2,9 @@ const crypto = require("crypto");
 const { URL } = require("url");
 const packageInfo = require("./package.json");
 const { buildDishService } = require("./src/dish-service");
+const storyRuns=require("./src/story-runs");
+const {freezeStoryVariant,buildStoryResult}=require("./src/story-result");
+function storyEnabled(){return storyRuns.enabled();}
 const {
   initStorage,
   loadOlympiad,
@@ -786,7 +789,7 @@ function buildAttemptView(olympiad, attempt, settings) {
     stepStart: tour.stepStart,
     stepEnd: tour.stepEnd
   }));
-  const scoresVisible = attempt.status !== "in_progress" && settings.showParticipantScore;
+  const scoresVisible = storyRuns.scoresVisible(attempt,settings);
 
   return {
     id: attempt.id,
@@ -798,6 +801,7 @@ function buildAttemptView(olympiad, attempt, settings) {
     stateRevision: Math.max(0, Number(attempt.stateRevision) || 0),
     currentStepIndex: attempt.currentStepIndex,
     certificateOrder: olympiad.certificateOrder || null,
+    story: storyRuns.storyView(attempt),
     dishService: buildDishService(attempt),
     progress: buildProgress(attempt),
     timing: getTiming(attempt),
@@ -839,10 +843,11 @@ function buildAttemptView(olympiad, attempt, settings) {
 function buildAttemptPulse(olympiad, attempt, settings) {
   const currentTour = getCurrentTour(attempt);
   const summary = summarizeAttempt(olympiad, attempt);
-  const scoresVisible = attempt.status !== "in_progress" && settings.showParticipantScore;
+  const scoresVisible = storyRuns.scoresVisible(attempt,settings);
 
   return {
     id: attempt.id,
+    story: storyRuns.storyView(attempt),
     status: attempt.status,
     startedAt: attempt.startedAt,
     finishedAt: attempt.finishedAt,
@@ -1639,7 +1644,7 @@ function summarizePm01AttemptsForAdmin(exam, attempts, settings) {
       activeAttempts: normalizedAttempts.filter((attempt) => attempt.status === "in_progress").length,
       completed: normalizedAttempts.filter((attempt) => attempt.status !== "in_progress").length,
       pendingReview: normalizedAttempts.filter((attempt) => attempt.status === "pending_review").length,
-      reviewed: normalizedAttempts.filter((attempt) => attempt.status === "reviewed").length,
+      reviewed: normalizedAttempts.filter((attempt) => attempt.status === "reviewed" && (options.forceScores || !attempt.storyRunId || attempt._storyRun?.publishedAt)).length,
       institutions: institutions.size,
       groups: groups.size,
       mentors: mentors.size
@@ -2118,6 +2123,7 @@ async function requireAdmin(req) {
 async function buildRankedAttempts(olympiad, settings, options = {}) {
   const exposeScores = options.forceScores || settings.showParticipantScore;
   const baseAttempts = options.attempts || currentOlympiadAttempts(await loadAttempts(), olympiad.id);
+  for(const attempt of baseAttempts) await storyRuns.hydrate(attempt);
 
   const prepared = baseAttempts
     .map((attempt) => {
@@ -2125,25 +2131,28 @@ async function buildRankedAttempts(olympiad, settings, options = {}) {
       const summary = summarizeAttempt(olympiad, normalized);
       return {
         ...normalized,
+        _storyRun: normalized._storyRun,
         summary,
         diploma: diplomaByScore(summary.totalFinalScore)
       };
     });
 
   const rankedCompleted = prepared
-    .filter((attempt) => attempt.status === "reviewed")
+    .filter((attempt) => attempt.status === "reviewed" && (!attempt.storyRunId || options.forceScores || attempt._storyRun?.publishedAt))
     .sort(compareAttemptsByRank)
     .map((attempt, index, sorted) => {
+      const group = sorted.filter(a => (a.storyRunId || null) === (attempt.storyRunId || null));
+      const groupIndex = group.indexOf(attempt);
       const rank =
-        index > 0 && compareAttemptsByRank(attempt, sorted[index - 1]) === 0
-          ? sorted[index - 1]._assignedRank
-          : index + 1;
+        groupIndex > 0 && compareAttemptsByRank(attempt, group[groupIndex - 1]) === 0
+          ? group[groupIndex - 1]._assignedRank
+          : groupIndex + 1;
       attempt._assignedRank = rank;
       return { rank, _source: attempt };
     });
 
   const unranked = prepared
-    .filter((attempt) => attempt.status !== "reviewed")
+    .filter((attempt) => attempt.status !== "reviewed" || (!options.forceScores && attempt.storyRunId && !attempt._storyRun?.publishedAt))
     .sort((left, right) => safeDateMs(right.startedAt) - safeDateMs(left.startedAt))
     .map((attempt) => ({ rank: null, _source: attempt }));
 
@@ -2154,10 +2163,10 @@ async function buildRankedAttempts(olympiad, settings, options = {}) {
       status: attempt.status,
       startedAt: attempt.startedAt,
       finishedAt: attempt.finishedAt,
-      summary: exposeScores
+      summary: (attempt.storyRunId ? (options.forceScores || attempt._storyRun?.publishedAt) : exposeScores)
         ? attempt.summary
-        : { ...attempt.summary, totalFinalScore: null },
-      diploma: attempt.status === "reviewed" ? attempt.diploma : ""
+        : { totalFinalScore:null,totalMaxScore:attempt.summary.totalMaxScore,tourScores:attempt.summary.tourScores.map(t=>({tourId:t.tourId,code:t.code,title:t.title,maxScore:t.maxScore,finalScore:null,penalty:null})),totalPenalty:null,tieBreak:null },
+      diploma: attempt.status === "reviewed" && (!attempt.storyRunId || options.forceScores || attempt._storyRun?.publishedAt) ? attempt.diploma : ""
     }));
 }
 
@@ -3599,7 +3608,10 @@ async function handleApi(req, res, url, runtime = {}) {
   }
 
   if (method === "GET" && pathname === "/api/public/olympiad") {
-    sendJson(res, 200, { ok: true, data: getOlympiadPublicData(await ensureOlympiad()) });
+    const data=getOlympiadPublicData(await ensureOlympiad());
+    data.storyEnabled=storyEnabled();
+    data.story=storyEnabled()?storyRuns.publicRun(await storyRuns.currentRun()):null;
+    sendJson(res, 200, { ok: true, data });
     return;
   }
 
@@ -3612,14 +3624,15 @@ async function handleApi(req, res, url, runtime = {}) {
       return;
     }
 
-    if (!isOlympiadAvailable(olympiadData)) {
+    const run=storyEnabled()?await storyRuns.currentRun():null;
+    if (!storyEnabled() && !isOlympiadAvailable(olympiadData)) {
       sendJson(res, 403, { ok: false, message: "Олимпиада сейчас недоступна." });
       return;
     }
 
     const signature = makeParticipantSignature(validation.profile);
     const attempts = currentOlympiadAttempts(await loadAttemptSummaries(), olympiadData.id).filter(
-      (attempt) => attempt.participantSignature === signature
+      (attempt) => attempt.participantSignature === signature && (run ? attempt.storyRunId===run.id : !attempt.storyRunId)
     );
     const activeAttempt = attempts.find((attempt) => attempt.status === "in_progress");
     const completedAttempt = attempts.find((attempt) => attempt.status !== "in_progress");
@@ -3644,7 +3657,8 @@ async function handleApi(req, res, url, runtime = {}) {
       return;
     }
 
-    if (!isOlympiadAvailable(olympiadData)) {
+    const run=storyEnabled()?await storyRuns.currentRun():null;
+    if (!storyEnabled() && !isOlympiadAvailable(olympiadData)) {
       sendJson(res, 403, { ok: false, message: "Олимпиада сейчас недоступна." });
       return;
     }
@@ -3662,7 +3676,7 @@ async function handleApi(req, res, url, runtime = {}) {
     const currentAttempts = currentOlympiadAttempts(
       await loadAttemptSummaries(),
       olympiadData.id
-    );
+    ).filter(a=>run ? a.storyRunId===run.id : !a.storyRunId);
     const activeAttemptSummary = currentAttempts.find(
       (attempt) =>
         attempt.participantSignature === participantSignature &&
@@ -3698,13 +3712,20 @@ async function handleApi(req, res, url, runtime = {}) {
     }
 
     const { attemptId, routeSeed } = makeOlympiadAttemptIdentity(
-      olympiadData.id,
+      run ? `${olympiadData.id}|${run.id}` : olympiadData.id,
       participantSignature,
       settings
     );
+    if (run ? !storyRuns.entryOpen(run) : storyEnabled()) {
+      sendJson(res, 403, { ok: false, message: "Вход закрыт. Начатые попытки продолжаются." });
+      return;
+    }
     const variant = buildVariant(olympiadData, { seed: routeSeed });
+    if(run) freezeStoryVariant(variant,run);
+    const startedAt = nowIso();
     const attempt = {
       id: attemptId,
+      ...(run?{storyRunId:run.id}:{}),
       olympiadId: olympiadData.id,
       schemaVersion: olympiadData.schemaVersion || 2,
       participant: validation.profile,
@@ -3712,9 +3733,9 @@ async function handleApi(req, res, url, runtime = {}) {
       routeSeed,
       accessTokenHash: hashAttemptAccessToken(accessToken),
       stateRevision: 0,
-      startedAt: nowIso(),
+      startedAt,
       expiresAt: new Date(
-        Date.now() + olympiadData.durationMinutes * 60 * 1000
+        Date.parse(startedAt) + olympiadData.durationMinutes * 60 * 1000
       ).toISOString(),
       finishedAt: null,
       status: "in_progress",
@@ -3723,7 +3744,7 @@ async function handleApi(req, res, url, runtime = {}) {
       answers: {},
       tourStates: {
         [variant.tours[0].id]: {
-          startedAt: nowIso(),
+          startedAt,
           finishedAt: null
         }
       },
@@ -3732,9 +3753,11 @@ async function handleApi(req, res, url, runtime = {}) {
       totalPenalty: 0
     };
 
+    if(run) Object.defineProperty(attempt,"_storyRun",{value:run,configurable:true});
     markQuestionPresented(attempt);
     const creation = await createAttemptAtomic(attempt);
     if (!creation.created) {
+      if(creation.entryClosed){sendJson(res,403,{ok:false,message:"Вход закрыт. Начатые попытки продолжаются."});return;}
       const existing = creation.attempt || (await loadAttemptById(attempt.id));
       if (!existing || existing.olympiadId !== olympiadData.id) {
         sendJson(res, 409, {
@@ -3763,6 +3786,13 @@ async function handleApi(req, res, url, runtime = {}) {
     return;
   }
 
+  if (method === "GET" && pathname.match(/^\/api\/public\/attempts\/[^/]+\/story-result$/)) {
+    const olympiad=await ensureOlympiad();let attempt=await loadAttemptById(pathname.split("/")[4]);
+    if(!attempt||attempt.olympiadId!==olympiad.id){sendJson(res,404,{ok:false,message:"Попытка не найдена."});return;}
+    if(!hasAttemptAccess(req,attempt)){sendAttemptAccessDenied(res);return;}
+    attempt=await normalizeAndPersistIfChanged(olympiad,attempt);res.setHeader("Cache-Control","private, no-store");
+    sendJson(res,200,{ok:true,data:buildStoryResult(olympiad,attempt)});return;
+  }
   if (method === "GET" && pathname.match(/^\/api\/public\/attempts\/[^/]+$/)) {
     const olympiadData = await ensureOlympiad();
     const attemptId = pathname.split("/")[4];
@@ -4198,6 +4228,23 @@ async function handleApi(req, res, url, runtime = {}) {
       return;
     }
 
+    if(pathname==="/api/admin/story-runs"&&method==="GET") {
+      const runs=await storyRuns.listRuns(),olympiad=await ensureOlympiad(),normalized=[];
+      for(const a of (await loadAttemptSummaries()).filter(a=>a.storyRunId)) normalized.push(await normalizeAndPersistIfChanged(olympiad,await loadAttemptById(a.id)));
+      sendJson(res,200,{ok:true,data:runs.map(run=>{const own=normalized.filter(a=>a.storyRunId===run.id);return {...storyRuns.publicRun(run),started:own.length,completed:own.filter(a=>a.status!=="in_progress").length,active:own.filter(a=>a.status==="in_progress").length};})});return;
+    }
+    if(pathname==="/api/admin/story-runs"&&method==="POST") {
+      const body=await parseBody(req,{maxBytes:4096});try{const run=await storyRuns.createRun(body.date);invalidateAttemptCaches();sendJson(res,201,{ok:true,data:storyRuns.publicRun(run)});}catch(error){sendJson(res,409,{ok:false,message:error.message});}return;
+    }
+    if(pathname.match(/^\/api\/admin\/story-runs\/[^/]+$/)&&method==="PATCH") {
+      const body=await parseBody(req,{maxBytes:4096});if(Object.keys(body).some(k=>!["stopped","decorationsDisabled"].includes(k))){sendJson(res,400,{ok:false,message:"Дата и версии закреплены. Создайте другое проведение."});return;}
+      try{const run=await storyRuns.updateRun(pathname.split("/")[4],body);invalidateAttemptCaches();sendJson(res,200,{ok:true,data:storyRuns.publicRun(run)});}catch(error){sendJson(res,409,{ok:false,message:error.message});}return;
+    }
+    if(pathname.match(/^\/api\/admin\/story-runs\/[^/]+\/publish$/)&&method==="POST") {
+      const id=pathname.split("/")[4],olympiad=await ensureOlympiad();
+      for(const a of (await loadAttemptSummaries()).filter(a=>a.storyRunId===id&&a.status==="in_progress")) await normalizeAndPersistIfChanged(olympiad,await loadAttemptById(a.id));
+      try{const run=await storyRuns.publishRun(id);invalidateAttemptCaches();sendJson(res,200,{ok:true,data:storyRuns.publicRun(run)});}catch(error){sendJson(res,409,{ok:false,message:error.message});}return;
+    }
     if (pathname.startsWith("/api/admin/content/")) {
       olympiadBase = ensureOlympiadBase();
       customQuestionMap = await ensureCustomQuestionMap();

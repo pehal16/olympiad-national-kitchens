@@ -504,7 +504,7 @@ function updateStartAvailability() {
   const consentGranted = !elements.startConsent || elements.startConsent.checked;
   const browserSupported = supportsOlympiadFullscreen();
 
-  elements.startAttempt.disabled = blockedByCompletion || !hasParticipant || !consentGranted || state.isStartingAttempt || !browserSupported;
+  elements.startAttempt.disabled = blockedByCompletion || (state.olympiad?.storyEnabled && !state.olympiad?.story?.entryOpen) || !hasParticipant || !consentGranted || state.isStartingAttempt || !browserSupported;
 
   if (!elements.startConsentHint) {
     return;
@@ -2904,6 +2904,7 @@ function renderQuestion(question) {
   if (hydratedQuestion.type === "final_kitchen") {
     state.questionController = window.T5FinalKitchen.create({
       mount: elements.questionBody, question: hydratedQuestion, attemptId: state.attempt.id,
+      inlineIntro: Boolean(state.attempt.story),
       submitButton: elements.submitAnswer,
       onPhase: (phase) => {
         elements.attemptSection.classList.toggle("is-t5-intro", phase === "intro");
@@ -2951,6 +2952,7 @@ function renderQuestion(question) {
   } else if (hydratedQuestion.type === "dish_detective") {
     state.questionController = window.T3Detective.create({
       mount: elements.questionBody, question: hydratedQuestion, attemptId: state.attempt.id,
+      inlineIntro: Boolean(state.attempt.story),
       submitButton: elements.submitAnswer,
       onPhase: (intro) => elements.attemptSection.classList.toggle("is-t3-intro", intro),
       onChange: (answer) => {
@@ -2961,6 +2963,7 @@ function renderQuestion(question) {
   } else if (hydratedQuestion.interactionMode === "guest_order") {
     state.questionController = window.T4GuestOrder.create({
       mount: elements.questionBody, question: hydratedQuestion, attemptId: state.attempt.id,
+      inlineIntro: Boolean(state.attempt.story),
       submitButton: elements.submitAnswer,
       onPhase: (intro) => elements.attemptSection.classList.toggle("is-t4-intro", intro),
       onChange: (answer) => {
@@ -2980,6 +2983,7 @@ function renderQuestion(question) {
     if (hydratedQuestion.interactionMode === "country_match") {
       state.questionController = window.T2CountryMatch.create({
         mount: elements.questionBody, question: hydratedQuestion, attemptId: state.attempt.id,
+      inlineIntro: Boolean(state.attempt.story),
         onChange: (answer) => {
           rememberDraft(hydratedQuestion.id, answer);
           refreshAttemptControls(); updateExamCockpit();
@@ -3064,6 +3068,7 @@ function renderAttempt() {
     elements.progressTourFill.style.width = "100%";
   }
 
+  window.OlympiadStory?.chapter(attempt);
   renderQuestion(currentQuestion);
   renderJourneyMap();
   refreshAttemptControls();
@@ -3140,6 +3145,7 @@ function renderResult() {
     elements.resultTours.appendChild(card);
   });
 
+  window.OlympiadStory?.result(state.attempt,api,()=>syncAttempt(true));
   refreshAttemptControls();
   renderJourneyMap();
   setAttemptSaveStatus("Финиш принят. Результат сохранён в облаке.", "success");
@@ -3819,6 +3825,17 @@ async function init() {
   await registerServiceWorker();
   renderHero();
   renderRules();
+  window.OlympiadStory?.intro(state.olympiad);
+  const refreshStoryAdmission = async () => {
+    if (!state.olympiad?.storyEnabled || state.attempt || document.hidden) return;
+    try {
+      state.olympiad = await api("/api/public/olympiad");
+      window.OlympiadStory?.intro(state.olympiad);
+      updateStartAvailability();
+    } catch { /* Admission is always checked again by the server on start. */ }
+  };
+  window.setInterval(refreshStoryAdmission, 60000);
+  document.addEventListener("visibilitychange", refreshStoryAdmission);
   setupInstallPrompt();
   setInstallAvailability(false);
   setNetworkStatus(navigator.onLine);

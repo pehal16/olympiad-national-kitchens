@@ -7,7 +7,7 @@
       current.node.remove(); current = null; root.document.body.classList.remove('t5-service-open');
     }
     const receipt = attempt?.dishService;
-    if (!receipt || !['pleased', 'puzzled'].includes(receipt.mood)) return;
+    if (!receipt || !['neutral', 'pleased', 'puzzled'].includes(receipt.mood)) return;
     const key = `nko_dish_service_v1_${attempt.id}_${receipt.questionId}`;
     let acknowledged = seen.has(key);
     try { acknowledged ||= root.localStorage.getItem(key) === 'seen'; } catch { /* Memory fallback. */ }
@@ -40,15 +40,15 @@
     }
     scene.setAttribute('aria-label', 'Ваше блюдо подано на стол перед гостем');
     const guest = el('img', 't5-service-guest');
-    guest.src = `/assets/olympiad/tour5/service/guest-table-${receipt.mood}-v2.webp`;
-    guest.alt = receipt.mood === 'pleased' ? 'Гость смотрит на блюдо перед собой и улыбается' : 'Гость с недоумением смотрит на поданное блюдо';
+    guest.src = receipt.mood === "neutral" ? "/assets/olympiad/story/v1/scenes/neutral.webp" : `/assets/olympiad/tour5/service/guest-table-${receipt.mood}-v2.webp`;
+    guest.alt = receipt.mood === 'neutral' ? 'Гость спокойно принимает подачу перед собой' : receipt.mood === 'pleased' ? 'Гость смотрит на блюдо перед собой и улыбается' : 'Гость с недоумением смотрит на поданное блюдо';
     const missing = el('p', 't5-service-missing', 'Изображение подачи не загрузилось. Ответ сохранён.');
     missing.hidden = true;
     const failed = () => { missing.hidden = false; scene.classList.add('is-missing'); };
     guest.addEventListener('error', failed);
     scene.append(guest, missing);
     const copy = el('div', 't5-service-copy');
-    const title = el('h2', '', receipt.mood === 'pleased' ? 'Гость доволен' : 'Гость в недоумении');
+    const title = el('h2', '', receipt.mood === 'neutral' ? 'Блюдо подано' : receipt.mood === 'pleased' ? 'Гость доволен' : 'Гость в недоумении');
     title.id = 't5-service-title';
     const caption = el('figcaption', 't5-service-caption');
     caption.append(el('p', 't5-service-eyebrow', `Блюдо ${receipt.number} · подано`), title);

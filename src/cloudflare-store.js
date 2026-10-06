@@ -4,6 +4,7 @@ let cloudflareEnv = null;
 
 function configureCloudflareStorage(env) {
   cloudflareEnv = env || cloudflareEnv || null;
+  require('./story-runs').configureStoryStorage(cloudflareEnv);
 }
 
 function requireEnv() {
@@ -340,6 +341,19 @@ async function createAttemptAtomic(attempt) {
     accessTokenHash: attempt.accessTokenHash || null
   };
   const storedAt = nowIso();
+  if(storedAttempt.storyRunId) {
+    const result=await requireEnv().DB.batch([
+      statement(`INSERT INTO attempts(id,payload_json,updated_at,state_revision,access_token_hash,story_run_id)
+        SELECT ?1,?2,?3,0,?4,?5 FROM olympiad_story_runs r WHERE r.id=?5 AND r.stopped=0
+        AND r.published_at IS NULL AND r.entry_starts_at<=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+        AND r.entry_ends_at>strftime('%Y-%m-%dT%H:%M:%fZ','now')
+        ON CONFLICT(id) DO NOTHING`,String(storedAttempt.id),JSON.stringify(cloneAttemptState(storedAttempt)),storedAt,storedAttempt.accessTokenHash,storedAttempt.storyRunId),
+      statement(`INSERT INTO attempt_variants(id,payload_json,updated_at) SELECT ?1,?2,?3
+        WHERE EXISTS(SELECT 1 FROM attempts WHERE id=?1 AND access_token_hash=?4) ON CONFLICT(id) DO NOTHING`,String(storedAttempt.id),JSON.stringify(storedAttempt.variant),storedAt,storedAttempt.accessTokenHash)
+    ]);
+    const existing=await loadAttemptById(storedAttempt.id);
+    return {created:Number(result[0]?.meta?.changes)>0,attempt:existing,entryClosed:!existing};
+  }
   const statements = [
     statement(
       `INSERT INTO attempts
