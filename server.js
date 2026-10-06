@@ -3631,8 +3631,9 @@ async function handleApi(req, res, url, runtime = {}) {
     }
 
     const signature = makeParticipantSignature(validation.profile);
-    const attempts = currentOlympiadAttempts(await loadAttemptSummaries(), olympiadData.id).filter(
-      (attempt) => attempt.participantSignature === signature && (run ? attempt.storyRunId===run.id : !attempt.storyRunId)
+    const ownAttempt=run?await loadAttemptById(makeOlympiadAttemptIdentity(`${olympiadData.id}|${run.id}`,signature,settings).attemptId):null;
+    const attempts = run?(ownAttempt?[ownAttempt]:[]):currentOlympiadAttempts(await loadAttemptSummaries(), olympiadData.id).filter(
+      (attempt) => attempt.participantSignature === signature && !attempt.storyRunId
     );
     const activeAttempt = attempts.find((attempt) => attempt.status === "in_progress");
     const completedAttempt = attempts.find((attempt) => attempt.status !== "in_progress");
@@ -3673,10 +3674,13 @@ async function handleApi(req, res, url, runtime = {}) {
     }
 
     const participantSignature = makeParticipantSignature(validation.profile);
-    const currentAttempts = currentOlympiadAttempts(
-      await loadAttemptSummaries(),
-      olympiadData.id
-    ).filter(a=>run ? a.storyRunId===run.id : !a.storyRunId);
+    // New runs have a deterministic indexed identity. Avoid scanning all
+    // participant summaries for every simultaneous start.
+    const identity=makeOlympiadAttemptIdentity(run ? `${olympiadData.id}|${run.id}` : olympiadData.id,participantSignature,settings);
+    const ownAttempt=run ? await loadAttemptById(identity.attemptId) : null;
+    const currentAttempts = run ? (ownAttempt?[ownAttempt]:[]) : currentOlympiadAttempts(
+      await loadAttemptSummaries(),olympiadData.id
+    ).filter(a=>!a.storyRunId);
     const activeAttemptSummary = currentAttempts.find(
       (attempt) =>
         attempt.participantSignature === participantSignature &&
@@ -3711,11 +3715,7 @@ async function handleApi(req, res, url, runtime = {}) {
       return;
     }
 
-    const { attemptId, routeSeed } = makeOlympiadAttemptIdentity(
-      run ? `${olympiadData.id}|${run.id}` : olympiadData.id,
-      participantSignature,
-      settings
-    );
+    const { attemptId, routeSeed } = identity;
     if (run ? !storyRuns.entryOpen(run) : storyEnabled()) {
       sendJson(res, 403, { ok: false, message: "Вход закрыт. Начатые попытки продолжаются." });
       return;

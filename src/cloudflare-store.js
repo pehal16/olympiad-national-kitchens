@@ -342,7 +342,7 @@ async function createAttemptAtomic(attempt) {
   };
   const storedAt = nowIso();
   if(storedAttempt.storyRunId) {
-    const result=await requireEnv().DB.batch([
+    const creationStatements=[
       statement(`INSERT INTO attempts(id,payload_json,updated_at,state_revision,access_token_hash,story_run_id)
         SELECT ?1,?2,?3,0,?4,?5 FROM olympiad_story_runs r WHERE r.id=?5 AND r.stopped=0
         AND r.published_at IS NULL AND r.entry_starts_at<=strftime('%Y-%m-%dT%H:%M:%fZ','now')
@@ -350,7 +350,13 @@ async function createAttemptAtomic(attempt) {
         ON CONFLICT(id) DO NOTHING`,String(storedAttempt.id),JSON.stringify(cloneAttemptState(storedAttempt)),storedAt,storedAttempt.accessTokenHash,storedAttempt.storyRunId),
       statement(`INSERT INTO attempt_variants(id,payload_json,updated_at) SELECT ?1,?2,?3
         WHERE EXISTS(SELECT 1 FROM attempts WHERE id=?1 AND access_token_hash=?4) ON CONFLICT(id) DO NOTHING`,String(storedAttempt.id),JSON.stringify(storedAttempt.variant),storedAt,storedAttempt.accessTokenHash)
-    ]);
+    ];
+    for(const row of answerRowPayloads(storedAttempt))creationStatements.push(statement(
+      `INSERT INTO attempt_answers(attempt_id,question_id,payload_json,updated_at) SELECT ?1,?2,?3,?4
+       WHERE EXISTS(SELECT 1 FROM attempts WHERE id=?1 AND access_token_hash=?5 AND state_revision=0)
+       ON CONFLICT(attempt_id,question_id) DO NOTHING`,String(storedAttempt.id),row.questionId,JSON.stringify(row.payload),storedAt,storedAttempt.accessTokenHash));
+    const result=await requireEnv().DB.batch(creationStatements);
+    if(Number(result[0]?.meta?.changes)>0)return {created:true,attempt:storedAttempt};
     const existing=await loadAttemptById(storedAttempt.id);
     return {created:Number(result[0]?.meta?.changes)>0,attempt:existing,entryClosed:!existing};
   }
@@ -503,8 +509,8 @@ async function loadAttemptById(attemptId) {
     return null;
   }
   const row = await first(
-    `SELECT id, payload_json, state_revision, access_token_hash
-     FROM attempts WHERE id = ?1`,
+    `SELECT a.id,a.payload_json,a.state_revision,a.access_token_hash,v.payload_json AS variant_json
+     FROM attempts a LEFT JOIN attempt_variants v ON v.id=a.id WHERE a.id = ?1`,
     String(attemptId)
   );
   if (!row) {
@@ -520,7 +526,7 @@ async function loadAttemptById(attemptId) {
   }
 
   const variantPayload = statePayload._variantStored
-    ? await loadVariantByAttemptId(attemptId)
+    ? parseJson(row.variant_json)
     : null;
   const answerRows = statePayload._answersStored
     ? await loadAnswerRowsByAttemptId(attemptId)

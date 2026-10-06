@@ -24,6 +24,12 @@ test('D1 story day: protected publication, simultaneous start, per-run identity 
  const prefix=`/api/public/attempts/${attempt.id}`;
  assert.equal((await api(prefix+'/story-result')).status,401);assert.equal((await api(prefix+'/story-result',{token:'synthetic_foreign_participant_token'})).status,401);
  assert.deepEqual(Object.keys((await api(prefix+'/story-result',{token})).data),['state','entryEndsAt']);
+ // Pages exposes writeHead/end, without Node's setHeader method. Exercise that
+ // response contract so private result headers work on the deployed adapter.
+ const request=require('node:stream').Readable.from([]);request.method='GET';request.headers={'x-attempt-token':token};request.url=prefix+'/story-result';request.socket={remoteAddress:'127.0.0.1'};
+ const response={headersSent:false,writeHead(code,headers){this.code=code;this.headers=headers;this.headersSent=true;},end(body){this.body=body;}};
+ await require('../server').handleApi(request,response,new URL(base+prefix+'/story-result'));
+ assert.equal(response.code,200);assert.equal(response.headers['Cache-Control'],'private, no-store');assert.equal(JSON.parse(response.body).data.state,'waiting');
  const finished=await api(prefix+'/finish',{method:'POST',token,body:{}});assert.equal(finished.status,200);assert.equal(finished.data.summary.totalFinalScore,null);assert.equal(finished.data.story.resultAvailable,false);
  assert.doesNotMatch(JSON.stringify(finished.data),/storyPlates|expectedAnswer|correctIngredientIds|isCorrect/);
  assert.equal((await api(prefix+'/pulse',{token})).data.summary.totalFinalScore,null);

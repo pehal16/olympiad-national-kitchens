@@ -3,6 +3,9 @@ on:
   workflow_dispatch:
   push:
     branches: [codex/restaurant-story]
+concurrency:
+  group: restaurant-story-isolated-preview
+  cancel-in-progress: true
 jobs:
   preview:
     runs-on: ubuntu-latest

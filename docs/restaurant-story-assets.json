@@ -7,7 +7,7 @@
     "data/banks/tour1.js",
     "data/banks/tour2.js",
     "data/banks/tour3.js",
-    "data/banks/tour4-guest-order.js",
+    "data/banks/tour4.js",
     "docs/olympiad-t4-content-audit.md",
     "docs/olympiad-t5-photo-fairness.md",
     "docs/olympiad-october-2026-assets.json"
@@ -32,7 +32,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Круассан без начинки, из слоёного теста."
     },
     {
       "id": "T1-A02",
@@ -53,7 +54,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Рамен с пшеничной лапшой, свининой, яйцом, зелёным луком и нори."
     },
     {
       "id": "T1-A03",
@@ -74,7 +76,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Отварные хинкали со складчатой оболочкой из теста."
     },
     {
       "id": "T1-A04",
@@ -95,7 +98,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Тако: сложенная кукурузная тортилья с говядиной, луком, кинзой и сальсой."
     },
     {
       "id": "T1-A05",
@@ -116,7 +120,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Том-ям с креветками и грибами, без лапши."
     },
     {
       "id": "T1-A06",
@@ -137,7 +142,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Мясная лазанья с томатным рагу, бешамелем и сырной корочкой."
     },
     {
       "id": "T1-A07",
@@ -158,7 +164,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Нигири: рис с ломтиками лосося и тунца."
     },
     {
       "id": "T1-A08",
@@ -179,7 +186,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Плов с мясом, морковью и чесноком."
     },
     {
       "id": "T1-A09",
@@ -200,7 +208,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Паэлья с морепродуктами, перцем и зелёным горошком."
     },
     {
       "id": "T1-A10",
@@ -221,7 +230,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Хот-дог с сосиской, квашеной капустой, луком и горчицей."
     },
     {
       "id": "fish_and_chips",
@@ -242,7 +252,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Рыба в кляре с жареным картофелем."
     },
     {
       "id": "tiramisu",
@@ -263,7 +274,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Тирамису: кофейный десерт с маскарпоне и какао."
     },
     {
       "id": "wiener_schnitzel",
@@ -284,7 +296,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Венский шницель из телятины в сухарной панировке, с лимоном."
     },
     {
       "id": "ratatouille",
@@ -305,7 +318,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Рататуй из тушёных овощей."
     },
     {
       "id": "onigiri",
@@ -326,7 +340,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Онигири: порция риса с полоской нори."
     },
     {
       "id": "pho",
@@ -347,7 +362,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Фо с рисовой лапшой, говядиной и зеленью в прозрачном бульоне."
     },
     {
       "id": "bibimbap",
@@ -368,7 +384,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Бибимбап: рис с овощами, мясом и яйцом."
     },
     {
       "id": "pad_thai",
@@ -389,7 +406,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Пад-тай: обжаренная рисовая лапша с креветками."
     },
     {
       "id": "olivier",
@@ -410,7 +428,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Современная российская версия «Оливье»: картофель, морковь, яйцо, солёный огурец, варёная колбаса, горошек и майонез."
     },
     {
       "id": "gazpacho",
@@ -431,7 +450,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Гаспачо: холодный томатный суп с овощами."
     },
     {
       "id": "pastel_de_nata",
@@ -452,7 +472,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Паштел-де-ната: корзиночка из слоёного теста с заварным кремом."
     },
     {
       "id": "brussels_waffle",
@@ -473,7 +494,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Брюссельская вафля прямоугольной формы с сахарной пудрой."
     },
     {
       "id": "goulash",
@@ -494,7 +516,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Венгерский гуляш: суп с говядиной, паприкой и овощами."
     },
     {
       "id": "peking_duck",
@@ -515,7 +538,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Пекинская утка: ломтики утки с хрустящей кожей."
     },
     {
       "id": "eclair",
@@ -536,7 +560,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Эклер из заварного теста с кремовой начинкой."
     },
     {
       "id": "kharcho",
@@ -557,7 +582,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Харчо с говядиной, рисом и кинзой."
     },
     {
       "id": "burrito",
@@ -578,7 +604,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Буррито: пшеничная тортилья с говядиной и чёрной фасолью."
     },
     {
       "id": "mochi",
@@ -599,7 +626,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Дайфуку моти с клубникой и пастой из красной фасоли."
     },
     {
       "id": "buffalo_wings",
@@ -620,7 +648,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Куриные крылышки в остром соусе баффало."
     },
     {
       "id": "carbonara",
@@ -641,11 +670,12 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Карбонара с гуанчиале, яичным соусом, пекорино и чёрным перцем."
     },
     {
       "id": "syrniki",
-      "title": "сырники",
+      "title": "Сырники",
       "output": "public/assets/olympiad/story/v1/plates/syrniki.webp",
       "dimensions": [
         1200,
@@ -662,11 +692,12 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Творог; Небольшие порции в виде лепёшек; Обычно обжаривают на сковороде"
     },
     {
       "id": "draniki",
-      "title": "драники",
+      "title": "Драники",
       "output": "public/assets/olympiad/story/v1/plates/draniki.webp",
       "dimensions": [
         1200,
@@ -683,11 +714,12 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Тёртый сырой картофель; Небольшие плоские порции; Обжаривают на сковороде"
     },
     {
       "id": "shakshuka",
-      "title": "шакшука",
+      "title": "Шакшука",
       "output": "public/assets/olympiad/story/v1/plates/shakshuka.webp",
       "dimensions": [
         1200,
@@ -704,11 +736,12 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Томатно-овощной соус; Яйца готовят целыми, не взбивая; Часто подают прямо в сковороде"
     },
     {
       "id": "samsa",
-      "title": "самса",
+      "title": "Самса",
       "output": "public/assets/olympiad/story/v1/plates/samsa.webp",
       "dimensions": [
         1200,
@@ -725,11 +758,12 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Сочная начинка — мясо с луком; Закрытое изделие часто формуют треугольником; Традиционный вариант выпекают на стенке тандыра"
     },
     {
       "id": "hummus",
-      "title": "хумус",
+      "title": "Хумус",
       "output": "public/assets/olympiad/story/v1/plates/hummus.webp",
       "dimensions": [
         1200,
@@ -746,11 +780,12 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Нут; Густая однородная паста; В состав входит тахини — кунжутная паста"
     },
     {
       "id": "apple_strudel",
-      "title": "яблочный штрудель",
+      "title": "Яблочный штрудель",
       "output": "public/assets/olympiad/story/v1/plates/apple_strudel.webp",
       "dimensions": [
         1068,
@@ -767,11 +802,12 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "В классическом варианте — тонкое вытяжное тесто; Яблоки; Сворачивают с начинкой и выпекают"
     },
     {
       "id": "cheesecake",
-      "title": "чизкейк",
+      "title": "Чизкейк",
       "output": "public/assets/olympiad/story/v1/plates/cheesecake.webp",
       "dimensions": [
         1200,
@@ -788,11 +824,12 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Десерт; Сливочный или творожный сыр; Отдельная основа, часто из крошки печенья"
     },
     {
       "id": "beef_stroganoff",
-      "title": "бефстроганов",
+      "title": "Бефстроганов",
       "output": "public/assets/olympiad/story/v1/plates/beef_stroganoff.webp",
       "dimensions": [
         1200,
@@ -809,11 +846,12 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Говядина, нарезанная тонкими полосками; В этой версии — сметанный соус с луком; Мясо быстро обжаривают и доводят до готовности в соусе"
     },
     {
       "id": "guacamole",
-      "title": "гуакамоле",
+      "title": "Гуакамоле",
       "output": "public/assets/olympiad/story/v1/plates/guacamole.webp",
       "dimensions": [
         1200,
@@ -830,11 +868,12 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Авокадо; Густой соус или паста; Закуска или дополнение к другим блюдам"
     },
     {
       "id": "falafel",
-      "title": "фалафель",
+      "title": "Фалафель",
       "output": "public/assets/olympiad/story/v1/plates/falafel.webp",
       "dimensions": [
         1200,
@@ -851,7 +890,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Измельчённые бобовые, чаще нут; Небольшие шарики или котлетки; Обычно жарят во фритюре"
     },
     {
       "id": "table-guest",
@@ -893,7 +933,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Горячий суп со свёклой, капустой, картофелем и кусочками говядины; сметана и хлеб для подачи."
     },
     {
       "id": "quesadilla",
@@ -914,7 +955,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Тонкая тортилья с расплавленным сыром внутри, подрумяненная на сковороде."
     },
     {
       "id": "sweet_sour_chicken",
@@ -935,7 +977,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Кусочки курицы с ананасом и сладким перцем в кисло-сладком соусе; гарнир — белый рис."
     },
     {
       "id": "pork_shashlik",
@@ -956,7 +999,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Цельные обжаренные кусочки свинины на металлических шампурах; лаваш, томат, огурец и красный лук."
     },
     {
       "id": "grilled_salmon",
@@ -977,7 +1021,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Целое филе лосося со следами решётки, отварным картофелем и зелёными овощами; без кляра."
     },
     {
       "id": "mushroom_risotto",
@@ -998,7 +1043,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Кремовое блюдо из риса с грибами, подаётся горячим, без мясной начинки."
     },
     {
       "id": "thin_blini",
@@ -1019,7 +1065,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Тонкие гибкие блины со сковороды, сложенные или свёрнутые; ягодное варенье отдельно."
     },
     {
       "id": "fudgy_brownie",
@@ -1040,7 +1087,8 @@
         "nativeIndividuallyViewed": true,
         "accepted": true,
         "notes": "Individual dish checked against the referenced bank version; natural portion and vessel; no additional selected ingredients. Alpha and proportions verified during WebP export."
-      }
+      },
+      "recipeVersion": "Шоколадный десерт с плотной влажной серединой, которая не вытекает при разрезании."
     },
     {
       "id": "neutral",
