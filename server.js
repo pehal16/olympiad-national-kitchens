@@ -4229,6 +4229,7 @@ async function handleApi(req, res, url, runtime = {}) {
     }
 
     if(pathname==="/api/admin/story-runs"&&method==="GET") {
+      if(storyEnabled())await storyRuns.currentRun();
       const runs=await storyRuns.listRuns(),olympiad=await ensureOlympiad(),normalized=[];
       for(const a of (await loadAttemptSummaries()).filter(a=>a.storyRunId)) normalized.push(await normalizeAndPersistIfChanged(olympiad,await loadAttemptById(a.id)));
       sendJson(res,200,{ok:true,data:runs.map(run=>{const own=normalized.filter(a=>a.storyRunId===run.id);return {...storyRuns.publicRun(run),started:own.length,completed:own.filter(a=>a.status!=="in_progress").length,active:own.filter(a=>a.status==="in_progress").length};})});return;

@@ -2,6 +2,13 @@
 
 Last updated: 2026-10-06
 
+## Anytime olympiad entry — current user instruction (2026-10-06)
+
+- The user now explicitly requests starting the olympiad at any time. This supersedes the earlier requirement to assign a Moscow calendar day before new story attempts are admitted. `STORY_ANYTIME_ENTRY=true` enables an automatically persisted free-entry run (`anytime-v1`) with no invented event date or time limit for entry. Migration 0009 adds an explicit `entry_mode`; existing runs stay scheduled and retain their previous time bounds.
+- Concurrent first visits create one run, including when only future dates exist. Atomic D1 admission checks its mode, stop flag and publication state; every attempt still receives 45 minutes and its per-run identity. One participant cannot repeat a completed attempt. Explicit currently scheduled days take precedence; outside their windows the free-entry run retains its own identity and organizer state. Reading metadata never replaces a stopped/published run.
+- For this mode the organizer stops new starts, waits for active attempts to finish/expire, then publishes. Stopping does not interrupt or prevent resuming an existing attempt; resume remains enabled in the client. Scores, reactions, table and certificate stay hidden until publication. Waiting polls use the actual open/stopped state without a fictional closing date. The organizer guide and landing copy explain free entry; updated shell versions refresh cached scripts.
+- Local checks: 269 tests pass, Cloudflare build and local PM01 verification pass. Chromium desktop 1440×1000 and mobile viewport 390×844 perform real registration, consent and protected start: HTTP 201, exactly 45 minutes, first photo question, no application exceptions or horizontal overflow. Browser plugin unavailable; existing Playwright CLI used without new dependencies. Preview now tests 50 full free-entry flows followed by 60 scheduled flows with separate D1. Production release confirmation is recorded after deployment.
+
 ## Restaurant story — blueprint 15 (2026-10-06)
 
 - Current authority: user explicitly requested implementation and production release of the complete «Ресторан путешествий. Вечер вкусов» plan. No 3D, no invented event date, PUBLIC repository retained. New story attempts use blueprint 15 / storyVersion 1 / assetVersion 1, five existing tours / 36 questions / 45 minutes / 150 points. Old attempts and PM01 are preserved.

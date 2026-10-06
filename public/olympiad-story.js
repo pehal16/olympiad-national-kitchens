@@ -21,7 +21,9 @@
     sub.textContent='Гость принёс гастрономический альбом. Помогите собрать дегустационное меню для его компании — через пять глав олимпиады «Национальные кухни мира».';
     doc.querySelector('.landing-hero-media').style.backgroundImage=`url("${base}arrival.webp")`;
     const note=doc.querySelector('.landing-pilot-note');
-    if(note)note.textContent=olympiad.story?`Вход ${olympiad.story.date}: с 00:00 до 00:00 следующего дня по Москве. Каждому — полные 45 минут.`:'Дата проведения будет объявлена организатором.';
+    if(note)note.textContent=olympiad.story?.entryMode==='anytime'
+      ? (olympiad.story.entryOpen?'Начните в любое время. После старта у вас будут полные 45 минут.':olympiad.story.publishedAt?'Итоги опубликованы. Новые попытки этого проведения закрыты.':'Организатор остановил новые старты. Начатые попытки продолжаются.')
+      : olympiad.story?`Вход ${olympiad.story.date}: с 00:00 до 00:00 следующего дня по Москве. Каждому — полные 45 минут.`:'Дата проведения будет объявлена организатором.';
     const existing=doc.getElementById('story-introduction');if(existing)existing.remove();
     const section=el('section','story-introduction');section.id='story-introduction';
     section.append(el('h2','','Один вечер. Пять глав.'),el('p','','«В моём альбоме достопримечательностей почти нет. Зато ужины сняты со всех сторон».'));
@@ -38,7 +40,9 @@
       'После подтверждения вернуться к заданию нельзя. Ошибки не дают штрафных баллов. По истечении лимита тура открывается следующий; при общем лимите 45 минут попытка завершается. Неподтверждённый выбор не считается ответом.'
     ])guide.append(el('p','',text));section.append(guide);
     doc.getElementById('prestart-section').before(section);
-    const rule=doc.querySelector('#prestart-section .landing-pilot-note');if(rule)rule.textContent='Время начинается только после явного старта. Даже при старте перед полуночью у вас будут свои 45 минут. Итоги публикуются организатором после общего завершения.';
+    const rule=doc.querySelector('#prestart-section .landing-pilot-note');if(rule)rule.textContent=olympiad.story?.entryMode==='anytime'
+      ? 'Время начинается только после нажатия «Начать олимпиаду». Перед стартом зарегистрируйтесь и подтвердите правила. На прохождение — 45 минут; итоги публикуются организатором.'
+      : 'Время начинается только после явного старта. Даже при старте перед полуночью у вас будут свои 45 минут. Итоги публикуются организатором после общего завершения.';
   }
   function chapter(attempt){
     if(attempt?.story)doc.getElementById('story-introduction')?.setAttribute('hidden','');
@@ -61,7 +65,7 @@
     }
   }
   function clearTimer(){root.clearTimeout(timer);timer=null;}
-  function schedule(){clearTimer();if(!session||loaded||doc.hidden||session.status==='in_progress')return;timer=root.setTimeout(refresh,Date.now()<Date.parse(session.story.entryEndsAt)?300000:60000);}
+  function schedule(){clearTimer();if(!session||loaded||doc.hidden||session.status==='in_progress')return;const open=session.story.entryMode==='anytime'?session.story.entryOpen:Date.now()<Date.parse(session.story.entryEndsAt);timer=root.setTimeout(refresh,open?300000:60000);}
   async function refresh(){
     if(!session||loaded||inFlight||doc.hidden)return;inFlight=true;
     const id=session.id;
@@ -69,7 +73,7 @@
       const data=await request(`/api/public/attempts/${encodeURIComponent(id)}/story-result`);
       if(session?.id!==id)return;
       if(data.state==='published'){loaded=data;renderTable(data);onAvailable?.();clearTimer();}
-      else {const message=resultMount?.querySelector('.story-poll-status');if(message)message.textContent='Ответы сохранены. Публикация итогов ещё ожидается.';}
+      else {if(typeof data.entryOpen==='boolean')session.story.entryOpen=data.entryOpen;const message=resultMount?.querySelector('.story-poll-status');if(message)message.textContent='Ответы сохранены. Публикация итогов ещё ожидается.';}
     } catch(error){const message=resultMount?.querySelector('.story-poll-status');if(message)message.textContent='Не удалось обновить итоги. Сохранённая попытка остаётся на сервере; повторите обновление.';}
     finally{inFlight=false;schedule();}
   }

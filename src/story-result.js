@@ -35,7 +35,8 @@ function answerText(q,payload) {
 }
 function buildStoryResult(olympiad,attempt) {
   if(!attempt.storyRunId) return {state:'legacy'};
-  if(attempt.status==='in_progress'||!attempt._storyRun?.publishedAt) return {state:'waiting',entryEndsAt:attempt._storyRun?.entryEndsAt||null};
+  if(attempt.status==='in_progress'||!attempt._storyRun?.publishedAt) return {state:'waiting',entryEndsAt:attempt._storyRun?.entryEndsAt||null,
+    ...(attempt._storyRun?.entryMode==='anytime'?{entryOpen:require('./story-runs').entryOpen(attempt._storyRun)}:{})};
   const earned=[], kitchen=[], review=[];
   for(const q of attempt.variant.questions) {
     const saved=attempt.answers?.[q.id], payload=saved?.answerPayload;

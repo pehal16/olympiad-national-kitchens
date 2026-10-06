@@ -503,8 +503,9 @@ function updateStartAvailability() {
   const hasParticipant = Boolean(state.participant);
   const consentGranted = !elements.startConsent || elements.startConsent.checked;
   const browserSupported = supportsOlympiadFullscreen();
+  const entryBlocked = state.olympiad?.storyEnabled && !state.olympiad?.story?.entryOpen && !state.activeAttemptId;
 
-  elements.startAttempt.disabled = blockedByCompletion || (state.olympiad?.storyEnabled && !state.olympiad?.story?.entryOpen) || !hasParticipant || !consentGranted || state.isStartingAttempt || !browserSupported;
+  elements.startAttempt.disabled = blockedByCompletion || entryBlocked || !hasParticipant || !consentGranted || state.isStartingAttempt || !browserSupported;
 
   if (!elements.startConsentHint) {
     return;
@@ -520,6 +521,8 @@ function updateStartAvailability() {
     elements.startConsentHint.textContent = "Подтвердите готовность к старту.";
   } else if (state.isStartingAttempt) {
     elements.startConsentHint.textContent = "Открываем вашу попытку…";
+  } else if (entryBlocked) {
+    elements.startConsentHint.textContent = "Новые старты сейчас закрыты организатором.";
   } else {
     elements.startConsentHint.textContent = "Можно начинать.";
   }

@@ -28,9 +28,12 @@ async function main(){
   await sql('DELETE FROM attempts WHERE story_run_id IS NOT NULL');await sql('DELETE FROM olympiad_story_runs');
   for(const count of [50,60]){
     const date=new Date(Date.now()+10800000+(count===60?86400000:0)).toISOString().slice(0,10);
-    const run=await api('/api/admin/story-runs','',{date});
-    run.entryStartsAt=new Date(Date.now()-1000).toISOString();run.entryEndsAt=new Date(Date.now()+3600000).toISOString();
-    await sql('UPDATE olympiad_story_runs SET entry_starts_at=?,entry_ends_at=?,payload_json=? WHERE id=?',[run.entryStartsAt,run.entryEndsAt,JSON.stringify(run),run.id]);
+    const run=count===50?(await api('/api/public/olympiad')).story:await api('/api/admin/story-runs','',{date});
+    if(count===50){assert.equal(run.entryMode,'anytime');assert.equal(run.date,null);assert.equal(run.entryOpen,true);}
+    else {
+      run.entryStartsAt=new Date(Date.now()-1000).toISOString();run.entryEndsAt=new Date(Date.now()+3600000).toISOString();
+      await sql('UPDATE olympiad_story_runs SET entry_starts_at=?,entry_ends_at=?,payload_json=? WHERE id=?',[run.entryStartsAt,run.entryEndsAt,JSON.stringify(run),run.id]);
+    }
     await api(`/api/admin/story-runs/${run.id}/publish`,'',{},'POST',409);
     const alphabet='АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЭЮЯ',times=[];
     const people=await Promise.all(Array.from({length:count},async(_,i)=>{
@@ -49,12 +52,13 @@ async function main(){
     }));
     const records=await sql("SELECT a.id,json_extract(a.payload_json,'$.status') AS status,json_extract(a.payload_json,'$.totalFinalScore') AS score,(SELECT COUNT(*) FROM attempt_answers b WHERE b.attempt_id=a.id) AS answers FROM attempts a WHERE story_run_id=?",[run.id]);
     for(const a of records){assert.equal(a.status,'reviewed');assert.equal(a.score,150);assert.equal(a.answers,36);}
-    const pending=await api(`/api/public/attempts/${people[0].attempt.id}/story-result`,people[0].token);assert.deepEqual(Object.keys(pending),['state','entryEndsAt']);
+    const pending=await api(`/api/public/attempts/${people[0].attempt.id}/story-result`,people[0].token);assert.deepEqual(Object.keys(pending),run.entryMode==='anytime'?['state','entryEndsAt','entryOpen']:['state','entryEndsAt']);
     await api(`/api/public/attempts/${people[0].attempt.id}/story-result`,people[1].token,undefined,'GET',401);
-    run.entryEndsAt=new Date(Date.now()-1000).toISOString();await sql('UPDATE olympiad_story_runs SET entry_ends_at=?,payload_json=? WHERE id=?',[run.entryEndsAt,JSON.stringify(run),run.id]);
+    if(run.entryMode==='anytime')await api(`/api/admin/story-runs/${run.id}`,'',{stopped:true},'PATCH');
+    else {run.entryEndsAt=new Date(Date.now()-1000).toISOString();await sql('UPDATE olympiad_story_runs SET entry_ends_at=?,payload_json=? WHERE id=?',[run.entryEndsAt,JSON.stringify(run),run.id]);}
     const publication=await api(`/api/admin/story-runs/${run.id}/publish`,'',{});assert.equal((await api(`/api/admin/story-runs/${run.id}/publish`,'',{})).publishedAt,publication.publishedAt);
     await Promise.all(people.map(async p=>{const r=await api(`/api/public/attempts/${p.attempt.id}/story-result`,p.token);assert.equal(r.state,'published');assert.equal(r.plates.length,51);assert.equal(r.summary.totalFinalScore,150);}));
-    times.sort((a,b)=>a-b);const metric={environment:'Cloudflare Pages preview / separate D1',participants:count,answers:count*36,errors:0,lostAnswers:0,duplicateAnswers:0,answerP95Ms:Math.round(times[Math.ceil(times.length*.95)-1]),timestamp:new Date().toISOString()};evidence.push(metric);console.log(JSON.stringify(metric));
+    times.sort((a,b)=>a-b);const metric={environment:'Cloudflare Pages preview / separate D1',entryMode:run.entryMode,participants:count,answers:count*36,errors:0,lostAnswers:0,duplicateAnswers:0,answerP95Ms:Math.round(times[Math.ceil(times.length*.95)-1]),timestamp:new Date().toISOString()};evidence.push(metric);console.log(JSON.stringify(metric));
     fs.writeFileSync('output/story/cloudflare-load.json',JSON.stringify(evidence,null,2));
   }
   fs.writeFileSync('output/story/cloudflare-load.json',JSON.stringify(evidence,null,2));

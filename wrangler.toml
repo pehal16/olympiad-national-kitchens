@@ -11,6 +11,7 @@ migrations_dir = "migrations"
 
 [vars]
 STORY_ENABLED = "true"
+STORY_ANYTIME_ENTRY = "true"
 STORAGE_BACKEND = "cloudflare"
 LEARNING_ENABLED = "true"
 LEARNING_PILOT_GROUP_CODE = "1-ПК-24Б"
@@ -24,6 +25,7 @@ migrations_dir = "migrations"
 
 [env.preview.vars]
 STORY_ENABLED = "true"
+STORY_ANYTIME_ENTRY = "true"
 STORAGE_BACKEND = "cloudflare"
 LEARNING_ENABLED = "false"
 LEARNING_PILOT_GROUP_CODE = "1-ПК-24Б"
