@@ -27,15 +27,16 @@
     const scene = el('figure', 't5-service-scene is-loading');
     scene.setAttribute('aria-busy', 'true');
     scene.dataset.kind = receipt.kind || (receipt.number === 1 ? 'pizza' : receipt.number === 2 ? 'greek' : 'roll');
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = doc.createElementNS(ns, 'svg'), defs = doc.createElementNS(ns, 'defs');
+    svg.setAttribute('width', '0'); svg.setAttribute('height', '0'); svg.setAttribute('aria-hidden', 'true');
+    svg.append(defs); scene.append(svg);
     if (scene.dataset.kind === 'roll') {
-      const ns = 'http://www.w3.org/2000/svg';
-      const svg = doc.createElementNS(ns, 'svg');
-      svg.setAttribute('width', '0'); svg.setAttribute('height', '0'); svg.setAttribute('aria-hidden', 'true');
-      const defs = doc.createElementNS(ns, 'defs'), clip = doc.createElementNS(ns, 'clipPath');
+      const clip = doc.createElementNS(ns, 'clipPath');
       clip.id = 't5-service-roll-mask'; clip.setAttribute('clipPathUnits', 'objectBoundingBox');
       const ellipse = doc.createElementNS(ns, 'ellipse');
       for (const [name, value] of Object.entries({ cx: '.5', cy: '.50', rx: '.485', ry: '.285', transform: 'rotate(-24 .5 .5)' })) ellipse.setAttribute(name, value);
-      clip.append(ellipse); defs.append(clip); svg.append(defs); scene.append(svg);
+      clip.append(ellipse); defs.append(clip);
     }
     scene.setAttribute('aria-label', 'Ваше блюдо подано на стол перед гостем');
     const guest = el('img', 't5-service-guest');
@@ -53,10 +54,46 @@
     caption.append(el('p', 't5-service-eyebrow', `Блюдо ${receipt.number} · подано`), title);
     const plate = el('div', 't5-service-plate');
     plate.classList.toggle('is-tray', receipt.isTray === true);
-    for (const photo of receipt.photos || []) {
+    const serving = receipt.servingPhoto;
+    const imageFor = photo => {
       const image = el('img'); image.src = photo.imageUrl; image.alt = photo.imageAlt;
       image.addEventListener('error', failed);
-      plate.append(image);
+      return image;
+    };
+    if (serving) {
+      plate.classList.add('is-native'); plate.append(imageFor(serving));
+    } else if (scene.dataset.kind === 'pizza' && !receipt.isTray && receipt.photos?.length === 1) {
+      // Slice the selected photograph itself. No replacement of wrong toppings.
+      plate.classList.add('is-sliced');
+      const ring = doc.createElementNS(ns, 'clipPath'), path = doc.createElementNS(ns, 'path');
+      ring.id = 't5-service-pizza-rim'; ring.setAttribute('clipPathUnits', 'objectBoundingBox');
+      path.setAttribute('d', 'M .5 .03 A .47 .47 0 1 1 .5 .97 A .47 .47 0 1 1 .5 .03 Z M .5 .065 A .435 .435 0 1 0 .5 .935 A .435 .435 0 1 0 .5 .065 Z');
+      path.setAttribute('clip-rule', 'evenodd'); ring.append(path); defs.append(ring);
+      const rim = imageFor(receipt.photos[0]); rim.className = 't5-service-pizza-rim'; rim.alt = ''; plate.append(rim);
+      for (let index = 0; index < 8; index++) {
+        const start = (-90 + index * 45 + .35) * Math.PI / 180;
+        const end = (-45 + index * 45 - .35) * Math.PI / 180;
+        const point = angle => `${.5 + .435 * Math.cos(angle)} ${.5 + .435 * Math.sin(angle)}`;
+        const clip = doc.createElementNS(ns, 'clipPath'), sector = doc.createElementNS(ns, 'path');
+        clip.id = `t5-service-pizza-slice-${index}`; clip.setAttribute('clipPathUnits', 'objectBoundingBox');
+        sector.setAttribute('d', `M .5 .5 L ${point(start)} A .435 .435 0 0 1 ${point(end)} Z`);
+        clip.append(sector); defs.append(clip);
+        const slice = imageFor(receipt.photos[0]); slice.className = 't5-service-pizza-slice';
+        slice.alt = index === 0 ? receipt.photos[0].imageAlt + ', восемь долек' : '';
+        slice.style.clipPath = `url(#${clip.id})`;
+        const middle = (start + end) / 2;
+        slice.style.translate = `${Math.cos(middle) * .15}% ${Math.sin(middle) * .15}%`;
+        plate.append(slice);
+      }
+    } else {
+      for (const photo of receipt.photos || []) plate.append(imageFor(photo));
+    }
+    if (scene.dataset.kind === 'roll' && !serving?.includesAccompaniments) {
+      const sides = imageFor({
+        imageUrl: '/assets/olympiad/tour5/service/plates/roll-accompaniments-v3.webp',
+        imageAlt: 'Сопровождение подачи: соевый соус, маринованный имбирь и васаби'
+      });
+      sides.className = 't5-service-accompaniments'; scene.append(sides);
     }
     scene.append(plate, caption);
     Promise.all(Array.from(scene.querySelectorAll('img'), image => image.decode().catch(failed)))

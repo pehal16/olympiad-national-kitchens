@@ -2,6 +2,13 @@
 
 Last updated: 2026-10-06
 
+## Natural restaurant servings (2026-10-06)
+
+- User requested realistic scale and separate plating for all three T5 dishes. Native ImageGen alpha cutouts provide eight sliced Margherita wedges, an individual Greek salad bowl, and eight Philadelphia pieces with soy sauce, ginger, wasabi and chopsticks. Scene center moves from 78% to 71% of height; compact vessel sizes are checked against the guest. No 3D work is added. Four individually inspected WebP exports and complete prompts/provenance extend docs/olympiad-october-2026-assets.json to 17 historical/current assets. Originals remain local; conversion only resizes proportionally and preserves alpha.
+- src/dish-service-assets.js matches exactly three immutable original food image URLs, never a score or recipe name. Receipts retain exact original photos and add servingPhoto only for those matching compositions. Other saved compositions keep their original food; basis-present pizzas use eight source-image sectors and noncanonical rolls receive the separate native accompaniment cutout. No-basis selections remain a four-component tray. Accompaniments are decorative, not chosen or graded, as the intro explains. Scoring, 48/15 T5 limits, issued variants, protected commit/retry/reload, focus guard and certificate № 199 / 05.10.2026 remain unchanged.
+- Local Chrome desktop and Pixel 7 emulation cover all 210 compositions, selected-photo identity, native lookup, eight fallback pizza sectors, accompaniment presence, natural scale, loading and dismissal with no JS faults or overflow. Main-interface synthetic three-dish submission/reload completes 36 saved answers with T5 16/12/12 and the combined-order certificate. Guard lock and continuing after deliberately failed native plate/accompaniment downloads pass. Exact staged-release tests: 256/256; Cloudflare build and required local PM01 check pass. Live deployment verification is required after publication. Shell/SW service5; certificate cert3/order2. Intentional old prototype changes remain excluded. Physical-device QA and student calibration remain outstanding college rehearsal, not claimed as complete.
+- Baseline bcea264 was deployed successfully in Cloudflare run 37466646369, with live required checks and all 13 then-current asset hashes verified. Repository stays PUBLIC by the user's explicit choice. No real production participants are created for QA.
+
 
 ## Guest table and combined certificate order (2026-10-06)
 

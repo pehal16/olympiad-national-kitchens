@@ -25,7 +25,7 @@
     const intro = el('section','t5-photo-intro'), workbench = el('section','t5-photo-workbench');
     intro.append(el('div','t5-photo-eyebrow','Тур 5 · Финальная кухня'),el('h3','','Три блюда. Ваша сборка.'),el('p','t5-photo-lead','«Маргарита» → греческий салат → «Филадельфия»'));
     const rules = el('ul','t5-photo-rules');
-    ['Для каждого блюда выберите 4 компонента из 8 и выполните сборку.','Правильный компонент — 4 балла. Максимум — 16 за блюдо и 48 за тур. Порядок выбора продуктов не влияет на баллы.','Состав можно менять до нажатия «Подать». После подачи переходите к следующему блюду.','На тур отведено 15 минут. Таймер уже идёт.'].forEach(text => rules.append(el('li','',text)));
+    ['Для каждого блюда выберите 4 компонента из 8 и выполните сборку.','Правильный компонент — 4 балла. Максимум — 16 за блюдо и 48 за тур. Порядок выбора продуктов не влияет на баллы.','Состав можно менять до нажатия «Подать». После подачи переходите к следующему блюду.','Соевый соус, имбирь и васаби сопровождают подачу роллов. Их выбирать не нужно, на баллы они не влияют.','На тур отведено 15 минут. Таймер уже идёт.'].forEach(text => rules.append(el('li','',text)));
     intro.append(rules,button('Перейти к сборке','t5-photo-primary',()=>{ if(locked)return; started=true;seen.add(introKey);write(introKey,true);update();cards.values().next().value?.focus(); }));
     const head = el('header','t5-photo-heading'), heading = el('div');
     heading.append(el('div','t5-photo-eyebrow',`Блюдо ${question.station.number} из 3 · ${dish.cuisineLabel}`),el('h3','',dish.title),el('p','t5-photo-version',dish.variantLabel));

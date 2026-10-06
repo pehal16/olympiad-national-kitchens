@@ -2,6 +2,7 @@
 
 const { sanitizePhotoDish } = require("./t5-photo-contract");
 const photo = require("../public/t5-photo-model");
+const { servingFor } = require("./dish-service-assets");
 
 // Feedback belongs to a saved immutable answer, never a draft or a future dish.
 function buildDishService(attempt) {
@@ -17,12 +18,14 @@ function buildDishService(attempt) {
     const selected = photo.selection(dish, payload.selectedIngredientIds || []);
     if (selected.length !== 4) return null;
     const plan = photo.plan(sanitizePhotoDish(dish), payload.selectedIngredientIds, "served");
+    const photos = plan.layers.map(layer => ({ imageUrl: layer.path, imageAlt: layer.alt }));
     return {
       questionId: question.id, number: question.station.number, dishTitle: dish.title,
       kind: dish.photo.kind,
       mood: saved.autoScore === question.maxScore ? "pleased" : "puzzled",
       composition: selected.map(item => item.text),
-      photos: plan.layers.map(layer => ({ imageUrl: layer.path, imageAlt: layer.alt })),
+      photos,
+      servingPhoto: servingFor(photos, plan.phase === "mise"),
       isTray: plan.phase === "mise"
     };
   } catch {

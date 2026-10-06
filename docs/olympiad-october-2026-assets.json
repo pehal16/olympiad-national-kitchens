@@ -219,14 +219,177 @@
       "attempts": 1,
       "prompt": "Use case: identity-preserve.\nAsset type: alternate mild puzzled reaction for the same single natural restaurant serving scene.\nInput image: the supplied pleased guest photograph is the edit target. Preserve absolutely the same fictional man's identity, hair, shirt, body pose, arm and hand positions, camera framing, stone table, cafe, lighting, shadows and materials.\nPrimary request: Change ONLY his facial expression from a pleased smile to gentle mild puzzled surprise at an unexpected order. Raise the eyebrows a little, give a very subtle natural forehead crease, and replace the smile with a relaxed neutral gently closed mouth. The expression is restrained and respectful, not angry, judgmental, exaggerated or comic. Both eyes keep looking DOWN at the empty center of the table around x=50%, y=77%, with exactly the same slight head inclination and gaze direction.\nComposition invariants: same landscape 3:2 photograph. Guest remains in the upper 55% of the frame; light stone tabletop occupies the lower 45%. Same natural hands at the left and right sides, no hands in the clear central placement area x=30–70%, y=62–94%. The actual submitted food and plate will be composited later, so the center stays completely empty.\nConstraints: all non-facial details unchanged. No dish, plate, food, cup, cutlery, napkin, text, logos or watermark. No split panels or collage. No CGI, illustration, 3D or animation. Keep photorealism and real skin texture.",
       "review": "Native и итоговый WebP просмотрены: тот же взрослый гость и кафе, руки по сторонам, взгляд на нижний центр каменного стола. Реальная сохранённая фотография еды размещается интерфейсом непосредственно перед гостем; её состав не заменяется."
+    },
+    {
+      "id": "pizza_served_v3",
+      "path": "public/assets/olympiad/tour5/service/plates/pizza-served-v3.webp",
+      "imageUrl": "/assets/olympiad/tour5/service/plates/pizza-served-v3.webp",
+      "bytes": 241888,
+      "sha256": "5318cf225dffd1a8ec65d744b2a4c1835077f7f0bb014e7a2d00c823755ecb5d",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 2,
+      "mode": "edit",
+      "transparentBackground": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        96,
+        68,
+        1138,
+        758
+      ],
+      "localNative": "output/imagegen/serving-v3/pizza-served-v3-native.png",
+      "references": [
+        {
+          "path": "public/assets/olympiad/tour5/photo-v4/40d0331e32ced98b858ec60f.webp",
+          "role": "edit target: canonical Margherita ingredient content"
+        },
+        {
+          "path": "public/assets/olympiad/tour5/service/guest-table-pleased-v2.webp",
+          "role": "supporting lighting and camera context only; no guest or background in cutout"
+        }
+      ],
+      "prompt": "Use case: precise-object-edit.\nAsset type: transparent photorealistic restaurant food cutout for compositing onto a real cafe table.\nInput images: Image 1 is the edit target: the existing Margherita pizza photograph. Image 2 is a lighting and camera context reference ONLY: the guest and his light stone cafe table. Do NOT include the guest, table or background in the output.\nPrimary request: Re-photograph the same Margherita pizza as a realistic ordinary 28–30 cm restaurant pizza on a simple beautiful light off-white ceramic plate. Preserve its exact ingredient category: baked dough, crushed tomatoes with olive oil, melted mozzarella and basil ONLY, with no new toppings. Change the camera view from overhead to a low natural food photograph taken about 30–35 degrees ABOVE the tabletop, so the crust's real thickness and the plate's front rim are visible. It must look like actual food ready to be served, not a flat graphic or a giant pizza.\nSlicing: the pizza has been cut into EXACTLY EIGHT triangular radial slices, arranged together as a compact complete circular pizza. Show four straight diametral cuts crossing at the center, making eight radial wedges. The thin real cuts must visibly pass through melted cheese, tomato and outer crust; each wedge has a separate crust edge. Cuts are narrow natural seams, about 1–2 mm, no enormous gaps, no wedge removed, no cheese pulls, no knife. Do not turn the pizza into separate scattered pieces.\nLighting and realism: soft warm-neutral window light from the LEFT, matching the cafe context reference; real baked crust pores and delicate browning, natural melted cheese, genuine basil leaves, subtle olive-oil sheen. Realistic modest crust thickness, ordinary proportions. Gentle contact shadow directly beneath the plate, with transparent pixels outside the object and its subtle shadow.\nComposition: landscape 3:2 image. Complete plate and pizza centered with at least 15% clear transparent margin on each side. The plate looks elliptical due ONLY to the genuine 30–35 degree camera perspective, not image stretching. Keep the entire ceramic plate and all eight slices fully visible.\nBackground: genuinely transparent alpha background, no solid background, no gray or white backdrop, no checkerboard drawn into the pixels.\nConstraints: no person, hands, furniture, table, background, text, logo, watermark, utensils, napkins, decorative side food or extra garnish. No olives, no peppers, no mushrooms, no meat, no pineapple, no eggs, no extra cheese category. Only dough, tomatoes/olive oil, mozzarella and basil. Fully photorealistic, no CGI, illustration, 3D render or animation.",
+      "iterations": [
+        {
+          "prompt": "Use case: precise-object-edit.\nAsset type: transparent photorealistic restaurant food cutout for compositing onto a real cafe table.\nInput images: Image 1 is the edit target: the existing Margherita pizza photograph. Image 2 is a lighting and camera context reference ONLY: the guest and his light stone cafe table. Do NOT include the guest, table or background in the output.\nPrimary request: Re-photograph the same Margherita pizza as a realistic ordinary 28–30 cm restaurant pizza on a simple beautiful light off-white ceramic plate. Preserve its exact ingredient category: baked dough, crushed tomatoes with olive oil, melted mozzarella and basil ONLY, with no new toppings. Change the camera view from overhead to a low natural food photograph taken about 30–35 degrees ABOVE the tabletop, so the crust's real thickness and the plate's front rim are visible. It must look like actual food ready to be served, not a flat graphic or a giant pizza.\nSlicing: the pizza has been cut into EXACTLY EIGHT triangular radial slices, arranged together as a compact complete circular pizza. Show four straight diametral cuts crossing at the center, making eight radial wedges. The thin real cuts must visibly pass through melted cheese, tomato and outer crust; each wedge has a separate crust edge. Cuts are narrow natural seams, about 1–2 mm, no enormous gaps, no wedge removed, no cheese pulls, no knife. Do not turn the pizza into separate scattered pieces.\nLighting and realism: soft warm-neutral window light from the LEFT, matching the cafe context reference; real baked crust pores and delicate browning, natural melted cheese, genuine basil leaves, subtle olive-oil sheen. Realistic modest crust thickness, ordinary proportions. Gentle contact shadow directly beneath the plate, with transparent pixels outside the object and its subtle shadow.\nComposition: landscape 3:2 image. Complete plate and pizza centered with at least 15% clear transparent margin on each side. The plate looks elliptical due ONLY to the genuine 30–35 degree camera perspective, not image stretching. Keep the entire ceramic plate and all eight slices fully visible.\nBackground: genuinely transparent alpha background, no solid background, no gray or white backdrop, no checkerboard drawn into the pixels.\nConstraints: no person, hands, furniture, table, background, text, logo, watermark, utensils, napkins, decorative side food or extra garnish. No olives, no peppers, no mushrooms, no meat, no pineapple, no eggs, no extra cheese category. Only dough, tomatoes/olive oil, mozzarella and basil. Fully photorealistic, no CGI, illustration, 3D render or animation."
+        },
+        {
+          "prompt": "Use case: precise-object-edit.\nInput image: the supplied eight-slice Margherita on its off-white plate is the edit target. Preserve exactly the pizza ingredients, all eight triangular slices and narrow radial seams, natural crust thickness, real melted cheese, tomato and basil, ceramic plate, genuine angled perspective and left window lighting.\nPrimary request: Correct ONLY the isolation and framing. Remove every trace of colored background, halo, backdrop and blurred haze outside the ceramic plate. The output must be a clean isolated photograph of the food and plate on genuine TRANSPARENT ALPHA, with clean natural plate edges. Only a very small subtle soft contact shadow immediately under the plate is permitted; no broad glow or background gradient.\nFraming: landscape 3:2 canvas. The whole plate and its tiny contact shadow must occupy no more than 70% of the canvas width and 70% of its height, centered with at least 15% fully transparent clear margin on ALL four sides. Scale the entire subject down proportionally to achieve that margin; do not stretch or squash the subject, do not change the food or angle.\nInvariants: exactly EIGHT compact radial pizza slices, no large gaps, no removed slice. Margherita ingredients are dough, tomatoes with olive oil, mozzarella and basil only; absolutely no new topping or side food. Keep photorealistic edible texture and camera at roughly30–35degrees above the tabletop. No table, people, hands, cups, utensils, text, logo, watermark, white background or painted checkerboard. Genuine transparent alpha outside the object, not a black or gray background."
+        }
+      ],
+      "review": {
+        "nativeViewed": true,
+        "exportViewed": true,
+        "ingredients": "Dough, tomato/olive oil, mozzarella, basil only; no added filling.",
+        "slicing": "Exactly eight radial triangular slices remain as a compact whole pizza; cuts continue through cheese and outer crust.",
+        "perspective": "Natural angled plate and visible crust thickness; food is not a flat overhead image.",
+        "alpha": "RGBA alpha genuinely includes fully transparent pixels; colored RGB values outside the object are alpha zero, not a painted backdrop. Plate fully visible.",
+        "limitation": "Requested 15% clear margin is not exact: alpha bounds retain about 8% horizontal margin after the second attempt. No further generation beyond the 2-attempt limit. Consumer should size the whole image proportionally rather than stretch it."
+      },
+      "sceneReview": "Export and rendered scene personally inspected: natural scale relative to guest; complete vessel, matching left light, exact selected recipe ingredients."
+    },
+    {
+      "id": "greek_served_v3",
+      "path": "public/assets/olympiad/tour5/service/plates/greek-served-v3.webp",
+      "imageUrl": "/assets/olympiad/tour5/service/plates/greek-served-v3.webp",
+      "bytes": 158410,
+      "sha256": "897dbd2968ebc1df4f3b9100ff868edce29b101285153f31e71449eab18534b0",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 1,
+      "mode": "edit",
+      "transparentBackground": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        51,
+        25,
+        1139,
+        781
+      ],
+      "localNative": "output/imagegen/serving-v3/greek-served-v3-native.png",
+      "references": [
+        {
+          "path": "public/assets/olympiad/tour5/photo-v4/6aad7b5c766293d552299676.webp",
+          "role": "edit target: Greek salad ingredient content"
+        },
+        {
+          "path": "public/assets/olympiad/tour5/service/guest-table-pleased-v2.webp",
+          "role": "supporting lighting and camera context only; no guest or background in cutout"
+        }
+      ],
+      "prompt": "Use case: precise-object-edit.\nAsset type: transparent photorealistic restaurant food cutout for a single natural cafe serving scene.\nInput images: Image 1 is the edit target: the existing Greek salad with tomato, cucumber, red onion, dark olives, feta, olive oil and dried oregano. Image 2 is supporting lighting and camera context ONLY: the cafe guest and light stone table. Do not include the guest, table or any background in the output.\nPrimary request: Re-photograph the same Greek salad as a modest attractive individual restaurant serving in a shallow light off-white ceramic bowl, about 20–22 cm in real diameter. Preserve exactly the source ingredients: ripe red tomato chunks, green-skinned cucumber pieces, thin red onion arcs, dark olives, a rectangular piece of feta on top, olive oil and dried oregano. The feta stays visibly on top with a few natural dried oregano flakes. Arrange the vegetables evenly as a restrained normal individual portion rather than a mountain or overfilled bowl.\nCamera and lighting: view from 30–35 degrees above tabletop height, not overhead. Show the natural side wall and front rim of the shallow bowl, believable food depth and real vegetable textures. The bowl's ellipse comes from true camera perspective, never stretching or flattening. Soft warm-neutral window light from the left, matching the cafe reference; natural subtle shadows and a very small soft contact shadow immediately under the bowl.\nComposition: wide landscape 3:2 transparent canvas. Entire bowl centered and fully visible; the bowl plus tiny shadow occupy at most 70% of canvas width and 70% of canvas height. Leave at least 15% clear transparent empty margin on each side. The actual dish should be one clean isolated photo asset, not a photo on a card.\nBackground: genuinely transparent alpha, no white backdrop, no black backdrop, no checkerboard painted into pixels, no background glow or colored haze.\nConstraints: no pepper, lettuce or salad leaves, mayonnaise, chicken, fresh herbs or any new garnish. No bread, side food, lemon or decorative food, no fork, spoon, napkin, people, hands, table, cafe background, text, logos or watermark. Only tomato, cucumber, red onion, dark olives, feta, olive oil and dried oregano from the source. Fully photorealistic food photography, no illustration, CGI, animation or 3D render.",
+      "review": {
+        "nativeViewed": true,
+        "exportViewed": true,
+        "ingredients": "Tomatoes, cucumber, red onion, dark olives, rectangular feta on top, olive oil, dried oregano; no pepper, lettuce, mayonnaise, meat, fresh herb garnish or extra ingredients.",
+        "plating": "Natural modest single serving in a shallow pale ceramic bowl, whole bowl visible, vegetables spread evenly with no mountain of food.",
+        "perspective": "Real angled photo with the front/side of the bowl visible and genuine depth rather than top-down stretched artwork.",
+        "alpha": "Verified RGBA extrema 0–255. True alpha-zero transparent pixels outside the isolated food/bowl. Hidden colored RGB under zero alpha does not become a backdrop in the WebP export.",
+        "limitation": "Opaque object has approximately 14% horizontal margin; very faint shadow alpha extends farther, so literal 15% clear margin on all sides is not exact. Scale the entire image proportionally in the interface."
+      },
+      "sceneReview": "Export and rendered scene personally inspected: natural scale relative to guest; complete vessel, matching left light, exact selected recipe ingredients."
+    },
+    {
+      "id": "roll_served_v3",
+      "path": "public/assets/olympiad/tour5/service/plates/roll-served-v3.webp",
+      "imageUrl": "/assets/olympiad/tour5/service/plates/roll-served-v3.webp",
+      "bytes": 181978,
+      "sha256": "48046f457fde95decda181d3f9535fb671cfb0b12216e12cf28784902befd1ed",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 1,
+      "mode": "edit",
+      "transparentBackground": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "localNative": "output/imagegen/serving-v3/roll-native.png",
+      "references": [
+        "Philadelphia food edit target: public/assets/olympiad/tour5/photo-v4/eb8483a389517cf1dfa6a2ea.webp",
+        "Lighting and camera only: public/assets/olympiad/tour5/service/guest-table-pleased-v2.webp"
+      ],
+      "prompt": "Use case: precise-object-edit. Image 1 is the edit target and exact Philadelphia roll food reference. Image 2 is ONLY a reference for camera perspective and left daylight; do not include its man, table or background. Create an isolated photorealistic served set on genuinely transparent alpha background. Preserve exactly EIGHT sliced Philadelphia roll pieces, salmon on outside, rice outside nori, filling ONLY cream cheese and cucumber, no fish filling. Arrange eight pieces beautifully and compactly on a light oval ceramic platter, all eight clearly countable. Include separate small dark ceramic soy sauce bowl, small portion of pink pickled ginger, one small neat wasabi cone, and a simple pair of chopsticks at side. Camera 30–35 degrees above the table plane, natural soft light from left. Realistic salmon thinness and individual rice grains. Entire set visible centered in landscape 3:2 canvas with 10–15 percent transparent margins. Keep native subtle object shadows. No actual tabletop or opaque backdrop, no humans, no text, logo, extra food or garnishes.",
+      "review": "Native and exported WebP personally inspected. Exactly eight salmon exterior pieces; cream cheese/cucumber visible in front piece; entire plate, sauce bowl, ginger, wasabi and chopsticks visible. True alpha background and native shadows retained.",
+      "sceneReview": "Export and rendered scene personally inspected. Eight cut pieces have salmon outside and cream cheese/cucumber inside. The separate accompaniment cutout is used only beside exact noncanonical saved compositions; no score or recipe substitution."
+    },
+    {
+      "id": "roll_accompaniments_v3",
+      "path": "public/assets/olympiad/tour5/service/plates/roll-accompaniments-v3.webp",
+      "imageUrl": "/assets/olympiad/tour5/service/plates/roll-accompaniments-v3.webp",
+      "bytes": 108876,
+      "sha256": "b1c0a01ffbe203a5b303fe020d9a1e821b99bedb81b605809871a2c0bcf3797e",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "attempts": 1,
+      "mode": "generate",
+      "transparentBackground": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "localNative": "output/imagegen/serving-v3/roll-accompaniments-native.png",
+      "references": [
+        "Ceramic material and lighting only: public/assets/olympiad/tour5/photo-v4/eb8483a389517cf1dfa6a2ea.webp",
+        "Lighting and camera only: public/assets/olympiad/tour5/service/guest-table-pleased-v2.webp"
+      ],
+      "prompt": "Use case: photorealistic-natural. Create a single isolated compact accompaniment set on a genuinely transparent alpha background. ONLY three small vessels close together: dark ceramic small bowl filled with soy sauce, small light ceramic saucer with a modest portion of pink pickled ginger, and tiny light ceramic saucer holding one small neat green wasabi cone. Match natural realistic ceramic and food textures, 30–35-degree elevated view above table plane, soft daylight from left. Entire three-vessel set centered in landscape 3:2 canvas with 15 percent transparent margin, subtle native object shadows. No rolls, no main platter, no chopsticks, no other food, no people, no text, logos, no tabletop or opaque background. Reference images are lighting/perspective/material references ONLY, never copy their rolls, man, table or background.",
+      "review": "Native and exported WebP personally inspected. Only three vessels: soy sauce, pink ginger, wasabi cone. Entire vessels visible; genuine alpha background and native shadows retained.",
+      "sceneReview": "Export and rendered scene personally inspected. Eight cut pieces have salmon outside and cream cheese/cucumber inside. The separate accompaniment cutout is used only beside exact noncanonical saved compositions; no score or recipe substitution."
     }
   ],
   "servingScene": {
     "backgrounds": "guest-table v2",
     "placement": [
       0.5,
-      0.78
+      0.71
     ],
-    "food": "Unmodified saved final photographs, composed with code-native masks and contact shadow. Missing basis uses four selected ingredient photographs on a tray. No generated canonical substitution."
+    "nativeCanvasWidths": {
+      "pizza": 0.36,
+      "greek": 0.29,
+      "roll": 0.37
+    },
+    "food": "Exact immutable saved photograph remains in receipt.photos. A server-only mapping of three original photo URLs selects ingredient-preserving native transparent serving photos for those compositions only. Other compositions use their exact original photographs; all basis-present pizzas are sliced into eight source-image sectors, all rolls receive soy sauce, ginger and wasabi. No-basis selections remain four selected components on a tray.",
+    "grading": "Accompaniments are decorative, not selectable or graded. No change to scores, timing, ingredients, issued variants or guard.",
+    "alpha": "True native alpha preserved; proportional resize and format conversion only. Final rendered object geometry is reviewed independently of source canvas margins."
   }
 }
