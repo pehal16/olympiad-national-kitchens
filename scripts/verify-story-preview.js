@@ -11,8 +11,17 @@ async function main(){
   let ready=false,last;
   for(let i=0;i<25;i++){try{const metadata=await api('/api/public/olympiad');assert.equal(metadata.storyEnabled,true);await api('/api/admin/login','',{password:process.env.STORY_PREVIEW_ADMIN_PASSWORD});ready=true;break;}catch(error){last=error;await new Promise(resolve=>setTimeout(resolve,1500));}}
   if(!ready)throw last;
-  // Let the new deployment reach all edge routes before measuring concurrent traffic.
-  await new Promise(resolve=>setTimeout(resolve,15000));
+  // Probe the exact start route without valid participant data. Fresh deployment
+  // hosts can expose metadata before their POST routes have propagated. These
+  // readiness probes never create attempts and are outside measured traffic.
+  let startReady=false;
+  for(let i=0;i<18;i++){
+    const r=await fetch(base+'/api/public/attempts/start',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+    if(/application\/json/.test(r.headers.get('content-type')||'')&&[400,403].includes(r.status)){startReady=true;break;}
+    await r.text();await new Promise(resolve=>setTimeout(resolve,5000));
+  }
+  assert.ok(startReady,'Fresh preview start route did not propagate');
+  await new Promise(resolve=>setTimeout(resolve,30000));
   // Dedicated preview only: remove prior synthetic rehearsals, preserving production.
   await sql('DELETE FROM attempt_answers WHERE attempt_id IN (SELECT id FROM attempts WHERE story_run_id IS NOT NULL)');
   await sql('DELETE FROM attempt_variants WHERE id IN (SELECT id FROM attempts WHERE story_run_id IS NOT NULL)');
