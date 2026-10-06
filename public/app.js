@@ -372,6 +372,14 @@ function isAttemptInProgress() {
   return Boolean(state.attempt && state.attempt.status === "in_progress");
 }
 
+function supportsOlympiadFullscreen() {
+  return typeof document.documentElement.requestFullscreen === "function" && document.fullscreenEnabled !== false;
+}
+
+function unsupportedOlympiadBrowserMessage() {
+  return "В этом браузере недоступен полноэкранный режим, обязательный для олимпиады. Используйте Chrome или Edge на компьютере либо другое устройство с поддержкой полноэкранного режима.";
+}
+
 function updateExamGuardUi() {
   if (elements.examIncidentsBadge) {
     elements.examIncidentsBadge.textContent = `Зафиксировано событий: ${state.examIncidents}`;
@@ -385,6 +393,12 @@ function updateExamGuardUi() {
 
   if (elements.examGuardOverlay) {
     elements.examGuardOverlay.classList.toggle("hidden", !state.examGuardActive);
+  }
+
+  if (elements.examGuardReturn) {
+    const supported = supportsOlympiadFullscreen();
+    elements.examGuardReturn.disabled = !supported;
+    elements.examGuardReturn.textContent = supported ? "Вернуться к олимпиаде" : "Полноэкранный режим недоступен";
   }
 
   document.body.classList.toggle("exam-mode-active", isAttemptInProgress());
@@ -486,8 +500,9 @@ function updateStartAvailability() {
   const blockedByCompletion = elements.startAttempt.dataset.lockReason === "completed";
   const hasParticipant = Boolean(state.participant);
   const consentGranted = !elements.startConsent || elements.startConsent.checked;
+  const browserSupported = supportsOlympiadFullscreen();
 
-  elements.startAttempt.disabled = blockedByCompletion || !hasParticipant || !consentGranted || state.isStartingAttempt;
+  elements.startAttempt.disabled = blockedByCompletion || !hasParticipant || !consentGranted || state.isStartingAttempt || !browserSupported;
 
   if (!elements.startConsentHint) {
     return;
@@ -495,6 +510,8 @@ function updateStartAvailability() {
 
   if (blockedByCompletion) {
     elements.startConsentHint.textContent = "Повторный старт недоступен.";
+  } else if (!browserSupported) {
+    elements.startConsentHint.textContent = `${unsupportedOlympiadBrowserMessage()} ${state.activeAttemptId ? "Если попытка уже начата, обратитесь к организатору." : "Попытка не запущена."}`;
   } else if (!hasParticipant) {
     elements.startConsentHint.textContent = "Сначала сохраните данные участника.";
   } else if (!consentGranted) {
@@ -524,7 +541,7 @@ async function requestExamFullscreen(options = {}) {
     return true;
   }
 
-  if (typeof document.documentElement.requestFullscreen !== "function") {
+  if (!supportsOlympiadFullscreen()) {
     return false;
   }
 
@@ -546,6 +563,11 @@ async function requestExamFullscreen(options = {}) {
 async function restoreExamMode() {
   if (!isAttemptInProgress()) {
     return true;
+  }
+
+  if (!supportsOlympiadFullscreen()) {
+    activateExamGuard(`${unsupportedOlympiadBrowserMessage()} Если попытка уже начата, обратитесь к организатору.`, "fullscreen_required");
+    return false;
   }
 
   const fullscreenReady = await requestExamFullscreen({ silent: true });
@@ -749,7 +771,9 @@ function enableExamMode() {
   requestExamFullscreen({ silent: true }).then((ok) => {
     if (!ok) {
       activateExamGuard(
-        "Включите полноэкранный режим, чтобы продолжить олимпиаду.",
+        supportsOlympiadFullscreen()
+          ? "Включите полноэкранный режим, чтобы продолжить олимпиаду."
+          : `${unsupportedOlympiadBrowserMessage()} Если попытка уже начата, обратитесь к организатору.`,
         "fullscreen_required"
       );
     }
@@ -3535,6 +3559,11 @@ async function handleRegistration(event) {
 
 async function startAttempt() {
   if (state.isStartingAttempt || !state.participant) return;
+  if (!supportsOlympiadFullscreen()) {
+    showMessage(elements.prestartMessage, `${unsupportedOlympiadBrowserMessage()} ${state.activeAttemptId ? "Если попытка уже начата, обратитесь к организатору." : "Попытка не запущена."}`, "warning");
+    updateStartAvailability();
+    return;
+  }
   if (elements.startConsent && !elements.startConsent.checked) {
     showMessage(
       elements.prestartMessage,
@@ -3553,6 +3582,11 @@ async function startAttempt() {
   setAttemptSyncMeta("Подбираем вариант и подключаемся к облаку...");
 
   try {
+    if (!await requestExamFullscreen({ silent: true })) {
+      setAttemptSaveStatus(state.activeAttemptId ? "Продолжение не подтверждено" : "Попытка не запущена", "warning");
+      showMessage(elements.prestartMessage, `Разрешите полноэкранный режим и повторите старт. ${state.activeAttemptId ? "Если попытка уже начата, её таймер продолжает идти." : "Таймер ещё не запущен."}`, "warning");
+      return;
+    }
     const pendingStartKey = await makePendingStartKey(state.participant);
     const attemptToken =
       loadAttemptAccessToken(state.activeAttemptId) ||
@@ -3599,6 +3633,13 @@ async function startAttempt() {
     showMessage(elements.prestartMessage, message, "error");
   } finally {
     state.isStartingAttempt = false;
+    if (!isAttemptInProgress() && document.fullscreenElement && typeof document.exitFullscreen === "function") {
+      try {
+        await document.exitFullscreen();
+      } catch (error) {
+        // The participant can also leave fullscreen with the browser controls.
+      }
+    }
     updateStartAvailability();
   }
 }
