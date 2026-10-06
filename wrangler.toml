@@ -15,11 +15,11 @@ STORAGE_BACKEND = "cloudflare"
 LEARNING_ENABLED = "true"
 LEARNING_PILOT_GROUP_CODE = "1-ПК-24Б"
 
-# CI replaces this safe placeholder with the dedicated preview D1 UUID.
+# Dedicated preview database; production binding above is never used by rehearsals.
 [[env.preview.d1_databases]]
 binding = "DB"
 database_name = "olympiad-gkts-story-preview-db"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "5986e1bf-dd54-4260-86fe-db0ac794254f"
 migrations_dir = "migrations"
 
 [env.preview.vars]

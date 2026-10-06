@@ -15,8 +15,9 @@ async function main(){
   const admin=crypto.randomBytes(32).toString('base64url'),attemptSecret=crypto.randomBytes(40).toString('base64url');
   console.log(`::add-mask::${admin}`);console.log(`::add-mask::${attemptSecret}`);
   const current=await api(`/pages/projects/${project}`);
-  await api(`/pages/projects/${project}`,'PATCH',{deployment_configs:{preview:{env_vars:{...current.deployment_configs.preview.env_vars,
-    ADMIN_PASSWORD:{type:'secret_text',value:admin},ATTEMPT_ID_SECRET:{type:'secret_text',value:attemptSecret}}}}});
+  await api(`/pages/projects/${project}`,'PATCH',{deployment_configs:{preview:{env_vars:{
+    ADMIN_PASSWORD:{type:'secret_text',value:admin},ATTEMPT_ID_SECRET:{type:'secret_text',value:attemptSecret}},
+    wrangler_config_hash:current.deployment_configs.preview.wrangler_config_hash}}});
   const file='wrangler.toml',config=fs.readFileSync(file,'utf8');
   fs.writeFileSync(file,config.replace(/(\[\[env\.preview\.d1_databases\]\][\s\S]*?database_id = ")[^"]+/,`$1${db.uuid}`));
   fs.appendFileSync(process.env.GITHUB_ENV,`STORY_PREVIEW_DB_ID=${db.uuid}\nSTORY_PREVIEW_ADMIN_PASSWORD=${admin}\n`);
