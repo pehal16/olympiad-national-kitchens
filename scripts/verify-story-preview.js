@@ -11,6 +11,8 @@ async function main(){
   let ready=false,last;
   for(let i=0;i<25;i++){try{const metadata=await api('/api/public/olympiad');assert.equal(metadata.storyEnabled,true);await api('/api/admin/login','',{password:process.env.STORY_PREVIEW_ADMIN_PASSWORD});ready=true;break;}catch(error){last=error;await new Promise(resolve=>setTimeout(resolve,1500));}}
   if(!ready)throw last;
+  // Let the new deployment reach all edge routes before measuring concurrent traffic.
+  await new Promise(resolve=>setTimeout(resolve,15000));
   // Dedicated preview only: remove prior synthetic rehearsals, preserving production.
   await sql('DELETE FROM attempt_answers WHERE attempt_id IN (SELECT id FROM attempts WHERE story_run_id IS NOT NULL)');
   await sql('DELETE FROM attempt_variants WHERE id IN (SELECT id FROM attempts WHERE story_run_id IS NOT NULL)');

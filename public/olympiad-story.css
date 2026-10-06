@@ -12,6 +12,7 @@ body.exam-mode-active #story-introduction{display:none}
 .story-result{color:#183b36}.story-result-facts{display:flex;gap:30px;justify-content:space-between;margin:26px 0;font-size:clamp(1rem,2vw,1.5rem)}
 .story-waiting-scene{display:block;width:min(100%,650px);border-radius:12px;margin:24px 0}.story-poll-status{line-height:1.6}
 .story-table{overflow:hidden;position:relative;height:390px;border-radius:12px;background:#ddd7cd;touch-action:pan-y;isolation:isolate}.story-table:focus-visible{outline:3px solid #147568;outline-offset:4px}
+.story-table.is-compact{width:min(100%,650px)}
 .story-table-track{height:100%;position:relative;background:url('/assets/olympiad/story/v1/scenes/table.webp') left center/auto 100% repeat-x;transition:transform .35s ease}
 .story-table-guest{position:absolute;height:100%;width:auto;left:0;top:0;object-fit:cover;object-position:left;z-index:0;pointer-events:none}
 .story-table-items{position:absolute;left:0;bottom:0;display:grid;align-items:end;z-index:1}

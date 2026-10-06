@@ -94,7 +94,7 @@
     doc.getElementById('result-subtitle').textContent='В меню — полностью правильные блюда. Нажмите на подачу, чтобы посмотреть ваш ответ и объяснение.';
     const facts=el('div','story-result-facts');facts.append(el('strong','',`Блюд в меню: ${data.plates.length} из ${data.collectionMax}`),el('strong','',`Баллы: ${data.summary.totalFinalScore} из ${data.summary.totalMaxScore}`));resultMount.append(facts);
     if(!session.story.decorationsDisabled){
-      const viewport=el('div','story-table');viewport.tabIndex=0;viewport.setAttribute('aria-label','Дегустационный стол. Стрелки влево и вправо перемещают подачи.');
+      const viewport=el('div','story-table');viewport.classList.toggle('is-compact',data.plates.length<=3);viewport.tabIndex=0;viewport.setAttribute('aria-label','Дегустационный стол. Стрелки влево и вправо перемещают подачи.');
       const track=el('div','story-table-track');viewport.append(track);
       const mobile=root.matchMedia('(max-width: 600px)'),pageSize=()=>mobile.matches?2:6;
       const guest=image(base+'table-guest.webp','Гость смотрит на еду перед собой','story-table-guest');track.append(guest);
