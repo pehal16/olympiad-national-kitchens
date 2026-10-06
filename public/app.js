@@ -684,7 +684,7 @@ function handleExamVisibilityChange() {
     return;
   }
 
-  if (state.examGuardActive) {
+  if (state.examGuardActive && document.fullscreenElement) {
     restoreExamMode();
   }
 }
@@ -707,7 +707,7 @@ function handleExamWindowBlur() {
 
 function handleExamWindowFocus() {
   clearTimeout(state.blurGuardTimer);
-  if (isAttemptInProgress() && state.examGuardActive) {
+  if (isAttemptInProgress() && state.examGuardActive && document.fullscreenElement) {
     restoreExamMode();
   }
 }
