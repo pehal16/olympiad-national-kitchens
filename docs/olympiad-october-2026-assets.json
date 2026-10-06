@@ -177,6 +177,56 @@
       "mode": "edit",
       "prompt": "Use case: identity-preserve.\nAsset type: alternate restaurant guest reaction photograph for an educational cooking competition website.\nInput image: the supplied photograph is the edit target. Preserve the same fictional adult man and his recognizable face, hair, skin, cream shirt, seated pose, hands, cafe setting, table, lighting, camera position, crop, and photo realism.\nPrimary request: Change only the man's facial expression from smiling to mild puzzled surprise at an unexpected order. His eyebrows rise slightly, the forehead has a very subtle natural crease, and the smile is replaced with a neutral gently closed mouth. His eyes keep looking slightly down toward the order. The expression is restrained, kind, respectful, and easy to recognize as a little confused, not angry or disappointed harshly.\nConstraints: all other details stay unchanged; same wide 3:2 composition, head and face fully visible, same two natural hands on the clean empty table; no food, plates, dishes, cups, cutlery, lettering, logos or watermark. No ridicule, no exaggerated expression, no aggression, no cartoon, no CGI.",
       "review": "Один и тот же взрослый гость: улыбка либо мягкое недоумение. Блюдо показывается отдельным точным снимком сохранённого состава."
+    },
+    {
+      "id": "guest-table-pleased-v2",
+      "path": "public/assets/olympiad/tour5/service/guest-table-pleased-v2.webp",
+      "imageUrl": "/assets/olympiad/tour5/service/guest-table-pleased-v2.webp",
+      "bytes": 124628,
+      "sha256": "897ce5ae4d7f5a53d9d91e278b89eaa8f1474d7e4933f9482e43cf538f0fa442",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "mode": "edit",
+      "attempts": 2,
+      "prompt": "Use case: precise-object-edit.\nInput image: edit the supplied photograph. Preserve the same guest identity and friendly restrained smile, downward gaze, cream shirt, cafe, light stone material, realistic hands at the far sides and warm-neutral daylight.\nPrimary request: Adjust ONLY camera framing and the amount of table visible. Pull the camera back and slightly higher so the guest is smaller in the frame: his entire head starts around y=4% and ends around y=28%, his torso ends at y=55%. The horizontal far edge of the light stone tabletop must run through y=55% of the frame, so the lower 45% of the photograph is tabletop. His hands rest naturally near x=15% and x=85%, y=65%, leaving the center completely empty. The empty tabletop at the center MUST start at y=55%, not at y=70% as it currently does.\nComposition: wide landscape 3:2, full head and upper body in the upper 55%, clear pale stone table in the bottom 45%. Keep natural human proportions and perspective, a believable cafe photograph. Guest's head and eyes look down toward the empty point x=50%, y=77% where a dish will later be composited. A generously sized empty region x=30–70%, y=62–94% must contain only tabletop, no sleeves, hands or body.\nConstraints: no food, plate, cup, utensils, napkin, text, watermark, or logos. No split panels or collage. Change framing and position in frame without changing identity, outfit, mood, scene or material. Photorealism only, no CGI, illustration or 3D.",
+      "promptHistory": [
+        {
+          "prompt": "Use case: identity-preserve.\nAsset type: landscape background photograph for a single natural restaurant serving scene in an educational cooking website.\nInput image: the supplied photograph is the edit target. Keep the same recognizable fictional male guest: same face, hair, age, cream shirt, natural skin and the same cozy modern cafe atmosphere.\nPrimary request: Reframe the scene to show the guest from his complete head to his waist in the upper 55% of a wide 3:2 photograph, seated behind a light neutral natural stone cafe table. The tabletop fills the lower 45% of the image. The man has a restrained pleased smile and looks clearly DOWN toward the center of the empty table where his food will later be placed: his eyes and gently inclined head look at approximately x=50%, y=77% of the full image. He is not looking at the camera.\nComposition/framing: single unbroken natural photograph, full face and head with breathing room, same natural warm cafe lighting, camera high enough to see a generous clear tabletop surface. Both forearms and relaxed hands rest at the FAR left and right sides of the table, around x=15% and x=85%, leaving the central tabletop completely clear. Empty central placement area spans approximately x=30–70% and y=65–94%, with no hands or objects covering it. The plate and actual selected dish will be composited into this clear area by the website, so no food or tableware may be drawn.\nMaterials and light: matte pale beige-gray natural stone tabletop, subtle realistic stone texture, soft warm-neutral daylight from the upper left, gentle natural shadows, real fabric and skin texture. High-quality photorealistic hospitality editorial photography.\nConstraints: change the framing, tabletop material, arm placement and downward gaze as requested while preserving guest identity, shirt and cafe. Absolutely NO dish, NO plate, NO food, NO cups, cutlery, napkins, text, logos or watermark. No collage or split panels. No animation, no 3D, no CGI, no illustration. Anatomically realistic hands, no hands in the central empty placement area.",
+          "review": "Reviewed: identity and hand placement correct, but tabletop covered only lower 30%; refined once to meet requested lower 45%."
+        },
+        {
+          "prompt": "Use case: precise-object-edit.\nInput image: edit the supplied photograph. Preserve the same guest identity and friendly restrained smile, downward gaze, cream shirt, cafe, light stone material, realistic hands at the far sides and warm-neutral daylight.\nPrimary request: Adjust ONLY camera framing and the amount of table visible. Pull the camera back and slightly higher so the guest is smaller in the frame: his entire head starts around y=4% and ends around y=28%, his torso ends at y=55%. The horizontal far edge of the light stone tabletop must run through y=55% of the frame, so the lower 45% of the photograph is tabletop. His hands rest naturally near x=15% and x=85%, y=65%, leaving the center completely empty. The empty tabletop at the center MUST start at y=55%, not at y=70% as it currently does.\nComposition: wide landscape 3:2, full head and upper body in the upper 55%, clear pale stone table in the bottom 45%. Keep natural human proportions and perspective, a believable cafe photograph. Guest's head and eyes look down toward the empty point x=50%, y=77% where a dish will later be composited. A generously sized empty region x=30–70%, y=62–94% must contain only tabletop, no sleeves, hands or body.\nConstraints: no food, plate, cup, utensils, napkin, text, watermark, or logos. No split panels or collage. Change framing and position in frame without changing identity, outfit, mood, scene or material. Photorealism only, no CGI, illustration or 3D.",
+          "review": "Reviewed: table starts around y55%, clear center x30–70%, y62–94%; guest gaze down toward center; hands outside placement area."
+        }
+      ],
+      "review": "Native и итоговый WebP просмотрены: тот же взрослый гость и кафе, руки по сторонам, взгляд на нижний центр каменного стола. Реальная сохранённая фотография еды размещается интерфейсом непосредственно перед гостем; её состав не заменяется."
+    },
+    {
+      "id": "guest-table-puzzled-v2",
+      "path": "public/assets/olympiad/tour5/service/guest-table-puzzled-v2.webp",
+      "imageUrl": "/assets/olympiad/tour5/service/guest-table-puzzled-v2.webp",
+      "bytes": 107818,
+      "sha256": "4d5ed17ea59b5c770d1afc44f1dfa60da8e7b14fd35baec6cd9d4af0b235b49e",
+      "dimensions": [
+        1200,
+        800
+      ],
+      "tool": "builtin image_gen.imagegen",
+      "mode": "edit",
+      "attempts": 1,
+      "prompt": "Use case: identity-preserve.\nAsset type: alternate mild puzzled reaction for the same single natural restaurant serving scene.\nInput image: the supplied pleased guest photograph is the edit target. Preserve absolutely the same fictional man's identity, hair, shirt, body pose, arm and hand positions, camera framing, stone table, cafe, lighting, shadows and materials.\nPrimary request: Change ONLY his facial expression from a pleased smile to gentle mild puzzled surprise at an unexpected order. Raise the eyebrows a little, give a very subtle natural forehead crease, and replace the smile with a relaxed neutral gently closed mouth. The expression is restrained and respectful, not angry, judgmental, exaggerated or comic. Both eyes keep looking DOWN at the empty center of the table around x=50%, y=77%, with exactly the same slight head inclination and gaze direction.\nComposition invariants: same landscape 3:2 photograph. Guest remains in the upper 55% of the frame; light stone tabletop occupies the lower 45%. Same natural hands at the left and right sides, no hands in the clear central placement area x=30–70%, y=62–94%. The actual submitted food and plate will be composited later, so the center stays completely empty.\nConstraints: all non-facial details unchanged. No dish, plate, food, cup, cutlery, napkin, text, logos or watermark. No split panels or collage. No CGI, illustration, 3D or animation. Keep photorealism and real skin texture.",
+      "review": "Native и итоговый WebP просмотрены: тот же взрослый гость и кафе, руки по сторонам, взгляд на нижний центр каменного стола. Реальная сохранённая фотография еды размещается интерфейсом непосредственно перед гостем; её состав не заменяется."
     }
-  ]
+  ],
+  "servingScene": {
+    "backgrounds": "guest-table v2",
+    "placement": [
+      0.5,
+      0.78
+    ],
+    "food": "Unmodified saved final photographs, composed with code-native masks and contact shadow. Missing basis uses four selected ingredient photographs on a tray. No generated canonical substitution."
+  }
 }

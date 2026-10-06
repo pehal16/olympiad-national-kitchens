@@ -8,7 +8,6 @@
     name: document.getElementById("certificate-name"),
     score: document.getElementById("certificate-score"),
     mentor: document.getElementById("certificate-mentor"),
-    date: document.getElementById("certificate-date"),
     number: document.getElementById("certificate-number")
   };
 
@@ -100,10 +99,10 @@
     fields.score.textContent = `${score} из ${maxScore} баллов`;
     fields.mentor.textContent = participant.mentorName || "—";
     fields.mentor.style.fontSize = `${participant.mentorName?.length > 70 ? 12 : participant.mentorName?.length > 35 ? 15 : 19}px`;
-    fields.date.textContent = new Intl.DateTimeFormat("ru-RU", {
+    const orderDate = new Intl.DateTimeFormat("ru-RU", {
       day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC"
     }).format(new Date(order.date));
-    fields.number.textContent = `№ ${order.number}`;
+    fields.number.textContent = `№ ${order.number} / ${orderDate}`;
 
     sheet.hidden = false;
     fitParticipantName();

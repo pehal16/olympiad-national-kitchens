@@ -19,6 +19,7 @@ function buildDishService(attempt) {
     const plan = photo.plan(sanitizePhotoDish(dish), payload.selectedIngredientIds, "served");
     return {
       questionId: question.id, number: question.station.number, dishTitle: dish.title,
+      kind: dish.photo.kind,
       mood: saved.autoScore === question.maxScore ? "pleased" : "puzzled",
       composition: selected.map(item => item.text),
       photos: plan.layers.map(layer => ({ imageUrl: layer.path, imageAlt: layer.alt })),

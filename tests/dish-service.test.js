@@ -24,6 +24,7 @@ test('all 210 saved dish combinations return their exact visual and full-credit 
       const score = scoreQuestion(question, answerPayload);
       const attempt = { variant: { questions: [question] }, answers: { [question.id]: { answerPayload, ...score } } };
       const receipt = buildDishService(attempt);
+      assert.equal(receipt.kind, dish.photo.kind);
       assert.equal(receipt.mood, score.autoScore === 16 ? 'pleased' : 'puzzled');
       assert.deepEqual(new Set(receipt.composition), new Set(dish.items.filter(item => ids.includes(item.id)).map(item => item.text)));
       const final = dish.photo.finals.find(entry => entry.key === ids.map(id => dish.items.find(item => item.id === id).visual.token).sort().join('+'));

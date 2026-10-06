@@ -3,6 +3,14 @@
 Last updated: 2026-10-06
 
 
+## Guest table and combined certificate order (2026-10-06)
+
+- User corrected the service visual: dish must be directly in front of the guest, with their gaze and reaction on the meal. Separate portrait/right-hand dish card is replaced by one cafe table scene. Two native ImageGen backgrounds preserve the same person, camera, light and table. Exact saved food photographs are integrated on the table by client masks/scaling/shadows; no 3D model, regenerated canonical substitute or change to the selected ingredients. No-basis combinations show four selected components on a tray. Receipt adds the already-public dish kind for vessel rendering; historical feedback without kind falls back to station number. Blueprint 14, scoring, timing, protected save, acknowledgement and reload behavior stay unchanged.
+- Certificate removes the separate date fact and shows **№ 199 / 05.10.2026** under one Order label. Three fact columns preserve landscape A4 and long-name fitting. Protected access, saved score and unofficial-result label remain. Signed order PDF is not published.
+- All 210 saved compositions render and dismiss on desktop Chrome and Pixel 7 emulation, images decode without missing assets or JS faults. Main-interface synthetic three-dish save/reload and combined certificate are verified; the certificate's three cells and no overflow pass desktop/mobile checks. Working-tree tests: 266/266. Exact staged-release tests pass 254/254; Cloudflare build and required local PM01 verification pass. Live verification follows the workflow deployment. Native scene provenance/prompts are appended to docs/olympiad-october-2026-assets.json (13 historical/current assets). Shell/SW service4, certificate cert3/order2. Old intentional prototype changes remain excluded.
+- Previous release 0968a87 deployed successfully in Cloudflare run 37461906143; live required check and all 11 original asset hashes passed. Real participants were not created in production for QA. Physical devices and student difficulty still require college rehearsal.
+
+
 ## Olympia revisions: focus, menu and guest service (2026-10-06)
 
 - User chose one of four ready plated servings for T4. New attempts use blueprint 14; 8 orders / 32 unique dishes / 32 points / 10 minutes remain. Four affected pairs receive eight neutral food photographs. Main dishes have explicitly described sides; restaurant versions are named. T3 dossier 8 replaces nachos with beef stroganoff ingredient mise-en-place, aliases and three clues; nine other dossiers are unchanged. Historical issued variants and assets remain immutable.
