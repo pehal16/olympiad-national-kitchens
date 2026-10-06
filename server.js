@@ -3790,8 +3790,8 @@ async function handleApi(req, res, url, runtime = {}) {
     const olympiad=await ensureOlympiad();let attempt=await loadAttemptById(pathname.split("/")[4]);
     if(!attempt||attempt.olympiadId!==olympiad.id){sendJson(res,404,{ok:false,message:"Попытка не найдена."});return;}
     if(!hasAttemptAccess(req,attempt)){sendAttemptAccessDenied(res);return;}
-    attempt=await normalizeAndPersistIfChanged(olympiad,attempt);res.setHeader("Cache-Control","private, no-store");
-    sendJson(res,200,{ok:true,data:buildStoryResult(olympiad,attempt)});return;
+    attempt=await normalizeAndPersistIfChanged(olympiad,attempt);
+    sendJson(res,200,{ok:true,data:buildStoryResult(olympiad,attempt)},{"Cache-Control":"private, no-store"});return;
   }
   if (method === "GET" && pathname.match(/^\/api\/public\/attempts\/[^/]+$/)) {
     const olympiadData = await ensureOlympiad();
