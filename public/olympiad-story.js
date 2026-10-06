@@ -92,6 +92,7 @@
     if(!resultMount)return;resultMount._resizeObserver?.disconnect();resultMount.replaceChildren();
     doc.getElementById('result-title').textContent='Ваш дегустационный стол';
     doc.getElementById('result-subtitle').textContent='В меню — полностью правильные блюда. Нажмите на подачу, чтобы посмотреть ваш ответ и объяснение.';
+    const notice=el('p','story-publish-notice','Итоги опубликованы. Ваш стол, разбор и свидетельство готовы.');notice.setAttribute('role','status');resultMount.append(notice);
     const facts=el('div','story-result-facts');facts.append(el('strong','',`Блюд в меню: ${data.plates.length} из ${data.collectionMax}`),el('strong','',`Баллы: ${data.summary.totalFinalScore} из ${data.summary.totalMaxScore}`));resultMount.append(facts);
     if(!session.story.decorationsDisabled){
       const viewport=el('div','story-table');viewport.classList.toggle('is-compact',data.plates.length<=3);viewport.tabIndex=0;viewport.setAttribute('aria-label','Дегустационный стол. Стрелки влево и вправо перемещают подачи.');

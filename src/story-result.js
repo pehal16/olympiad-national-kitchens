@@ -19,7 +19,8 @@ function freezeStoryVariant(variant,run) {
       q.storyPlates=[plateFor(correct.menuDishId||q.dishId||q.sourceId,correct.text,
         correct.description||`На фотографии изображено блюдо «${correct.text}».`)];
     } else if(q.type==='final_kitchen') {
-      const dish=q.dishes[0]; q.storyPlates=[plateFor(dish.dishId||q.dishKey,dish.title,dish.variantLabel,dish.variantLabel)];
+      const dish=q.dishes[0]; q.storyPlates=[plateFor(dish.dishId||q.dishKey,dish.title,
+        `${dish.variantLabel}. Состав: ${dish.items.filter(i=>dish.correctIngredientIds.includes(i.id)).map(i=>i.text).join(', ')}.`,dish.variantLabel)];
     }
   }
   return variant;
@@ -40,7 +41,7 @@ function buildStoryResult(olympiad,attempt) {
     const saved=attempt.answers?.[q.id], payload=saved?.answerPayload;
     const action={questionId:q.id,tour:q.tourCode,number:q.sequenceInTour,savedAnswer:answerText(q,payload),score:Number(saved?.finalScore||0),maxScore:q.maxScore};
     const expected=q.type==='single_choice'?q.options.find(o=>o.isCorrect)?.text:q.type==='dish_detective'?q.answerPolicy.canonical:
-      q.type==='bucket_sort'?answerText(q,{buckets:q.correctBuckets}):q.dishes?.[0]?.variantLabel;
+      q.type==='bucket_sort'?answerText(q,{buckets:q.correctBuckets}):q.dishes?.[0]?.items.filter(i=>q.dishes[0].correctIngredientIds.includes(i.id)).map(i=>i.text).join(', ');
     review.push({...action,expectedAnswer:expected||'',explanation:q.storyPlates?.map(p=>p.explanation).join(' ')||''});
     if(!saved) continue;
     for(const p of q.storyPlates||[]) {
