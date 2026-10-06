@@ -28,3 +28,11 @@ body.exam-mode-active #story-introduction{display:none}
 .story-run-admin{margin:0 0 24px;padding:24px}.story-run-admin form{display:flex;gap:14px;align-items:end;flex-wrap:wrap}.story-run-admin input{min-height:44px;padding:8px;font-size:16px;font-family:inherit}.story-run-row{padding:20px 0;border-top:1px solid #cddbd4}.story-run-actions{display:flex;gap:12px;flex-wrap:wrap}.story-run-message{line-height:1.6}
 @media(max-width:600px){.has-restaurant-story .landing-hero{min-height:600px}.story-chapter{grid-template-columns:86px 1fr;gap:12px}.story-chapter-scene{width:86px;height:112px;object-fit:cover}.story-chapter-copy h2{font-size:1.2rem}.story-chapter-copy p{font-size:13px}.story-chapters{gap:12px;font-size:13px}.story-result-facts{gap:12px;flex-wrap:wrap}.story-table{height:340px}.story-table-guest{object-position:12% center}.story-serving-image{height:105px}.story-serving span{font-size:12px}.story-dish-dialog{padding:18px}.story-run-admin{padding:16px}}
 @media(prefers-reduced-motion:reduce){.story-table-track,.story-serving{transition:none}}
+@media(max-width:600px){
+  .story-chapter{display:block}.story-chapter::after{content:'';display:block;clear:both}
+  .story-chapter-scene{float:right;width:76px;height:76px;margin:0 0 12px 14px}
+  .story-chapter-copy h2{max-width:calc(100% - 90px)}
+  .story-chapter-copy .story-album-strip{clear:both;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding-top:8px}
+  .story-album-strip figure{width:auto}.story-album-strip img{width:100%;height:54px}.story-album-strip figcaption{font-size:11px}
+  .story-map-notes{grid-column:1/-1;font-size:13px}
+}

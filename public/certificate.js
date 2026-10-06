@@ -103,6 +103,9 @@
       day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC"
     }).format(new Date(order.date));
     fields.number.textContent = `№ ${order.number} / ${orderDate}`;
+    // A published story day is an official run; retain the previous pilot
+    // annotation only for legacy attempts.
+    if (attempt.story) document.querySelector('.certificate-pilot-label')?.remove();
 
     sheet.hidden = false;
     fitParticipantName();
