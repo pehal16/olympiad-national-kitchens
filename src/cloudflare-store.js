@@ -1,6 +1,7 @@
 "use strict";
 
 let cloudflareEnv = null;
+const { retryD1 } = require('./d1-retry');
 
 function configureCloudflareStorage(env) {
   cloudflareEnv = env || cloudflareEnv || null;
@@ -118,14 +119,14 @@ async function initCloudflareStorage() {
 async function all(sql, ...bindings) {
   const { DB } = requireEnv();
   const statement = DB.prepare(sql);
-  const result = bindings.length ? await statement.bind(...bindings).all() : await statement.all();
+  const result = await retryD1(() => bindings.length ? statement.bind(...bindings).all() : statement.all());
   return result.results || [];
 }
 
 async function first(sql, ...bindings) {
   const { DB } = requireEnv();
   const statement = DB.prepare(sql);
-  return bindings.length ? statement.bind(...bindings).first() : statement.first();
+  return retryD1(() => bindings.length ? statement.bind(...bindings).first() : statement.first());
 }
 
 async function run(sql, ...bindings) {
@@ -355,7 +356,7 @@ async function createAttemptAtomic(attempt) {
       `INSERT INTO attempt_answers(attempt_id,question_id,payload_json,updated_at) SELECT ?1,?2,?3,?4
        WHERE EXISTS(SELECT 1 FROM attempts WHERE id=?1 AND access_token_hash=?5 AND state_revision=0)
        ON CONFLICT(attempt_id,question_id) DO NOTHING`,String(storedAttempt.id),row.questionId,JSON.stringify(row.payload),storedAt,storedAttempt.accessTokenHash));
-    const result=await requireEnv().DB.batch(creationStatements);
+    const result=await retryD1(() => requireEnv().DB.batch(creationStatements));
     if(Number(result[0]?.meta?.changes)>0)return {created:true,attempt:storedAttempt};
     const existing=await loadAttemptById(storedAttempt.id);
     return {created:Number(result[0]?.meta?.changes)>0,attempt:existing,entryClosed:!existing};
@@ -399,7 +400,7 @@ async function createAttemptAtomic(attempt) {
 
   try {
     const { DB } = requireEnv();
-    await DB.batch(statements);
+    await retryD1(() => DB.batch(statements));
   } catch (error) {
     if (!/unique|constraint/i.test(String(error?.message || error))) {
       throw error;
@@ -471,7 +472,7 @@ async function updateAttemptWithRevision(attempt, expectedRevision, options = {}
   );
 
   const { DB } = requireEnv();
-  const results = await DB.batch(statements);
+  const results = await retryD1(() => DB.batch(statements));
   const updated = changedRowCount(results[results.length - 1]) === 1;
   if (updated) {
     attempt.stateRevision = expected + 1;

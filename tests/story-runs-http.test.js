@@ -21,6 +21,7 @@ test('D1 story day: protected publication, simultaneous start, per-run identity 
  assert.equal(starts.filter(s=>s.status===201).length,1);assert.equal(new Set(starts.map(s=>s.data?.id)).size,1);
  const attempt=starts[0].data;assert.equal(attempt.story.runId,id);assert.equal(attempt.story.storyVersion,1);assert.equal(Date.parse(attempt.expiresAt)-Date.parse(attempt.startedAt),45*60000);
  const saved=await store.loadAttemptById(attempt.id);assert.equal(saved.variant.blueprintVersion,15);assert.equal(saved.variant.storyVersion,1);assert.equal(saved.variant.questions.length,36);
+ assert.ok(saved.questionLog[saved.variant.questions[0].id]?.presentedAt,'Atomic start retains first question timing');
  const prefix=`/api/public/attempts/${attempt.id}`;
  assert.equal((await api(prefix+'/story-result')).status,401);assert.equal((await api(prefix+'/story-result',{token:'synthetic_foreign_participant_token'})).status,401);
  assert.deepEqual(Object.keys((await api(prefix+'/story-result',{token})).data),['state','entryEndsAt']);

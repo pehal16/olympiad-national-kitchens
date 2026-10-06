@@ -51,6 +51,14 @@
       chapterNode.append(copy);chapterNode.dataset.chapter=number;
     }
     chapterNode.querySelector('.story-recorded').textContent=`Записано ответов: ${attempt.progress.answeredCount} из ${attempt.progress.totalQuestions}. Правильность пока не раскрывается.`;
+    const signature=JSON.stringify([attempt.story.recordedPhotos,attempt.story.recordedMap]);
+    if(chapterNode.dataset.recorded!==signature){
+      chapterNode.querySelector('.story-album-strip')?.remove();
+      const strip=el('div','story-album-strip');
+      if(number<=2)for(const photo of (attempt.story.recordedPhotos||[]).slice(-3)){const figure=el('figure');figure.append(image(photo.imageUrl,`Записанная фотография ${photo.number}`),el('figcaption','',`Фото ${photo.number} · записано`));strip.append(figure);}
+      if(number===2&&attempt.story.recordedMap?.length){const notes=el('details','story-map-notes');notes.append(el('summary','','Последний записанный блок карты'));for(const pair of attempt.story.recordedMap)notes.append(el('p','',`${pair.dish} → ${pair.country}`));notes.append(el('small','','Это ваши сохранённые сопоставления; правильность появится в разборе.'));strip.append(notes);}
+      chapterNode.querySelector('.story-chapter-copy').append(strip);chapterNode.dataset.recorded=signature;
+    }
   }
   function clearTimer(){root.clearTimeout(timer);timer=null;}
   function schedule(){clearTimer();if(!session||loaded||doc.hidden||session.status==='in_progress')return;timer=root.setTimeout(refresh,Date.now()<Date.parse(session.story.entryEndsAt)?300000:60000);}

@@ -233,6 +233,33 @@ test("D1 olympiad attempt storage enforces its concurrency contract", async (t) 
     assert.equal(persisted.questionLog.q1.marker, winningCandidate.marker);
   });
 
+  await t.test("transient D1 failures before and after commit cannot duplicate a saved answer", async () => {
+    for (const committed of [false, true]) {
+      const attempt = makeAttempt(`attempt-network-${committed}`, 'network');
+      await createAttemptAtomic(attempt);
+      const candidate = {...await loadAttemptById(attempt.id), answeredCount: 1,
+        answers: {q1: {selectedId: 'one-answer', finalScore: 4}}, questionLog: {q1: {questionId: 'q1'}}};
+      const batch = d1.batch.bind(d1);
+      let calls = 0;
+      d1.batch = async statements => {
+        if (calls++ === 0) {
+          if (committed) await batch(statements);
+          throw new Error('D1_ERROR: Network connection lost.');
+        }
+        return batch(statements);
+      };
+      try {
+        assert.equal(await updateAttemptWithRevision(candidate, 0, {changedQuestionIds: ['q1']}), !committed);
+        const saved = await loadAttemptById(attempt.id);
+        assert.equal(saved.stateRevision, 1);
+        assert.equal(saved.answeredCount, 1);
+        assert.equal(saved.answers.q1.finalScore, 4);
+        assert.equal(database.prepare('SELECT COUNT(*) AS count FROM attempt_answers WHERE attempt_id=?').get(attempt.id).count, 1);
+        assert.equal(calls, 2);
+      } finally { d1.batch = batch; }
+    }
+  });
+
   await t.test("stateOnly advances state without rewriting an answer row", async () => {
     const attempt = makeAttempt("attempt-state-only", "before", {
       answers: { q1: { selectedId: "stored-answer" } },

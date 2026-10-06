@@ -46,6 +46,7 @@ async function main(){
     const publication=await api(`/api/admin/story-runs/${run.id}/publish`,'',{});assert.equal((await api(`/api/admin/story-runs/${run.id}/publish`,'',{})).publishedAt,publication.publishedAt);
     await Promise.all(people.map(async p=>{const r=await api(`/api/public/attempts/${p.attempt.id}/story-result`,p.token);assert.equal(r.state,'published');assert.equal(r.plates.length,51);assert.equal(r.summary.totalFinalScore,150);}));
     times.sort((a,b)=>a-b);const metric={environment:'Cloudflare Pages preview / separate D1',participants:count,answers:count*36,errors:0,lostAnswers:0,duplicateAnswers:0,answerP95Ms:Math.round(times[Math.ceil(times.length*.95)-1]),timestamp:new Date().toISOString()};evidence.push(metric);console.log(JSON.stringify(metric));
+    fs.writeFileSync('output/story/cloudflare-load.json',JSON.stringify(evidence,null,2));
   }
   fs.writeFileSync('output/story/cloudflare-load.json',JSON.stringify(evidence,null,2));
   assert.ok(evidence.every(m=>m.answerP95Ms<=3000),'Preview answer p95 exceeds the 3000 ms target.');

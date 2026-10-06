@@ -1,5 +1,6 @@
 "use strict";
 const { readJson, writeJson } = require('./utils');
+const { retryD1 } = require('./d1-retry');
 let env = null;
 function configureStoryStorage(value) { env = value; }
 function enabled() { return String(env?.STORY_ENABLED ?? process.env.STORY_ENABLED ?? 'false')==='true'; }
@@ -18,18 +19,18 @@ function makeRun(date, id = require('crypto').randomUUID()) {
     blueprintVersion:15, storyVersion:1, assetVersion:1, createdAt:new Date().toISOString(), publishedAt:null, stopped:false, decorationsDisabled:false };
 }
 async function listRuns() {
-  if (env?.DB) return (await env.DB.prepare('SELECT * FROM olympiad_story_runs ORDER BY event_date DESC').all()).results.map(decode);
+  if (env?.DB) return (await retryD1(() => env.DB.prepare('SELECT * FROM olympiad_story_runs ORDER BY event_date DESC').all())).results.map(decode);
   return readJson(localFile(), []).sort((a,b)=>b.date.localeCompare(a.date));
 }
 async function getRun(id) {
-  if (env?.DB) return decode(await env.DB.prepare('SELECT * FROM olympiad_story_runs WHERE id=?').bind(id).first());
+  if (env?.DB) return decode(await retryD1(() => env.DB.prepare('SELECT * FROM olympiad_story_runs WHERE id=?').bind(id).first()));
   return readJson(localFile(), []).find(r=>r.id===id) || null;
 }
 async function createRun(date) {
   const run = makeRun(date);
   if (env?.DB) {
-    await env.DB.prepare('INSERT INTO olympiad_story_runs(id,event_date,entry_starts_at,entry_ends_at,payload_json) VALUES(?,?,?,?,?)')
-      .bind(run.id,run.date,run.entryStartsAt,run.entryEndsAt,JSON.stringify(run)).run();
+    await retryD1(() => env.DB.prepare('INSERT INTO olympiad_story_runs(id,event_date,entry_starts_at,entry_ends_at,payload_json) VALUES(?,?,?,?,?) ON CONFLICT(id) DO NOTHING')
+      .bind(run.id,run.date,run.entryStartsAt,run.entryEndsAt,JSON.stringify(run)).run());
   } else {
     const runs=readJson(localFile(),[]);
     if(runs.some(r=>r.date===date)) throw new Error('Для этой даты проведение уже создано.');
@@ -41,17 +42,17 @@ async function updateRun(id, patch) {
   const run=await getRun(id); if(!run) throw new Error('Проведение не найдено.');
   const next={...run};
   for(const key of ['stopped','decorationsDisabled']) if(typeof patch[key]==='boolean') next[key]=patch[key];
-  if(env?.DB) await env.DB.prepare('UPDATE olympiad_story_runs SET stopped=?,payload_json=? WHERE id=?')
-    .bind(Number(next.stopped),JSON.stringify(next),id).run();
+  if(env?.DB) await retryD1(() => env.DB.prepare('UPDATE olympiad_story_runs SET stopped=?,payload_json=? WHERE id=?')
+    .bind(Number(next.stopped),JSON.stringify(next),id).run());
   else { const runs=readJson(localFile(),[]); runs[runs.findIndex(r=>r.id===id)]=next; writeJson(localFile(),runs); }
   return getRun(id);
 }
 async function publishRun(id, now=Date.now()) {
   const stamp=new Date(now).toISOString();
   if(env?.DB) {
-    await env.DB.prepare(`UPDATE olympiad_story_runs SET published_at=?1 WHERE id=?2 AND published_at IS NULL
+    await retryD1(() => env.DB.prepare(`UPDATE olympiad_story_runs SET published_at=?1 WHERE id=?2 AND published_at IS NULL
       AND entry_ends_at<=?1 AND NOT EXISTS (SELECT 1 FROM attempts a WHERE a.story_run_id=?2
-        AND json_extract(a.payload_json,'$.status')='in_progress')`).bind(stamp,id).run();
+        AND json_extract(a.payload_json,'$.status')='in_progress')`).bind(stamp,id).run());
     const run=await getRun(id); if(!run?.publishedAt) throw new Error('Публикация доступна после закрытия входа и завершения всех попыток.');
     return run;
   }
@@ -81,7 +82,12 @@ async function hydrate(attempt) {
 function storyView(attempt) {
   if(!attempt.storyRunId) return null;
   const run=attempt._storyRun;
+  const questions=attempt.variant?.questions||[];
+  const recordedPhotos=questions.filter(q=>q.tourCode==='T1'&&attempt.answers?.[q.id]).map(q=>({number:q.sequenceInTour,imageUrl:q.imageUrl}));
+  const mapQuestion=[...questions].reverse().find(q=>q.tourCode==='T2'&&attempt.answers?.[q.id]);
+  const recordedMap=mapQuestion?mapQuestion.items.map(item=>({dish:item.text,country:mapQuestion.buckets.find(b=>b.id===attempt.answers[mapQuestion.id].answerPayload?.buckets?.[item.id])?.label||'не выбрано'})):[];
   return { runId:attempt.storyRunId,storyVersion:1,assetVersion:attempt.variant?.assetVersion||1,currentChapter:Math.min(5,Math.max(1,Number(attempt.variant?.questions?.[attempt.currentStepIndex]?.tourOrder)||5)),
+    recordedPhotos,recordedMap,
     resultAvailable:Boolean(run?.publishedAt&&attempt.status!=='in_progress'),entryEndsAt:run?.entryEndsAt||null,decorationsDisabled:Boolean(run?.decorationsDisabled) };
 }
 function scoresVisible(attempt,settings) {
