@@ -1,0 +1,72 @@
+{
+  "base": "https://olympiad-gkts.pages.dev",
+  "checks": [
+    {
+      "width": 320,
+      "scene": {
+        "url": "https://olympiad-gkts.pages.dev/assets/olympiad/display-v1/preview/story/layout-v2/scenes/arrival-mobile.webp",
+        "position": "50% 0%",
+        "height": 230,
+        "width": 304,
+        "natural": [
+          533,
+          800
+        ]
+      }
+    },
+    {
+      "width": 360,
+      "scene": {
+        "url": "https://olympiad-gkts.pages.dev/assets/olympiad/display-v1/preview/story/layout-v2/scenes/arrival-mobile.webp",
+        "position": "50% 0%",
+        "height": 252,
+        "width": 344,
+        "natural": [
+          533,
+          800
+        ]
+      }
+    },
+    {
+      "width": 390,
+      "scene": {
+        "url": "https://olympiad-gkts.pages.dev/assets/olympiad/display-v1/preview/story/layout-v2/scenes/arrival-mobile.webp",
+        "position": "50% 0%",
+        "height": 273,
+        "width": 374,
+        "natural": [
+          533,
+          800
+        ]
+      }
+    },
+    {
+      "width": 430,
+      "scene": {
+        "url": "https://olympiad-gkts.pages.dev/assets/olympiad/display-v1/preview/story/layout-v2/scenes/arrival-mobile.webp",
+        "position": "50% 0%",
+        "height": 290,
+        "width": 414,
+        "natural": [
+          533,
+          800
+        ]
+      }
+    },
+    {
+      "width": 1366,
+      "scene": {
+        "url": "https://olympiad-gkts.pages.dev/assets/olympiad/display-v1/preview/story/layout-v2/scenes/arrival-wide.webp",
+        "position": "50% 0%",
+        "height": 580,
+        "width": 455,
+        "natural": [
+          800,
+          533
+        ]
+      }
+    }
+  ],
+  "errors": [],
+  "posts": []
+}

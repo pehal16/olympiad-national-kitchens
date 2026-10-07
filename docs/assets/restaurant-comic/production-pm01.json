@@ -1,0 +1,57 @@
+{
+  "ok": true,
+  "baseUrl": "https://olympiad-gkts.pages.dev",
+  "checkedAt": "2026-10-07T21:08:45.546Z",
+  "checks": [
+    {
+      "route": "/api/health",
+      "status": 200,
+      "appVersion": "1.7.0",
+      "storageBackend": "cloudflare",
+      "pm01": {
+        "id": "pm01-2026-exam",
+        "schemaVersion": 1,
+        "variants": 5,
+        "modules": 5,
+        "totalMaxScore": 100,
+        "routes": {
+          "student": "/pm01.html",
+          "admin": "/pm01-admin.html"
+        }
+      }
+    },
+    {
+      "route": "/api/pm01/public/exam",
+      "status": 200,
+      "variants": 5,
+      "modules": 5,
+      "digitalShiftNormativeAnchors": 4,
+      "digitalShiftNormativeDossier": "2026-06-22",
+      "digitalShiftInteractionBlueprints": 5,
+      "digitalShiftPracticeGuard": "ok",
+      "digitalShiftPracticeGuardVersion": "2026-06-22.training-guard.v1",
+      "digitalShiftPracticeGuardVariantCoverage": 5,
+      "digitalShiftVisualRubric": "approval_required_before_final_asset",
+      "digitalShiftPackages": 5,
+      "digitalShiftPreviewAssets": 10,
+      "digitalShiftCockpits": 5,
+      "digitalShiftMatrixRows": 25,
+      "privateAnswerKeyFields": 0
+    },
+    {
+      "route": "/pm01.html",
+      "status": 200,
+      "bytes": 9559
+    },
+    {
+      "route": "/pm01-admin.html",
+      "status": 200,
+      "bytes": 7428
+    },
+    {
+      "route": "/pm01-approval.html",
+      "status": 200,
+      "bytes": 3024
+    }
+  ]
+}

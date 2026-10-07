@@ -1,0 +1,14 @@
+{
+  "base": "https://078fe953.olympiad-gkts.pages.dev",
+  "assets": 591,
+  "clientFiles": 20,
+  "verified": 611,
+  "failures": [],
+  "headers": {
+    "cacheControl": "public, max-age=31536000, immutable"
+  },
+  "storyEnabled": true,
+  "entryMode": "anytime",
+  "entryOpen": false,
+  "date": null
+}

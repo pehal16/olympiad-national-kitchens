@@ -1,6 +1,6 @@
 # Project Memory
 
-Last updated: 2026-10-07
+Last updated: 2026-10-08
 
 ## Per-question comic guest — layout 4 / dialogue 1 / condition edition 2 (2026-10-07)
 
@@ -11,6 +11,8 @@ Last updated: 2026-10-07
 - Five individually reviewed originals and WebP exports (600x900, total 236570 bytes) are recorded in docs/restaurant-comic-assets.json. Mobile CSS crops face/shoulders; food photographs remain proportional/whole and reuse optimized current assets. Design, full 36-page script and source review: docs/restaurant-comic-design.md / restaurant-comic-script.md / restaurant-comic-sources.md.
 - Local acceptance: 280 tests, Cloudflare build and full-server PM01 pass; isolated browser covers all 36 dialogues/exchanges/answers, nine sizes, map/keyboard/touch/zoom, draft/guard recovery, T3 focus, failures/stop-resume, certificate 150/150 before publication and 51 plates afterwards. Native Codex browser separately verifies registration/start/extra exchange/restoration. Screenshot/evidence dossier: docs/restaurant-comic-verification.md. Full-route derivatives are 4.33MB vs 26.02MB original-equivalent (83% smaller payload, not a network latency claim).
 - Certificate remains available immediately at personal completion with saved points and order № 199 / 05.10.2026. Correct-answer keys remain absent even after publication; table/guest quality reactions wait for organizer. Public repo stays public, and this is not secrecy of already-published source. Cloudflare preview/release receipts follow successful workflows; physical college-device/student/teacher review remains separate.
+
+- Released runtime **56b35e8**, 08.10.2026 Moscow: preview workflow 37686450061 / 078fe953 passes 50 anytime participants (1800 answers, p95 786 ms) and 60 scheduled (2160, p95 919 ms), zero lost/duplicate/errors; all 3960 issued dialogues verified. Production workflow 37687001731 / 2cbfab1e succeeds. Required live verifier passes, 591 resources + 20 client files match, entry remains anytime/open/date null. Anonymous production review at 320/360/390/430/1366 and native Codex instruction/version check pass with zero POSTs/new technical participants. Final receipt in docs/assets/restaurant-comic/release.json; documentation-only follow-up does not redeploy.
 
 ## Immediate personal certificate, no participant answer keys (2026-10-07)
 

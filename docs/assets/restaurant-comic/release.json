@@ -1,0 +1,66 @@
+{
+  "runtimeCommit": "56b35e844f5bd56dad4643e2f2158ffc0520ae23",
+  "layoutVersion": 4,
+  "dialogueVersion": 1,
+  "conditionVersion": 2,
+  "clientShell": "layout4-comic4",
+  "previewWorkflow": 37686450061,
+  "previewDeployment": "078fe953",
+  "productionWorkflow": 37687001731,
+  "productionDeployment": "2cbfab1e",
+  "productionUrl": "https://olympiad-gkts.pages.dev",
+  "deployedAt": "2026-10-07T21:07:45.720Z",
+  "checkedAt": "2026-10-07T21:11:47.144Z",
+  "tests": 280,
+  "localFullRoute": {
+    "questions": 36,
+    "score": 150,
+    "plates": 51
+  },
+  "previewLoad": [
+    {
+      "environment": "Cloudflare Pages preview / separate D1",
+      "entryMode": "anytime",
+      "participants": 50,
+      "answers": 1800,
+      "conditionVersion": 2,
+      "dialogueVersion": 1,
+      "frozenDialoguesVerified": 1800,
+      "errors": 0,
+      "lostAnswers": 0,
+      "duplicateAnswers": 0,
+      "answerP95Ms": 786,
+      "timestamp": "2026-10-07T21:04:14.827Z"
+    },
+    {
+      "environment": "Cloudflare Pages preview / separate D1",
+      "entryMode": "scheduled",
+      "participants": 60,
+      "answers": 2160,
+      "conditionVersion": 2,
+      "dialogueVersion": 1,
+      "frozenDialoguesVerified": 2160,
+      "errors": 0,
+      "lostAnswers": 0,
+      "duplicateAnswers": 0,
+      "answerP95Ms": 919,
+      "timestamp": "2026-10-07T21:05:04.482Z"
+    }
+  ],
+  "content": {
+    "base": "https://olympiad-gkts.pages.dev",
+    "assets": 591,
+    "clientFiles": 20,
+    "verified": 611,
+    "failures": [],
+    "headers": {
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    "storyEnabled": true,
+    "entryMode": "anytime",
+    "entryOpen": true,
+    "date": null
+  },
+  "productionAttemptsCreated": 0,
+  "physicalCollegeDevicesVerified": false
+}
