@@ -163,10 +163,10 @@ body.olympiad-page.story-immersive.exam-mode-active:has(#attempt-section.is-t5:n
 @media(max-width:767px){
  .has-restaurant-story .shell,body.olympiad-page.story-immersive.exam-mode-active .shell,body.olympiad-page.story-immersive.exam-mode-active:has(#attempt-section.is-t5:not(.hidden)) .shell {width:calc(100% - 16px)}
  .has-restaurant-story .landing-hero {display:flex;flex-direction:column;gap:18px}
- .has-restaurant-story .landing-hero-media {position:relative;top:auto;min-height:0;height:230px;max-height:none;order:0}
+ .has-restaurant-story .landing-hero-media {position:relative;top:auto;min-height:0;height:clamp(230px,70vw,290px);max-height:none;order:0}
  .has-restaurant-story .landing-hero-copy {order:1;padding:0 8px}
  .has-restaurant-story .landing-hero-copy h1 {font-size:34px}
- .has-restaurant-story .landing-hero .restaurant-arrival img {object-position:center 30%}
+ .has-restaurant-story .landing-hero .restaurant-arrival img {object-position:center top}
  .has-restaurant-story #registration-form {grid-template-columns:1fr}
  .has-restaurant-story #prestart-section > .card {padding:16px}
  .story-immersive .story-chapter {grid-template-columns:48px minmax(0,1fr);gap:10px;padding:12px}
