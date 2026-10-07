@@ -1,0 +1,19 @@
+{
+  "tasks": 36,
+  "score": 150,
+  "plates": 51,
+  "checks": [
+    "T1: seven viewports, full image, zoom/focus, no overflow",
+    "Question 3: saved draft and guard recovery",
+    "T2: seven viewports, full image, zoom/focus, no overflow",
+    "T3: seven viewports, full image, zoom/focus, no overflow",
+    "Question 17: saved draft and guard recovery",
+    "T4: seven viewports, full image, zoom/focus, no overflow",
+    "Question 27: saved draft and guard recovery",
+    "T5: seven viewports, full image, zoom/focus, no overflow",
+    "Question 35: saved draft and guard recovery",
+    "Touch T2: four visible photos, nearby country picker, undo, keyboard selection and server confirmation; live decor stop/resume",
+    "Touch/reduced-motion: failed decor, photo retry, lost network request, one stored answer, decorationsDisabled and standard answer"
+  ],
+  "errors": []
+}

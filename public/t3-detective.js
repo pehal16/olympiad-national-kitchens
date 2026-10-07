@@ -9,7 +9,7 @@
       isComplete: () => text.trim().length >= 2
     };
   }
-  function create({ mount, question, attemptId, submitButton, onChange, onPhase, inlineIntro = false }) {
+  function create({ mount, question, attemptId, submitButton, onChange, onPhase, inlineIntro = false, presentationMode = 'standard' }) {
     const doc = mount.ownerDocument;
     const win = doc.defaultView;
     const introKey = `nko_t3_intro_v1_${attemptId}`;
@@ -31,6 +31,7 @@
     const originalType = submitButton.getAttribute("type");
     const shell = doc.createElement("section");
     shell.className = "t3-dossier";
+    shell.classList.toggle('restaurant-dossier', presentationMode === 'restaurant');
     mount.append(shell);
     const element = (tag, className, text) => {
       const node = doc.createElement(tag);
@@ -40,6 +41,7 @@
     };
     const changed = () => { write(draftKey, model.getAnswer().text); onChange(model.getAnswer()); };
     const viewportChanged = () => {
+      if (presentationMode === 'restaurant') doc.body.classList.toggle('t3-keyboard-open', doc.activeElement === input && Boolean(win.visualViewport && win.visualViewport.height < 500));
       if (doc.activeElement !== input || !win.visualViewport || win.visualViewport.height > 500) return;
       // Keep both input and confirm accessible when a keyboard shrinks the viewport.
       win.requestAnimationFrame(() => submitButton.scrollIntoView({ block: "nearest", behavior: "instant" }));
@@ -131,6 +133,7 @@
       },
       dispose() {
         disposed = true;
+        doc.body.classList.remove('t3-keyboard-open');
         win.visualViewport?.removeEventListener("resize", viewportChanged);
         placeholder.replaceWith(submitButton);
         if (originalType === null) submitButton.removeAttribute("type"); else submitButton.setAttribute("type", originalType);

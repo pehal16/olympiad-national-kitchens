@@ -19,7 +19,7 @@
     const title=doc.getElementById('hero-title'),sub=doc.getElementById('hero-subtitle');
     title.textContent='Ресторан путешествий. Вечер вкусов';
     sub.textContent='Гость принёс гастрономический альбом. Помогите собрать дегустационное меню для его компании — через пять глав олимпиады «Национальные кухни мира».';
-    doc.querySelector('.landing-hero-media').style.backgroundImage=`url("${base}arrival.webp")`;
+    const hero=doc.querySelector('.landing-hero-media');hero.style.backgroundImage='none';hero.replaceChildren(root.RestaurantLayout.picture('arrival','restaurant-arrival','Гость приходит в ресторан с гастрономическим альбомом'));
     const note=doc.querySelector('.landing-pilot-note');
     if(note)note.textContent=olympiad.story?.entryMode==='anytime'
       ? (olympiad.story.entryOpen?'Начните в любое время. После старта у вас будут полные 45 минут.':olympiad.story.publishedAt?'Итоги опубликованы. Новые попытки этого проведения закрыты.':'Организатор остановил новые старты. Начатые попытки продолжаются.')
@@ -88,7 +88,7 @@
     doc.getElementById('result-title').textContent='Меню принято. Спасибо за этот вечер!';
     doc.getElementById('result-subtitle').textContent='Ответы сохранены. Персональный стол, баллы, разбор и свидетельство откроются после публикации итогов организатором. Можно закрыть страницу и вернуться в этом браузере.';
     resultMount.replaceChildren();
-    if(!attempt.story.decorationsDisabled)resultMount.append(image(base+'waiting.webp','Гость закрывает альбом и ожидает общего финала','story-waiting-scene'));
+    if(!attempt.story.decorationsDisabled)resultMount.append(root.RestaurantLayout.picture('waiting','story-waiting-scene restaurant-waiting','Гость закрывает альбом и ожидает общего финала'));
     resultMount.append(el('p','story-poll-status','Ожидаем общего финала.'),button('Обновить итоги',refresh));
     refresh();
   }

@@ -33,7 +33,7 @@
     };
   }
 
-  function create({ mount, question, attemptId, onChange, inlineIntro = false }) {
+  function create({ mount, question, attemptId, onChange, inlineIntro = false, presentationMode = 'standard' }) {
     const doc = mount.ownerDocument;
     const win = doc.defaultView;
     const model = createState(question, question.savedAnswer);
@@ -45,6 +45,8 @@
     let dragging = null;
     const shell = doc.createElement("section");
     shell.className = "t2-match";
+    const restaurant = presentationMode === 'restaurant';
+    shell.classList.toggle('restaurant-map', restaurant);
     mount.append(shell);
     const element = (tag, className, text) => {
       const node = doc.createElement(tag);
@@ -192,6 +194,7 @@
           dragging = null; button.classList.remove("is-dragging");
           zones.forEach(({ zone }) => zone.classList.remove("is-over"));
         });
+        if (restaurant) slot.append(button, root.RestaurantLayout.zoomButton(item.imageUrl, item.imageAlt));
         bank.append(slot); slots.set(item.id, { slot, placeholder }); nodes.set(item.id, { button, item });
       });
       function sync() {
@@ -210,8 +213,13 @@
           const { quick, occupied } = pickerButtons.get(country.id);
           occupied.textContent = item ? `Занято: ${nodes.get(item).item.text}` : "Свободно";
           quick.setAttribute("aria-label", `${country.label}. ${occupied.textContent}`);
-          if (!item && empty.parentNode !== holder) holder.replaceChildren(empty);
-          if (item && nodes.get(item).button.parentNode !== holder) holder.replaceChildren(nodes.get(item).button);
+          if (restaurant) {
+            empty.textContent = item ? nodes.get(item).item.text : 'Выберите блюдо';
+            if (empty.parentNode !== holder) holder.replaceChildren(empty);
+          } else {
+            if (!item && empty.parentNode !== holder) holder.replaceChildren(empty);
+            if (item && nodes.get(item).button.parentNode !== holder) holder.replaceChildren(nodes.get(item).button);
+          }
         });
         nodes.forEach(({ button, item }, id) => {
           const { slot, placeholder } = slots.get(id);
@@ -220,8 +228,10 @@
           button.classList.toggle("is-assigned", placed);
           button.setAttribute("aria-pressed", id === selected ? "true" : "false");
           button.setAttribute("aria-label", `${item.text}${placed ? `, размещено: ${zones.get(model.placements[id]).country.label}` : ""}. Выбрать блюдо`);
-          if (placed && placeholder.parentNode !== slot) slot.replaceChildren(placeholder);
-          if (!placed && button.parentNode !== slot) slot.replaceChildren(button);
+          if (!restaurant) {
+            if (placed && placeholder.parentNode !== slot) slot.replaceChildren(placeholder);
+            if (!placed && button.parentNode !== slot) slot.replaceChildren(button);
+          }
         });
         progress.textContent = `Сопоставлено: ${Object.keys(model.placements).length} из ${question.items.length}`;
         if (focused && shell.contains(focused) && doc.activeElement !== focused) focused.focus({ preventScroll: true });

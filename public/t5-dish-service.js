@@ -3,6 +3,8 @@
   const seen = new Set();
   let current = null;
   function sync(attempt, onDismiss) {
+    if (current && !current.node.isConnected) current = null;
+    if (attempt?.story?.decorationsDisabled) { current?.node.remove(); current = null; root.document.body.classList.remove('t5-service-open'); return; }
     if (current && current.attemptId !== attempt?.id) {
       current.node.remove(); current = null; root.document.body.classList.remove('t5-service-open');
     }
@@ -14,13 +16,14 @@
     if (acknowledged || current?.key === key) return;
     current?.node.remove();
     const doc = root.document;
+    const inline = Boolean(attempt.story && !attempt.story.decorationsDisabled);
     const el = (tag, className, text) => {
       const node = doc.createElement(tag); node.className = className || '';
       if (text !== undefined) node.textContent = text;
       return node;
     };
-    const node = el('section', 't5-service-overlay');
-    node.setAttribute('role', 'dialog'); node.setAttribute('aria-modal', 'true');
+    const node = el('section', inline ? 't5-service-inline' : 't5-service-overlay');
+    node.setAttribute('role', inline ? 'region' : 'dialog'); if (!inline) node.setAttribute('aria-modal', 'true');
     node.setAttribute('aria-labelledby', 't5-service-title');
     node.dataset.mood = receipt.mood;
     const card = el('div', 't5-service-card');
@@ -46,7 +49,8 @@
     missing.hidden = true;
     const failed = () => { missing.hidden = false; scene.classList.add('is-missing'); };
     guest.addEventListener('error', failed);
-    scene.append(guest, missing);
+    if (inline && receipt.mood === 'neutral') scene.append(root.RestaurantLayout.picture('service', 'restaurant-service-background', guest.alt), missing);
+    else scene.append(guest, missing);
     const copy = el('div', 't5-service-copy');
     const title = el('h2', '', receipt.mood === 'neutral' ? 'Блюдо подано' : receipt.mood === 'pleased' ? 'Гость доволен' : 'Гость в недоумении');
     title.id = 't5-service-title';
@@ -102,7 +106,7 @@
       el('p', 't5-service-composition', receipt.composition.join(' · ')),
       el('p', 't5-service-saved', 'Ответ сохранён на сервере.'),
       el('p', 't5-service-clock', attempt.status === 'in_progress' ? 'Время тура продолжает идти.' : 'Олимпиада завершена.'));
-    const next = el('button', 't5-photo-primary', attempt.status === 'in_progress' ? 'Следующее блюдо' : 'К результату');
+    const next = el('button', 't5-photo-primary', inline ? 'Скрыть подачу' : attempt.status === 'in_progress' ? 'Следующее блюдо' : 'К результату');
     next.type = 'button';
     next.addEventListener('click', () => {
       if (next.disabled) return;
@@ -111,17 +115,23 @@
       node.remove(); current = null; doc.body.classList.remove('t5-service-open'); onDismiss();
     });
     node.addEventListener('keydown', event => {
-      if (event.key === 'Tab' && !next.disabled) { event.preventDefault(); next.focus({ preventScroll: true }); }
+      if (!inline && event.key === 'Tab' && !next.disabled) { event.preventDefault(); next.focus({ preventScroll: true }); }
     });
-    copy.append(next); card.append(scene, copy); node.append(card); doc.body.append(node);
-    doc.body.classList.add('t5-service-open');
-    current = { attemptId: attempt.id, key, node, next, locked: true };
+    copy.append(next); card.append(scene, copy); node.append(card);
+    if (inline) {
+      const host = attempt.status === 'in_progress' ? doc.getElementById('story-service-slot') : doc.querySelector('.story-result');
+      if (!host) return;
+      host.prepend(node);
+      if (attempt.status === 'in_progress') root.requestAnimationFrame(() => { if (node.isConnected) node.scrollIntoView({block:'start',behavior:'instant'}); });
+    } else { doc.body.append(node); doc.body.classList.add('t5-service-open'); }
+    current = { attemptId: attempt.id, key, node, next, inline, locked: true };
   }
   function setLocked(value) {
     if (!current) return;
     const locked = Boolean(value), wasLocked = current.locked;
     current.locked = locked; current.next.disabled = locked; current.node.inert = locked;
-    if (!locked && wasLocked) current.next.focus({ preventScroll: true });
+    if (!locked && wasLocked && !current.inline) current.next.focus({ preventScroll: true });
   }
-  root.T5DishService = { sync, setLocked, isOpen: () => Boolean(current) };
+  function hideInline() { if (!current?.inline) return; seen.add(current.key); try { root.localStorage.setItem(current.key, 'seen'); } catch {} current.node.remove(); current = null; }
+  root.T5DishService = { sync, setLocked, hideInline, isOpen: () => Boolean(current), isBlocking: () => Boolean(current && !current.inline) };
 })(typeof window !== 'undefined' ? window : globalThis);

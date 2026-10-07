@@ -219,7 +219,8 @@ function refreshAttemptControls() {
   const isBusy = state.isSubmittingAnswer || state.isSelectingDish || state.isFinishingAttempt || state.pendingFlushInFlight;
   const isBlockedByGuard = attemptInProgress && state.examGuardActive;
   const interactionLocked = isBusy || isBlockedByGuard;
-  const dishServiceOpen = window.T5DishService?.isOpen() === true;
+  const dishServiceOpen = window.T5DishService?.isBlocking() === true;
+  window.RestaurantLayout?.setLocked(interactionLocked);
   window.T5DishService?.setLocked(interactionLocked);
 
   if (elements.questionBody) {
@@ -1422,6 +1423,9 @@ function rememberDraft(questionId, answerPayload) {
     return;
   }
   state.localDrafts[questionId] = answerPayload;
+  if (state.attempt?.story) {
+    try { localStorage.setItem(`nko_story_draft_v2_${state.attempt.id}_${questionId}`, JSON.stringify(answerPayload)); } catch { /* The current page retains its draft. */ }
+  }
 }
 
 function clearDraft(questionId) {
@@ -1429,6 +1433,7 @@ function clearDraft(questionId) {
     return;
   }
   delete state.localDrafts[questionId];
+  if (state.attempt?.story) { try { localStorage.removeItem(`nko_story_draft_v2_${state.attempt.id}_${questionId}`); } catch {} }
 }
 
 function cloneClientValue(value) {
@@ -2155,6 +2160,14 @@ function renderSingleChoice(question) {
       updateAnswerUi();
     });
     figure.append(image, failure);
+    if (window.RestaurantLayout?.enabled(state.attempt)) {
+      failure.textContent = 'Фотография не загрузилась. Повторите загрузку перед ответом.';
+      const retry = document.createElement('button'); retry.type = 'button'; retry.className = 'button secondary restaurant-retry'; retry.textContent = 'Загрузить фото ещё раз'; retry.hidden = true;
+      image.addEventListener('error', () => { retry.hidden = false; });
+      image.addEventListener('load', () => { retry.hidden = true; });
+      retry.addEventListener('click', () => { photoLoaded = false; const src = image.src; image.removeAttribute('src'); image.src = src; updateAnswerUi(); });
+      figure.append(retry);
+    }
     elements.questionBody.appendChild(figure);
   }
   const savedAnswer = question.savedAnswer ? question.savedAnswer.selectedOptionId : null;
@@ -2845,7 +2858,13 @@ function renderDishAssembly(question) {
   };
 }
 
+function readStoryDraft(questionId) {
+  if (!state.attempt?.story) return null;
+  try { return JSON.parse(localStorage.getItem(`nko_story_draft_v2_${state.attempt.id}_${questionId}`) || 'null'); } catch { return null; }
+}
+
 function renderQuestion(question) {
+  window.RestaurantLayout?.beforeQuestion();
   state.questionController?.dispose?.();
   elements.questionBody.innerHTML = "";
   state.questionController = null;
@@ -2864,6 +2883,7 @@ function renderQuestion(question) {
       question.savedAnswer ||
       queuedAnswerForQuestion(question.id) ||
       state.localDrafts[question.id] ||
+      readStoryDraft(question.id) ||
       null
   };
 
@@ -2908,6 +2928,7 @@ function renderQuestion(question) {
     state.questionController = window.T5FinalKitchen.create({
       mount: elements.questionBody, question: hydratedQuestion, attemptId: state.attempt.id,
       inlineIntro: Boolean(state.attempt.story),
+      presentationMode: window.RestaurantLayout?.enabled(state.attempt) ? 'restaurant' : 'standard',
       submitButton: elements.submitAnswer,
       onPhase: (phase) => {
         elements.attemptSection.classList.toggle("is-t5-intro", phase === "intro");
@@ -2956,6 +2977,7 @@ function renderQuestion(question) {
     state.questionController = window.T3Detective.create({
       mount: elements.questionBody, question: hydratedQuestion, attemptId: state.attempt.id,
       inlineIntro: Boolean(state.attempt.story),
+      presentationMode: window.RestaurantLayout?.enabled(state.attempt) ? 'restaurant' : 'standard',
       submitButton: elements.submitAnswer,
       onPhase: (intro) => elements.attemptSection.classList.toggle("is-t3-intro", intro),
       onChange: (answer) => {
@@ -2967,6 +2989,7 @@ function renderQuestion(question) {
     state.questionController = window.T4GuestOrder.create({
       mount: elements.questionBody, question: hydratedQuestion, attemptId: state.attempt.id,
       inlineIntro: Boolean(state.attempt.story),
+      presentationMode: window.RestaurantLayout?.enabled(state.attempt) ? 'restaurant' : 'standard',
       submitButton: elements.submitAnswer,
       onPhase: (intro) => elements.attemptSection.classList.toggle("is-t4-intro", intro),
       onChange: (answer) => {
@@ -2987,6 +3010,7 @@ function renderQuestion(question) {
       state.questionController = window.T2CountryMatch.create({
         mount: elements.questionBody, question: hydratedQuestion, attemptId: state.attempt.id,
       inlineIntro: Boolean(state.attempt.story),
+        presentationMode: window.RestaurantLayout?.enabled(state.attempt) ? 'restaurant' : 'standard',
         onChange: (answer) => {
           rememberDraft(hydratedQuestion.id, answer);
           refreshAttemptControls(); updateExamCockpit();
@@ -3009,6 +3033,7 @@ function renderQuestion(question) {
 }
 
 function renderAttempt() {
+  window.RestaurantLayout?.beforeQuestion();
   const attempt = state.attempt;
   const currentTour = attempt.currentTour;
   const currentQuestion = attempt.currentQuestion;
@@ -3073,6 +3098,7 @@ function renderAttempt() {
 
   window.OlympiadStory?.chapter(attempt);
   renderQuestion(currentQuestion);
+  window.RestaurantLayout?.mount(attempt);
   renderJourneyMap();
   refreshAttemptControls();
   updateExamCockpit();
@@ -3096,6 +3122,7 @@ function renderCertificate(attempt, scoresVisible) {
 }
 
 function renderResult() {
+  window.RestaurantLayout?.result();
   if (state.attempt?.status !== "in_progress" && state.questionController?.isFinalKitchen) {
     state.questionController.dispose(); state.questionController = null;
   }
@@ -3167,6 +3194,7 @@ function canSoftSyncAttempt(nextAttempt) {
   if (state.attempt.status !== "in_progress" || nextAttempt.status !== "in_progress") {
     return false;
   }
+  if (Boolean(state.attempt.story?.decorationsDisabled) !== Boolean(nextAttempt.story?.decorationsDisabled)) return false;
 
   const currentQuestionId =
     state.attempt.currentQuestion && state.attempt.currentQuestion.id;
@@ -3250,7 +3278,7 @@ function applyAttemptState(attempt, options = {}) {
     : describeAttemptTransition(previousAttempt, attempt);
   state.attempt = attempt;
   if (attempt?.id) state.activeAttemptId = attempt.id;
-  window.T5DishService?.sync(attempt, () => {
+  const syncService = () => window.T5DishService?.sync(attempt, () => {
     refreshAttemptControls();
     if (state.attempt?.status === 'in_progress') elements.questionBody.querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
     else elements.certificateOpen?.focus({ preventScroll: true });
@@ -3269,6 +3297,7 @@ function applyAttemptState(attempt, options = {}) {
       saveTimingSnapshot(attempt);
       setParticipantShellState();
       updateJourneyProgress();
+      syncService();
       refreshAttemptControls();
       return;
     }
@@ -3278,6 +3307,8 @@ function applyAttemptState(attempt, options = {}) {
     disableExamMode();
     renderResult();
   }
+  syncService();
+  refreshAttemptControls();
 
   if (transitionMessage && attempt.status === "in_progress") {
     showQuestionTransition(transitionMessage);

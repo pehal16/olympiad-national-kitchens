@@ -19,7 +19,7 @@
       isComplete: () => selectedOptionId !== null
     };
   }
-  function create({ mount, question, attemptId, submitButton, onChange, onPhase, inlineIntro = false }) {
+  function create({ mount, question, attemptId, submitButton, onChange, onPhase, inlineIntro = false, presentationMode = 'standard' }) {
     const doc = mount.ownerDocument, win = doc.defaultView;
     const version = question.presentationVersion;
     const scope = `${attemptId}_${version}`;
@@ -40,6 +40,7 @@
       return node;
     };
     const shell = element("section", "t4-order"); mount.append(shell);
+    shell.classList.toggle('restaurant-orders', presentationMode === 'restaurant');
     const placeholder = doc.createComment("shared submit button location"); submitButton.before(placeholder);
     const originalType = submitButton.getAttribute("type");
     const cards = new Map(), controls = [];

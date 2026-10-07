@@ -2,7 +2,7 @@
   'use strict';
   const drafts = new Map(), seen = new Set();
   function create(options) {
-    const { mount, question, attemptId, submitButton, onChange, onPhase } = options;
+    const { mount, question, attemptId, submitButton, onChange, onPhase, presentationMode = 'standard' } = options;
     const doc = mount.ownerDocument, win = doc.defaultView, model = root.T5PhotoModel, dish = question.selectedDish;
     const scope = `${attemptId}:photo4:${question.id}:${dish.id}`, introKey = `${attemptId}:photo4:intro`;
     const listeners = new AbortController(), photos = new Map(), controls = [], cards = new Map();
@@ -46,6 +46,11 @@
     compose.append(pantry,panel);workbench.append(compose);
     const footer=el('div','t5-photo-footer'), draftNotice=el('p','t5-photo-small');draftNotice.hidden=true;footer.append(draftNotice,submitButton);workbench.append(footer);submitButton.textContent='Подать';
     shell.append(intro,workbench);
+    if (presentationMode === 'restaurant') {
+      shell.classList.add('restaurant-kitchen');
+      const actions = el('section','restaurant-kitchen-actions');
+      actions.append(stepbar, operation, edit, footer); compose.append(actions);
+    }
     const answer = () => ({dishId:dish.id,selectedIngredientIds:[...selected]});
     function persist(){write(scope,{...answer(),stage,layout});draftNotice.hidden=!storageFailed;draftNotice.textContent='Черновик сохраняется до закрытия этой страницы.';}
     function update(){
@@ -83,7 +88,7 @@
       if(failed&&!layers.childElementCount)layers.append(el('p','t5-photo-empty','Ваш состав: '+model.selection(dish,selected).map(item=>item.text).join(', ')));
       if(selected.size===4&&stage!=='served')model.plan(dish,selected,model.nextStage(dish,selected,stage),layout).layers.forEach(layer=>decode(layer.path).catch(()=>{}));
     }
-    function changed(){persist();update();render();onChange?.(answer());}
+    function changed(){if(presentationMode==='restaurant')root.T5DishService?.hideInline();persist();update();render();onChange?.(answer());}
     for(const item of dish.items){
       const card=el('button','t5-photo-card');card.type='button';on(card,'click',()=>{if(locked)return;if(selected.has(item.id))selected.delete(item.id);else if(selected.size<4)selected.add(item.id);stage='select';changed();});card.dataset.ingredient=item.id;card.setAttribute('aria-pressed','false');
       const photo=el('img');photo.src=item.imageUrl;photo.alt='';photo.draggable=false;photo.loading='eager';photo.decoding='async';

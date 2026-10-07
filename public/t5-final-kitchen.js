@@ -23,8 +23,8 @@
       isComplete: () => Boolean(dish && selected.length === 4)
     };
   }
-  function create({ mount, question, attemptId, submitButton, onChange, onPhase, lockDish, inlineIntro = false }) {
-    if (question.presentationVersion === 4) return root.T5PhotoKitchen.create({ mount, question, attemptId, submitButton, onChange, onPhase, inlineIntro });
+  function create({ mount, question, attemptId, submitButton, onChange, onPhase, lockDish, inlineIntro = false, presentationMode = 'standard' }) {
+    if (question.presentationVersion === 4) return root.T5PhotoKitchen.create({ mount, question, attemptId, submitButton, onChange, onPhase, inlineIntro, presentationMode });
     const doc = mount.ownerDocument, win = doc.defaultView;
     const scope = `${attemptId}_${question.presentationVersion}`;
     const introKey = `nko_t5_intro_${scope}`;
