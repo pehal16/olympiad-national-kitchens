@@ -2,11 +2,11 @@
   'use strict';
   const doc=root.document,base='/assets/olympiad/story/v1/scenes/';
   const chapters=[
-    ['Фотоальбом','album','В моём альбоме достопримечательностей почти нет. Зато ужины сняты со всех сторон. Помогите подписать фотографии.'],
-    ['Карта путешествий','map','Фотографии записаны. Теперь восстановим маршрут: соедините блюда с кухнями мира.'],
-    ['Записная книжка','notes','Карта стала закладкой. В заметках сохранились три подсказки к каждому блюду — восстановите названия.'],
-    ['Пожелания компании','orders','Компания уже собирается за столом. Для каждого пожелания выберите одну подходящую подачу из четырёх.'],
-    ['Финальная кухня','neutral','Пора на кухню: выберите четыре компонента, выполните сборку и нажмите «Подать». Гость принимает блюда; разбор появится после общего финала.']
+    ['Фотоальбом','album','В моём альбоме почти нет достопримечательностей. Зато каждый ужин — отдельная история. Узнаете это блюдо?'],
+    ['Карта путешествий','map','Эти вкусы я привёз из разных поездок. Давайте отметим, где началась история каждого блюда.'],
+    ['Записная книжка','notes','Названия в блокноте куда-то исчезли. Хорошо, что я записывал продукты и приготовление — три заметки помогут вернуть каждое блюдо в меню.'],
+    ['Пожелания компании','orders','Мои друзья уже выбирают места за столом. У каждого свои пожелания: подберите подачу, которая подойдёт гостю.'],
+    ['Финальная кухня','neutral','Меню почти готово — теперь заглянем на кухню. Соберите три подачи для нашего вечера. Я приму их, а впечатлениями поделюсь после общего финала.']
   ];
   let session=null,timer=null,request=null,onAvailable=null,resultMount=null,loaded=null,inFlight=false,chapterNode=null;
   function el(tag,cls,text){const n=doc.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
@@ -17,8 +17,8 @@
     if(!olympiad.storyEnabled)return;
     doc.body.classList.add('has-restaurant-story');
     const title=doc.getElementById('hero-title'),sub=doc.getElementById('hero-subtitle');
-    title.textContent='Ресторан путешествий. Вечер вкусов';
-    sub.textContent='Гость принёс гастрономический альбом. Помогите собрать дегустационное меню для его компании — через пять глав олимпиады «Национальные кухни мира».';
+    title.textContent='Ресторан путешествий';
+    sub.textContent='Вечер вкусов · олимпиада «Национальные кухни мира»';
     const hero=doc.querySelector('.landing-hero-media');hero.style.backgroundImage='none';hero.replaceChildren(root.RestaurantLayout.picture('arrival','restaurant-arrival','Гость приходит в ресторан с гастрономическим альбомом'));
     const note=doc.querySelector('.landing-pilot-note');
     if(note)note.textContent=olympiad.story?.entryMode==='anytime'
@@ -26,9 +26,9 @@
       : olympiad.story?`Вход ${olympiad.story.date}: с 00:00 до 00:00 следующего дня по Москве. Каждому — полные 45 минут.`:'Дата проведения будет объявлена организатором.';
     const existing=doc.getElementById('story-introduction');if(existing)existing.remove();
     const section=el('section','story-introduction');section.id='story-introduction';
-    section.append(el('h2','','Один вечер. Пять глав.'),el('p','','«В моём альбоме достопримечательностей почти нет. Зато ужины сняты со всех сторон».'));
+    section.append(el('p','story-invitation','Гость приглашает вас за стол'),el('blockquote','story-welcome-line','«Я привёз альбом из путешествий. Поможете собрать меню для моих друзей? В конце вечера нас ждёт целый стол историй».'));
     const route=el('ol','story-chapters');chapters.forEach(([name],i)=>route.append(el('li','',`${i+1}. ${name}`)));
-    section.append(route,el('p','','Фотографии → карта → заметки → заказы → кухня. Ответ считается записанным после подтверждения сервера. Сюжет и настроение гостя дополнительных баллов не дают.'),el('p','','До начала ознакомьтесь с правилами. Во время прохождения правильность и баллы скрыты. После закрытия входа и завершения всех попыток организатор откроет персональный стол, разбор и свидетельство.'));
+    section.append(route);
     const guide=el('details','story-answer-review');guide.append(el('summary','','Как проходить пять глав'));
     for(const text of [
       'Фотоальбом: узнайте десять блюд по фотографиям. Выберите один ответ и подтвердите его. За верный ответ — 2 балла; 6 минут, максимум 20.',
@@ -37,21 +37,25 @@
       'Пожелания компании: восемь заказов. Прочитайте все условия и выберите одну из четырёх готовых подач. За подходящую подачу — 4 балла; 10 минут, максимум 32.',
       'Финальная кухня: три блюда. Выберите ровно четыре компонента для указанной версии рецепта, выполните показанные действия и нажмите «Подать». Каждый верный компонент — 4 балла, максимум 16 за блюдо; 15 минут, максимум 48.',
       'Соевый соус, имбирь и васаби сопровождают подачу роллов. Их выбирать не нужно; они не влияют на баллы.',
-      'После подтверждения вернуться к заданию нельзя. Ошибки не дают штрафных баллов. По истечении лимита тура открывается следующий; при общем лимите 45 минут попытка завершается. Неподтверждённый выбор не считается ответом.'
+      'После подтверждения вернуться к заданию нельзя. Ошибки не дают штрафных баллов. По истечении лимита тура открывается следующий; при общем лимите 45 минут попытка завершается. Неподтверждённый выбор не считается ответом.',
+      'Сюжет не добавляет баллов. Правильность, оценки, реакции гостя, персональный стол и свидетельство открываются только после публикации общих итогов организатором.'
     ])guide.append(el('p','',text));section.append(guide);
-    doc.getElementById('prestart-section').before(section);
+    const entry=doc.getElementById('prestart-section'),copy=doc.querySelector('.landing-hero-copy');
+    copy.append(section,entry);
     const rule=doc.querySelector('#prestart-section .landing-pilot-note');if(rule)rule.textContent=olympiad.story?.entryMode==='anytime'
       ? 'Время начинается только после нажатия «Начать олимпиаду». Перед стартом зарегистрируйтесь и подтвердите правила. На прохождение — 45 минут; итоги публикуются организатором.'
       : 'Время начинается только после явного старта. Даже при старте перед полуночью у вас будут свои 45 минут. Итоги публикуются организатором после общего завершения.';
   }
   function chapter(attempt){
+    doc.body.classList.remove('story-result-active');
     if(attempt?.story)doc.getElementById('story-introduction')?.setAttribute('hidden','');
     if(!attempt?.story||attempt.story.decorationsDisabled){chapterNode?.remove();chapterNode=null;return;}
     if(!chapterNode){chapterNode=el('section','story-chapter');doc.getElementById('question-card').before(chapterNode);}
     const number=attempt.story.currentChapter,[name,scene,text]=chapters[number-1];
     if(chapterNode.dataset.chapter!==String(number)){
-      chapterNode.replaceChildren(image(base+scene+'.webp','Гость и предметы этой главы','story-chapter-scene'));
-      const copy=el('div','story-chapter-copy');copy.append(el('h2','',`${number}. ${name}`),el('p','',text),el('p','story-recorded'));
+      const avatar=el('div','story-guest-avatar');avatar.append(image(root.RestaurantMedia.displayUrl('/assets/olympiad/story/layout-v2/scenes/album-wide.webp','card'),'Ваш гость',''));
+      chapterNode.replaceChildren(avatar);
+      const copy=el('div','story-chapter-copy');copy.append(el('h2','',`Глава ${number} · ${name}`),el('blockquote','story-guest-line',`«${text}»`),el('p','story-recorded'));
       chapterNode.append(copy);chapterNode.dataset.chapter=number;
     }
     chapterNode.querySelector('.story-recorded').textContent=`Записано ответов: ${attempt.progress.answeredCount} из ${attempt.progress.totalQuestions}. Правильность пока не раскрывается.`;
@@ -59,7 +63,6 @@
     if(chapterNode.dataset.recorded!==signature){
       chapterNode.querySelector('.story-album-strip')?.remove();
       const strip=el('div','story-album-strip');
-      if(number<=2)for(const photo of (attempt.story.recordedPhotos||[]).slice(-3)){const figure=el('figure');figure.append(image(photo.imageUrl,`Записанная фотография ${photo.number}`),el('figcaption','',`Фото ${photo.number} · записано`));strip.append(figure);}
       if(number===2&&attempt.story.recordedMap?.length){const notes=el('details','story-map-notes');notes.append(el('summary','','Последний записанный блок карты'));for(const pair of attempt.story.recordedMap)notes.append(el('p','',`${pair.dish} → ${pair.country}`));notes.append(el('small','','Это ваши сохранённые сопоставления; правильность появится в разборе.'));strip.append(notes);}
       chapterNode.querySelector('.story-chapter-copy').append(strip);chapterNode.dataset.recorded=signature;
     }
@@ -79,7 +82,8 @@
   }
   function result(attempt,api,notify){
     if(attempt?.story)doc.getElementById('story-introduction')?.setAttribute('hidden','');
-    clearTimer();if(!attempt?.story){resultMount?.remove();resultMount=null;session=null;loaded=null;return;}
+    clearTimer();if(!attempt?.story){doc.body.classList.remove('story-result-active');resultMount?.remove();resultMount=null;session=null;loaded=null;return;}
+    doc.body.classList.add('story-result-active');
     if(session?.id!==attempt.id){loaded=null;resultMount?.remove();resultMount=null;}
     session=attempt;request=api;onAvailable=notify;
     for(const id of ['result-overview','result-next','result-tours'])doc.getElementById(id)?.classList.add('hidden');
@@ -141,6 +145,10 @@
     }));kitchen.append(article);}resultMount.append(kitchen);
     const review=el('details','story-answer-review');review.append(el('summary','','Разбор всех ответов'));
     for(const row of data.review){const article=el('article','story-review-row');article.append(el('h3','',`${row.tour} · задание ${row.number}`),el('p','',`Ваш ответ: ${row.savedAnswer}`),el('p','',`Верный ответ: ${row.expectedAnswer}`),el('p','',`${row.score} из ${row.maxScore}. ${row.explanation}`));review.append(article);}resultMount.append(review);
+    const certificate=doc.getElementById('certificate-section');
+    doc.getElementById('result-section').append(certificate);
+    doc.getElementById('certificate-heading').textContent='Ваше свидетельство об участии';
+    doc.getElementById('certificate-open').textContent='Открыть свидетельство';
   }
   doc.addEventListener('visibilitychange',()=>{clearTimer();if(!doc.hidden&&session&&!loaded)refresh();});
   root.OlympiadStory={intro,chapter,result};

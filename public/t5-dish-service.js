@@ -47,7 +47,14 @@
     guest.alt = receipt.mood === 'neutral' ? 'Гость спокойно принимает подачу перед собой' : receipt.mood === 'pleased' ? 'Гость смотрит на блюдо перед собой и улыбается' : 'Гость с недоумением смотрит на поданное блюдо';
     const missing = el('p', 't5-service-missing', 'Изображение подачи не загрузилось. Ответ сохранён.');
     missing.hidden = true;
-    const failed = () => { missing.hidden = false; scene.classList.add('is-missing'); };
+    const failed = () => root.requestAnimationFrame(updateScene);
+    function updateScene(){
+      if(!scene.isConnected)return;
+      const images=Array.from(scene.querySelectorAll('img'));
+      const pending=images.some(image=>!image.complete),unavailable=images.some(image=>image.complete&&!image.naturalWidth);
+      missing.hidden=!unavailable;scene.classList.toggle('is-missing',unavailable);
+      scene.classList.toggle('is-loading',pending);scene.setAttribute('aria-busy',String(pending));
+    }
     guest.addEventListener('error', failed);
     if (inline && receipt.mood === 'neutral') scene.append(root.RestaurantLayout.picture('service', 'restaurant-service-background', guest.alt), missing);
     else scene.append(guest, missing);
@@ -60,7 +67,7 @@
     plate.classList.toggle('is-tray', receipt.isTray === true);
     const serving = receipt.servingPhoto;
     const imageFor = photo => {
-      const image = el('img'); image.src = photo.imageUrl; image.alt = photo.imageAlt;
+      const image = el('img'); if(inline&&root.RestaurantMedia)root.RestaurantMedia.setImage(image,photo.imageUrl);else image.src = photo.imageUrl; image.alt = photo.imageAlt;
       image.addEventListener('error', failed);
       return image;
     };
@@ -100,8 +107,6 @@
       sides.className = 't5-service-accompaniments'; scene.append(sides);
     }
     scene.append(plate, caption);
-    Promise.all(Array.from(scene.querySelectorAll('img'), image => image.decode().catch(failed)))
-      .then(() => { scene.classList.remove('is-loading'); scene.setAttribute('aria-busy', 'false'); });
     copy.append(el('h3', 't5-service-dish', receipt.dishTitle),
       el('p', 't5-service-composition', receipt.composition.join(' · ')),
       el('p', 't5-service-saved', 'Ответ сохранён на сервере.'),
@@ -124,6 +129,8 @@
       host.prepend(node);
       if (attempt.status === 'in_progress') root.requestAnimationFrame(() => { if (node.isConnected) node.scrollIntoView({block:'start',behavior:'instant'}); });
     } else { doc.body.append(node); doc.body.classList.add('t5-service-open'); }
+    for(const photo of scene.querySelectorAll('img')){photo.addEventListener('load',updateScene);photo.addEventListener('error',failed);}
+    updateScene();
     current = { attemptId: attempt.id, key, node, next, inline, locked: true };
   }
   function setLocked(value) {

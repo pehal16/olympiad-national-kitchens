@@ -3853,7 +3853,7 @@ pre {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: #f6f2ec url("/assets/olympiad/landing/hero-national-cuisines.webp") center 47% / cover no-repeat;
+  background: #f6f2ec;
 }
 
 .landing-hero-copy {

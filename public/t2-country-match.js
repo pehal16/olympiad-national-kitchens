@@ -43,6 +43,7 @@
     let started = inlineIntro || seen || question.sequenceInTour !== 1 || model.isComplete() || Object.keys(model.placements).length > 0;
     let selected = null;
     let dragging = null;
+    let disposeAtlas=null;
     const shell = doc.createElement("section");
     shell.className = "t2-match";
     const restaurant = presentationMode === 'restaurant';
@@ -63,7 +64,7 @@
     function renderActivity() {
       shell.replaceChildren();
       const toolbar = element("div", "t2-toolbar");
-      const instruction = element("p", "t2-instruction", "Перетащите блюдо к стране или нажмите блюдо, затем страну.");
+      const instruction = element("p", "t2-instruction", restaurant ? "1. Выберите блюдо. 2. Нажмите страну на карте." : "Перетащите блюдо к стране или нажмите блюдо, затем страну.");
       const help = element("details", "t2-help");
       help.append(element("summary", "", "Как выполнять"), ruleList());
       toolbar.append(instruction, help);
@@ -98,7 +99,8 @@
       function select(id) {
         selected = selected === id ? null : id;
         sync();
-        announce(selected ? `Выбрано: ${nodes.get(id).item.text}. Теперь выберите страну.` : "Выбор отменён.");
+        announce(selected ? `Выбрано: ${nodes.get(id).item.text}. ${restaurant?'Теперь нажмите страну на карте.':'Теперь выберите страну.'}` : "Выбор отменён.");
+        if(restaurant&&selected&&countries.getBoundingClientRect().bottom<80)countries.scrollIntoView({block:'center',behavior:win.matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'});
       }
       function assign(id, country) {
         const oldRects = new Map([...nodes].map(([item, entry]) => [item, entry.button.getBoundingClientRect()]));
@@ -129,7 +131,7 @@
         flag.addEventListener("error", () => { flag.hidden = true; });
         target.append(flag, element("span", "", country.label));
         const holder = element("div", "t2-holder");
-        const empty = element("button", "t2-empty", "Выберите блюдо");
+        const empty = element(restaurant ? "div" : "button", "t2-empty", "Выберите блюдо");
         empty.setAttribute("aria-label", `Разместить выбранное блюдо: ${country.label}`);
         const undo = element("button", "t2-undo", "Вернуть");
         undo.addEventListener("click", () => {
@@ -177,12 +179,13 @@
         button.dataset.itemId = item.id;
         button.draggable = !coarse;
         const photo = element("div", "t2-photo");
-        const img = element("img", ""); img.src = item.imageUrl; img.alt = item.imageAlt;
+        const img = element("img", ""); if(restaurant&&root.RestaurantMedia)root.RestaurantMedia.setImage(img,item.imageUrl,'card');else img.src = item.imageUrl; img.alt = item.imageAlt;
         img.width = 900; img.height = 600; img.draggable = false;
         const missing = element("span", "t2-photo-missing", "Фото недоступно"); missing.hidden = true;
         img.addEventListener("error", () => { img.hidden = true; missing.hidden = false; });
         photo.append(img, missing);
-        button.append(photo, element("span", "t2-dish-name", item.text));
+        const assignedLabel=element('small','t2-assigned-label');assignedLabel.hidden=true;
+        button.append(photo, element("span", "t2-dish-name", item.text),assignedLabel);
         button.addEventListener("click", () => select(item.id));
         button.addEventListener("dragstart", (event) => {
           dragging = item.id; selected = item.id;
@@ -199,7 +202,7 @@
       });
       function sync() {
         const focused = doc.activeElement;
-        picker.hidden = !selected || !coarse;
+        picker.hidden = restaurant || !selected || !coarse;
         if (selected) {
           pickerLabel.textContent = `Страна для: ${nodes.get(selected).item.text}`;
           picker.setAttribute("aria-label", pickerLabel.textContent);
@@ -214,8 +217,10 @@
           occupied.textContent = item ? `Занято: ${nodes.get(item).item.text}` : "Свободно";
           quick.setAttribute("aria-label", `${country.label}. ${occupied.textContent}`);
           if (restaurant) {
-            empty.textContent = item ? nodes.get(item).item.text : 'Выберите блюдо';
+            if(item){const assigned=nodes.get(item).item,thumb=element('img','t2-map-dish');root.RestaurantMedia.setImage(thumb,assigned.imageUrl,'card');thumb.alt='';thumb.addEventListener('error',()=>{thumb.hidden=true;});empty.replaceChildren(thumb,element('span','',assigned.text));}
+            else empty.textContent='Выберите блюдо';
             if (empty.parentNode !== holder) holder.replaceChildren(empty);
+            zone.classList.toggle('has-dish',Boolean(item));
           } else {
             if (!item && empty.parentNode !== holder) holder.replaceChildren(empty);
             if (item && nodes.get(item).button.parentNode !== holder) holder.replaceChildren(nodes.get(item).button);
@@ -228,6 +233,7 @@
           button.classList.toggle("is-assigned", placed);
           button.setAttribute("aria-pressed", id === selected ? "true" : "false");
           button.setAttribute("aria-label", `${item.text}${placed ? `, размещено: ${zones.get(model.placements[id]).country.label}` : ""}. Выбрать блюдо`);
+          const label=button.querySelector('.t2-assigned-label');label.hidden=!restaurant||!placed;label.textContent=placed?'Ваш выбор: '+zones.get(model.placements[id]).country.label:'';
           if (!restaurant) {
             if (placed && placeholder.parentNode !== slot) slot.replaceChildren(placeholder);
             if (!placed && button.parentNode !== slot) slot.replaceChildren(button);
@@ -235,6 +241,12 @@
         });
         progress.textContent = `Сопоставлено: ${Object.keys(model.placements).length} из ${question.items.length}`;
         if (focused && shell.contains(focused) && doc.activeElement !== focused) focused.focus({ preventScroll: true });
+      }
+      if(restaurant&&root.RestaurantAtlas){
+        const menu=element('aside','t2-atlas-menu'),title=shell.querySelector('.t2-bank-title');
+        const workspace=element('div','t2-atlas-workspace');countries.before(workspace);workspace.append(countries,menu);menu.append(title,bank);
+        disposeAtlas=root.RestaurantAtlas.attach(countries,question.buckets);
+        status.classList.add('t2-atlas-selection');status.textContent='Выберите любое блюдо в наборе, затем его страну на карте.';
       }
       sync();
     }
@@ -263,7 +275,7 @@
       });
       shell.append(start);
     }
-    return { getAnswer: () => model.getAnswer(), isComplete: () => started && model.isComplete(), dispose: () => shell.removeEventListener("keydown", keydown) };
+    return { getAnswer: () => model.getAnswer(), isComplete: () => started && model.isComplete(), dispose: () => {disposeAtlas?.();shell.removeEventListener("keydown", keydown);} };
   }
   const api = { createState, create };
   if (typeof module !== "undefined" && module.exports) module.exports = api;

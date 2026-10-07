@@ -6,8 +6,8 @@
   const el = (tag, cls, text) => { const n = doc.createElement(tag); n.className = cls || ''; if (text !== undefined) n.textContent = text; return n; };
   function picture(scene, cls, alt = '') {
     const p = el('picture', cls), source = el('source'), img = el('img');
-    source.media = '(max-width: 767px)'; source.srcset = base + scene + '-mobile.webp';
-    img.src = base + scene + '-wide.webp'; img.alt = alt; img.decoding = 'async';
+    source.media = '(max-width: 767px)'; source.srcset = root.RestaurantMedia?.displayUrl(base + scene + '-mobile.webp')||base + scene + '-mobile.webp';
+    img.src = root.RestaurantMedia?.displayUrl(base + scene + '-wide.webp')||base + scene + '-wide.webp'; img.alt = alt; img.decoding = 'async';img.fetchPriority='low';
     img.addEventListener('error', () => { p.classList.add('is-missing'); img.hidden = true; });
     p.append(source, img); return p;
   }
@@ -43,7 +43,7 @@
     active = enabled(attempt) && attempt.status === 'in_progress';
     doc.body.classList.toggle('story-immersive', active);
     const section = doc.getElementById('attempt-section');
-    section.dataset.layoutVersion = active ? '2' : '1';
+    section.dataset.layoutVersion = active ? '3' : '1';
     if (!active) {
       const details = doc.getElementById('restaurant-details'); if (details) { details.before(details.querySelector('.exam-cockpit')); details.remove(); }
       doc.getElementById('story-service-slot')?.remove(); return;
@@ -56,9 +56,6 @@
     }
     doc.querySelector('#restaurant-details > summary').textContent = `${doc.getElementById('participant-name').textContent} · сведения и темп`;
     const chapter = attempt.story.currentChapter;
-    for (const scene of scenes.slice(chapter - 1, chapter + 1)) {
-      const img = new root.Image(); img.src = base + scene + (root.matchMedia('(max-width:767px)').matches ? '-mobile.webp' : '-wide.webp');
-    }
     let slot = doc.getElementById('story-service-slot');
     if (!slot) { slot = el('div', 'restaurant-service-slot'); slot.id = 'story-service-slot'; doc.getElementById('question-card').before(slot); }
   }
@@ -69,22 +66,21 @@
     const paper = el('div', 'restaurant-paper');
     if (chapter === 1) {
       const photo = body.querySelector('.question-photo');
-      if (photo) { photo.prepend(picture('album', 'restaurant-album-background')); photo.append(zoomButton(attempt.currentQuestion.imageUrl, attempt.currentQuestion.imageAlt)); }
-      body.append(paper); move(story, paper); move(prompt, paper); move(note, paper); move(body.querySelector('.options'), paper); move(doc.querySelector('.action-deck'), paper);
+      if (photo) { photo.append(zoomButton(attempt.currentQuestion.imageUrl, attempt.currentQuestion.imageAlt)); }
+      body.append(paper); move(prompt, paper); move(note, paper); move(body.querySelector('.options'), paper); move(doc.querySelector('.action-deck'), paper);
     } else if (chapter === 3) {
       const dossier = body.querySelector('.t3-dossier'), evidence = body.querySelector('.t3-evidence');
       const notebook = el('div', 'restaurant-notebook');
       dossier.prepend(picture('notes', 'restaurant-context restaurant-notes-context'));
       dossier.append(notebook); move(evidence.querySelector('.t3-visual'), notebook); notebook.append(paper);
-      move(story, paper); move(prompt, paper); move(note, paper); move(evidence.querySelector('.t3-clues'), paper); move(dossier.querySelector('.t3-answer-form'), paper);
+      move(prompt, paper); move(note, paper); move(evidence.querySelector('.t3-clues'), paper); move(dossier.querySelector('.t3-answer-form'), paper);
       const actual = notebook.querySelector('.t3-visual'); actual.append(zoomButton(attempt.currentQuestion.imageUrl, attempt.currentQuestion.imageAlt));
     } else if (chapter === 4) {
       card.prepend(picture('orders', 'restaurant-context restaurant-orders-context'));
-      card.append(paper); move(story, paper); move(prompt, paper); move(note, paper); move(body, paper);
+      card.append(paper); move(prompt, paper); move(note, paper); move(body, paper);
     } else {
-      move(story, card, true);
       const task = body.querySelector(chapter === 2 ? '.t2-match' : '.t5-photo-workbench');
-      if (task) task.prepend(picture(scenes[chapter - 1], 'restaurant-context restaurant-work-context'));
+      if (task&&chapter!==2) task.prepend(picture(scenes[chapter - 1], 'restaurant-context restaurant-work-context'));
     }
   }
   function result() {
@@ -93,5 +89,5 @@
     doc.getElementById('story-service-slot')?.remove();
   }
   function setLocked(value) { if (value && zoom?.open) zoom.close(); }
-  root.RestaurantLayout = {layoutVersion:2, enabled, beforeQuestion, mount, result, picture, zoomButton, setLocked};
+  root.RestaurantLayout = {layoutVersion:3, enabled, beforeQuestion, mount, result, picture, zoomButton, setLocked};
 })(window);

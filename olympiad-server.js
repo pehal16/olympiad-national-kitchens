@@ -5,7 +5,7 @@ const path = require("node:path");
 const { createSqliteD1 } = require("./src/sqlite-d1");
 
 const STATIC_FILES = new Set([
-  '/restaurant-layout.js', '/restaurant-layout.css',
+  '/restaurant-layout.js', '/restaurant-layout.css', '/restaurant-media.js', '/restaurant-atlas.js',
   "/", "/olympiad-story.js", "/olympiad-story.css", "/t5-photo-model.js", "/t5-photo-kitchen.js", "/t5-photo-kitchen.css", "/t5-dish-service.js", "/t5-dish-service.css", "/certificate.html", "/certificate.js", "/certificate.css", "/index.html", "/app.js", "/t2-country-match.js", "/t3-detective.js", "/t4-guest-order.js", "/t5-final-kitchen.js", "/t5-final-kitchen.css", "/styles.css", "/admin.html", "/admin.js",
   "/content-admin.html", "/content-admin.js", "/visual-demo.html",
   "/visual-demo.js", "/sw.js", "/manifest.webmanifest",

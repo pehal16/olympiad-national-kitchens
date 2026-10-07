@@ -451,7 +451,7 @@ function releaseExamGuard(message = "") {
   state.examGuardReason = "";
   updateExamGuardUi();
   refreshAttemptControls();
-  if (wasActive && state.attempt?.currentQuestion?.type === "final_kitchen") {
+  if (wasActive && (state.attempt?.currentQuestion?.type === "final_kitchen" || elements.attemptMessage.textContent === previousReason)) {
     hideMessage(elements.attemptMessage);
   }
   if (message) {
@@ -1912,6 +1912,7 @@ function participantFromForm() {
 }
 
 function renderHero() {
+  if(!state.olympiad.storyEnabled)document.querySelector('.landing-hero-media').style.backgroundImage='url("/assets/olympiad/landing/hero-national-cuisines.webp")';
   elements.heroTitle.textContent = state.olympiad.title;
   elements.heroSubtitle.textContent = state.olympiad.subtitle;
   if (elements.heroFormatBadge) {
@@ -2139,7 +2140,8 @@ function renderSingleChoice(question) {
     const figure = document.createElement("figure");
     figure.className = "question-photo";
     const image = document.createElement("img");
-    image.src = question.imageUrl;
+    if(window.RestaurantLayout?.enabled(state.attempt)&&window.RestaurantMedia)window.RestaurantMedia.setImage(image,question.imageUrl);else image.src = question.imageUrl;
+    image.fetchPriority='high';
     image.alt = question.imageAlt;
     image.width = 1200;
     image.height = 800;

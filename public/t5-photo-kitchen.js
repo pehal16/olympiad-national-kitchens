@@ -66,7 +66,7 @@
       submitButton.hidden=!started;submitButton.disabled=locked||!ready||stage!=='served';
     }
     function decode(url){
-      if(!photos.has(url)){const photo=new win.Image();photo.src=url;const pending=photo.decode().then(()=>photo).catch(error=>{photos.delete(url);throw error;});photos.set(url,pending);if(photos.size>24)photos.delete(photos.keys().next().value);}
+      if(!photos.has(url)){const photo=new win.Image();photo.dataset.sourceUrl=url;photo.src=presentationMode==='restaurant'&&root.RestaurantMedia?root.RestaurantMedia.displayUrl(url):url;const pending=photo.decode().catch(error=>{if(photo.src.endsWith(url))throw error;photo.src=url;return photo.decode();}).then(()=>photo).catch(error=>{photos.delete(url);throw error;});photos.set(url,pending);if(photos.size>24)photos.delete(photos.keys().next().value);}
       return photos.get(url);
     }
     async function render(){
@@ -91,7 +91,7 @@
     function changed(){if(presentationMode==='restaurant')root.T5DishService?.hideInline();persist();update();render();onChange?.(answer());}
     for(const item of dish.items){
       const card=el('button','t5-photo-card');card.type='button';on(card,'click',()=>{if(locked)return;if(selected.has(item.id))selected.delete(item.id);else if(selected.size<4)selected.add(item.id);stage='select';changed();});card.dataset.ingredient=item.id;card.setAttribute('aria-pressed','false');
-      const photo=el('img');photo.src=item.imageUrl;photo.alt='';photo.draggable=false;photo.loading='eager';photo.decoding='async';
+      const photo=el('img');if(presentationMode==='restaurant'&&root.RestaurantMedia)root.RestaurantMedia.setImage(photo,item.imageUrl,'card');else photo.src=item.imageUrl;photo.alt='';photo.draggable=false;photo.loading='eager';photo.decoding='async';
       on(photo,'error',()=>{photo.hidden=true;});card.append(photo,el('span','',item.text),el('small','','Добавить'));cards.set(item.id,card);grid.append(card);
       on(card,'dragstart',event=>{if(locked||card.disabled){event.preventDefault();return;}event.dataTransfer.setData('application/x-t5-photo-product',item.id);event.dataTransfer.effectAllowed='copy';scene.classList.add('is-over');});
       on(card,'dragend',()=>scene.classList.remove('is-over'));

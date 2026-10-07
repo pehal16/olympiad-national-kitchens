@@ -51,3 +51,151 @@ body.olympiad-page.story-immersive.exam-mode-active:has(#attempt-section.is-t5:n
 @media(prefers-reduced-motion:reduce){.story-immersive * {animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 /* Keep the guest's face and hands inside the short portrait frames. */
 @media(max-width:800px){.has-restaurant-story .landing-hero-media {height:clamp(290px,78vw,350px);min-height:290px;max-height:none}.restaurant-arrival img {object-position:center top}.restaurant-waiting img {object-position:center top}}
+
+/* Layout 3: a readable invitation, a menu-sized album and a geographical atlas. */
+.has-restaurant-story {background:#f6f4ec;color:#173d37;font-family:Arial,system-ui,sans-serif}
+.has-restaurant-story .shell {width:min(1240px,calc(100% - 32px));box-sizing:border-box}
+.has-restaurant-story .landing-hero {overflow:visible;min-height:0;grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr);gap:28px;border-radius:0;background:transparent}
+.has-restaurant-story .landing-hero-media {order:0;z-index:0;position:sticky;top:96px;min-height:0;height:580px;max-height:calc(100dvh - 120px);border-radius:16px;overflow:hidden}
+.has-restaurant-story .landing-hero-copy {order:1;padding:12px 0;width:auto;display:flex;flex-direction:column;min-width:0}
+.has-restaurant-story .landing-hero-copy h1 {font:600 clamp(32px,3.5vw,48px)/1.08 Georgia,serif;letter-spacing:-.025em;color:#173d37}
+.has-restaurant-story .landing-hero .lead {max-width:none;margin:10px 0 0;font-size:16px;line-height:1.5}
+.has-restaurant-story .landing-hero-actions {display:none}
+.has-restaurant-story .landing-facts {font-size:14px;margin:14px 0 0;order:3}
+.has-restaurant-story .landing-hero-copy > .landing-pilot-note {order:4;margin-bottom:18px}
+.has-restaurant-story .story-introduction {order:2;padding:20px 0 0}
+.story-invitation {font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#6b6d59;margin:0 0 8px}
+.story-welcome-line {font:400 clamp(20px,2vw,25px)/1.5 Georgia,serif;margin:0;color:#173d37}
+.has-restaurant-story .story-chapters {font-size:12px;gap:8px 14px;margin:14px 0 0;padding:12px 0;line-height:1.4}
+.has-restaurant-story .story-introduction .story-answer-review {padding:8px 0;border-top:0}
+.has-restaurant-story .story-introduction .story-answer-review summary {font-size:14px;min-height:40px;line-height:40px}
+.has-restaurant-story #prestart-section {order:5;grid-template-columns:1fr;gap:16px;margin:0}
+.has-restaurant-story #prestart-section > .card {padding:20px;border:1px solid #cddbd4;border-radius:12px;background:#fffdf7;box-shadow:none;min-width:0}
+.has-restaurant-story #prestart-section h2 {font:600 22px/1.2 Georgia,serif;margin:0 0 8px}
+.has-restaurant-story #prestart-section .section-intro {font-size:13px;margin:0 0 14px}
+.has-restaurant-story #registration-form {display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.has-restaurant-story #registration-form .field {min-width:0;margin:0}
+.has-restaurant-story #registration-form .field-wide {grid-column:auto}
+.has-restaurant-story #registration-form input {width:100%;min-height:48px;padding:10px;font-size:15px;box-sizing:border-box}
+.has-restaurant-story #registration-submit {grid-column:1/-1;min-height:48px}
+.has-restaurant-story #prestart-section .button {min-height:48px}
+.has-restaurant-story #prestart-section small,.has-restaurant-story .consent-check {font-size:12px;line-height:1.55}
+.has-restaurant-story .landing-hero .restaurant-arrival img {object-position:center top}
+.has-restaurant-story.story-result-active #hero-section {display:none!important}
+.has-restaurant-story.story-result-active #result-section {margin-top:12px}
+body.olympiad-page.story-immersive.exam-mode-active .shell,
+body.olympiad-page.story-immersive.exam-mode-active:has(#attempt-section.is-t5:not(.hidden)) .shell {width:min(1240px,calc(100% - 32px));max-width:1240px;padding:12px 0 32px}
+.story-immersive .story-chapter {display:grid;grid-template-columns:72px minmax(0,1fr);gap:18px;align-items:center;margin:0 0 14px;padding:18px 22px;background:#ede9dc;border:1px solid #d6d8c8;border-radius:12px}
+.story-guest-avatar {position:relative;align-self:start;width:72px;height:72px;border-radius:50%;overflow:hidden;background:#d2d3bf}
+.story-guest-avatar img {position:absolute;width:300%;height:auto;max-width:none;left:-100%;top:0}
+.story-immersive .story-chapter h2 {font:600 14px/1.4 Arial,system-ui,sans-serif;margin:0 0 6px;color:#5c6c54}
+.story-guest-line {font:400 clamp(19px,1.8vw,23px)/1.45 Georgia,serif;margin:0;max-width:1000px}
+.story-immersive .story-recorded {margin:8px 0 0;font-size:11px!important}
+.story-immersive #attempt-section[data-chapter="1"] #question-body {grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;padding:38px 34px;background:#ece4d2 url('/assets/olympiad/story/layout-v3/album-spread.webp') center/100% 100%;border:1px solid #c2af91;border-radius:12px}
+.story-immersive .question-photo {border:0;background:transparent;min-height:0;padding:20px;align-self:center;overflow:visible}
+.story-immersive .question-photo > img {width:min(100%,420px);max-width:100%;margin:0 auto 12px;padding:8px;aspect-ratio:3/2;height:auto;box-sizing:border-box;border:1px solid #dbd5c6;box-shadow:0 5px 14px #3c251b20}
+.story-immersive .question-photo > .restaurant-zoom {align-self:center;margin:0;background:#fffdf5}
+.story-immersive #attempt-section[data-chapter="1"] .restaurant-paper {padding:20px 26px;border:0;background:transparent;box-shadow:none}
+.story-immersive #question-prompt {font-size:22px;margin-top:0}
+.story-immersive .photo-options .option {padding:12px;min-height:48px;font-size:16px}
+.restaurant-map {padding:0;background:none;gap:12px}
+.restaurant-map .t2-toolbar {order:0;margin:0;padding:12px 16px;background:#ede9dc}
+.restaurant-map .t2-instruction {font-weight:600;font-size:16px;align-self:center}
+.t2-atlas-workspace {order:1;display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,1fr);gap:18px;align-items:start}
+.t2-atlas-workspace > .t2-atlas-board {order:0}.t2-atlas-workspace > .t2-atlas-menu {order:1}
+.restaurant-map .t2-atlas-board {position:relative;display:block;aspect-ratio:2/1;min-width:0;padding:0;overflow:visible;border:1px solid #c4cec0;border-radius:12px;background:#eef1e8}
+.t2-atlas-world,.t2-atlas-routes {position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:12px}
+.t2-atlas-routes {z-index:1;pointer-events:none;overflow:visible}
+.t2-atlas-routes path {fill:none;stroke:#577b67;stroke-width:1.5;stroke-dasharray:4 4}
+.t2-atlas-routes circle {fill:#147568;stroke:#fffdf7;stroke-width:3;pointer-events:auto;cursor:pointer}
+.restaurant-map .t2-atlas-board .t2-country {position:absolute;left:var(--atlas-x);top:var(--atlas-y);transform:translate(-50%,-50%);width:36%;z-index:2;padding:6px;background:#fffdf8f5;border:1px solid #bccbbb;border-radius:9px;box-shadow:0 3px 9px #254f3620}
+.restaurant-map .t2-atlas-board .t2-country.has-dish {border-color:#147568;background:#f2f6ed}
+.restaurant-map .t2-target {min-height:48px!important;padding:6px;flex-direction:row;gap:8px;font-size:15px!important;text-align:left}
+.restaurant-map .t2-flag {width:28px;height:21px;flex:0 0 28px}
+.restaurant-map .t2-holder {min-height:0}
+.restaurant-map .t2-empty {font-size:12px;line-height:1.35;min-height:0!important;padding:6px;border-radius:6px}
+.restaurant-map .t2-empty:has(.t2-map-dish) {display:flex;align-items:center;gap:6px;text-align:left}.t2-map-dish {width:42px;height:32px;object-fit:contain;border-radius:4px;flex:none}
+.restaurant-map .t2-undo {font-size:12px;min-height:48px!important;margin-top:5px;border-radius:6px}
+.t2-atlas-menu {min-width:0;padding:12px;background:#fffdf7;border:1px solid #cddbd4;border-radius:12px}
+.restaurant-map .t2-bank-title {margin:0 0 10px;font:600 19px/1.3 Georgia,serif;color:#173d37}
+.restaurant-map .t2-bank {grid-template-columns:1fr 1fr;gap:10px}
+.restaurant-map .t2-bank-slot {padding:5px;min-height:0;border:1px solid #cddbd4}
+.restaurant-map .t2-dish {border:2px solid transparent;padding:0;box-shadow:none}
+.restaurant-map .t2-dish.is-selected {border-color:#147568;background:#eaf2e8;box-shadow:0 0 0 2px #14756820}
+.restaurant-map .t2-dish.is-assigned .t2-photo {width:100%;flex:initial}
+.restaurant-map .t2-dish-name,.restaurant-map .t2-dish.is-assigned .t2-dish-name {font:600 15px/1.3 Georgia,serif;text-align:center;padding:6px 3px;min-height:36px}
+.t2-assigned-label {display:block;font-size:11px;line-height:1.4;padding:2px 3px 6px;color:#285f48}
+.restaurant-map .restaurant-zoom {font-size:12px!important;padding:6px 3px;min-height:48px}
+.restaurant-map .t2-progress {order:2;background:none;padding:0;font-size:13px}
+.restaurant-map .t2-status {order:3;background:#e7eee3;color:#173d37;padding:12px;font-size:14px;border-left:3px solid #147568}
+.restaurant-notes-context {height:110px}
+.restaurant-notebook .t3-visual {padding:20px}
+.restaurant-notebook .t3-visual > img {max-height:330px}
+.restaurant-notebook {padding:20px}
+.restaurant-orders-context {height:460px}
+.story-immersive #attempt-section[data-chapter="4"] #question-card {grid-template-columns:minmax(180px,.45fr) minmax(0,1.55fr);gap:18px}
+.restaurant-orders .t4-photo {max-height:210px}
+.restaurant-kitchen .t5-photo-card img {max-height:100px}
+.restaurant-kitchen .t5-photo-pantry,.restaurant-kitchen .t5-photo-panel,.restaurant-kitchen-actions {padding:14px}
+.restaurant-kitchen .t5-photo-heading {padding:14px 18px}
+.restaurant-kitchen .restaurant-work-context {height:80px}
+.restaurant-kitchen .t5-photo-scene {background-image:url('/assets/olympiad/display-v1/preview/story/layout-v2/scenes/kitchen-wide.webp')}
+.restaurant-waiting {height:360px;max-width:650px}
+.has-restaurant-story .certificate-section {margin-top:24px;border:1px solid #b7cbbb;background:#f0f3e9}
+.story-immersive #attempt-section .dashboard-head {padding:8px 14px!important;box-shadow:none}
+.story-immersive .dashboard-head h2 {font:600 18px/1.3 Georgia,serif;margin:0}
+.story-immersive #participant-meta {margin:4px 0 0;font-size:11px}
+.story-immersive .timer-box {padding:6px 12px!important;min-width:112px;box-shadow:none}
+.story-immersive .timer-box strong {font:600 23px/1.2 Arial,system-ui,sans-serif}
+.story-immersive .timer-box span {font-size:10px!important}
+.story-immersive .restaurant-details > summary {min-height:32px;padding:8px 12px;font-size:12px}
+.story-immersive #attempt-section > .card:not(.dashboard-head) {box-shadow:none}
+.story-immersive .progress-bars {margin:6px 0}.story-immersive .progress-line {height:5px!important}
+.story-immersive .stage-chip {font:400 12px/1.3 Arial,system-ui,sans-serif}
+.story-immersive #question-transition-banner {font:400 12px/1.4 Arial,system-ui,sans-serif;padding:6px 10px;min-height:0;margin:4px 0 10px;border:0;box-shadow:none;background:transparent}
+.story-immersive #attempt-message.info,.story-immersive #attempt-message.success {display:none}
+.story-immersive #attempt-sync-meta {font-size:10px;overflow-wrap:anywhere}
+.story-immersive #attempt-section[data-chapter="1"] #question-body {background-size:110% 125%;padding:42px 40px}
+.story-immersive #attempt-section[data-chapter="1"] .restaurant-paper {padding:20px}
+.restaurant-notes-context img {object-position:center bottom}
+.restaurant-orders-context img {object-position:left center}
+@media(max-width:1099px){.t2-atlas-workspace {grid-template-columns:minmax(0,1.8fr) minmax(0,1fr);gap:12px}.restaurant-map .t2-target {font-size:13px!important}.restaurant-map .t2-atlas-board .t2-country {width:39%}.restaurant-map .t2-dish-name {font-size:14px}.has-restaurant-story .landing-hero {gap:20px}}
+@media(max-width:767px){
+ .has-restaurant-story .shell,body.olympiad-page.story-immersive.exam-mode-active .shell,body.olympiad-page.story-immersive.exam-mode-active:has(#attempt-section.is-t5:not(.hidden)) .shell {width:calc(100% - 16px)}
+ .has-restaurant-story .landing-hero {display:flex;flex-direction:column;gap:18px}
+ .has-restaurant-story .landing-hero-media {position:relative;top:auto;min-height:0;height:230px;max-height:none;order:0}
+ .has-restaurant-story .landing-hero-copy {order:1;padding:0 8px}
+ .has-restaurant-story .landing-hero-copy h1 {font-size:34px}
+ .has-restaurant-story .landing-hero .restaurant-arrival img {object-position:center 30%}
+ .has-restaurant-story #registration-form {grid-template-columns:1fr}
+ .has-restaurant-story #prestart-section > .card {padding:16px}
+ .story-immersive .story-chapter {grid-template-columns:48px minmax(0,1fr);gap:10px;padding:12px}
+ .story-guest-avatar {width:48px;height:48px}
+ .story-immersive .story-chapter-copy h2 {max-width:none;font-size:12px}
+ .story-guest-line {font-size:18px;line-height:1.45}
+ .story-immersive #attempt-section[data-chapter="1"] #question-body {grid-template-columns:1fr;padding:12px;background-image:none;background:#f4eedf;border:3px solid #8f7758}
+ .story-immersive .question-photo {padding:8px;max-width:430px;justify-self:center;width:100%;box-sizing:border-box}
+ .story-immersive .question-photo > img {margin:0 0 10px;width:100%;padding:5px}
+ .story-immersive #attempt-section[data-chapter="1"] .restaurant-paper {padding:16px 4px}
+ .t2-atlas-workspace {grid-template-columns:1fr;gap:12px}
+ .restaurant-map .t2-atlas-board {aspect-ratio:5/6;margin:18px 0}
+ .restaurant-map .t2-atlas-board .t2-country {width:43%;padding:5px}
+ .restaurant-map .t2-target {font-size:13px!important;min-height:48px!important;padding:4px;gap:5px;flex-wrap:nowrap}
+ .restaurant-map .t2-target span {overflow-wrap:normal}
+ .restaurant-map .t2-flag {width:22px;height:17px;flex-basis:22px}
+ .restaurant-map .t2-empty {font-size:11px;min-height:0!important}
+ .restaurant-map .t2-undo {min-height:48px!important}
+ .restaurant-map .t2-toolbar {padding:10px;gap:8px}
+ .restaurant-map .t2-help {width:auto}.restaurant-map .t2-help summary {font-size:12px;padding:6px 10px}
+ .restaurant-map .t2-bank {gap:10px}
+ .restaurant-map .t2-photo {max-height:120px}
+ .restaurant-map .t2-dish-name,.restaurant-map .t2-dish.is-assigned .t2-dish-name {font-size:16px}
+ .restaurant-notes-context {height:90px}.restaurant-notebook {padding:12px}
+ .restaurant-notebook .t3-visual > img {max-height:230px}
+ .story-immersive #attempt-section[data-chapter="4"] #question-card {display:flex}
+ .restaurant-orders-context {height:150px}
+ .restaurant-orders .t4-photo {max-height:none}
+ .restaurant-kitchen .t5-photo-scene {background-image:url('/assets/olympiad/display-v1/preview/story/layout-v2/scenes/kitchen-mobile.webp')}
+ .restaurant-kitchen .restaurant-work-context {height:65px}
+ .restaurant-waiting {height:340px}
+}

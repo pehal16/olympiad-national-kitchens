@@ -68,7 +68,7 @@
     }
     function photo(option, className) {
       const frame = element("span", className || "t4-photo");
-      const img = element("img"); img.src = option.imageUrl; img.alt = option.imageAlt;
+      const img = element("img"); if(presentationMode==='restaurant'&&className!=='t4-zoom-photo'&&root.RestaurantMedia)root.RestaurantMedia.setImage(img,option.imageUrl,'card');else img.src = option.imageUrl; img.alt = option.imageAlt;
       img.width = 900; img.height = 600; img.decoding = "async"; img.loading = "eager"; img.draggable = false;
       const fallback = element("span", "t4-photo-missing", "Фото недоступно"); fallback.hidden = true;
       img.addEventListener("error", () => { img.hidden = true; fallback.hidden = false; });

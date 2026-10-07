@@ -52,7 +52,7 @@
       const scene = element("div", "t3-evidence");
       const visual = element("figure", "t3-visual");
       const img = element("img");
-      img.src = question.imageUrl;
+      if(presentationMode==='restaurant'&&root.RestaurantMedia)root.RestaurantMedia.setImage(img,question.imageUrl);else img.src = question.imageUrl;
       img.alt = question.imageAlt;
       img.width = 900; img.height = 600;
       img.decoding = "async";
