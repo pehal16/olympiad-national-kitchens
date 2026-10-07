@@ -1,0 +1,31 @@
+{
+  "runtimeCommit": "8141afffa329c3f63556fe7c8d54e8a73ec7a8f7",
+  "workflow": "37618624590",
+  "deployment": "6cede2dc",
+  "deployedAt": "2026-10-07T12:07:30Z",
+  "layoutVersion": 3,
+  "shellVersion": "layout3b",
+  "testCount": 271,
+  "build": "pass",
+  "localPm01": "pass",
+  "livePm01": "pass",
+  "nativeProductionWidths": [
+    320,
+    390,
+    430,
+    1366
+  ],
+  "nativeErrors": [],
+  "nativeHorizontalOverflow": false,
+  "nativeChecks": [
+    "arrival head and hands visible",
+    "instruction expand and collapse",
+    "registration navigation",
+    "certificate hidden before publication"
+  ],
+  "syntheticProductionParticipants": 0,
+  "previewWorkflow": "37617149834",
+  "previewRuntime": "ea2dd0a00886ffa8842b7614e19b8a3afe5bab53",
+  "previewDeployment": "b09e7ee0",
+  "previewLoadNotRepeatedForCssOnlyCrop": true
+}

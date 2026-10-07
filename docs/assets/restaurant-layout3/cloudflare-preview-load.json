@@ -1,0 +1,24 @@
+[
+  {
+    "environment": "Cloudflare Pages preview / separate D1",
+    "entryMode": "anytime",
+    "participants": 50,
+    "answers": 1800,
+    "errors": 0,
+    "lostAnswers": 0,
+    "duplicateAnswers": 0,
+    "answerP95Ms": 822,
+    "timestamp": "2026-10-07T11:55:52.533Z"
+  },
+  {
+    "environment": "Cloudflare Pages preview / separate D1",
+    "entryMode": "scheduled",
+    "participants": 60,
+    "answers": 2160,
+    "errors": 0,
+    "lostAnswers": 0,
+    "duplicateAnswers": 0,
+    "answerP95Ms": 1100,
+    "timestamp": "2026-10-07T11:56:38.261Z"
+  }
+]
