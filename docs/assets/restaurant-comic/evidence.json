@@ -1,0 +1,27 @@
+{
+  "tasks": 36,
+  "score": 150,
+  "plates": 51,
+  "checks": [
+    "T1: nine viewports, full image, zoom/focus, no overflow",
+    "Question 3: saved draft and guard recovery",
+    "T2: nine viewports, full image, zoom/focus, no overflow",
+    "Map: drag, occupied replacement, undo, keyboard recovery and four exact photo placements",
+    "T3: nine viewports, full image, zoom/focus, no overflow",
+    "Question 17: saved draft and guard recovery",
+    "T4: nine viewports, full image, zoom/focus, no overflow",
+    "Question 27: saved draft and guard recovery",
+    "T5: nine viewports, full image, zoom/focus, no overflow",
+    "Question 35: saved draft and guard recovery",
+    "36 issued dialogues and optional exchanges; soft sync and reload preserve the conversation; automatic T3 focus; no judging before publication",
+    "Touch T2: world map, four visible photos, map targets, undo, keyboard selection and server confirmation; live decor stop/resume",
+    "Touch/reduced-motion: failed decor, photo retry, lost network request, one stored answer, decorationsDisabled and standard answer"
+  ],
+  "images": {
+    "uniqueDisplayRequests": 137,
+    "displayBytes": 4332078,
+    "originalEquivalentBytes": 26015100,
+    "reductionPercent": 83
+  },
+  "errors": []
+}

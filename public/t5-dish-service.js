@@ -3,10 +3,10 @@
   const seen = new Set();
   let current = null;
   function sync(attempt, onDismiss) {
-    if (current && !current.node.isConnected) current = null;
-    if (attempt?.story?.decorationsDisabled) { current?.node.remove(); current = null; root.document.body.classList.remove('t5-service-open'); return; }
+    if (current && !current.node.isConnected) { current = null; root.document.body.classList.remove('t5-service-open','story-service-visible'); }
+    if (attempt?.story?.decorationsDisabled) { current?.node.remove(); current = null; root.document.body.classList.remove('t5-service-open','story-service-visible'); return; }
     if (current && current.attemptId !== attempt?.id) {
-      current.node.remove(); current = null; root.document.body.classList.remove('t5-service-open');
+      current.node.remove(); current = null; root.document.body.classList.remove('t5-service-open','story-service-visible');
     }
     const receipt = attempt?.dishService;
     if (!receipt || !['neutral', 'pleased', 'puzzled'].includes(receipt.mood)) return;
@@ -14,6 +14,7 @@
     let acknowledged = seen.has(key);
     try { acknowledged ||= root.localStorage.getItem(key) === 'seen'; } catch { /* Memory fallback. */ }
     if (acknowledged || current?.key === key) return;
+    root.document.body.classList.toggle('story-service-visible',Boolean(attempt.story&&attempt.status==='in_progress'));
     current?.node.remove();
     const doc = root.document;
     const inline = Boolean(attempt.story && !attempt.story.decorationsDisabled);
@@ -117,7 +118,7 @@
       if (next.disabled) return;
       seen.add(key);
       try { root.localStorage.setItem(key, 'seen'); } catch { /* Do not block continuing. */ }
-      node.remove(); current = null; doc.body.classList.remove('t5-service-open'); onDismiss();
+      node.remove(); current = null; doc.body.classList.remove('t5-service-open','story-service-visible'); onDismiss();
     });
     node.addEventListener('keydown', event => {
       if (!inline && event.key === 'Tab' && !next.disabled) { event.preventDefault(); next.focus({ preventScroll: true }); }
@@ -127,7 +128,7 @@
       const host = attempt.status === 'in_progress' ? doc.getElementById('story-service-slot') : doc.querySelector('.story-result');
       if (!host) return;
       host.prepend(node);
-      if (attempt.status === 'in_progress') root.requestAnimationFrame(() => { if (node.isConnected) node.scrollIntoView({block:'start',behavior:'instant'}); });
+      // An inline serving never moves focus or scrolls away from the next task.
     } else { doc.body.append(node); doc.body.classList.add('t5-service-open'); }
     for(const photo of scene.querySelectorAll('img')){photo.addEventListener('load',updateScene);photo.addEventListener('error',failed);}
     updateScene();
@@ -139,6 +140,6 @@
     current.locked = locked; current.next.disabled = locked; current.node.inert = locked;
     if (!locked && wasLocked && !current.inline) current.next.focus({ preventScroll: true });
   }
-  function hideInline() { if (!current?.inline) return; seen.add(current.key); try { root.localStorage.setItem(current.key, 'seen'); } catch {} current.node.remove(); current = null; }
+  function hideInline() { root.document.body.classList.remove('story-service-visible');if (!current?.inline) return; seen.add(current.key); try { root.localStorage.setItem(current.key, 'seen'); } catch {} current.node.remove(); current = null; }
   root.T5DishService = { sync, setLocked, hideInline, isOpen: () => Boolean(current), isBlocking: () => Boolean(current && !current.inline) };
 })(typeof window !== 'undefined' ? window : globalThis);

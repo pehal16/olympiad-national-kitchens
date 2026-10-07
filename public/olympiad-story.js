@@ -13,6 +13,7 @@
   function button(text,fn,cls='button secondary'){const n=el('button',cls,text);n.type='button';n.addEventListener('click',fn);return n;}
   function image(path,alt,cls){const n=el('img',cls);n.src=path;n.alt=alt;n.decoding='async';n.addEventListener('error',()=>{n.hidden=true;});return n;}
   function arrow(direction,fn){const n=button('',fn,'story-arrow');n.setAttribute('aria-label',direction<0?'Предыдущие подачи':'Следующие подачи');n.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${direction<0?'M15 5 8 12l7 7':'m9 5 7 7-7 7'}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;return n;}
+  function phase(name){const line=doc.querySelector('.story-welcome-line');if(line&&name==='registered')line.textContent='«Итак, познакомились! Альбом уже на столе. Подтвердите правила и начинайте, когда будете готовы: наш вечер отсчитывается только после старта». ';}
   function intro(olympiad){
     if(!olympiad.storyEnabled)return;
     doc.body.classList.add('has-restaurant-story');
@@ -46,26 +47,70 @@
       ? 'Время начинается только после нажатия «Начать олимпиаду». Перед стартом зарегистрируйтесь и подтвердите правила. На прохождение — 45 минут; итоги публикуются организатором.'
       : 'Время начинается только после явного старта. Даже при старте перед полуночью у вас будут свои 45 минут. Итоги публикуются организатором после общего завершения.';
   }
+  let dialogueAttempt=null,dialogueSignature='',typed=false,locked=false,extraOpen=false,busyQuestion=null,confirmedCount=0,wasBlocked=false;
+  const opened=new Set();
+  function dialogueKey(attempt,q){return `nko_dialogue_v1_${attempt.id}_${q.id}`;}
+  function say(text){const n=chapterNode?.querySelector('.story-action-line');if(n&&n.textContent!==text)n.textContent=text;}
+  function extra(show){
+    extraOpen=show;
+    const exchange=chapterNode?.querySelector('.story-exchange'),toggle=chapterNode?.querySelector('.story-more');
+    if(!exchange||!toggle)return;
+    exchange.hidden=!show;toggle.setAttribute('aria-expanded',String(show));toggle.textContent=show?'Вернуться к истории':'Расскажи ещё';
+    if(show&&dialogueAttempt){const key=dialogueKey(dialogueAttempt,dialogueAttempt.currentQuestion);opened.add(key);try{root.localStorage.setItem(key,'open');}catch{}}
+    else if(dialogueAttempt){const key=dialogueKey(dialogueAttempt,dialogueAttempt.currentQuestion);opened.delete(key);try{root.localStorage.removeItem(key);}catch{}}
+  }
   function chapter(attempt){
     doc.body.classList.remove('story-result-active');
     if(attempt?.story)doc.getElementById('story-introduction')?.setAttribute('hidden','');
-    if(!attempt?.story||attempt.story.decorationsDisabled){chapterNode?.remove();chapterNode=null;return;}
+    if(!attempt?.story||attempt.story.decorationsDisabled||!attempt.currentQuestion){chapterNode?.remove();chapterNode=null;dialogueAttempt=null;return;}
     if(!chapterNode){chapterNode=el('section','story-chapter');doc.getElementById('question-card').before(chapterNode);}
-    const number=attempt.story.currentChapter,[name,scene,text]=chapters[number-1];
-    if(chapterNode.dataset.chapter!==String(number)){
-      const avatar=el('div','story-guest-avatar');avatar.append(image(root.RestaurantMedia.displayUrl('/assets/olympiad/story/layout-v2/scenes/album-wide.webp','card'),'Ваш гость',''));
-      chapterNode.replaceChildren(avatar);
-      const copy=el('div','story-chapter-copy');copy.append(el('h2','',`Глава ${number} · ${name}`),el('blockquote','story-guest-line',`«${text}»`),el('p','story-recorded'));
-      chapterNode.append(copy);chapterNode.dataset.chapter=number;
+    const q=attempt.currentQuestion,number=attempt.story.currentChapter,[name]=chapters[number-1];
+    const changed=chapterNode.dataset.question!==q.id||chapterNode.dataset.attempt!==attempt.id;
+    const previous=dialogueAttempt;if(previous?.id!==attempt.id){confirmedCount=attempt.progress.answeredCount;busyQuestion=null;}dialogueAttempt=attempt;
+    if(changed){
+      const d=root.StoryDialogue.forQuestion(q);dialogueSignature=JSON.stringify(q.savedAnswer||null);typed=false;
+      chapterNode.dataset.question=q.id;chapterNode.dataset.attempt=attempt.id;chapterNode.dataset.chapter=number;chapterNode.dataset.pose=d.pose;
+      chapterNode.setAttribute('aria-label','Разговор с гостем');
+      const stage=el('div','story-narrator-stage'),portrait=image(`/assets/olympiad/story/layout-v4/portraits/${d.pose}.webp`,'Ваш гость в ресторане','story-narrator-portrait');
+      portrait.width=600;portrait.height=900;portrait.fetchPriority='high';portrait.addEventListener('error',()=>stage.classList.add('is-missing'));
+      const copy=el('div','story-chapter-copy'),bubble=el('div','story-speech');
+      bubble.append(el('span','story-speaker','Ваш гость'),el('p','story-guest-line',d.line));
+      const frame=el('div','story-portrait-frame');frame.append(portrait);stage.append(frame,bubble);
+      const more=button('Расскажи ещё',()=>extra(!extraOpen),'story-more');more.setAttribute('aria-expanded','false');more.setAttribute('aria-controls','story-extra-dialogue');
+      const exchange=el('div','story-exchange');exchange.id='story-extra-dialogue';exchange.hidden=true;
+      const student=el('div','story-student-speech');student.append(el('span','story-speaker','Вы'),el('p','',d.student));
+      const response=el('div','story-extra-speech');response.append(el('span','story-speaker','Ваш гость'),el('p','',d.extra));exchange.append(student,response);
+      const status=el('p','story-action-line');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+      copy.append(el('h2','',`Глава ${number} · ${name}`),more,exchange,status);
+      chapterNode.replaceChildren(stage,copy);
+      let wasOpen=opened.has(dialogueKey(attempt,q));try{wasOpen ||= root.localStorage.getItem(dialogueKey(attempt,q))==='open';}catch{}
+      extra(wasOpen);
+      if(previous?.id===attempt.id&&attempt.progress.answeredCount>previous.progress.answeredCount)say(number===4?'Заказ принят. Следующая записка уже перед вами.':'Записал. Откроем следующую страницу.');
+      else if(attempt.progress.answeredCount)say('Продолжаем с сохранённой страницы.');
+      const nextPose=['album','map','notes','orders','table'][Math.min(4,number)];
+      if(nextPose!==d.pose){const preload=new root.Image();preload.src=`/assets/olympiad/story/layout-v4/portraits/${nextPose}.webp`;}
     }
-    chapterNode.querySelector('.story-recorded').textContent=`Записано ответов: ${attempt.progress.answeredCount} из ${attempt.progress.totalQuestions}. Правильность пока не раскрывается.`;
-    const signature=JSON.stringify([attempt.story.recordedPhotos,attempt.story.recordedMap]);
-    if(chapterNode.dataset.recorded!==signature){
-      chapterNode.querySelector('.story-album-strip')?.remove();
-      const strip=el('div','story-album-strip');
-      if(number===2&&attempt.story.recordedMap?.length){const notes=el('details','story-map-notes');notes.append(el('summary','','Последний записанный блок карты'));for(const pair of attempt.story.recordedMap)notes.append(el('p','',`${pair.dish} → ${pair.country}`));notes.append(el('small','','Это ваши сохранённые сопоставления. Правильные ответы не показываются.'));strip.append(notes);}
-      chapterNode.querySelector('.story-chapter-copy').append(strip);chapterNode.dataset.recorded=signature;
-    }
+    chapterNode.querySelector('.story-more').disabled=locked;
+  }
+  function draft(questionId,payload){
+    if(!dialogueAttempt||chapterNode?.dataset.question!==questionId)return;
+    const signature=JSON.stringify(payload);if(signature===dialogueSignature)return;dialogueSignature=signature;
+    const q=dialogueAttempt.currentQuestion;
+    if(q.tourCode==='T3'){if(payload?.text?.trim()&&!typed){typed=true;say('Вижу, запись начата. Подтвердите её, когда закончите.');}}
+    else if(q.tourCode==='T2')say('Отметка на карте изменена. Сохраните блок, когда закончите.');
+    else if(q.tourCode==='T5')say('Рабочая поверхность обновлена. Продолжайте свою сборку.');
+    else say(q.tourCode==='T4'?'Ваш выбор отмечен в меню. Подтвердите заказ.':'Подпись выбрана. Подтвердите её для альбома.');
+  }
+  function action(questionId,text){if(chapterNode?.dataset.question===questionId)say(text);}
+  function updateState(state){
+    locked=Boolean(state.locked);const b=chapterNode?.querySelector('.story-more');if(b)b.disabled=locked;
+    if(!chapterNode){wasBlocked=Boolean(state.blocked);return;}
+    if(Number(state.confirmedCount)>confirmedCount){confirmedCount=state.confirmedCount;say('Записал. Можем продолжать наш вечер.');}
+    else if(state.blocked)say('Вернитесь в защищённый режим — мы продолжим с этой страницы.');
+    else if(wasBlocked)say('Режим восстановлен. Продолжим с этой страницы.');
+    else if(state.busy){busyQuestion ||= chapterNode.dataset.question;if(busyQuestion===chapterNode.dataset.question)say('Передаём вашу запись. Ждём подтверждения сервера.');}
+    if(!state.busy)busyQuestion=null;
+    wasBlocked=Boolean(state.blocked);
   }
   function clearTimer(){root.clearTimeout(timer);timer=null;}
   function schedule(){clearTimer();if(!session||loaded||doc.hidden||session.status==='in_progress')return;const open=session.story.entryMode==='anytime'?session.story.entryOpen:Date.now()<Date.parse(session.story.entryEndsAt);timer=root.setTimeout(refresh,open?300000:60000);}
@@ -81,6 +126,8 @@
     finally{inFlight=false;schedule();}
   }
   function result(attempt,api,notify){
+    chapterNode?.remove();chapterNode=null;dialogueAttempt=null;
+    doc.body.classList.remove('story-service-visible');
     if(attempt?.story)doc.getElementById('story-introduction')?.setAttribute('hidden','');
     clearTimer();if(!attempt?.story){doc.body.classList.remove('story-result-active');resultMount?.remove();resultMount=null;session=null;loaded=null;return;}
     doc.body.classList.add('story-result-active');
@@ -154,5 +201,5 @@
     doc.getElementById('certificate-open').textContent='Открыть свидетельство';
   }
   doc.addEventListener('visibilitychange',()=>{clearTimer();if(!doc.hidden&&session&&!loaded)refresh();});
-  root.OlympiadStory={intro,chapter,result};
+  root.OlympiadStory={intro,chapter,result,draft,action,updateState,phase};
 })(window);

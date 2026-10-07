@@ -221,6 +221,7 @@ function refreshAttemptControls() {
   const interactionLocked = isBusy || isBlockedByGuard;
   const dishServiceOpen = window.T5DishService?.isBlocking() === true;
   window.RestaurantLayout?.setLocked(interactionLocked);
+  window.OlympiadStory?.updateState({locked:interactionLocked,blocked:isBlockedByGuard,busy:isBusy,confirmedCount:state.attempt?.progress?.answeredCount});
   window.T5DishService?.setLocked(interactionLocked);
 
   if (elements.questionBody) {
@@ -1411,6 +1412,8 @@ async function api(path, options = {}) {
 function showMessage(element, message, type = "success") {
   element.textContent = message;
   element.className = `message ${type}`;
+  if(element===elements.attemptMessage&&type==='error')window.OlympiadStory?.action(state.attempt?.currentQuestion?.id,'Подтверждение не получено. Проверьте сообщение и повторите сохранение.');
+  if(element===elements.registrationMessage&&type==='success'&&state.participant)window.OlympiadStory?.phase('registered');
 }
 
 function hideMessage(element) {
@@ -1423,6 +1426,7 @@ function rememberDraft(questionId, answerPayload) {
     return;
   }
   state.localDrafts[questionId] = answerPayload;
+  window.OlympiadStory?.draft(questionId,answerPayload);
   if (state.attempt?.story) {
     try { localStorage.setItem(`nko_story_draft_v2_${state.attempt.id}_${questionId}`, JSON.stringify(answerPayload)); } catch { /* The current page retains its draft. */ }
   }

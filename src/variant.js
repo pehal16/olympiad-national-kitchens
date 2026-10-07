@@ -860,6 +860,11 @@ function getCurrentTour(attempt) {
 }
 
 function sanitizeQuestion(question, attempt) {
+  const safe=sanitizeQuestionData(question,attempt);
+  const dialogue=require('./story-dialogue').publicDialogue(question);
+  return dialogue?{...safe,dialogue}:safe;
+}
+function sanitizeQuestionData(question, attempt) {
   if (!question) {
     return null;
   }

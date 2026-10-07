@@ -2144,7 +2144,7 @@ async function buildRankedAttempts(olympiad, settings, options = {}) {
     .filter((attempt) => attempt.status === "reviewed" && (!attempt.storyRunId || options.forceScores || attempt._storyRun?.publishedAt))
     .sort(compareAttemptsByRank)
     .map((attempt, index, sorted) => {
-      const group = sorted.filter(a => (a.storyRunId || null) === (attempt.storyRunId || null));
+      const group = sorted.filter(a => require('./src/story-dialogue').rankingGroup(a) === require('./src/story-dialogue').rankingGroup(attempt));
       const groupIndex = group.indexOf(attempt);
       const rank =
         groupIndex > 0 && compareAttemptsByRank(attempt, group[groupIndex - 1]) === 0
@@ -2162,6 +2162,8 @@ async function buildRankedAttempts(olympiad, settings, options = {}) {
   return [...rankedCompleted, ...unranked].map(({ rank, _source: attempt }) => ({
       rank,
       id: attempt.id,
+      conditionVersion: require('./src/story-dialogue').conditionVersion(attempt),
+      storyRunId: attempt.storyRunId || null,
       participant: attempt.participant,
       status: attempt.status,
       startedAt: attempt.startedAt,
@@ -2937,6 +2939,8 @@ async function buildExportRows(olympiad) {
       );
       return {
         fullName: attempt.participant.fullName,
+        conditionVersion: require('./src/story-dialogue').conditionVersion(attempt),
+        storyRunId: attempt.storyRunId || '',
         institution: attempt.participant.institution,
         groupName: attempt.participant.groupName,
         mentorName: attempt.participant.mentorName || "",
@@ -4705,6 +4709,8 @@ async function handleApi(req, res, url, runtime = {}) {
         rank: attempt.rank,
         id: attempt.id,
         fullName: attempt.participant.fullName,
+        conditionVersion: attempt.conditionVersion,
+        storyRunId: attempt.storyRunId,
         institution: attempt.participant.institution,
         groupName: attempt.participant.groupName,
         mentorName: attempt.participant.mentorName || "",
@@ -4780,7 +4786,10 @@ async function handleApi(req, res, url, runtime = {}) {
               optionOrderLog: attempt.variant.optionOrderLog,
               usedDishIds: attempt.variant.usedDishIds,
               seed: attempt.variant.seed || attempt.routeSeed || "",
-              blueprintVersion: attempt.variant.blueprintVersion || null
+              blueprintVersion: attempt.variant.blueprintVersion || null,
+              conditionVersion: require('./src/story-dialogue').conditionVersion(attempt),
+              dialogueVersion: attempt.variant.dialogueVersion || 0,
+              storyRunId: attempt.storyRunId || null
             },
             integritySummary: summarizeIntegrityEvents(integrityEvents)
           },

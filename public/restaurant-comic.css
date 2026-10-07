@@ -1,0 +1,146 @@
+/* Layout 4: one conversation, five distinct work surfaces. */
+.story-immersive .restaurant-workspace{display:grid;grid-template-columns:minmax(260px,.28fr) minmax(0,1fr);gap:24px;align-items:start}
+.story-immersive .restaurant-conversation,.story-immersive .restaurant-task{min-width:0}
+.story-immersive .story-chapter{display:block;padding:0;border:0;background:none;box-shadow:none;animation:comic-arrive .25s ease-out}
+.story-immersive .story-narrator-stage{position:relative;overflow:hidden;border-radius:20px;background:#e3d9c6;min-height:570px}
+.story-immersive .story-narrator-portrait{display:block;width:100%;height:auto;margin-top:110px;object-fit:contain;border-radius:0}
+.story-immersive .story-speech{position:absolute;top:14px;right:12px;left:12px;background:#fffef9;border:1px solid #c4cab7;border-radius:20px;padding:18px 20px;box-shadow:0 4px 14px #193e3712;z-index:1}
+.story-immersive .story-speech::after{content:'';position:absolute;left:34%;top:100%;width:28px;height:36px;background:#fffef9;clip-path:polygon(0 0,100% 0,0 100%)}
+.story-immersive .story-speaker{display:block;font:600 11px/1.4 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#5a7365;margin:0 0 8px}
+.story-immersive .story-guest-line{margin:0;font:19px/1.43 Georgia,serif;color:#173d37;text-wrap:pretty}
+.story-immersive .story-chapter-copy{padding:12px 2px 0}
+.story-immersive .story-chapter-copy h2{font:600 12px/1.5 system-ui,sans-serif;color:#61796c;margin:0 0 10px}
+.story-immersive .story-more{display:block;width:100%;min-height:48px;border:1px solid #277467;background:#fffef9;color:#145e53;border-radius:12px;font:600 15px system-ui,sans-serif;cursor:pointer}
+.story-immersive .story-more:hover{background:#e9f0e7}
+.story-immersive .story-more:focus-visible{outline:3px solid #147568;outline-offset:3px}
+.story-immersive .story-more:disabled{opacity:.6;cursor:wait}
+.story-immersive .story-exchange{margin-top:12px;display:grid;gap:10px}
+.story-immersive .story-exchange[hidden]{display:none}
+.story-immersive .story-student-speech,.story-immersive .story-extra-speech{border-radius:15px;padding:14px 16px;border:1px solid #cad2be;background:#fffef9}
+.story-immersive .story-student-speech{margin-left:24px;background:#e4efe7}
+.story-immersive .story-exchange p{font:17px/1.5 Georgia,serif;margin:0;color:#173d37}
+.story-immersive .story-action-line{font:13px/1.5 system-ui,sans-serif;color:#40685c;min-height:20px;margin:12px 2px 0}
+.story-immersive .story-narrator-stage.is-missing{min-height:210px}.story-immersive .story-narrator-stage.is-missing .story-speech{position:relative;inset:auto;margin:12px}.story-immersive .story-narrator-stage.is-missing .story-speech::after{display:none}
+.story-immersive .restaurant-task #question-card{padding:0;border:0;background:transparent;display:block}
+.story-immersive .restaurant-task #question-prompt{font:26px/1.25 Georgia,serif;margin:0 0 12px;text-wrap:balance}
+.story-immersive .restaurant-task #question-note{font-size:13px;line-height:1.5}
+.story-immersive #question-card.has-dialogue-condition #question-case{display:none}
+.story-immersive .restaurant-task .action-deck{padding-top:14px;margin:0}
+.story-immersive .restaurant-task .actions{gap:10px}
+.story-immersive .restaurant-task .actions button{min-height:48px}
+.story-immersive .restaurant-task #finish-attempt{font-size:13px;background:transparent;border-color:#a7bfb1}
+.story-immersive .restaurant-header-route{display:grid;gap:5px;min-width:0;flex:1}
+.story-immersive .restaurant-header-route .stage-chip{border:0;background:none;padding:0;font:600 15px/1.4 system-ui,sans-serif;color:#173d37}
+.story-immersive .restaurant-header-status{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.story-immersive .restaurant-header-status #participant-exam-badge,.story-immersive .restaurant-header-status #attempt-save-status{font-size:11px;padding:4px 8px;min-height:0}
+.story-immersive .dashboard-head>div:first-child:not(.restaurant-header-route){display:none}
+.story-immersive #attempt-section>.card:has(.restaurant-workspace){padding:20px 16px}
+.story-immersive .progress-meta,.story-immersive .participant-mode-strip,.story-immersive .progress-bars,.story-immersive #question-transition-banner{display:none}
+.story-immersive .restaurant-details{font-size:12px;margin:0}
+.story-immersive .is-t1 .restaurant-task #question-body{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);padding:28px 24px;gap:22px;background-size:100% 100%;border-radius:16px;min-height:480px}
+.story-immersive .is-t1 .restaurant-task .question-photo{width:100%;max-width:430px;margin:auto;align-self:start}
+.story-immersive .is-t1 .restaurant-task .question-photo img{aspect-ratio:3/2;width:100%;height:auto;object-fit:contain}
+.story-immersive .is-t1 .restaurant-task .option{min-height:50px;font-size:16px}
+.story-immersive .is-t1 .restaurant-paper{padding:2px 0}
+.story-immersive .restaurant-task .t2-atlas-workspace{grid-template-columns:minmax(0,1.7fr) minmax(240px,1fr);gap:14px}
+.story-immersive .restaurant-task .t2-countries{min-width:0;width:100%;max-width:100%;box-sizing:border-box;aspect-ratio:1.65;min-height:350px}
+.story-immersive .restaurant-task .t2-country{width:39%;padding:6px}
+.story-immersive .restaurant-task .t2-country .t2-target{font-size:14px;min-height:44px}
+.story-immersive .restaurant-task .t2-atlas-menu .t2-photo img{max-height:155px;object-fit:contain}
+.story-immersive .restaurant-task .t2-selected-preview{grid-column:1;display:flex;gap:12px;align-items:center;background:#fffef9;border:1px solid #90b8a6;border-radius:12px;padding:8px 12px;color:#173d37;font:600 14px/1.4 system-ui,sans-serif;position:relative}
+.story-immersive .t2-selected-preview[hidden]{display:none}.story-immersive .t2-selected-preview img{width:62px;height:44px;object-fit:contain;border-radius:5px}
+.story-immersive .restaurant-task .t2-atlas-workspace:has(.t2-selected-preview:not([hidden])) .t2-countries{grid-column:1}.story-immersive .restaurant-task .t2-atlas-workspace:has(.t2-selected-preview:not([hidden])) .t2-atlas-menu{grid-column:2;grid-row:1/3}
+.story-immersive .restaurant-task .restaurant-notebook{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);padding:24px;gap:20px;border:1px solid #d1c5a6;background:linear-gradient(90deg,#f7f1df 49.5%,#cfc7b2 50%,#fffbee 51%);border-radius:14px;position:relative}
+.story-immersive .restaurant-notebook::before{content:'';position:absolute;width:28px;height:55px;background:#3d7869;right:28px;top:-5px;clip-path:polygon(0 0,100% 0,100% 100%,50% 80%,0 100%)}
+.story-immersive .restaurant-task .t3-clue{border-radius:0;background:repeating-linear-gradient(#fffdf5 0,#fffdf5 29px,#dcdcca 30px);box-shadow:none;border-bottom:1px solid #d2ccba}
+.story-immersive .restaurant-task .t3-answer-form input{min-height:52px;font-size:19px}
+.story-immersive .is-t4 .restaurant-task #question-card{display:block}
+.story-immersive .is-t4 .restaurant-task .restaurant-paper{width:100%;padding:24px;background:#faf8ef;border:1px solid #d8d4bf;border-radius:16px}
+.story-immersive .restaurant-task .t4-options{gap:14px}
+.story-immersive .restaurant-task .t4-photo img{height:auto;max-height:190px;object-fit:contain}
+.story-immersive .restaurant-task .t4-option{padding:12px;font-size:15px}.story-immersive .restaurant-task .t4-option-description{font-size:13px;line-height:1.45}
+.story-immersive .restaurant-task .t5-photo-compose{grid-template-columns:minmax(190px,.8fr) minmax(230px,1.1fr) minmax(170px,.7fr);gap:14px}
+.story-immersive .restaurant-task .t5-photo-scene{min-height:240px}.story-immersive .restaurant-task .t5-photo-grid{gap:8px}.story-immersive .restaurant-task .t5-photo-card img{height:70px;object-fit:contain}
+.story-immersive .restaurant-task .t5-photo-card{min-width:0;padding:8px;font-size:13px}.story-immersive .restaurant-task .t5-photo-card span{overflow-wrap:anywhere}
+.story-immersive .restaurant-task .restaurant-kitchen-actions{padding:14px 12px}.story-immersive .restaurant-task .restaurant-kitchen-actions button{white-space:normal}
+.story-immersive .restaurant-service-slot:empty{display:none}
+.story-immersive.story-service-visible .story-narrator-stage{display:none}
+.story-immersive.story-service-visible .story-chapter-copy h2{display:none}
+.story-immersive .restaurant-conversation .t5-service-card{grid-template-columns:1fr;padding:0;gap:10px}
+.story-immersive .restaurant-conversation .t5-service-scene{min-height:0;aspect-ratio:1.35;border-radius:16px}
+.story-immersive .restaurant-conversation .t5-service-copy{padding:10px;font-size:12px}.story-immersive .restaurant-conversation .t5-service-copy p{font-size:12px}.story-immersive .restaurant-conversation .t5-service-copy h3{font-size:19px}.story-immersive .restaurant-conversation .t5-service-caption h2{font-size:18px}
+@keyframes comic-arrive{from{opacity:.65;transform:translateY(5px)}to{opacity:1;transform:none}}
+@media(max-width:1279px){
+ .story-immersive .restaurant-workspace{grid-template-columns:1fr;gap:18px}.story-immersive .story-chapter{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:14px}
+ .story-immersive .story-narrator-stage{min-height:0;display:flex;align-items:center;gap:20px;background:none;overflow:visible;border-radius:0}
+ .story-immersive .story-narrator-portrait{width:160px;height:175px;object-fit:cover;object-position:35% 28%;margin:0;border-radius:16px}
+ .story-immersive .story-speech{position:relative;inset:auto;flex:1;padding:18px;margin:0}.story-immersive .story-speech::after{left:-20px;top:55%;width:20px;height:24px;clip-path:polygon(100% 0,100% 100%,0 70%)}
+ .story-immersive .story-chapter-copy{padding:0}.story-immersive .story-guest-line{font-size:20px}.story-immersive .story-exchange{grid-column:1/-1}
+ .story-immersive .restaurant-conversation:has(.t5-service-inline){display:grid;grid-template-columns:1fr 1fr;gap:15px}.story-immersive.story-service-visible .story-chapter{display:block}
+ .story-immersive .restaurant-task .t5-photo-compose{grid-template-columns:minmax(190px,.8fr) minmax(230px,1.1fr) minmax(170px,.7fr)}
+}
+@media(max-width:767px){
+ .story-immersive .shell{padding:10px}.story-immersive #attempt-section>.card:has(.restaurant-workspace){padding:12px 8px}.story-immersive .restaurant-workspace{gap:14px}
+ .story-immersive .story-chapter{display:block}.story-immersive .story-narrator-stage{gap:12px;align-items:flex-start}
+ .story-immersive .story-narrator-portrait{width:80px;height:125px;object-position:33% 27%;flex:none;position:sticky;top:90px}
+ .story-immersive .story-speech{padding:13px 14px;border-radius:16px}.story-immersive .story-speaker{font-size:10px;margin-bottom:5px}.story-immersive .story-guest-line{font-size:17px;line-height:1.45}.story-immersive .story-speech::after{top:65px;left:-12px;width:12px;height:18px}
+ .story-immersive .story-chapter-copy{margin-top:10px}.story-immersive .story-chapter-copy h2{display:none}.story-immersive .story-more{width:auto;padding:0 16px;min-height:48px;font-size:14px}.story-immersive .story-action-line{margin:7px 0;font-size:12px;min-height:0}
+ .story-immersive .story-exchange p{font-size:16px}.story-immersive .dashboard-head{gap:8px;flex-wrap:wrap}.story-immersive .restaurant-header-route{flex-basis:100%}.story-immersive .restaurant-header-route .stage-chip{font-size:13px}.story-immersive .timer-stack{margin-left:0;width:100%}.story-immersive .timer-box{flex:1;padding:7px 10px}.story-immersive .timer-box strong{font-size:20px}.story-immersive .timer-box span{font-size:10px}
+ .story-immersive .restaurant-task #question-prompt{font-size:23px}.story-immersive .is-t1 .restaurant-task #question-body{display:flex;flex-direction:column;padding:18px 12px;gap:18px;min-height:0;background:#fffbed;border:1px solid #dad0b7}.story-immersive .is-t1 .restaurant-task .question-photo{max-width:430px;width:100%}.story-immersive .restaurant-paper{width:100%}
+ .story-immersive .restaurant-task .t2-atlas-workspace{display:flex;flex-direction:column;gap:12px}.story-immersive .restaurant-task .t2-atlas-menu{order:0;width:100%}.story-immersive .restaurant-task .t2-selected-preview{order:1;position:sticky;top:145px;z-index:3;width:100%;box-sizing:border-box}.story-immersive .restaurant-task .t2-countries{order:2;aspect-ratio:5/6;min-height:365px;width:100%}.story-immersive .restaurant-task .t2-country{width:44%;padding:5px}.story-immersive .restaurant-task .t2-atlas-menu .t2-photo img{max-height:115px}.story-immersive .restaurant-task .t2-target{font-size:13px}.story-immersive .t2-selected-preview img{width:50px;height:36px}
+ .story-immersive .restaurant-task .restaurant-notebook{display:flex;flex-direction:column;padding:20px 14px;gap:16px;background:#fffbed}.story-immersive .restaurant-task .t3-visual{width:100%}.story-immersive .restaurant-task .t3-clue{padding:12px}.story-immersive .restaurant-notebook:focus-within::before{display:none}
+ .story-immersive .is-t4 .restaurant-task .restaurant-paper{padding:16px 10px}.story-immersive .restaurant-task .t4-options{grid-template-columns:1fr}.story-immersive .restaurant-task .t4-photo img{max-height:220px}
+ .story-immersive .restaurant-task .t5-photo-compose{display:flex;flex-direction:column}.story-immersive .restaurant-task .t5-photo-panel{order:0}.story-immersive .restaurant-task .t5-photo-pantry{order:1}.story-immersive .restaurant-task .restaurant-kitchen-actions{order:2}.story-immersive .restaurant-task .t5-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.story-immersive .restaurant-task .t5-photo-card img{height:95px}.story-immersive .restaurant-task .t5-photo-card{font-size:14px}.story-immersive .restaurant-task .t5-photo-scene{min-height:260px}
+ .story-immersive .restaurant-conversation:has(.t5-service-inline){display:block}.story-immersive .restaurant-conversation .t5-service-scene{aspect-ratio:1.45}.story-immersive .restaurant-task .actions{flex-direction:column;align-items:stretch}
+}
+@media(prefers-reduced-motion:reduce){.story-immersive .story-chapter{animation:none}.story-immersive *{scroll-behavior:auto}}
+
+/* Override the older shell's deliberately strong compatibility selectors. */
+.story-immersive #attempt-section[data-layout-version="4"] .dashboard-head>div:not(.restaurant-header-route):not(.timer-stack){display:none!important}
+.story-immersive #attempt-section[data-layout-version="4"] .dashboard-head>.restaurant-header-route{display:grid!important}
+.story-immersive #attempt-section[data-layout-version="4"] .progress-bars{display:none!important}
+.story-immersive #attempt-section[data-layout-version="4"] .progress-meta,.story-immersive #attempt-section[data-layout-version="4"] .participant-mode-strip{display:none!important}
+.story-immersive .restaurant-current-chapter{font:600 19px/1.2 Georgia,serif;color:#173d37}
+.story-immersive #attempt-section[data-layout-version="4"] .restaurant-workspace{grid-template-columns:minmax(285px,.34fr) minmax(0,1fr)}
+.story-immersive #attempt-section[data-layout-version="4"] .story-narrator-stage{display:flex;flex-direction:column;min-height:0;background:none;overflow:visible}
+.story-immersive #attempt-section[data-layout-version="4"] .story-speech{position:relative;inset:auto;order:0;margin:0 0 18px;padding:17px 19px}
+.story-immersive #attempt-section[data-layout-version="4"] .story-speech::after{height:102px;width:18px;left:35%;z-index:2;clip-path:polygon(60% 0,100% 0,0 100%)}
+.story-immersive #attempt-section[data-layout-version="4"] .story-chapter[data-pose="map"] .story-speech::after{height:162px}
+.story-immersive #attempt-section[data-layout-version="4"] .story-chapter[data-pose="notes"] .story-speech::after{height:156px}
+.story-immersive #attempt-section[data-layout-version="4"] .story-chapter[data-pose="orders"] .story-speech::after{height:136px}
+.story-immersive #attempt-section[data-layout-version="4"] .story-chapter[data-pose="table"] .story-speech::after{height:168px}
+.story-result:has(.t5-service-inline) .story-waiting-scene{display:none}
+.story-immersive .story-narrator-portrait[hidden]{display:none!important}
+.story-immersive #attempt-section[data-layout-version="4"] .story-narrator-portrait{order:1;margin:0;width:100%;height:340px;object-fit:cover;object-position:center 45%;border-radius:16px}
+.story-immersive #attempt-section[data-layout-version="4"] .story-portrait-frame{order:1;width:100%;overflow:hidden;border-radius:16px;position:relative}
+.story-immersive #attempt-section[data-layout-version="4"] .story-narrator-stage.is-missing .story-portrait-frame{display:none}
+.story-immersive #attempt-section[data-layout-version="4"] .story-guest-line{font-size:18px;line-height:1.42}
+.story-immersive.story-service-visible #attempt-section[data-layout-version="4"] .story-narrator-stage{display:none}
+.story-immersive #attempt-section[data-layout-version="4"][data-chapter="4"] #question-card{display:block;grid-template-columns:none}
+.story-immersive #attempt-section[data-layout-version="4"][data-chapter="4"] .restaurant-paper{width:100%;box-sizing:border-box}
+@media(max-width:1279px){
+ .story-immersive #attempt-section[data-layout-version="4"] .restaurant-workspace{grid-template-columns:1fr}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-narrator-stage{flex-direction:row;align-items:center}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-narrator-portrait{order:0;width:150px;height:175px;object-position:35% 35%}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-portrait-frame{order:0;width:150px;height:175px;flex:none}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-speech{order:1;margin:0}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-speech::after{left:-110px;top:64px;width:110px;height:24px;clip-path:polygon(100% 0,100% 100%,0 60%)}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-chapter[data-pose] .story-speech::after{height:24px}
+}
+@media(max-width:767px){
+ .story-immersive #attempt-section[data-layout-version="4"] .dashboard-head{flex-wrap:wrap!important}
+ .story-immersive #attempt-section[data-layout-version="4"] .timer-stack{width:100%!important;flex:1 1 100%;min-width:0}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-narrator-stage{align-items:flex-start}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-portrait-frame{width:80px;height:125px}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-narrator-portrait{position:absolute;width:165px;max-width:none;height:247.5px;left:-20px;top:-30px;object-fit:contain;border-radius:0}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-chapter[data-pose="album"] .story-narrator-portrait{top:-5px}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-chapter[data-pose="orders"] .story-narrator-portrait{top:-22px}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-speech{padding:12px 14px;min-width:0}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-speech::after{top:56px;left:-50px;width:50px;height:18px}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-chapter[data-pose] .story-speech::after{height:18px}
+ .story-immersive #attempt-section[data-layout-version="4"] .story-guest-line{font-size:17px}
+ .story-immersive #attempt-section[data-layout-version="4"] .restaurant-task .actions{display:flex;flex-direction:column;flex-wrap:nowrap;min-width:0;width:100%;align-items:stretch}
+ .story-immersive #attempt-section[data-layout-version="4"] .restaurant-task .actions button{width:100%;min-width:0;max-width:100%;white-space:normal;flex:0 0 auto}
+ .story-immersive #attempt-section[data-layout-version="4"][data-chapter="1"] #question-body{display:flex;flex-direction:column;padding:18px 12px;gap:18px;min-height:0;background:#fffbed}
+ .story-immersive #attempt-section[data-layout-version="4"][data-chapter="4"] #question-card{display:block}
+}

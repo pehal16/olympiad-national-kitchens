@@ -88,7 +88,7 @@
       if(failed&&!layers.childElementCount)layers.append(el('p','t5-photo-empty','Ваш состав: '+model.selection(dish,selected).map(item=>item.text).join(', ')));
       if(selected.size===4&&stage!=='served')model.plan(dish,selected,model.nextStage(dish,selected,stage),layout).layers.forEach(layer=>decode(layer.path).catch(()=>{}));
     }
-    function changed(){if(presentationMode==='restaurant')root.T5DishService?.hideInline();persist();update();render();onChange?.(answer());}
+    function changed(){if(presentationMode==='restaurant')root.T5DishService?.hideInline();persist();update();render();onChange?.(answer());if(presentationMode==='restaurant'&&stage!=='select')root.OlympiadStory?.action(question.id,stage==='served'?'Сборка завершена. Нажмите «Подать», чтобы сохранить блюдо.':'Шаг выполнен. Продолжайте сборку по своему плану.');}
     for(const item of dish.items){
       const card=el('button','t5-photo-card');card.type='button';on(card,'click',()=>{if(locked)return;if(selected.has(item.id))selected.delete(item.id);else if(selected.size<4)selected.add(item.id);stage='select';changed();});card.dataset.ingredient=item.id;card.setAttribute('aria-pressed','false');
       const photo=el('img');if(presentationMode==='restaurant'&&root.RestaurantMedia)root.RestaurantMedia.setImage(photo,item.imageUrl,'card');else photo.src=item.imageUrl;photo.alt='';photo.draggable=false;photo.loading='eager';photo.decoding='async';

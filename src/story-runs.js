@@ -110,7 +110,7 @@ function storyView(attempt) {
   const recordedPhotos=questions.filter(q=>q.tourCode==='T1'&&attempt.answers?.[q.id]).map(q=>({number:q.sequenceInTour,imageUrl:q.imageUrl}));
   const mapQuestion=[...questions].reverse().find(q=>q.tourCode==='T2'&&attempt.answers?.[q.id]);
   const recordedMap=mapQuestion?mapQuestion.items.map(item=>({dish:item.text,country:mapQuestion.buckets.find(b=>b.id===attempt.answers[mapQuestion.id].answerPayload?.buckets?.[item.id])?.label||'не выбрано'})):[];
-  return { runId:attempt.storyRunId,storyVersion:1,assetVersion:attempt.variant?.assetVersion||1,currentChapter:Math.min(5,Math.max(1,Number(attempt.variant?.questions?.[attempt.currentStepIndex]?.tourOrder)||5)),
+  return { runId:attempt.storyRunId,storyVersion:1,assetVersion:attempt.variant?.assetVersion||1,conditionVersion:require('./story-dialogue').conditionVersion(attempt),dialogueVersion:attempt.variant?.dialogueVersion||0,currentChapter:Math.min(5,Math.max(1,Number(attempt.variant?.questions?.[attempt.currentStepIndex]?.tourOrder)||5)),
     recordedPhotos,recordedMap,
     resultAvailable:Boolean(run?.publishedAt&&attempt.status!=='in_progress'),entryMode:run?.entryMode||'scheduled',entryOpen:entryOpen(run),entryEndsAt:run?.entryEndsAt||null,decorationsDisabled:Boolean(run?.decorationsDisabled) };
 }

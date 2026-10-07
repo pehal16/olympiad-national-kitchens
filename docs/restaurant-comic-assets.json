@@ -1,0 +1,71 @@
+{
+  "layoutVersion": 4,
+  "dialogueVersion": 1,
+  "assets": [
+    {
+      "pose": "album",
+      "source": "C:\\Users\\АМ\\.codex\\generated_images\\01a09b88-e413-7740-adfb-d5d13946d70f\\exec-a9292d8c-c613-4817-bf63-bbbb085a3985.png",
+      "imageUrl": "/assets/olympiad/story/layout-v4/portraits/album.webp",
+      "size": [
+        600,
+        900
+      ],
+      "bytes": 42884,
+      "sha256": "d58b40c8c79d81e0dc31f0be25a60864cf83c0c9ce540a901bbcc82145752fe9",
+      "review": "Same face; five visible fingers; closed unlabelled album; no food.",
+      "method": "Built-in imagegen. Reference: layout-v2 arrival-wide.webp. Same realistic guest, white shirt, warm daylight restaurant; no text, food or UI. Proportional resize and WebP export only."
+    },
+    {
+      "pose": "map",
+      "source": "C:\\Users\\АМ\\.codex\\generated_images\\01a09b88-e413-7740-adfb-d5d13946d70f\\exec-54582a93-0b82-477a-99e8-3c49f8d11a4a.png",
+      "imageUrl": "/assets/olympiad/story/layout-v4/portraits/map.webp",
+      "size": [
+        600,
+        900
+      ],
+      "bytes": 52590,
+      "sha256": "6f211c62e9fcecc288ff0cb080cc7c658b8096346258fce0825bb64bebc0c0d5",
+      "review": "Same face; natural hands; unfolded map with no legible country association or food.",
+      "method": "Built-in imagegen. Reference: layout-v2 arrival-wide.webp. Same realistic guest, white shirt, warm daylight restaurant; no text, food or UI. Proportional resize and WebP export only."
+    },
+    {
+      "pose": "notes",
+      "source": "C:\\Users\\АМ\\.codex\\generated_images\\01a09b88-e413-7740-adfb-d5d13946d70f\\exec-34cc5053-b331-4deb-88fa-dc72b8ad8cc5.png",
+      "imageUrl": "/assets/olympiad/story/layout-v4/portraits/notes.webp",
+      "size": [
+        600,
+        900
+      ],
+      "bytes": 43084,
+      "sha256": "abdc720b3dd543155d781dd7adf27de2182b70f925cc7d4519362fd9a16211d2",
+      "review": "Same face; pen and blank notebook; natural hands; no ingredient clues.",
+      "method": "Built-in imagegen. Reference: layout-v2 arrival-wide.webp. Same realistic guest, white shirt, warm daylight restaurant; no text, food or UI. Proportional resize and WebP export only."
+    },
+    {
+      "pose": "orders",
+      "source": "C:\\Users\\АМ\\.codex\\generated_images\\01a09b88-e413-7740-adfb-d5d13946d70f\\exec-bb2eeded-4e4a-4bdf-abec-3d7fbc0ab9c0.png",
+      "imageUrl": "/assets/olympiad/story/layout-v4/portraits/orders.webp",
+      "size": [
+        600,
+        900
+      ],
+      "bytes": 45926,
+      "sha256": "a63904b9dd46d41c6e3eadd5c4e8601f4bf682837375d75ee2579a12beb6704d",
+      "review": "Same face; unlabelled green menu; gesture; no food.",
+      "method": "Built-in imagegen. Reference: layout-v2 arrival-wide.webp. Same realistic guest, white shirt, warm daylight restaurant; no text, food or UI. Proportional resize and WebP export only."
+    },
+    {
+      "pose": "table",
+      "source": "C:\\Users\\АМ\\.codex\\generated_images\\01a09b88-e413-7740-adfb-d5d13946d70f\\exec-249fee7d-af02-4043-9bd3-3b26ae738908.png",
+      "imageUrl": "/assets/olympiad/story/layout-v4/portraits/table.webp",
+      "size": [
+        600,
+        900
+      ],
+      "bytes": 52086,
+      "sha256": "9204b60a6ac04cc3b0b0903a02ce1c1e5d7aefac84a85fd373aba9552a0a9565",
+      "review": "Same face; natural resting hands; one empty small plate; neutral attentive expression.",
+      "method": "Built-in imagegen. Reference: layout-v2 arrival-wide.webp. Same realistic guest, white shirt, warm daylight restaurant; no text, food or UI. Proportional resize and WebP export only."
+    }
+  ]
+}

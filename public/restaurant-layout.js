@@ -1,7 +1,6 @@
 (function (root) {
   'use strict';
   const doc = root.document, base = '/assets/olympiad/story/layout-v2/scenes/';
-  const scenes = ['album', 'map', 'notes', 'orders', 'kitchen'];
   let moved = [], zoom = null, active = false;
   const el = (tag, cls, text) => { const n = doc.createElement(tag); n.className = cls || ''; if (text !== undefined) n.textContent = text; return n; };
   function picture(scene, cls, alt = '') {
@@ -21,7 +20,7 @@
     if (zoom?.open) zoom.close();
     for (const [node, marker] of moved.reverse()) marker.replaceWith(node);
     moved = [];
-    doc.querySelectorAll('.restaurant-context, .restaurant-paper, .restaurant-notebook').forEach(n => n.remove());
+    doc.querySelectorAll('.restaurant-context, .restaurant-paper, .restaurant-notebook, .restaurant-workspace, .restaurant-header-route').forEach(n => n.remove());
   }
   function zoomButton(url, alt) {
     const b = el('button', 'restaurant-zoom', 'Увеличить фото'); b.type = 'button';
@@ -43,7 +42,7 @@
     active = enabled(attempt) && attempt.status === 'in_progress';
     doc.body.classList.toggle('story-immersive', active);
     const section = doc.getElementById('attempt-section');
-    section.dataset.layoutVersion = active ? '3' : '1';
+    section.dataset.layoutVersion = active ? '4' : '1';
     if (!active) {
       const details = doc.getElementById('restaurant-details'); if (details) { details.before(details.querySelector('.exam-cockpit')); details.remove(); }
       doc.getElementById('story-service-slot')?.remove(); return;
@@ -63,6 +62,12 @@
     shell(attempt); if (!active) return;
     const chapter = attempt.story.currentChapter, body = doc.getElementById('question-body'), card = doc.getElementById('question-card');
     const story = doc.querySelector('.story-chapter'), prompt = doc.getElementById('question-prompt'), note = doc.getElementById('question-note');
+    const header=el('div','restaurant-header-route'),status=el('div','restaurant-header-status');
+    header.append(el('span','restaurant-current-chapter',['Фотоальбом','Карта путешествий','Записная книжка','Пожелания компании','Финальная кухня'][chapter-1]));
+    doc.querySelector('.dashboard-head').prepend(header);move(doc.getElementById('progress-tour'),header);header.append(status);move(doc.getElementById('attempt-save-status'),status);move(doc.getElementById('participant-exam-badge'),status);
+    const workspace=el('div','restaurant-workspace'),conversation=el('aside','restaurant-conversation'),task=el('div','restaurant-task');
+    story.before(workspace);workspace.append(conversation,task);move(story,conversation);move(doc.getElementById('story-service-slot'),conversation);move(card,task);move(doc.querySelector('.action-deck'),task);
+    card.classList.toggle('has-dialogue-condition',chapter===1&&attempt.story.conditionVersion===2&&/^Страница альбома: [^.]+\.$/.test(attempt.currentQuestion.scenario||''));
     const paper = el('div', 'restaurant-paper');
     if (chapter === 1) {
       const photo = body.querySelector('.question-photo');
@@ -71,16 +76,11 @@
     } else if (chapter === 3) {
       const dossier = body.querySelector('.t3-dossier'), evidence = body.querySelector('.t3-evidence');
       const notebook = el('div', 'restaurant-notebook');
-      dossier.prepend(picture('notes', 'restaurant-context restaurant-notes-context'));
       dossier.append(notebook); move(evidence.querySelector('.t3-visual'), notebook); notebook.append(paper);
       move(prompt, paper); move(note, paper); move(evidence.querySelector('.t3-clues'), paper); move(dossier.querySelector('.t3-answer-form'), paper);
       const actual = notebook.querySelector('.t3-visual'); actual.append(zoomButton(attempt.currentQuestion.imageUrl, attempt.currentQuestion.imageAlt));
     } else if (chapter === 4) {
-      card.prepend(picture('orders', 'restaurant-context restaurant-orders-context'));
       card.append(paper); move(prompt, paper); move(note, paper); move(body, paper);
-    } else {
-      const task = body.querySelector(chapter === 2 ? '.t2-match' : '.t5-photo-workbench');
-      if (task&&chapter!==2) task.prepend(picture(scenes[chapter - 1], 'restaurant-context restaurant-work-context'));
     }
   }
   function result() {
@@ -89,5 +89,5 @@
     doc.getElementById('story-service-slot')?.remove();
   }
   function setLocked(value) { if (value && zoom?.open) zoom.close(); }
-  root.RestaurantLayout = {layoutVersion:3, enabled, beforeQuestion, mount, result, picture, zoomButton, setLocked};
+  root.RestaurantLayout = {layoutVersion:4, enabled, beforeQuestion, mount, result, picture, zoomButton, setLocked};
 })(window);

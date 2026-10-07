@@ -71,6 +71,7 @@
       const countries = element("div", "t2-countries");
       countries.setAttribute("aria-label", "Страны для сопоставления");
       const bank = element("div", "t2-bank");
+      const preview=element('div','t2-selected-preview');preview.hidden=true;preview.setAttribute('aria-live','polite');
       bank.setAttribute("aria-label", "Блюда");
       const progress = element("p", "t2-progress");
       const status = element("p", "t2-status");
@@ -201,6 +202,8 @@
         bank.append(slot); slots.set(item.id, { slot, placeholder }); nodes.set(item.id, { button, item });
       });
       function sync() {
+        preview.hidden=!selected||Boolean(dragging);
+        if(selected){const item=nodes.get(selected).item;const thumbnail=element('img');root.RestaurantMedia?.setImage(thumbnail,item.imageUrl,'card');thumbnail.alt='';const name=element('span','',item.text+' · теперь выберите страну');preview.replaceChildren(thumbnail,name);}
         const focused = doc.activeElement;
         picker.hidden = restaurant || !selected || !coarse;
         if (selected) {
@@ -246,6 +249,7 @@
         const menu=element('aside','t2-atlas-menu'),title=shell.querySelector('.t2-bank-title');
         const workspace=element('div','t2-atlas-workspace');countries.before(workspace);workspace.append(countries,menu);menu.append(title,bank);
         disposeAtlas=root.RestaurantAtlas.attach(countries,question.buckets);
+        countries.before(preview);
         status.classList.add('t2-atlas-selection');status.textContent='Выберите любое блюдо в наборе, затем его страну на карте.';
       }
       sync();
@@ -256,6 +260,7 @@
         shell.querySelectorAll(".is-selected").forEach((node) => { node.classList.remove("is-selected"); node.setAttribute("aria-pressed", "false"); });
         shell.querySelectorAll(".is-ready").forEach((node) => node.classList.remove("is-ready"));
         shell.querySelector(".t2-mobile-picker").hidden = true;
+        const preview=shell.querySelector('.t2-selected-preview');if(preview)preview.hidden=true;
         shell.querySelector(".t2-status").textContent = "Выбор отменён.";
       }
     };

@@ -44,6 +44,9 @@ async function main(){
     const map=new Map(variants.map(v=>[v.id,JSON.parse(v.payload_json)]));
     for(let round=0;round<36;round++)await Promise.all(people.map(async(p,i)=>{
       const q=map.get(p.attempt.id).questions[round],prefix=`/api/public/attempts/${p.attempt.id}`;assert.equal(p.attempt.currentQuestion.id,q.id);
+      assert.equal(p.attempt.story.conditionVersion,2);assert.equal(p.attempt.story.dialogueVersion,1);
+      assert.deepEqual(p.attempt.currentQuestion.dialogue,q.dialogue,'current dialogue matches the frozen issued variant');
+      if(q.tourCode==='T1')assert.match(p.attempt.currentQuestion.scenario,/Страница альбома:/,'country remains in the ordinary condition');
       const send=()=>api(prefix+'/answer',p.token,{questionId:q.id,answerPayload:correct(q)}),before=performance.now();const a=await send();times.push(performance.now()-before);
       if((round+i)%10===0)assert.equal((await send()).progress.answeredCount,round+1);
       assert.equal(a.progress.answeredCount,round+1);assert.equal(a.summary.totalFinalScore,null);assert.doesNotMatch(JSON.stringify(a.currentQuestion),/storyPlates|isCorrect|correctIngredientIds/);
@@ -60,7 +63,7 @@ async function main(){
     else {run.entryEndsAt=new Date(Date.now()-1000).toISOString();await sql('UPDATE olympiad_story_runs SET entry_ends_at=?,payload_json=? WHERE id=?',[run.entryEndsAt,JSON.stringify(run),run.id]);}
     const publication=await api(`/api/admin/story-runs/${run.id}/publish`,'',{});assert.equal((await api(`/api/admin/story-runs/${run.id}/publish`,'',{})).publishedAt,publication.publishedAt);
     await Promise.all(people.map(async p=>{const r=await api(`/api/public/attempts/${p.attempt.id}/story-result`,p.token);assert.equal(r.state,'published');assert.equal(r.plates.length,51);assert.equal(r.summary.totalFinalScore,150);assert.doesNotMatch(JSON.stringify(r),/expectedAnswer|correctIngredientIds|explanation/);}));
-    times.sort((a,b)=>a-b);const metric={environment:'Cloudflare Pages preview / separate D1',entryMode:run.entryMode,participants:count,answers:count*36,errors:0,lostAnswers:0,duplicateAnswers:0,answerP95Ms:Math.round(times[Math.ceil(times.length*.95)-1]),timestamp:new Date().toISOString()};evidence.push(metric);console.log(JSON.stringify(metric));
+    times.sort((a,b)=>a-b);const metric={environment:'Cloudflare Pages preview / separate D1',entryMode:run.entryMode,participants:count,answers:count*36,conditionVersion:2,dialogueVersion:1,frozenDialoguesVerified:count*36,errors:0,lostAnswers:0,duplicateAnswers:0,answerP95Ms:Math.round(times[Math.ceil(times.length*.95)-1]),timestamp:new Date().toISOString()};evidence.push(metric);console.log(JSON.stringify(metric));
     fs.writeFileSync('output/story/cloudflare-load.json',JSON.stringify(evidence,null,2));
   }
   fs.writeFileSync('output/story/cloudflare-load.json',JSON.stringify(evidence,null,2));

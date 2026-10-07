@@ -8,6 +8,7 @@ function plateFor(id,title,explanation,version=null) {
   return { dishId:id,title,recipeVersion:version||asset?.description||'Блюдо действующего банка',assetVersion:1,imageUrl:asset?.imageUrl||null,imageAlt:title,explanation };
 }
 function freezeStoryVariant(variant,run) {
+  require('./story-dialogue').freezeDialogue(variant);
   variant.blueprintVersion=15; variant.storyVersion=run.storyVersion; variant.assetVersion=run.assetVersion; variant.runId=run.id;
   for(const q of variant.questions) {
     if(q.type==='bucket_sort') q.storyPlates=q.items.map(item=>({itemId:item.id,...plateFor(item.dishId,item.text,

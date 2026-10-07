@@ -39,7 +39,8 @@ function createAttemptsCsv(rows) {
     "Тур 5",
     "Итоговый балл",
     "Время (мс)",
-    "Награда"
+    "Награда",
+    "Проведение", "Редакция условий"
   ];
 
   const lines = [headers.map(csvEscape).join(";")];
@@ -60,7 +61,7 @@ function createAttemptsCsv(rows) {
         row.tour5,
         row.totalFinalScore,
         row.totalDurationMs,
-        row.diploma
+        row.diploma, row.storyRunId, row.conditionVersion || 1
       ]
         .map(csvEscape)
         .join(";")
