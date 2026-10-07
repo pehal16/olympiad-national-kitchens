@@ -7,6 +7,7 @@ input_file = ROOT / 'output/story/layout3/display-inputs.json'
 registry_file = ROOT / 'docs/restaurant-display-assets.json'
 inputs = json.loads(input_file.read_text(encoding='utf-8-sig')) if input_file.exists() else sorted({entry['sourceUrl'] for entry in json.loads(registry_file.read_text(encoding='utf-8'))['exports']})
 exports = []
+previous = {entry['url']:entry for entry in json.loads(registry_file.read_text(encoding='utf-8'))['exports']} if registry_file.exists() else {}
 for url in inputs:
     source = ROOT / 'public' / url.lstrip('/')
     if not source.is_file():
@@ -18,6 +19,10 @@ for url in inputs:
             target_url = '/assets/olympiad/display-v1/' + role + url[len('/assets/olympiad'):]
             target = ROOT / 'public' / target_url.lstrip('/')
             target.parent.mkdir(parents=True, exist_ok=True)
+            known = previous.get(target_url)
+            if known and target.exists() and hashlib.sha256(source.read_bytes()).hexdigest() == known['sourceSha256'] and hashlib.sha256(target.read_bytes()).hexdigest() == known['sha256']:
+                exports.append(known)
+                continue
             image.save(target, 'WEBP', quality=quality, method=6)
             exports.append({'sourceUrl': url, 'sourceSha256': hashlib.sha256(source.read_bytes()).hexdigest(), 'sourceSize': list(original.size), 'url': target_url, 'role': role, 'size': list(image.size), 'bytes': target.stat().st_size, 'sha256': hashlib.sha256(target.read_bytes()).hexdigest(), 'alpha': 'A' in image.getbands()})
 album_source = pathlib.Path('C:/Users/АМ/.codex/generated_images/01a09b88-e413-7740-adfb-d5d13946d70f/exec-1c9902e5-c664-4436-ad89-1aef48a12b7c.png')

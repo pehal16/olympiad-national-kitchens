@@ -13,7 +13,7 @@ test('display exports are complete, proportionate and linked to unchanged origin
     assert.ok(Math.max(...entry.size)<=(entry.role==='card'?400:800));
     const roles=groups.get(entry.sourceUrl)||new Set();roles.add(entry.role);groups.set(entry.sourceUrl,roles);
   }
-  assert.equal(groups.size,288);for(const roles of groups.values())assert.deepEqual([...roles].sort(),['card','preview']);
+  assert.equal(groups.size,registry.sources);for(const roles of groups.values())assert.deepEqual([...roles].sort(),['card','preview']);
   assert.ok(registry.exports.filter(e=>e.role==='card').reduce((s,e)=>s+e.bytes,0)<registry.sourceBytes*.1,'card transfer budget');
 });
 test('all issued map countries have geographical locations and separate accessible labels',()=>{

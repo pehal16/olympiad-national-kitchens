@@ -1,9 +1,9 @@
 {
   "version": 1,
   "operation": "proportional resize only; no composition edits; source images retained",
-  "sources": 288,
-  "sourceBytes": 73789242,
-  "displayBytes": 21999074,
+  "sources": 292,
+  "sourceBytes": 74480394,
+  "displayBytes": 22340738,
   "exports": [
     {
       "sourceUrl": "/assets/olympiad/story/layout-v2/scenes/album-mobile.webp",
@@ -9796,6 +9796,142 @@
       "bytes": 34558,
       "sha256": "38bbfe8162fcc044ae92c147af0a74d344b823f2ba1ff311ae29337e4bcc8ff2",
       "alpha": false
+    },
+    {
+      "sourceUrl": "/assets/olympiad/tour5/service/plates/greek-served-v3.webp",
+      "sourceSha256": "897dbd2968ebc1df4f3b9100ff868edce29b101285153f31e71449eab18534b0",
+      "sourceSize": [
+        1200,
+        800
+      ],
+      "url": "/assets/olympiad/display-v1/card/tour5/service/plates/greek-served-v3.webp",
+      "role": "card",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 17732,
+      "sha256": "a0b94a5e6a4aca18cc89c9d21163910aa55fb74c392a21b2008603d20c7eda5e",
+      "alpha": true
+    },
+    {
+      "sourceUrl": "/assets/olympiad/tour5/service/plates/greek-served-v3.webp",
+      "sourceSha256": "897dbd2968ebc1df4f3b9100ff868edce29b101285153f31e71449eab18534b0",
+      "sourceSize": [
+        1200,
+        800
+      ],
+      "url": "/assets/olympiad/display-v1/preview/tour5/service/plates/greek-served-v3.webp",
+      "role": "preview",
+      "size": [
+        800,
+        533
+      ],
+      "bytes": 56620,
+      "sha256": "1ebcfec46765039db4638548d566c1fd3d94d1d9ed2a9658b45b019b0f8d29be",
+      "alpha": true
+    },
+    {
+      "sourceUrl": "/assets/olympiad/tour5/service/plates/pizza-served-v3.webp",
+      "sourceSha256": "5318cf225dffd1a8ec65d744b2a4c1835077f7f0bb014e7a2d00c823755ecb5d",
+      "sourceSize": [
+        1200,
+        800
+      ],
+      "url": "/assets/olympiad/display-v1/card/tour5/service/plates/pizza-served-v3.webp",
+      "role": "card",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 27578,
+      "sha256": "3dce5c56d34b4afe4b7db08d0dd957d85dfc0fe71ded23454472ca65a1eb013a",
+      "alpha": true
+    },
+    {
+      "sourceUrl": "/assets/olympiad/tour5/service/plates/pizza-served-v3.webp",
+      "sourceSha256": "5318cf225dffd1a8ec65d744b2a4c1835077f7f0bb014e7a2d00c823755ecb5d",
+      "sourceSize": [
+        1200,
+        800
+      ],
+      "url": "/assets/olympiad/display-v1/preview/tour5/service/plates/pizza-served-v3.webp",
+      "role": "preview",
+      "size": [
+        800,
+        533
+      ],
+      "bytes": 91252,
+      "sha256": "580180edb9fcecc2cabff2060be75654759cbb3c84d2bc04ffac00ac1e63da71",
+      "alpha": true
+    },
+    {
+      "sourceUrl": "/assets/olympiad/tour5/service/plates/roll-accompaniments-v3.webp",
+      "sourceSha256": "b1c0a01ffbe203a5b303fe020d9a1e821b99bedb81b605809871a2c0bcf3797e",
+      "sourceSize": [
+        1200,
+        800
+      ],
+      "url": "/assets/olympiad/display-v1/card/tour5/service/plates/roll-accompaniments-v3.webp",
+      "role": "card",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 13386,
+      "sha256": "8e658450341d13b9ef34b3d223b2a052be210bbb818cc4f3bba2442ebbb58e20",
+      "alpha": true
+    },
+    {
+      "sourceUrl": "/assets/olympiad/tour5/service/plates/roll-accompaniments-v3.webp",
+      "sourceSha256": "b1c0a01ffbe203a5b303fe020d9a1e821b99bedb81b605809871a2c0bcf3797e",
+      "sourceSize": [
+        1200,
+        800
+      ],
+      "url": "/assets/olympiad/display-v1/preview/tour5/service/plates/roll-accompaniments-v3.webp",
+      "role": "preview",
+      "size": [
+        800,
+        533
+      ],
+      "bytes": 43046,
+      "sha256": "19e7cc241988a94011130bc802388d566ce3347ff1c51a0d1461fb2c9f30adaf",
+      "alpha": true
+    },
+    {
+      "sourceUrl": "/assets/olympiad/tour5/service/plates/roll-served-v3.webp",
+      "sourceSha256": "48046f457fde95decda181d3f9535fb671cfb0b12216e12cf28784902befd1ed",
+      "sourceSize": [
+        1200,
+        800
+      ],
+      "url": "/assets/olympiad/display-v1/card/tour5/service/plates/roll-served-v3.webp",
+      "role": "card",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 22840,
+      "sha256": "6fe742e8e94488595ab558e7036f5dfc9f4c78a8671bdbf11dbc3ebafd69f274",
+      "alpha": true
+    },
+    {
+      "sourceUrl": "/assets/olympiad/tour5/service/plates/roll-served-v3.webp",
+      "sourceSha256": "48046f457fde95decda181d3f9535fb671cfb0b12216e12cf28784902befd1ed",
+      "sourceSize": [
+        1200,
+        800
+      ],
+      "url": "/assets/olympiad/display-v1/preview/tour5/service/plates/roll-served-v3.webp",
+      "role": "preview",
+      "size": [
+        800,
+        533
+      ],
+      "bytes": 69210,
+      "sha256": "13bb0e95866671aa7c4ab0dabec1952c280b778697b63f1e0bc509f33fcbe19c",
+      "alpha": true
     }
   ],
   "album": {
