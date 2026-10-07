@@ -1,0 +1,156 @@
+{
+  "baseUrl": "https://olympiad-gkts.pages.dev",
+  "runtimeCommit": "4320a65",
+  "deployment": "dcab27bd",
+  "workflow": 37598039163,
+  "checkedAt": "2026-10-07T09:14:11.637Z",
+  "textNormalization": "BOM and CRLF only; Windows checkout vs Linux CI",
+  "assets": [
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/arrival-wide.webp",
+      "sha256": "b41fb8c9f1dbb2573c084e731d83ca01d4d18f4e63a2e07cd0357d79572e5133",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/album-wide.webp",
+      "sha256": "4d1fd6fdc00ab290d5db4b2cb6e767cb69c8395cc55c7d391f057e21f446f63b",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/map-wide.webp",
+      "sha256": "432ed645fbc814f2ce7749e3f5535eb7770f44c6d19923d5586017e200d34a81",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/notes-wide.webp",
+      "sha256": "9dc45ab4333d0364be48d551291870e822874754888fee99f3ab37cfe2f37bb3",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/orders-wide.webp",
+      "sha256": "0aa7e6dac48a11d07fc169bb7684f97092034cf3598de689ed15c5599b6e6891",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/kitchen-wide.webp",
+      "sha256": "eb4d5b58de215b046e2df69d8c7493c5edbcb395728930a632bf139c509a0196",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/service-wide.webp",
+      "sha256": "cd389ca3f9e8acc4a593c2b20afbd7693f9df556983a91c0f2b6061d3e81a252",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/waiting-wide.webp",
+      "sha256": "3d5586e181d6371de4cbff7d529291dabd249a3753452c86afff4a05583ece94",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/arrival-mobile.webp",
+      "sha256": "fcde1d2a1792d9be6d306fcfc7c94387ac08b11504c444d04cb76ecff3d759b7",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/album-mobile.webp",
+      "sha256": "af203895571fbe8db30b935c0eb066d2310f19f3f1d76cb9ef9c85984d802846",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/map-mobile.webp",
+      "sha256": "49308f40bce1755f377e715d154071623c870b197e1d37620e2fe26a5e12e872",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/notes-mobile.webp",
+      "sha256": "97366d6cf0e94e5536a9dfa8e52c5e20d375c2f596ba091d1c82e1de57fa5bc7",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/orders-mobile.webp",
+      "sha256": "fd98caa025cc3f6c9362ded48a3bb661f7debf264b1ff29aa163ba852a237e8e",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/kitchen-mobile.webp",
+      "sha256": "20e5118fd46fc827af4d71ea901d0df5115d27930487a24fca21d74061c326f2",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/service-mobile.webp",
+      "sha256": "a266d061eab412e78afb3281ae883220e6562af76e2d236f55e8c3e7a4aca6e2",
+      "status": 200
+    },
+    {
+      "url": "/assets/olympiad/story/layout-v2/scenes/waiting-mobile.webp",
+      "sha256": "36f55d26087ae72c977ea6048894e6637764ce7ddcfb134a429a365ff2513cce",
+      "status": 200
+    }
+  ],
+  "files": [
+    {
+      "url": "/index.html",
+      "status": 200,
+      "match": true
+    },
+    {
+      "url": "/restaurant-layout.js",
+      "status": 200,
+      "match": true
+    },
+    {
+      "url": "/restaurant-layout.css",
+      "status": 200,
+      "match": true
+    },
+    {
+      "url": "/app.js",
+      "status": 200,
+      "match": true
+    },
+    {
+      "url": "/olympiad-story.js",
+      "status": 200,
+      "match": true
+    },
+    {
+      "url": "/t2-country-match.js",
+      "status": 200,
+      "match": true
+    },
+    {
+      "url": "/t3-detective.js",
+      "status": 200,
+      "match": true
+    },
+    {
+      "url": "/t4-guest-order.js",
+      "status": 200,
+      "match": true
+    },
+    {
+      "url": "/t5-photo-kitchen.js",
+      "status": 200,
+      "match": true
+    },
+    {
+      "url": "/t5-final-kitchen.js",
+      "status": 200,
+      "match": true
+    },
+    {
+      "url": "/t5-dish-service.js",
+      "status": 200,
+      "match": true
+    },
+    {
+      "url": "/sw.js",
+      "status": 200,
+      "match": true
+    }
+  ],
+  "storyEnabled": true,
+  "entryMode": "anytime",
+  "entryOpen": true,
+  "productionAttemptsCreated": 0
+}
