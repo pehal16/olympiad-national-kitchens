@@ -16,7 +16,7 @@ function isOlympiadApi(pathname) {
   return pathname === "/api/public/olympiad" ||
     pathname === "/api/public/register" ||
     pathname === "/api/public/attempts/start" ||
-    /^\/api\/public\/attempts\/[^/]+(?:\/(?:story-result|current|pulse|answer|dish-selection|finish|integrity))?$/.test(pathname) ||
+    /^\/api\/public\/attempts\/[^/]+(?:\/(?:certificate|story-result|current|pulse|answer|dish-selection|finish|integrity))?$/.test(pathname) ||
     pathname.startsWith("/api/admin/story-runs") ||
     pathname === "/api/admin/login" ||
     pathname === "/api/admin/session" ||

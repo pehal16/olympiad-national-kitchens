@@ -23,6 +23,10 @@ test('D1 story day: protected publication, simultaneous start, per-run identity 
  const saved=await store.loadAttemptById(attempt.id);assert.equal(saved.variant.blueprintVersion,15);assert.equal(saved.variant.storyVersion,1);assert.equal(saved.variant.questions.length,36);
  assert.ok(saved.questionLog[saved.variant.questions[0].id]?.presentedAt,'Atomic start retains first question timing');
  const prefix=`/api/public/attempts/${attempt.id}`;
+ assert.equal(attempt.certificateAvailable,false);
+ assert.equal((await api(prefix+'/certificate')).status,401);
+ assert.equal((await api(prefix+'/certificate',{token:'synthetic_foreign_participant_token'})).status,401);
+ assert.equal((await api(prefix+'/certificate',{token})).status,409);
  assert.equal((await api(prefix+'/story-result')).status,401);assert.equal((await api(prefix+'/story-result',{token:'synthetic_foreign_participant_token'})).status,401);
  assert.deepEqual(Object.keys((await api(prefix+'/story-result',{token})).data),['state','entryEndsAt']);
  // Pages exposes writeHead/end, without Node's setHeader method. Exercise that
@@ -32,6 +36,11 @@ test('D1 story day: protected publication, simultaneous start, per-run identity 
  await require('../server').handleApi(request,response,new URL(base+prefix+'/story-result'));
  assert.equal(response.code,200);assert.equal(response.headers['Cache-Control'],'private, no-store');assert.equal(JSON.parse(response.body).data.state,'waiting');
  const finished=await api(prefix+'/finish',{method:'POST',token,body:{}});assert.equal(finished.status,200);assert.equal(finished.data.summary.totalFinalScore,null);assert.equal(finished.data.story.resultAvailable,false);
+ assert.equal(finished.data.certificateAvailable,true);
+ const certificate=await api(prefix+'/certificate',{token});assert.equal(certificate.status,200);
+ assert.deepEqual(certificate.data.summary,{totalFinalScore:0,totalMaxScore:150});
+ assert.deepEqual(certificate.data.certificateOrder,{number:'199',date:'2026-10-05'});
+ assert.doesNotMatch(JSON.stringify(certificate.data),/expectedAnswer|correctIngredientIds|isCorrect|tourScores|answers|variant/);
  assert.doesNotMatch(JSON.stringify(finished.data),/storyPlates|expectedAnswer|correctIngredientIds|isCorrect/);
  assert.equal((await api(prefix+'/pulse',{token})).data.summary.totalFinalScore,null);
  const run=await runs.getRun(id);run.entryEndsAt=new Date(Date.now()-1000).toISOString();
@@ -39,6 +48,9 @@ test('D1 story day: protected publication, simultaneous start, per-run identity 
  const publication=await api(`/api/admin/story-runs/${id}/publish`,{admin:true,method:'POST'});assert.equal(publication.status,200);
  const again=await api(`/api/admin/story-runs/${id}/publish`,{admin:true,method:'POST'});assert.equal(again.data.publishedAt,publication.data.publishedAt);
  const result=await api(prefix+'/story-result',{token});assert.equal(result.data.state,'published');assert.equal(result.data.plates.length,0);
+ assert.deepEqual(result.data.review,[]);
+ assert.doesNotMatch(JSON.stringify(result.data),/expectedAnswer|explanation|correctIngredientIds|isCorrect/);
+ assert.deepEqual((await api(prefix+'/certificate',{token})).data,certificate.data,'publication does not change the certificate');
  assert.equal((await api(prefix+'/current',{token})).data.summary.totalFinalScore,0);
  assert.equal((await api('/api/public/attempts/start',{method:'POST',token,body:{participant:{...participant,fullName:'Второй Тестовый Участник'}}})).status,403);
  // Reuse a new synthetic day, same participant, never blocked by prior or legacy completion.

@@ -53,11 +53,13 @@ async function main(){
     const records=await sql("SELECT a.id,json_extract(a.payload_json,'$.status') AS status,json_extract(a.payload_json,'$.totalFinalScore') AS score,(SELECT COUNT(*) FROM attempt_answers b WHERE b.attempt_id=a.id) AS answers FROM attempts a WHERE story_run_id=?",[run.id]);
     for(const a of records){assert.equal(a.status,'reviewed');assert.equal(a.score,150);assert.equal(a.answers,36);}
     const pending=await api(`/api/public/attempts/${people[0].attempt.id}/story-result`,people[0].token);assert.deepEqual(Object.keys(pending),run.entryMode==='anytime'?['state','entryEndsAt','entryOpen']:['state','entryEndsAt']);
+    await Promise.all(people.map(async p=>{const c=await api(`/api/public/attempts/${p.attempt.id}/certificate`,p.token);assert.deepEqual(c.summary,{totalFinalScore:150,totalMaxScore:150});assert.doesNotMatch(JSON.stringify(c),/expectedAnswer|correctIngredientIds|tourScores|answers/);}));
+    await api(`/api/public/attempts/${people[0].attempt.id}/certificate`,people[1].token,undefined,'GET',401);
     await api(`/api/public/attempts/${people[0].attempt.id}/story-result`,people[1].token,undefined,'GET',401);
     if(run.entryMode==='anytime')await api(`/api/admin/story-runs/${run.id}`,'',{stopped:true},'PATCH');
     else {run.entryEndsAt=new Date(Date.now()-1000).toISOString();await sql('UPDATE olympiad_story_runs SET entry_ends_at=?,payload_json=? WHERE id=?',[run.entryEndsAt,JSON.stringify(run),run.id]);}
     const publication=await api(`/api/admin/story-runs/${run.id}/publish`,'',{});assert.equal((await api(`/api/admin/story-runs/${run.id}/publish`,'',{})).publishedAt,publication.publishedAt);
-    await Promise.all(people.map(async p=>{const r=await api(`/api/public/attempts/${p.attempt.id}/story-result`,p.token);assert.equal(r.state,'published');assert.equal(r.plates.length,51);assert.equal(r.summary.totalFinalScore,150);}));
+    await Promise.all(people.map(async p=>{const r=await api(`/api/public/attempts/${p.attempt.id}/story-result`,p.token);assert.equal(r.state,'published');assert.equal(r.plates.length,51);assert.equal(r.summary.totalFinalScore,150);assert.doesNotMatch(JSON.stringify(r),/expectedAnswer|correctIngredientIds|explanation/);}));
     times.sort((a,b)=>a-b);const metric={environment:'Cloudflare Pages preview / separate D1',entryMode:run.entryMode,participants:count,answers:count*36,errors:0,lostAnswers:0,duplicateAnswers:0,answerP95Ms:Math.round(times[Math.ceil(times.length*.95)-1]),timestamp:new Date().toISOString()};evidence.push(metric);console.log(JSON.stringify(metric));
     fs.writeFileSync('output/story/cloudflare-load.json',JSON.stringify(evidence,null,2));
   }

@@ -62,10 +62,14 @@
 
     let attempt;
     try {
-      const response = await fetch(`/api/public/attempts/${encodeURIComponent(attemptId)}`, {
+      const response = await fetch(`/api/public/attempts/${encodeURIComponent(attemptId)}/certificate`, {
         headers: { "X-Attempt-Token": attemptToken },
         cache: "no-store"
       });
+      if (response.status === 409) {
+        fail("Свидетельство доступно после личного завершения олимпиады.");
+        return;
+      }
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const payload = await response.json();
       attempt = payload?.data || payload;
@@ -103,8 +107,8 @@
       day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC"
     }).format(new Date(order.date));
     fields.number.textContent = `№ ${order.number} / ${orderDate}`;
-    // A published story day is an official run; retain the previous pilot
-    // annotation only for legacy attempts.
+    // Story participants receive the document at their own finish.
+    // Retain the previous pilot annotation only for legacy attempts.
     if (attempt.story) document.querySelector('.certificate-pilot-label')?.remove();
 
     sheet.hidden = false;

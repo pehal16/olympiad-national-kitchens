@@ -1,27 +1,27 @@
-const CACHE_NAME = "national-kitchens-olympiad-story-layout-3b";
+const CACHE_NAME = "national-kitchens-olympiad-story-layout-3c";
 const PRECACHE_URLS = [
-  "/olympiad-story.js?v=story-layout3b",
-  "/restaurant-layout.js?v=layout3b",
-  "/restaurant-layout.css?v=layout3b",
+  "/olympiad-story.js?v=story-layout3c",
+  "/restaurant-layout.js?v=layout3c",
+  "/restaurant-layout.css?v=layout3c",
   "/olympiad-story.css?v=story2",
   "/",
   "/admin.html",
   "/content-admin.html",
   "/certificate.html",
-  "/styles.css?v=1.7.0-layout3b",
+  "/styles.css?v=1.7.0-layout3c",
   "/t5-final-kitchen.css?v=1.7.0-story2",
   "/t5-photo-kitchen.css?v=1.7.0-story2",
   "/t5-dish-service.css?v=1.7.0-story2",
   "/t5-photo-model.js?v=1.7.0-story2",
-  "/t5-dish-service.js?v=1.7.0-layout3b",
-  "/t5-photo-kitchen.js?v=1.7.0-layout3b",
+  "/t5-dish-service.js?v=1.7.0-layout3c",
+  "/t5-photo-kitchen.js?v=1.7.0-layout3c",
   "/certificate.css?v=1.7.0-cert3",
-  "/certificate.js?v=1.7.0-order2",
-  "/app.js?v=1.7.0-layout3b",
+  "/certificate.js?v=1.7.0-finish1",
+  "/app.js?v=1.7.0-layout3c",
   "/t5-final-kitchen.js?v=1.7.0-layout2",
-  "/t4-guest-order.js?v=1.7.0-layout3b",
-  "/t2-country-match.js?v=1.7.0-layout3b",
-  "/t3-detective.js?v=1.7.0-layout3b",
+  "/t4-guest-order.js?v=1.7.0-layout3c",
+  "/t2-country-match.js?v=1.7.0-layout3c",
+  "/t3-detective.js?v=1.7.0-layout3c",
   "/admin.js?v=1.7.0-anytime1",
   "/content-admin.js?v=1.7.0",
   "/manifest.webmanifest?v=1.7.0",
@@ -29,8 +29,8 @@ const PRECACHE_URLS = [
   "/icons/icon-512.png",
   "/brand-prof-tourism.png",
   "/brand-gkts-shield.jpg",
-  "/restaurant-media.js?v=layout3b",
-  "/restaurant-atlas.js?v=layout3b"
+  "/restaurant-media.js?v=layout3c",
+  "/restaurant-atlas.js?v=layout3c"
 ];
 
 self.addEventListener("install", (event) => {

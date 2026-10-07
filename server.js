@@ -4,6 +4,7 @@ const packageInfo = require("./package.json");
 const { buildDishService } = require("./src/dish-service");
 const storyRuns=require("./src/story-runs");
 const {freezeStoryVariant,buildStoryResult}=require("./src/story-result");
+const {certificateAvailable,buildParticipantCertificate}=require("./src/participant-certificate");
 function storyEnabled(){return storyRuns.enabled();}
 const {
   initStorage,
@@ -801,6 +802,7 @@ function buildAttemptView(olympiad, attempt, settings) {
     stateRevision: Math.max(0, Number(attempt.stateRevision) || 0),
     currentStepIndex: attempt.currentStepIndex,
     certificateOrder: olympiad.certificateOrder || null,
+    certificateAvailable: certificateAvailable(attempt, settings),
     story: storyRuns.storyView(attempt),
     dishService: buildDishService(attempt),
     progress: buildProgress(attempt),
@@ -847,6 +849,7 @@ function buildAttemptPulse(olympiad, attempt, settings) {
 
   return {
     id: attempt.id,
+    certificateAvailable: certificateAvailable(attempt, settings),
     story: storyRuns.storyView(attempt),
     status: attempt.status,
     startedAt: attempt.startedAt,
@@ -3786,6 +3789,14 @@ async function handleApi(req, res, url, runtime = {}) {
     return;
   }
 
+  if (method === "GET" && pathname.match(/^\/api\/public\/attempts\/[^/]+\/certificate$/)) {
+    const olympiad=await ensureOlympiad();let attempt=await loadAttemptById(pathname.split("/")[4]);
+    if(!attempt||attempt.olympiadId!==olympiad.id){sendJson(res,404,{ok:false,message:"Попытка не найдена."});return;}
+    if(!hasAttemptAccess(req,attempt)){sendAttemptAccessDenied(res);return;}
+    attempt=await normalizeAndPersistIfChanged(olympiad,attempt);
+    const certificate=buildParticipantCertificate(olympiad,attempt,settings);
+    sendJson(res,certificate?200:409,certificate?{ok:true,data:certificate}:{ok:false,message:"Свидетельство доступно после завершения олимпиады."},{"Cache-Control":"private, no-store"});return;
+  }
   if (method === "GET" && pathname.match(/^\/api\/public\/attempts\/[^/]+\/story-result$/)) {
     const olympiad=await ensureOlympiad();let attempt=await loadAttemptById(pathname.split("/")[4]);
     if(!attempt||attempt.olympiadId!==olympiad.id){sendJson(res,404,{ok:false,message:"Попытка не найдена."});return;}

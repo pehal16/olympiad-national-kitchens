@@ -3110,7 +3110,7 @@ function renderCertificate(attempt, scoresVisible) {
   const score = attempt?.summary?.totalFinalScore;
   const maxScore = attempt?.summary?.totalMaxScore;
   const participant = attempt?.participant;
-  const available = Boolean(
+  const available = typeof attempt?.certificateAvailable === "boolean" ? attempt.certificateAvailable : Boolean(
     attempt?.status !== "in_progress" &&
     scoresVisible &&
     Number.isFinite(score) &&

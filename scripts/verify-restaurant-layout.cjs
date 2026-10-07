@@ -60,11 +60,22 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
    if(q.type==='final_kitchen'){await page.locator('.t5-service-inline').waitFor();await page.locator('.t5-service-inline .t5-service-scene[aria-busy="false"]').waitFor();assert.equal(await page.locator('.t5-service-overlay').count(),0);assert.equal(await page.locator('.t5-service-scene img').evaluateAll(ns=>ns.every(n=>n.complete&&n.naturalWidth>0)),true,'served food and scenery load successfully');assert.equal(await page.locator('.t5-service-missing').isVisible(),false,'no false photo failure');assert.equal(await page.locator('.t5-service-inline').getAttribute('aria-modal'),null);if(i<35)assert.equal(await page.locator('#question-body').evaluate(n=>n.inert),false);await page.locator('.t5-service-inline').screenshot({path:path.join(output,`service-${i}.png`),animations:'disabled'});await page.setViewportSize({width:390,height:900});await page.locator('.t5-service-inline').screenshot({path:path.join(output,`service-${i}-mobile.png`),animations:'disabled'});await page.setViewportSize({width:1366,height:768});}
   }
   const saved=await store.loadAttemptById(id);assert.equal(Object.keys(saved.answers).length,36);assert.equal(saved.totalFinalScore,150);
-  assert.equal(await page.locator('#certificate-section').isVisible(),false,'no certificate before publication');
+  assert.equal(await page.locator('#certificate-section').isVisible(),true,'certificate immediately after personal finish');
+  assert.equal(await page.locator('#result-section').evaluate(n=>n.lastElementChild.id),'certificate-section','personal-finish certificate is the final section');
+  const certificateReply=await context.request.get(base+`/api/public/attempts/${id}/certificate`,{headers:{'X-Attempt-Token':await page.evaluate(id=>localStorage.getItem(`nko_attempt_access_${id}`),id)}});
+  assert.equal(certificateReply.status(),200);const certificateData=(await certificateReply.json()).data;
+  assert.deepEqual(certificateData.summary,{totalFinalScore:150,totalMaxScore:150});
+  assert.doesNotMatch(JSON.stringify(certificateData),/expectedAnswer|correctIngredientIds|isCorrect|tourScores/);
+  await page.locator('#certificate-open').click();await page.locator('#certificate-sheet:not([hidden])').waitFor();
+  assert.equal(await page.locator('#certificate-score').innerText(),'150 из 150 баллов');
+  assert.equal(await page.locator('#certificate-number').innerText(),'№ 199 / 05.10.2026');
+  await page.locator('#certificate-sheet').screenshot({path:path.join(output,'certificate-immediate.png')});
+  await page.getByRole('link',{name:'← К результату'}).click();await page.locator('#certificate-section:not(.hidden)').waitFor();
   assert.equal(await page.locator('#hero-section').isVisible(),false,'finished story does not repeat invitation');
   const run=await runs.getRun(saved.storyRunId);await runs.updateRun(run.id,{stopped:true});await runs.publishRun(run.id);
   await page.getByRole('button',{name:'Обновить итоги',exact:true}).click();await page.locator('.story-publish-notice').waitFor();assert.match(await page.locator('.story-result-facts').innerText(),/51/);await page.screenshot({path:path.join(output,'table-51.png'),fullPage:true});
   await page.locator('#certificate-section').waitFor();assert.equal(await page.locator('#result-section').evaluate(n=>n.lastElementChild.id),'certificate-section','certificate is the final result section');
+  assert.equal(await page.getByText('Разбор всех ответов',{exact:true}).count(),0);
   // A separate synthetic day exercises the emergency shell and actual network failures.
   const edgeRun=await runs.createRun(new Date(Date.now()+10800000).toISOString().slice(0,10));
   const touch=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true,reducedMotion:'reduce',serviceWorkers:'block'}),edge=await touch.newPage();

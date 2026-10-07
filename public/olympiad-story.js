@@ -38,7 +38,7 @@
       'Финальная кухня: три блюда. Выберите ровно четыре компонента для указанной версии рецепта, выполните показанные действия и нажмите «Подать». Каждый верный компонент — 4 балла, максимум 16 за блюдо; 15 минут, максимум 48.',
       'Соевый соус, имбирь и васаби сопровождают подачу роллов. Их выбирать не нужно; они не влияют на баллы.',
       'После подтверждения вернуться к заданию нельзя. Ошибки не дают штрафных баллов. По истечении лимита тура открывается следующий; при общем лимите 45 минут попытка завершается. Неподтверждённый выбор не считается ответом.',
-      'Сюжет не добавляет баллов. Правильность, оценки, реакции гостя, персональный стол и свидетельство открываются только после публикации общих итогов организатором.'
+      'Сюжет не добавляет баллов. Сразу после личного завершения можно открыть свидетельство с набранными баллами из 150. Правильные ответы не показываются. Персональный стол, реакции гостя и общие итоги открываются после публикации организатором.'
     ])guide.append(el('p','',text));section.append(guide);
     const entry=doc.getElementById('prestart-section'),copy=doc.querySelector('.landing-hero-copy');
     copy.append(section,entry);
@@ -63,7 +63,7 @@
     if(chapterNode.dataset.recorded!==signature){
       chapterNode.querySelector('.story-album-strip')?.remove();
       const strip=el('div','story-album-strip');
-      if(number===2&&attempt.story.recordedMap?.length){const notes=el('details','story-map-notes');notes.append(el('summary','','Последний записанный блок карты'));for(const pair of attempt.story.recordedMap)notes.append(el('p','',`${pair.dish} → ${pair.country}`));notes.append(el('small','','Это ваши сохранённые сопоставления; правильность появится в разборе.'));strip.append(notes);}
+      if(number===2&&attempt.story.recordedMap?.length){const notes=el('details','story-map-notes');notes.append(el('summary','','Последний записанный блок карты'));for(const pair of attempt.story.recordedMap)notes.append(el('p','',`${pair.dish} → ${pair.country}`));notes.append(el('small','','Это ваши сохранённые сопоставления. Правильные ответы не показываются.'));strip.append(notes);}
       chapterNode.querySelector('.story-chapter-copy').append(strip);chapterNode.dataset.recorded=signature;
     }
   }
@@ -88,9 +88,14 @@
     session=attempt;request=api;onAvailable=notify;
     for(const id of ['result-overview','result-next','result-tours'])doc.getElementById(id)?.classList.add('hidden');
     if(!resultMount){resultMount=el('section','story-result');doc.getElementById('result-tours').after(resultMount);}
+    const certificate=doc.getElementById('certificate-section');
+    doc.getElementById('result-section').append(certificate);
+    doc.getElementById('certificate-heading').textContent='Ваше свидетельство об участии';
+    doc.getElementById('certificate-open').textContent='Открыть свидетельство';
+    certificate.querySelector('p').textContent='Олимпиада завершена. В свидетельстве указаны ваши баллы из 150 и приказ № 199 / 05.10.2026. Документ можно сохранить как PDF.';
     if(loaded){renderTable(loaded);return;}
     doc.getElementById('result-title').textContent='Меню принято. Спасибо за этот вечер!';
-    doc.getElementById('result-subtitle').textContent='Ответы сохранены. Персональный стол, баллы, разбор и свидетельство откроются после публикации итогов организатором. Можно закрыть страницу и вернуться в этом браузере.';
+    doc.getElementById('result-subtitle').textContent='Ответы сохранены. Свидетельство с набранными баллами уже доступно ниже. Правильные ответы не показываются. Персональный стол откроется после публикации общих итогов. Можно закрыть страницу и вернуться в этом браузере.';
     resultMount.replaceChildren();
     if(!attempt.story.decorationsDisabled)resultMount.append(root.RestaurantLayout.picture('waiting','story-waiting-scene restaurant-waiting','Гость закрывает альбом и ожидает общего финала'));
     resultMount.append(el('p','story-poll-status','Ожидаем общего финала.'),button('Обновить итоги',refresh));
@@ -100,15 +105,15 @@
     const modal=el('dialog','story-dish-dialog');
     const close=button('Закрыть',()=>modal.close());
     if(p.imageUrl)modal.append(image(p.imageUrl,p.imageAlt||p.title,'story-detail-image'));
-    modal.append(el('h2','',p.title),el('p','',p.recipeVersion),el('p','',p.explanation));
+    modal.append(el('h2','',p.title),el('p','',p.recipeVersion));
     for(const a of p.actions)modal.append(el('p','',`${a.tour}, задание ${a.number}. Ваш ответ: ${a.savedAnswer}. Баллы: ${a.score} из ${a.maxScore}.`));
     modal.append(close);doc.body.append(modal);modal.addEventListener('close',()=>{modal.remove();source?.focus({preventScroll:true});},{once:true});modal.showModal();
   }
   function renderTable(data){
     if(!resultMount)return;resultMount._resizeObserver?.disconnect();resultMount.replaceChildren();
     doc.getElementById('result-title').textContent='Ваш дегустационный стол';
-    doc.getElementById('result-subtitle').textContent='В меню — полностью правильные блюда. Нажмите на подачу, чтобы посмотреть ваш ответ и объяснение.';
-    const notice=el('p','story-publish-notice','Итоги опубликованы. Ваш стол, разбор и свидетельство готовы.');notice.setAttribute('role','status');resultMount.append(notice);
+    doc.getElementById('result-subtitle').textContent='В меню — заработанные подачи. Нажмите на блюдо, чтобы посмотреть свой сохранённый ответ. Правильные ответы не показываются.';
+    const notice=el('p','story-publish-notice','Общие итоги опубликованы. Ваш дегустационный стол готов; свидетельство доступно в конце страницы.');notice.setAttribute('role','status');resultMount.append(notice);
     const facts=el('div','story-result-facts');facts.append(el('strong','',`Блюд в меню: ${data.plates.length} из ${data.collectionMax}`),el('strong','',`Баллы: ${data.summary.totalFinalScore} из ${data.summary.totalMaxScore}`));resultMount.append(facts);
     if(!session.story.decorationsDisabled){
       const viewport=el('div','story-table');viewport.classList.toggle('is-compact',data.plates.length<=3);viewport.tabIndex=0;viewport.setAttribute('aria-label','Дегустационный стол. Стрелки влево и вправо перемещают подачи.');
@@ -117,7 +122,7 @@
       const guest=image(base+'table-guest.webp','Гость смотрит на еду перед собой','story-table-guest');track.append(guest);
       const items=el('div','story-table-items');track.append(items);
       for(const p of data.plates){let b; b=button('',()=>showPlate(p,b),'story-serving');b.setAttribute('aria-label',p.title);const photo=el('img','story-serving-image');photo.dataset.src=p.imageUrl||'';photo.alt=p.imageAlt||p.title;photo.decoding='async';photo.addEventListener('error',()=>{photo.hidden=true;});b.append(photo,el('span','',p.title));items.append(b);}
-      if(!data.plates.length)items.append(el('p','story-empty','В этом меню пока нет полностью правильных блюд. Все сохранённые ответы и баллы доступны в разборе ниже.'));
+      if(!data.plates.length)items.append(el('p','story-empty','В этом меню пока нет заработанных подач. Набранные баллы указаны в вашем свидетельстве.'));
       let page=0;
       const previous=arrow(-1,()=>move(-1)),next=arrow(1,()=>move(1)),position=el('p','story-table-position');
       function layout(){const size=pageSize(),pages=Math.max(1,Math.ceil(data.plates.length/size));page=Math.min(page,pages-1);const width=viewport.clientWidth;guest.style.width=`${width}px`;
@@ -140,11 +145,9 @@
     filter.addEventListener('input',()=>{for(const row of rows.children)row.hidden=!row.dataset.search.includes(filter.value.toLocaleLowerCase('ru'));});list.append(rows);resultMount.append(list);
     const kitchen=el('section','story-kitchen-review');kitchen.append(el('h2','','Что получилось на кухне'));
     if(!data.kitchen.length)kitchen.append(el('p','','Подтверждённых подач на кухне нет.'));
-    for(const row of data.kitchen){const article=el('article','story-kitchen-row');article.append(el('h3','',row.receipt.dishTitle),el('p','',`Баллы: ${row.score} из ${row.maxScore}. ${row.fullyCorrect?'Блюдо добавлено в меню.':'Эта подача сохранена для разбора.'}`),el('p','',row.receipt.composition.join(' · ')),button('Посмотреть подачу и реакцию',()=>{
+    for(const row of data.kitchen){const article=el('article','story-kitchen-row');article.append(el('h3','',row.receipt.dishTitle),el('p','',`Баллы: ${row.score} из ${row.maxScore}. ${row.fullyCorrect?'Блюдо добавлено в меню.':'Сохранён фактический состав вашей подачи.'}`),el('p','',row.receipt.composition.join(' · ')),button('Посмотреть подачу и реакцию',()=>{
       root.T5DishService?.sync({id:session.id+':review:'+Date.now(),status:'reviewed',dishService:row.receipt},()=>{});root.T5DishService?.setLocked(false);
     }));kitchen.append(article);}resultMount.append(kitchen);
-    const review=el('details','story-answer-review');review.append(el('summary','','Разбор всех ответов'));
-    for(const row of data.review){const article=el('article','story-review-row');article.append(el('h3','',`${row.tour} · задание ${row.number}`),el('p','',`Ваш ответ: ${row.savedAnswer}`),el('p','',`Верный ответ: ${row.expectedAnswer}`),el('p','',`${row.score} из ${row.maxScore}. ${row.explanation}`));review.append(article);}resultMount.append(review);
     const certificate=doc.getElementById('certificate-section');
     doc.getElementById('result-section').append(certificate);
     doc.getElementById('certificate-heading').textContent='Ваше свидетельство об участии';

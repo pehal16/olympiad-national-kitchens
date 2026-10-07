@@ -28,3 +28,10 @@ test('story album and map show only confirmed photos and the actual chosen count
   assert.equal(view.recordedMap[1].country,'не выбрано');
   assert.doesNotMatch(JSON.stringify(view),/isCorrect|expectedAnswer|finalScore|storyPlates|correctBuckets/);
 });
+
+test('published collection never supplies solutions for unanswered or incorrect questions',()=>{
+ const a=fixture();for(const q of a.variant.questions.slice(0,18))save(a,q,correct(q));
+ const data=buildStoryResult(olympiad,a);
+ assert.ok(data.plates.length>0);assert.deepEqual(data.review,[]);
+ assert.doesNotMatch(JSON.stringify(data),/expectedAnswer|explanation|correctBuckets|correctIngredientIds|answerPolicy|isCorrect/);
+});

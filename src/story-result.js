@@ -37,13 +37,10 @@ function buildStoryResult(olympiad,attempt) {
   if(!attempt.storyRunId) return {state:'legacy'};
   if(attempt.status==='in_progress'||!attempt._storyRun?.publishedAt) return {state:'waiting',entryEndsAt:attempt._storyRun?.entryEndsAt||null,
     ...(attempt._storyRun?.entryMode==='anytime'?{entryOpen:require('./story-runs').entryOpen(attempt._storyRun)}:{})};
-  const earned=[], kitchen=[], review=[];
+  const earned=[], kitchen=[];
   for(const q of attempt.variant.questions) {
     const saved=attempt.answers?.[q.id], payload=saved?.answerPayload;
     const action={questionId:q.id,tour:q.tourCode,number:q.sequenceInTour,savedAnswer:answerText(q,payload),score:Number(saved?.finalScore||0),maxScore:q.maxScore};
-    const expected=q.type==='single_choice'?q.options.find(o=>o.isCorrect)?.text:q.type==='dish_detective'?q.answerPolicy.canonical:
-      q.type==='bucket_sort'?answerText(q,{buckets:q.correctBuckets}):q.dishes?.[0]?.items.filter(i=>q.dishes[0].correctIngredientIds.includes(i.id)).map(i=>i.text).join(', ');
-    review.push({...action,expectedAnswer:expected||'',explanation:q.storyPlates?.map(p=>p.explanation).join(' ')||''});
     if(!saved) continue;
     for(const p of q.storyPlates||[]) {
       let correct=false;
@@ -60,12 +57,14 @@ function buildStoryResult(olympiad,attempt) {
           if(correct) imageUrl=receipt.servingPhoto?.imageUrl||receipt.photos?.[0]?.imageUrl||p.imageUrl;
         } else correct=false;
       }
-      if(correct) earned.push({...p,imageUrl,actions:[q.type==='bucket_sort'?{...action,savedAnswer:answerText(q,{buckets:{[p.itemId]:payload.buckets[p.itemId]}}).split('; ').find(s=>s.startsWith(p.title+' →'))||action.savedAnswer,score:q.maxScore/q.items.length,maxScore:q.maxScore/q.items.length}:action]});
+      const {explanation,...publicPlate}=p;
+      if(correct) earned.push({...publicPlate,imageUrl,actions:[q.type==='bucket_sort'?{...action,savedAnswer:answerText(q,{buckets:{[p.itemId]:payload.buckets[p.itemId]}}).split('; ').find(s=>s.startsWith(p.title+' →'))||action.savedAnswer,score:q.maxScore/q.items.length,maxScore:q.maxScore/q.items.length}:action]});
     }
   }
   earned.sort((a,b)=>Number(b.actions[0].tour==='T5')-Number(a.actions[0].tour==='T5'));
   const combined=new Map();
   for(const p of earned) { const key=p.dishId+'|'+p.recipeVersion; if(combined.has(key)) combined.get(key).actions.push(...p.actions); else combined.set(key,p); }
-  return {state:'published',publishedAt:attempt._storyRun.publishedAt,plates:[...combined.values()],collectionMax:51,summary:summarizeAttempt(olympiad,attempt),kitchen,review};
+  // Keep the empty array for already-open older clients without supplying keys.
+  return {state:'published',publishedAt:attempt._storyRun.publishedAt,plates:[...combined.values()],collectionMax:51,summary:summarizeAttempt(olympiad,attempt),kitchen,review:[]};
 }
 module.exports={freezeStoryVariant,buildStoryResult};

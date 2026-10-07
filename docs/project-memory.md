@@ -2,6 +2,13 @@
 
 Last updated: 2026-10-07
 
+## Immediate personal certificate, no participant answer keys (2026-10-07)
+
+- Latest explicit user instruction supersedes the earlier certificate-after-publication decision: each story participant receives the document at their own terminal finish with saved aggregate points out of 150. Full completion, early finish and expiration qualify; in-progress attempts do not. Shared table/ranking/guest reactions still wait for organizer publication. No invented date, score recalculation, bank, schema or timer changes.
+- Protected owner-only GET /api/public/attempts/:id/certificate normalizes expiration, uses saved answer scores and returns only identity/order/finish/aggregate. Private no-store; denied missing/foreign token, active attempt and legacy hidden-score policy. certificateAvailable metadata enables the last result section while normal pre-publication summaries remain hidden. Certificate keeps № 199 / 05.10.2026 and PDF format.
+- Participant correct-answer review is removed even after publication. story-result no longer supplies expected answers or explanatory answer keys; review stays an empty array for already-open older clients. Earned plates and actual saved kitchen compositions remain available after publication. Organizer/admin keys are unchanged. Shell layout3c / certificate finish1 refreshes clients without forced active-attempt reloads.
+- Local acceptance: 275 tests/build/full-server PM01 pass. HTTP covers active/foreign/missing token, partial 2/150 finish, expiration 0/150, publication-independent repeated certificate and empty-key published collection. Real browser completes 36 answers/150, opens certificate before publication, returns and then views 51 plates without answer review; native local Codex browser independently covers early finish/0/150/order/return. Report and synthetic screenshots: docs/participant-certificate-verification.md. Preview/main receipts follow actual deployment; no production technical participants.
+
 ## Menu, narrative and geographic map — client layout 3 (2026-10-07)
 
 - Latest user review supersedes the layout-2 minimum 500 px T1 photograph: the actual dish now fits one album/menu page (360–420 px desktop, contained and proportionate), with answers on the other. Compact arrival/registration, a prominent guest quotation before all five chapters, smaller secondary scenes and quieter repeated status text address clutter. LayoutVersion 3 only; bank, blueprint 15, story/food assetVersion 1, scoring, timers, anytime entry and server publication remain unchanged.
