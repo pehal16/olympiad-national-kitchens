@@ -2,6 +2,15 @@
 
 Last updated: 2026-10-08
 
+## Familiar pizza cover and modest participant UI cleanup (2026-10-08)
+
+- User prefers the original pizza landing cover. Reused the existing approved `landing/hero-national-cuisines.webp` (165474 bytes), with a readable invitation beside it on desktop and a whole proportional photograph above the copy on mobile. Registration/start now sit below the cover. Keep this cover preference in future visual revisions.
+- Five-tour instructions are consolidated into the existing rules disclosure; repeated pre-start explanations and the ungraded workshop link are removed from the participant landing presentation. The workshop itself remains available at its existing URL. Metadata refresh preserves the welcome conversation and creates neither duplicate guides nor replacement cover nodes.
+- Removed repeated chapter captions, the initial duplicate map instruction, and routine timestamp lines beside questions. Save/protected-mode badges, full conditions, map action feedback, warnings and sending errors remain visible; timestamps remain in the expandable participant cockpit. The kitchen instruction uses a secondary text hierarchy. No bank, grading, timer, dialogue or issued-variant changes.
+- Published results clear the last inline serving, so only the panorama guest remains. Actual saved kitchen compositions/reactions are available in an optional disclosure. Certificate remains the final section, available immediately at personal completion with points and order № 199 / 05.10.2026. Returning to a completed attempt now explicitly hides registration, including a fresh page restoration.
+- Client shell/SW revision `layout4-cleanup2`; layoutVersion 4, dialogueVersion 1, conditionVersion 2 and server compatibility unchanged. Existing intentional prototype/generated-runtime changes stay outside this release.
+- Local acceptance: 280 tests; SQLite concurrency 50/1800 answers (p95 487 ms) and 60/2160 (p95 455 ms), zero errors/loss/duplicates; Cloudflare build and full-server PM01 verification pass. Full browser route verifies 36 answers, 150 points, 51 published plates, nine widths, reloads/guard/T3 focus/map/touch/image/network failure recovery and the final certificate. Landing checks cover the same nine widths, registration/rules navigation, zero horizontal overflow, zero JS errors and zero POSTs. QA files/screenshots are temporary local artifacts outside the repository; physical college-device review remains separate.
+
 ## Per-question comic guest — layout 4 / dialogue 1 / condition edition 2 (2026-10-07)
 
 - User explicitly approved full implementation/release of 36 distinct primary and optional conversations, same realistic guest in five poses, neutral action receipts and responsive left/above layout. Reused attached restaurant worktree from origin/main; unrelated dirty originals/generated runtimes remain preserved and excluded.

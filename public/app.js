@@ -354,12 +354,13 @@ function setAttemptSaveStatus(message, type = "idle") {
   updateExamCockpit();
 }
 
-function setAttemptSyncMeta(message) {
+function setAttemptSyncMeta(message, { routine = false } = {}) {
   if (!elements.attemptSyncMeta) {
     return;
   }
 
   elements.attemptSyncMeta.textContent = message;
+  elements.attemptSyncMeta.dataset.routine = String(routine);
   updateExamCockpit();
 }
 
@@ -3135,6 +3136,7 @@ function renderResult() {
   const summary = state.attempt.summary;
   const scoresVisible = Number.isFinite(summary.totalFinalScore);
   disableExamMode();
+  elements.prestartSection.classList.add("hidden");
   elements.attemptSection.classList.add("hidden");
   elements.resultSection.classList.remove("hidden");
   refreshNavigationState();
@@ -3392,7 +3394,7 @@ async function syncAttempt(silent = false) {
     if (data.status === "in_progress") {
       updateTimers();
     }
-    setAttemptSyncMeta(`Обновлено: ${formatDateTime(new Date())}`);
+    setAttemptSyncMeta(`Обновлено: ${formatDateTime(new Date())}`, { routine: true });
     if (!silent && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
       setAttemptSaveStatus("Данные обновлены", "success");
     }
@@ -3460,7 +3462,7 @@ async function performPendingAnswerFlush(options = {}) {
     setAttemptSaveStatus(lastSyncedAttempt?.answerReceipt?.saved === false
       ? wasKitchen ? "Лимит времени истёк. Блюдо не записано." : "Лимит времени истёк. Заказ не записан." : "Ответы сохранены в облаке",
       lastSyncedAttempt?.answerReceipt?.saved === false ? "warning" : "success");
-    setAttemptSyncMeta(`Синхронизация завершена: ${formatDateTime(new Date())}`);
+    setAttemptSyncMeta(`Синхронизация завершена: ${formatDateTime(new Date())}`, { routine: true });
     return lastSyncedAttempt;
   } catch (caughtError) {
     let error = caughtError;
@@ -3671,7 +3673,7 @@ async function startAttempt() {
     startTimers();
     refreshAttemptControls();
     setAttemptSaveStatus("Маршрут открыт", "success");
-    setAttemptSyncMeta(`Подключение подтверждено: ${formatDateTime(new Date())}`);
+    setAttemptSyncMeta(`Подключение подтверждено: ${formatDateTime(new Date())}`, { routine: true });
     showMessage(
       elements.attemptMessage,
       "Маршрут открыт. Ответы будут автоматически сохраняться в облаке, а защищённый режим олимпиады включён.",
@@ -3765,7 +3767,7 @@ async function submitAnswer() {
       setAttemptSaveStatus("Финальный ответ принят. Маршрут завершён.", "success");
       showMessage(elements.attemptMessage, "Маршрут завершён.", "success");
     }
-    setAttemptSyncMeta(`Ответ записан: ${formatDateTime(new Date())}`);
+    setAttemptSyncMeta(`Ответ записан: ${formatDateTime(new Date())}`, { routine: true });
   } catch (error) {
     const message = formatAnswerActionMessage(error);
     setAttemptSaveStatus("Не удалось отправить ответ", "error");

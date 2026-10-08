@@ -3,7 +3,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const {createOlympiadServer}=require('../olympiad-server'),store=require('../src/store'),runs=require('../src/story-runs');
-const output=path.resolve('output/story/layout4-browser');fs.mkdirSync(output,{recursive:true});
+const output=path.resolve(process.env.RESTAURANT_QA_OUTPUT || 'output/story/layout4-browser');fs.mkdirSync(output,{recursive:true});
 const correct=q=>q.type==='single_choice'?{selectedOptionId:q.options.find(o=>o.isCorrect).id}:q.type==='bucket_sort'?{buckets:q.correctBuckets}:q.type==='dish_detective'?{text:q.answerPolicy.canonical}:{dishId:q.dishes[0].id,selectedIngredientIds:q.dishes[0].correctIngredientIds};
 const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.selectedIngredientIds].sort()}:a;
 (async()=>{
@@ -73,6 +73,8 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
   const saved=await store.loadAttemptById(id);assert.equal(Object.keys(saved.answers).length,36);assert.equal(saved.totalFinalScore,150);
   checks.push('36 issued dialogues and optional exchanges; soft sync and reload preserve the conversation; automatic T3 focus; no judging before publication');
   assert.equal(await page.locator('#certificate-section').isVisible(),true,'certificate immediately after personal finish');
+  assert.equal(await page.locator('#prestart-section').isVisible(),false,'personal finish does not repeat registration');
+  assert.equal(await page.locator('#result-award').isVisible(),false,'story finish has one certificate action');
   assert.equal(await page.locator('#result-section').evaluate(n=>n.lastElementChild.id),'certificate-section','personal-finish certificate is the final section');
   const certificateReply=await context.request.get(base+`/api/public/attempts/${id}/certificate`,{headers:{'X-Attempt-Token':await page.evaluate(id=>localStorage.getItem(`nko_attempt_access_${id}`),id)}});
   assert.equal(certificateReply.status(),200);const certificateData=(await certificateReply.json()).data;
@@ -85,9 +87,18 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
   await page.getByRole('link',{name:'← К результату'}).click();await page.locator('#certificate-section:not(.hidden)').waitFor();
   assert.equal(await page.locator('#hero-section').isVisible(),false,'finished story does not repeat invitation');
   const run=await runs.getRun(saved.storyRunId);await runs.updateRun(run.id,{stopped:true});await runs.publishRun(run.id);
-  await page.getByRole('button',{name:'Обновить итоги',exact:true}).click();await page.locator('.story-publish-notice').waitFor();assert.match(await page.locator('.story-result-facts').innerText(),/51/);await page.screenshot({path:path.join(output,'table-51.png'),fullPage:true});
+  await page.getByRole('button',{name:'Обновить итоги',exact:true}).click();await page.locator('.story-publish-notice').waitFor();assert.match(await page.locator('.story-result-facts').innerText(),/51/);
+  assert.equal(await page.locator('.t5-service-inline').count(),0,'published table does not repeat the last serving and guest');
+  await page.locator('.story-kitchen-review summary').click();
+  assert.equal(await page.getByRole('button',{name:'Посмотреть подачу и реакцию'}).count(),3,'collapsed kitchen still exposes all saved servings');
+  await page.locator('.story-kitchen-review summary').click();
+  await page.waitForFunction(()=>[...document.querySelectorAll('.story-table img')].every(i=>i.complete));
+  await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:path.join(output,'table-51.png'),fullPage:true});
   await page.locator('#certificate-section').waitFor();assert.equal(await page.locator('#result-section').evaluate(n=>n.lastElementChild.id),'certificate-section','certificate is the final result section');
   assert.equal(await page.getByText('Разбор всех ответов',{exact:true}).count(),0);
+  await page.reload();await page.locator('.story-publish-notice').waitFor();
+  assert.equal(await page.locator('#prestart-section').isVisible(),false,'completed restore does not repeat registration');
+  assert.equal(await page.locator('.t5-service-inline').count(),0,'completed restore keeps the published table focused');
   // A separate synthetic day exercises the emergency shell and actual network failures.
   const edgeRun=await runs.createRun(new Date(Date.now()+10800000).toISOString().slice(0,10));
   const touch=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true,reducedMotion:'reduce',serviceWorkers:'block'}),edge=await touch.newPage();

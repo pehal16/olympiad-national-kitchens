@@ -250,7 +250,7 @@
         const workspace=element('div','t2-atlas-workspace');countries.before(workspace);workspace.append(countries,menu);menu.append(title,bank);
         disposeAtlas=root.RestaurantAtlas.attach(countries,question.buckets);
         countries.before(preview);
-        status.classList.add('t2-atlas-selection');status.textContent='Выберите любое блюдо в наборе, затем его страну на карте.';
+        status.classList.add('t2-atlas-selection');
       }
       sync();
     }

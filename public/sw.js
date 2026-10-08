@@ -1,29 +1,29 @@
-const CACHE_NAME = "national-kitchens-olympiad-story-layout-4-comic4";
+const CACHE_NAME = "national-kitchens-olympiad-story-layout-4-cleanup2";
 const PRECACHE_URLS = [
-  "/story-dialogue.js?v=layout4-comic4",
-  "/restaurant-comic.css?v=layout4-comic4",
-  "/olympiad-story.js?v=story-layout4-comic4",
-  "/restaurant-layout.js?v=layout4-comic4",
-  "/restaurant-layout.css?v=layout4-comic4",
+  "/story-dialogue.js?v=layout4-cleanup2",
+  "/restaurant-comic.css?v=layout4-cleanup2",
+  "/olympiad-story.js?v=story-layout4-cleanup2",
+  "/restaurant-layout.js?v=layout4-cleanup2",
+  "/restaurant-layout.css?v=layout4-cleanup2",
   "/olympiad-story.css?v=story2",
   "/",
   "/admin.html",
   "/content-admin.html",
   "/certificate.html",
-  "/styles.css?v=1.7.0-layout4-comic4",
+  "/styles.css?v=1.7.0-layout4-cleanup2",
   "/t5-final-kitchen.css?v=1.7.0-story2",
   "/t5-photo-kitchen.css?v=1.7.0-story2",
   "/t5-dish-service.css?v=1.7.0-story2",
   "/t5-photo-model.js?v=1.7.0-story2",
-  "/t5-dish-service.js?v=1.7.0-layout4-comic4",
-  "/t5-photo-kitchen.js?v=1.7.0-layout4-comic4",
+  "/t5-dish-service.js?v=1.7.0-layout4-cleanup2",
+  "/t5-photo-kitchen.js?v=1.7.0-layout4-cleanup2",
   "/certificate.css?v=1.7.0-cert3",
   "/certificate.js?v=1.7.0-finish1",
-  "/app.js?v=1.7.0-layout4-comic4",
+  "/app.js?v=1.7.0-layout4-cleanup2",
   "/t5-final-kitchen.js?v=1.7.0-layout2",
-  "/t4-guest-order.js?v=1.7.0-layout4-comic4",
-  "/t2-country-match.js?v=1.7.0-layout4-comic4",
-  "/t3-detective.js?v=1.7.0-layout4-comic4",
+  "/t4-guest-order.js?v=1.7.0-layout4-cleanup2",
+  "/t2-country-match.js?v=1.7.0-layout4-cleanup2",
+  "/t3-detective.js?v=1.7.0-layout4-cleanup2",
   "/admin.js?v=1.7.0-comic4",
   "/content-admin.js?v=1.7.0",
   "/manifest.webmanifest?v=1.7.0",
@@ -31,8 +31,8 @@ const PRECACHE_URLS = [
   "/icons/icon-512.png",
   "/brand-prof-tourism.png",
   "/brand-gkts-shield.jpg",
-  "/restaurant-media.js?v=layout4-comic4",
-  "/restaurant-atlas.js?v=layout4-comic4"
+  "/restaurant-media.js?v=layout4-cleanup2",
+  "/restaurant-atlas.js?v=layout4-cleanup2"
 ];
 
 self.addEventListener("install", (event) => {
