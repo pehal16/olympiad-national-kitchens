@@ -1,6 +1,16 @@
 # Project Memory
 
-Last updated: 2026-10-08
+Last updated: 2026-10-09
+
+## Full participant walkthrough and kitchen polish (2026-10-09)
+
+- Walked the actual 36-question participant route in the native Codex browser on an isolated local full server, including mixed answers and immediate 56/150 certificate. Repeated the route after fixes; production QA must remain read-only and must not create technical participants.
+- Reproduced and fixed T4 photo/rules dialogs remaining in the browser's top layer after fullscreen exit, where they obscured guard recovery. Locking closes the dialog; protected mode and its incident logging remain intact. Keyboard selection now scrolls the selected menu card into view. Removed the second empty-tray message.
+- Reproduced T5 ingredient dragging being blocked by the shared focus guard's older component selector. Only the actual kitchen cards inside the current question are added to the existing allowlist; unrelated image drags remain blocked. The visible route excludes the terminal served state, so numbered steps match the operation counter and all are completed when ready to serve.
+- Kept the approved pizza cover and all five chapter identities/dialogues. Kitchen desktop/tablet uses a three-column ingredient menu beside a combined preview/actions column, with 96 px contained food images. Mobile follows selection, assembly, serving in that order. Mobile country callouts place flags above names to avoid overflowing long labels; tablet timer header stays compact. The completed page removes a link to its hidden invitation. Routine recovery and kitchen draft instructions remain in the cockpit instead of repeating below the task; warnings/errors remain visible.
+- Shell/SW `layout4-polish4`; layoutVersion 4, dialogueVersion 1, conditionVersion 2, bank, blueprint, grading, timing, publication policy and certificate order are unchanged. Original checkout changes and the two preexisting generated runtime modifications are preserved and excluded.
+- Acceptance script now reproduces guard recovery from both order dialogs, keyboard card visibility, real protected kitchen drag/undo with unrelated-drag denial, consistent step counters, mobile map label containment and kitchen order, compact headers, immediate final certificate and one guest, and table arrows/detail/focus at 320/390/768/1366. Full browser route remains 36 answers/150 points/51 plates with nine viewports, reloads, automatic T3 focus, image/network failures and disabled-decoration recovery. Local evidence/screenshots stay outside the repository in a temporary QA directory. Real college devices and teacher/student comprehension remain separate acceptance.
+- Local acceptance: 280 tests and Cloudflare build pass; full-server PM01 verification passes on isolated port 3223. SQLite D1 rehearsal: 50 participants/1800 answers/p95 323 ms and 60/2160/p95 434 ms, zero errors/loss/duplicates. The browser route uses 4,249,814 derivative-image bytes versus 25,951,972 equivalent original bytes (84% less); this measures payload, not college-network latency. Native second mixed-answer run completes with an immediate 50/150 certificate.
 
 ## Familiar pizza cover and modest participant UI cleanup (2026-10-08)
 

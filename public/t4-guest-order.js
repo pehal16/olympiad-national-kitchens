@@ -92,7 +92,7 @@
         traySelection.append(photo(option, "t4-tray-photo"), element("strong", "t4-tray-name", option.text));
       } else traySelection.append(element("p", "t4-empty", "Выберите блюдо из меню"));
       clearButton.hidden = !option; clearButton.disabled = locked;
-      status.textContent = option ? `Выбрано вами: ${option.text}. Заказ ещё не отправлен.` : "На подносе пока нет блюда.";
+      status.textContent = option ? `Выбрано вами: ${option.text}. Заказ ещё не отправлен.` : "";
       if (animate) { traySelection.classList.remove("t4-selection-enter"); void traySelection.offsetWidth; traySelection.classList.add("t4-selection-enter"); }
     }
     function select(id) { if (locked || !model.select(id)) return; update(true); persist(); }
@@ -134,7 +134,7 @@
           event.preventDefault(); if (locked) return;
           const targetIndex = event.key === "Home" ? 0 : event.key === "End" ? question.options.length - 1 :
             (index + offsets[event.key] + question.options.length) % question.options.length;
-          const target = question.options[targetIndex]; select(target.id); cards.get(target.id).focus({ preventScroll: true });
+          const target = question.options[targetIndex]; select(target.id); cards.get(target.id).focus();
         });
         button.addEventListener("dragstart", (event) => {
           if (locked || !button.draggable) { event.preventDefault(); return; }
@@ -195,6 +195,7 @@
       isComplete: () => started && model.isComplete(),
       setLocked(value) {
         locked = Boolean(value);
+        if (locked && dialog.open) closeDialog();
         for (const control of controls) control.disabled = locked;
         for (const button of cards.values()) button.draggable = !locked && !win.matchMedia("(pointer: coarse)").matches;
         if (locked && draggingId) cancelDrag();

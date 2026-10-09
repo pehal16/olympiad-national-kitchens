@@ -27,14 +27,43 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
      await page.setViewportSize({width,height});await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:path.join(output,`t${chapter}-${width}.png`),fullPage:true});
      assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`T${chapter} overflow at ${width}`);
      if(chapter===4&&width<768)assert.equal(await page.locator('.t4-menu').evaluate(n=>getComputedStyle(n).gridTemplateColumns.split(' ').length),1);
+     if(width>=768)assert.ok((await page.locator('.dashboard-head').boundingBox()).height<135,'desktop and tablet header stays compact');
+     if(chapter===5&&width<768){const pantry=await page.locator('.t5-photo-pantry').boundingBox(),assembly=await page.locator('.t5-photo-panel').boundingBox();assert.ok(pantry.y+pantry.height<=assembly.y,'mobile kitchen shows step 1 before step 2');}
      if(chapter===4){const bounds=await page.locator('.t4-menu-select').first().boundingBox();assert.ok(bounds.width>=(width>=1280?240:width>=768?220:200),'order options must remain substantial photographs, never strips');}
      if(chapter===2&&width>=768){const board=await page.locator('.t2-countries').boundingBox(),bank=await page.locator('.t2-atlas-menu').boundingBox();assert.ok(board.x+board.width+8<=bank.x,'map and photo bank remain separated');}
+     if(chapter===2&&width<768)assert.ok(await page.locator('.t2-target').evaluateAll(ns=>ns.every(n=>[...n.children].every(c=>{const a=n.getBoundingClientRect(),b=c.getBoundingClientRect();return b.left>=a.left-1&&b.right<=a.right+1;}))),'country name and flag fit their mobile map target');
     }
     await page.setViewportSize({width:1366,height:768});
     if(chapter===1){const width=await page.locator('.question-photo > img').evaluate(n=>n.getBoundingClientRect().width);assert.ok(width>=350&&width<=430,'T1 photograph fits the menu at 1366');}
     const zoom=page.locator(chapter===4?'.t4-zoom':'.restaurant-zoom').first();
     if(await zoom.count()) {await zoom.click();const dialog=page.locator('dialog[open]');await dialog.getByRole('button',{name:'Закрыть',exact:true}).click();assert.ok(await zoom.evaluate(n=>n===document.activeElement),'zoom restores source focus');}
     checks.push(`T${chapter}: nine viewports, full image, zoom/focus, no overflow`);
+    if(chapter===4){
+     await page.locator('.t4-zoom').first().click();
+     await page.evaluate(()=>document.exitFullscreen());
+     await page.locator('#exam-guard-return').waitFor();
+     assert.equal(await page.locator('.t4-dialog[open]').count(),0,'focus guard closes order photo so its modal cannot block recovery');
+     await recover();
+     assert.equal(await page.locator('#attempt-sync-meta').isVisible(),false,'routine recovery timestamp stays in the participant cockpit');
+     await page.locator('.t4-help').click();
+     await page.evaluate(()=>document.exitFullscreen());
+     await page.locator('#exam-guard-return').waitFor();
+     assert.equal(await page.locator('.t4-dialog[open]').count(),0,'focus guard also closes order rules');
+     await recover();
+     checks.push('T4: photo and rules cannot trap focus above the protected-mode recovery screen');
+     await page.locator('.t4-menu-select').first().press('End');
+     const lastCard=await page.locator('.t4-menu-select').last().boundingBox();
+     assert.ok(lastCard.y<768&&lastCard.y+lastCard.height>0,'keyboard navigation scrolls the selected order into view');
+    }
+    if(chapter===5){
+     const ingredient=page.locator('.t5-photo-card').first();
+     await page.locator('.t5-photo-scene').scrollIntoViewIfNeeded();
+     await ingredient.dragTo(page.locator('.t5-photo-scene'));
+     assert.equal((await page.evaluate(()=>state.questionController.getAnswer())).selectedIngredientIds.length,1,'protected mode permits dragging a kitchen ingredient into assembly');
+     assert.equal(await page.evaluate(()=>!document.querySelector('.story-narrator-portrait').dispatchEvent(new DragEvent('dragstart',{bubbles:true,cancelable:true,dataTransfer:new DataTransfer()}))),true,'unrelated restaurant image remains protected against dragging');
+     await page.locator('.t5-photo-chip').click();
+     checks.push('T5: actual ingredient drag works in protected mode and can be undone');
+    }
    }
    if(q.type==='dish_detective'&&q.sequenceInTour!==1)assert.equal(await page.evaluate(()=>document.activeElement.id),'t3-answer-input','next notebook page activates typing');
    await page.locator('.story-more').click();assert.equal(await page.locator('.story-student-speech p').innerText(),q.dialogue.student);assert.equal(await page.locator('.story-extra-speech p').innerText(),q.dialogue.extra);
@@ -44,7 +73,16 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
    else if(q.type==='single_choice')await page.locator(`input[value="${answer.selectedOptionId}"]`).check();
    else if(q.type==='bucket_sort')for(const [item,country]of Object.entries(answer.buckets)){await page.locator(`[data-item-id="${item}"]`).click();await page.locator(`.t2-country[data-country-id="${country}"] .t2-target`).click();assert.equal(await page.locator('.t2-bank .t2-dish').count(),4);}
    else if(q.type==='dish_detective'){await page.locator('#t3-answer-input').fill(answer.text);}
-   else {for(const item of answer.selectedIngredientIds)await page.locator(`[data-ingredient="${item}"]`).click();assert.equal(await page.locator('.t5-service-inline').count(),0,'next composition dismisses previous inline receipt');for(let step=0;step<7&&!await page.locator('#submit-answer').isEnabled();step++)await page.locator('.t5-photo-operation button').click();}
+   else {
+    for(const item of answer.selectedIngredientIds)await page.locator(`[data-ingredient="${item}"]`).click();
+    assert.equal(await page.locator('.t5-service-inline').count(),0,'next composition dismisses previous inline receipt');
+    const stepCount=await page.locator('.t5-photo-steps li').count();
+    assert.equal(await page.locator('.t5-photo-operation .t5-photo-small').innerText(),`Шаг 1 из ${stepCount}`,'step counter matches the visible route');
+    for(let step=0;step<7&&!await page.locator('#submit-answer').isEnabled();step++)await page.locator('.t5-photo-operation button').click();
+    assert.equal(await page.locator('.t5-photo-steps li.is-done').count(),stepCount,'completed assembly has no unexplained extra step');
+    assert.equal(await page.locator('#attempt-sync-meta').isVisible(),false,'completed kitchen does not repeat a request to finish assembly');
+    if(q.sequenceInTour===1){await page.waitForFunction(()=>document.querySelector('.t5-photo-scene')?.dataset.status==='ready');await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await page.screenshot({path:path.join(output,'kitchen-ready.png'),fullPage:true});}
+   }
    if(q.type==='bucket_sort'){
     const pairs=Object.entries(answer.buckets),[item,country]=pairs[0];
     if(q.sequenceInTour===1){
@@ -75,7 +113,11 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
   assert.equal(await page.locator('#certificate-section').isVisible(),true,'certificate immediately after personal finish');
   assert.equal(await page.locator('#prestart-section').isVisible(),false,'personal finish does not repeat registration');
   assert.equal(await page.locator('#result-award').isVisible(),false,'story finish has one certificate action');
+  assert.equal(await page.locator('#nav-home').isVisible(),false,'completed story does not link to its hidden invitation');
   assert.equal(await page.locator('#result-section').evaluate(n=>n.lastElementChild.id),'certificate-section','personal-finish certificate is the final section');
+  assert.equal(await page.locator('.story-waiting-scene').isVisible(),false,'the final serving and waiting state do not show two guests');
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+  await page.screenshot({path:path.join(output,'personal-finish.png'),fullPage:true});
   const certificateReply=await context.request.get(base+`/api/public/attempts/${id}/certificate`,{headers:{'X-Attempt-Token':await page.evaluate(id=>localStorage.getItem(`nko_attempt_access_${id}`),id)}});
   assert.equal(certificateReply.status(),200);const certificateData=(await certificateReply.json()).data;
   assert.deepEqual(certificateData.summary,{totalFinalScore:150,totalMaxScore:150});
@@ -94,6 +136,18 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
   await page.locator('.story-kitchen-review summary').click();
   await page.waitForFunction(()=>[...document.querySelectorAll('.story-table img')].every(i=>i.complete));
   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:path.join(output,'table-51.png'),fullPage:true});
+  for(const width of [320,390,768,1366]){
+   await page.setViewportSize({width,height:900});
+   await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);
+   const size=width<=600?2:6;
+   await page.getByRole('button',{name:'Следующие подачи',exact:true}).click();
+   assert.equal(await page.locator('.story-table-position').innerText(),`Подачи ${size+1}–${size*2} из 51`,'table page size responds to viewport');
+   await page.getByRole('button',{name:'Предыдущие подачи',exact:true}).click();
+   await page.locator('.story-serving').first().click();
+   await page.locator('.story-dish-dialog').getByRole('button',{name:'Закрыть',exact:true}).click();
+   assert.equal(await page.locator('.story-serving').first().evaluate(n=>n===document.activeElement),true,'table detail returns focus to its plate');
+  }
+  checks.push('Published table: responsive navigation, plate detail and source focus at 320/390/768/1366');
   await page.locator('#certificate-section').waitFor();assert.equal(await page.locator('#result-section').evaluate(n=>n.lastElementChild.id),'certificate-section','certificate is the final result section');
   assert.equal(await page.getByText('Разбор всех ответов',{exact:true}).count(),0);
   await page.reload();await page.locator('.story-publish-notice').waitFor();

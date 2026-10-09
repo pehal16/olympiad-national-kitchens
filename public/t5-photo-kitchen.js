@@ -38,7 +38,7 @@
     const mediaNotice = el('div','t5-photo-media-notice');mediaNotice.hidden=true;mediaNotice.append(el('span','','Изображение не загрузилось. Можно продолжить сборку.'),button('Повторить','t5-photo-text-button',()=>{photos.clear();grid.querySelectorAll('img[hidden]').forEach(image=>{image.hidden=false;const url=image.src;image.removeAttribute('src');image.src=url;});render();}));
     const list = el('div','t5-photo-selected');list.setAttribute('aria-label','Выбранные компоненты');
     const stepbar = el('ol','t5-photo-steps');stepbar.setAttribute('aria-label','Шаги сборки');
-    const steps = route.map((value,index)=>{const node=el('li','',String(index+1));node.dataset.stage=value;stepbar.append(node);return node;});
+    const steps = route.slice(0,-1).map((value,index)=>{const node=el('li','',String(index+1));node.dataset.stage=value;stepbar.append(node);return node;});
     const operation = el('div','t5-photo-operation'), operationLabel = el('span','t5-photo-small'), next = button('','t5-photo-primary',()=>{if(locked || selected.size!==4 || stage==='served')return;stage=model.nextStage(dish,selected,stage);changed();});
     const edit = button('Изменить состав','t5-photo-text-button',()=>{if(locked)return;stage='select';changed();cards.values().next().value?.focus();});
     operation.append(operationLabel,next);
@@ -59,6 +59,7 @@
       for(const [id,card] of cards){const picked=selected.has(id);card.classList.toggle('is-selected',picked);card.setAttribute('aria-pressed',String(picked));card.disabled=locked || (selected.size===4&&!picked);card.draggable=!card.disabled;card.querySelector('small').textContent=picked?'Выбрано':'Добавить';}
       list.replaceChildren();for(const item of model.selection(dish,selected)){const chip=el('button','t5-photo-chip',item.text+' ×');chip.type='button';chip.dataset.remove=item.id;chip.disabled=locked;chip.setAttribute('aria-label','Убрать: '+item.text);list.append(chip);}
       steps.forEach((node,index)=>{const current=index===route.indexOf(stage);node.classList.toggle('is-done',index<route.indexOf(stage));if(current)node.setAttribute('aria-current','step');else node.removeAttribute('aria-current');});
+      stepbar.setAttribute('aria-label',stage==='served'?'Все шаги сборки выполнены':`Шаги сборки: ${route.indexOf(stage)+1} из ${steps.length}`);
       const ready=selected.size===4;next.hidden=stage==='served';next.disabled=locked||!ready;next.textContent=stage==='served'?'':ready?model.operations[dish.photo.kind][route.indexOf(stage)]:'Выберите 4 продукта';
       operationLabel.textContent=!ready?'Выбор компонентов':stage==='served'?'Сборка завершена':`Шаг ${route.indexOf(stage)+1} из ${route.length-1}`;
       edit.hidden=stage==='select';

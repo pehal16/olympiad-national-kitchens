@@ -458,7 +458,7 @@ function releaseExamGuard(message = "") {
   }
   if (message) {
     setAttemptSaveStatus(message, "success");
-    setAttemptSyncMeta(`Контроль восстановлен: ${formatDateTime(new Date())}`);
+    setAttemptSyncMeta(`Контроль восстановлен: ${formatDateTime(new Date())}`, { routine: true });
   }
   updateExamCockpit();
   if (wasActive) {
@@ -644,7 +644,7 @@ function handleProtectedDragStart(event) {
   if (countryDish && elements.questionBody.contains(countryDish)) return;
   const guestDish = event.target?.closest?.(".t4-order .t4-menu-select");
   if (guestDish && elements.questionBody.contains(guestDish) && state.attempt?.currentQuestion?.interactionMode === "guest_order") return;
-  const kitchenComponent = event.target?.closest?.(".t5-kitchen .t5-component");
+  const kitchenComponent = event.target?.closest?.(".t5-kitchen .t5-component, .t5-photo-kitchen .t5-photo-card");
   if (kitchenComponent && elements.questionBody.contains(kitchenComponent) && state.attempt?.currentQuestion?.type === "final_kitchen") return;
 
   event.preventDefault();
@@ -2945,7 +2945,7 @@ function renderQuestion(question) {
         rememberDraft(hydratedQuestion.id, answer);
         if (!hasPendingAnswers() && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
           setAttemptSaveStatus(answer.selectedIngredientIds?.length ? "Состав ещё не отправлен" : hydratedQuestion.selectedDish ? "Выберите компоненты" : "Выберите блюдо", "idle");
-          setAttemptSyncMeta(hydratedQuestion.presentationVersion === 4 ? "Завершите сборку и нажмите «Подать»." : "Черновик не является ответом. Запись подтверждает сервер.");
+          setAttemptSyncMeta(hydratedQuestion.presentationVersion === 4 ? "Завершите сборку и нажмите «Подать»." : "Черновик не является ответом. Запись подтверждает сервер.", { routine: hydratedQuestion.presentationVersion === 4 });
         }
         refreshAttemptControls(); updateExamCockpit();
       },
