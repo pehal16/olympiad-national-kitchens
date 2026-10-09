@@ -1,0 +1,18 @@
+{
+  "baseUrl": "https://olympiad-gkts.pages.dev",
+  "checkedAt": "2026-10-09T10:20:09.287Z",
+  "menuVersion": 3,
+  "conditionVersion": 3,
+  "currentMenuPhotos": 32,
+  "currentEarnedPlates": 8,
+  "staticImageFiles": 116,
+  "matchedImageBytes": 6808008,
+  "shells": [
+    "index.html",
+    "admin.html",
+    "admin.js",
+    "restaurant-layout.js",
+    "sw.js"
+  ],
+  "technicalParticipantsCreated": 0
+}
