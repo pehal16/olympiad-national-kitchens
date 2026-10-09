@@ -1,0 +1,749 @@
+{
+  "menuVersion": 3,
+  "generator": "Built-in image_gen; one image per call; chakhokhbili cutout received a separate corrective edit",
+  "operation": "Proportional WebP resize/export only; source originals retained",
+  "assets": [
+    {
+      "key": "shchi",
+      "prompt": "Use case: photorealistic-natural. Asset: educational restaurant menu photograph, landscape 3:2. One realistic modest complete serving in matte ivory ceramic tableware on pale warm stone. Side window daylight, camera 40 degrees above table, natural edible textures and scale. Entire plate/bowl visible with safe margins. No people, text, watermark, labels, symbols, interface, excessive garnish, plastic gloss or extra unlisted foods. All alternatives must look equally appetizing; not an idealized advertising render. Subject: Russian shchi with fresh white cabbage, potato, carrot and chunks of cooked beef in a clear pale golden broth, cabbage ribbons visible, no beetroot or red borscht broth. One small ivory soup bowl, teaspoon of sour cream on the soup and one small slice of rye bread beside the bowl.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/6141",
+      "title": "Щи из свежей капусты с говядиной",
+      "review": "Проверены светлый капустный бульон, кусочки говядины и картофеля; свёклы нет, сметана и хлеб отдельно.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-148d6028-0d3e-4e93-a3a5-cec29c4efd8b.png",
+      "sourceSha256": "1f394d7575514d23baef1c74bb6b24bbc946817acaa23c780b154ae5a26a7227",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-1f394d757551.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 130886,
+      "sha256": "d6cd8d1bc8696fc82ee88b769f4056a881cf7cb2cd952a9b6bd146735b9fad6b",
+      "alpha": false
+    },
+    {
+      "key": "solyanka",
+      "prompt": "Use case: photorealistic-natural. Asset: educational restaurant menu photograph, landscape 3:2. One realistic modest complete serving in matte ivory ceramic tableware on pale warm stone. Side window daylight, camera 40 degrees above table, natural edible textures and scale. Entire plate/bowl visible with safe margins. No people, text, watermark, labels, symbols, interface, excessive garnish, plastic gloss or extra unlisted foods. All alternatives must look equally appetizing; not an idealized advertising render. Subject: Russian mixed meat solyanka soup: reddish tomato broth with assorted cooked and smoked meat pieces, sliced pickled cucumber and a few olive slices, one thin lemon slice and small dab of sour cream. One ivory soup bowl and one small rye bread slice beside it. No beetroot, no potatoes, no cabbage, no cream-soup puree.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/27689",
+      "title": "Солянка мясная сборная",
+      "review": "Проверены красноватый томатный бульон, разные мясные кусочки, огурец, маслины и лимон; свёкла не изображена.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-2a273ff8-866a-456c-ae56-3beba5204c7f.png",
+      "sourceSha256": "3e3cba5b4f905a1341d49cfb5e46bd86edbb720e3df197113a4e4f8ade7b98d8",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-3e3cba5b4f90.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 123370,
+      "sha256": "8f469f7672158c832097f831d6fe127258c2994b87da7593b6f5cf634580bf3f",
+      "alpha": false
+    },
+    {
+      "key": "vinaigrette",
+      "prompt": "Use case: photorealistic-natural. Asset: educational restaurant menu photograph, landscape 3:2. One realistic modest complete serving on matte ivory ceramic plate on pale warm stone. Side window daylight, camera 40 degrees above table. Natural edible texture and portion scale, entire plate and all food visible with safe margins, appetizing but not glossy advertising. No people, text, watermark, labels, interface, flowers, extra sides or unlisted ingredients. Subject: Russian vinaigrette salad. A neat small loose mound of diced cooked beetroot, cooked potato and carrot, diced pickled cucumber and a few onion pieces, green peas. Light vegetable-oil dressing with no mayonnaise, no meat, no eggs, no fish. Natural separate cubes, red purple beet, pale potato, orange carrot and green peas, all lightly tinted by beet. No geometric gel block, no lettuce leaves.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/13131",
+      "title": "Винегрет с зелёным горошком",
+      "review": "Кубики свёклы, картофеля, моркови и огурца с горошком; масляный блеск, без майонеза, мяса и рыбы.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-5609277e-2157-4e21-8b82-05bed2170bcf.png",
+      "sourceSha256": "773c9395fe9ca4493c2938113325ac2ae638d696c4fc1ee33233c4b19c04eb22",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-773c9395fe9c.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 97932,
+      "sha256": "61d543c9ceafc8222252349bb1de14efe08415113678ec7fca0e79ce06666d67",
+      "alpha": false
+    },
+    {
+      "key": "olivier_beef",
+      "prompt": "Use case: photorealistic-natural. Asset: educational restaurant menu photograph, landscape 3:2. One realistic modest complete serving on matte ivory ceramic plate on pale warm stone. Side window daylight, camera 40 degrees above table. Natural edible texture and portion scale, entire plate and all food visible with safe margins, appetizing but not glossy advertising. No people, text, watermark, labels, interface, flowers, extra sides or unlisted ingredients. Subject: Olivier salad in the familiar contemporary version with COOKED BEEF, boiled potato, carrot, boiled egg, green peas and pickled cucumber, mixed with a modest amount of mayonnaise. Loose small mound, natural diced beef pieces brown-grey not sausage pink. Clearly mixed cubed salad, not layered, no beetroot, no lettuce, no garnish.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/18376",
+      "title": "Оливье с говядиной",
+      "review": "Видны волокнистые кусочки готовой говядины вместо колбасы, овощи, яйцо, горошек и умеренная майонезная заправка.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-36928a53-0cbb-4880-979b-6ff427663e2a.png",
+      "sourceSha256": "62571e39e0c628a6ec8df36dcf0f1494a936bb7adc11e01dcf50122ba7275806",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-62571e39e0c6.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 108772,
+      "sha256": "f3064222edd60088b4b03fc983f91de2ea96f48b27a41caa7385eef39d95d74a",
+      "alpha": false
+    },
+    {
+      "key": "mimosa_saira",
+      "prompt": "Use case: photorealistic-natural. Asset: educational restaurant menu photograph, landscape 3:2. One realistic modest complete serving on matte ivory ceramic plate on pale warm stone. Side window daylight, camera 40 degrees above table. Natural edible texture and portion scale, entire plate and all food visible with safe margins, appetizing but not glossy advertising. No people, text, watermark, labels, interface, flowers, extra sides or unlisted ingredients. Subject: Russian Mimosa salad in the explicit version WITHOUT potatoes, carrots or cheese. Individual small portion, compact layered mound with a wedge removed onto the same plate, visible finely grated cooked egg whites, flaked canned saury fish and fine onion, modest thin mayonnaise layers. Top entirely fine fluffy yellow cooked egg-yolk crumbs. Natural salad textures, not sponge cake, no pastry, no red beetroot, no berries, no garnish.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/12961",
+      "title": "Мимоза с сайрой",
+      "review": "Срез показывает рыбные и яичные слои; сверху крошка желтка, нет моркови, картофеля и сыра выбранной версии.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-a0e1cacd-faad-48bd-b2bd-10dd2cdff4e8.png",
+      "sourceSha256": "21efb180f1b312c1ed00a12adb81741996cd617ea9ab9b58ed930ca9436ba37e",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-21efb180f1b3.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 99244,
+      "sha256": "476beaf3bb935d3ea90547ca7eed0c41331c592cb9edb668b7648aafcc84c100",
+      "alpha": false
+    },
+    {
+      "key": "herring_shuba",
+      "prompt": "Use case: photorealistic-natural. Asset: educational restaurant menu photograph, landscape 3:2. One realistic modest complete serving on matte ivory ceramic plate on pale warm stone. Side window daylight, camera 40 degrees above table. Natural edible texture and portion scale, entire plate and all food visible with safe margins, appetizing but not glossy advertising. No people, text, watermark, labels, interface, flowers, extra sides or unlisted ingredients. Subject: A modest portion of Russian herring under a fur coat salad. Several visible layers of diced herring and onion, grated cooked potato, carrot and beetroot with thin mayonnaise dressing. Round individual layered mound with a small cut section facing the camera; deep pink-purple beetroot layer on top, natural salad flakes rather than shiny gelatin. No eggs in this exact version, no bread, no berries, no garnish, no cake or sweet cream.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/661",
+      "title": "Сельдь под шубой",
+      "review": "Срез показывает сельдь, лук, картофель, морковь и свекольный верх; нет яйца выбранной версии.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-2c788b63-d5c6-4b73-8f21-ddec740aceb9.png",
+      "sourceSha256": "0594f5db278fd3b394083cce0d7615291226ebba2d0e9aa5678d7c70655c1f4f",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-0594f5db278f.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 91302,
+      "sha256": "e78f9177e346b48511b286a07edc04834c31cbc9c00eee0ff0d8979975f472d8",
+      "alpha": false
+    },
+    {
+      "key": "chakhokhbili",
+      "prompt": "Use case: photorealistic-natural. Asset: educational restaurant menu photograph, landscape 3:2. One realistic modest complete serving on matte ivory ceramic plate on pale warm stone. Side window daylight, camera 40 degrees above table. Natural edible texture and portion scale, entire plate and all food visible with safe margins, appetizing but not glossy advertising. No people, text, watermark, labels, interface, flowers, extra sides or unlisted ingredients. Subject: Georgian chakhokhbili: browned chicken thigh and leg pieces braised in a rustic tomato and onion sauce, tiny garlic and cilantro, modest white rice alongside on same plate. Red tomato stew with clear chicken pieces, no nuts, cream, cheese, pineapple or peppers.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/630",
+      "title": "Чахохбили с рисом",
+      "review": "Куриные порционные кусочки в томатно-луковой подливе, зелень и рис; нет орехового соуса, панировки и ананаса.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-af74c96b-1a5a-4e2b-b622-d0e03b4e1861.png",
+      "sourceSha256": "61f7ee6b906785020df96aaf371a64e1e2587efa0169cb25c3097dbae3b7e49f",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-61f7ee6b9067.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 137284,
+      "sha256": "23cfa2af8127383838e6e1fb9ce5fbb1022f1ef13fcfa03c0da1762bb2f92e9e",
+      "alpha": false
+    },
+    {
+      "key": "chicken_tabaka",
+      "prompt": "Use case: photorealistic-natural. Asset: educational restaurant menu photograph, landscape 3:2. One realistic modest complete serving on matte ivory ceramic plate on pale warm stone. Side window daylight, camera 40 degrees above table. Natural edible texture and portion scale, entire plate and all food visible with safe margins, appetizing but not glossy advertising. No people, text, watermark, labels, interface, flowers, extra sides or unlisted ingredients. Subject: Chicken tabaka: one small whole young chicken butterflied and flattened, pan fried under a press, golden garlic skin, recognizable symmetrical wings and two legs, about 600 g whole bird on a realistically large dinner plate, two tomato wedges and a few cucumber slices at side. No sauce, nuts, cutlet, breading or rice.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/598",
+      "title": "Цыплёнок табака с овощами",
+      "review": "Небольшой распластанный целый цыплёнок, две ножки и крылья; золотистая кожа, томат и огурец, без соуса.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-338f49ab-8c94-42ee-aac4-35657d5e99e2.png",
+      "sourceSha256": "e8108dbd53c432b9d20d367e4595e0355b33572de136ba1d48295603a696e2d4",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-e8108dbd53c4.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 149506,
+      "sha256": "464f2021745967ce6ed7e176c81bb65fd156eb78bab4b422320ac971ed4a5f60",
+      "alpha": false
+    },
+    {
+      "key": "chicken_satsivi",
+      "prompt": "Use case: photorealistic-natural. Asset: educational restaurant menu photograph, landscape 3:2. One realistic modest complete serving on matte ivory ceramic plate on pale warm stone. Side window daylight, camera 40 degrees above table. Natural edible texture and portion scale, entire plate and all food visible with safe margins, appetizing but not glossy advertising. No people, text, watermark, labels, interface, flowers, extra sides or unlisted ingredients. Subject: Georgian chicken satsivi: several cooked chicken pieces in a thick smooth ivory beige ground walnut sauce with tiny brown walnut flecks, modest white rice at side. No tomato, carrot, cream, whole scattered walnuts, flowers or other garnish. Clearly walnut sauce, normal realistic chicken proportions.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/11810",
+      "title": "Сациви из курицы с рисом",
+      "review": "Курица в бежевом ореховом соусе с мелкими ореховыми частицами; рис соответствует заявленной подаче меню.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-57733e55-c1aa-418f-bfde-ed6d44684eca.png",
+      "sourceSha256": "5d6f67dc2f6cc8310265824f980e775de16de291c97293ab66edd7363b619302",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-5d6f67dc2f6c.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 115932,
+      "sha256": "6375f874b90c3ec09ea5bb87b12302a81f98bc423a103bbe4d518d0ed4bd8ef9",
+      "alpha": false
+    },
+    {
+      "key": "chicken_kyiv",
+      "prompt": "Use case: photorealistic-natural. Asset: educational restaurant menu photograph, landscape 3:2. One realistic modest complete serving on matte ivory ceramic plate on pale warm stone. Side window daylight, camera 40 degrees above table. Natural edible texture and portion scale, entire plate and all food visible with safe margins, appetizing but not glossy advertising. No people, text, watermark, labels, interface, flowers, extra sides or unlisted ingredients. Subject: One chicken Kyiv cutlet with its small wing bone, made of whole chicken breast wrapped around parsley butter, crispy golden breadcrumb crust. The front third is cut and rests immediately adjacent showing whole white breast surrounding a small hollow with melted yellow herb butter. Smooth potato puree alongside. No cheese, minced meat, tomato sauce, lemon, salad or rice.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/43526",
+      "title": "Котлета по-киевски с пюре",
+      "review": "Срез цельного куриного филе показывает масло с зеленью внутри; сухарная оболочка и пюре, не фарш и не сыр.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-e56ac0d0-2c58-4334-b312-90952e267a63.png",
+      "sourceSha256": "e42f4cb9717c60269c6e6b43ac93292ef16768c5f5c08a28e7074071344b908c",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-e42f4cb9717c.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 112218,
+      "sha256": "17c9992b9db36397b06f12a068dbe35c129c2f2dfad79a8116548d69f33b9083",
+      "alpha": false
+    },
+    {
+      "key": "beef_roast",
+      "prompt": "Use case: photorealistic-natural. Educational restaurant menu photograph, landscape 3:2. One modest realistic serving on matte ivory ceramic plate on pale warm stone. Soft side window daylight, camera 40 degrees above table, entire plate and all food visible with margins. Natural appetizing textures, same neutral table setting, no advertising gloss. No people, text, labels, watermark, interface, flowers, extra unlisted ingredients. Subject: Russian beef roast zharkoye, stew of browned beef cubes, substantial irregular potato chunks, carrot slices and onion all simmered together in a little brown gravy. A few chopped herbs. Rustic but neat modest serving in shallow ivory bowl on ivory saucer. No cheese crust, pastry lid, minced meat or separate mashed potatoes.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/20951",
+      "title": "Жаркое из говядины с картофелем",
+      "review": "Говядина, картофель кусочками, морковь и лук вместе в подливе; нет отдельно выложенного пюре и сырной корочки.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-3197ea62-b32b-4a44-b675-2185ca4dee89.png",
+      "sourceSha256": "ae9df4ce335fb2da9139654455869b7698cce72afb1c09326e749abc7dccab14",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-ae9df4ce335f.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 131698,
+      "sha256": "618fbe00b754b6032bda16af78df602d4f15f8d869ccd707521b117f2f429346",
+      "alpha": false
+    },
+    {
+      "key": "goulash_puree",
+      "prompt": "Use case: photorealistic-natural. Educational restaurant menu photograph, landscape 3:2. One modest realistic serving on matte ivory ceramic plate on pale warm stone. Soft side window daylight, camera 40 degrees above table, entire plate and all food visible with margins. Natural appetizing textures, same neutral table setting, no advertising gloss. No people, text, labels, watermark, interface, flowers, extra unlisted ingredients. Subject: Cafeteria style beef goulash: tender beef cubes in reddish brown tomato onion gravy alongside smooth potato puree on same plate. The two portions meet slightly, no potatoes in meat gravy, no sour cream, cheese or pasta.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/802",
+      "title": "Гуляш с картофельным пюре",
+      "review": "Кусочки говядины в томатной подливе; пюре отдельно, картофеля внутри подливы нет.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-f8546e60-f065-4cce-91b0-5fb211de17cf.png",
+      "sourceSha256": "a029353f0af2d339e3501dc0e6b60c2117100734bfcf3c7b6738836337a20240",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-a029353f0af2.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 109732,
+      "sha256": "09177477c4111227f70f8b1b4fc16381065c6d494debaf735c6a75473ae1206a",
+      "alpha": false
+    },
+    {
+      "key": "stroganoff_puree",
+      "prompt": "Use case: photorealistic-natural. Educational restaurant menu photograph, landscape 3:2. One modest realistic serving on matte ivory ceramic plate on pale warm stone. Soft side window daylight, camera 40 degrees above table, entire plate and all food visible with margins. Natural appetizing textures, same neutral table setting, no advertising gloss. No people, text, labels, watermark, interface, flowers, extra unlisted ingredients. Subject: Beef Stroganoff: recognizable narrow thin strips of beef with soft onion in creamy light beige sour cream sauce, alongside smooth potato puree. Tiny parsley flecks. No mushrooms, chunky potato in sauce, no deep red tomato sauce or cheese.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/13479",
+      "title": "Бефстроганов с картофельным пюре",
+      "review": "Узкие полоски говядины и лук в светлом сметанном соусе; пюре отдельно, грибов нет.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-eaa9721d-d6f1-48e0-86e9-a3b22e90ef92.png",
+      "sourceSha256": "4c14a2e824c6911eb18c428056eb5a023ef7284513259743be6dc8944ef58345",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-4c14a2e824c6.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 121332,
+      "sha256": "943d04efdbb28dde5e8c27815b02a345e256c9dcc85301135e1961782fa0c396",
+      "alpha": false
+    },
+    {
+      "key": "meat_french",
+      "prompt": "Use case: photorealistic-natural. Educational restaurant menu photograph, landscape 3:2. One modest realistic serving on matte ivory ceramic plate on pale warm stone. Soft side window daylight, camera 40 degrees above table, entire plate and all food visible with margins. Natural appetizing textures, same neutral table setting, no advertising gloss. No people, text, labels, watermark, interface, flowers, extra unlisted ingredients. Subject: Familiar Russian cafe version of meat po-frantsuzski with potatoes: one baked portion, layered thin potato slices, whole pork chop, soft onion and sour cream, melted golden cheese crust on top. Front cut edge clearly shows whole pork and sliced potatoes underneath cheese. Modest serving, no salad, tomatoes, mushrooms, rice, mince or puree.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/7342",
+      "title": "Мясо по-французски с картофелем",
+      "review": "На срезе цельный кусок свинины с картофельными ломтиками, сверху лук и сырная корочка; без фарша.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-19c47a27-383e-448d-9047-b3f2a1268701.png",
+      "sourceSha256": "eb4c5b31e2371180b1b5339bfc90b4ac1d0cae23fe4a577e48327fe16f34cc29",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-eb4c5b31e237.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 95152,
+      "sha256": "45a2f20fce869c1354e3c6a5982aee1e857e27180aca2ae659c0571e6c137ec9",
+      "alpha": false
+    },
+    {
+      "key": "zander_polish",
+      "prompt": "Use case: photorealistic-natural. Educational restaurant menu photograph, landscape 3:2. One modest realistic complete serving on matte ivory ceramic plate on pale warm stone. Soft side window daylight, camera 40 degrees above table, entire plate and food visible with margins. Natural appetizing textures and scale, no advertising gloss. No people, text, labels, watermark, flowers, interface, extra unlisted ingredients. Subject: Zander pikeperch poached white fish fillet, unbreaded, gently cooked intact fillet with moist white flakes. Polish sauce on fish made of melted butter, chopped hard boiled egg white and yellow yolk, chopped parsley. Three small boiled potato pieces alongside. No fried crust, cream, tomatoes, cheese, lemon or rice.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/21543",
+      "title": "Судак под польским соусом с картофелем",
+      "review": "Светлое филе без жареной корочки, рубленое яйцо и петрушка в масле; отварной картофель рядом.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-edfc51a8-ffb6-4c65-8f6c-12b6a74be6dd.png",
+      "sourceSha256": "c1a3b10021f7fdec4077832c3ebc1afa09d0acb59eec4aa31c20dfbba61cfe00",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-c1a3b10021f7.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 108944,
+      "sha256": "53d157e04176234d16c548efc16a36f5a4bf91bdcd343eaf9dd8d8862a6f66f0",
+      "alpha": false
+    },
+    {
+      "key": "fish_marinade",
+      "prompt": "Use case: photorealistic-natural. Educational restaurant menu photograph, landscape 3:2. One modest realistic complete serving on matte ivory ceramic plate on pale warm stone. Soft side window daylight, camera 40 degrees above table, entire plate and food visible with margins. Natural appetizing textures and scale, no advertising gloss. No people, text, labels, watermark, flowers, interface, extra unlisted ingredients. Subject: Pollock fish under vegetable marinade, traditional Russian dish: two white fish fillet portions lightly floured and fried then covered with cooked shredded carrot, soft onion and tomato marinade. Small portion white rice at side. No cheese, egg sauce, cream, chips, green peas or lemon.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/8050",
+      "title": "Рыба под овощным маринадом с рисом",
+      "review": "Рыбные порционные кусочки под морковно-луковым томатным маринадом, рис рядом; нет яично-масляного соуса.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-7da41986-fcd3-46b0-a3a4-f88d25a91a10.png",
+      "sourceSha256": "8ba4840eda6f6de0438c139724ff3a5241f90f6b70e7ad61350344b794610625",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-8ba4840eda6f.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 105880,
+      "sha256": "f68d2bd8e0d00fb1c7003c43501ecccd102c56b6beae495b5e6518fb0982865b",
+      "alpha": false
+    },
+    {
+      "key": "fish_cutlets",
+      "prompt": "Use case: photorealistic-natural. Educational restaurant menu photograph, landscape 3:2. One modest realistic complete serving on matte ivory ceramic plate on pale warm stone. Soft side window daylight, camera 40 degrees above table, entire plate and food visible with margins. Natural appetizing textures and scale, no advertising gloss. No people, text, labels, watermark, flowers, interface, extra unlisted ingredients. Subject: Two oval fried cod fish cutlets from minced white fish, onion and soaked white bread with egg, lightly flour dusted before frying, browned smooth surface without coarse breadcrumb coating. One cutlet cut in half showing moist pale fine mince. Modest potato puree at side. No egg sauce, cheese, salad, tomato, lemon, chips or rice.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/747",
+      "title": "Рыбные котлеты с пюре",
+      "review": "Румяные котлеты со светлым рыбным фаршем на срезе, пюре рядом; нет кляра и крупной сухарной оболочки.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-18a3b926-11c4-4908-8c5b-cd58a9042ee9.png",
+      "sourceSha256": "feba2e7f3c49fbd7ff7b74542a847566d56c2c6deb776d94bfb6ee3af9196ae0",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-feba2e7f3c49.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 85080,
+      "sha256": "5a38663f52af4bfef9dfc2e0b14968ea38247682f31f2e6f18bab7ecf35209ba",
+      "alpha": false
+    },
+    {
+      "key": "cannelloni",
+      "prompt": "Use case: photorealistic-natural. Educational restaurant menu photograph, landscape 3:2. One modest realistic complete serving on matte ivory ceramic plate on pale warm stone. Soft side window daylight, camera 40 degrees above table, entire plate and food visible with margins. Natural appetizing textures and scale, no advertising gloss. No people, text, labels, watermark, flowers, interface, extra unlisted ingredients. Subject: Three substantial Italian cannelloni tubes filled with ricotta and spinach, baked in creamy bechamel and grated Grana cheese, pale golden browned top. One front tube cut to reveal white ricotta and finely chopped green spinach inside recognizable rolled pasta tube. No tomato sauce, meat, mushrooms, whole spinach garnish or green pasta. Modest complete serving on ivory plate.",
+      "recipeSource": "https://www.giallozafferano.com/recipes/Spinach-and-ricotta-cannelloni.html",
+      "title": "Каннеллони с рикоттой и шпинатом",
+      "review": "Крупные трубочки с рикоттой и шпинатом на срезе, запечённый бешамель с сыром; не небольшие равиоли.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-46e98162-7499-42df-97f0-35f08d8133af.png",
+      "sourceSha256": "7777ffba97b8c1a3a3420586091d74def0e2196164654a391ddb5add51aa8e0e",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-7777ffba97b8.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 109394,
+      "sha256": "50637cf1f59c9136987c7fc1d997e8e7debb6dbf0cb09499f936059e900977d4",
+      "alpha": false
+    },
+    {
+      "key": "syrniki",
+      "prompt": "Use case: photorealistic-natural. Educational restaurant menu photograph, landscape 3:2. One modest realistic serving on matte ivory ceramic plate on pale warm stone. Soft side window daylight, camera 40 degrees above table, entire plate and food visible with safe margins. Natural appetizing food textures, no advertising gloss. No people, text, labels, watermark, interface, flowers, berries, chocolate decoration or extra unlisted ingredients. Subject: Three traditional pan-fried syrniki from cottage cheese, egg, sugar and flour. Thick small round cakes with golden browned flat faces and tender fine cottage cheese grain visible on cut half of one syrnik. Small ivory ramekin sour cream separately on same plate. No raisins, berries, jam, milk pancakes or garnish.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/8490",
+      "title": "Сырники со сметаной",
+      "review": "Небольшие творожные изделия с румяной плоской поверхностью и творожной серединой на срезе; сметана отдельно.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-8ea0799d-0ca7-4139-8ebe-4a35d170e1ac.png",
+      "sourceSha256": "d1098dfcbfe611a39eb9dc309086c7561c90188c0f2f8538b0f664701ef4a673",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-d1098dfcbfe6.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 109586,
+      "sha256": "3ddbb39aa9ed450d40e6159c7d1d4d16245e87d21c1b009521fb1bcc8ccbfb18",
+      "alpha": false
+    },
+    {
+      "key": "curd_casserole",
+      "prompt": "Use case: photorealistic-natural. Educational restaurant menu photograph, landscape 3:2. One modest realistic serving on matte ivory ceramic plate on pale warm stone. Soft side window daylight, camera 40 degrees above table, entire plate and food visible with safe margins. Natural appetizing food textures, no advertising gloss. No people, text, labels, watermark, interface, flowers, berries, chocolate decoration or extra unlisted ingredients. Subject: One rectangular thick slice of oven-baked cottage cheese casserole with semolina, egg and sour cream. Golden brown top, moist creamy pale fine curd crumb on cut sides, no separate dough layers. Small ivory ramekin sour cream on same plate. No raisins, berries, jam, cookie base or garnish.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/5568",
+      "title": "Творожная запеканка со сметаной",
+      "review": "Порционный срез однородной запечённой творожной массы, румяный верх; нет основания из печенья, сметана отдельно.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-d5eb028c-e782-4339-a5c3-beb493dc3541.png",
+      "sourceSha256": "08da821f67eecba22429ffe9c0edae945ccc2d691107c6776c4c6e6ec0228794",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-08da821f67ee.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 100014,
+      "sha256": "d49f1f2c8fb003c77b26b15f94c73b2f19013fd4617639ce950c116e25ef204f",
+      "alpha": false
+    },
+    {
+      "key": "medovik",
+      "prompt": "Use case: photorealistic-natural. Educational restaurant menu photograph, landscape 3:2. One modest realistic serving on matte ivory ceramic plate on pale warm stone. Soft side window daylight, camera 40 degrees above table, entire plate and food visible with safe margins. Natural appetizing food textures, no advertising gloss. No people, text, labels, watermark, interface, flowers, berries, chocolate decoration or extra unlisted ingredients. Subject: One modest triangular slice of Medovik honey cake with six thin golden honey dough layers separated by delicate pale sour cream layers, coated in fine honey cake crumbs. Natural tender layered texture, clear slice cross-section facing viewer. No fruit, jam, nuts, chocolate, coffee, cookie base, whipped cream flower or spoon.",
+      "recipeSource": "https://www.gastronom.ru/recipe/27667/medovik-so-smetannym-kremom",
+      "title": "Медовик со сметанным кремом",
+      "review": "Медовые коржи с белым кремом на срезе, крошка коржей; нет ягод, джема, кофе или шоколадного декора.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-39cd5aa6-3738-4bf8-8501-014635ef3c79.png",
+      "sourceSha256": "016a9d5447fde2d2e8be5855e6b9d0561a33ea5531a6a21a8e06fadfb73771ec",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-016a9d5447fd.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 122472,
+      "sha256": "0857e538bb49edd4bbb81716c0d0cc996b7bed0a8e92c60eb0ef8fbbe865297d",
+      "alpha": false
+    },
+    {
+      "key": "napoleon",
+      "prompt": "Use case: photorealistic-natural. Educational restaurant menu photograph, landscape 3:2. One modest realistic serving on matte ivory ceramic plate on pale warm stone. Soft side window daylight, camera 40 degrees above table, entire plate and food visible with safe margins. Natural appetizing food textures, no advertising gloss. No people, text, labels, watermark, interface, flowers, berries, chocolate decoration or extra unlisted ingredients. Subject: One modest rectangular slice of Napoleon cake made of multiple flaky puff pastry layers with pale vanilla milk egg custard between them. Fine golden puff pastry crumbs on top, natural uneven fragile flaky layers, visible cut cross-section. No honey, fruit, jam, nuts, chocolate, coffee, cookie base or garnish. Simple version without nut topping.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/12493",
+      "title": "Наполеон с заварным кремом",
+      "review": "Неровные слоёные коржи с заварным кремом, слоёная крошка сверху; без ореховой посыпки заявленной версии.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-2cfc6fa1-b5ff-468a-ac38-92391de044c2.png",
+      "sourceSha256": "f3b5ce8c8bc21b578f0f423db1288d952b161cb9fd94b0c689c6b9c0aa51af67",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-f3b5ce8c8bc2.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 93298,
+      "sha256": "d380ec444d3b94f7d315ec1287dbf47f7e940897dba4c0a8a896b91f49c9da35",
+      "alpha": false
+    },
+    {
+      "key": "cheesecake_ny",
+      "prompt": "Use case: photorealistic-natural. Educational restaurant menu photograph, landscape 3:2. One modest realistic serving on matte ivory ceramic plate on pale warm stone. Soft side window daylight, camera 40 degrees above table, entire plate and food visible with safe margins. Natural appetizing food textures, no advertising gloss. No people, text, labels, watermark, interface, flowers, berries, chocolate decoration or extra unlisted ingredients. Subject: One modest triangular slice of baked New York cheesecake made with cream cheese, eggs and sour cream on thin crushed shortbread cookie butter base. Tall smooth ivory dense creamy filling, lightly pale gold baked top, narrow brown crumb base, clean cut face. No honey dough layers, raisins, fruit, jam, nuts, chocolate, syrup or whipped cream.",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/7653",
+      "title": "Чизкейк Нью-Йорк",
+      "review": "Один гладкий сырный слой над тонким основанием из крошки печенья; нет множества коржей и ягодной заливки.",
+      "reviewedAt": "2026-10-09",
+      "role": "menu",
+      "sourceFile": "exec-64ee51d6-36a4-41b6-a20c-7356eb77ec51.png",
+      "sourceSha256": "5700d5f2dc8e88e828a31f5ffd09ab087feabe7407f6edabe8f77f456dac23d3",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/tour4/t4-menu-v3-5700d5f2dc8e.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 75784,
+      "sha256": "6e38be40c85106c35ae7176ad63c072c5fb0d6869b9f21eb1dbd8e734dcc6a17",
+      "alpha": false
+    },
+    {
+      "key": "fish_and_chips_t4_v3",
+      "role": "reused-menu",
+      "sourceUrl": "/assets/olympiad/tour2/t2-active-30.webp",
+      "sourceSha256": "0a0bd123fe6aecd11576092d1c263c068e78c32905f22abf31005e6eba18b6de",
+      "url": "/assets/olympiad/tour4/t4-menu-v3-0a0bd123fe6a.webp",
+      "sha256": "0a0bd123fe6aecd11576092d1c263c068e78c32905f22abf31005e6eba18b6de",
+      "size": [
+        900,
+        600
+      ],
+      "bytes": 93862,
+      "alpha": false,
+      "recipeSource": "https://www.bbcgoodfood.com/recipes/next-level-fish-chips",
+      "title": "Фиш-энд-чипс",
+      "review": "Existing photograph viewed separately: whole plate, ingredients and texture agree with the specified menu version. Byte-identical copy gives an opaque T4 path without changing the photo."
+    },
+    {
+      "key": "lasagna_t4_v3",
+      "role": "reused-menu",
+      "sourceUrl": "/assets/olympiad/tour1/t1-active-06.webp",
+      "sourceSha256": "6ddc428bdc4811894d94a44b8325d1fd4740981db5ecc1b3843158d7bde8a022",
+      "url": "/assets/olympiad/tour4/t4-menu-v3-6ddc428bdc48.webp",
+      "sha256": "6ddc428bdc4811894d94a44b8325d1fd4740981db5ecc1b3843158d7bde8a022",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 148986,
+      "alpha": false,
+      "recipeSource": "https://www.giallozafferano.com/recipes/Lasagne-alla-Bolognese.html",
+      "title": "Лазанья с мясным рагу",
+      "review": "Existing photograph viewed separately: whole plate, ingredients and texture agree with the specified menu version. Byte-identical copy gives an opaque T4 path without changing the photo."
+    },
+    {
+      "key": "carbonara_t4_v3",
+      "role": "reused-menu",
+      "sourceUrl": "/assets/olympiad/tour2/t2-active-44.webp",
+      "sourceSha256": "93aad856590b79b7a335d02a744015a108aadf1ef486f362979ec20d05a87355",
+      "url": "/assets/olympiad/tour4/t4-menu-v3-93aad856590b.webp",
+      "sha256": "93aad856590b79b7a335d02a744015a108aadf1ef486f362979ec20d05a87355",
+      "size": [
+        900,
+        600
+      ],
+      "bytes": 96752,
+      "alpha": false,
+      "recipeSource": "https://www.giallozafferano.com/recipes/Spaghetti-Carbonara-Bacon-and-egg-spaghetti.html",
+      "title": "Спагетти карбонара",
+      "review": "Existing photograph viewed separately: whole plate, ingredients and texture agree with the specified menu version. Byte-identical copy gives an opaque T4 path without changing the photo."
+    },
+    {
+      "key": "tiramisu_t4_v3",
+      "role": "reused-menu",
+      "sourceUrl": "/assets/olympiad/tour2/t2-active-27.webp",
+      "sourceSha256": "5d65e0f86eec44a8dd0f53f81309cc1f142340d2e86e02bfcf0dfef522c93121",
+      "url": "/assets/olympiad/tour4/t4-menu-v3-5d65e0f86eec.webp",
+      "sha256": "5d65e0f86eec44a8dd0f53f81309cc1f142340d2e86e02bfcf0dfef522c93121",
+      "size": [
+        900,
+        600
+      ],
+      "bytes": 104542,
+      "alpha": false,
+      "recipeSource": "https://www.iamcook.ru/showrecipe/1072",
+      "title": "Тирамису",
+      "review": "Existing photograph viewed separately: whole plate, ingredients and texture agree with the specified menu version. Byte-identical copy gives an opaque T4 path without changing the photo."
+    },
+    {
+      "key": "vinaigrette",
+      "prompt": "Use case: background-removal. Cut out exactly the entire ivory plate or bowl and saucer with its existing food from the reference photograph. Preserve the food, ingredients, portion, arrangement, texture, camera angle and lighting precisely. Remove ONLY the stone tabletop and any objects outside the plate/saucer. Truly transparent background, clean natural alpha edge, no white rectangular matte, no colored halo, no extra food or text. Keep whole plate centered with transparent margins, do not cut off ceramic rim. This is a restaurant panorama asset. Subject identity: vinaigrette",
+      "review": "Individually checked food, full plate and real alpha; separately viewed in the actual published-table detail, with no background halo, missing rim or added ingredients. Chakhokhbili upper rim repaired in native edit.",
+      "role": "panorama",
+      "sourceFile": "exec-d76d6564-fd11-436f-907b-5d90484688b0.png",
+      "sourceSha256": "e0503025e8f8703ef68bcc139a0b062a7bca64324801c40ba1ccd819329b0687",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/story/v3/plates/t4-menu-v3-e0503025e8f8.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 128800,
+      "sha256": "76f274447963cc3d82e6ccdd9ab17343ecfe6b7e48b8a7ed5be0d3f47ef19da8",
+      "alpha": true,
+      "title": "Винегрет с зелёным горошком",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/13131",
+      "referenceMenuUrl": "/assets/olympiad/tour4/t4-menu-v3-773c9395fe9c.webp",
+      "reviewedAt": "2026-10-09"
+    },
+    {
+      "key": "chakhokhbili",
+      "prompt": "Edit this isolated plate cutout: keep exactly the same complete chicken chakhokhbili in tomato onion herb sauce with white rice on the same ivory plate. Zoom the camera out so the whole plate, every rim edge, is completely within frame with generous transparent margin at least 8% on ALL four sides. Currently the upper rim is cropped: reconstruct its naturally rounded complete edge. Preserve food ingredients, portion, photographic textures, lighting, and viewpoint. Background removal: true transparent alpha outside the plate, no tabletop, no rectangle, no opaque gradient or background, no outside cast shadow, no added garnish. Preserve the isolated plate and food only. Photorealistic.",
+      "review": "Individually checked food, full plate and real alpha; separately viewed in the actual published-table detail, with no background halo, missing rim or added ingredients. Chakhokhbili upper rim repaired in native edit.",
+      "role": "panorama",
+      "sourceFile": "exec-ba384ae9-e3a5-412f-ab15-825081a74431.png",
+      "sourceSha256": "29252613b95c16a1bf951984ebde1001738387346263ad266ddac34f6bf366a8",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/story/v3/plates/t4-menu-v3-29252613b95c.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 132284,
+      "sha256": "3516f2652c2bd02bc9066d7788f057e402f114cdf3420a5b8c076190f0227c93",
+      "alpha": true,
+      "title": "Чахохбили с рисом",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/630",
+      "referenceMenuUrl": "/assets/olympiad/tour4/t4-menu-v3-61f7ee6b9067.webp",
+      "reviewedAt": "2026-10-09"
+    },
+    {
+      "key": "beef_roast",
+      "prompt": "Use case: background-removal. Cut out exactly the entire ivory plate or bowl and saucer with its existing food from the reference photograph. Preserve the food, ingredients, portion, arrangement, texture, camera angle and lighting precisely. Remove ONLY the stone tabletop and any objects outside the plate/saucer. Truly transparent background, clean natural alpha edge, no white rectangular matte, no colored halo, no extra food or text. Keep whole plate centered with transparent margins, do not cut off ceramic rim. This is a restaurant panorama asset. Subject identity: beef_roast",
+      "review": "Individually checked food, full plate and real alpha; separately viewed in the actual published-table detail, with no background halo, missing rim or added ingredients. Chakhokhbili upper rim repaired in native edit.",
+      "role": "panorama",
+      "sourceFile": "exec-42f45879-2212-4a99-9be4-26c0b4fbd800.png",
+      "sourceSha256": "1f658deee21442f551501518e0c55e80e796b3188ba2b424959e9a4a72a73048",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/story/v3/plates/t4-menu-v3-1f658deee214.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 137752,
+      "sha256": "918f793bc303a3d28361343c097caa6b54f89b221009a9f2e9c0fbb6b2fd6dfe",
+      "alpha": true,
+      "title": "Жаркое из говядины с картофелем",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/20951",
+      "referenceMenuUrl": "/assets/olympiad/tour4/t4-menu-v3-ae9df4ce335f.webp",
+      "reviewedAt": "2026-10-09"
+    },
+    {
+      "key": "ricotta_ravioli",
+      "prompt": "Use case: background-removal. Cut out exactly the entire ivory plate or bowl and saucer with its existing food from the reference photograph. Preserve the food, ingredients, portion, arrangement, texture, camera angle and lighting precisely. Remove ONLY the stone tabletop and any objects outside the plate/saucer. Truly transparent background, clean natural alpha edge, no white rectangular matte, no colored halo, no extra food or text. Keep whole plate centered with transparent margins, do not cut off ceramic rim. This is a restaurant panorama asset. Subject identity: ricotta_ravioli",
+      "review": "Individually checked food, full plate and real alpha; separately viewed in the actual published-table detail, with no background halo, missing rim or added ingredients. Chakhokhbili upper rim repaired in native edit.",
+      "role": "panorama",
+      "sourceFile": "exec-5e747fb8-be18-4879-84a5-5300c9bc80e7.png",
+      "sourceSha256": "3cc4d477554b611d88ee24e6f3a83d458f6229b2c36a11dd4e8cc126fbffdc0b",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/story/v3/plates/t4-menu-v3-3cc4d477554b.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 101692,
+      "sha256": "7c2aa376a18bf21846402b7422d7e5c367aace3a0b463acf995023beb2920217",
+      "alpha": true,
+      "title": "Равиоли с рикоттой и шпинатом",
+      "recipeSource": "https://www.giallozafferano.com/recipes/Ricotta-and-spinach-ravioli.html",
+      "referenceMenuUrl": "/assets/olympiad/tour4/t4-menu-v1-51e097c6fa28.webp",
+      "reviewedAt": "2026-10-09"
+    },
+    {
+      "key": "zander_polish",
+      "prompt": "Use case: background-removal. Cut out exactly the entire ivory plate with all its food from the reference photograph. Preserve the exact food, ingredients, portion, arrangement, texture, lighting and camera angle. Remove ONLY the stone tabletop. Truly transparent background, clean natural alpha edge, no white rectangular matte, no colored halo, no extra ingredients or text. Keep whole plate centered with transparent margins, do not cut off ceramic rim. Restaurant panorama asset. Subject identity: zander_polish",
+      "review": "Individually checked food, full plate and real alpha; separately viewed in the actual published-table detail, with no background halo, missing rim or added ingredients. Chakhokhbili upper rim repaired in native edit.",
+      "role": "panorama",
+      "sourceFile": "exec-4b45479a-8688-472e-88fb-b5625fdb9292.png",
+      "sourceSha256": "1411b368090e50a6bfb1af5efe011f826ace72b1ea2c13c16bd4f6c6be614167",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/story/v3/plates/t4-menu-v3-1411b368090e.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 117150,
+      "sha256": "317efe6f93d0024bd9185a11b083cc6d72a295d1e176a7a0a8853698db0cb345",
+      "alpha": true,
+      "title": "Судак под польским соусом с картофелем",
+      "recipeSource": "https://www.iamcook.ru/showrecipe/21543",
+      "referenceMenuUrl": "/assets/olympiad/tour4/t4-menu-v3-c1a3b10021f7.webp",
+      "reviewedAt": "2026-10-09"
+    },
+    {
+      "key": "medovik",
+      "prompt": "Use case: background-removal. Cut out exactly the entire ivory plate with all its food from the reference photograph. Preserve the exact food, ingredients, portion, arrangement, texture, lighting and camera angle. Remove ONLY the stone tabletop. Truly transparent background, clean natural alpha edge, no white rectangular matte, no colored halo, no extra ingredients or text. Keep whole plate centered with transparent margins, do not cut off ceramic rim. Restaurant panorama asset. Subject identity: medovik",
+      "review": "Individually checked food, full plate and real alpha; separately viewed in the actual published-table detail, with no background halo, missing rim or added ingredients. Chakhokhbili upper rim repaired in native edit.",
+      "role": "panorama",
+      "sourceFile": "exec-dbea67db-71b5-445f-9cb5-7213eda1ce6a.png",
+      "sourceSha256": "2a67bcd9dc193bab8d533de87bf66e385022d86a22a5ffdd722b7498107b6b6a",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "url": "/assets/olympiad/story/v3/plates/t4-menu-v3-2a67bcd9dc19.webp",
+      "size": [
+        1200,
+        800
+      ],
+      "bytes": 114248,
+      "sha256": "4656071ddd49d41fd4b25beb20112dabac823a4c7c78e710c27dbb61885b0688",
+      "alpha": true,
+      "title": "Медовик со сметанным кремом",
+      "recipeSource": "https://www.gastronom.ru/recipe/27667/medovik-so-smetannym-kremom",
+      "referenceMenuUrl": "/assets/olympiad/tour4/t4-menu-v3-016a9d5447fd.webp",
+      "reviewedAt": "2026-10-09"
+    }
+  ],
+  "browserReview": "All eight menu screens at 1366 and 390, all 32 zooms, and six new transparent plate details separately viewed on 2026-10-09."
+}

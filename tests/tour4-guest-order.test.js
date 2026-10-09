@@ -20,7 +20,8 @@ test("T4 eight fixed orders, 32 distinct menu positions, 32/10 within unchanged 
     "croissant", "ramen", "khinkali", "taco", "tom_yum", "lasagna", "sushi", "pilaf", "paella", "hotdog",
     "margherita_pizza", "burger", "shawarma", "greek_salad", "caesar_salad", "adjarian_khachapuri", "philadelphia_roll"
   ]);
-  dishes.forEach((id) => assert.equal(otherTargets.has(id), false, id));
+  // Familiar distractors may revisit earlier chapters; eight earned plates stay unique.
+  bank.map(q=>q.dishId).forEach((id) => assert.equal(otherTargets.has(id), false, id));
   bank.forEach((q, index) => {
     assert.equal(q.id, `T4-${String(index + 1).padStart(2, "0")}`);
     assert.equal(q.guestOrder.number, index + 1);

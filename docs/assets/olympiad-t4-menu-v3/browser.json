@@ -1,0 +1,39 @@
+{
+  "tasks": 36,
+  "score": 150,
+  "plates": 51,
+  "checks": [
+    "T1: nine viewports, full image, zoom/focus, no overflow",
+    "Question 3: saved draft and guard recovery",
+    "T2: nine viewports, full image, zoom/focus, no overflow",
+    "Map: drag, occupied replacement, undo, keyboard recovery and four exact photo placements",
+    "T3: nine viewports, full image, zoom/focus, no overflow",
+    "Question 17: saved draft and guard recovery",
+    "T4: nine viewports, full image, zoom/focus, no overflow",
+    "T4: photo and rules cannot trap focus above the protected-mode recovery screen",
+    "T4 order 1: four complete photos/descriptions, desktop/mobile, four zooms without selection, draft clear",
+    "T4 order 2: four complete photos/descriptions, desktop/mobile, four zooms without selection, draft clear",
+    "Question 27: saved draft and guard recovery",
+    "T4 order 3: four complete photos/descriptions, desktop/mobile, four zooms without selection, draft clear",
+    "T4 order 4: four complete photos/descriptions, desktop/mobile, four zooms without selection, draft clear",
+    "T4 order 5: four complete photos/descriptions, desktop/mobile, four zooms without selection, draft clear",
+    "T4 order 6: four complete photos/descriptions, desktop/mobile, four zooms without selection, draft clear",
+    "T4 order 7: four complete photos/descriptions, desktop/mobile, four zooms without selection, draft clear",
+    "T4 order 8: four complete photos/descriptions, desktop/mobile, four zooms without selection, draft clear",
+    "T5: nine viewports, full image, zoom/focus, no overflow",
+    "T5: actual ingredient drag works in protected mode and can be undone",
+    "Question 35: saved draft and guard recovery",
+    "36 issued dialogues and optional exchanges; soft sync and reload preserve the conversation; automatic T3 focus; no judging before publication",
+    "T4: all eight new earned plates load in the published table detail and restore focus",
+    "Published table: responsive navigation, plate detail and source focus at 320/390/768/1366",
+    "Touch T2: world map, four visible photos, map targets, undo, keyboard selection and server confirmation; live decor stop/resume",
+    "Touch/reduced-motion: failed decor, photo retry, lost network request, one stored answer, decorationsDisabled and standard answer"
+  ],
+  "images": {
+    "uniqueDisplayRequests": 135,
+    "displayBytes": 4264382,
+    "originalEquivalentBytes": 26367710,
+    "reductionPercent": 84
+  },
+  "errors": []
+}

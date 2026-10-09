@@ -334,5 +334,53 @@
     "source": "/assets/olympiad/tour4/t4-menu-v1-64d018af2c9b.webp",
     "description": "Шоколадный десерт с плотной влажной серединой, которая не вытекает при разрезании.",
     "imageUrl": "/assets/olympiad/story/v1/plates/fudgy_brownie.webp"
+  },
+  {
+    "id": "vinaigrette_t4_v3",
+    "title": "Винегрет с зелёным горошком",
+    "source": "/assets/olympiad/tour4/t4-menu-v3-773c9395fe9c.webp",
+    "description": "Свёкла, картофель, морковь, солёный огурец, лук и горошек, нарезанные небольшими кусочками; заправка на растительном масле.",
+    "imageUrl": "/assets/olympiad/story/v3/plates/t4-menu-v3-e0503025e8f8.webp",
+    "menuVersion": 3
+  },
+  {
+    "id": "chakhokhbili_t4_v3",
+    "title": "Чахохбили с рисом",
+    "source": "/assets/olympiad/tour4/t4-menu-v3-61f7ee6b9067.webp",
+    "description": "Кусочки курицы, тушённые с томатами, луком, чесноком и зеленью. Гарнир — белый рис.",
+    "imageUrl": "/assets/olympiad/story/v3/plates/t4-menu-v3-29252613b95c.webp",
+    "menuVersion": 3
+  },
+  {
+    "id": "beef_roast_t4_v3",
+    "title": "Жаркое из говядины с картофелем",
+    "source": "/assets/olympiad/tour4/t4-menu-v3-ae9df4ce335f.webp",
+    "description": "Кусочки говядины и картофеля, тушённые вместе с луком и морковью в небольшом количестве подливы.",
+    "imageUrl": "/assets/olympiad/story/v3/plates/t4-menu-v3-1f658deee214.webp",
+    "menuVersion": 3
+  },
+  {
+    "id": "ricotta_ravioli",
+    "title": "Равиоли с рикоттой и шпинатом",
+    "source": "/assets/olympiad/tour4/t4-menu-v1-51e097c6fa28.webp",
+    "description": "Небольшие отварные изделия из яичного теста с мягким сыром рикотта и шпинатом внутри.",
+    "imageUrl": "/assets/olympiad/story/v3/plates/t4-menu-v3-3cc4d477554b.webp",
+    "menuVersion": 3
+  },
+  {
+    "id": "zander_polish_t4_v3",
+    "title": "Судак под польским соусом с картофелем",
+    "source": "/assets/olympiad/tour4/t4-menu-v3-c1a3b10021f7.webp",
+    "description": "Припущенное филе судака с соусом из сливочного масла, рубленого варёного яйца и петрушки. Гарнир — отварной картофель.",
+    "imageUrl": "/assets/olympiad/story/v3/plates/t4-menu-v3-1411b368090e.webp",
+    "menuVersion": 3
+  },
+  {
+    "id": "medovik_t4_v3",
+    "title": "Медовик со сметанным кремом",
+    "source": "/assets/olympiad/tour4/t4-menu-v3-016a9d5447fd.webp",
+    "description": "Тонкие медовые коржи, прослоенные сметанным кремом и выдержанные для пропитки; сверху крошка коржей.",
+    "imageUrl": "/assets/olympiad/story/v3/plates/t4-menu-v3-2a67bcd9dc19.webp",
+    "menuVersion": 3
   }
 ]

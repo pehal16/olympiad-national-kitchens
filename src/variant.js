@@ -366,7 +366,7 @@ function validateQuestionStructure(question) {
         question.presentationVersion !== 1 || !question.guestOrder?.text || !question.guestOrder?.style ||
         new Set(options.map((option) => option.id)).size !== 4 ||
         options.some((option) => !option.text?.trim() || !option.description?.trim() ||
-          !/^\/assets\/olympiad\/tour4\/t4-(?:menu-v1|plate-v2)-[a-f0-9]{12}\.webp$/.test(option.imageUrl)))) {
+          !/^\/assets\/olympiad\/tour4\/t4-(?:menu-v[13]|plate-v2)-[a-f0-9]{12}\.webp$/.test(option.imageUrl)))) {
       throw new Error(`Вопрос ${question.sourceId || question.id} нарушает контракт заказа гостя.`);
     }
     return;

@@ -1,0 +1,510 @@
+{
+  "menuVersion": 3,
+  "conditionVersion": 3,
+  "reviewedAt": "2026-10-09",
+  "reviewScope": "Ingredients and preparation passages; recipe versions declared. Photos reviewed individually. Student calibration pending.",
+  "orders": [
+    {
+      "style": "Обед · горячий суп",
+      "text": "Хочу горячий суп со свёклой, кусочками овощей и говядиной. Со сметаной и хлебом. Не однородный крем-суп.",
+      "criteria": {
+        "beet": true,
+        "beef": true,
+        "texture": "pieces"
+      },
+      "dishes": [
+        {
+          "id": "borsch",
+          "title": "Борщ с говядиной и сметаной",
+          "description": "Горячий суп со свёклой, капустой, картофелем и кусочками говядины; сметана и хлеб для подачи.",
+          "imageUrl": "/assets/olympiad/tour4/t4-plate-v2-12c457572062.webp",
+          "source": "https://www.iamcook.ru/showrecipe/11579",
+          "profile": {
+            "beet": true,
+            "beef": true,
+            "texture": "pieces"
+          }
+        },
+        {
+          "id": "shchi_t4_v3",
+          "title": "Щи из свежей капусты с говядиной",
+          "description": "Суп с говядиной, свежей капустой, картофелем, морковью и луком; сметана и хлеб отдельно.",
+          "assetKey": "shchi",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-1f394d757551.webp",
+          "source": "https://www.iamcook.ru/showrecipe/6141",
+          "profile": {
+            "beet": false,
+            "beef": true,
+            "texture": "pieces"
+          }
+        },
+        {
+          "id": "solyanka_t4_v3",
+          "title": "Солянка мясная сборная",
+          "description": "Суп с несколькими видами мясных продуктов, солёным огурцом и томатом; маслины, лимон, сметана и хлеб для подачи.",
+          "assetKey": "solyanka",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-3e3cba5b4f90.webp",
+          "source": "https://www.iamcook.ru/showrecipe/27689",
+          "profile": {
+            "beet": false,
+            "beef": false,
+            "texture": "pieces"
+          },
+          "sourceNotes": "Assorted meat products; beef is not a required ingredient in this declared version."
+        },
+        {
+          "id": "mushroom_cream_soup",
+          "title": "Крем-суп из шампиньонов",
+          "description": "Однородный грибной крем-суп со сливками, ломтиками шампиньонов и тостами.",
+          "imageUrl": "/assets/olympiad/tour4/t4-plate-v2-1c3b3ae30b0e.webp",
+          "source": "https://www.iamcook.ru/showrecipe/4093",
+          "profile": {
+            "beet": false,
+            "beef": false,
+            "texture": "puree"
+          }
+        }
+      ]
+    },
+    {
+      "style": "Закуска · знакомые салаты",
+      "text": "Начну с овощного салата: пусть будет свёкла и небольшие кусочки овощей. Заправка — растительное масло. Сегодня без мяса, рыбы и майонеза.",
+      "criteria": {
+        "beet": true,
+        "animalMain": false,
+        "dressing": "oil"
+      },
+      "dishes": [
+        {
+          "id": "vinaigrette_t4_v3",
+          "title": "Винегрет с зелёным горошком",
+          "description": "Свёкла, картофель, морковь, солёный огурец, лук и горошек, нарезанные небольшими кусочками; заправка на растительном масле.",
+          "assetKey": "vinaigrette",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-773c9395fe9c.webp",
+          "source": "https://www.iamcook.ru/showrecipe/13131",
+          "profile": {
+            "beet": true,
+            "animalMain": false,
+            "dressing": "oil"
+          }
+        },
+        {
+          "id": "olivier_beef_t4_v3",
+          "title": "Оливье с говядиной",
+          "description": "Отварная говядина, картофель, морковь, яйца, солёный огурец и горошек; майонезная заправка.",
+          "assetKey": "olivier_beef",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-62571e39e0c6.webp",
+          "source": "https://www.iamcook.ru/showrecipe/18376",
+          "profile": {
+            "beet": false,
+            "animalMain": true,
+            "dressing": "mayonnaise"
+          }
+        },
+        {
+          "id": "mimosa_saira_t4_v3",
+          "title": "Мимоза с сайрой",
+          "description": "Слоёный салат из консервированной сайры, яиц, лука и майонеза, с крошкой желтка сверху. Здесь версия без картофеля и моркови.",
+          "assetKey": "mimosa_saira",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-21efb180f1b3.webp",
+          "source": "https://www.iamcook.ru/showrecipe/12961",
+          "profile": {
+            "beet": false,
+            "animalMain": true,
+            "dressing": "mayonnaise"
+          }
+        },
+        {
+          "id": "herring_shuba_t4_v3",
+          "title": "Сельдь под шубой",
+          "description": "Сельдь, лук, картофель, морковь и свёкла, уложенные слоями с майонезом. Здесь версия без яйца.",
+          "assetKey": "herring_shuba",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-0594f5db278f.webp",
+          "source": "https://www.iamcook.ru/showrecipe/661",
+          "profile": {
+            "beet": true,
+            "animalMain": true,
+            "dressing": "mayonnaise"
+          }
+        }
+      ]
+    },
+    {
+      "style": "Горячее · четыре блюда из птицы",
+      "text": "На горячее выберу курицу, тушённую с овощами, а не жареную в панировке. Люблю томатную подливу и зелень; к ней хотелось бы рис.",
+      "criteria": {
+        "technique": "braised",
+        "sauce": "tomato",
+        "side": "rice"
+      },
+      "dishes": [
+        {
+          "id": "chakhokhbili_t4_v3",
+          "title": "Чахохбили с рисом",
+          "description": "Кусочки курицы, тушённые с томатами, луком, чесноком и зеленью. Гарнир — белый рис.",
+          "assetKey": "chakhokhbili",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-61f7ee6b9067.webp",
+          "source": "https://www.iamcook.ru/showrecipe/630",
+          "profile": {
+            "technique": "braised",
+            "sauce": "tomato",
+            "side": "rice"
+          }
+        },
+        {
+          "id": "chicken_tabaka_t4_v3",
+          "title": "Цыплёнок табака с овощами",
+          "description": "Небольшой цыплёнок, распластанный и обжаренный на сковороде под прессом; томат и огурец для подачи.",
+          "assetKey": "chicken_tabaka",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-e8108dbd53c4.webp",
+          "source": "https://www.iamcook.ru/showrecipe/598",
+          "profile": {
+            "technique": "fried_press",
+            "sauce": "none",
+            "side": "vegetables"
+          }
+        },
+        {
+          "id": "chicken_satsivi_t4_v3",
+          "title": "Сациви из курицы с рисом",
+          "description": "Курица в густом соусе из грецких орехов с луком, чесноком и пряностями. В этом меню подаётся с рисом.",
+          "assetKey": "chicken_satsivi",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-5d6f67dc2f6c.webp",
+          "source": "https://www.iamcook.ru/showrecipe/11810",
+          "profile": {
+            "technique": "boiled",
+            "sauce": "walnut",
+            "side": "rice"
+          },
+          "sourceNotes": "Rice is an explicitly declared accompaniment of this menu, not a defining ingredient of satsivi. Serving temperature is not a question criterion."
+        },
+        {
+          "id": "chicken_kyiv_t4_v3",
+          "title": "Котлета по-киевски с пюре",
+          "description": "Цельное куриное филе со сливочным маслом и зеленью внутри, обжаренное в сухарной панировке. Гарнир — картофельное пюре.",
+          "assetKey": "chicken_kyiv",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-e42f4cb9717c.webp",
+          "source": "https://www.iamcook.ru/showrecipe/43526",
+          "profile": {
+            "technique": "fried_breaded",
+            "sauce": "butter_inside",
+            "side": "puree"
+          }
+        }
+      ]
+    },
+    {
+      "style": "Горячее · мясо и картофель",
+      "text": "Хочу сытное мясное блюдо с картофелем: говядина кусочками, картофель тушится вместе с ней. Пюре оставим на другой раз; сырная корочка тоже не нужна.",
+      "criteria": {
+        "meat": "beef",
+        "potato": "stewed_together",
+        "cheeseCrust": false
+      },
+      "dishes": [
+        {
+          "id": "beef_roast_t4_v3",
+          "title": "Жаркое из говядины с картофелем",
+          "description": "Кусочки говядины и картофеля, тушённые вместе с луком и морковью в небольшом количестве подливы.",
+          "assetKey": "beef_roast",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-ae9df4ce335f.webp",
+          "source": "https://www.iamcook.ru/showrecipe/20951",
+          "profile": {
+            "meat": "beef",
+            "potato": "stewed_together",
+            "cheeseCrust": false
+          }
+        },
+        {
+          "id": "goulash_puree_t4_v3",
+          "title": "Гуляш с картофельным пюре",
+          "description": "Столовая версия: кусочки говядины в томатной подливе с луком и морковью. Картофельное пюре подаётся отдельно от мяса.",
+          "assetKey": "goulash_puree",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-a029353f0af2.webp",
+          "source": "https://www.iamcook.ru/showrecipe/802",
+          "profile": {
+            "meat": "beef",
+            "potato": "puree_side",
+            "cheeseCrust": false
+          }
+        },
+        {
+          "id": "stroganoff_puree_t4_v3",
+          "title": "Бефстроганов с картофельным пюре",
+          "description": "Тонкие полоски говядины с луком в сметанном соусе с небольшим добавлением томата; рядом картофельное пюре.",
+          "assetKey": "stroganoff_puree",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-4c14a2e824c6.webp",
+          "source": "https://www.iamcook.ru/showrecipe/13479",
+          "profile": {
+            "meat": "beef",
+            "potato": "puree_side",
+            "cheeseCrust": false
+          }
+        },
+        {
+          "id": "meat_french_t4_v3",
+          "title": "Мясо по-французски с картофелем",
+          "description": "Привычная версия кафе: свинина с ломтиками картофеля, луком и сметаной, запечённая под сырной корочкой.",
+          "assetKey": "meat_french",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-eb4c5b31e237.webp",
+          "source": "https://www.iamcook.ru/showrecipe/7342",
+          "profile": {
+            "meat": "pork",
+            "potato": "baked_layers",
+            "cheeseCrust": true
+          }
+        }
+      ]
+    },
+    {
+      "style": "Горячее · рыбное меню",
+      "text": "Для меня — белая рыба с отварным картофелем. Рыбу хочу приготовленную в небольшом количестве бульона, без жареной корочки. Соус — со сливочным маслом, яйцом и зеленью.",
+      "criteria": {
+        "technique": "poached",
+        "sauce": "egg_butter",
+        "side": "boiled_potato"
+      },
+      "dishes": [
+        {
+          "id": "zander_polish_t4_v3",
+          "title": "Судак под польским соусом с картофелем",
+          "description": "Припущенное филе судака с соусом из сливочного масла, рубленого варёного яйца и петрушки. Гарнир — отварной картофель.",
+          "assetKey": "zander_polish",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-c1a3b10021f7.webp",
+          "source": "https://www.iamcook.ru/showrecipe/21543",
+          "profile": {
+            "technique": "poached",
+            "sauce": "egg_butter",
+            "side": "boiled_potato"
+          }
+        },
+        {
+          "id": "fish_marinade_t4_v3",
+          "title": "Рыба под овощным маринадом с рисом",
+          "description": "Обжаренные кусочки минтая под маринадом из моркови, лука и томата. В этом меню подаются с белым рисом.",
+          "assetKey": "fish_marinade",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-8ba4840eda6f.webp",
+          "source": "https://www.iamcook.ru/showrecipe/8050",
+          "profile": {
+            "technique": "fried_marinade",
+            "sauce": "carrot_tomato",
+            "side": "rice"
+          },
+          "sourceNotes": "Rice is an explicitly declared accompaniment of this menu, not a defining ingredient of fish under marinade."
+        },
+        {
+          "id": "fish_and_chips_t4_v3",
+          "title": "Фиш-энд-чипс",
+          "description": "Филе белой рыбы, обжаренное в хрустящем кляре, с крупно нарезанным жареным картофелем.",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-0a0bd123fe6a.webp",
+          "source": "https://www.bbcgoodfood.com/recipes/next-level-fish-chips",
+          "profile": {
+            "technique": "fried_batter",
+            "sauce": "none",
+            "side": "chips"
+          }
+        },
+        {
+          "id": "fish_cutlets_t4_v3",
+          "title": "Рыбные котлеты с пюре",
+          "description": "Жареные котлеты из измельчённой трески с луком, яйцом и размоченным хлебом. Гарнир — картофельное пюре.",
+          "assetKey": "fish_cutlets",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-feba2e7f3c49.webp",
+          "source": "https://www.iamcook.ru/showrecipe/747",
+          "profile": {
+            "technique": "fried_minced",
+            "sauce": "none",
+            "side": "puree"
+          }
+        }
+      ]
+    },
+    {
+      "style": "Горячее · итальянская паста",
+      "text": "Попробую пасту с начинкой из мягкого сыра и шпината. Хочу небольшие закрытые изделия, сваренные в воде. Запечённую пасту и мясной соус сегодня пропущу.",
+      "criteria": {
+        "filling": "ricotta_spinach",
+        "shape": "small_closed",
+        "finish": "boiled"
+      },
+      "dishes": [
+        {
+          "id": "ricotta_ravioli",
+          "title": "Равиоли с рикоттой и шпинатом",
+          "description": "Небольшие отварные изделия из яичного теста с мягким сыром рикотта и шпинатом внутри.",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v1-51e097c6fa28.webp",
+          "source": "https://www.giallozafferano.com/recipes/Ricotta-and-spinach-ravioli.html",
+          "profile": {
+            "filling": "ricotta_spinach",
+            "shape": "small_closed",
+            "finish": "boiled"
+          }
+        },
+        {
+          "id": "cannelloni_t4_v3",
+          "title": "Каннеллони с рикоттой и шпинатом",
+          "description": "Крупные трубочки пасты с рикоттой и шпинатом, запечённые под соусом бешамель и сыром.",
+          "assetKey": "cannelloni",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-7777ffba97b8.webp",
+          "source": "https://www.giallozafferano.com/recipes/Spinach-and-ricotta-cannelloni.html",
+          "profile": {
+            "filling": "ricotta_spinach",
+            "shape": "large_tubes",
+            "finish": "baked"
+          }
+        },
+        {
+          "id": "lasagna_t4_v3",
+          "title": "Лазанья с мясным рагу",
+          "description": "Слои яичной пасты, мясного рагу с томатом и соуса бешамель, запечённые под сыром. Здесь версия со светлыми листами пасты.",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-6ddc428bdc48.webp",
+          "source": "https://www.giallozafferano.com/recipes/Lasagne-alla-Bolognese.html",
+          "profile": {
+            "filling": "meat",
+            "shape": "layers",
+            "finish": "baked"
+          },
+          "additionalSources": [
+            "https://www.bbcgoodfood.com/recipes/classic-lasagne-0"
+          ],
+          "sourceNotes": "Menu adaptation: light egg pasta sheets instead of the spinach sheets in the GialloZafferano Bolognese version. Meat ragu and bechamel retained; ordinary sheets also supported by the Good Food recipe. This is not labelled an exact traditional Bolognese recipe."
+        },
+        {
+          "id": "carbonara_t4_v3",
+          "title": "Спагетти карбонара",
+          "description": "Спагетти с яйцом, пекорино, обжаренной свиной щековиной и чёрным перцем; версия без сливок.",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-93aad856590b.webp",
+          "source": "https://www.giallozafferano.com/recipes/Spaghetti-Carbonara-Bacon-and-egg-spaghetti.html",
+          "profile": {
+            "filling": "none",
+            "shape": "long_strands",
+            "finish": "boiled"
+          }
+        }
+      ]
+    },
+    {
+      "style": "Завтрак · блины и творожные блюда",
+      "text": "Хочу тонкие гибкие блины со сковороды, которые можно свернуть. Ягодное варенье отдельно; без несладкой начинки.",
+      "criteria": {
+        "base": "flour",
+        "form": "thin_flexible",
+        "finish": "pan"
+      },
+      "dishes": [
+        {
+          "id": "thin_blini",
+          "title": "Тонкие блины с вареньем",
+          "description": "Тонкие гибкие блины на молоке, приготовленные на сковороде; ягодное варенье отдельно.",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v1-a10f479e6bc2.webp",
+          "source": "https://www.iamcook.ru/showrecipe/14007",
+          "profile": {
+            "base": "flour",
+            "form": "thin_flexible",
+            "finish": "pan"
+          }
+        },
+        {
+          "id": "flour_oladyi",
+          "title": "Оладьи со сметаной",
+          "description": "Небольшие пышные мучные оладьи на кефире, обжаренные на сковороде; сметана отдельно.",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v1-73d09e4f21ba.webp",
+          "source": "https://www.iamcook.ru/showrecipe/14317",
+          "profile": {
+            "base": "flour",
+            "form": "thick_round",
+            "finish": "pan"
+          }
+        },
+        {
+          "id": "syrniki_t4_v3",
+          "title": "Сырники со сметаной",
+          "description": "Небольшие жареные изделия из творога с яйцом, сахаром и мукой, с румяной корочкой; сметана отдельно.",
+          "assetKey": "syrniki",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-d1098dfcbfe6.webp",
+          "source": "https://www.iamcook.ru/showrecipe/8490",
+          "profile": {
+            "base": "curd",
+            "form": "thick_round",
+            "finish": "pan"
+          }
+        },
+        {
+          "id": "curd_casserole_t4_v3",
+          "title": "Творожная запеканка со сметаной",
+          "description": "Запечённая творожная масса с яйцом и манной крупой, нарезанная порциями; сметана отдельно.",
+          "assetKey": "curd_casserole",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-08da821f67ee.webp",
+          "source": "https://www.iamcook.ru/showrecipe/5568",
+          "profile": {
+            "base": "curd",
+            "form": "slice",
+            "finish": "oven"
+          }
+        }
+      ]
+    },
+    {
+      "style": "Десерт · к чаю",
+      "text": "К чаю хочу торт с тонкими медовыми коржами и нежным сметанным кремом. Пусть крем пропитает коржи; кофейный вкус мне сегодня не нужен.",
+      "criteria": {
+        "base": "honey_layers",
+        "cream": "sour_cream",
+        "coffee": false
+      },
+      "dishes": [
+        {
+          "id": "medovik_t4_v3",
+          "title": "Медовик со сметанным кремом",
+          "description": "Тонкие медовые коржи, прослоенные сметанным кремом и выдержанные для пропитки; сверху крошка коржей.",
+          "assetKey": "medovik",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-016a9d5447fd.webp",
+          "source": "https://www.gastronom.ru/recipe/27667/medovik-so-smetannym-kremom",
+          "profile": {
+            "base": "honey_layers",
+            "cream": "sour_cream",
+            "coffee": false
+          }
+        },
+        {
+          "id": "napoleon_t4_v3",
+          "title": "Наполеон с заварным кремом",
+          "description": "Коржи из слоёного теста с молочно-яичным заварным кремом; сверху крошка слоёных коржей. Версия без ореховой посыпки.",
+          "assetKey": "napoleon",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-f3b5ce8c8bc2.webp",
+          "source": "https://www.iamcook.ru/showrecipe/12493",
+          "profile": {
+            "base": "puff_layers",
+            "cream": "custard",
+            "coffee": false
+          }
+        },
+        {
+          "id": "tiramisu_t4_v3",
+          "title": "Тирамису",
+          "description": "Печенье савоярди, пропитанное кофе, крем с маскарпоне и какао сверху; охлаждённая подача.",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-5d65e0f86eec.webp",
+          "source": "https://www.iamcook.ru/showrecipe/1072",
+          "profile": {
+            "base": "savoiardi",
+            "cream": "mascarpone",
+            "coffee": true
+          }
+        },
+        {
+          "id": "cheesecake_ny_t4_v3",
+          "title": "Чизкейк Нью-Йорк",
+          "description": "Запечённый десерт со сливочным сыром на основе из крошки песочного печенья, подаётся охлаждённым.",
+          "assetKey": "cheesecake_ny",
+          "imageUrl": "/assets/olympiad/tour4/t4-menu-v3-5700d5f2dc8e.webp",
+          "source": "https://www.iamcook.ru/showrecipe/7653",
+          "profile": {
+            "base": "cookie_crumb",
+            "cream": "cream_cheese",
+            "coffee": false
+          }
+        }
+      ]
+    }
+  ]
+}

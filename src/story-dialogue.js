@@ -8,11 +8,18 @@ const countries={
   'T1-A07':['Япония','из Японии','Суши'], 'T1-A08':['Узбекистан','из Узбекистана','Плов'],
   'T1-A09':['Испания','из Испании','Паэлья'], 'T1-A10':['США','из США','Хот-дог']
 };
-function conditionVersion(attempt){return Number(attempt?.variant?.conditionVersion)===2?2:1;}
+function conditionVersion(attempt){
+  const edition=Number(attempt?.variant?.conditionVersion);
+  if([1,2,3].includes(edition))return edition;
+  // Non-story starts also freeze the menu in their questions, without dialogue metadata.
+  return attempt?.variant?.questions?.some(q=>q.tourCode==='T4'&&q.menuVersion===3)?3:1;
+}
 function rankingGroup(attempt){return JSON.stringify([attempt.storyRunId||null,conditionVersion(attempt)]);}
 function freezeDialogue(variant){
   if(variant.dialogueVersion===1) return variant;
-  variant.dialogueVersion=1;variant.conditionVersion=2;
+  variant.dialogueVersion=1;
+  // Different menus must not share ranks. Already frozen attempts return above.
+  variant.conditionVersion=variant.questions.some(q=>q.tourCode==='T4'&&q.menuVersion===3)?3:2;
   for(const q of variant.questions){
     const dialogue={...forQuestion(q),key:q.sourceId||q.id};
     const trip=q.tourCode==='T1'?countries[q.sourceId]:null;

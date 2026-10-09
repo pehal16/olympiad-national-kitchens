@@ -5,7 +5,7 @@ const {forQuestion}=require('../src/story-dialogue-texts');
 const olympiad=require('../data/olympiad');
 const make=()=>buildVariant(olympiad,{seed:'immutable-comic-scenarios'});
 test('36 frozen scenes are distinct; current-question dialogue never supplies keys or later scenes',()=>{
- const v=freezeDialogue(make());assert.equal(v.questions.length,36);assert.equal(v.conditionVersion,2);assert.equal(v.dialogueVersion,1);
+ const v=freezeDialogue(make());assert.equal(v.questions.length,36);assert.equal(v.conditionVersion,3);assert.equal(v.dialogueVersion,1);
  assert.equal(new Set(v.questions.map(q=>q.dialogue.line)).size,36);assert.equal(new Set(v.questions.map(q=>q.dialogue.extra)).size,36);
  for(const q of v.questions){
   const safe=sanitizeQuestion(q,{answers:{}});assert.deepEqual(safe.dialogue,q.dialogue);
@@ -17,7 +17,8 @@ test('36 frozen scenes are distinct; current-question dialogue never supplies ke
  assert.equal(sanitizeQuestion(null,{answers:{}}),null);
 });
 test('legacy attempts keep their issued conditions; frozen dialogue survives serialization and bank changes',()=>{
- const legacy=make(),before=JSON.stringify(legacy);assert.equal(conditionVersion({variant:legacy}),1);
+ const oldMenu=structuredClone(olympiad);oldMenu.questionBank.tour4Tasks=require('../data/banks/tour4-menu-v2');
+ const legacy=buildVariant(oldMenu,{seed:'historical-no-dialogue'}),before=JSON.stringify(legacy);assert.equal(conditionVersion({variant:legacy}),1);
  for(const q of legacy.questions.filter(q=>q.tourCode==='T1'))assert.doesNotMatch(forQuestion(q).line,/Франци|Япони|Грузи|Мексик|Таиланд|Итали|Узбекистан|Испани|США/);
  assert.equal(JSON.stringify(legacy),before);
  const current=freezeDialogue(make()),saved=JSON.stringify(current),restored=JSON.parse(saved);restored.questions[0].sourceId='edited-bank-id';
@@ -27,6 +28,22 @@ test('legacy attempts keep their issued conditions; frozen dialogue survives ser
 test('rank identity separates condition editions inside a run and separates runs',()=>{
  const old={storyRunId:'same-run',variant:{}},newer={storyRunId:'same-run',variant:{conditionVersion:2}},other={...newer,storyRunId:'other-run'};
  assert.notEqual(rankingGroup(old),rankingGroup(newer));assert.notEqual(rankingGroup(newer),rankingGroup(other));assert.equal(rankingGroup({...old,variant:{conditionVersion:1}}),rankingGroup(old));
+ const menu3={storyRunId:'same-run',variant:{conditionVersion:3}};
+ assert.equal(conditionVersion(menu3),3);assert.notEqual(rankingGroup(menu3),rankingGroup(newer));assert.notEqual(rankingGroup(menu3),rankingGroup(old));
+});
+
+test('new ordinary attempts with the v3 menu do not share legacy ordinary ranks',()=>{
+ const newer={variant:make()},older={variant:{questions:require('../data/banks/tour4-menu-v2')}};
+ assert.equal(conditionVersion(newer),3);assert.equal(conditionVersion(older),1);
+ assert.notEqual(rankingGroup(newer),rankingGroup(older));
+ assert.equal(newer.variant.conditionVersion,undefined,'reading the edition does not rewrite the issued variant');
+});
+test('old country-dialogue edition stays 2 and never gains the new menu on restoration',()=>{
+ const oldMenu=structuredClone(olympiad);oldMenu.questionBank.tour4Tasks=require('../data/banks/tour4-menu-v2');
+ const v=freezeDialogue(buildVariant(oldMenu,{seed:'country-edition-2'}));assert.equal(v.conditionVersion,2);
+ const before=JSON.stringify(v);freezeDialogue(v);assert.equal(JSON.stringify(v),before);
+ assert.ok(v.questions.filter(q=>q.tourCode==='T4').every(q=>q.menuVersion===undefined));
+ assert.ok(v.questions.filter(q=>q.tourCode==='T1').every(q=>/Страница альбома:/.test(q.scenario)));
 });
 test('an unreviewed first-tour recipe cannot silently receive a country clue',()=>{
  const v=make();v.questions[0].options.find(o=>o.isCorrect).text='Иное блюдо';assert.throws(()=>freezeDialogue(v),/reviewed dish changed/);

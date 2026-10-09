@@ -67,7 +67,7 @@
     doc.querySelector('.dashboard-head').prepend(header);move(doc.getElementById('progress-tour'),header);header.append(status);move(doc.getElementById('attempt-save-status'),status);move(doc.getElementById('participant-exam-badge'),status);
     const workspace=el('div','restaurant-workspace'),conversation=el('aside','restaurant-conversation'),task=el('div','restaurant-task');
     story.before(workspace);workspace.append(conversation,task);move(story,conversation);move(doc.getElementById('story-service-slot'),conversation);move(card,task);move(doc.querySelector('.action-deck'),task);
-    card.classList.toggle('has-dialogue-condition',chapter===1&&attempt.story.conditionVersion===2&&/^Страница альбома: [^.]+\.$/.test(attempt.currentQuestion.scenario||''));
+    card.classList.toggle('has-dialogue-condition',chapter===1&&[2,3].includes(attempt.story.conditionVersion)&&/^Страница альбома: [^.]+\.$/.test(attempt.currentQuestion.scenario||''));
     const paper = el('div', 'restaurant-paper');
     if (chapter === 1) {
       const photo = body.querySelector('.question-photo');

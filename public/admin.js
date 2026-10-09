@@ -567,7 +567,7 @@ function renderAttempts(attempts) {
     row.tabIndex = 0;
     row.innerHTML = `
       <td>${attempt.rank ?? "—"}</td>
-      <td>${escapeHtml(attempt.fullName)}<br /><span class="muted">${escapeHtml(attempt.institution || "")} · редакция ${attempt.conditionVersion === 2 ? '2 (страны в Т1)' : '1'}${attempt.storyRunId ? ' · '+escapeHtml(attempt.storyRunId) : ''}</span></td>
+      <td>${escapeHtml(attempt.fullName)}<br /><span class="muted">${escapeHtml(attempt.institution || "")} · редакция ${attempt.conditionVersion === 3 ? '3 (обновлённое меню Т4)' : attempt.conditionVersion === 2 ? '2 (страны в Т1)' : '1'}${attempt.storyRunId ? ' · '+escapeHtml(attempt.storyRunId) : ''}</span></td>
       <td>${escapeHtml(attempt.groupName || "")}<br /><span class="muted">${escapeHtml(attempt.mentorName || "  ")}</span></td>
       <td>${escapeHtml(attempt.status)}</td>
       <td>${attempt.totalFinalScore ?? ""}</td>

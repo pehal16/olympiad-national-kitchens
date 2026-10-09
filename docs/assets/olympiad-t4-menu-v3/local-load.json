@@ -1,0 +1,20 @@
+[
+  {
+    "environment": "local SQLite D1 adapter",
+    "participants": 50,
+    "answers": 1800,
+    "errors": 0,
+    "lostAnswers": 0,
+    "duplicateAnswers": 0,
+    "answerP95Ms": 447
+  },
+  {
+    "environment": "local SQLite D1 adapter",
+    "participants": 60,
+    "answers": 2160,
+    "errors": 0,
+    "lostAnswers": 0,
+    "duplicateAnswers": 0,
+    "answerP95Ms": 496
+  }
+]

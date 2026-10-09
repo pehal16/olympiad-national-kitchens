@@ -1,9 +1,9 @@
-const CACHE_NAME = "national-kitchens-olympiad-story-layout-4-polish4";
+const CACHE_NAME = "national-kitchens-olympiad-story-layout-4-menu3";
 const PRECACHE_URLS = [
   "/story-dialogue.js?v=layout4-polish4",
   "/restaurant-comic.css?v=layout4-polish4",
   "/olympiad-story.js?v=story-layout4-polish4",
-  "/restaurant-layout.js?v=layout4-polish4",
+  "/restaurant-layout.js?v=layout4-menu3",
   "/restaurant-layout.css?v=layout4-polish4",
   "/olympiad-story.css?v=story2",
   "/",
@@ -24,7 +24,7 @@ const PRECACHE_URLS = [
   "/t4-guest-order.js?v=1.7.0-layout4-polish4",
   "/t2-country-match.js?v=1.7.0-layout4-polish4",
   "/t3-detective.js?v=1.7.0-layout4-polish4",
-  "/admin.js?v=1.7.0-comic4",
+  "/admin.js?v=1.7.0-menu3",
   "/content-admin.js?v=1.7.0",
   "/manifest.webmanifest?v=1.7.0",
   "/icons/icon-192.png",

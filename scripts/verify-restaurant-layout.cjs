@@ -66,6 +66,32 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
     }
    }
    if(q.type==='dish_detective'&&q.sequenceInTour!==1)assert.equal(await page.evaluate(()=>document.activeElement.id),'t3-answer-input','next notebook page activates typing');
+   if(q.interactionMode==='guest_order'){
+    await page.waitForFunction(()=>[...document.querySelectorAll('.t4-menu-select img')].every(n=>n.complete&&n.naturalWidth>0));
+    assert.equal(await page.locator('.t4-menu-select').count(),4);
+    for(const option of q.options){
+     const card=page.locator(`[data-option-id="${option.id}"]`);
+     assert.match(await card.innerText(),new RegExp(option.text.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+     assert.ok((await card.innerText()).includes(option.description),'full recipe description');
+    }
+    for(const width of [1366,390]){
+     await page.setViewportSize({width,height:900});await page.evaluate(()=>window.scrollTo(0,0));
+     await page.screenshot({path:path.join(output,`menu-v3-${q.sequenceInTour}-${width}.png`),fullPage:true,animations:'disabled'});
+     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'all four dishes fit');
+    }
+    await page.setViewportSize({width:1366,height:768});
+    for(let j=0;j<4;j++){
+     const zoom=page.locator('.t4-zoom').nth(j),before=await page.evaluate(()=>state.questionController.getAnswer());
+     await zoom.click();await page.waitForFunction(()=>document.querySelector('.t4-dialog[open] img')?.naturalWidth>0);
+     assert.equal(await page.locator('.t4-dialog[open] img').getAttribute('src'),q.options[j].imageUrl,'zoom shows the issued photograph');
+     await page.locator('.t4-dialog[open]').getByRole('button',{name:'Закрыть',exact:true}).click();
+     assert.deepEqual(await page.evaluate(()=>state.questionController.getAnswer()),before,'zoom does not choose');
+     assert.equal(await zoom.evaluate(n=>n===document.activeElement),true);
+    }
+    await page.locator('.t4-menu-select').first().click();await page.locator('.t4-clear').click();
+    assert.equal(await page.locator('#submit-answer').isEnabled(),false,'clear removes the draft');
+    checks.push(`T4 order ${q.sequenceInTour}: four complete photos/descriptions, desktop/mobile, four zooms without selection, draft clear`);
+   }
    await page.locator('.story-more').click();assert.equal(await page.locator('.story-student-speech p').innerText(),q.dialogue.student);assert.equal(await page.locator('.story-extra-speech p').innerText(),q.dialogue.extra);
    assert.equal(await page.locator('.story-guest-line').innerText(),q.dialogue.line,'primary dialogue stays readable');
    await page.evaluate(()=>syncAttempt(true));assert.equal(await page.locator('.story-guest-line').innerText(),q.dialogue.line);assert.equal(await page.locator('.story-exchange').isVisible(),true,'soft sync preserves expanded dialogue');
@@ -147,6 +173,18 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
    await page.locator('.story-dish-dialog').getByRole('button',{name:'Закрыть',exact:true}).click();
    assert.equal(await page.locator('.story-serving').first().evaluate(n=>n===document.activeElement),true,'table detail returns focus to its plate');
   }
+  await page.setViewportSize({width:1366,height:900});
+  await page.locator('.story-plate-list summary').click();
+  for(const order of variant.questions.filter(q=>q.tourCode==='T4')){
+   const plate=order.storyPlates[0],link=page.locator('.story-plate-link').filter({hasText:plate.title});
+   await link.click();await page.waitForFunction(()=>document.querySelector('.story-dish-dialog img')?.naturalWidth>0);
+   assert.equal(await page.locator('.story-dish-dialog img').getAttribute('src'),plate.imageUrl);
+   await page.locator('.story-dish-dialog').screenshot({path:path.join(output,`menu-v3-earned-${order.sequenceInTour}.png`)});
+   await page.locator('.story-dish-dialog').getByRole('button',{name:'Закрыть',exact:true}).click();
+   assert.equal(await link.evaluate(n=>n===document.activeElement),true);
+  }
+  await page.locator('.story-plate-list summary').click();
+  checks.push('T4: all eight new earned plates load in the published table detail and restore focus');
   checks.push('Published table: responsive navigation, plate detail and source focus at 320/390/768/1366');
   await page.locator('#certificate-section').waitFor();assert.equal(await page.locator('#result-section').evaluate(n=>n.lastElementChild.id),'certificate-section','certificate is the final result section');
   assert.equal(await page.getByText('Разбор всех ответов',{exact:true}).count(),0);
