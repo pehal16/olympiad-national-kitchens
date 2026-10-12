@@ -1,10 +1,10 @@
-const CACHE_NAME = "national-kitchens-olympiad-story-layout-5-oct12";
+const CACHE_NAME = "national-kitchens-olympiad-story-layout-5-live-table3";
 const PRECACHE_URLS = [
   "/story-dialogue.js?v=layout5-oct12",
   "/restaurant-comic.css?v=layout5-oct12",
-  "/olympiad-story.js?v=story-layout5-oct12",
-  "/story-banquet.js?v=oct12",
-  "/story-banquet.css?v=oct12",
+  "/olympiad-story.js?v=story-layout5-live-table3",
+  "/story-banquet.js?v=live-table3",
+  "/story-banquet.css?v=live-table3",
   "/restaurant-layout.js?v=layout5-oct12",
   "/restaurant-layout.css?v=layout5-oct12",
   "/olympiad-story.css?v=story2",

@@ -23,6 +23,7 @@ function freezeStoryVariant(variant,run) {
       const dish=q.dishes[0]; q.storyPlates=[plateFor(dish.dishId||q.dishKey,dish.title,
         `${dish.variantLabel}. Состав: ${dish.items.filter(i=>dish.correctIngredientIds.includes(i.id)).map(i=>i.text).join(', ')}.`,dish.variantLabel)];
     }
+    for(const p of q.storyPlates||[])p.country=require('./story-country').countryFor(q,p);
   }
   return variant;
 }
@@ -59,7 +60,7 @@ function buildStoryResult(olympiad,attempt) {
         } else correct=false;
       }
       const {explanation,...publicPlate}=p;
-      if(correct) earned.push({...publicPlate,imageUrl,actions:[q.type==='bucket_sort'?{...action,savedAnswer:answerText(q,{buckets:{[p.itemId]:payload.buckets[p.itemId]}}).split('; ').find(s=>s.startsWith(p.title+' →'))||action.savedAnswer,score:q.maxScore/q.items.length,maxScore:q.maxScore/q.items.length}:action]});
+      if(correct) earned.push({...publicPlate,country:p.country||require('./story-country').countryFor(q,p),imageUrl,actions:[q.type==='bucket_sort'?{...action,savedAnswer:answerText(q,{buckets:{[p.itemId]:payload.buckets[p.itemId]}}).split('; ').find(s=>s.startsWith(p.title+' →'))||action.savedAnswer,score:q.maxScore/q.items.length,maxScore:q.maxScore/q.items.length}:action]});
     }
   }
   earned.sort((a,b)=>Number(b.actions[0].tour==='T5')-Number(a.actions[0].tour==='T5'));

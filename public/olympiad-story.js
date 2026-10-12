@@ -147,7 +147,7 @@
     doc.getElementById('certificate-heading').textContent='Ваше свидетельство об участии';
     doc.getElementById('certificate-open').textContent='Открыть свидетельство';
     certificate.querySelector('p').textContent='Олимпиада завершена. В свидетельстве указаны ваши баллы из 150 и приказ № 199 / 05.10.2026. Документ можно сохранить как PDF.';
-    if(loaded){renderTable(loaded);return;}
+    if(loaded){if(resultMount._publishedData!==loaded||resultMount._decorationsDisabled!==Boolean(session.story.decorationsDisabled))renderTable(loaded);return;}
     doc.getElementById('result-title').textContent='Меню принято. Спасибо за этот вечер!';
     doc.getElementById('result-subtitle').textContent='Ответы сохранены. Свидетельство с баллами доступно в конце страницы. Персональный стол откроется после публикации общих итогов — вернитесь к нему в этом браузере.';
     resultMount.replaceChildren();
@@ -160,11 +160,13 @@
     const close=button('Закрыть',()=>modal.close());
     if(p.imageUrl)modal.append(image(p.imageUrl,p.imageAlt||p.title,'story-detail-image'));
     modal.append(el('h2','',p.title),el('p','',p.recipeVersion));
+    if(p.country)modal.append(el('p','',`${p.country.name}. ${p.country.context}`));
     for(const a of p.actions)modal.append(el('p','',`${a.tour}, задание ${a.number}. Ваш ответ: ${a.savedAnswer}. Баллы: ${a.score} из ${a.maxScore}.`));
     modal.append(close);doc.body.append(modal);modal.addEventListener('close',()=>{modal.remove();source?.focus({preventScroll:true});},{once:true});modal.showModal();
   }
   function renderTable(data){
     if(!resultMount)return;resultMount._resizeObserver?.disconnect();resultMount.replaceChildren();
+    resultMount._publishedData=data;resultMount._decorationsDisabled=Boolean(session.story.decorationsDisabled);
     root.T5DishService?.hideInline();
     doc.getElementById('result-title').textContent='Ваш дегустационный стол';
     doc.getElementById('result-subtitle').textContent='В меню — заработанные подачи. Нажмите на блюдо, чтобы посмотреть свой сохранённый ответ. Правильные ответы не показываются.';

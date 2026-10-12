@@ -160,18 +160,29 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
   assert.equal(await page.locator('.t5-service-inline').count(),0,'published table does not repeat the last serving and guest');
   await page.locator('.story-kitchen-review summary').click();
   assert.equal(await page.getByRole('button',{name:'Посмотреть подачу и реакцию'}).count(),3,'collapsed kitchen still exposes all saved servings');
+  await page.evaluate(()=>syncAttempt(true));
+  assert.equal(await page.locator('.story-kitchen-review').evaluate(n=>n.open),true,'result synchronization preserves an open review');
   await page.locator('.story-kitchen-review summary').click();
   await page.waitForFunction(()=>[...document.querySelectorAll('.story-banquet img')].every(i=>i.complete&&i.naturalWidth>0&&!i.hidden));
   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:path.join(output,'table-51.png'),fullPage:true});
   for(const width of [320,390,768,1366]){
    await page.setViewportSize({width,height:900});
+   await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'banquet has no horizontal overflow');
    assert.equal(await page.locator('.story-serving').count(),51,'all earned plates share one table');
    assert.equal(await page.locator('.story-serving[inert]').count(),0,'no table page hides plates');
    assert.equal(await page.getByRole('button',{name:'Следующие подачи',exact:true}).count(),0);
+   const zoom=page.locator('.story-banquet-controls button').first();
+   if(await zoom.getAttribute('aria-pressed')==='true')await zoom.click();
+   await page.getByRole('button',{name:'Приблизить стол',exact:true}).click();
+   assert.equal(await zoom.getAttribute('aria-pressed'),'true','zoom opens the actual table, not another list');
+   await page.evaluate(()=>syncAttempt(true));
+   assert.equal(await zoom.getAttribute('aria-pressed'),'true','result synchronization preserves zoom');
    await page.locator('.story-serving').first().click();
    await page.locator('.story-dish-dialog').getByRole('button',{name:'Закрыть',exact:true}).click();
    assert.equal(await page.locator('.story-serving').first().evaluate(n=>n===document.activeElement),true);
+   await page.getByRole('button',{name:'Весь стол',exact:true}).click();
+   assert.equal(await zoom.getAttribute('aria-pressed'),'false','all plates remain in the full-table view');
    await page.locator('.story-banquet').screenshot({path:path.join(output,'banquet-51-'+width+'.png'),animations:'disabled'});
   }
   await page.setViewportSize({width:1366,height:900});
