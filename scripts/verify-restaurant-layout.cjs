@@ -169,24 +169,25 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
    await page.setViewportSize({width,height:900});
    await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'banquet has no horizontal overflow');
-   assert.equal(await page.locator('.story-serving').count(),51,'all earned plates share one table');
-   assert.equal(await page.locator('.story-serving[inert]').count(),0,'no table page hides plates');
+   assert.equal(await page.locator('.story-serving').count(),0,'approved photograph is a coherent scene without pasted dishes');
+   assert.equal(await page.locator('.story-plate-link').count(),51,'all earned dishes remain in the menu below the scene');
+   assert.equal(await page.locator('.story-plate-list').evaluate(n=>n.open),true,'earned menu starts open');
    assert.equal(await page.getByRole('button',{name:'Следующие подачи',exact:true}).count(),0);
    const zoom=page.locator('.story-banquet-controls button').first();
    if(await zoom.getAttribute('aria-pressed')==='true')await zoom.click();
-   await page.getByRole('button',{name:'Приблизить стол',exact:true}).click();
+   await page.getByRole('button',{name:'Увеличить фото',exact:true}).click();
    assert.equal(await zoom.getAttribute('aria-pressed'),'true','zoom opens the actual table, not another list');
    await page.evaluate(()=>syncAttempt(true));
    assert.equal(await zoom.getAttribute('aria-pressed'),'true','result synchronization preserves zoom');
-   await page.locator('.story-serving').first().click();
+   await page.locator('.story-plate-link').first().click();
    await page.locator('.story-dish-dialog').getByRole('button',{name:'Закрыть',exact:true}).click();
-   assert.equal(await page.locator('.story-serving').first().evaluate(n=>n===document.activeElement),true);
-   await page.getByRole('button',{name:'Весь стол',exact:true}).click();
+   assert.equal(await page.locator('.story-plate-link').first().evaluate(n=>n===document.activeElement),true);
+   await page.getByRole('button',{name:'Весь кадр',exact:true}).click();
    assert.equal(await zoom.getAttribute('aria-pressed'),'false','all plates remain in the full-table view');
    await page.locator('.story-banquet').screenshot({path:path.join(output,'banquet-51-'+width+'.png'),animations:'disabled'});
   }
   await page.setViewportSize({width:1366,height:900});
-  await page.locator('.story-plate-list summary').click();
+  if(!await page.locator('.story-plate-list').evaluate(n=>n.open))await page.locator('.story-plate-list summary').click();
   for(const order of variant.questions.filter(q=>q.tourCode==='T4')){
    const plate=order.storyPlates[0],link=page.locator('.story-plate-link').filter({hasText:plate.title});
    await link.click();await page.waitForFunction(()=>document.querySelector('.story-dish-dialog img')?.naturalWidth>0);
@@ -197,7 +198,7 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
   }
   await page.locator('.story-plate-list summary').click();
   checks.push('T4: all eight new earned plates load in the published table detail and restore focus');
-  checks.push('Published banquet: all 51 plates, no paging or inert dishes, detail and source focus at 320/390/768/1366');
+  checks.push('Published final: approved intact photograph, open 51-dish earned menu, photo zoom, detail/focus and preserved synchronization at 320/390/768/1366');
   await page.locator('#certificate-section').waitFor();assert.equal(await page.locator('#result-section').evaluate(n=>n.lastElementChild.id),'certificate-section','certificate is the final result section');
   assert.equal(await page.getByText('Разбор всех ответов',{exact:true}).count(),0);
   await page.reload();await page.locator('.story-publish-notice').waitFor();

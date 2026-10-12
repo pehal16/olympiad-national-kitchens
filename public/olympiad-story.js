@@ -167,16 +167,16 @@
     if(!resultMount)return;resultMount._resizeObserver?.disconnect();resultMount.replaceChildren();
     resultMount._publishedData=data;resultMount._decorationsDisabled=Boolean(session.story.decorationsDisabled);
     root.T5DishService?.hideInline();
-    doc.getElementById('result-title').textContent='Ваш дегустационный стол';
+    doc.getElementById('result-title').textContent='Вечер вкусов завершён';
     doc.getElementById('result-subtitle').textContent='В меню — заработанные подачи. Нажмите на блюдо, чтобы посмотреть свой сохранённый ответ. Правильные ответы не показываются.';
     const notice=el('p','story-publish-notice','Общие итоги опубликованы.');notice.setAttribute('role','status');resultMount.append(notice);
     const facts=el('div','story-result-facts');facts.append(el('strong','',`Блюд в меню: ${data.plates.length} из ${data.collectionMax}`),el('strong','',`Баллы: ${data.summary.totalFinalScore} из ${data.summary.totalMaxScore}`));resultMount.append(facts);
     if(!session.story.decorationsDisabled&&root.StoryBanquet)resultMount.append(root.StoryBanquet.render(data,showPlate));
-    const list=el('details','story-plate-list'),summary=el('summary','','Все подачи');list.append(summary);
+    const list=el('details','story-plate-list'),summary=el('summary','','Ваше заработанное меню');list.open=true;list.append(summary);
     const filter=el('input','story-search');filter.type='search';filter.placeholder='Найти блюдо';filter.setAttribute('aria-label','Поиск среди заработанных подач');list.append(filter);
     const rows=el('ul','story-plate-rows');
     for(const p of data.plates){const row=el('li');const b=button(p.title,()=>showPlate(p,b),'story-plate-link');row.dataset.search=p.title.toLocaleLowerCase('ru');row.append(b,el('span','',p.actions.map(a=>a.tour).join(', ')));rows.append(row);}
-    filter.addEventListener('input',()=>{for(const row of rows.children)row.hidden=!row.dataset.search.includes(filter.value.toLocaleLowerCase('ru'));});list.append(rows);resultMount.append(list);
+    filter.addEventListener('input',()=>{for(const row of rows.children)row.hidden=!row.dataset.search.includes(filter.value.toLocaleLowerCase('ru'));});list.append(rows);if(!data.plates.length)list.append(el('p','','В этом прохождении заработанных подач нет. Ваши баллы сохранены.'));resultMount.append(list);
     const kitchen=el('details','story-kitchen-review story-answer-review');kitchen.append(el('summary','','Что получилось на кухне'));
     if(!data.kitchen.length)kitchen.append(el('p','','Подтверждённых подач на кухне нет.'));
     for(const row of data.kitchen){const article=el('article','story-kitchen-row');article.append(el('h3','',row.receipt.dishTitle),el('p','',`Баллы: ${row.score} из ${row.maxScore}. ${row.fullyCorrect?'Блюдо добавлено в меню.':'Сохранён фактический состав вашей подачи.'}`),el('p','',row.receipt.composition.join(' · ')),button('Посмотреть подачу и реакцию',()=>{

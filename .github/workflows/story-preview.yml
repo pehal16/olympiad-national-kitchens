@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   preview:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     permissions:
       contents: read
     env:
