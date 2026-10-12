@@ -30,7 +30,7 @@ async function main(){
     const r=await fetch(base+'/api/public/attempts/start',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
     const valid=/application\/json/.test(r.headers.get('content-type')||'')&&[400,403].includes(r.status);await r.text();
     const client=await fetch(base+'/story-banquet.js?rehearsal='+process.env.GITHUB_SHA);
-    consecutive=valid&&client.ok&&normalized(await client.text())===expectedClient?consecutive+1:0;
+    const clientText=await client.text();consecutive=valid&&client.ok&&normalized(clientText)===expectedClient?consecutive+1:0;
     if(consecutive===4){startReady=true;break;}
     await new Promise(resolve=>setTimeout(resolve,5000));
   }
@@ -85,4 +85,4 @@ async function main(){
   fs.writeFileSync('output/story/cloudflare-load.json',JSON.stringify(evidence,null,2));
   assert.ok(evidence.every(m=>m.answerP95Ms<=3000),'Preview answer p95 exceeds the 3000 ms target.');
 }
-main().catch(e=>{console.error(e.message);process.exitCode=1;});
+main().catch(e=>{const diagnostic={message:e.message,causeCode:e.cause?.code,causeMessage:e.cause?.message,checkedAt:new Date().toISOString()};fs.writeFileSync('output/story/cloudflare-run-failure.json',JSON.stringify(diagnostic,null,2));console.error(JSON.stringify(diagnostic));process.exitCode=1;});

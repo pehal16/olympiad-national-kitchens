@@ -160,7 +160,6 @@
     const close=button('Закрыть',()=>modal.close());
     if(p.imageUrl)modal.append(image(p.imageUrl,p.imageAlt||p.title,'story-detail-image'));
     modal.append(el('h2','',p.title),el('p','',p.recipeVersion));
-    if(p.country)modal.append(el('p','',`${p.country.name}. ${p.country.context}`));
     for(const a of p.actions)modal.append(el('p','',`${a.tour}, задание ${a.number}. Ваш ответ: ${a.savedAnswer}. Баллы: ${a.score} из ${a.maxScore}.`));
     modal.append(close);doc.body.append(modal);modal.addEventListener('close',()=>{modal.remove();source?.focus({preventScroll:true});},{once:true});modal.showModal();
   }

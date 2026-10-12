@@ -48,12 +48,6 @@
    image.addEventListener('load',()=>{image.hidden=false;seat.classList.remove('is-photo-missing');});
    const hit=element('div','story-dish-hit');hit.setAttribute('aria-hidden','true');
    seat.append(image,hit,element('span','',plate.title));seat.addEventListener('click',()=>showPlate(plate,seat));
-   if(plate.country?.flagUrl){
-    const pick=element('span','story-dish-flag'),wood=element('img','story-flag-pick'),flag=element('img','story-flag-print');
-    pick.setAttribute('aria-hidden','true');wood.src='/assets/olympiad/story/v5/scenes/flag-pick.webp';wood.alt='';flag.src=plate.country.flagUrl;flag.alt='';
-    for(const accessory of[wood,flag]){accessory.decoding='async';accessory.addEventListener('error',()=>pick.hidden=true);}
-    pick.append(wood,flag);seat.append(pick);seat.setAttribute('aria-label',plate.title+'. '+plate.country.name);
-   }
    seat.addEventListener('focus',()=>{if(table.classList.contains('is-zoomed'))seat.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});});surface.append(seat);
   });
   viewport.append(surface);table.append(viewport);
@@ -70,5 +64,5 @@
   if(root.ResizeObserver){const observer=new root.ResizeObserver(()=>{if(!table.isConnected){observer.disconnect();return;}if(!manualView)setView(root.matchMedia('(max-width:767px)').matches,false);});observer.observe(viewport);}
   return table;
  }
- root.StoryBanquet={render,layoutVersion:3};
+ root.StoryBanquet={render,layoutVersion:4};
 })(window);

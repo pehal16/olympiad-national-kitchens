@@ -35,19 +35,3 @@ test('published collection never supplies solutions for unanswered or incorrect 
  assert.ok(data.plates.length>0);assert.deepEqual(data.review,[]);
  assert.doesNotMatch(JSON.stringify(data),/expectedAnswer|explanation|correctBuckets|correctIngredientIds|answerPolicy|isCorrect/);
 });
-
-test('earned flag metadata follows frozen map pairs and notebook countries, without early disclosure',()=>{
- const attempt=fixture();for(const question of attempt.variant.questions)save(attempt,question,correct(question));
- const snapshot=JSON.stringify(attempt.variant),result=buildStoryResult(olympiad,attempt);
- assert.equal(result.plates.length,51);assert.ok(result.plates.every(plate=>plate.country?.flagUrl));
- for(const question of attempt.variant.questions.filter(q=>q.type==='bucket_sort'))for(const plate of question.storyPlates){
-  const bucket=question.buckets.find(b=>b.id===question.correctBuckets[plate.itemId]);assert.equal(plate.country.name,bucket.label);assert.equal(plate.country.flagUrl,bucket.flagUrl);
- }
- assert.equal(result.plates.find(p=>p.dishId==='philadelphia_roll').country.code,'us');
- assert.equal(result.plates.find(p=>p.dishId==='greek_salad').country.code,'gr');
- assert.equal(result.plates.find(p=>p.dishId==='solyanka').country.code,'ru');
- assert.equal(JSON.stringify(attempt.variant),snapshot);
- const old=structuredClone(attempt);for(const question of old.variant.questions)for(const plate of question.storyPlates)delete plate.country;
- const before=JSON.stringify(old.variant);assert.equal(buildStoryResult(olympiad,old).plates.length,51);assert.equal(JSON.stringify(old.variant),before,'adding flags does not rewrite an old issued variant');
- attempt._storyRun.publishedAt=null;assert.doesNotMatch(JSON.stringify(buildStoryResult(olympiad,attempt)),/country|flagUrl|plates/);
-});

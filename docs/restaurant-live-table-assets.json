@@ -2,7 +2,7 @@
   "operation": "Native ImageGen photography and alpha assets; proportional WebP export only. All original pixels retained locally. No food generation during participant requests.",
   "concept": {
     "sourceFile": "exec-4480fa60-bffc-494f-a6f9-3226acca39a3.png",
-    "status": "Camera/composition explicitly accepted by user; art direction only, never used as an earned-dish image.",
+    "status": "Camera/composition explicitly accepted by user; flag decorations later rejected. Art direction only, never used as an earned-dish image.",
     "prompt": "Use case: photorealistic-natural\nAsset type: photographic art-direction concept for the interactive final table of a culinary olympiad. A NEW natural composition, not a catalog and not a mockup of pasted cutouts.\nInput Image 1 is ONLY the reference for the same male white-shirted travel guest and warm real restaurant. Do not copy its empty-table layout.\nMake a genuine believable editorial food photograph as if a professional photographer stood beside a real served restaurant table. Camera at a natural seated-diner/elevated 25-30 degree angle, three-quarter view along the table from its near right corner, less top-down. The guest sits on the left side at the far half, his face, shoulders and hands naturally visible, looking at the meal close to him with quiet pleasure. Keep his identity and white shirt. Window daylight soft and natural, wood furniture, plant-filled warm cafe background, authentic linen and understated cutlery, not an overly huge blank cloth stage.\nEIGHT realistic human-scale served dishes arranged organically at different depths, on DIFFERENT appropriate ceramic dishes, like a real shared tasting supper, not equal tiny souvenir plates and not in repeated rows. A Margherita pizza on a 28 cm white plate, truly cut into eight wedges; modest Greek salad bowl with feta, tomato/cucumber/onion/olives/olive oil/oregano; platter of eight sliced Philadelphia uramaki, salmon OUTSIDE and cream cheese/cucumber INSIDE, accompanied by separate soy sauce, ginger, wasabi; croissant, ramen, khinkali, taco, tom yum as small tasting servings further along the table. Natural perspective, actual depth of bowls, truthful contact shadows and reflected warm light. Food close to the lens appears larger because of perspective but never bigger than a human body or absurdly oversized. Let dishes relate to seated diners and place settings; no uniform gallery spacing, no isolated food thumbnails, no collage effect, no harsh cutout white edges.\nEach food has ONE VERY small realistic paper flag on a thin cocktail toothpick, physically inserted in the food or fixed to its edge. Correct flags: pizza Italy green-white-red vertical stripes; Greek salad Greece blue-white horizontal stripes and white cross on blue canton; Philadelphia US flag with blue canton and red-white stripes; croissant France blue-white-red vertical; ramen Japan white/red disc; khinkali Georgia white with red crosses; taco Mexico green-white-red with tiny central emblem; tom yum Thailand horizontal red-white-blue-white-red. Flag cloth/paper, sticks and printed graphics share the SAME lighting and camera as food. These should be tiny tasteful props and not the main visual. No floating flag icons.\nOne consistent photographic exposure and lens, 50mm editorial food photography look, full color, sharp recognizable central dishes, slightly softer restaurant background. LANDSCAPE photo fills canvas, no UI, no text, no labels, no drawings, no 3D aesthetic, no contact sheet.",
     "sourceSha256": "c148c6954d061e24c8615a26de9c03f5f115e343a22676a81b90c5c8aab4d414",
     "sourceSize": [
@@ -105,85 +105,8 @@
       "bytes": 274158,
       "sha256": "6bdd52ef5f9cff875e66236899fced55ce9ae7b77ccb87bd40f792dacec2c155",
       "mode": "RGB"
-    },
-    {
-      "key": "miniature-flag-pick",
-      "sourceFile": "exec-b33a2bc1-35d6-427a-95e9-d40fdeab77b6.png",
-      "url": "/assets/olympiad/story/v5/scenes/flag-pick.webp",
-      "prompt": "Use case: product-mockup\nAsset type: transparent photographic reusable restaurant food flag accessory, a SMALL blank white PAPER flag on a thin natural wooden toothpick.\nPrimary request: a realistic miniature serving flag to place into a food dish, photographed from the same 40 degree slightly elevated front view as restaurant food. ONE slender pale wood toothpick, pointing straight down, with one small perfectly rectangular white paper flag fixed along its upper half, extending to the right.\nComposition: square canvas, actual transparent background. Toothpick positioned on x=25% line, from y=15% to y=95%. White paper rectangle has straight clean edges and a flat front face occupying x=25% through x=85%, y=12% through y=44%; small natural paper crease and warm soft side lighting, no printed design, no border. Entire object fully visible. The paper face is nearly front-facing and rectangular so the web interface can overlay accurate country flag SVGs without deforming them. Wood grain visible but subtle, realistic thin sharp tip. Natural daylight from upper left.\nNo food, no table, no hand, no country emblem, no text, no pole base, no multiple flags, no watermarks, no 3D renderer look. Genuine transparency with clean edges and no opaque background.",
-      "review": "Native paper/wood alpha accessory individually inspected. Correct code-native licensed flag is printed on white paper, preserves flag aspect ratio; accessory failure hides only the accessory.",
-      "sourceSha256": "2065b977d18c3a420a5919ec8a7b8df7e2f00e684bdf58658d55eccf6e95ec18",
-      "sourceSize": [
-        1254,
-        1254
-      ],
-      "size": [
-        320,
-        320
-      ],
-      "bytes": 7328,
-      "sha256": "16b0666cbbc72b2a560bfe58473b4c561eb5f2426c41464393782cbb0f57e450",
-      "mode": "RGBA"
     }
   ],
-  "flagIcons": {
-    "sourceRepository": "https://github.com/lipis/flag-icons",
-    "commit": "086f7e97d657358203916dbe84f61c2bccaa81eb",
-    "license": "public/assets/olympiad/flags/LICENSE.txt",
-    "codes": [
-      "by",
-      "gr",
-      "il",
-      "lb",
-      "pl",
-      "ua",
-      "uz"
-    ],
-    "assets": [
-      {
-        "code": "by",
-        "bytes": 2078,
-        "sha256": "a1efa44ad1167d6d77abbe59ce85aa3a68ff4bd57af79454c08a3ade5c178578",
-        "sourceUrl": "https://raw.githubusercontent.com/lipis/flag-icons/086f7e97d657358203916dbe84f61c2bccaa81eb/flags/4x3/by.svg"
-      },
-      {
-        "code": "gr",
-        "bytes": 868,
-        "sha256": "a184070f7678b06777be8ac38cb05ba41829591a6dac9b64b2b72db66aec82f5",
-        "sourceUrl": "https://raw.githubusercontent.com/lipis/flag-icons/086f7e97d657358203916dbe84f61c2bccaa81eb/flags/4x3/gr.svg"
-      },
-      {
-        "code": "il",
-        "bytes": 834,
-        "sha256": "04a099ac4370b5e856f5f8d44ce0822ec47a6d3bc395a7d048d3a46d69274d68",
-        "sourceUrl": "https://raw.githubusercontent.com/lipis/flag-icons/086f7e97d657358203916dbe84f61c2bccaa81eb/flags/4x3/il.svg"
-      },
-      {
-        "code": "lb",
-        "bytes": 2770,
-        "sha256": "94b12b3f1dc43809f93516592f07bb4eb85dabbfdd6010b736f467fa64283e7f",
-        "sourceUrl": "https://raw.githubusercontent.com/lipis/flag-icons/086f7e97d657358203916dbe84f61c2bccaa81eb/flags/4x3/lb.svg"
-      },
-      {
-        "code": "pl",
-        "bytes": 215,
-        "sha256": "06687a4b90fc00195d0795aea1c26a9f73f1b6ea6a76e358724b2f1f32b7c8f4",
-        "sourceUrl": "https://raw.githubusercontent.com/lipis/flag-icons/086f7e97d657358203916dbe84f61c2bccaa81eb/flags/4x3/pl.svg"
-      },
-      {
-        "code": "ua",
-        "bytes": 234,
-        "sha256": "b7892e2bee1b25eb5407d6f5249b020dcece29ee1c9cc1a8a6a10c4f38ce6801",
-        "sourceUrl": "https://raw.githubusercontent.com/lipis/flag-icons/086f7e97d657358203916dbe84f61c2bccaa81eb/flags/4x3/ua.svg"
-      },
-      {
-        "code": "uz",
-        "bytes": 1498,
-        "sha256": "62ce6f1073416e8d3d599639ec8b105f4de167c0730f036e47c650e686c4ff5d",
-        "sourceUrl": "https://raw.githubusercontent.com/lipis/flag-icons/086f7e97d657358203916dbe84f61c2bccaa81eb/flags/4x3/uz.svg"
-      }
-    ]
-  },
   "rejectedPrototypes": [
     {
       "sourceFile": "exec-e9ad274c-2116-4d82-bc43-c911bb0ef573.png",
@@ -192,6 +115,14 @@
     {
       "sourceFile": "exec-685df5f0-79ef-4df8-be7b-2697512970f3.png",
       "status": "Linen-table background rejected, not used in final renderer or shipped."
+    }
+  ],
+  "rejectedAccessories": [
+    {
+      "sourceFile": "exec-b33a2bc1-35d6-427a-95e9-d40fdeab77b6.png",
+      "sourceSha256": "2065b977d18c3a420a5919ec8a7b8df7e2f00e684bdf58658d55eccf6e95ec18",
+      "prompt": "Use case: product-mockup\nAsset type: transparent photographic reusable restaurant food flag accessory, a SMALL blank white PAPER flag on a thin natural wooden toothpick.\nPrimary request: a realistic miniature serving flag to place into a food dish, photographed from the same 40 degree slightly elevated front view as restaurant food. ONE slender pale wood toothpick, pointing straight down, with one small perfectly rectangular white paper flag fixed along its upper half, extending to the right.\nComposition: square canvas, actual transparent background. Toothpick positioned on x=25% line, from y=15% to y=95%. White paper rectangle has straight clean edges and a flat front face occupying x=25% through x=85%, y=12% through y=44%; small natural paper crease and warm soft side lighting, no printed design, no border. Entire object fully visible. The paper face is nearly front-facing and rectangular so the web interface can overlay accurate country flag SVGs without deforming them. Wood grain visible but subtle, realistic thin sharp tip. Natural daylight from upper left.\nNo food, no table, no hand, no country emblem, no text, no pole base, no multiple flags, no watermarks, no 3D renderer look. Genuine transparency with clean edges and no opaque background.",
+      "status": "Removed at explicit user request on 2026-10-12; not part of the released scene."
     }
   ]
 }

@@ -8,8 +8,6 @@
 .story-banquet-serving .story-dish-hit{position:absolute;inset:0;clip-path:ellipse(46% 32% at 50% 50%);pointer-events:auto}
 .story-banquet-serving .story-serving-image{display:block;width:100%;height:100%;max-width:none;object-fit:contain;filter:drop-shadow(0 2px 1px #271b1040);transition:filter .16s}
 .story-banquet-serving span{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.story-banquet-serving .story-dish-flag{position:absolute!important;display:block;left:42%;bottom:48%;width:22%;height:auto;aspect-ratio:1;margin:0;overflow:visible;clip:auto;transform:rotate(-5deg);pointer-events:none;z-index:1}
-.story-flag-pick{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}.story-flag-print{position:absolute;left:25%;top:12%;width:56%;height:33%;object-fit:contain;mix-blend-mode:multiply}.story-banquet-serving .story-dish-flag[hidden]{display:none}
 .story-banquet-serving:after{content:attr(data-title);display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);max-width:200px;width:max-content;padding:8px 12px;border-radius:6px;background:#163e37;color:white;font:500 13px/1.35 system-ui,sans-serif;pointer-events:none;box-shadow:0 3px 12px #0002}
 .story-banquet-serving:hover{transform:translate(-50%,-50%);background:none}.story-banquet-serving:hover .story-serving-image{filter:drop-shadow(1px 4px 3px #48332255)}.story-banquet-serving:hover:after,.story-banquet-serving:focus-visible:after{display:block}.story-banquet-serving:hover,.story-banquet-serving:focus-visible{z-index:200!important}
 .story-banquet-serving:focus-visible{outline:3px solid #147568;outline-offset:1px;border-radius:50%}
