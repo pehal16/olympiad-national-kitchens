@@ -23,11 +23,16 @@ async function main(){
   // Probe the exact start route without valid participant data. Fresh deployment
   // hosts can expose metadata before their POST routes have propagated. These
   // readiness probes never create attempts and are outside measured traffic.
-  let startReady=false;
-  for(let i=0;i<18;i++){
+  const normalized=text=>text.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n');
+  const expectedClient=normalized(fs.readFileSync('public/story-banquet.js','utf8'));
+  let startReady=false,consecutive=0;
+  for(let i=0;i<30;i++){
     const r=await fetch(base+'/api/public/attempts/start',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
-    if(/application\/json/.test(r.headers.get('content-type')||'')&&[400,403].includes(r.status)){startReady=true;break;}
-    await r.text();await new Promise(resolve=>setTimeout(resolve,5000));
+    const valid=/application\/json/.test(r.headers.get('content-type')||'')&&[400,403].includes(r.status);await r.text();
+    const client=await fetch(base+'/story-banquet.js?rehearsal='+process.env.GITHUB_SHA);
+    consecutive=valid&&client.ok&&normalized(await client.text())===expectedClient?consecutive+1:0;
+    if(consecutive===4){startReady=true;break;}
+    await new Promise(resolve=>setTimeout(resolve,5000));
   }
   assert.ok(startReady,'Fresh preview start route did not propagate');
   await new Promise(resolve=>setTimeout(resolve,30000));
