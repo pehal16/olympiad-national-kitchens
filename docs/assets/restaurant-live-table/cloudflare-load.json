@@ -1,0 +1,30 @@
+[
+  {
+    "environment": "Cloudflare Pages preview / separate D1",
+    "entryMode": "anytime",
+    "participants": 50,
+    "answers": 1800,
+    "conditionVersion": 4,
+    "dialogueVersion": 2,
+    "frozenDialoguesVerified": 1800,
+    "errors": 0,
+    "lostAnswers": 0,
+    "duplicateAnswers": 0,
+    "answerP95Ms": 706,
+    "timestamp": "2026-10-12T16:11:31.114Z"
+  },
+  {
+    "environment": "Cloudflare Pages preview / separate D1",
+    "entryMode": "scheduled",
+    "participants": 60,
+    "answers": 2160,
+    "conditionVersion": 4,
+    "dialogueVersion": 2,
+    "frozenDialoguesVerified": 2160,
+    "errors": 0,
+    "lostAnswers": 0,
+    "duplicateAnswers": 0,
+    "answerP95Ms": 975,
+    "timestamp": "2026-10-12T16:12:10.133Z"
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "base": "https://olympiad-gkts.pages.dev",
+  "checkedAt": "2026-10-12T16:21:05.699Z",
+  "files": [
+    {
+      "file": "public/story-banquet.js",
+      "bytes": 2473,
+      "sha256": "d353fc6df47ac23d56261755c8fa181807bb83f25695329aa186dd008f3ccbf8"
+    },
+    {
+      "file": "public/assets/olympiad/story/v5/scenes/banquet-approved-no-flags.webp",
+      "bytes": 282590,
+      "sha256": "16e4f0b21bd7b5492b9e15734fb1385c74ff503587b6e90992e4643195c9c177"
+    },
+    {
+      "file": "public/story-banquet.css",
+      "bytes": 1856,
+      "sha256": "375bbf64660817f3f2bf48e77dd0d8b6770bf15c1eb503dbf782ebf9556dd0c9"
+    },
+    {
+      "file": "public/olympiad-story.js",
+      "bytes": 23442,
+      "sha256": "0707bb76720e445e7207df77ae95da360f0074091250075c545c45b524a7b270"
+    },
+    {
+      "file": "public/index.html",
+      "bytes": 17379,
+      "sha256": "bc74daf1a196629f865969e949809be25a41e845b716b2d7314460ad060ce426"
+    },
+    {
+      "file": "public/sw.js",
+      "bytes": 3162,
+      "sha256": "ef9074e65feb50ec18e354ea5086ae532ed508b2d1996eedeeadcc31027ec23e"
+    }
+  ],
+  "ok": true
+}
