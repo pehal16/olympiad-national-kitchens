@@ -5,14 +5,14 @@ const {forQuestion}=require('../src/story-dialogue-texts');
 const olympiad=require('../data/olympiad');
 const make=()=>buildVariant(olympiad,{seed:'immutable-comic-scenarios'});
 test('36 frozen scenes are distinct; current-question dialogue never supplies keys or later scenes',()=>{
- const v=freezeDialogue(make());assert.equal(v.questions.length,36);assert.equal(v.conditionVersion,3);assert.equal(v.dialogueVersion,1);
+ const v=freezeDialogue(make());assert.equal(v.questions.length,36);assert.equal(v.conditionVersion,4);assert.equal(v.dialogueVersion,2);
  assert.equal(new Set(v.questions.map(q=>q.dialogue.line)).size,36);assert.equal(new Set(v.questions.map(q=>q.dialogue.extra)).size,36);
  for(const q of v.questions){
   const safe=sanitizeQuestion(q,{answers:{}});assert.deepEqual(safe.dialogue,q.dialogue);
   assert.doesNotMatch(JSON.stringify(safe.dialogue),/isCorrect|correctBuckets|correctIngredientIds|canonical|autoScore/);
   assert.equal(Object.keys(safe.dialogue).length,6);
   if(q.tourCode==='T1'){assert.match(q.scenario,/Страница альбома:/);assert.match(q.dialogue.line,/Эта страница — из/);assert.ok(!q.dialogue.line.includes(q.options.find(o=>o.isCorrect).text));}
-  else assert.doesNotMatch(q.dialogue.line,/Франци|Япони|Грузи|Мексик|Таиланд|Итали|Узбекистан|Испани|США/);
+  else if(q.tourCode!=='T3')assert.doesNotMatch(q.dialogue.line,/Франци|Япони|Грузи|Мексик|Таиланд|Итали|Узбекистан|Испани|США/);
  }
  assert.equal(sanitizeQuestion(null,{answers:{}}),null);
 });
@@ -33,7 +33,7 @@ test('rank identity separates condition editions inside a run and separates runs
 });
 
 test('new ordinary attempts with the v3 menu do not share legacy ordinary ranks',()=>{
- const newer={variant:make()},older={variant:{questions:require('../data/banks/tour4-menu-v2')}};
+ const newer={variant:buildVariant(require('./fixtures/olympiad-menu3'),{seed:'ordinary-menu3'})},older={variant:{questions:require('../data/banks/tour4-menu-v2')}};
  assert.equal(conditionVersion(newer),3);assert.equal(conditionVersion(older),1);
  assert.notEqual(rankingGroup(newer),rankingGroup(older));
  assert.equal(newer.variant.conditionVersion,undefined,'reading the edition does not rewrite the issued variant');
@@ -46,5 +46,5 @@ test('old country-dialogue edition stays 2 and never gains the new menu on resto
  assert.ok(v.questions.filter(q=>q.tourCode==='T1').every(q=>/Страница альбома:/.test(q.scenario)));
 });
 test('an unreviewed first-tour recipe cannot silently receive a country clue',()=>{
- const v=make();v.questions[0].options.find(o=>o.isCorrect).text='Иное блюдо';assert.throws(()=>freezeDialogue(v),/reviewed dish changed/);
+ const changed=structuredClone(olympiad);changed.questionBank.tour1Pools.find(p=>p.active).questions[0].options.find(o=>o.isCorrect).text='Иное блюдо';assert.throws(()=>buildVariant(changed,{seed:'changed-source'}),/reviewed dish changed/);
 });

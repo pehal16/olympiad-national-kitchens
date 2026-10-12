@@ -1,6 +1,6 @@
 (function(root){
   'use strict';
-  const prefixes=['/assets/olympiad/tour1/','/assets/olympiad/tour2/','/assets/olympiad/tour3/','/assets/olympiad/tour4/','/assets/olympiad/tour5/photo-v4/','/assets/olympiad/tour5/service/','/assets/olympiad/story/layout-v2/scenes/'];
+  const prefixes=['/assets/olympiad/story/v1/plates/','/assets/olympiad/story/v3/plates/','/assets/olympiad/story/v4/plates/','/assets/olympiad/tour1/','/assets/olympiad/tour2/','/assets/olympiad/tour3/','/assets/olympiad/tour4/','/assets/olympiad/tour5/photo-v4/','/assets/olympiad/tour5/service/','/assets/olympiad/story/layout-v2/scenes/'];
   function displayUrl(url,role='preview'){
     if(typeof url!=='string'||!prefixes.some(p=>url.startsWith(p))||!url.endsWith('.webp'))return url;
     return '/assets/olympiad/display-v1/'+role+url.slice('/assets/olympiad'.length);

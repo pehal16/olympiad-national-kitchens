@@ -1,6 +1,6 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
-const menu=require('../data/banks/tour4-menu-v3.json'),bank=require('../data/banks/tour4'),oldBank=require('../data/banks/tour4-menu-v2'),olympiad=require('../data/olympiad');
+const menu=require('../data/banks/tour4-menu-v3.json'),bank=require('../data/banks/tour4-menu-v3'),oldBank=require('../data/banks/tour4-menu-v2'),olympiad=require('./fixtures/olympiad-menu3');
 const {buildVariant,sanitizeQuestion}=require('../src/variant');
 const {freezeStoryVariant,buildStoryResult}=require('../src/story-result');
 const {makeRun}=require('../src/story-runs');

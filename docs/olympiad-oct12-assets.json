@@ -1,0 +1,85 @@
+{
+  "operation": "Native imagegen, one image per call; proportional WebP exports; source originals retained",
+  "assets": [
+    {
+      "key": "fondue",
+      "prompt": "Use case: photorealistic-natural. Asset: 3:2 landscape educational restaurant food photograph. A modest Swiss cheese fondue serving: round matte ivory caquelon with side handle containing smooth pale golden melted cheese, on a small black tabletop warmer stand. Small ivory bowl of crusty bread cubes beside it; one thin fondue fork rests naturally at the side with one cube dipped in cheese visible. Whole vessels fully inside frame, realistic scale, 40-degree camera angle, natural side-window light, warm pale stone surface. No flags, country symbols, lettering, watermark, hands, people, wine bottles, extra side dishes or meat. Natural photographic food and cheese texture, no cartoon or 3D render.",
+      "url": "/assets/olympiad/tour2/t2-active-47.webp",
+      "sourceFile": "exec-4259117a-c675-4df5-81c4-afbc63bc9966.png",
+      "sourceSha256": "7edf4260dc237b2fcd15f852a87ff27634d8848997257ddfdac065521e8941ec",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "size": [
+        900,
+        600
+      ],
+      "sha256": "ddfa285fdc665f9af8b33a7758135846edb49a4a930a2481b6cd80ddc52c7919",
+      "bytes": 80920,
+      "alpha": false,
+      "reviewedAt": "2026-10-12",
+      "review": "Individually viewed: recognizable ingredients, natural food textures, matching declared recipe; alpha vessels fitted entirely for earned plates. Browser review follows."
+    },
+    {
+      "key": "solyanka_case",
+      "prompt": "Use case: scientific-educational food photography, landscape 3:2. Ingredients and preparation mise en place for a mixed meat solyanka soup, NOT a finished soup. On neutral pale warm stone work surface: small separated ivory bowls with strips of cooked pork, slices of cooked-smoked sausage and darker smoked sausage, sliced pickled cucumbers, chopped onion, thick tomato paste; black olives in a tiny bowl, sliced lemon, small cup of sour cream. A modest steel saucepan of plain clear broth in the background. A few chopped meat strips on a simple wooden board show preparation. Entire ingredients and cookware visible, side daylight, natural kitchen proportions, camera 40 degrees above surface, textures realistic. No completed red soup, no potato, cabbage, beetroot, chickpeas, rice, eggs, cheese, text, flags, hands, faces, watermark or decorative national items. No cartoon/3D.",
+      "url": "/assets/olympiad/tour3/t3-case-10-v4.webp",
+      "sourceFile": "exec-9fcdf194-cfd9-4cdc-bab4-dc2010e6d97c.png",
+      "sourceSha256": "0be12392afddbe07c2acb1a70f44fa7666bc8baa5e5808d09687d3c7dbc7cd26",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "size": [
+        900,
+        600
+      ],
+      "sha256": "be446f0f3a29371ce15fdb205c301f85318facd10505ce04bb389185362b6036",
+      "bytes": 109376,
+      "alpha": false,
+      "reviewedAt": "2026-10-12",
+      "review": "Individually viewed: recognizable ingredients, natural food textures, matching declared recipe; alpha vessels fitted entirely for earned plates. Browser review follows."
+    },
+    {
+      "key": "fondue_plate",
+      "prompt": "Edit target: this cheese fondue photo. Remove the stone background and isolate the complete ivory cheese fondue pot, black warmer stand, little bread-cube bowl, and fondue fork with its dipped cube on true transparent alpha. Keep the exact food, vessel colors, viewpoint and light. Zoom out and reconstruct the cropped right handle and fork end so EVERY object is fully inside frame with 8% transparent margin on all sides. No new food, people, text, flags, background gradients or outside shadow. Natural photographic cutout; zero alpha outside the objects.",
+      "url": "/assets/olympiad/story/v4/plates/plate-2e885680994d.webp",
+      "sourceFile": "exec-266d3967-bfbb-4cfd-8efc-7907f69c8c71.png",
+      "sourceSha256": "2e885680994d0d63e7f8262998377e737ac90afd682ffbdd101c6e97d111a674",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "size": [
+        1200,
+        800
+      ],
+      "sha256": "59f48832b5921a69ccea2e1ed67501ded7ff070aba0b903c33c3b8a9190aafe2",
+      "bytes": 102052,
+      "alpha": true,
+      "reviewedAt": "2026-10-12",
+      "review": "Individually viewed: recognizable ingredients, natural food textures, matching declared recipe; alpha vessels fitted entirely for earned plates. Browser review follows."
+    },
+    {
+      "key": "solyanka_plate",
+      "prompt": "Edit target: this actual mixed meat solyanka soup photo. Isolate precisely the complete soup bowl and adjacent rye bread as a photorealistic cutout with true transparent alpha. Preserve exactly the reddish broth, mixed meat, pickles, black/green olives, lemon slice and sour cream, same ivory bowl and angle, light and texture. Fit the entire bowl and bread with at least 6% transparent margin on each edge. Remove stone surface, window and all background. No added food, person, letters, flags, rectangle, backdrop gradient or outside cast shadow.",
+      "url": "/assets/olympiad/story/v4/plates/plate-da3cd506b167.webp",
+      "sourceFile": "exec-ee8058ab-0e22-4fbe-9446-b6f995b79e1d.png",
+      "sourceSha256": "da3cd506b1678d5706a14bc217927231e54e1c442611530c58f266cdaa54147c",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "size": [
+        1200,
+        800
+      ],
+      "sha256": "e92ae68a44cdba564333210919f7188620550039703967237a3e0d3f76a82c9c",
+      "bytes": 139006,
+      "alpha": true,
+      "reviewedAt": "2026-10-12",
+      "review": "Individually viewed: recognizable ingredients, natural food textures, matching declared recipe; alpha vessels fitted entirely for earned plates. Browser review follows."
+    }
+  ]
+}

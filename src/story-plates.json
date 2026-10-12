@@ -382,5 +382,19 @@
     "description": "Тонкие медовые коржи, прослоенные сметанным кремом и выдержанные для пропитки; сверху крошка коржей.",
     "imageUrl": "/assets/olympiad/story/v3/plates/t4-menu-v3-2a67bcd9dc19.webp",
     "menuVersion": 3
+  },
+  {
+    "id": "cheese_fondue",
+    "title": "Сырное фондю",
+    "source": "/assets/olympiad/tour2/t2-active-47.webp",
+    "description": "Расплавленный сыр в какелоне с хлебными кубиками.",
+    "imageUrl": "/assets/olympiad/story/v4/plates/plate-2e885680994d.webp"
+  },
+  {
+    "id": "solyanka",
+    "title": "Солянка",
+    "source": "/assets/olympiad/tour4/t4-menu-v3-3e3cba5b4f90.webp",
+    "description": "Сборная мясная солянка с копчёностями, солёным огурцом и томатом; лимон, маслины и сметана для подачи.",
+    "imageUrl": "/assets/olympiad/story/v4/plates/plate-da3cd506b167.webp"
   }
 ]

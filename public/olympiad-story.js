@@ -44,7 +44,7 @@
       'Пожелания компании: восемь заказов. Прочитайте все условия и выберите одну из четырёх готовых подач. За подходящую подачу — 4 балла; 10 минут, максимум 32.',
       'Финальная кухня: три блюда. Выберите ровно четыре компонента для указанной версии рецепта, выполните показанные действия и нажмите «Подать». Каждый верный компонент — 4 балла, максимум 16 за блюдо; 15 минут, максимум 48.',
       'Соевый соус, имбирь и васаби сопровождают подачу роллов. Их выбирать не нужно; они не влияют на баллы.',
-      'После подтверждения вернуться к заданию нельзя. Ошибки не дают штрафных баллов. По истечении лимита тура открывается следующий; при общем лимите 45 минут попытка завершается. Неподтверждённый выбор не считается ответом.',
+      'После подтверждения вернуться к заданию нельзя. В новой редакции каждому заданию отведено отдельное время: фото — 36 секунд; блок карты — 72 секунды; название — 48 секунд; заказ — 75 секунд; сборка — 5 минут. Таймер продолжает идти при перезагрузке и уходе из окна. По истечении времени открывается следующее задание, неподтверждённый черновик не отправляется автоматически. Общий предел — 45 минут. Ранее начатые попытки сохраняют прежние лимиты.',
       'Сюжет не добавляет баллов. Сразу после личного завершения можно открыть свидетельство с набранными баллами из 150. Правильные ответы не показываются. Персональный стол, реакции гостя и общие итоги открываются после публикации организатором.'
     ])guide.append(el('p','',text));doc.getElementById('rules-details').append(guide);
     }
@@ -170,29 +170,7 @@
     doc.getElementById('result-subtitle').textContent='В меню — заработанные подачи. Нажмите на блюдо, чтобы посмотреть свой сохранённый ответ. Правильные ответы не показываются.';
     const notice=el('p','story-publish-notice','Общие итоги опубликованы.');notice.setAttribute('role','status');resultMount.append(notice);
     const facts=el('div','story-result-facts');facts.append(el('strong','',`Блюд в меню: ${data.plates.length} из ${data.collectionMax}`),el('strong','',`Баллы: ${data.summary.totalFinalScore} из ${data.summary.totalMaxScore}`));resultMount.append(facts);
-    if(!session.story.decorationsDisabled){
-      const viewport=el('div','story-table');viewport.classList.toggle('is-compact',data.plates.length<=3);viewport.tabIndex=0;viewport.setAttribute('aria-label','Дегустационный стол. Стрелки влево и вправо перемещают подачи.');
-      const track=el('div','story-table-track');viewport.append(track);
-      const mobile=root.matchMedia('(max-width: 600px)'),pageSize=()=>mobile.matches?2:6;
-      const guest=image(base+'table-guest.webp','Гость смотрит на еду перед собой','story-table-guest');track.append(guest);
-      const items=el('div','story-table-items');track.append(items);
-      for(const p of data.plates){let b; b=button('',()=>showPlate(p,b),'story-serving');b.setAttribute('aria-label',p.title);const photo=el('img','story-serving-image');photo.dataset.src=p.imageUrl||'';photo.alt=p.imageAlt||p.title;photo.decoding='async';photo.addEventListener('error',()=>{photo.hidden=true;});b.append(photo,el('span','',p.title));items.append(b);}
-      if(!data.plates.length)items.append(el('p','story-empty','В этом меню пока нет заработанных подач. Набранные баллы указаны в вашем свидетельстве.'));
-      let page=0;
-      const previous=arrow(-1,()=>move(-1)),next=arrow(1,()=>move(1)),position=el('p','story-table-position');
-      function layout(){const size=pageSize(),pages=Math.max(1,Math.ceil(data.plates.length/size));page=Math.min(page,pages-1);const width=viewport.clientWidth;guest.style.width=`${width}px`;
-        const slots=Math.min(size,Math.max(data.plates.length,1));
-        track.style.width=`${pages*100}%`;items.style.gridTemplateColumns=`repeat(${Math.max(data.plates.length,1)}, ${width/slots}px)`;
-        for(let i=0;i<items.children.length;i++){const node=items.children[i];node.inert=i<page*size||i>=(page+1)*size;const photo=node.querySelector('img[data-src]');if(photo&&i>=page*size&&i<(page+1)*size&&photo.dataset.src){photo.src=photo.dataset.src;delete photo.dataset.src;}}
-        track.style.transform=`translateX(${-page*width}px)`;previous.disabled=page===0;next.disabled=page===pages-1;position.textContent=data.plates.length?`Подачи ${page*size+1}–${Math.min((page+1)*size,data.plates.length)} из ${data.plates.length}`:'Пустое меню';
-      }
-      function move(direction){page=Math.max(0,Math.min(Math.max(0,Math.ceil(data.plates.length/pageSize())-1),page+direction));layout();}
-      viewport.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();move(event.key==='ArrowRight'?1:-1);}});
-      let pointer=null;viewport.addEventListener('pointerdown',e=>{pointer=e.clientX;});viewport.addEventListener('pointerup',e=>{if(pointer!==null&&Math.abs(e.clientX-pointer)>45)move(e.clientX<pointer?1:-1);pointer=null;});
-      const nav=el('div','story-table-nav');nav.append(previous,position,next);resultMount.append(viewport,nav);
-      const observer=new ResizeObserver(layout);observer.observe(viewport);requestAnimationFrame(layout);
-      resultMount._resizeObserver?.disconnect();resultMount._resizeObserver=observer;
-    }
+    if(!session.story.decorationsDisabled&&root.StoryBanquet)resultMount.append(root.StoryBanquet.render(data,showPlate));
     const list=el('details','story-plate-list'),summary=el('summary','','Все подачи');list.append(summary);
     const filter=el('input','story-search');filter.type='search';filter.placeholder='Найти блюдо';filter.setAttribute('aria-label','Поиск среди заработанных подач');list.append(filter);
     const rows=el('ul','story-plate-rows');

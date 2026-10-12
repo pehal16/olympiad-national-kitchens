@@ -18,6 +18,7 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
   const id=await page.evaluate(()=>state.attempt.id),variant=(await store.loadAttemptById(id)).variant;
   for(let i=0;i<36;i++){
    const q=variant.questions[i],answer=correct(q);await page.waitForFunction(qid=>state.attempt.currentQuestion?.id===qid,q.id);await recover();
+   assert.ok((await page.evaluate(()=>state.attempt.timing.questionRemainingMs))>0,'question clock is active');
    const chapter=Number(await page.locator('#attempt-section').getAttribute('data-chapter'));
    assert.equal(await page.locator('.story-guest-line').innerText(),q.dialogue.line,'issued dialogue');
    assert.equal(await page.locator('.story-narrator-portrait').count(),1);
@@ -160,18 +161,18 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
   await page.locator('.story-kitchen-review summary').click();
   assert.equal(await page.getByRole('button',{name:'Посмотреть подачу и реакцию'}).count(),3,'collapsed kitchen still exposes all saved servings');
   await page.locator('.story-kitchen-review summary').click();
-  await page.waitForFunction(()=>[...document.querySelectorAll('.story-table img')].every(i=>i.complete));
+  await page.waitForFunction(()=>[...document.querySelectorAll('.story-banquet img')].every(i=>i.complete&&i.naturalWidth>0&&!i.hidden));
   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:path.join(output,'table-51.png'),fullPage:true});
   for(const width of [320,390,768,1366]){
    await page.setViewportSize({width,height:900});
-   await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);
-   const size=width<=600?2:6;
-   await page.getByRole('button',{name:'Следующие подачи',exact:true}).click();
-   assert.equal(await page.locator('.story-table-position').innerText(),`Подачи ${size+1}–${size*2} из 51`,'table page size responds to viewport');
-   await page.getByRole('button',{name:'Предыдущие подачи',exact:true}).click();
+   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'banquet has no horizontal overflow');
+   assert.equal(await page.locator('.story-serving').count(),51,'all earned plates share one table');
+   assert.equal(await page.locator('.story-serving[inert]').count(),0,'no table page hides plates');
+   assert.equal(await page.getByRole('button',{name:'Следующие подачи',exact:true}).count(),0);
    await page.locator('.story-serving').first().click();
    await page.locator('.story-dish-dialog').getByRole('button',{name:'Закрыть',exact:true}).click();
-   assert.equal(await page.locator('.story-serving').first().evaluate(n=>n===document.activeElement),true,'table detail returns focus to its plate');
+   assert.equal(await page.locator('.story-serving').first().evaluate(n=>n===document.activeElement),true);
+   await page.locator('.story-banquet').screenshot({path:path.join(output,'banquet-51-'+width+'.png'),animations:'disabled'});
   }
   await page.setViewportSize({width:1366,height:900});
   await page.locator('.story-plate-list summary').click();
@@ -185,7 +186,7 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
   }
   await page.locator('.story-plate-list summary').click();
   checks.push('T4: all eight new earned plates load in the published table detail and restore focus');
-  checks.push('Published table: responsive navigation, plate detail and source focus at 320/390/768/1366');
+  checks.push('Published banquet: all 51 plates, no paging or inert dishes, detail and source focus at 320/390/768/1366');
   await page.locator('#certificate-section').waitFor();assert.equal(await page.locator('#result-section').evaluate(n=>n.lastElementChild.id),'certificate-section','certificate is the final result section');
   assert.equal(await page.getByText('Разбор всех ответов',{exact:true}).count(),0);
   await page.reload();await page.locator('.story-publish-notice').waitFor();

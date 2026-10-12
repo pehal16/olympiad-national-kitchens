@@ -2,6 +2,7 @@
   'use strict';
   // Geographical display only. No dish associations or marking keys.
   const locations={it:[12.5,42.8],fr:[2.2,46.5],at:[14.5,47.6],gb:[-2,54],jp:[138,37],kr:[128,36],vn:[106,16],th:[101,15],pt:[-8,39.5],es:[-4,40],be:[4.5,50.5],ru:[60,58],cn:[104,35],ge:[43.5,42],hu:[19,47],us:[-98,39],mx:[-102,24]};
+  locations.ch=[8.2,46.8];
   const project=([lon,lat])=>[(lon+180)/360*1000,(85-lat)/145*500];
   const slots=[[220,95],[780,95],[220,390],[780,390]];
   function coordinates(country){const code=(country.flagUrl||'').match(/\/([a-z]{2})\.svg$/)?.[1];return locations[code]?project(locations[code]):[500,250];}

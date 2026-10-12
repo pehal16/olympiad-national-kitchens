@@ -816,7 +816,10 @@ function buildVariant(olympiad, options = {}) {
       continue;
     }
 
-    return {
+    const questionClock=flatQuestions.some(q=>q.tourCode==='T4'&&q.menuVersion===4);
+    if(questionClock)for(const q of flatQuestions){const tour=tours.find(t=>t.id===q.tourId);q.timeLimitSeconds=tour.timeLimitMinutes*60/tour.questionCount;}
+    const variant={
+      ...(questionClock?{questionTimingVersion:1,conditionVersion:4}:{}),
       schemaVersion: olympiad.schemaVersion || 2,
       blueprintVersion: olympiad.blueprintVersion || olympiad.schemaVersion || 2,
       seed,
@@ -835,6 +838,7 @@ function buildVariant(olympiad, options = {}) {
           ])
       )
     };
+    return questionClock?require('./story-dialogue').freezeDialogue(variant):variant;
   }
 
   throw new Error("Не удалось собрать вариант олимпиады с заданными ограничениями.");

@@ -2052,7 +2052,9 @@ function saveTimingSnapshot(attempt) {
   state.timingSnapshot = {
     syncedAt: Date.now(),
     totalRemainingMs: attempt.timing ? attempt.timing.totalRemainingMs : 0,
-    tourRemainingMs: attempt.timing ? attempt.timing.tourRemainingMs : 0
+    tourRemainingMs: attempt.timing ? attempt.timing.tourRemainingMs : 0,
+    questionRemainingMs: attempt.timing?.questionRemainingMs ?? null,
+    questionLimitSeconds: attempt.timing?.questionLimitSeconds ?? null
   };
 }
 
@@ -3228,6 +3230,9 @@ function describeAttemptTransition(previousAttempt, nextAttempt) {
   if (!nextAttempt) {
     return "";
   }
+  if(previousAttempt?.timing?.questionLimitSeconds&&previousAttempt.currentStepIndex!==nextAttempt.currentStepIndex&&nextAttempt.progress.answeredCount===previousAttempt.progress.answeredCount){
+    return nextAttempt.status==='in_progress'?'Время на задание истекло. Неподтверждённый ответ не записан; открыто следующее задание.':'Время завершилось. Неподтверждённые ответы не записаны; ранее сохранённые ответы учтены.';
+  }
 
   if (!previousAttempt && nextAttempt.status === "in_progress" && nextAttempt.currentTour) {
     return `Старт ${nextAttempt.currentTour.code}: маршрут открыт, можно отвечать.`;
@@ -3340,12 +3345,16 @@ function updateTimers() {
   const tourRemaining = Math.max(0, state.timingSnapshot.tourRemainingMs - elapsed);
 
   elements.timerTotal.textContent = formatTime(totalRemaining);
-  elements.timerTour.textContent = formatTime(tourRemaining);
+  const hasQuestionClock=state.timingSnapshot.questionRemainingMs!==null;
+  const questionRemaining=hasQuestionClock?Math.max(0,state.timingSnapshot.questionRemainingMs-elapsed):null;
+  elements.timerTourBox.querySelector('span').textContent=hasQuestionClock?'На это задание':'Лимит текущего тура';
+  elements.timerTour.textContent = formatTime(hasQuestionClock?questionRemaining:tourRemaining);
   toneTimerBox(elements.timerTotalBox, totalRemaining);
   toneTimerBox(elements.timerTourBox, tourRemaining);
+  if(hasQuestionClock){elements.timerTourBox.classList.toggle('critical',questionRemaining<=5000);elements.timerTourBox.classList.toggle('warning',questionRemaining>5000&&questionRemaining<=15000);}
   updateExamCockpit();
 
-  if ((totalRemaining === 0 || tourRemaining === 0) && !state.syncingAfterTimeout) {
+  if ((totalRemaining === 0 || tourRemaining === 0 || questionRemaining === 0) && !state.syncingAfterTimeout) {
     state.syncingAfterTimeout = true;
     const selectedGuestDraft = state.attempt?.currentQuestion?.interactionMode === "guest_order" &&
       hasMeaningfulAnswer(state.questionController?.getAnswer?.()) && !state.isSubmittingAnswer && !state.isFinishingAttempt;
@@ -3353,7 +3362,7 @@ function updateTimers() {
       state.questionController?.isComplete?.() && !state.isSubmittingAnswer && !state.isFinishingAttempt && !state.isSelectingDish;
     // Flush this exact scoped choice through the existing queue. Server deadlines
     // still decide acceptance; a rejected late choice must never be called saved.
-    (selectedGuestDraft || completeKitchenDraft ? submitAnswer() : syncAttempt(true)).finally(() => {
+    (!hasQuestionClock&&(selectedGuestDraft || completeKitchenDraft) ? submitAnswer() : syncAttempt(true)).finally(() => {
       state.syncingAfterTimeout = false;
     });
   }
@@ -3755,7 +3764,7 @@ async function submitAnswer() {
       throw new Error("Сервер не подтвердил сохранение ответа. Повторите отправку.");
     }
     if (data.answerReceipt?.saved === false) {
-      setAttemptSaveStatus(answerPayload.dishId ? "Лимит времени истёк. Блюдо не записано." : "Лимит времени истёк. Заказ не записан.", "warning");
+      setAttemptSaveStatus(answerPayload.dishId ? "Лимит времени истёк. Блюдо не записано." : "Лимит времени истёк. Ответ не записан.", "warning");
       setAttemptSyncMeta("Сервер подтвердил переход, но не сохранение этого ответа.");
       return;
     }

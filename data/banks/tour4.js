@@ -1,10 +1,10 @@
 "use strict";
 
 // Menu revision is frozen into each issued question; v2 snapshots stay unchanged.
-const menu = require('./tour4-menu-v3.json');
+const menu = require('./tour4-menu-v4.json');
 module.exports = menu.orders.map(({ style, text, dishes }, index) => ({
   id: `T4-${String(index + 1).padStart(2, "0")}`,
-  type: "single_choice", interactionMode: "guest_order", presentationVersion: 1, menuVersion: 3,
+  type: "single_choice", interactionMode: "guest_order", presentationVersion: 1, menuVersion: 4,
   prompt: `Заказ гостя № ${index + 1}`, maxScore: 4,
   cuisine: "mixed", cuisineGroup: "general",
   dishId: dishes[0].id, dishIds: dishes.map(({ id }) => id),

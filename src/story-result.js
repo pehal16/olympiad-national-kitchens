@@ -18,7 +18,7 @@ function freezeStoryVariant(variant,run) {
     else if(q.type==='single_choice') {
       const correct=q.options.find(o=>o.isCorrect);
       q.storyPlates=[plateFor(correct.menuDishId||q.dishId||q.sourceId,correct.text,
-        correct.description||`На фотографии изображено блюдо «${correct.text}».`)];
+        correct.description||`На фотографии изображено блюдо «${correct.text}».`,correct.description)];
     } else if(q.type==='final_kitchen') {
       const dish=q.dishes[0]; q.storyPlates=[plateFor(dish.dishId||q.dishKey,dish.title,
         `${dish.variantLabel}. Состав: ${dish.items.filter(i=>dish.correctIngredientIds.includes(i.id)).map(i=>i.text).join(', ')}.`,dish.variantLabel)];

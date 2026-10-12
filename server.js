@@ -472,7 +472,7 @@ function getQuestionLog(attempt, questionId) {
   return attempt.questionLog[questionId];
 }
 
-function markQuestionPresented(attempt) {
+function markQuestionPresented(attempt, availableAt = nowIso()) {
   const question = getCurrentQuestion(attempt);
   if (!question) {
     return;
@@ -481,6 +481,7 @@ function markQuestionPresented(attempt) {
   const entry = getQuestionLog(attempt, question.id);
   if (!entry.presentedAt) {
     entry.presentedAt = nowIso();
+    if(require('./src/question-clock').enabled(attempt))entry.availableAt=availableAt;
     entry.sourceId = question.sourceId;
     entry.tourId = question.tourId;
     entry.optionOrder = Array.isArray(question.options)
@@ -492,11 +493,11 @@ function markQuestionPresented(attempt) {
   }
 }
 
-function startTourIfNeeded(attempt, tour) {
+function startTourIfNeeded(attempt, tour, startedAt = nowIso()) {
   attempt.tourStates = attempt.tourStates || {};
   if (!attempt.tourStates[tour.id]) {
     attempt.tourStates[tour.id] = {
-      startedAt: nowIso(),
+      startedAt,
       finishedAt: null
     };
   }
@@ -527,7 +528,8 @@ function getTiming(attempt) {
 
   return {
     totalRemainingMs,
-    tourRemainingMs
+    tourRemainingMs,
+    ...require('./src/question-clock').timing(attempt,getCurrentQuestion(attempt),currentTour,now)
   };
 }
 
@@ -689,6 +691,27 @@ function normalizeAttemptState(olympiad, attempt) {
   }
 
   startTourIfNeeded(attempt, currentTour);
+
+  if(require('./src/question-clock').enabled(attempt)){
+    markQuestionPresented(attempt);
+    while(attempt.status==='in_progress'){
+      const question=getCurrentQuestion(attempt),tour=getCurrentTour(attempt);
+      if(!question)return finalizeAttempt(olympiad,attempt,'finished');
+      const deadline=require('./src/question-clock').deadline(attempt,question,tour);
+      if(deadline===null||Date.now()<deadline)break;
+      const endedAt=new Date(deadline).toISOString(),log=getQuestionLog(attempt,question.id);
+      log.timedOutAt=endedAt;log.timeSpentMs=Math.max(0,deadline-Date.parse(log.availableAt||log.presentedAt));
+      attempt.currentStepIndex+=1;
+      const next=getCurrentQuestion(attempt);
+      if(!next)return finalizeAttempt(olympiad,attempt,'finished');
+      if(next.tourId!==question.tourId){
+        const state=getTourState(attempt,tour.id);if(state)state.finishedAt=endedAt;
+        startTourIfNeeded(attempt,getCurrentTour(attempt),endedAt);
+      }
+      markQuestionPresented(attempt,endedAt);
+    }
+    return attempt;
+  }
 
   while (currentTour) {
     const timing = getTiming(attempt);
@@ -3980,7 +4003,7 @@ async function handleApi(req, res, url, runtime = {}) {
     const answerView = (stored) => {
       const view = buildAttemptView(olympiadData, stored, settings);
       const issued = stored.variant?.questions?.find((question) => question.id === body.questionId);
-      if (issued?.interactionMode === "guest_order" || issued?.type === "final_kitchen") {
+      if (issued?.interactionMode === "guest_order" || issued?.type === "final_kitchen" || (issued&&require('./src/question-clock').enabled(stored))) {
         view.answerReceipt = { questionId: body.questionId, saved: Boolean(stored.answers?.[body.questionId]) };
       }
       return view;

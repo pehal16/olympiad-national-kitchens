@@ -1,9 +1,9 @@
 {
   "version": 1,
   "operation": "proportional resize only; no composition edits; source images retained",
-  "sources": 325,
-  "sourceBytes": 78191274,
-  "displayBytes": 24377350,
+  "sources": 329,
+  "sourceBytes": 78622628,
+  "displayBytes": 24677364,
   "exports": [
     {
       "sourceUrl": "/assets/olympiad/story/layout-v2/scenes/album-mobile.webp",
@@ -11053,6 +11053,142 @@
       ],
       "bytes": 52570,
       "sha256": "f952f33b9580b3ceb9a560639f57ed185109f4a2b82692dc02148e2de5e3244d",
+      "alpha": true
+    },
+    {
+      "sourceUrl": "/assets/olympiad/tour2/t2-active-47.webp",
+      "sourceSha256": "ddfa285fdc665f9af8b33a7758135846edb49a4a930a2481b6cd80ddc52c7919",
+      "sourceSize": [
+        900,
+        600
+      ],
+      "url": "/assets/olympiad/display-v1/card/tour2/t2-active-47.webp",
+      "role": "card",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 14500,
+      "sha256": "b4bff9cd34554d44904359f3bfcfcbb55451ad7a8c490e2796b65f8780ca3d37",
+      "alpha": false
+    },
+    {
+      "sourceUrl": "/assets/olympiad/tour2/t2-active-47.webp",
+      "sourceSha256": "ddfa285fdc665f9af8b33a7758135846edb49a4a930a2481b6cd80ddc52c7919",
+      "sourceSize": [
+        900,
+        600
+      ],
+      "url": "/assets/olympiad/display-v1/preview/tour2/t2-active-47.webp",
+      "role": "preview",
+      "size": [
+        800,
+        533
+      ],
+      "bytes": 50064,
+      "sha256": "470fa58c25ab80d849170a6178944db5000376db0d7289aba36f1513867fef21",
+      "alpha": false
+    },
+    {
+      "sourceUrl": "/assets/olympiad/tour3/t3-case-10-v4.webp",
+      "sourceSha256": "be446f0f3a29371ce15fdb205c301f85318facd10505ce04bb389185362b6036",
+      "sourceSize": [
+        900,
+        600
+      ],
+      "url": "/assets/olympiad/display-v1/card/tour3/t3-case-10-v4.webp",
+      "role": "card",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 19752,
+      "sha256": "ed2bb723f71822671dd5ac328c29c796bd369c4a4efcac896fb17cc0285ad34a",
+      "alpha": false
+    },
+    {
+      "sourceUrl": "/assets/olympiad/tour3/t3-case-10-v4.webp",
+      "sourceSha256": "be446f0f3a29371ce15fdb205c301f85318facd10505ce04bb389185362b6036",
+      "sourceSize": [
+        900,
+        600
+      ],
+      "url": "/assets/olympiad/display-v1/preview/tour3/t3-case-10-v4.webp",
+      "role": "preview",
+      "size": [
+        800,
+        533
+      ],
+      "bytes": 68288,
+      "sha256": "bfe33c9e33e98e4130d27a72d01743da43c3fcd0f953e0aabaea058933b06e89",
+      "alpha": false
+    },
+    {
+      "sourceUrl": "/assets/olympiad/story/v4/plates/plate-2e885680994d.webp",
+      "sourceSha256": "59f48832b5921a69ccea2e1ed67501ded7ff070aba0b903c33c3b8a9190aafe2",
+      "sourceSize": [
+        1200,
+        800
+      ],
+      "url": "/assets/olympiad/display-v1/card/story/v4/plates/plate-2e885680994d.webp",
+      "role": "card",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 16780,
+      "sha256": "316e241df606528604221cefb94284e3d3bf4820fff6785a9fdf35cee4b949dd",
+      "alpha": true
+    },
+    {
+      "sourceUrl": "/assets/olympiad/story/v4/plates/plate-2e885680994d.webp",
+      "sourceSha256": "59f48832b5921a69ccea2e1ed67501ded7ff070aba0b903c33c3b8a9190aafe2",
+      "sourceSize": [
+        1200,
+        800
+      ],
+      "url": "/assets/olympiad/display-v1/preview/story/v4/plates/plate-2e885680994d.webp",
+      "role": "preview",
+      "size": [
+        800,
+        533
+      ],
+      "bytes": 47662,
+      "sha256": "754b46f5035de655cd92b284e6b3d330f330da53389691af4663c3e66fe83f37",
+      "alpha": true
+    },
+    {
+      "sourceUrl": "/assets/olympiad/story/v4/plates/plate-da3cd506b167.webp",
+      "sourceSha256": "e92ae68a44cdba564333210919f7188620550039703967237a3e0d3f76a82c9c",
+      "sourceSize": [
+        1200,
+        800
+      ],
+      "url": "/assets/olympiad/display-v1/card/story/v4/plates/plate-da3cd506b167.webp",
+      "role": "card",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 19666,
+      "sha256": "422b7dd153a40afea0999a9f3f8ef0b976ea691e84790cd7e64e6067fcf0cea0",
+      "alpha": true
+    },
+    {
+      "sourceUrl": "/assets/olympiad/story/v4/plates/plate-da3cd506b167.webp",
+      "sourceSha256": "e92ae68a44cdba564333210919f7188620550039703967237a3e0d3f76a82c9c",
+      "sourceSize": [
+        1200,
+        800
+      ],
+      "url": "/assets/olympiad/display-v1/preview/story/v4/plates/plate-da3cd506b167.webp",
+      "role": "preview",
+      "size": [
+        800,
+        533
+      ],
+      "bytes": 63302,
+      "sha256": "cbd36b045b26fc3439ee5e2a7017300e798471c19be30b6e859d846bc43421bc",
       "alpha": true
     }
   ],

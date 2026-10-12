@@ -42,7 +42,7 @@
     active = enabled(attempt) && attempt.status === 'in_progress';
     doc.body.classList.toggle('story-immersive', active);
     const section = doc.getElementById('attempt-section');
-    section.dataset.layoutVersion = active ? '4' : '1';
+    section.dataset.layoutVersion = active ? '5' : '1';
     if (!active) {
       const details = doc.getElementById('restaurant-details'); if (details) { details.before(details.querySelector('.exam-cockpit')); details.remove(); }
       doc.getElementById('story-service-slot')?.remove(); return;
@@ -67,7 +67,7 @@
     doc.querySelector('.dashboard-head').prepend(header);move(doc.getElementById('progress-tour'),header);header.append(status);move(doc.getElementById('attempt-save-status'),status);move(doc.getElementById('participant-exam-badge'),status);
     const workspace=el('div','restaurant-workspace'),conversation=el('aside','restaurant-conversation'),task=el('div','restaurant-task');
     story.before(workspace);workspace.append(conversation,task);move(story,conversation);move(doc.getElementById('story-service-slot'),conversation);move(card,task);move(doc.querySelector('.action-deck'),task);
-    card.classList.toggle('has-dialogue-condition',chapter===1&&[2,3].includes(attempt.story.conditionVersion)&&/^Страница альбома: [^.]+\.$/.test(attempt.currentQuestion.scenario||''));
+    card.classList.toggle('has-dialogue-condition',((chapter===1&&[2,3,4].includes(attempt.story.conditionVersion)&&/^Страница альбома: [^.]+\.$/.test(attempt.currentQuestion.scenario||''))||(chapter===3&&attempt.story.conditionVersion===4&&/^Страница блокнота: [^.]+\.$/.test(attempt.currentQuestion.scenario||''))));
     const paper = el('div', 'restaurant-paper');
     if (chapter === 1) {
       const photo = body.querySelector('.question-photo');
@@ -89,5 +89,5 @@
     doc.getElementById('story-service-slot')?.remove();
   }
   function setLocked(value) { if (value && zoom?.open) zoom.close(); }
-  root.RestaurantLayout = {layoutVersion:4, enabled, beforeQuestion, mount, result, picture, zoomButton, setLocked};
+  root.RestaurantLayout = {layoutVersion:5, enabled, beforeQuestion, mount, result, picture, zoomButton, setLocked};
 })(window);

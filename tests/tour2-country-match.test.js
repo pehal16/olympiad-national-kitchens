@@ -11,7 +11,7 @@ const { createState } = require("../public/t2-country-match");
 const expected = [
   [["Тирамису", "it"], ["Рататуй", "fr"], ["Венский шницель", "at"], ["Фиш-энд-чипс", "gb"]],
   [["Онигири", "jp"], ["Бибимбап", "kr"], ["Фо", "vn"], ["Пад-тай", "th"]],
-  [["Паштел-де-ната", "pt"], ["Гаспачо", "es"], ["Брюссельская вафля", "be"], ["Салат «Оливье»", "ru"]],
+  [["Сырное фондю", "ch"], ["Гаспачо", "es"], ["Брюссельская вафля", "be"], ["Салат «Оливье»", "ru"]],
   [["Эклер", "fr"], ["Пекинская утка", "cn"], ["Суп харчо", "ge"], ["Гуляш", "hu"]],
   [["Крылышки баффало", "us"], ["Паста карбонара", "it"], ["Буррито", "mx"], ["Моти", "jp"]]
 ];
@@ -51,11 +51,12 @@ test("T2 fixes five 4x4 tasks, twenty unique dishes, sources and local assets", 
 test("T2 full visual review preserves all non-media content, other banks and historical assets", () => {
   const hash = (value) => createHash("sha256").update(value).digest("hex");
   // The later explicit request covers every image, including T2-01/02; keys/text stay frozen.
-  const nonMedia = bank.map((q) => ({ ...q, items: q.items.map(({ imageUrl, ...item }) => item) }));
+  const previousBank=require('../data/banks/tour2-v1');
+  const nonMedia = previousBank.map((q) => ({ ...q, items: q.items.map(({ imageUrl, ...item }) => item) }));
   assert.equal(hash(JSON.stringify(nonMedia)), "38b3ee7941029796770d8bb2f53c7e48f73f2722ef0aaba665ababd7903c34d3");
   const historical = Array.from({ length: 26 }, (_, i) => fs.readFileSync(path.join(__dirname, `../public/assets/olympiad/tour2/t2-active-${String(i + 1).padStart(2, "0")}.webp`)));
   assert.equal(hash(Buffer.concat(historical)), "5f41cb615758a78f44dd066fb5b4f43b8f3f4726d63b11faa0986bc4c9374caf");
-  bank.flatMap((q) => q.items).forEach((item, index) => {
+  previousBank.flatMap((q) => q.items).forEach((item, index) => {
     assert.equal(item.imageUrl, `/assets/olympiad/tour2/t2-active-${index + 27}.webp`);
   });
   const baseline = {

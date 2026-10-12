@@ -83,7 +83,7 @@ for (const q of bank) {
 test("bounded fuzzy spelling, compound required tokens, close wrong dishes", () => {
   const check = (index, value, score) => assert.equal(scoreQuestion(bank[index], { text: value }).finalScore, score, value);
   [[0,"сырнки"],[1,"дранки"],[2,"шакшуак"],[3,"самса"],[4,"хумсу"],
-    [5,"яблочный штруедль"],[6,"чизкйек"],[7,"бефстроганоф"],[8,"гуакамлоэ"],[9,"фалафлеь"]]
+    [5,"яблочный штруедль"],[6,"чизкйек"],[7,"бефстроганоф"],[8,"гуакамлоэ"],[9,"салянка"]]
     .forEach(([i, value]) => check(i, value, 3));
   [[0,"сырки"],[1,"пряники"],[3,"салса"],[3,"сальса"],[3,"salsa"],[3,"samosa"],[5,"вишневый штрудель"],[5,"яблочный"],
     [6,"чиз"],[6,"cheese cake with berries"],[8,"соус гуакамоле"],[9,"фала"]]
@@ -102,7 +102,7 @@ test("singular, plural, inflections and approved word orders work with bounded t
     [6, ["чизкейки", "чизкейков", "чиз-кейки", "чизкйеки", "cheese cakes"]],
     [7, ["беф строганов", "говядина по-строгановски", "бефстроганов из говядины", "beef stroganoff"]],
     [8, ["гуакамолле", "гуакомоли", "гуакомолэ"]],
-    [9, ["фалафели", "фалафелей", "фалафелями", "фалафэли", "falafels"]]
+    [9, ["солянки", "солянку", "солянкой", "мясная солянка", "solyanka"]]
   ];
   for (const [index, forms] of cases) {
     for (const text of forms) assert.equal(scoreQuestion(bank[index], { text }).finalScore, 3, text);
@@ -144,9 +144,16 @@ test("new spelling policy does not mutate or upgrade an already-issued private k
 });
 
 test("T3 replacement preserves the other nine authored dossiers", () => {
-  const authored = JSON.stringify(bank.filter((q, index) => index !== 7).map(({ answerPolicy, ...question }) => question));
+  const authored = JSON.stringify(require('../data/banks/tour3-v1').filter((q, index) => index !== 7).map(({ answerPolicy, ...question }) => question));
   assert.equal(crypto.createHash("sha256").update(authored).digest("hex"),
     "ff94d13e6fc1c877716c476a2260160b71e04029f0f00bd279098b0945aa5edf");
+  const previous = require('../data/banks/tour3-v1');
+  assert.deepEqual(bank.slice(0,9),previous.slice(0,9),'only the tenth dossier changes in edition 4');
+  const oldFalafel=structuredClone(previous[9]),snapshot=JSON.stringify(oldFalafel);
+  assert.equal(scoreQuestion(oldFalafel,{text:'фалафель'}).finalScore,3);
+  assert.equal(scoreQuestion(oldFalafel,{text:'солянка'}).finalScore,0);
+  assert.equal(scoreQuestion(bank[9],{text:'фалафель'}).finalScore,0);
+  assert.equal(JSON.stringify(oldFalafel),snapshot,'issued falafel keeps its photo, clues and scoring');
 });
 
 test("replacing nachos never changes the answer key or illustration of an issued dossier", () => {
