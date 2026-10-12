@@ -4,7 +4,16 @@ const base=process.env.STORY_PREVIEW_URL,db=process.env.STORY_PREVIEW_DB_ID,acco
 if(!/^https:\/\/[a-z0-9-]+\.olympiad-gkts\.pages\.dev$/.test(base||'')||!db||db==='4c30c9ab-0c53-4b8a-865a-7c9078d48c2f')throw Error('An isolated preview URL and dedicated test D1 are required.');
 async function sql(query,params=[]){const r=await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/d1/database/${db}/query`,{method:'POST',headers:{Authorization:`Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({sql:query,params})});const j=await r.json();assert.ok(r.ok&&j.success,JSON.stringify(j.errors));return j.result[0].results;}
 let cookie='';const evidence=[];
-async function api(url,token='',body,method=body?'POST':'GET',expected=200){const r=await fetch(base+url,{method,headers:{'Content-Type':'application/json',...(token?{'X-Attempt-Token':token}:{}),...(url.startsWith('/api/admin')?{cookie}:{} )},...(body!==undefined?{body:JSON.stringify(body)}:{})});assert.match(r.headers.get('content-type')||'',/application\/json/,`${url}: ${r.status}, preview is not ready`);const j=await r.json();assert.ok(r.status===expected||(expected===200&&r.status===201),`${url}: ${r.status}: ${j.message}`);if(url.endsWith('/login')){assert.ok(r.headers.get('set-cookie'),'Preview login session cookie missing');cookie=r.headers.get('set-cookie').split(';')[0];}return j.data;}
+async function api(url,token='',body,method=body?'POST':'GET',expected=200){
+ const r=await fetch(base+url,{method,headers:{'Content-Type':'application/json',...(token?{'X-Attempt-Token':token}:{}),...(url.startsWith('/api/admin')?{cookie}:{} )},...(body!==undefined?{body:JSON.stringify(body)}:{})});
+ if(!/application\/json/.test(r.headers.get('content-type')||'')){
+  const diagnostic={url:base+url,method,status:r.status,contentType:r.headers.get('content-type'),ray:r.headers.get('cf-ray'),server:r.headers.get('server'),responseExcerpt:(await r.text()).slice(0,2000),checkedAt:new Date().toISOString()};
+  fs.writeFileSync('output/story/cloudflare-http-failure.json',JSON.stringify(diagnostic,null,2));
+  throw Error('Preview HTTP failure: '+JSON.stringify(diagnostic));
+ }
+ const j=await r.json();assert.ok(r.status===expected||(expected===200&&r.status===201),`${url}: ${r.status}: ${j.message}`);
+ if(url.endsWith('/login')){assert.ok(r.headers.get('set-cookie'),'Preview login session cookie missing');cookie=r.headers.get('set-cookie').split(';')[0];}return j.data;
+}
 function correct(q){if(q.type==='single_choice')return {selectedOptionId:q.options.find(o=>o.isCorrect).id};if(q.type==='bucket_sort')return {buckets:q.correctBuckets};if(q.type==='dish_detective')return {text:q.answerPolicy.canonical};return {dishId:q.dishes[0].id,selectedIngredientIds:q.dishes[0].correctIngredientIds};}
 async function main(){
   // Fresh Pages deployment URLs may propagate after upload has completed.
