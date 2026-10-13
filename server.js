@@ -741,9 +741,12 @@ async function normalizeAndPersistIfChanged(olympiad, attempt) {
 
   const expectedRevision = Math.max(0, Number(attempt.stateRevision) || 0);
   const beforeQuestionLog = JSON.parse(JSON.stringify(attempt.questionLog || {}));
-  const before = JSON.stringify(attempt);
+  // Normalization changes attempt state, never the immutable issued variant.
+  // Avoid serializing its large photo catalogue twice on every participant request.
+  const serializeState = value => { const state = { ...value }; delete state.variant; return JSON.stringify(state); };
+  const before = serializeState(attempt);
   const normalized = normalizeAttemptState(olympiad, attempt);
-  const after = JSON.stringify(normalized);
+  const after = serializeState(normalized);
 
   if (before !== after) {
     const questionIds = new Set([
