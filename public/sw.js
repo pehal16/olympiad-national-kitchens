@@ -1,4 +1,4 @@
-const CACHE_NAME = "national-kitchens-olympiad-story-layout-5-seal1";
+const CACHE_NAME = "national-kitchens-olympiad-story-layout-5-seal2";
 const PRECACHE_URLS = [
   "/story-dialogue.js?v=layout5-oct12",
   "/restaurant-comic.css?v=layout5-oct12",
@@ -19,8 +19,8 @@ const PRECACHE_URLS = [
   "/t5-photo-model.js?v=1.7.0-story2",
   "/t5-dish-service.js?v=1.7.0-layout5-oct12",
   "/t5-photo-kitchen.js?v=1.7.0-assembly45",
-  "/certificate.css?v=1.7.0-seal1",
-  "/certificate.js?v=1.7.0-seal1",
+  "/certificate.css?v=1.7.0-seal2",
+  "/certificate.js?v=1.7.0-seal2",
   "/assets/olympiad/certificate/college-seal-user-v1.jpg",
   "/app.js?v=1.7.0-assembly45",
   "/t5-final-kitchen.js?v=1.7.0-layout2",

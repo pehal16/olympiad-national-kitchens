@@ -123,6 +123,13 @@
       saveButton.disabled = true;
       return;
     }
+    const clusterMark = sheet.querySelector(".certificate-cluster-mark img");
+    if (!clusterMark?.complete || !clusterMark.naturalWidth) {
+      status.textContent = "Логотип «Профессионалитета» не загрузился. Обновите страницу перед сохранением сертификата.";
+      status.classList.add("error");
+      saveButton.disabled = true;
+      return;
+    }
     status.textContent = "В окне печати выберите «Сохранить как PDF» и горизонтальный формат A4. На телефоне лист можно сдвигать по горизонтали; сам макет не меняется.";
     saveButton.disabled = false;
   }
