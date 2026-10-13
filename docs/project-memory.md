@@ -2,6 +2,10 @@
 
 Last updated: 2026-10-13
 
+## Event date supplied for the regulation (2026-10-13)
+
+- User specified16.10.2026,09:00–16:00 Moscow time, and provision of the participation link two days earlier,14.10.2026. The clean regulation instruction in `output/Инструкция_для_положения_олимпиады_2026.txt` now states these dates and omits the advance public URL. This request edits the regulation text only: no link was sent, reminder created, or production admission window configured. Production is still in anytime-entry mode; distinguish that state from the announced event schedule when implementing the conducting window later.
+
 ## Prestart instruction review and 45-second kitchen refinement (2026-10-13)
 
 - During the requested live prestart instruction audit, the user revised the earlier answer: **T1–T4 remain30 seconds per question; each T5 assembly gets45 seconds**. New total is1125 seconds /18 minutes45 seconds, not19 minutes45 seconds. New issued variants use conditionVersion6/questionTimingVersion3; tours5/2.5/5/4/2.25 minutes. Previous editions5 (18-minute all30s),4 (45-minute question clocks) and older snapshots retain their frozen limits and separate ranks. Blueprint15/story1/asset1/dialogue2/layout5, bank/scoring150, immediate dinner/certificate and organizer-gated earned menu remain unchanged.
