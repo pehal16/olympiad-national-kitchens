@@ -2,6 +2,12 @@
 
 Last updated: 2026-10-13
 
+## Windows desktop trial package (2026-10-13)
+
+- User requests a trial launch on the stationary iRU shown in their PowerShell screenshot: i7-14700F,20 cores/28 threads,approximately64GB RAM. Current tool execution remains on ASUS F17/DESKTOP-KIKSDE2, so local preparation/verification must not be described as an actual launch on the iRU. Domain requested for a later connection: `olympiada.gorlkts.ru`. Production remains Cloudflare; no DNS change, migration, firewall opening or live-data import is authorized by the trial package itself.
+- `scripts/windows-trial.js` wraps the existing olympiad-only SQLite server, explicitly enables story/anytime entry and uses loopback only. First launch generates persistent local secrets and an isolated DB under `%LOCALAPPDATA%/GKTSOlympiadTrial/v1`; report excludes passwords, organizer file is private. Restart retains answers and identity; corrupted credentials fail without deleting/rekeying. Separate backup and60-person rehearsal commands keep synthetic load apart from manual trials.
+- `scripts/build-windows-trial.js` packages a precise committed source snapshot and the installed signed OpenJS Foundation Windows Node.js runtime/license, with revision/file hashes. No dirty prototype files, node_modules, .env, production/private storage or personal registrations are included. Minimal launcher `.cmd` files require no global installation or admin rights. Runbook: `docs/windows-trial-runbook.md`. Acceptance and downloadable package receipts are recorded after actual checks; iRU/network verification requires executing the downloaded launcher on that computer.
+
 ## User-supplied college seal on every participant certificate (2026-10-13)
 
 - User explicitly asks to place the supplied blue college seal on all certificates. `public/assets/olympiad/certificate/college-seal-user-v1.jpg` is a byte-identical copy of the 510×352 JPEG attachment, 111,836 bytes, SHA256 `37bf944551bcb634a212a5b2c2535aba6519871a491351e0ecb9d6f77688ba2f`. All lettering, numbers and the existing autograph remain untouched; no generated/redrawn stamp or newly invented signatory. The shared certificate template covers current story and legacy olympiad attempts.
