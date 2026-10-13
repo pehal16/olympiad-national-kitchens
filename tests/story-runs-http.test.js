@@ -19,7 +19,7 @@ test('D1 story day: protected publication, simultaneous start, per-run identity 
  const participant={fullName:'Тестовый Участник Истории',institution:'Тестовый колледж',groupName:'Тестовая группа',mentorName:''},token='synthetic_story_participant_token_2026';
  const starts=await Promise.all(Array.from({length:8},()=>api('/api/public/attempts/start',{method:'POST',body:{participant},token})));
  assert.equal(starts.filter(s=>s.status===201).length,1);assert.equal(new Set(starts.map(s=>s.data?.id)).size,1);
- const attempt=starts[0].data;assert.equal(attempt.story.runId,id);assert.equal(attempt.story.storyVersion,1);assert.equal(Date.parse(attempt.expiresAt)-Date.parse(attempt.startedAt),18*60000);
+ const attempt=starts[0].data;assert.equal(attempt.story.runId,id);assert.equal(attempt.story.storyVersion,1);assert.equal(Date.parse(attempt.expiresAt)-Date.parse(attempt.startedAt),18.75*60000);
  const saved=await store.loadAttemptById(attempt.id);assert.equal(saved.variant.blueprintVersion,15);assert.equal(saved.variant.storyVersion,1);assert.equal(saved.variant.questions.length,36);
  assert.ok(saved.questionLog[saved.variant.questions[0].id]?.presentedAt,'Atomic start retains first question timing');
  const prefix=`/api/public/attempts/${attempt.id}`;

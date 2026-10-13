@@ -28,7 +28,7 @@ async function loadStoryRuns() {
   const runs=await adminApi('/api/admin/story-runs');
   const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
   if(!mount.dataset.ready){
-    mount.append(el('h2','Ресторан путешествий: проведение'),el('p','В режиме свободного входа начать можно в любое время. Для публикации итогов остановите новые старты и дождитесь завершения активных попыток. Новые попытки: по 30 секунд на задание, всего 18 минут. Ранее начатые сохраняют свои лимиты и отдельный рейтинг. При необходимости можно создать отдельный день по Москве.'));
+    mount.append(el('h2','Ресторан путешествий: проведение'),el('p','В режиме свободного входа начать можно в любое время. Для публикации итогов остановите новые старты и дождитесь завершения активных попыток. Новые попытки: по 30 секунд в Т1–Т4 и по 45 секунд на каждую сборку Т5, всего 18 минут 45 секунд. Ранее начатые сохраняют свои лимиты и отдельный рейтинг. При необходимости можно создать отдельный день по Москве.'));
     const form=el('form'),label=el('label','Дата проведения по Москве '),date=el('input');date.type='date';date.required=true;label.append(date);
     const create=el('button','Создать день');create.className='button primary';create.type='submit';
     const message=el('p');message.className='story-run-message';message.setAttribute('role','status');message.id='story-run-message';
@@ -567,7 +567,7 @@ function renderAttempts(attempts) {
     row.tabIndex = 0;
     row.innerHTML = `
       <td>${attempt.rank ?? "—"}</td>
-      <td>${escapeHtml(attempt.fullName)}<br /><span class="muted">${escapeHtml(attempt.institution || "")} · редакция ${attempt.conditionVersion === 5 ? '5 (30 секунд на задание, 18 минут)' : attempt.conditionVersion === 4 ? '4 (страны Т3 и время на задание)' : attempt.conditionVersion === 3 ? '3 (обновлённое меню Т4)' : attempt.conditionVersion === 2 ? '2 (страны в Т1)' : '1'}${attempt.storyRunId ? ' · '+escapeHtml(attempt.storyRunId) : ''}</span></td>
+      <td>${escapeHtml(attempt.fullName)}<br /><span class="muted">${escapeHtml(attempt.institution || "")} · редакция ${attempt.conditionVersion === 6 ? '6 (Т1–Т4: 30 секунд; Т5: 45 секунд)' : attempt.conditionVersion === 5 ? '5 (30 секунд на задание, 18 минут)' : attempt.conditionVersion === 4 ? '4 (страны Т3 и время на задание)' : attempt.conditionVersion === 3 ? '3 (обновлённое меню Т4)' : attempt.conditionVersion === 2 ? '2 (страны в Т1)' : '1'}${attempt.storyRunId ? ' · '+escapeHtml(attempt.storyRunId) : ''}</span></td>
       <td>${escapeHtml(attempt.groupName || "")}<br /><span class="muted">${escapeHtml(attempt.mentorName || "  ")}</span></td>
       <td>${escapeHtml(attempt.status)}</td>
       <td>${attempt.totalFinalScore ?? ""}</td>

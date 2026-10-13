@@ -1922,17 +1922,23 @@ function renderHero() {
   elements.heroSubtitle.textContent = state.olympiad.subtitle;
   if (elements.heroFormatBadge) {
     const totalTours = Array.isArray(state.olympiad.tours) ? state.olympiad.tours.length : 0;
-    elements.heroFormatBadge.textContent = `${state.olympiad.durationMinutes} минут · ${totalTours} туров · ${state.olympiad.questionCount ?? 36} заданий`;
+    elements.heroFormatBadge.textContent = `${formatLimitMinutes(state.olympiad.durationMinutes)} · ${totalTours} туров · ${state.olympiad.questionCount ?? 36} заданий`;
   }
+}
+
+function formatLimitMinutes(value) {
+  const seconds=Math.max(0,Math.round(Number(value)*60)),minutes=Math.floor(seconds/60),rest=seconds%60;
+  const word=(n,forms)=>forms[n%100>=11&&n%100<=14?2:n%10===1?0:n%10>=2&&n%10<=4?1:2];
+  return [minutes?`${minutes} ${word(minutes,['минута','минуты','минут'])}`:'',rest?`${rest} ${word(rest,['секунда','секунды','секунд'])}`:''].filter(Boolean).join(' ')||'0 минут';
 }
 
 function renderRules() {
   const rules = [
-    `Общий лимит: ${state.olympiad.durationMinutes} минут.`,
+    `Общий лимит: ${formatLimitMinutes(state.olympiad.durationMinutes)}.`,
     "После старта работает защищённый полноэкранный режим; таймер идёт непрерывно.",
     "Уход из вкладки, потеря фокуса и выход из полноэкранного режима блокируют интерфейс и записываются в серверный журнал.",
     "Запись в журнале рассматривает организатор; отдельное срабатывание само по себе не уменьшает балл.",
-    "В первом туре все участники узнают одни и те же 10 блюд по фотографиям. Варианты ответов перемешиваются; остальные туры собираются индивидуально.",
+    "Задания и правила оценивания одинаковы для участников одной редакции. Перемешиваются варианты ответов, карточки сопоставлений и компоненты пятого тура.",
     "Один вопрос на экране без возврата назад.",
     "Ответы проверяются автоматически.",
     "Итог фиксируется после завершения."
@@ -3095,7 +3101,7 @@ function renderAttempt() {
       ? "Определите блюдо по подсказкам"
       : currentQuestion?.interactionMode === "country_match"
       ? "" : currentTour.description || "";
-    elements.tourLimit.textContent = `${currentTour.timeLimitMinutes} минут`;
+    elements.tourLimit.textContent = formatLimitMinutes(currentTour.timeLimitMinutes);
   } else {
     elements.progressTour.textContent = "Тур завершён";
     elements.tourCode.textContent = "FIN";
@@ -3635,7 +3641,7 @@ async function startAttempt() {
   if (elements.startConsent && !elements.startConsent.checked) {
     showMessage(
       elements.prestartMessage,
-      `Подтвердите готовность работать ${state.olympiad.durationMinutes} минут без отвлечений.`,
+      `Подтвердите готовность работать ${formatLimitMinutes(state.olympiad.durationMinutes)} без отвлечений.`,
       "warning"
     );
     updateStartAvailability();

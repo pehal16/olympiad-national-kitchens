@@ -26,7 +26,7 @@ function setup({ supported = true, enabled = true, consent = true, fullscreenAll
   };
   const state = { olympiad: { durationMinutes: 18 }, participant: { fullName: "Synthetic participant" }, isStartingAttempt: false, activeAttemptId: "", attempt: null };
   const context = vm.createContext({
-    document, state, elements,
+    document, state, elements, formatLimitMinutes: value => `${value} минут`,
     showMessage: (element, message) => calls.push({ target: element.id, message }),
     hideMessage() {}, setAttemptSaveStatus() {}, setAttemptSyncMeta() {},
     requestExamFullscreen: async () => {

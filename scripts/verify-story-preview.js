@@ -41,7 +41,7 @@ async function main(){
   await sql('DELETE FROM attempt_variants WHERE id IN (SELECT id FROM attempts WHERE story_run_id IS NOT NULL)');
   await sql('DELETE FROM attempts WHERE story_run_id IS NOT NULL');await sql('DELETE FROM olympiad_story_runs');
   for(const count of [50,60]){
-    const date=new Date(Date.now()+10800000+(count===60?86400000:0)).toISOString().slice(0,10);
+    const date=new Date(Date.now()+11250000+(count===60?86400000:0)).toISOString().slice(0,10);
     const run=count===50?(await api('/api/public/olympiad')).story:await api('/api/admin/story-runs','',{date});
     if(count===50){assert.equal(run.entryMode,'anytime');assert.equal(run.date,null);assert.equal(run.entryOpen,true);}
     else {
@@ -52,13 +52,13 @@ async function main(){
     const alphabet='АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЭЮЯ',times=[];
     const people=await Promise.all(Array.from({length:count},async(_,i)=>{
       const token=crypto.randomBytes(32).toString('base64url'),participant={fullName:`Репетиционный Участник ${alphabet[Math.floor(i/alphabet.length)]}${alphabet[i%alphabet.length]}`,institution:'Изолированный технический стенд',groupName:'Тестовая группа',mentorName:''};
-      const [a,b]=await Promise.all([api('/api/public/attempts/start',token,{participant}),api('/api/public/attempts/start',token,{participant})]);assert.equal(a.id,b.id);assert.equal(Date.parse(a.expiresAt)-Date.parse(a.startedAt),1080000);return {token,attempt:a};
+      const [a,b]=await Promise.all([api('/api/public/attempts/start',token,{participant}),api('/api/public/attempts/start',token,{participant})]);assert.equal(a.id,b.id);assert.equal(Date.parse(a.expiresAt)-Date.parse(a.startedAt),1125000);return {token,attempt:a};
     }));
     const variants=await sql('SELECT v.id,v.payload_json FROM attempt_variants v JOIN attempts a ON a.id=v.id WHERE a.story_run_id=?',[run.id]);assert.equal(variants.length,count);
     const map=new Map(variants.map(v=>[v.id,JSON.parse(v.payload_json)]));
     for(let round=0;round<36;round++)await Promise.all(people.map(async(p,i)=>{
       const q=map.get(p.attempt.id).questions[round],prefix=`/api/public/attempts/${p.attempt.id}`;assert.equal(p.attempt.currentQuestion.id,q.id);
-      assert.equal(p.attempt.story.conditionVersion,5);assert.equal(p.attempt.story.dialogueVersion,2);
+      assert.equal(p.attempt.story.conditionVersion,6);assert.equal(p.attempt.story.dialogueVersion,2);
       assert.deepEqual(p.attempt.currentQuestion.dialogue,q.dialogue,'current dialogue matches the frozen issued variant');
       if(q.tourCode==='T1')assert.match(p.attempt.currentQuestion.scenario,/Страница альбома:/,'country remains in the ordinary condition');
       if(q.tourCode==='T3')assert.match(p.attempt.currentQuestion.scenario,/Страница блокнота:/,'notebook country remains in the ordinary condition');
@@ -79,7 +79,7 @@ async function main(){
     else {run.entryEndsAt=new Date(Date.now()-1000).toISOString();await sql('UPDATE olympiad_story_runs SET entry_ends_at=?,payload_json=? WHERE id=?',[run.entryEndsAt,JSON.stringify(run),run.id]);}
     const publication=await api(`/api/admin/story-runs/${run.id}/publish`,'',{});assert.equal((await api(`/api/admin/story-runs/${run.id}/publish`,'',{})).publishedAt,publication.publishedAt);
     await Promise.all(people.map(async p=>{const r=await api(`/api/public/attempts/${p.attempt.id}/story-result`,p.token);assert.equal(r.state,'published');assert.equal(r.plates.length,51);assert.equal(r.summary.totalFinalScore,150);assert.doesNotMatch(JSON.stringify(r),/expectedAnswer|correctIngredientIds|explanation/);}));
-    times.sort((a,b)=>a-b);const metric={environment:'Cloudflare Pages preview / separate D1',entryMode:run.entryMode,participants:count,answers:count*36,conditionVersion:5,dialogueVersion:2,frozenDialoguesVerified:count*36,errors:0,lostAnswers:0,duplicateAnswers:0,answerP95Ms:Math.round(times[Math.ceil(times.length*.95)-1]),timestamp:new Date().toISOString()};evidence.push(metric);console.log(JSON.stringify(metric));
+    times.sort((a,b)=>a-b);const metric={environment:'Cloudflare Pages preview / separate D1',entryMode:run.entryMode,participants:count,answers:count*36,conditionVersion:6,dialogueVersion:2,frozenDialoguesVerified:count*36,errors:0,lostAnswers:0,duplicateAnswers:0,answerP95Ms:Math.round(times[Math.ceil(times.length*.95)-1]),timestamp:new Date().toISOString()};evidence.push(metric);console.log(JSON.stringify(metric));
     fs.writeFileSync('output/story/cloudflare-load.json',JSON.stringify(evidence,null,2));
   }
   fs.writeFileSync('output/story/cloudflare-load.json',JSON.stringify(evidence,null,2));

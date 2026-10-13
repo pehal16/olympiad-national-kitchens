@@ -818,10 +818,11 @@ function buildVariant(olympiad, options = {}) {
 
     const questionClock=flatQuestions.some(q=>q.tourCode==='T4'&&q.menuVersion===4);
     const shortClock=questionClock&&require('./olympiad-timing').shortTimingEnabled(olympiad);
-    if(shortClock)for(const tour of tours)tour.timeLimitMinutes=tour.questionCount*30/60;
-    if(questionClock)for(const q of flatQuestions){const tour=tours.find(t=>t.id===q.tourId);q.timeLimitSeconds=shortClock?30:tour.timeLimitMinutes*60/tour.questionCount;}
+    const limitSeconds=code=>require('./olympiad-timing').questionLimitSeconds(olympiad,code),assemblyClock=shortClock&&limitSeconds('T5')===45;
+    if(shortClock)for(const tour of tours)tour.timeLimitMinutes=tour.questionCount*limitSeconds(tour.code)/60;
+    if(questionClock)for(const q of flatQuestions){const tour=tours.find(t=>t.id===q.tourId);q.timeLimitSeconds=shortClock?limitSeconds(q.tourCode):tour.timeLimitMinutes*60/tour.questionCount;}
     const variant={
-      ...(questionClock?{questionTimingVersion:shortClock?2:1,conditionVersion:shortClock?5:4,durationMinutes:tours.reduce((sum,t)=>sum+t.timeLimitMinutes,0)}:{}),
+      ...(questionClock?{questionTimingVersion:assemblyClock?3:shortClock?2:1,conditionVersion:assemblyClock?6:shortClock?5:4,durationMinutes:tours.reduce((sum,t)=>sum+t.timeLimitMinutes,0)}:{}),
       schemaVersion: olympiad.schemaVersion || 2,
       blueprintVersion: olympiad.blueprintVersion || olympiad.schemaVersion || 2,
       seed,

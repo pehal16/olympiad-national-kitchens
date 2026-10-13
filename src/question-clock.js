@@ -1,5 +1,5 @@
 'use strict';
-function enabled(attempt){return [1,2].includes(attempt?.variant?.questionTimingVersion);}
+function enabled(attempt){return [1,2,3].includes(attempt?.variant?.questionTimingVersion);}
 function deadline(attempt,question,tour){
  if(!enabled(attempt)||!question||!Number.isFinite(question.timeLimitSeconds)||question.timeLimitSeconds<=0)return null;
  const log=attempt.questionLog?.[question.id],start=Date.parse(log?.availableAt||log?.presentedAt||'');

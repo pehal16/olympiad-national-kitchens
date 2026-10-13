@@ -8,7 +8,8 @@ function shortTimingEnabled(olympiad) {
 }
 function publicTiming(olympiad) {
   if (!shortTimingEnabled(olympiad)) return { durationMinutes: olympiad.durationMinutes, tours: olympiad.tours };
-  const tours = olympiad.tours.map(t => ({ ...t, timeLimitMinutes: counts[t.code] * 30 / 60 }));
+  const tours = olympiad.tours.map(t => ({ ...t, timeLimitMinutes: counts[t.code] * questionLimitSeconds(olympiad,t.code) / 60 }));
   return { durationMinutes: tours.reduce((sum, t) => sum + t.timeLimitMinutes, 0), tours };
 }
-module.exports = { shortTimingEnabled, publicTiming };
+function questionLimitSeconds(olympiad,tourCode){return tourCode==='T5'&&olympiad.assemblyTimeLimitSeconds===45?45:30;}
+module.exports = { shortTimingEnabled, publicTiming, questionLimitSeconds };

@@ -6,10 +6,10 @@ const {isLockedDishAnswer}=require('../src/final-kitchen');
 const photo=require('../public/t5-photo-model');
 const combos=(items,n)=>n?items.flatMap((item,index)=>combos(items.slice(index+1),n-1).map(rest=>[item,...rest])):[[]];
 const perms=items=>items.length?items.flatMap((item,index)=>perms(items.filter((_,i)=>i!==index)).map(rest=>[item,...rest])):[[]];
-test('T5 photo v4 issues a fixed 3/24 route: 48 points/1.5 min, whole route 150/18/36',()=>{
+test('T5 photo v4 issues a fixed 3/24 route: 48 points/2.25 min, whole route 150/18.75/36',()=>{
  bank.forEach(validateQuestionStructure);const variant=buildVariant(olympiad,{seed:'photo-v4-contract'}),questions=variant.questions.filter(q=>q.type==='final_kitchen');
- assert.equal(variant.questions.length,36);assert.equal(variant.questions.reduce((sum,q)=>sum+q.maxScore,0),150);assert.equal(variant.tours.reduce((sum,tour)=>sum+tour.timeLimitMinutes,0),18);
- assert.equal(variant.tours[4].questionCount,3);assert.equal(variant.tours[4].maxScore,48);assert.equal(variant.tours[4].timeLimitMinutes,1.5);
+ assert.equal(variant.questions.length,36);assert.equal(variant.questions.reduce((sum,q)=>sum+q.maxScore,0),150);assert.equal(variant.tours.reduce((sum,tour)=>sum+tour.timeLimitMinutes,0),18.75);
+ assert.equal(variant.tours[4].questionCount,3);assert.equal(variant.tours[4].maxScore,48);assert.equal(variant.tours[4].timeLimitMinutes,2.25);
  assert.deepEqual(questions.map(q=>q.dishes[0].photo.kind),['pizza','greek','roll']);assert.ok(questions.every(q=>q.presentationVersion===4&&q.dishes.length===1&&q.dishes[0].items.length===8));
  for(const question of questions){const publicQ=sanitizeQuestion(question,{});assert.equal(publicQ.selectedDish.id,question.dishes[0].id);assert.deepEqual(publicQ.dishes,[]);assert.ok(isLockedDishAnswer({},question,{dishId:question.dishes[0].id}));assert.equal(isLockedDishAnswer({},question,{dishId:'forged'}),false);assert.doesNotMatch(JSON.stringify(publicQ),/correctIngredientIds|isCorrect|ingredientKey|surfaceTextures|previewUrl|sample/);}
 });

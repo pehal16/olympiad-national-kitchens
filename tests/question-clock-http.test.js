@@ -1,12 +1,12 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {buildVariant}=require('../src/variant'),olympiad=require('../data/olympiad'),clock=require('../src/question-clock');
-test('individual budgets total 18 minutes; exact deadline and historical timing remain distinct',()=>{
- const v=buildVariant(olympiad,{seed:'question-clock-budget'});assert.equal(v.conditionVersion,5);assert.equal(v.dialogueVersion,2);assert.equal(v.questionTimingVersion,2);
- assert.deepEqual(v.tours.map(t=>v.questions.find(q=>q.tourId===t.id).timeLimitSeconds),[30,30,30,30,30]);
- assert.equal(v.questions.reduce((s,q)=>s+q.timeLimitSeconds,0),1080);
+test('individual budgets total 18 minutes 45 seconds; exact deadline and historical timing remain distinct',()=>{
+ const v=buildVariant(olympiad,{seed:'question-clock-budget'});assert.equal(v.conditionVersion,6);assert.equal(v.dialogueVersion,2);assert.equal(v.questionTimingVersion,3);
+ assert.deepEqual(v.tours.map(t=>v.questions.find(q=>q.tourId===t.id).timeLimitSeconds),[30,30,30,30,45]);
+ assert.equal(v.questions.reduce((s,q)=>s+q.timeLimitSeconds,0),1125);
  for(const q of v.questions.filter(q=>q.tourCode==='T3')){assert.match(q.scenario,/Страница блокнота:/);assert.match(q.dialogue.line,/Эти заметки — из/);assert.ok(!q.dialogue.line.toLowerCase().includes(q.answerPolicy.canonical));}
- const q=v.questions[0],tour=v.tours[0],start=Date.parse('2026-10-12T08:00:00Z'),attempt={variant:v,expiresAt:new Date(start+1080000).toISOString(),questionLog:{[q.id]:{availableAt:new Date(start).toISOString()}},tourStates:{[tour.id]:{startedAt:new Date(start).toISOString()}}};
+ const q=v.questions[0],tour=v.tours[0],start=Date.parse('2026-10-12T08:00:00Z'),attempt={variant:v,expiresAt:new Date(start+1125000).toISOString(),questionLog:{[q.id]:{availableAt:new Date(start).toISOString()}},tourStates:{[tour.id]:{startedAt:new Date(start).toISOString()}}};
  assert.equal(clock.timing(attempt,q,tour,start+29999).questionRemainingMs,1);assert.equal(clock.timing(attempt,q,tour,start+30000).questionRemainingMs,0);
  assert.deepEqual(clock.timing({...attempt,variant:{questions:v.questions}},q,tour,start+30000),{});
 });
@@ -54,6 +54,18 @@ test('the issued 45-minute edition keeps its clock and ranks separately from the
  const group=require('../src/story-dialogue').rankingGroup;
  assert.notEqual(group({storyRunId:'same-day',variant:old}),group({storyRunId:'same-day',variant:current}));
  const profile=require('../src/olympiad-timing').publicTiming(olympiad);
- assert.equal(profile.durationMinutes,18);assert.deepEqual(profile.tours.map(t=>t.timeLimitMinutes),[5,2.5,5,4,1.5]);
+ assert.equal(profile.durationMinutes,18.75);assert.deepEqual(profile.tours.map(t=>t.timeLimitMinutes),[5,2.5,5,4,2.25]);
  assert.equal(olympiad.durationMinutes,45,'legacy fallback budgets are not mutated by producing the new edition');
+});
+
+test('new kitchen gets 45 seconds while edition5 retains its issued 30 seconds and separate rank',()=>{
+ const previousBank={...olympiad,assemblyTimeLimitSeconds:30},old=buildVariant(previousBank,{seed:'preserved-18-minute-edition'}),current=buildVariant(olympiad,{seed:'kitchen-45-second-edition'});
+ assert.equal(old.conditionVersion,5);assert.equal(old.questionTimingVersion,2);assert.equal(old.durationMinutes,18);
+ const issued=JSON.stringify(old);require('../src/story-dialogue').freezeDialogue(old);assert.equal(JSON.stringify(old),issued);assert.equal(clock.enabled({variant:old}),true);
+ assert.equal(current.conditionVersion,6);assert.equal(current.durationMinutes,18.75);
+ const q=current.questions[33],tour=current.tours[4],start=Date.parse('2026-10-13T10:00:00Z');
+ const a={variant:current,expiresAt:new Date(start+135000).toISOString(),questionLog:{[q.id]:{availableAt:new Date(start).toISOString()}},tourStates:{[tour.id]:{startedAt:new Date(start).toISOString()}}};
+ assert.equal(clock.timing(a,q,tour,start+44999).questionRemainingMs,1);assert.equal(clock.timing(a,q,tour,start+45000).questionRemainingMs,0);
+ assert.equal(old.questions[33].timeLimitSeconds,30);assert.equal(current.questions[33].timeLimitSeconds,45);
+ const group=require('../src/story-dialogue').rankingGroup;assert.notEqual(group({storyRunId:'same-run',variant:old}),group({storyRunId:'same-run',variant:current}));
 });
