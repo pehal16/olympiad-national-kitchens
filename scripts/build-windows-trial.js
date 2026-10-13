@@ -10,7 +10,10 @@ function argument(name, fallback) {
   return process.argv.find(value => value.startsWith(prefix))?.slice(prefix.length) || fallback;
 }
 function powershell(code) {
-  execFileSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", code], { stdio: "inherit", timeout: 240000 });
+  execFileSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", code], {
+    stdio: "inherit", timeout: 240000,
+    env: { ...process.env, PSModulePath: path.join(process.env.SystemRoot || "C:\\Windows", "System32", "WindowsPowerShell", "v1.0", "Modules") }
+  });
 }
 const quote = value => `'${String(value).replaceAll("'", "''")}'`;
 const hash = file => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
