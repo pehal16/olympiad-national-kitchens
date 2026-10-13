@@ -245,6 +245,17 @@ main {
 }
 .certificate-footer-left { left: 0; color: #dfbf67; }
 .certificate-footer-right { right: 0; color: #41545e; text-align: right; }
+.certificate-sheet > .certificate-seal {
+  position: absolute;
+  z-index: 2;
+  right: 39px;
+  bottom: 91px;
+  width: 260px;
+  height: auto;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
 
 .certificate-sheet.compact-name .certificate-main { padding-top: 0; }
 .certificate-sheet.compact-name .certificate-title strong { font-size: 72px; }

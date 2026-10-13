@@ -116,6 +116,13 @@
     await Promise.all(Array.from(sheet.images || sheet.querySelectorAll("img"), (image) =>
       image.decode ? image.decode().catch(() => undefined) : Promise.resolve()
     ));
+    const seal = sheet.querySelector(".certificate-seal");
+    if (!seal?.complete || !seal.naturalWidth) {
+      status.textContent = "Печать не загрузилась. Обновите страницу перед сохранением сертификата.";
+      status.classList.add("error");
+      saveButton.disabled = true;
+      return;
+    }
     status.textContent = "В окне печати выберите «Сохранить как PDF» и горизонтальный формат A4. На телефоне лист можно сдвигать по горизонтали; сам макет не меняется.";
     saveButton.disabled = false;
   }
