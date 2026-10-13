@@ -104,3 +104,6 @@ jobs:
 
       - name: Deploy Pages
         run: npx wrangler pages deploy dist-cloudflare --project-name "$CF_PAGES_PROJECT" --branch main --commit-dirty=true
+
+      - name: Verify production
+        run: npm run verify:cloudflare -- https://olympiad-gkts.pages.dev
