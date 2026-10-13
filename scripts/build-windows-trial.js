@@ -32,7 +32,8 @@ function main() {
     "public/assets/olympiad", "public/assets/runtime", "public/icons", "data", "config/settings.json", "migrations",
     "scripts/windows-trial.js", "scripts/windows-trial", "scripts/backup-olympiad-sqlite.js", "scripts/load-test-olympiad.js"];
   execFileSync("git", ["archive", "--format=zip", `--output=${sourceZip}`, revision, "--", ...included], { cwd: root });
-  powershell(`$ErrorActionPreference='Stop'; Expand-Archive -LiteralPath ${quote(sourceZip)} -DestinationPath ${quote(app)}`);
+  fs.mkdirSync(app);
+  execFileSync("tar.exe", ["-xf", sourceZip, "-C", app], { stdio: "inherit", timeout: 240000 });
   // No private files or historical registrations are distributed.
   fs.writeFileSync(path.join(app, "data", "participants.json"), "[]\n");
   const settingsFile = path.join(app, "config", "settings.json");
@@ -56,7 +57,7 @@ function main() {
   for (const file of files(app)) manifest.files[path.relative(app, file).replaceAll("\\", "/")] = hash(file);
   fs.writeFileSync(path.join(app, "package-manifest.json"), JSON.stringify(manifest, null, 2));
   fs.mkdirSync(path.dirname(destination), { recursive: true });
-  powershell(`$ErrorActionPreference='Stop'; Compress-Archive -LiteralPath ${quote(app)} -DestinationPath ${quote(destination)} -CompressionLevel Optimal`);
+  execFileSync("tar.exe", ["-a", "-cf", destination, "-C", staging, "OlympiadTrial"], { stdio: "inherit", timeout: 240000 });
   const receipt = { revision, nodeVersion, archive: destination, sha256: hash(destination), bytes: fs.statSync(destination).size, files: Object.keys(manifest.files).length, unpacked: app };
   fs.writeFileSync(`${destination}.json`, JSON.stringify(receipt, null, 2));
   console.log(JSON.stringify(receipt, null, 2));
