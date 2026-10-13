@@ -25,7 +25,12 @@ function main() {
   const staging = fs.mkdtempSync(path.join(os.tmpdir(), "olympiad-windows-package-"));
   const app = path.join(staging, "OlympiadTrial");
   const sourceZip = path.join(staging, "source.zip");
-  const included = ["server.js", "olympiad-server.js", "package.json", "src", "public", "data", "config/settings.json", "migrations", "scripts/windows-trial.js", "scripts/windows-trial", "scripts/backup-olympiad-sqlite.js", "scripts/load-test-olympiad.js"];
+  const { isOlympiadStatic } = require("../olympiad-server");
+  const publicRoots = execFileSync("git", ["ls-tree", "--name-only", revision, "public/"], { cwd: root, encoding: "utf8" })
+    .trim().split(/\r?\n/).filter(file => file.startsWith("public/") && !file.slice(7).includes("/") && isOlympiadStatic(`/${file.slice(7)}`));
+  const included = ["server.js", "olympiad-server.js", "package.json", "src", ...publicRoots,
+    "public/assets/olympiad", "public/assets/runtime", "public/icons", "data", "config/settings.json", "migrations",
+    "scripts/windows-trial.js", "scripts/windows-trial", "scripts/backup-olympiad-sqlite.js", "scripts/load-test-olympiad.js"];
   execFileSync("git", ["archive", "--format=zip", `--output=${sourceZip}`, revision, "--", ...included], { cwd: root });
   powershell(`$ErrorActionPreference='Stop'; Expand-Archive -LiteralPath ${quote(sourceZip)} -DestinationPath ${quote(app)}`);
   // No private files or historical registrations are distributed.
