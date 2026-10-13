@@ -3291,11 +3291,14 @@ function applyAttemptState(attempt, options = {}) {
     : describeAttemptTransition(previousAttempt, attempt);
   state.attempt = attempt;
   if (attempt?.id) state.activeAttemptId = attempt.id;
-  const syncService = () => window.T5DishService?.sync(attempt, () => {
-    refreshAttemptControls();
-    if (state.attempt?.status === 'in_progress') elements.questionBody.querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
-    else elements.certificateOpen?.focus({ preventScroll: true });
-  });
+  const syncService = () => {
+    if(attempt?.story&&attempt.status!=='in_progress'){window.T5DishService?.hideInline();return;}
+    window.T5DishService?.sync(attempt, () => {
+      refreshAttemptControls();
+      if (state.attempt?.status === 'in_progress') elements.questionBody.querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
+      else elements.certificateOpen?.focus({ preventScroll: true });
+    });
+  };
   attachPendingQueue(attempt);
   attachIntegrityQueue(attempt);
   if (!attempt) {
@@ -3632,7 +3635,7 @@ async function startAttempt() {
   if (elements.startConsent && !elements.startConsent.checked) {
     showMessage(
       elements.prestartMessage,
-      "Подтвердите готовность работать 45 минут без отвлечений.",
+      `Подтвердите готовность работать ${state.olympiad.durationMinutes} минут без отвлечений.`,
       "warning"
     );
     updateStartAvailability();

@@ -25,7 +25,7 @@
     const intro = el('section','t5-photo-intro'), workbench = el('section','t5-photo-workbench');
     intro.append(el('div','t5-photo-eyebrow','Тур 5 · Финальная кухня'),el('h3','','Три блюда. Ваша сборка.'),el('p','t5-photo-lead','«Маргарита» → греческий салат → «Филадельфия»'));
     const rules = el('ul','t5-photo-rules');
-    ['Для каждого блюда выберите 4 компонента из 8 и выполните сборку.','Правильный компонент — 4 балла. Максимум — 16 за блюдо и 48 за тур. Порядок выбора продуктов не влияет на баллы.','Состав можно менять до нажатия «Подать». После подачи переходите к следующему блюду.','Соевый соус, имбирь и васаби сопровождают подачу роллов. Их выбирать не нужно, на баллы они не влияют.','На тур отведено 15 минут. Таймер уже идёт.'].forEach(text => rules.append(el('li','',text)));
+    ['Для каждого блюда выберите 4 компонента из 8 и выполните сборку.','Правильный компонент — 4 балла. Максимум — 16 за блюдо и 48 за тур. Порядок выбора продуктов не влияет на баллы.','Состав можно менять до нажатия «Подать». После подачи переходите к следующему блюду.','Соевый соус, имбирь и васаби сопровождают подачу роллов. Их выбирать не нужно, на баллы они не влияют.',question.timeLimitSeconds?`На выбор, сборку и подачу одного блюда — ${question.timeLimitSeconds} секунд. Таймер уже идёт.`:'На тур отведено 15 минут. Таймер уже идёт.'].forEach(text => rules.append(el('li','',text)));
     intro.append(rules,button('Перейти к сборке','t5-photo-primary',()=>{ if(locked)return; started=true;seen.add(introKey);write(introKey,true);update();cards.values().next().value?.focus(); }));
     const head = el('header','t5-photo-heading'), heading = el('div');
     heading.append(el('div','t5-photo-eyebrow',`Блюдо ${question.station.number} из 3 · ${dish.cuisineLabel}`),el('h3','',dish.title),el('p','t5-photo-version',dish.variantLabel));
@@ -41,7 +41,10 @@
     const steps = route.slice(0,-1).map((value,index)=>{const node=el('li','',String(index+1));node.dataset.stage=value;stepbar.append(node);return node;});
     const operation = el('div','t5-photo-operation'), operationLabel = el('span','t5-photo-small'), next = button('','t5-photo-primary',()=>{if(locked || selected.size!==4 || stage==='served')return;stage=model.nextStage(dish,selected,stage);changed();});
     const edit = button('Изменить состав','t5-photo-text-button',()=>{if(locked)return;stage='select';changed();cards.values().next().value?.focus();});
-    operation.append(operationLabel,next);
+    const operationDetail=el('p','t5-photo-operation-detail'),guide=el('p','t5-photo-assembly-guide'),guideArrow=el('span','t5-photo-guide-arrow','↓'),guideText=el('span');
+    guideArrow.setAttribute('aria-hidden','true');guide.append(guideArrow,guideText);guide.id=`t5-assembly-guide-${question.globalIndex}`;
+    operationDetail.id=`t5-operation-detail-${question.globalIndex}`;next.setAttribute('aria-describedby',`${guide.id} ${operationDetail.id}`);
+    operation.append(operationLabel,operationDetail,guide,next);
     panel.append(scene,mediaNotice,list,stepbar,operation,edit);
     compose.append(pantry,panel);workbench.append(compose);
     const footer=el('div','t5-photo-footer'), draftNotice=el('p','t5-photo-small');draftNotice.hidden=true;footer.append(draftNotice,submitButton);workbench.append(footer);submitButton.textContent='Подать';
@@ -60,8 +63,11 @@
       list.replaceChildren();for(const item of model.selection(dish,selected)){const chip=el('button','t5-photo-chip',item.text+' ×');chip.type='button';chip.dataset.remove=item.id;chip.disabled=locked;chip.setAttribute('aria-label','Убрать: '+item.text);list.append(chip);}
       steps.forEach((node,index)=>{const current=index===route.indexOf(stage);node.classList.toggle('is-done',index<route.indexOf(stage));if(current)node.setAttribute('aria-current','step');else node.removeAttribute('aria-current');});
       stepbar.setAttribute('aria-label',stage==='served'?'Все шаги сборки выполнены':`Шаги сборки: ${route.indexOf(stage)+1} из ${steps.length}`);
-      const ready=selected.size===4;next.hidden=stage==='served';next.disabled=locked||!ready;next.textContent=stage==='served'?'':ready?model.operations[dish.photo.kind][route.indexOf(stage)]:'Выберите 4 продукта';
+      const ready=selected.size===4,operationText=model.operations[dish.photo.kind][route.indexOf(stage)];next.hidden=stage==='served';next.disabled=locked||!ready;next.textContent=stage==='served'?'':ready?(stage==='select'?'Собрать блюдо':operationText):'Собрать блюдо';
       operationLabel.textContent=!ready?'Выбор компонентов':stage==='served'?'Сборка завершена':`Шаг ${route.indexOf(stage)+1} из ${route.length-1}`;
+      operationDetail.hidden=!ready||stage==='served';operationDetail.textContent=operationText||'';
+      guide.classList.toggle('is-ready',ready&&stage!=='served');guideArrow.hidden=!ready||stage==='served';
+      guideText.textContent=!ready?`Выберите ещё ${4-selected.size} ${selected.size===3?'продукт':'продукта'}, затем нажмите «Собрать блюдо».`:stage==='served'?'Готово к подаче. Нажмите «Подать» ниже, чтобы сохранить ответ.':stage==='select'?'Все 4 продукта выбраны. Нажмите «Собрать блюдо» ниже.':`Продолжите сборку: нажмите «${operationText}» ниже.`;
       edit.hidden=stage==='select';
       controls.forEach(control=>{if(control!==next)control.disabled=locked;});
       submitButton.hidden=!started;submitButton.disabled=locked||!ready||stage!=='served';

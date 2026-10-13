@@ -23,7 +23,7 @@ test('new and legacy conditions stay owner-scoped and receive separate ranks and
  const restored=await api(`/api/public/attempts/${legacy.id}/current`,people[0].token);
  assert.equal(restored.data.story.conditionVersion,1);assert.doesNotMatch(restored.data.currentQuestion.dialogue.line,/Франци|Япони|Грузи|Мексик|Таиланд|Итали|Узбекистан|Испани|США/);assert.doesNotMatch(restored.data.currentQuestion.scenario,/Страница альбома/);
  const newer=people[1],snapshot=await store.loadAttemptById(newer.view.id),q=snapshot.variant.questions[0];
- assert.equal(newer.view.story.conditionVersion,4);assert.match(newer.view.currentQuestion.scenario,/Страница альбома/);assert.deepEqual(newer.view.currentQuestion.dialogue,q.dialogue);
+ assert.equal(newer.view.story.conditionVersion,5);assert.match(newer.view.currentQuestion.scenario,/Страница альбома/);assert.deepEqual(newer.view.currentQuestion.dialogue,q.dialogue);
  assert.equal((await api(`/api/public/attempts/${newer.view.id}/current`,people[0].token)).status,401);
  const submitted=await api(`/api/public/attempts/${newer.view.id}/answer`,newer.token,{questionId:q.id,answerPayload:{selectedOptionId:q.options.find(o=>o.isCorrect).id}});assert.equal(submitted.status,200);
  assert.notEqual(submitted.data.currentQuestion.dialogue.line,q.dialogue.line);assert.equal(submitted.data.answerReceipt?.autoScore,undefined);
@@ -31,7 +31,7 @@ test('new and legacy conditions stay owner-scoped and receive separate ranks and
  await api('/api/admin/login','',{password:'comic-editions-admin-password'});
  const ranked=(await api('/api/admin/attempts','',null,true)).data;
  assert.equal(ranked.find(a=>a.id===people[0].view.id).rank,1);assert.equal(ranked.find(a=>a.id===people[1].view.id).rank,1);assert.equal(ranked.find(a=>a.id===people[2].view.id).rank,2);
- assert.deepEqual(people.map(p=>ranked.find(a=>a.id===p.view.id).conditionVersion),[1,4,4,2]);
+ assert.deepEqual(people.map(p=>ranked.find(a=>a.id===p.view.id).conditionVersion),[1,5,5,2]);
  assert.equal(ranked.find(a=>a.id===people[3].view.id).rank,1);
  const csv=await api('/api/admin/exports/csv','',{},true);assert.equal(csv.status,200);const text=fs.readFileSync(csv.data.filePath,'utf8');assert.match(text,/Редакция условий/);assert.match(text,/Проведение/);
  const stored=await store.loadAttemptById(people[0].view.id);assert.equal(stored.variant.conditionVersion,undefined);assert.equal(stored.variant.questions[0].dialogue,undefined,'reading and finishing never rewrites legacy conditions');

@@ -48,7 +48,7 @@ test("T3 ten fixed dossiers, three clues, 30 points, no duplicate T1/T2/T5 entit
     assert.deepEqual(v.questions.filter((q) => q.tourCode === "T3").map((q) => q.sourceId), bank.map((q) => q.id));
     assert.equal(v.questions.length, 36);
     assert.equal(v.questions.reduce((sum, q) => sum + q.maxScore, 0), 150);
-    assert.equal(v.tours.find((t) => t.code === "T3").timeLimitMinutes, 8);
+    assert.equal(v.tours.find((t) => t.code === "T3").timeLimitMinutes, 5);
     assert.equal(olympiad.durationMinutes, 45);
   }
 });

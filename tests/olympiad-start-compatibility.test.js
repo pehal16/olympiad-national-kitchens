@@ -24,7 +24,7 @@ function setup({ supported = true, enabled = true, consent = true, fullscreenAll
     fullscreenElement: null,
     exitFullscreen: async () => { calls.push("exit-fullscreen"); document.fullscreenElement = null; }
   };
-  const state = { participant: { fullName: "Synthetic participant" }, isStartingAttempt: false, activeAttemptId: "", attempt: null };
+  const state = { olympiad: { durationMinutes: 18 }, participant: { fullName: "Synthetic participant" }, isStartingAttempt: false, activeAttemptId: "", attempt: null };
   const context = vm.createContext({
     document, state, elements,
     showMessage: (element, message) => calls.push({ target: element.id, message }),

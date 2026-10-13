@@ -11,17 +11,17 @@ const countries={
 const notebookTrips={syrniki:['Россия','из России'],draniki:['Беларусь','из Беларуси'],shakshuka:['Израиль','из Израиля'],samsa:['Узбекистан','из Узбекистана'],hummus:['Ливан','из Ливана'],apple_strudel:['Австрия','из Австрии'],cheesecake:['США','из США'],beef_stroganoff:['Россия','из России'],guacamole:['Мексика','из Мексики'],solyanka:['Россия','из России']};
 function conditionVersion(attempt){
   const edition=Number(attempt?.variant?.conditionVersion);
-  if([1,2,3,4].includes(edition))return edition;
+  if([1,2,3,4,5].includes(edition))return edition;
   // Non-story starts also freeze the menu in their questions, without dialogue metadata.
   return attempt?.variant?.questions?.some(q=>q.tourCode==='T4'&&q.menuVersion===3)?3:1;
 }
 function rankingGroup(attempt){return JSON.stringify([attempt.storyRunId||null,conditionVersion(attempt)]);}
 function freezeDialogue(variant){
   if([1,2].includes(variant.dialogueVersion)) return variant;
-  const newEdition=variant.conditionVersion===4||variant.questions.some(q=>q.tourCode==='T4'&&q.menuVersion===4);
+  const newEdition=[4,5].includes(variant.conditionVersion)||variant.questions.some(q=>q.tourCode==='T4'&&q.menuVersion===4);
   variant.dialogueVersion=newEdition?2:1;
   // Different menus must not share ranks. Already frozen attempts return above.
-  variant.conditionVersion=newEdition?4:variant.questions.some(q=>q.tourCode==='T4'&&q.menuVersion===3)?3:2;
+  variant.conditionVersion=variant.conditionVersion===5?5:newEdition?4:variant.questions.some(q=>q.tourCode==='T4'&&q.menuVersion===3)?3:2;
   for(const q of variant.questions){
     const dialogue={...forQuestion(q),key:newEdition?q.id:q.sourceId||q.id};
     const trip=q.tourCode==='T1'?countries[q.sourceId]:null;

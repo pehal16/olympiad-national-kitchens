@@ -105,6 +105,11 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
     assert.equal(await page.locator('.t5-service-inline').count(),0,'next composition dismisses previous inline receipt');
     const stepCount=await page.locator('.t5-photo-steps li').count();
     assert.equal(await page.locator('.t5-photo-operation .t5-photo-small').innerText(),`Шаг 1 из ${stepCount}`,'step counter matches the visible route');
+    assert.equal(await page.locator('.t5-photo-operation button').innerText(),'Собрать блюдо');
+    assert.match(await page.locator('.t5-photo-assembly-guide').innerText(),/Нажмите «Собрать блюдо»/);
+    const assemblyButton=await page.locator('.t5-photo-operation button').boundingBox();assert.ok(assemblyButton.height>=80,'assembly is an explicit large primary action');
+    assert.equal(await page.locator('.t5-photo-guide-arrow').isVisible(),true,'the callout points to the assembly action');
+    if(q.sequenceInTour===1){await page.locator('.t5-photo-operation').screenshot({path:path.join(output,'assemble-ready-desktop.png'),animations:'disabled'});await page.setViewportSize({width:390,height:900});await page.locator('.t5-photo-operation').screenshot({path:path.join(output,'assemble-ready-phone.png'),animations:'disabled'});await page.setViewportSize({width:1366,height:768});}
     for(let step=0;step<7&&!await page.locator('#submit-answer').isEnabled();step++)await page.locator('.t5-photo-operation button').click();
     assert.equal(await page.locator('.t5-photo-steps li.is-done').count(),stepCount,'completed assembly has no unexplained extra step');
     assert.equal(await page.locator('#attempt-sync-meta').isVisible(),false,'completed kitchen does not repeat a request to finish assembly');
@@ -133,7 +138,7 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
    if([2,16,26,34].includes(i)){assert.equal(await page.locator('.story-exchange').isVisible(),true,'reload preserves optional exchange');assert.equal(await page.locator('.story-guest-line').innerText(),q.dialogue.line);}
    await page.locator('#submit-answer').click();await page.waitForFunction(index=>state.attempt.progress.answeredCount===index,i+1);
    assert.equal(await page.evaluate(()=>state.attempt.summary.totalFinalScore),null);
-   if(q.type==='final_kitchen'){await page.locator('.t5-service-inline').waitFor();await page.locator('.t5-service-inline .t5-service-scene[aria-busy="false"]').waitFor();assert.equal(await page.locator('.t5-service-overlay').count(),0);assert.equal(await page.locator('.t5-service-scene img').evaluateAll(ns=>ns.every(n=>n.complete&&n.naturalWidth>0)),true,'served food and scenery load successfully');assert.equal(await page.locator('.t5-service-missing').isVisible(),false,'no false photo failure');assert.equal(await page.locator('.t5-service-inline').getAttribute('aria-modal'),null);if(i<35)assert.equal(await page.locator('#question-body').evaluate(n=>n.inert),false);await page.locator('.t5-service-inline').screenshot({path:path.join(output,`service-${i}.png`),animations:'disabled'});await page.setViewportSize({width:390,height:900});await page.locator('.t5-service-inline').screenshot({path:path.join(output,`service-${i}-mobile.png`),animations:'disabled'});await page.setViewportSize({width:1366,height:768});}
+   if(q.type==='final_kitchen'&&i<35){await page.locator('.t5-service-inline').waitFor();await page.locator('.t5-service-inline .t5-service-scene[aria-busy="false"]').waitFor();assert.equal(await page.locator('.t5-service-overlay').count(),0);assert.equal(await page.locator('.t5-service-scene img').evaluateAll(ns=>ns.every(n=>n.complete&&n.naturalWidth>0)),true,'served food and scenery load successfully');assert.equal(await page.locator('.t5-service-missing').isVisible(),false,'no false photo failure');assert.equal(await page.locator('.t5-service-inline').getAttribute('aria-modal'),null);if(i<35)assert.equal(await page.locator('#question-body').evaluate(n=>n.inert),false);await page.locator('.t5-service-inline').screenshot({path:path.join(output,`service-${i}.png`),animations:'disabled'});await page.setViewportSize({width:390,height:900});await page.locator('.t5-service-inline').screenshot({path:path.join(output,`service-${i}-mobile.png`),animations:'disabled'});await page.setViewportSize({width:1366,height:768});}
   }
   const saved=await store.loadAttemptById(id);assert.equal(Object.keys(saved.answers).length,36);assert.equal(saved.totalFinalScore,150);
   checks.push('36 issued dialogues and optional exchanges; soft sync and reload preserve the conversation; automatic T3 focus; no judging before publication');
@@ -143,6 +148,14 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
   assert.equal(await page.locator('#nav-home').isVisible(),false,'completed story does not link to its hidden invitation');
   assert.equal(await page.locator('#result-section').evaluate(n=>n.lastElementChild.id),'certificate-section','personal-finish certificate is the final section');
   assert.equal(await page.locator('.story-waiting-scene').isVisible(),false,'the final serving and waiting state do not show two guests');
+  await page.waitForFunction(()=>document.querySelector('.story-banquet-scene')?.naturalWidth>0);
+  assert.equal(await page.locator('.story-banquet').count(),1,'the common dinner is visible immediately after personal finish');
+  assert.equal(await page.locator('.t5-service-inline').count(),0,'the common dinner replaces the last serving scene');
+  assert.equal(await page.locator('.story-plate-link').count(),0,'the common dinner does not disclose earned dishes early');
+  assert.equal(await page.getByRole('button',{name:'Ваше меню',exact:true}).count(),0,'no dead menu shortcut before publication');
+  await page.getByRole('button',{name:'Увеличить фото',exact:true}).click();await page.evaluate(()=>syncAttempt(true));
+  assert.equal(await page.locator('.story-banquet').evaluate(n=>n.classList.contains('is-zoomed')),true,'pending synchronization preserves the dinner photo and zoom');
+  await page.getByRole('button',{name:'Весь кадр',exact:true}).click();
   await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
   await page.screenshot({path:path.join(output,'personal-finish.png'),fullPage:true});
   const certificateReply=await context.request.get(base+`/api/public/attempts/${id}/certificate`,{headers:{'X-Attempt-Token':await page.evaluate(id=>localStorage.getItem(`nko_attempt_access_${id}`),id)}});

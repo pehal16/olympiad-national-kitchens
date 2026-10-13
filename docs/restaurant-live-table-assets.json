@@ -26,7 +26,7 @@
         1536,
         1024
       ],
-      "role": "One intact decorative published-final dinner photo. Fixed food in the photograph does not represent the personal earned collection; that menu is listed separately, by explicit user choice.",
+      "role": "One intact decorative dinner photo, available immediately after personal finish since 2026-10-13. Fixed food does not represent the personal earned collection; that menu appears below only after organizer publication, by explicit user choice.",
       "review": "Personally inspected all dishes/table/guest/fork/lighting against supplied reference. All flags and toothpicks removed. Whole frame and original proportions retained; no crop or upscaling.",
       "prompt": "Use case: precise-object-edit. Edit target: the supplied accepted restaurant dinner photograph. Remove ONLY every miniature paper country flag AND every wooden flag toothpick from all dishes. Carefully reconstruct the small food/table regions behind each removed flag/pole in matching texture and lighting. Preserve everything else as closely as possible: the exact camera, entire composition, crop, same man's identity/expression, hand holding fork over the ramen, his shirt, every dish and bowl shape, placement and human-scale food sizes, cutlery, water glasses, vase/plants, wooden table grain, restaurant people/furniture, warm window light and shadows. Keep the pizza, Greek salad, salmon rolls with accompaniments, croissant, ramen, khinkali, tacos and tom-yum precisely in their original positions. No new garnish, replacement food, additional plates, new person, repositioning, overlay, label, text or UI. Keep it a single coherent natural food photograph, not separate cutouts or a redesign. Landscape3:2, opaque photograph.\n"
     }

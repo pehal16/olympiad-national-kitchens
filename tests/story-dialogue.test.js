@@ -5,7 +5,7 @@ const {forQuestion}=require('../src/story-dialogue-texts');
 const olympiad=require('../data/olympiad');
 const make=()=>buildVariant(olympiad,{seed:'immutable-comic-scenarios'});
 test('36 frozen scenes are distinct; current-question dialogue never supplies keys or later scenes',()=>{
- const v=freezeDialogue(make());assert.equal(v.questions.length,36);assert.equal(v.conditionVersion,4);assert.equal(v.dialogueVersion,2);
+ const v=freezeDialogue(make());assert.equal(v.questions.length,36);assert.equal(v.conditionVersion,5);assert.equal(v.dialogueVersion,2);
  assert.equal(new Set(v.questions.map(q=>q.dialogue.line)).size,36);assert.equal(new Set(v.questions.map(q=>q.dialogue.extra)).size,36);
  for(const q of v.questions){
   const safe=sanitizeQuestion(q,{answers:{}});assert.deepEqual(safe.dialogue,q.dialogue);

@@ -9,7 +9,7 @@ const { buildVariant, sanitizeQuestion, validateQuestionStructure } = require(".
 const { scoreQuestion, validateAnswerPayload } = require("../src/scoring");
 const { createState } = require("../public/t4-guest-order");
 
-test("T4 eight fixed orders, 32 distinct menu positions, 32/10 within unchanged 150/45/45", () => {
+test("T4 eight fixed orders, 32 distinct menu positions, 32/4 within 150/18/36", () => {
   assert.equal(bank.length, 8);
   const dishes = bank.flatMap((q) => q.options.map((o) => o.menuDishId));
   assert.equal(new Set(dishes).size, 32);
@@ -38,7 +38,7 @@ test("T4 eight fixed orders, 32 distinct menu positions, 32/10 within unchanged 
   assert.equal(v.blueprintVersion, 14); assert.equal(v.questions.length, 36);
   assert.equal(v.questions.reduce((s, q) => s + q.maxScore, 0), 150);
   assert.equal(olympiad.durationMinutes, 45);
-  assert.equal(v.tours.find((t) => t.code === "T4").timeLimitMinutes, 10);
+  assert.equal(v.tours.find((t) => t.code === "T4").timeLimitMinutes, 4);
 });
 
 test("T4 fixed order and IDs are reproducible; correct screen positions vary", () => {

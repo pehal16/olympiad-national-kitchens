@@ -817,9 +817,11 @@ function buildVariant(olympiad, options = {}) {
     }
 
     const questionClock=flatQuestions.some(q=>q.tourCode==='T4'&&q.menuVersion===4);
-    if(questionClock)for(const q of flatQuestions){const tour=tours.find(t=>t.id===q.tourId);q.timeLimitSeconds=tour.timeLimitMinutes*60/tour.questionCount;}
+    const shortClock=questionClock&&require('./olympiad-timing').shortTimingEnabled(olympiad);
+    if(shortClock)for(const tour of tours)tour.timeLimitMinutes=tour.questionCount*30/60;
+    if(questionClock)for(const q of flatQuestions){const tour=tours.find(t=>t.id===q.tourId);q.timeLimitSeconds=shortClock?30:tour.timeLimitMinutes*60/tour.questionCount;}
     const variant={
-      ...(questionClock?{questionTimingVersion:1,conditionVersion:4}:{}),
+      ...(questionClock?{questionTimingVersion:shortClock?2:1,conditionVersion:shortClock?5:4,durationMinutes:tours.reduce((sum,t)=>sum+t.timeLimitMinutes,0)}:{}),
       schemaVersion: olympiad.schemaVersion || 2,
       blueprintVersion: olympiad.blueprintVersion || olympiad.schemaVersion || 2,
       seed,
@@ -865,6 +867,7 @@ function getCurrentTour(attempt) {
 
 function sanitizeQuestion(question, attempt) {
   const safe=sanitizeQuestionData(question,attempt);
+  if(safe&&Number.isFinite(question.timeLimitSeconds))safe.timeLimitSeconds=question.timeLimitSeconds;
   const dialogue=require('./story-dialogue').publicDialogue(question);
   return dialogue?{...safe,dialogue}:safe;
 }

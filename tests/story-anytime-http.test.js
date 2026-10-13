@@ -2,7 +2,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const {createOlympiadServer}=require('../olympiad-server');
 const runs=require('../src/story-runs'),store=require('../src/store');
 
-test('anytime entry: one automatic run, full 45 minutes, stop/resume and protected publication',async t=>{
+test('anytime entry: one automatic run, full 18 minutes, stop/resume and protected publication',async t=>{
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'story-anytime-'));
   const {server,db}=createOlympiadServer({dbPath:path.join(directory,'test.sqlite'),adminPassword:'synthetic-anytime-admin-password',attemptIdSecret:'synthetic-anytime-attempt-identity-secret',storyEnabled:'true',storyAnytimeEntry:'true'});
   await new Promise(r=>server.listen(0,'127.0.0.1',r));
@@ -30,7 +30,7 @@ test('anytime entry: one automatic run, full 45 minutes, stop/resume and protect
   assert.equal(starts.filter(s=>s.status===201).length,1);assert.equal(new Set(starts.map(s=>s.data?.id)).size,1);
   const attempt=starts[0].data,prefix=`/api/public/attempts/${attempt.id}`;
   assert.equal(attempt.story.runId,id);assert.equal(attempt.story.entryMode,'anytime');
-  assert.equal(Date.parse(attempt.expiresAt)-Date.parse(attempt.startedAt),45*60000);
+  assert.equal(Date.parse(attempt.expiresAt)-Date.parse(attempt.startedAt),18*60000);
   assert.equal(attempt.summary.totalFinalScore,null);
   const saved=await store.loadAttemptById(attempt.id);
   await api(`/api/admin/story-runs/${id}`,{method:'PATCH',body:{stopped:true},admin:true});

@@ -29,7 +29,7 @@ function fixture() {
     stateRevision: 0, variant, answers: {}, questionLog: {} };
 }
 
-test("T5 exact 3/7/56 structure, neutral media and 150/45/36 route", () => {
+test("T5 exact 3/7/56 structure, neutral media and 150/18/36 route", () => {
   assert.equal(bank.length, 3);
   assert.deepEqual(bank.map((station) => station.dishes.length), [3, 2, 2]);
   bank.forEach((question) => assert.doesNotThrow(() => validateQuestionStructure(question)));
@@ -39,8 +39,8 @@ test("T5 exact 3/7/56 structure, neutral media and 150/45/36 route", () => {
   const variant = buildVariant(kitchenOlympiad(), { seed: "kitchen-contract" });
   assert.equal(variant.questions.length, 36);
   assert.equal(variant.questions.reduce((sum, question) => sum + question.maxScore, 0), 150);
-  assert.equal(variant.tours.reduce((sum, tour) => sum + tour.timeLimitMinutes, 0), 45);
-  assert.equal(variant.tours[4].maxScore, 48); assert.equal(variant.tours[4].timeLimitMinutes, 15);
+  assert.equal(variant.tours.reduce((sum, tour) => sum + tour.timeLimitMinutes, 0), 18);
+  assert.equal(variant.tours[4].maxScore, 48); assert.equal(variant.tours[4].timeLimitMinutes, 1.5);
   assert.equal(variant.tours[4].questionCount, 3);
   assert.deepEqual(variant.questions.filter((q) => q.type === "final_kitchen").map((q) => q.station.number), [1, 2, 3]);
   assert.deepEqual(variant, { ...buildVariant(kitchenOlympiad(), { seed: "kitchen-contract" }), generatedAt: variant.generatedAt });

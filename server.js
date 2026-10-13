@@ -393,13 +393,14 @@ function attemptMatchesAccess(attempt, accessKey, participantSignature, mode) {
 const { lockStationDish, isLockedDishAnswer } = require("./src/final-kitchen");
 
 function getOlympiadPublicData(olympiad) {
+  const timingProfile = require('./src/olympiad-timing').publicTiming(olympiad);
   return {
     id: olympiad.id,
     slug: olympiad.slug,
     title: olympiad.title,
     subtitle: olympiad.subtitle,
     description: olympiad.description,
-    durationMinutes: olympiad.durationMinutes,
+    durationMinutes: timingProfile.durationMinutes,
     questionCount: olympiad.tours.find((tour) => tour.code === "T5")?.generation?.mode === "final_kitchen_stations" ? 36 : 45,
     startAt: olympiad.startAt,
     endAt: olympiad.endAt,
@@ -408,7 +409,7 @@ function getOlympiadPublicData(olympiad) {
     methodologicalBasis: olympiad.methodologicalBasis || null,
     scoring: olympiad.scoring || null,
     appVersion: APP_VERSION,
-    tours: (olympiad.tours || []).map((tour) => ({
+    tours: (timingProfile.tours || []).map((tour) => ({
       id: tour.id,
       code: tour.code,
       order: tour.order,
@@ -3765,7 +3766,7 @@ async function handleApi(req, res, url, runtime = {}) {
       stateRevision: 0,
       startedAt,
       expiresAt: new Date(
-        Date.parse(startedAt) + olympiadData.durationMinutes * 60 * 1000
+        Date.parse(startedAt) + (variant.durationMinutes || olympiadData.durationMinutes) * 60 * 1000
       ).toISOString(),
       finishedAt: null,
       status: "in_progress",

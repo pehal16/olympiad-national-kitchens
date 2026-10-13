@@ -16,6 +16,8 @@ module.exports = {
   description:
     "Индивидуальная цифровая олимпиада с поэтапным прохождением, автоматической проверкой и сохранением результатов.",
   durationMinutes: 45,
+  // New menu-v4 attempts: 36 questions × 30 seconds. Legacy budgets below stay frozen.
+  questionTimeLimitSeconds: 30,
   timingMode: "total_and_tour_limits",
   registrationMode: "open_form",
   startAt: "2026-01-01T00:00:00+03:00",
