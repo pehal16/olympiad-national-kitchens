@@ -9,7 +9,7 @@ test("Cloudflare deployment contract exposes Pages, D1, and Yandex Disk file sto
   const wrangler = fs.readFileSync(path.join(root, "wrangler.toml"), "utf8");
   const schema = fs.readFileSync(path.join(root, "migrations", "0001_cloudflare_initial.sql"), "utf8");
   const worker = fs.readFileSync(path.join(root, "src", "cloudflare", "worker.js"), "utf8");
-  const server = fs.readFileSync(path.join(root, "server.js"), "utf8");
+  const server = fs.readFileSync(path.join(root, "server.js"), "utf8").replace(/\r\n/g, "\n");
   const store = fs.readFileSync(path.join(root, "src", "cloudflare-store.js"), "utf8");
   const workflow = fs.readFileSync(path.join(root, ".github", "workflows", "deploy-cloudflare.yml"), "utf8");
   const diskVerifier = fs.readFileSync(path.join(root, "scripts", "verify-yandex-disk-storage.js"), "utf8");
