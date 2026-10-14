@@ -1,0 +1,17 @@
+# Local rehearsal only. No OS trust installation and no public port listeners.
+{
+	admin 127.0.0.1:3181
+	auto_https disable_redirects
+	skip_install_trust
+}
+
+http://olympiada.gorlkts.ru:3180 {
+	bind 127.0.0.1
+	import olympiad-routes.caddy
+}
+
+https://olympiada.gorlkts.ru:3443 {
+	bind 127.0.0.1
+	tls internal
+	import olympiad-routes.caddy
+}

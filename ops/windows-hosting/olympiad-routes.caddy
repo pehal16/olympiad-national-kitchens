@@ -1,0 +1,14 @@
+# Participant traffic only. The organizer continues to use localhost:3100.
+@organizer path /admin.html /admin.js /content-admin.html /content-admin.js /api/admin /api/admin/*
+respond @organizer "Not found" 404
+
+@api path /api/*
+header @api {
+	Cache-Control "private, no-store"
+	defer
+}
+
+encode zstd gzip
+reverse_proxy 127.0.0.1:3100 {
+	header_up -X-Real-IP
+}

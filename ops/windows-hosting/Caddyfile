@@ -1,0 +1,8 @@
+# Prepared configuration. Do not start before checking WAN, DNS and ports 80/443.
+{
+	admin 127.0.0.1:2019
+}
+
+olympiada.gorlkts.ru {
+	import olympiad-routes.caddy
+}
