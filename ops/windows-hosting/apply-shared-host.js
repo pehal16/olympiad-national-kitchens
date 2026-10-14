@@ -8,7 +8,7 @@ const literal=text=>"'"+text.replace(/'/g,"''")+"'";
 const ps=code=>cp.execFileSync('powershell.exe',['-NoProfile','-Command',code],{encoding:'utf8',windowsHide:true}).trim();
 const allowed=new Set(['olympiad-server.js','src/shared-olympiad-api.js','scripts/windows-trial.js','public/index.html','public/app.js','public/attempt-reserve.js','public/sw.js','public/olympiad-story.js','public/olympiad-ready.css','public/olympiad-device.js','public/t2-country-match.js','public/restaurant-layout.js','public/t5-photo-kitchen.js']);
 function findNode(){
- const raw=ps("Get-NetTCPConnection -State Listen -LocalPort 3100 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Get-CimInstance Win32_Process -Filter ('ProcessId = ' + $_) } | Select-Object ProcessId,ExecutablePath,CommandLine | ConvertTo-Json -Compress");
+ const raw=ps("Get-NetTCPConnection -State Listen -ErrorAction Stop | Where-Object LocalPort -eq 3100 | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Get-CimInstance Win32_Process -Filter ('ProcessId = ' + $_) } | Select-Object ProcessId,ExecutablePath,CommandLine | ConvertTo-Json -Compress");
  if(!raw)return null;const entries=JSON.parse(raw),nodes=Array.isArray(entries)?entries:[entries];assert.equal(nodes.length,1,'Port3100 has an unexpected listener.');const n=nodes[0];
  assert.equal(path.resolve(n.ExecutablePath).toLowerCase(),path.join(root,'runtime','node.exe').toLowerCase(),'Port3100 belongs to another application.');
  assert.ok(n.CommandLine.includes('windows-trial.js'),'Unexpected application on port3100.');return n;
