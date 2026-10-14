@@ -5,7 +5,7 @@ const root=path.resolve(__dirname,'..'),payload=path.join(__dirname,'payload');
 const state=path.join(process.env.LOCALAPPDATA,'GKTSOlympiadTrial','v1');
 const digest=data=>crypto.createHash('sha256').update(data).digest('hex');
 const literal=text=>"'"+text.replace(/'/g,"''")+"'";
-const ps=code=>cp.execFileSync('powershell.exe',['-NoProfile','-Command',code],{encoding:'utf8',windowsHide:true}).trim();
+const ps=(code,capture=true)=>(cp.execFileSync('powershell.exe',['-NoProfile','-Command',code],{encoding:'utf8',windowsHide:true,stdio:capture?['ignore','pipe','pipe']:'ignore'})||'').trim();
 const allowed=new Set(['olympiad-server.js','src/shared-olympiad-api.js','scripts/windows-trial.js','public/index.html','public/app.js','public/attempt-reserve.js','public/sw.js','public/olympiad-story.js','public/olympiad-ready.css','public/olympiad-device.js','public/t2-country-match.js','public/restaurant-layout.js','public/t5-photo-kitchen.js']);
 function findNode(){
  const raw=ps("Get-NetTCPConnection -State Listen -ErrorAction Stop | Where-Object LocalPort -eq 3100 | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Get-CimInstance Win32_Process -Filter ('ProcessId = ' + $_) } | Select-Object ProcessId,ExecutablePath,CommandLine | ConvertTo-Json -Compress");
@@ -39,7 +39,7 @@ async function metadata(base){const r=await fetch(base+'/api/public/olympiad',{s
  await new Promise(r=>setTimeout(r,1000));
  if(!findNode()){
   const exe=path.join(root,'runtime','node.exe'),launcher=path.join(root,'scripts','windows-trial.js');
-  ps('Start-Process -FilePath '+literal(exe)+' -ArgumentList '+literal('"'+launcher+'" --no-browser')+' -WorkingDirectory '+literal(root)+' -WindowStyle Hidden -RedirectStandardOutput '+literal(path.join(backup,'restart.stdout.log'))+' -RedirectStandardError '+literal(path.join(backup,'restart.stderr.log')));
+  ps('Start-Process -FilePath '+literal(exe)+' -ArgumentList '+literal('"'+launcher+'" --no-browser')+' -WorkingDirectory '+literal(root)+' -WindowStyle Hidden -RedirectStandardOutput '+literal(path.join(backup,'restart.stdout.log'))+' -RedirectStandardError '+literal(path.join(backup,'restart.stderr.log')),false);
  }
  let ready=false,last;
  for(let i=0;i<20;i++){try{await metadata('http://127.0.0.1:3100');ready=true;break;}catch(e){last=e;await new Promise(r=>setTimeout(r,1500));}}
