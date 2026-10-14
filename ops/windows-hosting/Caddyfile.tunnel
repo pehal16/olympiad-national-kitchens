@@ -1,0 +1,19 @@
+# Private participant ingress for an SSH relay. No public listener or certificate.
+{
+	admin 127.0.0.1:3181
+	auto_https off
+	log default {
+		format filter {
+			wrap json
+			fields {
+				request>headers delete
+				request>uri delete
+			}
+		}
+	}
+}
+
+http://:3180 {
+	bind 127.0.0.1
+	import olympiad-routes.caddy
+}
