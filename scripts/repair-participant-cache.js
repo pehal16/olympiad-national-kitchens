@@ -1,0 +1,28 @@
+"use strict";
+const assert = require("node:assert/strict");
+const crypto = require("node:crypto");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const root = path.resolve(process.argv.find(v => v.startsWith("--project-dir="))?.slice(14) || path.join(__dirname, ".."));
+const filename = path.join(root, "public", "sw.js");
+const previous = fs.readFileSync(filename, "utf8");
+assert.match(previous, /const PRECACHE_URLS = \[/, "Unexpected worker; no file was changed.");
+const blocked = /^\s*"\/(?:admin|content-admin)\.(?:html|js)(?:\?[^"\r\n]*)?",?\r?\n/gm;
+const entries = previous.match(blocked) || [];
+if (!entries.length) { console.log("The worker already excludes organizer pages. No change needed."); process.exit(0); }
+assert.equal(entries.length, 4, "Unexpected organizer entries; no file was changed.");
+const revised = previous.replace(blocked, "").replace(/^(const CACHE_NAME = ")([^"\r\n]+)(";)/m, (_, a, name, b) => a + name + "-participant-ingress1" + b);
+assert.notEqual(revised, previous);assert.match(revised, /participant-ingress1/);
+const checksum = value => crypto.createHash("sha256").update(value).digest("hex");
+const directory = path.join(process.env.LOCALAPPDATA || os.homedir(), "GKTSOlympiadTrial", "v1", "backups", "client-cache");
+fs.mkdirSync(directory, { recursive: true });
+const backup = path.join(directory, `sw-before-${Date.now()}-${checksum(previous).slice(0,12)}.js`);
+fs.writeFileSync(backup, previous, { flag: "wx" });
+const temporary = filename + "." + crypto.randomBytes(6).toString("hex") + ".tmp";
+fs.writeFileSync(temporary, revised, { flag: "wx" });
+fs.renameSync(temporary, filename);
+assert.equal(fs.readFileSync(filename, "utf8"), revised);
+console.log("Fixed participant caching. Database, answers, credentials and timers were not changed.");
+console.log(`Backup: ${backup}`);
+console.log("Open the olympiad in a fresh browser tab to verify worker installation.");
