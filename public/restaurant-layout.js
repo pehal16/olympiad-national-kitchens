@@ -82,6 +82,8 @@
     } else if (chapter === 4) {
       card.append(paper); move(prompt, paper); move(note, paper); move(body, paper);
     }
+    // Keep the recovery link outside the album/notebook surface and its hit area.
+    move(doc.getElementById('attempt-reserve-address'), task);
   }
   function result() {
     beforeQuestion(); active = false; doc.body.classList.remove('story-immersive');

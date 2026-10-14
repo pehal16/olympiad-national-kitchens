@@ -9,7 +9,7 @@ const helpers = source.slice(source.indexOf("function supportsOlympiadFullscreen
 const availability = source.slice(source.indexOf("function updateStartAvailability()"), source.indexOf("function unlockExamKeyboard()"));
 const start = source.slice(source.indexOf("async function startAttempt()"), source.indexOf("async function submitAnswer()"));
 
-function setup({ supported = true, enabled = true, consent = true, fullscreenAllowed = true, serverFails = false } = {}) {
+function setup({ supported = true, enabled = true, consent = true, fullscreenAllowed = true, serverFails = false, mobile = false } = {}) {
   const calls = [];
   const elements = {
     startAttempt: { dataset: {}, textContent: "Начать олимпиаду" },
@@ -26,10 +26,13 @@ function setup({ supported = true, enabled = true, consent = true, fullscreenAll
   };
   const state = { olympiad: { durationMinutes: 18 }, participant: { fullName: "Synthetic participant" }, isStartingAttempt: false, activeAttemptId: "", attempt: null };
   const context = vm.createContext({
+    window: { OlympiadDevice: require('../public/olympiad-device') },
+    navigator: {userAgent:mobile?'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)':'Desktop',maxTouchPoints:mobile?5:0},
     document, state, elements, formatLimitMinutes: value => `${value} минут`,
     showMessage: (element, message) => calls.push({ target: element.id, message }),
     hideMessage() {}, setAttemptSaveStatus() {}, setAttemptSyncMeta() {},
     requestExamFullscreen: async () => {
+      if(mobile){calls.push('mobile-active-tab');return true;}
       calls.push("request-fullscreen");
       if (fullscreenAllowed) document.fullscreenElement = {};
       return fullscreenAllowed;
@@ -115,4 +118,12 @@ test("an unsupported resume preserves the existing attempt and does not claim it
   assert.doesNotMatch(run.elements.startConsentHint.textContent, /Попытка не запущена/);
   assert.equal(run.calls.includes("start-request"), false);
   assert.equal(run.calls.includes("start-timers"), false);
+});
+
+test('phone starts in the active tab without a fullscreen API and still requires consent',async()=>{
+  const run=setup({mobile:true,supported:false,enabled:false});await run.start();
+  assert.deepEqual(run.calls.filter(v=>typeof v==='string'),['mobile-active-tab','start-request','start-timers']);
+  assert.equal(run.document.fullscreenElement,null);
+  const noConsent=setup({mobile:true,supported:false,consent:false});await noConsent.start();
+  assert.equal(noConsent.calls.includes('start-request'),false);
 });

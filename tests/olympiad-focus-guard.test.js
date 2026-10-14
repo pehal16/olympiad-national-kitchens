@@ -7,13 +7,14 @@ const vm = require("node:vm");
 const source = fs.readFileSync(path.join(__dirname, "../public/app.js"), "utf8");
 const handlers = source.slice(source.indexOf("function handleExamVisibilityChange()"), source.indexOf("function handleExamBeforeUnload("));
 
-function setup({ fullscreen = false, inProgress = true, visibility = "visible" } = {}) {
+function setup({ fullscreen = false, inProgress = true, visibility = "visible", mobile = false } = {}) {
   const calls = [];
   const state = { examGuardActive: true, blurGuardTimer: null };
   const document = { fullscreenElement: fullscreen ? {} : null, visibilityState: visibility, hasFocus: () => true };
   const context = vm.createContext({
     state, document, clearTimeout() {}, setTimeout() {},
     isAttemptInProgress: () => inProgress,
+    isMobileExamBrowser: () => mobile,
     restoreExamMode: () => calls.push("restore"),
     activateExamGuard: (message, eventType) => calls.push(eventType)
   });
@@ -45,4 +46,14 @@ test("focus and fullscreen transitions do not create incidents after an attempt 
   const run = setup({ fullscreen: true, inProgress: false });
   run.run("handleExamWindowFocus(); handleExamVisibilityChange(); handleExamFullscreenChange();");
   assert.deepEqual(run.calls, []);
+});
+
+test("phone keyboard does not require fullscreen or create a focus incident; app switching remains recorded", () => {
+  const run=setup({mobile:true});
+  run.run('handleExamWindowBlur(); handleExamFullscreenChange();');
+  assert.deepEqual(run.calls,[]);
+  run.document.visibilityState='hidden';run.run('handleExamVisibilityChange();');
+  assert.deepEqual(run.calls,['tab_hidden']);
+  run.document.visibilityState='visible';run.run('handleExamVisibilityChange();');
+  assert.deepEqual(run.calls,['tab_hidden','restore']);
 });

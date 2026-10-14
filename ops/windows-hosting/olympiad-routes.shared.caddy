@@ -1,0 +1,26 @@
+# Official participant API has one authoritative Cloudflare D1 backend.
+# SQLite and its historical trials remain local; no Cloudflare token on this PC.
+@organizer path /admin.html /admin.js /content-admin.html /content-admin.js /api/admin /api/admin/*
+respond @organizer "Not found" 404
+
+@api path /api/*
+header @api {
+	Cache-Control "private, no-store"
+	defer
+}
+
+@participant path /api/health /api/public/olympiad /api/public/register /api/public/attempts/start /api/public/attempts/*
+handle @participant {
+	reverse_proxy https://olympiad-gkts.pages.dev {
+		header_up Host olympiad-gkts.pages.dev
+		header_up -X-Real-IP
+		header_up -Cookie
+	}
+}
+
+handle {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:3100 {
+		header_up -X-Real-IP
+	}
+}

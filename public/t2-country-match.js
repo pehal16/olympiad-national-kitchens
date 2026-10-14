@@ -205,7 +205,7 @@
         preview.hidden=!selected||Boolean(dragging);
         if(selected){const item=nodes.get(selected).item;const thumbnail=element('img');root.RestaurantMedia?.setImage(thumbnail,item.imageUrl,'card');thumbnail.alt='';const name=element('span','',item.text+' · теперь выберите страну');preview.replaceChildren(thumbnail,name);}
         const focused = doc.activeElement;
-        picker.hidden = restaurant || !selected || !coarse;
+        picker.hidden = !selected || !coarse;
         if (selected) {
           pickerLabel.textContent = `Страна для: ${nodes.get(selected).item.text}`;
           picker.setAttribute("aria-label", pickerLabel.textContent);

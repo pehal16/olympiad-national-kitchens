@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="/story-banquet.css?v=live-table5" />
     <link rel="stylesheet" href="/restaurant-layout.css?v=layout5-oct12" />
     <link rel="stylesheet" href="/restaurant-comic.css?v=layout5-oct12" />
+    <link rel="stylesheet" href="/olympiad-ready.css?v=oct16-ready1" />
   </head>
   <body class="olympiad-page">
     <div class="ambient ambient-a"></div>
@@ -47,6 +48,7 @@
           <button id="nav-attempt" class="button ghost" type="button">Текущий тур</button>
           <button id="nav-result" class="button ghost" type="button">Результат</button>
           <a class="button ghost landing-organizer" href="/admin.html">Организатор</a>
+          <a id="reserve-address" class="button ghost hidden" href="https://olympiad-gkts.pages.dev/" rel="noreferrer">Резервный адрес</a>
           <div id="network-status" class="network-badge online" role="status" aria-live="polite">Подключение…</div>
           <button id="install-app" class="button primary hidden" type="button">Установить приложение</button>
         </div>
@@ -62,11 +64,38 @@
           <div class="landing-hero-actions">
             <button id="hero-action-register" class="button primary" type="button" disabled>Загрузка олимпиады…</button>
             <button id="hero-action-rules" class="landing-text-link" type="button">Правила <span aria-hidden="true">→</span></button>
+            <button id="hero-action-preparation" class="landing-text-link" type="button">Как подготовиться <span aria-hidden="true">↓</span></button>
             <a class="landing-demo-link" href="/visual-demo.html#margherita" aria-label="Открыть мастерскую блюд без баллов">Мастерская блюд <span aria-hidden="true">↗</span></a>
           </div>
           <p id="hero-format-badge" class="landing-facts">18 минут 45 секунд <span>·</span> 5 туров <span>·</span> 36 заданий</p>
           <p class="landing-pilot-note">Тестовый запуск. Результаты неофициальны до утверждения организатором.</p>
         </div>
+      </section>
+
+      <section id="admission-banner" class="admission-banner" aria-label="Время проведения" data-open="false">
+        <div><strong id="admission-title">16 октября · 08:00–16:00</strong><p id="admission-description">Время московское. До открытия можно прочитать рекомендации и правила.</p></div>
+        <span id="admission-status" class="admission-status" role="status">Старт ещё не открыт</span>
+      </section>
+      <section id="preparation-section" class="preparation-section" aria-labelledby="preparation-title">
+        <div class="eyebrow">Подготовка к путешествию</div>
+        <h2 id="preparation-title">Какие кухни повторить</h2>
+        <p class="preparation-intro">Вспомните характерные блюда, основные продукты и способы приготовления. Вопросы охватывают разные кухни мира; этот обзор задаёт направления подготовки, а не раскрывает ответы или порядок заданий.</p>
+        <div class="preparation-grid">
+          <article class="preparation-card"><h3>Европа</h3><p>Италия, Франция, Греция, Испания, Австрия, Швейцария, Бельгия, Великобритания и Венгрия. Супы, салаты, паста, выпечка и десерты.</p></article>
+          <article class="preparation-card"><h3>Россия и Беларусь</h3><p>Супы, изделия из теста, блюда из картофеля и творога. Обращайте внимание на состав, форму и способ тепловой обработки.</p></article>
+          <article class="preparation-card"><h3>Кавказ и Центральная Азия</h3><p>Грузия и Узбекистан. Мясные блюда, крупы, изделия из теста и традиционные способы приготовления.</p></article>
+          <article class="preparation-card"><h3>Восточная и Юго-Восточная Азия</h3><p>Япония, Китай, Республика Корея, Вьетнам и Таиланд. Рис, лапша, супы, соусы и сочетания продуктов.</p></article>
+          <article class="preparation-card"><h3>Восточное Средиземноморье</h3><p>Ливан и Израиль. Блюда из бобовых и овощей, пасты, приправы и способы подачи.</p></article>
+          <article class="preparation-card"><h3>Северная Америка</h3><p>США и Мексика. Популярные ресторанные блюда, закуски, начинённые изделия и региональные варианты рецептов.</p></article>
+        </div>
+        <h3>На что обратить внимание</h3>
+        <ul class="preparation-checklist">
+          <li>Учитесь узнавать блюдо по внешнему виду, а затем проверяйте себя по составу и технологии.</li>
+          <li>Повторите названия и различия похожих блюд. В записной книжке название нужно будет ввести самостоятельно.</li>
+          <li>Читайте заказ целиком: важны одновременно продукты, способ приготовления и подача.</li>
+          <li>При сборке учитывайте именно указанную в задании версию рецепта. Национальные и ресторанные версии могут различаться.</li>
+        </ul>
+        <p class="preparation-note">Перед стартом проверьте интернет и заряд устройства, отключите отвлекающие уведомления. На телефоне выбирайте блюдо и страну касаниями — перетаскивание необязательно. Т1–Т4: по 30 секунд на задание; Т5: по 45 секунд на сборку и подачу. Общий предел — 18 минут 45 секунд.</p>
       </section>
 
       <section class="grid-two" id="prestart-section">
@@ -126,8 +155,9 @@
             <label class="consent-check">
               <input id="start-consent" type="checkbox" />
               <span>
-                Я ознакомлен(а) с правилами: уход из вкладки, потеря фокуса и выход из
-                полноэкранного режима блокируют продолжение и фиксируются в журнале; таймер
+                Я ознакомлен(а) с правилами: уход из вкладки блокирует продолжение и фиксируется
+                в журнале. На компьютере также контролируются потеря фокуса и выход из
+                полноэкранного режима; на телефоне работа идёт в активной вкладке. Таймер
                 при этом не останавливается. Попытки вставки текста и нажатие Print Screen
                 также записываются, если браузер передаёт это событие.
               </span>
@@ -232,6 +262,7 @@
               <div id="attempt-sync-meta" class="muted">Последняя синхронизация: —</div>
             </div>
             <div id="attempt-message" class="message hidden"></div>
+            <a id="attempt-reserve-address" class="button ghost hidden" href="https://olympiad-gkts.pages.dev/" rel="noreferrer">Продолжить на резервном адресе</a>
           </div>
         </section>
       </section>
@@ -287,17 +318,19 @@
 
     <script src="/restaurant-media.js?v=layout5-oct12"></script>
     <script src="/restaurant-atlas.js?v=layout5-oct12"></script>
-    <script src="/t2-country-match.js?v=1.7.0-layout5-oct12"></script>
+    <script src="/t2-country-match.js?v=1.7.0-oct16-ready1"></script>
     <script src="/t3-detective.js?v=1.7.0-layout5-oct12"></script>
     <script src="/t4-guest-order.js?v=1.7.0-layout5-oct12"></script>
     <script src="/t5-photo-model.js?v=1.7.0-story2"></script>
     <script src="/t5-dish-service.js?v=1.7.0-layout5-oct12"></script>
-    <script src="/t5-photo-kitchen.js?v=1.7.0-assembly45"></script>
+    <script src="/t5-photo-kitchen.js?v=1.7.0-oct16-ready1"></script>
     <script src="/t5-final-kitchen.js?v=1.7.0-layout2"></script>
-    <script src="/restaurant-layout.js?v=layout5-assembly45"></script>
+    <script src="/restaurant-layout.js?v=oct16-ready1"></script>
     <script src="/story-dialogue.js?v=layout5-oct12"></script>
     <script src="/story-banquet.js?v=assembly45"></script>
     <script src="/olympiad-story.js?v=story-layout5-assembly45"></script>
-    <script src="/app.js?v=1.7.0-assembly45"></script>
+    <script src="/olympiad-device.js?v=oct16-ready1"></script>
+    <script src="/attempt-reserve.js?v=shared1"></script>
+    <script src="/app.js?v=1.7.0-oct16-ready1"></script>
   </body>
 </html>

@@ -29,7 +29,7 @@
     const note=doc.querySelector('.landing-pilot-note');
     if(note)note.textContent=olympiad.story?.entryMode==='anytime'
       ? (olympiad.story.entryOpen?`Начните в любое время. Первые четыре тура — по 30 секунд на задание; кухня — по 45 секунд на блюдо. Всего ${root.formatLimitMinutes(olympiad.durationMinutes)}.`:olympiad.story.publishedAt?'Итоги опубликованы. Новые попытки этого проведения закрыты.':'Организатор остановил новые старты. Начатые попытки продолжаются.')
-      : olympiad.story?`Вход ${olympiad.story.date}: с 00:00 до 00:00 следующего дня по Москве. Каждому — ${root.formatLimitMinutes(olympiad.durationMinutes)}.`:'Дата проведения будет объявлена организатором.';
+      : olympiad.story?`Вход ${olympiad.story.date}: с ${new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit'}).format(new Date(olympiad.story.entryStartsAt))} до ${new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit'}).format(new Date(olympiad.story.entryEndsAt))}${Date.parse(olympiad.story.entryEndsAt)-Date.parse(olympiad.story.entryStartsAt)===86400000?' следующего дня':''} по Москве. Каждому — ${root.formatLimitMinutes(olympiad.durationMinutes)}.`:'Дата проведения будет объявлена организатором.';
     let section=doc.getElementById('story-introduction');
     if(!section){
     section=el('section','story-introduction');section.id='story-introduction';

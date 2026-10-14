@@ -13,11 +13,21 @@ function decode(row) {
 function entryOpen(run, now = Date.now()) {
   return Boolean(run && !run.stopped && !run.publishedAt && (run.entryMode==='anytime' || (now >= Date.parse(run.entryStartsAt) && now < Date.parse(run.entryEndsAt))));
 }
-function makeRun(date, id = require('crypto').randomUUID()) {
+function makeRun(date, id = require('crypto').randomUUID(), window = {}) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date))) throw new Error('Укажите дату проведения.');
   const start = new Date(`${date}T00:00:00+03:00`);
   if (!Number.isFinite(start.getTime()) || new Date(start.getTime()+10800000).toISOString().slice(0,10)!==date) throw new Error('Некорректная дата.');
-  return { id, date, entryMode:'scheduled', timeZone:'Europe/Moscow', entryStartsAt:start.toISOString(), entryEndsAt:new Date(start.getTime()+86400000).toISOString(),
+  const bounded=window.startTime!==undefined||window.endTime!==undefined;
+  const startTime=window.startTime??'00:00',endTime=window.endTime??'24:00';
+  const minutes=(time,end=false)=>{
+    if(end&&time==='24:00')return 1440;
+    if(typeof time!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(time))throw new Error('Время входа указывается в формате ЧЧ:ММ по Москве.');
+    return Number(time.slice(0,2))*60+Number(time.slice(3));
+  };
+  const from=minutes(startTime),to=minutes(endTime,true);
+  if(to<=from)throw new Error('Закрытие входа должно быть позже открытия в выбранную дату.');
+  return { id, date, entryMode:'scheduled', timeZone:'Europe/Moscow', entryStartsAt:new Date(start.getTime()+from*60000).toISOString(), entryEndsAt:new Date(start.getTime()+to*60000).toISOString(),
+    ...(bounded?{fixedAdmission:true}:{}),
     blueprintVersion:15, storyVersion:1, assetVersion:1, createdAt:new Date().toISOString(), publishedAt:null, stopped:false, decorationsDisabled:false };
 }
 async function listRuns() {
@@ -28,8 +38,8 @@ async function getRun(id) {
   if (env?.DB) return decode(await retryD1(() => env.DB.prepare('SELECT * FROM olympiad_story_runs WHERE id=?').bind(id).first()));
   return readJson(localFile(), []).find(r=>r.id===id) || null;
 }
-async function createRun(date) {
-  const run = makeRun(date);
+async function createRun(date, window = {}) {
+  const run = makeRun(date,undefined,window);
   if (env?.DB) {
     await retryD1(() => env.DB.prepare('INSERT INTO olympiad_story_runs(id,event_date,entry_starts_at,entry_ends_at,payload_json) VALUES(?,?,?,?,?) ON CONFLICT(id) DO NOTHING')
       .bind(run.id,run.date,run.entryStartsAt,run.entryEndsAt,JSON.stringify(run)).run());
@@ -86,18 +96,40 @@ async function publishRun(id, now=Date.now()) {
   run.publishedAt=stamp; writeJson(localFile(),runs); return run;
 }
 async function currentRun(now=Date.now()) {
+  const officialDate=env?.OFFICIAL_OLYMPIAD_DATE??process.env.OFFICIAL_OLYMPIAD_DATE;
+  if(officialDate){
+    const wanted=makeRun(officialDate,`official-${officialDate}`,{startTime:env?.OFFICIAL_OLYMPIAD_START_TIME??process.env.OFFICIAL_OLYMPIAD_START_TIME??'08:00',endTime:env?.OFFICIAL_OLYMPIAD_END_TIME??process.env.OFFICIAL_OLYMPIAD_END_TIME??'16:00'});
+    let official=(await listRuns()).find(r=>r.date===officialDate);
+    if(!official){
+      if(env?.DB){
+        await retryD1(()=>env.DB.prepare('INSERT INTO olympiad_story_runs(id,event_date,entry_starts_at,entry_ends_at,entry_mode,payload_json) VALUES(?,?,?,?,?,?) ON CONFLICT(event_date) DO NOTHING')
+          .bind(wanted.id,wanted.date,wanted.entryStartsAt,wanted.entryEndsAt,'scheduled',JSON.stringify(wanted)).run());
+        official=(await listRuns()).find(r=>r.date===officialDate);
+      }else official=await createRun(officialDate,{startTime:env?.OFFICIAL_OLYMPIAD_START_TIME??process.env.OFFICIAL_OLYMPIAD_START_TIME??'08:00',endTime:env?.OFFICIAL_OLYMPIAD_END_TIME??process.env.OFFICIAL_OLYMPIAD_END_TIME??'16:00'});
+    }
+    if(!official||official.entryStartsAt!==wanted.entryStartsAt||official.entryEndsAt!==wanted.entryEndsAt)throw new Error('Сохранённое время проведения отличается от настройки. Изменение существующих попыток не выполнено.');
+    return official;
+  }
   const runs=await listRuns();
   const scheduled=runs.filter(r=>r.entryMode!=='anytime');
   const active=scheduled.find(r=>now>=Date.parse(r.entryStartsAt)&&now<Date.parse(r.entryEndsAt));
   if(active)return active;
+  // An explicitly timed official day closes free entry before and after its
+  // window. Legacy whole-day runs retain the existing anytime behavior.
+  const bounded=scheduled.filter(r=>r.fixedAdmission);
+  if(bounded.length)return [...bounded].reverse().find(r=>Date.parse(r.entryStartsAt)>now)||bounded[0];
   if(anytimeEntryEnabled())return runs.find(r=>r.id===ANYTIME_RUN_ID)||ensureAnytimeRun();
   return [...scheduled].reverse().find(r=>Date.parse(r.entryStartsAt)>now) || scheduled[0] || null;
+}
+function recoveryPolicy(){
+  return env?.DB&&String(env?.SHARED_OLYMPIAD_BACKEND??process.env.SHARED_OLYMPIAD_BACKEND)==='d1'
+    ?{backend:'shared-d1',origins:['https://xn--80aaloaqinm.xn--b1amqadnhd.xn--p1ai','https://olympiad-gkts.pages.dev']}:null;
 }
 function publicRun(run, now=Date.now()) {
   if(!run) return null;
   return { id:run.id,date:run.date,entryMode:run.entryMode||'scheduled',timeZone:run.timeZone,entryStartsAt:run.entryStartsAt,entryEndsAt:run.entryEndsAt,
     blueprintVersion:run.blueprintVersion,storyVersion:run.storyVersion,assetVersion:run.assetVersion,
-    entryOpen:entryOpen(run,now),stopped:run.stopped,publishedAt:run.publishedAt,decorationsDisabled:run.decorationsDisabled };
+    serverTime:new Date(now).toISOString(),entryOpen:entryOpen(run,now),stopped:run.stopped,publishedAt:run.publishedAt,decorationsDisabled:run.decorationsDisabled };
 }
 async function hydrate(attempt) {
   if(attempt?.storyRunId) Object.defineProperty(attempt,'_storyRun',{value:await getRun(attempt.storyRunId),writable:true,enumerable:false,configurable:true});
@@ -117,4 +149,4 @@ function storyView(attempt) {
 function scoresVisible(attempt,settings) {
   return attempt.status!=='in_progress' && (attempt.storyRunId ? Boolean(attempt._storyRun?.publishedAt) : Boolean(settings.showParticipantScore));
 }
-module.exports={configureStoryStorage,enabled,makeRun,entryOpen,listRuns,getRun,createRun,updateRun,publishRun,currentRun,publicRun,hydrate,storyView,scoresVisible};
+module.exports={configureStoryStorage,enabled,makeRun,entryOpen,listRuns,getRun,createRun,updateRun,publishRun,currentRun,publicRun,hydrate,storyView,scoresVisible,recoveryPolicy};

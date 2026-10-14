@@ -3645,6 +3645,7 @@ async function handleApi(req, res, url, runtime = {}) {
     const data=getOlympiadPublicData(await ensureOlympiad());
     data.storyEnabled=storyEnabled();
     data.story=storyEnabled()?storyRuns.publicRun(await storyRuns.currentRun()):null;
+    if(storyRuns.recoveryPolicy())data.recovery=storyRuns.recoveryPolicy();
     sendJson(res, 200, { ok: true, data });
     return;
   }
@@ -4271,13 +4272,18 @@ async function handleApi(req, res, url, runtime = {}) {
     }
 
     if(pathname==="/api/admin/story-runs"&&method==="GET") {
-      if(storyEnabled())await storyRuns.currentRun();
+      const current=storyEnabled()?await storyRuns.currentRun():null,now=Date.now();
       const runs=await storyRuns.listRuns(),olympiad=await ensureOlympiad(),normalized=[];
-      for(const a of (await loadAttemptSummaries()).filter(a=>a.storyRunId)) normalized.push(await normalizeAndPersistIfChanged(olympiad,await loadAttemptById(a.id)));
-      sendJson(res,200,{ok:true,data:runs.map(run=>{const own=normalized.filter(a=>a.storyRunId===run.id);return {...storyRuns.publicRun(run),started:own.length,completed:own.filter(a=>a.status!=="in_progress").length,active:own.filter(a=>a.status==="in_progress").length};})});return;
+      for(const a of (await loadAttemptSummaries()).filter(a=>a.storyRunId)) normalized.push(a.status==='in_progress'&&Date.parse(a.expiresAt)<=now?await normalizeAndPersistIfChanged(olympiad,await loadAttemptById(a.id)):a);
+      sendJson(res,200,{ok:true,data:runs.map(run=>{
+        const own=normalized.filter(a=>a.storyRunId===run.id),active=own.filter(a=>a.status==='in_progress').length;
+        const closed=run.entryMode==='anytime'?run.stopped:now>=Date.parse(run.entryEndsAt);
+        const publicationBlockers=[...(!closed?['Приём новых участников ещё не завершён.']:[]),...(active?[`Активных попыток: ${active}.`]:[])];
+        return {...storyRuns.publicRun(run,now),isCurrent:run.id===current?.id,serverTime:new Date(now).toISOString(),started:own.length,completed:own.length-active,active,canPublish:!run.publishedAt&&closed&&!active,publicationBlockers};
+      })});return;
     }
     if(pathname==="/api/admin/story-runs"&&method==="POST") {
-      const body=await parseBody(req,{maxBytes:4096});try{const run=await storyRuns.createRun(body.date);invalidateAttemptCaches();sendJson(res,201,{ok:true,data:storyRuns.publicRun(run)});}catch(error){sendJson(res,409,{ok:false,message:error.message});}return;
+      const body=await parseBody(req,{maxBytes:4096});try{const run=await storyRuns.createRun(body.date,{startTime:body.startTime,endTime:body.endTime});invalidateAttemptCaches();sendJson(res,201,{ok:true,data:storyRuns.publicRun(run)});}catch(error){sendJson(res,409,{ok:false,message:error.message});}return;
     }
     if(pathname.match(/^\/api\/admin\/story-runs\/[^/]+$/)&&method==="PATCH") {
       const body=await parseBody(req,{maxBytes:4096});if(Object.keys(body).some(k=>!["stopped","decorationsDisabled"].includes(k))){sendJson(res,400,{ok:false,message:"Дата и версии закреплены. Создайте другое проведение."});return;}

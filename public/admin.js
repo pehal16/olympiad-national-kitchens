@@ -28,23 +28,51 @@ async function loadStoryRuns() {
   const runs=await adminApi('/api/admin/story-runs');
   const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
   if(!mount.dataset.ready){
-    mount.append(el('h2','Ресторан путешествий: проведение'),el('p','В режиме свободного входа начать можно в любое время. Для публикации итогов остановите новые старты и дождитесь завершения активных попыток. Новые попытки: по 30 секунд в Т1–Т4 и по 45 секунд на каждую сборку Т5, всего 18 минут 45 секунд. Ранее начатые сохраняют свои лимиты и отдельный рейтинг. При необходимости можно создать отдельный день по Москве.'));
+    mount.append(el('h2','Проведение олимпиады'),el('p','Здесь управляются допуск, активные попытки и публикация общих итогов. Остановка новых стартов не прерывает уже начатые попытки.'));
+    const current=el('div');current.id='story-run-current';mount.append(current);
+    const archive=el('details');archive.append(el('summary','Другие проведения и пробные попытки'));
+    const list=el('div');list.id='story-run-list';archive.append(list);mount.append(archive);
+    const planning=el('details');planning.append(el('summary','Создать отдельный день проведения'));
     const form=el('form'),label=el('label','Дата проведения по Москве '),date=el('input');date.type='date';date.required=true;label.append(date);
+    date.value='2026-10-16';date.setAttribute('aria-label','Дата проведения');
+    const hours=el('label','Открытие входа '),startTime=el('input');startTime.type='time';startTime.value='08:00';startTime.required=true;startTime.setAttribute('aria-label','Открытие входа');hours.append(startTime);
+    const closing=el('label','Закрытие входа '),endTime=el('input');endTime.type='time';endTime.value='16:00';endTime.required=true;closing.append(endTime);
+    endTime.setAttribute('aria-label','Закрытие входа');
     const create=el('button','Создать день');create.className='button primary';create.type='submit';
     const message=el('p');message.className='story-run-message';message.setAttribute('role','status');message.id='story-run-message';
-    form.append(label,create);form.addEventListener('submit',async event=>{event.preventDefault();create.disabled=true;try{await adminApi('/api/admin/story-runs',{method:'POST',body:JSON.stringify({date:date.value})});message.textContent='Проведение создано. Дата и версии закреплены.';await loadStoryRuns();}catch(error){message.textContent=error.message;}finally{create.disabled=false;}});
-    const list=el('div');list.id='story-run-list';mount.append(form,message,list);mount.dataset.ready='true';
+    form.append(label,hours,closing,create);form.addEventListener('submit',async event=>{event.preventDefault();create.disabled=true;try{await adminApi('/api/admin/story-runs',{method:'POST',body:JSON.stringify({date:date.value,startTime:startTime.value,endTime:endTime.value})});message.textContent='Проведение создано. Дата, часы входа и версии закреплены.';await loadStoryRuns();}catch(error){message.textContent=error.message;}finally{create.disabled=false;}});
+    planning.append(el('p','После создания время закрепляется. Основное проведение выделено выше; отдельный день не заменяет его автоматически.'),form);mount.append(planning,message);mount.dataset.ready='true';
   }
-  const list=document.getElementById('story-run-list');list.replaceChildren();
-  if(!runs.length)list.append(el('p','Дата ещё не назначена. Новые сценарные попытки закрыты.'));
+  // Keep controls stable while an operation is awaiting server confirmation.
+  if(mount.dataset.busy==='true')return;
+  const list=document.getElementById('story-run-list'),current=document.getElementById('story-run-current');list.replaceChildren();current.replaceChildren();
+  if(!runs.length)current.append(el('p','Дата ещё не назначена. Новые сценарные попытки закрыты.'));
+  const time=value=>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit'}).format(new Date(value));
+  const date=value=>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',day:'numeric',month:'long',year:'numeric'}).format(new Date(value));
   for(const run of runs){
-    const row=el('article');row.className='story-run-row';row.append(el('h3',run.entryMode==='anytime'?'Свободный вход · начать в любое время':`${run.date} · Москва`),el('p',`Начато: ${run.started}. Завершено: ${run.completed}. Активно: ${run.active}. ${run.publishedAt?'Итоги опубликованы':run.entryOpen?'Вход открыт':run.stopped?'Новые старты остановлены':'Вход закрыт или ещё не открыт'}.`));
+    const now=Date.parse(run.serverTime)||Date.now(),isCurrent=run.isCurrent;
+    const row=el('article');row.className='story-run-row'+(isCurrent?' is-current':'');row.dataset.runId=run.id;
+    const heading=el('div');heading.className='story-run-heading';
+    heading.append(el('h3',run.entryMode==='anytime'?'Пробный свободный вход':date(run.entryStartsAt)));
+    const state=el('span',run.publishedAt?'Итоги опубликованы':run.stopped?'Новые старты остановлены':run.entryOpen?'Вход открыт':now<Date.parse(run.entryStartsAt)?'Ожидает начала':'Вход закрыт');state.className='story-run-state';heading.append(state);row.append(heading);
+    if(run.entryMode!=='anytime')row.append(el('p',`Вход с ${time(run.entryStartsAt)} до ${time(run.entryEndsAt)} по Москве. До начала и после закрытия новые попытки недоступны.`));
+    const metrics=el('div');metrics.className='story-run-metrics';
+    for(const [label,count] of [['Начали',run.started],['Завершили',run.completed],['Проходят',run.active]]){const card=el('div');card.className='story-run-metric';card.append(el('strong',String(count)),el('span',label));metrics.append(card);}row.append(metrics);
+    const help=el('p');help.className='story-run-help';help.textContent=run.publishedAt?'Общие итоги, заработанное меню и разбор доступны участникам. Свидетельство с личными баллами выдаётся сразу после завершения.':run.entryMode==='anytime'?'Перед публикацией остановите новые старты и дождитесь завершения всех начатых попыток.':`Вход открывается автоматически. Публикация общих итогов — после ${time(run.entryEndsAt)} и завершения всех попыток. У последнего участника сохраняются полные 18 минут 45 секунд.`;row.append(help);
     const actions=el('div');actions.className='story-run-actions';
-    async function action(path,method,body,button){button.disabled=true;try{await adminApi(path,{method,...(body?{body:JSON.stringify(body)}:{})});document.getElementById('story-run-message').textContent='Изменение сохранено.';await loadStoryRuns();}catch(error){document.getElementById('story-run-message').textContent=error.message;button.disabled=false;}}
+    async function action(path,method,body){
+      if(mount.dataset.busy==='true')return;
+      mount.dataset.busy='true';row.setAttribute('aria-busy','true');actions.querySelectorAll('button').forEach(b=>b.disabled=true);
+      try{await adminApi(path,{method,...(body?{body:JSON.stringify(body)}:{})});document.getElementById('story-run-message').textContent='Изменение подтверждено сервером.';}
+      catch(error){document.getElementById('story-run-message').textContent=error.message;}
+      finally{delete mount.dataset.busy;await loadStoryRuns();}
+    }
     const stop=el('button',run.stopped?'Возобновить новые старты':'Остановить новые старты');stop.className='button secondary';stop.type='button';stop.disabled=Boolean(run.publishedAt);stop.addEventListener('click',()=>action(`/api/admin/story-runs/${run.id}`,'PATCH',{stopped:!run.stopped},stop));
     const decoration=el('button',run.decorationsDisabled?'Включить оформление':'Отключить оформление');decoration.className='button secondary';decoration.type='button';decoration.addEventListener('click',()=>action(`/api/admin/story-runs/${run.id}`,'PATCH',{decorationsDisabled:!run.decorationsDisabled},decoration));
-    const publish=el('button',run.publishedAt?'Опубликовано':'Опубликовать итоги');publish.type='button';publish.className='button primary';publish.disabled=Boolean(run.publishedAt)||(run.entryMode==='anytime'?!run.stopped:Date.now()<Date.parse(run.entryEndsAt))||run.active>0;publish.addEventListener('click',()=>action(`/api/admin/story-runs/${run.id}/publish`,'POST',null,publish));
-    actions.append(stop,decoration,publish);row.append(actions);list.append(row);
+    const publish=el('button',run.publishedAt?'Опубликовано':'Опубликовать общие итоги');publish.type='button';publish.className='button primary';publish.disabled=run.canPublish!==undefined?!run.canPublish:Boolean(run.publishedAt)||(run.entryMode==='anytime'?!run.stopped:now<Date.parse(run.entryEndsAt))||run.active>0;publish.addEventListener('click',()=>action(`/api/admin/story-runs/${run.id}/publish`,'POST',null,publish));
+    actions.append(stop,decoration,publish);row.append(actions);
+    if(!run.publishedAt&&run.publicationBlockers?.length)row.append(el('p','Публикация пока недоступна: '+run.publicationBlockers.join(' ')));
+    (isCurrent?current:list).append(row);
   }
 }
 

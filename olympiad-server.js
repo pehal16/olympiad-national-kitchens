@@ -5,6 +5,8 @@ const path = require("node:path");
 const { createSqliteD1 } = require("./src/sqlite-d1");
 
 const STATIC_FILES = new Set([
+  '/olympiad-ready.css', '/olympiad-device.js',
+  '/attempt-reserve.js',
   '/story-dialogue.js','/restaurant-comic.css','/story-banquet.js','/story-banquet.css',
   '/restaurant-layout.js', '/restaurant-layout.css', '/restaurant-media.js', '/restaurant-atlas.js',
   "/", "/olympiad-story.js", "/olympiad-story.css", "/t5-photo-model.js", "/t5-photo-kitchen.js", "/t5-photo-kitchen.css", "/t5-dish-service.js", "/t5-dish-service.css", "/certificate.html", "/certificate.js", "/certificate.css", "/index.html", "/app.js", "/t2-country-match.js", "/t3-detective.js", "/t4-guest-order.js", "/t5-final-kitchen.js", "/t5-final-kitchen.css", "/styles.css", "/admin.html", "/admin.js",
@@ -45,6 +47,8 @@ function sendJson(res, status, data) {
 }
 
 function createOlympiadServer(options = {}) {
+  const publicApiOrigin=options.publicApiOrigin||'';
+  if(publicApiOrigin&&publicApiOrigin!=='https://olympiad-gkts.pages.dev')throw new Error('Unsupported shared API origin.');
   const adminPassword = String(options.adminPassword || process.env.ADMIN_PASSWORD || "");
   const attemptIdSecret = String(options.attemptIdSecret || process.env.ATTEMPT_ID_SECRET || "");
   if (adminPassword.length < 16 || attemptIdSecret.length < 32) {
@@ -87,7 +91,11 @@ function createOlympiadServer(options = {}) {
     res.setHeader("X-Frame-Options", "DENY");
 
     try {
-      if (pathname === "/api/health" && req.method === "GET") {
+      if(publicApiOrigin&&(pathname==='/api/health'||(pathname.startsWith('/api/public/')&&isOlympiadApi(pathname)))){
+        await require('./src/shared-olympiad-api').relayParticipantApi(req,res,url,options.sharedApiFetch||fetch);
+      }else if(publicApiOrigin&&pathname==='/admin.html'&&req.method==='GET'){
+        res.writeHead(302,{Location:publicApiOrigin+'/admin.html','Cache-Control':'no-store'});res.end();
+      }else if (pathname === "/api/health" && req.method === "GET") {
         sendJson(res, 200, { ok: true, appVersion, mode: "olympiad-only", storage: "sqlite" });
       } else if (pathname.startsWith("/api/")) {
         if (!isOlympiadApi(pathname)) {

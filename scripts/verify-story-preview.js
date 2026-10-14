@@ -40,8 +40,8 @@ async function main(){
   await sql('DELETE FROM attempt_answers WHERE attempt_id IN (SELECT id FROM attempts WHERE story_run_id IS NOT NULL)');
   await sql('DELETE FROM attempt_variants WHERE id IN (SELECT id FROM attempts WHERE story_run_id IS NOT NULL)');
   await sql('DELETE FROM attempts WHERE story_run_id IS NOT NULL');await sql('DELETE FROM olympiad_story_runs');
-  for(const count of [50,60]){
-    const date=new Date(Date.now()+11250000+(count===60?86400000:0)).toISOString().slice(0,10);
+  for(const count of [50,70]){
+    const date=new Date(Date.now()+11250000+(count>50?86400000:0)).toISOString().slice(0,10);
     const run=count===50?(await api('/api/public/olympiad')).story:await api('/api/admin/story-runs','',{date});
     if(count===50){assert.equal(run.entryMode,'anytime');assert.equal(run.date,null);assert.equal(run.entryOpen,true);}
     else {

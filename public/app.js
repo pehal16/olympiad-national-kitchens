@@ -179,6 +179,20 @@ function updateHeroAction() {
   }
 }
 
+function updateAdmissionBanner() {
+  const banner=document.getElementById('admission-banner'),run=state.olympiad?.story;
+  if(!banner)return;
+  banner.hidden=!run;
+  if(!run)return;
+  const date=value=>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',day:'numeric',month:'long'}).format(new Date(value));
+  const hour=value=>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit'}).format(new Date(value));
+  document.getElementById('admission-title').textContent=run.entryMode==='anytime'?'Свободный вход':`${date(run.entryStartsAt)} · ${hour(run.entryStartsAt)}–${hour(run.entryEndsAt)}`;
+  banner.dataset.open=String(run.entryOpen);
+  const before=(Date.parse(run.serverTime)||Date.now())<Date.parse(run.entryStartsAt);
+  document.getElementById('admission-status').textContent=run.publishedAt?'Итоги опубликованы':run.stopped?'Новые старты остановлены':run.entryOpen?'Можно начинать':before?'Старт ещё не открыт':'Приём завершён';
+  document.getElementById('admission-description').textContent=run.entryOpen?'Начните в пределах времени входа. Каждому — полный личный лимит 18 минут 45 секунд.':run.publishedAt?'Участники могут вернуться к своим результатам.':run.stopped?'Начатые попытки продолжаются. Новые старты возобновляет организатор.':before?'Время московское. До открытия изучите рекомендации и правила.':'Приём новых участников завершён. Начатые попытки продолжаются в пределах своего личного времени.';
+}
+
 function refreshNavigationState() {
   const attemptActive = Boolean(state.attempt && state.attempt.status === "in_progress");
   const resultVisible =
@@ -381,6 +395,14 @@ function supportsOlympiadFullscreen() {
   return typeof document.documentElement.requestFullscreen === "function" && document.fullscreenEnabled !== false;
 }
 
+function isMobileExamBrowser() {
+  return window.OlympiadDevice?.isMobile(navigator) === true;
+}
+
+function supportsOlympiadProtectedMode() {
+  return isMobileExamBrowser() || supportsOlympiadFullscreen();
+}
+
 function unsupportedOlympiadBrowserMessage() {
   return "В этом браузере недоступен полноэкранный режим, обязательный для олимпиады. Используйте Chrome или Edge на компьютере либо другое устройство с поддержкой полноэкранного режима.";
 }
@@ -401,7 +423,7 @@ function updateExamGuardUi() {
   }
 
   if (elements.examGuardReturn) {
-    const supported = supportsOlympiadFullscreen();
+    const supported = supportsOlympiadProtectedMode();
     elements.examGuardReturn.disabled = !supported;
     elements.examGuardReturn.textContent = supported ? "Вернуться к олимпиаде" : "Полноэкранный режим недоступен";
   }
@@ -505,7 +527,7 @@ function updateStartAvailability() {
   const blockedByCompletion = elements.startAttempt.dataset.lockReason === "completed";
   const hasParticipant = Boolean(state.participant);
   const consentGranted = !elements.startConsent || elements.startConsent.checked;
-  const browserSupported = supportsOlympiadFullscreen();
+  const browserSupported = supportsOlympiadProtectedMode();
   const entryBlocked = state.olympiad?.storyEnabled && !state.olympiad?.story?.entryOpen && !state.activeAttemptId;
 
   elements.startAttempt.disabled = blockedByCompletion || entryBlocked || !hasParticipant || !consentGranted || state.isStartingAttempt || !browserSupported;
@@ -544,6 +566,7 @@ function unlockExamKeyboard() {
 }
 
 async function requestExamFullscreen(options = {}) {
+  if (isMobileExamBrowser()) return document.visibilityState === "visible";
   if (document.fullscreenElement) {
     await tryLockExamKeyboard();
     return true;
@@ -573,13 +596,13 @@ async function restoreExamMode() {
     return true;
   }
 
-  if (!supportsOlympiadFullscreen()) {
+  if (!supportsOlympiadProtectedMode()) {
     activateExamGuard(`${unsupportedOlympiadBrowserMessage()} Если попытка уже начата, обратитесь к организатору.`, "fullscreen_required");
     return false;
   }
 
   const fullscreenReady = await requestExamFullscreen({ silent: true });
-  const focusReady = document.visibilityState === "visible" && document.hasFocus();
+  const focusReady = document.visibilityState === "visible" && (isMobileExamBrowser() || document.hasFocus());
 
   if (fullscreenReady && focusReady) {
     releaseExamGuard("Контроль восстановлен. Можно продолжать.");
@@ -692,12 +715,15 @@ function handleExamVisibilityChange() {
     return;
   }
 
-  if (state.examGuardActive && document.fullscreenElement) {
+  if (state.examGuardActive && (isMobileExamBrowser() || document.fullscreenElement)) {
     restoreExamMode();
   }
 }
 
 function handleExamWindowBlur() {
+  // Mobile keyboard/native controls can blur a still-visible page. Switching
+  // apps or tabs is handled by visibilitychange and pagehide on these devices.
+  if (isMobileExamBrowser()) return;
   if (!isAttemptInProgress()) {
     return;
   }
@@ -715,12 +741,13 @@ function handleExamWindowBlur() {
 
 function handleExamWindowFocus() {
   clearTimeout(state.blurGuardTimer);
-  if (isAttemptInProgress() && state.examGuardActive && document.fullscreenElement) {
+  if (isAttemptInProgress() && state.examGuardActive && (isMobileExamBrowser() || document.fullscreenElement)) {
     restoreExamMode();
   }
 }
 
 function handleExamFullscreenChange() {
+  if (isMobileExamBrowser()) return;
   if (!isAttemptInProgress()) {
     return;
   }
@@ -1615,6 +1642,61 @@ async function restoreSessionAttempt() {
   }
 }
 
+let pendingReserveTransfer=null;
+function receiveReserveTransfer(){
+  if(!window.AttemptReserve||!location.hash.startsWith('#resume='))return;
+  const hash=location.hash;
+  history.replaceState(null,'',location.pathname+location.search);
+  pendingReserveTransfer=window.AttemptReserve.decode(hash,location.origin);
+}
+async function restoreReserveTransfer(){
+  if(!pendingReserveTransfer)return false;
+  if(state.olympiad?.recovery?.backend!=='shared-d1')throw new Error('Этот адрес пока не подключён к общей базе. Вернитесь на исходную страницу.');
+  const t=pendingReserveTransfer;
+  // Verify ownership before persisting a credential or replacing a saved draft.
+  const attempt=await api(`/api/public/attempts/${encodeURIComponent(t.attemptId)}`,{attemptToken:t.token});
+  rememberAttemptAccessToken(attempt.id,t.token);
+  if(t.queue?.length){try{localStorage.setItem(pendingQueueStorageKey(attempt.id),JSON.stringify(t.queue));}catch{state.pendingQueueAttemptId=attempt.id;state.pendingAnswerQueue=t.queue;}}
+  if(t.draft?.questionId===attempt.currentQuestion?.id){state.localDrafts[t.draft.questionId]=t.draft.answer;try{localStorage.setItem(`nko_story_draft_v2_${attempt.id}_${t.draft.questionId}`,JSON.stringify(t.draft.answer));}catch{}}
+  state.participant=attempt.participant;renderParticipant();applyAttemptState(attempt);
+  if(attempt.status==='in_progress'){startTimers();setAttemptSaveStatus('Продолжение восстановлено','success');flushPendingAnswers();}
+  pendingReserveTransfer=null;return true;
+}
+function savedRecoveryReference(){
+  try{return JSON.parse(localStorage.getItem('nko_shared_recovery_v1')||'null');}catch{return null;}
+}
+function rememberRecoveryReference(){
+  const recovery=state.olympiad?.recovery;
+  if(!state.attempt?.id||recovery?.backend!=='shared-d1')return;
+  try{localStorage.setItem('nko_shared_recovery_v1',JSON.stringify({recovery,attemptId:state.attempt.id,questionId:state.attempt.currentQuestion?.id}));}catch{}
+}
+function setupReserveAddress(){
+  const stored=savedRecoveryReference();
+  for(const id of ['reserve-address','attempt-reserve-address']){
+  const link=document.getElementById(id);
+  const origins=(state.olympiad?.recovery||stored?.recovery)?.origins;
+  if(!link||!window.AttemptReserve||!Array.isArray(origins)||!origins.includes(location.origin))return;
+  const target=origins.find(origin=>origin!==location.origin);
+  if(!window.AttemptReserve.origins.includes(target))return;
+  link.href=target+'/';link.classList.remove('hidden');
+  link.textContent=target.includes('pages.dev')?'Резервный адрес':'Основной адрес';
+  link.onclick=event=>{
+    const attemptId=state.attempt?.id||stored?.attemptId;
+    if(!attemptId)return;
+    event.preventDefault();
+    try{
+      const token=loadAttemptAccessToken(attemptId);if(!token)throw new Error('Не найден доступ к попытке. Обратитесь к организатору.');
+      const q=state.attempt?.currentQuestion;
+      let draft=q&&state.questionController?{questionId:q.id,answer:state.questionController.getAnswer()}:null,queue=state.pendingAnswerQueue||[];
+      if(!state.attempt){try{queue=JSON.parse(localStorage.getItem(pendingQueueStorageKey(attemptId))||'[]');const answer=stored?.questionId&&JSON.parse(localStorage.getItem(`nko_story_draft_v2_${attemptId}_${stored.questionId}`)||'null');if(answer)draft={questionId:stored.questionId,answer};}catch{}}
+      const href=window.AttemptReserve.link(target,{version:1,from:location.origin,createdAt:Date.now(),attemptId,token,
+        ...(draft?{draft}:{}),queue});
+      location.assign(href);
+    }catch(error){showMessage(elements.attemptMessage,error.message,'warning');}
+  };
+  }
+}
+
 function pendingQueueStorageKey(attemptId) {
   return attemptId ? `nko_pending_answers_${attemptId}` : "";
 }
@@ -1935,8 +2017,8 @@ function formatLimitMinutes(value) {
 function renderRules() {
   const rules = [
     `Общий лимит: ${formatLimitMinutes(state.olympiad.durationMinutes)}.`,
-    "После старта работает защищённый полноэкранный режим; таймер идёт непрерывно.",
-    "Уход из вкладки, потеря фокуса и выход из полноэкранного режима блокируют интерфейс и записываются в серверный журнал.",
+    "На компьютере прохождение работает в полноэкранном режиме, на телефоне — в активной вкладке. Таймер идёт непрерывно.",
+    "Уход из вкладки блокирует интерфейс и записывается в серверный журнал. На компьютере также контролируются потеря фокуса и выход из полноэкранного режима.",
     "Запись в журнале рассматривает организатор; отдельное срабатывание само по себе не уменьшает балл.",
     "Задания и правила оценивания одинаковы для участников одной редакции. Перемешиваются варианты ответов, карточки сопоставлений и компоненты пятого тура.",
     "Один вопрос на экране без возврата назад.",
@@ -3296,6 +3378,7 @@ function applyAttemptState(attempt, options = {}) {
     ? ""
     : describeAttemptTransition(previousAttempt, attempt);
   state.attempt = attempt;
+  rememberRecoveryReference();
   if (attempt?.id) state.activeAttemptId = attempt.id;
   const syncService = () => {
     if(attempt?.story&&attempt.status!=='in_progress'){window.T5DishService?.hideInline();return;}
@@ -3337,6 +3420,11 @@ function applyAttemptState(attempt, options = {}) {
   }
 
   setParticipantShellState();
+
+  if(!preserveQuestionRender&&isMobileExamBrowser()&&attempt.status==='in_progress'&&attempt.currentQuestion?.type!=='dish_detective'){
+    const questionId=attempt.currentQuestion?.id;
+    requestAnimationFrame(()=>{if(state.attempt?.currentQuestion?.id===questionId)elements.attemptSection.scrollIntoView({block:'start',behavior:'instant'});});
+  }
 
   if (attempt.status === "in_progress" && hasPendingAnswers() && !state.pendingFlushInFlight) {
     setAttemptSyncMeta("Найдены локально сохранённые ответы. Догружаем их в облако.");
@@ -3633,7 +3721,7 @@ async function handleRegistration(event) {
 
 async function startAttempt() {
   if (state.isStartingAttempt || !state.participant) return;
-  if (!supportsOlympiadFullscreen()) {
+  if (!supportsOlympiadProtectedMode()) {
     showMessage(elements.prestartMessage, `${unsupportedOlympiadBrowserMessage()} ${state.activeAttemptId ? "Если попытка уже начата, обратитесь к организатору." : "Попытка не запущена."}`, "warning");
     updateStartAvailability();
     return;
@@ -3877,20 +3965,28 @@ async function finishAttempt() {
 }
 
 async function init() {
+  receiveReserveTransfer();
   await loadAppVersion();
   state.olympiad = await api("/api/public/olympiad");
+  setupReserveAddress();
   hideMessage(elements.heroLoadMessage);
   elements.heroRetry?.classList.add("hidden");
   elements.registrationSubmit.disabled = false;
   await registerServiceWorker();
   renderHero();
   renderRules();
+  updateAdmissionBanner();
+  document.getElementById('hero-action-preparation')?.addEventListener('click',()=>{
+    closeNavDrawer();document.getElementById('preparation-section')?.scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'});
+  });
   window.OlympiadStory?.intro(state.olympiad);
   const refreshStoryAdmission = async () => {
     if (!state.olympiad?.storyEnabled || state.attempt || document.hidden) return;
     try {
       state.olympiad = await api("/api/public/olympiad");
       window.OlympiadStory?.intro(state.olympiad);
+      updateAdmissionBanner();
+      updateHeroAction();
       updateStartAvailability();
     } catch { /* Admission is always checked again by the server on start. */ }
   };
@@ -3902,6 +3998,13 @@ async function init() {
   setAttemptSaveStatus("Система готова", "idle");
   setAttemptSyncMeta("Обновление: —");
   refreshNavigationState();
+
+  const updateMobileKeyboard=()=>{
+    const active=document.activeElement,editable=active?.matches('input:not([type=checkbox]):not([type=radio]),textarea');
+    document.documentElement.classList.toggle('phone-keyboard-open',Boolean(isMobileExamBrowser()&&editable&&window.visualViewport&&window.innerHeight-window.visualViewport.height>150));
+  };
+  window.visualViewport?.addEventListener('resize',updateMobileKeyboard);
+  document.addEventListener('focusin',updateMobileKeyboard);document.addEventListener('focusout',updateMobileKeyboard);
 
   window.addEventListener("online", () => {
     setNetworkStatus(true);
@@ -3989,10 +4092,11 @@ async function init() {
     }
   });
   updateStartAvailability();
-  await restoreSessionAttempt();
+  if(!await restoreReserveTransfer())await restoreSessionAttempt();
 }
 
 function showInitializationError(error) {
+  setupReserveAddress();
   const reason = error?.status === 0 || error?.status >= 500
     ? "Сервер временно недоступен."
     : formatApiError(error);

@@ -57,9 +57,11 @@ async function startTrial(paths, { port = 3100, openBrowser = true } = {}) {
   const [major, minor] = process.versions.node.split(".").map(Number);
   if (major < 24 || (major === 24 && minor < 15)) throw new Error("Нужен комплект с Node.js 24.15 или новее.");
   const credentials = readCredentials(paths);
+  const hostingFile=path.join(paths.root,'hosting-settings.json');
+  const hosting=fs.existsSync(hostingFile)?JSON.parse(fs.readFileSync(hostingFile,'utf8')):{};
   configureTrial(paths);
   const { createOlympiadServer } = require("../olympiad-server");
-  const { server, db } = createOlympiadServer({ dbPath: paths.database, ...credentials, storyEnabled: true, storyAnytimeEntry: true });
+  const { server, db } = createOlympiadServer({ dbPath: paths.database, ...credentials, storyEnabled: true, storyAnytimeEntry: true,publicApiOrigin:hosting.publicApiOrigin||'' });
   try {
     await new Promise((resolve, reject) => {
       server.once("error", reject);
@@ -78,14 +80,15 @@ async function startTrial(paths, { port = 3100, openBrowser = true } = {}) {
     const report = {
       startedAt: new Date().toISOString(), machine: os.hostname(), cpu: os.cpus()[0]?.model,
       memoryGB: Math.round(os.totalmem() / 1024 ** 3), node: process.versions.node,
-      url: baseUrl, database: paths.database, mode: "isolated-windows-trial",
+      url: baseUrl, database: paths.database, mode:hosting.publicApiOrigin?'shared-d1-participant-host':"isolated-windows-trial",
+      ...(hosting.publicApiOrigin?{publicApiOrigin:hosting.publicApiOrigin,addonVersion:hosting.addonVersion||null}:{}),
       durationMinutes: metadata.data.durationMinutes, totalQuestions: metadata.data.questionCount,
       totalPoints: metadata.data.tours.reduce((sum, tour) => sum + Number(tour.maxScore), 0),
       revision: fs.existsSync(path.join(__dirname, "..", "package-manifest.json"))
         ? JSON.parse(fs.readFileSync(path.join(__dirname, "..", "package-manifest.json"), "utf8")).revision : "development-copy"
     };
     fs.writeFileSync(paths.report, JSON.stringify(report, null, 2));
-    fs.writeFileSync(paths.organizer, `\uFEFFПРОБНЫЙ СЕРВЕР ОЛИМПИАДЫ\r\nПанель: ${baseUrl}/admin.html\r\nПароль: ${credentials.adminPassword}\r\n\r\nЛокальные тестовые данные: ${paths.root}\r\nЭтот файл содержит пароль. Не отправляйте его участникам.\r\n`, { mode: 0o600 });
+    fs.writeFileSync(paths.organizer,hosting.publicApiOrigin?`\uFEFFОФИЦИАЛЬНАЯ ОЛИМПИАДА\r\nПанель: ${hosting.publicApiOrigin}/admin.html\r\nДля входа используется существующий пароль организатора Cloudflare.\r\nЛокальная база пробных прохождений и её ключи сохранены отдельно.\r\n`:`\uFEFFПРОБНЫЙ СЕРВЕР ОЛИМПИАДЫ\r\nПанель: ${baseUrl}/admin.html\r\nПароль: ${credentials.adminPassword}\r\n\r\nЛокальные тестовые данные: ${paths.root}\r\nЭтот файл содержит пароль. Не отправляйте его участникам.\r\n`, { mode: 0o600 });
     console.log(`\nПробная олимпиада запущена на ${os.hostname()}.\nОткройте: ${baseUrl}\nПанель организатора: ${baseUrl}/admin.html\nПароль сохранён в: ${paths.organizer}\nОтветы: ${paths.database}\nОтчёт о запуске: ${paths.report}\n\nОставьте это окно открытым. Для остановки нажмите Ctrl+C.\n`);
     if (openBrowser && process.platform === "win32") {
       const browser = spawn("cmd.exe", ["/d", "/c", "start", "", baseUrl], { stdio: "ignore", windowsHide: true });

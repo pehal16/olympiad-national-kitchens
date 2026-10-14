@@ -27,10 +27,10 @@ const normalized=a=>a.selectedIngredientIds?{...a,selectedIngredientIds:[...a.se
     for(const [width,height] of [[1536,1024],[1440,900],[1366,768],[1024,900],[768,900],[320,900],[360,900],[390,900],[430,900]]){
      await page.setViewportSize({width,height});await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:path.join(output,`t${chapter}-${width}.png`),fullPage:true});
      assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`T${chapter} overflow at ${width}`);
-     if(chapter===4&&width<768)assert.equal(await page.locator('.t4-menu').evaluate(n=>getComputedStyle(n).gridTemplateColumns.split(' ').length),1);
+     if(chapter===4&&width<768)assert.equal(await page.locator('.t4-menu').evaluate(n=>getComputedStyle(n).gridTemplateColumns.split(' ').length),width>=360?2:1);
      if(width>=768)assert.ok((await page.locator('.dashboard-head').boundingBox()).height<135,'desktop and tablet header stays compact');
      if(chapter===5&&width<768){const pantry=await page.locator('.t5-photo-pantry').boundingBox(),assembly=await page.locator('.t5-photo-panel').boundingBox();assert.ok(pantry.y+pantry.height<=assembly.y,'mobile kitchen shows step 1 before step 2');}
-     if(chapter===4){const bounds=await page.locator('.t4-menu-select').first().boundingBox();assert.ok(bounds.width>=(width>=1280?240:width>=768?220:200),'order options must remain substantial photographs, never strips');}
+     if(chapter===4){const bounds=await page.locator('.t4-menu-select').first().boundingBox();assert.ok(bounds.width>=(width>=1280?240:width>=768?220:width>=360?135:200),'order options must remain substantial photographs, never strips');}
      if(chapter===2&&width>=768){const board=await page.locator('.t2-countries').boundingBox(),bank=await page.locator('.t2-atlas-menu').boundingBox();assert.ok(board.x+board.width+8<=bank.x,'map and photo bank remain separated');}
      if(chapter===2&&width<768)assert.ok(await page.locator('.t2-target').evaluateAll(ns=>ns.every(n=>[...n.children].every(c=>{const a=n.getBoundingClientRect(),b=c.getBoundingClientRect();return b.left>=a.left-1&&b.right<=a.right+1;}))),'country name and flag fit their mobile map target');
     }

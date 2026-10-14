@@ -27,7 +27,7 @@ jobs:
       - run: npm run build:cloudflare
       - name: Deploy preview and record URL
         run: node scripts/deploy-story-preview.js
-      - name: Full 50 and 60 participant rehearsals
+      - name: Full 50 and 70 participant rehearsals
         run: node scripts/verify-story-preview.js
       - uses: actions/upload-artifact@v4
         if: always()

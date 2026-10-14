@@ -1,16 +1,16 @@
-const CACHE_NAME = "national-kitchens-olympiad-story-layout-5-seal2";
+const CACHE_NAME = "national-kitchens-olympiad-oct16-ready1";
 const PRECACHE_URLS = [
+  "/olympiad-ready.css?v=oct16-ready1",
+  "/olympiad-device.js?v=oct16-ready1",
   "/story-dialogue.js?v=layout5-oct12",
   "/restaurant-comic.css?v=layout5-oct12",
   "/olympiad-story.js?v=story-layout5-assembly45",
   "/story-banquet.js?v=assembly45",
   "/story-banquet.css?v=live-table5",
-  "/restaurant-layout.js?v=layout5-assembly45",
+  "/restaurant-layout.js?v=oct16-ready1",
   "/restaurant-layout.css?v=layout5-oct12",
   "/olympiad-story.css?v=story2",
   "/",
-  "/admin.html",
-  "/content-admin.html",
   "/certificate.html",
   "/styles.css?v=1.7.0-layout5-oct12",
   "/t5-final-kitchen.css?v=1.7.0-story2",
@@ -18,17 +18,16 @@ const PRECACHE_URLS = [
   "/t5-dish-service.css?v=1.7.0-story2",
   "/t5-photo-model.js?v=1.7.0-story2",
   "/t5-dish-service.js?v=1.7.0-layout5-oct12",
-  "/t5-photo-kitchen.js?v=1.7.0-assembly45",
+  "/t5-photo-kitchen.js?v=1.7.0-oct16-ready1",
   "/certificate.css?v=1.7.0-seal2",
   "/certificate.js?v=1.7.0-seal2",
   "/assets/olympiad/certificate/college-seal-user-v1.jpg",
-  "/app.js?v=1.7.0-assembly45",
+  "/attempt-reserve.js?v=shared1",
+  "/app.js?v=1.7.0-oct16-ready1",
   "/t5-final-kitchen.js?v=1.7.0-layout2",
   "/t4-guest-order.js?v=1.7.0-layout5-oct12",
-  "/t2-country-match.js?v=1.7.0-layout5-oct12",
+  "/t2-country-match.js?v=1.7.0-oct16-ready1",
   "/t3-detective.js?v=1.7.0-layout5-oct12",
-  "/admin.js?v=1.7.0-assembly45",
-  "/content-admin.js?v=1.7.0",
   "/manifest.webmanifest?v=1.7.0",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
@@ -42,7 +41,16 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then(async (cache) => {
+        let index=0;
+        await Promise.all(Array.from({length:3},async()=>{
+          while(index<PRECACHE_URLS.length){
+            const url=PRECACHE_URLS[index++],request=new Request(url,{cache:'reload'}),response=await fetch(request);
+            if(!response.ok)throw new Error('Required offline file unavailable');
+            await cache.put(request,response);
+          }
+        }));
+      })
       .then(() => self.skipWaiting())
   );
 });
@@ -77,6 +85,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
+          if(response.status>=500)throw new Error('Shell temporarily unavailable');
           if (response && response.status === 200) {
             const cloned = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(request, cloned));
