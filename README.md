@@ -2,15 +2,23 @@
 
 Открытая веб-платформа для проведения учебной олимпиады и интерактивного экзамена
 по профессиональным кулинарным модулям. Проект помогает организаторам выдавать
-индивидуальные варианты, автоматически проверять ответы, вести протокол попыток и
+закреплённые варианты, автоматически проверять ответы, вести протокол попыток и
 экспортировать результаты без платной LMS-инфраструктуры.
 
-Production-домен: [https://olympiada.gorlkts.ru](https://olympiada.gorlkts.ru)
+Основной сайт: [https://olympiad-gkts.pages.dev](https://olympiad-gkts.pages.dev), Cloudflare Pages/D1.
+
+## Продолжение работы на новом ПК
+
+**Начните с [инструкции передачи проекта](docs/new-pc-handoff.md).** Она содержит контекст для новой сессии Codex, первое сообщение, пути локальных данных, правила сохранения результатов и дальнейшие шаги подключения `olympiada.gorlkts.ru`.
+
+14.10.2026 пользователь сообщил: распакованный Windows-комплект запущен на стационарном iRU, главная страница открылась. Подробные проверки прохождения и нагрузки на этом ПК ещё нужны. [Пробный комплект](https://github.com/pehal16/olympiad-national-kitchens/releases/tag/windows-trial-2026-10-13) использует отдельную SQLite-базу; [инструкция запуска](docs/windows-trial-runbook.md). Домен пока не подключён к новому ПК.
+
+Для разработки клонируйте `main` в отдельную локальную папку и откройте её как проект Codex на новом компьютере. Не работайте с устаревшими исходниками из ZIP как с текущей Git-копией. Прочитайте [AGENTS.md](AGENTS.md) и [память проекта](docs/project-memory.md); не коммитьте локальные секреты и результаты участников.
 
 ## Что реализовано
 
 - регистрация участника без личного кода;
-- индивидуальная генерация варианта перед стартом попытки;
+- закрепление выданного варианта и перемешивание вариантов выбора перед стартом попытки;
 - 5 туров с лимитами времени по сценарию;
 - один вопрос на экран и запрет возврата назад;
 - автоматическая проверка без ручной экспертизы;
@@ -27,14 +35,15 @@ Production-домен: [https://olympiada.gorlkts.ru](https://olympiada.gorlkts.
 
 Проект ориентирован на преподавателей, методистов и организаторов учебных
 олимпиад, которым нужен автономный экзаменационный стенд: локально на ноутбуке,
-в Docker-контейнере или в serverless-инфраструктуре Yandex Cloud.
+в отдельном Windows/SQLite-сервере или в инфраструктуре Cloudflare Pages/D1.
 
 ## Стек
 
-- Node.js 22+
+- Node.js 24.18.0 — проверенная версия для разработки и Windows/SQLite-запуска
 - встроенный HTTP-сервер без тяжелого backend-фреймворка
 - vanilla HTML/CSS/JavaScript для интерфейсов
-- Yandex Cloud Serverless Containers и YDB для production-развертывания
+- Cloudflare Pages и D1 для действующего production-развертывания
+- SQLite с WAL для отдельного сервера олимпиады на ПК
 - Electron для portable desktop-сборки под Windows
 - `node --test` для регрессионных тестов
 
@@ -56,10 +65,12 @@ Production-домен: [https://olympiada.gorlkts.ru](https://olympiada.gorlkts.
 - [docs](docs) - документация по деплою, восстановлению и production-процессу
 - [tests](tests) - регрессионные тесты
 
-## Запуск
+## Запуск общего стенда разработки
+
+Для сервера только олимпиады используйте [Windows-инструкцию](docs/windows-trial-runbook.md) и `node scripts/windows-trial.js`. Команды ниже запускают общий стенд с PM01 и другими модулями.
 
 ```powershell
-npm install
+npm ci
 npm start
 ```
 
@@ -85,7 +96,7 @@ npm.cmd test
 
 ```powershell
 npm.cmd run verify:pm01 -- http://localhost:3100
-npm.cmd run verify:pm01 -- https://olympiada.gorlkts.ru
+npm.cmd run verify:cloudflare -- https://olympiad-gkts.pages.dev
 ```
 
 ## Production
@@ -94,8 +105,8 @@ npm.cmd run verify:pm01 -- https://olympiada.gorlkts.ru
 [deploy-cloudflare.yml](.github/workflows/deploy-cloudflare.yml). Метаданные учебного модуля хранятся в D1, студенческие вложения – в приватном R2. Подробности:
 
 - [docs/learning-pilot-runbook.md](docs/learning-pilot-runbook.md)
-- [docs/cloudflare-migration-runbook.md](docs/cloudflare-migration-runbook.md)
-- [docs/yandex-cloud-serverless.md](docs/yandex-cloud-serverless.md)
+- [docs/project-memory.md](docs/project-memory.md) — актуальные версии, архитектура и результаты выпуска
+- [docs/yandex-cloud-serverless.md](docs/yandex-cloud-serverless.md) — историческая документация прежнего развёртывания
 - [docs/pm01-production-rollout.md](docs/pm01-production-rollout.md)
 - [docs/platform-audit.md](docs/platform-audit.md)
 - [docs/laptop-recovery.md](docs/laptop-recovery.md)
@@ -106,8 +117,8 @@ npm.cmd run verify:pm01 -- https://olympiada.gorlkts.ru
 - тур 1: [data/banks/tour1.js](data/banks/tour1.js)
 - тур 2: [data/banks/tour2.js](data/banks/tour2.js)
 - тур 3: [data/banks/tour3.js](data/banks/tour3.js)
-- тур 4: [data/banks/tour4.js](data/banks/tour4.js)
-- тур 5: [data/banks/tour5.js](data/banks/tour5.js)
+- тур 4: [data/banks/tour4-menu-v4.json](data/banks/tour4-menu-v4.json) — текущие заказы и подачи; прежние банки сохраняются для старых попыток
+- тур 5: [data/banks/tour5-photo-kitchen.js](data/banks/tour5-photo-kitchen.js) — текущая фотосборка трёх блюд
 - PM01-экзамен: [data/exams/pm01.js](data/exams/pm01.js)
 
 ## Режим «Учебные работы»

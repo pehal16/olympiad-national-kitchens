@@ -11,6 +11,8 @@ Before making changes:
 3. Review the latest commits with `git log -5 --oneline --decorate`.
 4. Read `docs/project-memory.md`.
 
+For continuation on a new computer, Windows standalone hosting, or the `olympiada.gorlkts.ru` connection task, also read `docs/new-pc-handoff.md` and `docs/windows-trial-runbook.md` before acting. On 2026-10-14 the user reported that the extracted Windows trial started and the home page opened on the stationary PC. This does not establish a completed target-PC load rehearsal. Verify the actual execution device, running process and nonsecret launch report; preserve its existing SQLite database and credentials. The frozen portable ZIP and current Git checkout are separate copies. GitHub/cloud access alone is not local PC access.
+
 If local changes exist, assume they are intentional user or agent work. Do not discard, reset, checkout, or revert them unless the user explicitly asks for that exact operation.
 
 ## Source Of Truth

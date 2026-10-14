@@ -1,6 +1,13 @@
 # Project Memory
 
-Last updated: 2026-10-13
+Last updated: 2026-10-14
+
+## New-PC continuation and user-reported successful start (2026-10-14)
+
+- User reports that the Windows archive is extracted, the trial was started and the olympiad home page opened on the new stationary PC. Record this as user-confirmed interface startup, not as independently inspected hardware/process/DB persistence or a completed60-person iRU rehearsal. Current tools still execute on the ASUS laptop. Actual target paths/global development tools were not supplied; derive them locally in the new session.
+- User asks to put full continuation context in GitHub so Codex on the new PC can continue. `docs/new-pc-handoff.md` contains the copyable first prompt, local-project/Git setup, archive-vs-main distinction, current36/150/18m45s rules, paths/privacy, preserved design choices, verification scope and the remaining network/domain/event-window work. README links it prominently and corrects its stale production/Yandex description; AGENTS requires reading it for this transition. The previously delivered ZIP stays pinned to`e032eaa`; subsequent certificate`seal2` changes are in current main,not silently installed into the archive.
+- Production remains Cloudflare; target`olympiada.gorlkts.ru` is not cut over by this documentation task. Event16.10.2026/09:00–16:00Moscow and link provision14.10 are known, but the application is still anytime-entry and no participant messages were sent. Do not ask for these known decisions again or confuse written dates with configured admission. Preserve `%LOCALAPPDATA%/GKTSOlympiadTrial/v1`, its secrets, attempts and backups when updating the local app. Technical load on ASUS does not close the college device/network/content rehearsal.
+- Documentation uses a fresh ordinary Git worktree from latest`origin/main` after managed creation returned`Git is unavailable`. Existing dirty original/story checkouts and the unrelated certificate worktree remain preserved. This documentation does not redeploy the platform or modify bank,settings,DNS,firewall,autostart or real results.
 
 ## Certificate marks and seal across the order field (2026-10-13)
 
