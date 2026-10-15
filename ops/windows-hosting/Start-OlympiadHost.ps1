@@ -64,7 +64,11 @@ function Start-OwnedApplication {
                 Write-HostEvent 'Using the configured Windows loopback proxy for the shared API.'
             }
         }
-        Start-Process -FilePath $nodeExe -ArgumentList @(('"' + $launcher + '"'), '--no-browser') -WorkingDirectory $trial -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $supervision 'app.stdout.log') -RedirectStandardError (Join-Path $supervision 'app.stderr.log')
+        $applicationArguments = @()
+        $networkPreload = Join-Path $supervision 'desktop-network-preload.js'
+        if (Test-Path -LiteralPath $networkPreload) { $applicationArguments += @('--require', ('"' + $networkPreload + '"')) }
+        $applicationArguments += @(('"' + $launcher + '"'), '--no-browser')
+        Start-Process -FilePath $nodeExe -ArgumentList $applicationArguments -WorkingDirectory $trial -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $supervision 'app.stdout.log') -RedirectStandardError (Join-Path $supervision 'app.stderr.log')
     } finally {
         foreach ($name in $environmentNames) { [Environment]::SetEnvironmentVariable($name, $previousEnvironment[$name], 'Process') }
     }
@@ -75,6 +79,20 @@ try {
     Write-HostEvent 'Supervisor started. Existing matching processes are retained.'
     while ($true) {
         try {
+            $mirrorScript = Join-Path $supervision 'desktop-mirror-agent.js'
+            $mirrorKey = Join-Path $env:LOCALAPPDATA 'GKTSOlympiadTrial\v1\cloud-mirror\identity-private.pem'
+            if ((Test-Path -LiteralPath $mirrorScript) -and (Test-Path -LiteralPath $mirrorKey)) {
+                $mirrorPidPath = Join-Path $supervision 'mirror.pid'
+                $mirrorId = 0
+                if (Test-Path -LiteralPath $mirrorPidPath) { [void][int]::TryParse((Get-Content -Raw -LiteralPath $mirrorPidPath).Trim(), [ref]$mirrorId) }
+                $mirrorProcess = if ($mirrorId -gt 0) { Get-CimInstance Win32_Process -Filter ('ProcessId = ' + $mirrorId) } else { $null }
+                $ownedMirror = $mirrorProcess -and [string]::Equals($mirrorProcess.ExecutablePath,$nodeExe,[System.StringComparison]::OrdinalIgnoreCase) -and $mirrorProcess.CommandLine.Contains($mirrorScript)
+                if (-not $ownedMirror) {
+                    $mirrorProcess = Start-Process -FilePath $nodeExe -ArgumentList @(('"' + $mirrorScript + '"')) -WorkingDirectory $supervision -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $supervision 'mirror.stdout.log') -RedirectStandardError (Join-Path $supervision 'mirror.stderr.log')
+                    $mirrorProcess.Id | Set-Content -LiteralPath $mirrorPidPath
+                    Write-HostEvent ('Started read-only cloud mirror PID ' + $mirrorProcess.Id)
+                }
+            }
             if (-not (Test-OwnedListener 3100 $nodeExe)) {
                 $nodeProcess = Start-OwnedApplication
                 Write-HostEvent ('Started olympiad application PID ' + $nodeProcess.Id)

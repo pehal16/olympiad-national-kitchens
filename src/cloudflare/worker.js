@@ -156,6 +156,9 @@ async function handleApiRequest(request, env) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === '/api/desktop-mirror') {
+      return require('../desktop-mirror-endpoint').handleMirrorRequest(request, env);
+    }
     if (url.pathname.startsWith("/api/")) {
       return handleApiRequest(request, env);
     }

@@ -10,6 +10,8 @@ database_id = "4c30c9ab-0c53-4b8a-865a-7c9078d48c2f"
 migrations_dir = "migrations"
 
 [vars]
+# Read-only desktop mirror identity; public verification key, not a secret.
+DESKTOP_MIRROR_PUBLIC_KEY = "MCowBQYDK2VwAyEAKiKhL1uJTqgGRVCgE8weYuYPqa2zPmvwRgcV/kqDE3I="
 STORY_ENABLED = "true"
 STORY_ANYTIME_ENTRY = "true"
 OFFICIAL_OLYMPIAD_DATE = "2026-10-16"
