@@ -1,5 +1,6 @@
 "use strict";
 const crypto=require('node:crypto'),{readJson,writeJson}=require('./utils'),{retryD1}=require('./d1-retry');
+const OLYMPIAD_ID=require('../data/olympiad').id;
 let env=null;
 function configureRegistry(value){env=value;}
 function file(){return require('node:path').join(require('./store').STORAGE_DIR,'olympiad-registrations.json');}
@@ -36,14 +37,14 @@ async function mentor(runId,signature,participant,name){
    // grading/finish retry against the latest participant metadata.
    env.DB.prepare(`UPDATE attempts SET payload_json=json_set(payload_json,'$.participant.mentorName',?),
     state_revision=state_revision+1,updated_at=? WHERE COALESCE(story_run_id,'legacy')=?
-    AND json_extract(payload_json,'$.participantSignature')=?`).bind(value,stamp,runId,signature)
+    AND json_extract(payload_json,'$.participantSignature')=? AND json_extract(payload_json,'$.olympiadId')=?`).bind(value,stamp,runId,signature,OLYMPIAD_ID)
   ]));
  }else{
   const rows=readJson(file(),[]);let row=rows.find(r=>r.id===id);
   if(!row){row={id,run_id:runId,participant_signature:signature,participant_json:JSON.stringify(participant),expected:0,registered_at:null};rows.push(row);}
   row.mentor_override=value;row.updated_at=stamp;writeJson(file(),rows);
   const target=require('node:path').join(require('./store').STORAGE_DIR,'attempts.json'),attempts=readJson(target,[]);
-  for(const a of attempts)if((a.storyRunId||'legacy')===runId&&a.participantSignature===signature){a.participant.mentorName=value;a.stateRevision=(a.stateRevision||0)+1;}
+  for(const a of attempts)if(a.olympiadId===OLYMPIAD_ID&&(a.storyRunId||'legacy')===runId&&a.participantSignature===signature){a.participant.mentorName=value;a.stateRevision=(a.stateRevision||0)+1;}
   writeJson(target,attempts);
  }
  return {id,mentorName:value};

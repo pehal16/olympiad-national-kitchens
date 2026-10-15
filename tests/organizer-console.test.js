@@ -41,6 +41,11 @@ test('organizer schedule, expected/registered statuses, mentor edits and private
  assert.equal((await api(runUrl+'/schedule',{method:'PATCH',admin:true,body:{entryStartsAt:'2099-01-04T05:00:00.000Z',entryEndsAt:'2099-01-04T13:00:00.000Z'}})).status,409,'Unique event date collision is safe');
  assert.equal(await runs.selectedRunId(),next.id);assert.equal((await runs.getRun(run.id)).entryStartsAt,window.entryStartsAt);
  assert.equal(db.prepare('SELECT COUNT(*) n FROM attempt_variants').first().n,1);
+ const signature='synthetic-legacy-shared-signature',oldMentor='Прежний Наставник';
+ for(const [id,olympiadId]of [['synthetic-legacy-olympiad',require('../data/olympiad').id],['synthetic-legacy-pm01','pm01-exam']])db.prepare('INSERT INTO attempts(id,payload_json,updated_at) VALUES(?,?,?)').bind(id,JSON.stringify({id,olympiadId,participantSignature:signature,participant:{...profile,mentorName:oldMentor}}),'now').run();
+ await registry.mentor('legacy',signature,profile,'Наставник Олимпиады');
+ const rawMentor=id=>JSON.parse(db.prepare('SELECT payload_json FROM attempts WHERE id=?').bind(id).first().payload_json).participant.mentorName;
+ assert.equal(rawMentor('synthetic-legacy-olympiad'),'Наставник Олимпиады');assert.equal(rawMentor('synthetic-legacy-pm01'),oldMentor,'Legacy mentor edit never reaches another exam with the same signature');
 });
 test('Excel parser handles quoted cells, arbitrary header order, defaults and bad input',()=>{
  assert.deepEqual(registry.parseImport('Группа\tФИО\tНаставник\nТЕСТ\tИванов Проверочный Студент\t"Наставник; Первый"',{institution:'Стенд'})[0],{fullName:'Иванов Проверочный Студент',institution:'Стенд',groupName:'ТЕСТ',mentorName:'Наставник; Первый'});
