@@ -5,7 +5,7 @@ const root=path.resolve(__dirname,'..'),payload=path.join(__dirname,'payload');
 const state=path.join(process.env.LOCALAPPDATA,'GKTSOlympiadTrial','v1');
 const digest=data=>crypto.createHash('sha256').update(data).digest('hex');
 const literal=text=>"'"+text.replace(/'/g,"''")+"'";
-const ps=(code,capture=true)=>(cp.execFileSync('powershell.exe',['-NoProfile','-Command',code],{encoding:'utf8',windowsHide:true,stdio:capture?['ignore','pipe','pipe']:'ignore'})||'').trim();
+const ps=(code,capture=true)=>(cp.execFileSync('powershell.exe',['-NoProfile','-Command','[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false); $OutputEncoding = [Console]::OutputEncoding; '+code],{encoding:'utf8',windowsHide:true,stdio:capture?['ignore','pipe','pipe']:'ignore'})||'').trim();
 const allowed=new Set(['olympiad-server.js','src/shared-olympiad-api.js','scripts/windows-trial.js','public/index.html','public/app.js','public/attempt-reserve.js','public/sw.js','public/olympiad-story.js','public/olympiad-ready.css','public/olympiad-device.js','public/t2-country-match.js','public/restaurant-layout.js','public/t5-photo-kitchen.js']);
 function findNode(){
  const raw=ps("Get-NetTCPConnection -State Listen -ErrorAction Stop | Where-Object LocalPort -eq 3100 | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Get-CimInstance Win32_Process -Filter ('ProcessId = ' + $_) } | Select-Object ProcessId,ExecutablePath,CommandLine | ConvertTo-Json -Compress");

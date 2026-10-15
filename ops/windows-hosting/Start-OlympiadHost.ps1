@@ -46,17 +46,39 @@ function Test-OwnedRelay {
     return $process -and [string]::Equals($process.ExecutablePath, $sshExe, [System.StringComparison]::OrdinalIgnoreCase) -and $process.CommandLine.Contains($sshFile) -and $process.CommandLine.Contains($RelayAlias)
 }
 
+function Start-OwnedApplication {
+    $environmentNames = @('HTTPS_PROXY', 'NODE_USE_ENV_PROXY', 'NO_PROXY')
+    $previousEnvironment = @{}
+    foreach ($name in $environmentNames) { $previousEnvironment[$name] = [Environment]::GetEnvironmentVariable($name, 'Process') }
+    try {
+        $hostingFile = Join-Path $env:LOCALAPPDATA 'GKTSOlympiadTrial\v1\hosting-settings.json'
+        $sharing = (Test-Path -LiteralPath $hostingFile) -and (Get-Content -Raw -LiteralPath $hostingFile | ConvertFrom-Json).publicApiOrigin -eq 'https://olympiad-gkts.pages.dev'
+        if ($sharing) {
+            $windowsProxy = Get-ItemProperty -LiteralPath 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' -ErrorAction SilentlyContinue
+            if ($windowsProxy.ProxyEnable -eq 1 -and $windowsProxy.ProxyServer -match '^(127\.0\.0\.1|localhost):([0-9]{1,5})$' -and [int]$Matches[2] -ge 1 -and [int]$Matches[2] -le 65535) {
+                # Respect this user's existing loopback HTTP proxy for the child
+                # Node process only; never change Windows or TLS trust settings.
+                $env:HTTPS_PROXY = 'http://' + $windowsProxy.ProxyServer
+                $env:NODE_USE_ENV_PROXY = '1'
+                $env:NO_PROXY = '127.0.0.1,localhost,::1' + $(if ($previousEnvironment.NO_PROXY) { ',' + $previousEnvironment.NO_PROXY } else { '' })
+                Write-HostEvent 'Using the configured Windows loopback proxy for the shared API.'
+            }
+        }
+        Start-Process -FilePath $nodeExe -ArgumentList @(('"' + $launcher + '"'), '--no-browser') -WorkingDirectory $trial -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $supervision 'app.stdout.log') -RedirectStandardError (Join-Path $supervision 'app.stderr.log')
+    } finally {
+        foreach ($name in $environmentNames) { [Environment]::SetEnvironmentVariable($name, $previousEnvironment[$name], 'Process') }
+    }
+}
+
 try {
     $PID | Set-Content -LiteralPath (Join-Path $supervision 'supervisor.pid')
     Write-HostEvent 'Supervisor started. Existing matching processes are retained.'
     while ($true) {
         try {
             if (-not (Test-OwnedListener 3100 $nodeExe)) {
-                $nodeProcess = Start-Process -FilePath $nodeExe -ArgumentList @(('"' + $launcher + '"')) -WorkingDirectory $trial -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $supervision 'app.stdout.log') -RedirectStandardError (Join-Path $supervision 'app.stderr.log')
+                $nodeProcess = Start-OwnedApplication
                 Write-HostEvent ('Started olympiad application PID ' + $nodeProcess.Id)
             }
-            $health = Invoke-RestMethod 'http://127.0.0.1:3100/api/health' -TimeoutSec 4
-            if (-not $health.ok -or $health.storage -ne 'sqlite' -or $health.mode -ne 'olympiad-only') { throw 'Unexpected application health.' }
             if (-not (Test-OwnedListener 3180 $caddyExe)) {
                 if (Get-NetTCPConnection -State Listen -LocalPort 3181 -ErrorAction SilentlyContinue) { throw 'Caddy admin port is already occupied.' }
                 $caddyProcess = Start-Process -FilePath $caddyExe -ArgumentList @('run','--config',('"' + $caddyFile + '"'),'--adapter','caddyfile') -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $supervision 'caddy.stdout.log') -RedirectStandardError (Join-Path $supervision 'caddy.stderr.log')
@@ -67,6 +89,12 @@ try {
                 $relayProcess.Id | Set-Content -LiteralPath $RelayPidFile
                 Write-HostEvent ('Started relay PID ' + $relayProcess.Id)
             }
+            # Shared mode relays health to Pages. Keep proxy/SSH recovery
+            # independent of upstream availability, and accept both known modes.
+            $health = Invoke-RestMethod 'http://127.0.0.1:3100/api/health' -TimeoutSec 4
+            $localMode = $health.storage -eq 'sqlite' -and $health.mode -eq 'olympiad-only'
+            $sharedMode = $health.storageBackend -eq 'cloudflare' -and $health.app -eq 'national-kitchens-olympiad'
+            if (-not $health.ok -or -not ($localMode -or $sharedMode)) { throw 'Unexpected application health.' }
         } catch {
             Write-HostEvent ('Component check failed: ' + $_.Exception.Message)
         }
