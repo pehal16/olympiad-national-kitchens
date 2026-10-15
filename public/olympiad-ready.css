@@ -36,6 +36,15 @@ body.story-result-active .preparation-section, body.story-result-active .admissi
 .story-run-admin .story-run-actions .button { min-height:48px; white-space:normal; }
 .story-run-admin [aria-busy="true"] { opacity:.75; }
 .story-run-message:empty { display:none; }
+.olympiad-admin-page .shell { grid-template-columns:minmax(0,1fr); }
+.olympiad-admin-page .shell > *, .olympiad-admin-page #admin-panel > *, .olympiad-admin-page .grid-two > * { min-width:0; }
+.admission-switch { display:inline-flex; align-items:center; justify-content:center; gap:12px; background:#fff; border:2px solid #66766b; color:#34483b; }
+.admission-switch-track { width:48px; height:28px; border-radius:20px; background:#66766b; padding:3px; box-sizing:border-box; flex-shrink:0; }
+.admission-switch-track::after { content:''; display:block; width:22px; height:22px; border-radius:50%; background:#fff; transition:transform .15s; }
+.admission-switch[aria-checked="true"] { border-color:#147568; background:#e0f3e7; color:#105b50; }
+.admission-switch[aria-checked="true"] .admission-switch-track { background:#147568; }
+.admission-switch[aria-checked="true"] .admission-switch-track::after { transform:translateX(20px); }
+@media (prefers-reduced-motion:reduce) { .admission-switch-track::after { transition:none; } }
 .t5-photo-pantry-toggle { display:none; }
 @media(max-width:900px) { .preparation-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:767px) {

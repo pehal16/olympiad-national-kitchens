@@ -11,7 +11,13 @@ function decode(row) {
   return row ? { ...JSON.parse(row.payload_json), entryMode:row.entry_mode||'scheduled', publishedAt: row.published_at || null, stopped: Boolean(row.stopped) } : null;
 }
 function entryOpen(run, now = Date.now()) {
-  return Boolean(run && !run.stopped && !run.publishedAt && (run.entryMode==='anytime' || (now >= Date.parse(run.entryStartsAt) && now < Date.parse(run.entryEndsAt))));
+  return Boolean(run && !run.stopped && !run.publishedAt && run.admissionMode!=='closed' &&
+    (run.admissionMode==='open' || run.entryMode==='anytime' || (now >= Date.parse(run.entryStartsAt) && now < Date.parse(run.entryEndsAt))));
+}
+function publicationClosed(run, now = Date.now()) {
+  // A manual opening after the scheduled end must still block publication.
+  return !entryOpen(run,now) && (run.entryMode==='anytime'
+    ? run.stopped || run.admissionMode==='closed' : now>=Date.parse(run.entryEndsAt));
 }
 function makeRun(date, id = require('crypto').randomUUID(), window = {}) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date))) throw new Error('Укажите дату проведения.');
@@ -69,18 +75,33 @@ async function ensureAnytimeRun() {
 }
 async function updateRun(id, patch) {
   const run=await getRun(id); if(!run) throw new Error('Проведение не найдено.');
+  if(patch.admissionMode!==undefined && !['auto','open','closed'].includes(patch.admissionMode)) throw new Error('Выберите ручное включение, выключение или расписание.');
+  if(run.publishedAt && (patch.admissionMode!==undefined || patch.stopped===false)) throw new Error('Итоги уже опубликованы. Новые старты этого проведения закрыты.');
   const next={...run};
   for(const key of ['stopped','decorationsDisabled']) if(typeof patch[key]==='boolean') next[key]=patch[key];
-  if(env?.DB) await retryD1(() => env.DB.prepare('UPDATE olympiad_story_runs SET stopped=?,payload_json=? WHERE id=?')
-    .bind(Number(next.stopped),JSON.stringify(next),id).run());
+  if(patch.admissionMode!==undefined){next.admissionMode=patch.admissionMode;next.stopped=false;}
+  if(env?.DB){
+    // Patch individual JSON fields so another organizer's decoration change
+    // cannot restore an obsolete admission state. Publication wins any race.
+    const keys=['stopped','decorationsDisabled'].filter(key=>typeof patch[key]==='boolean');
+    if(patch.admissionMode!==undefined){if(!keys.includes('stopped'))keys.push('stopped');keys.push('admissionMode');}
+    if(keys.length){
+      const jsonArgs=keys.map(()=>"?,json(?)").join(','),values=keys.flatMap(key=>['$.'+key,JSON.stringify(next[key])]);
+      await retryD1(() => env.DB.prepare(`UPDATE olympiad_story_runs SET ${keys.includes('stopped')?'stopped=?,':''}payload_json=json_set(payload_json,${jsonArgs}) WHERE id=?${patch.admissionMode!==undefined||patch.stopped===false?' AND published_at IS NULL':''}`)
+        .bind(...(keys.includes('stopped')?[Number(next.stopped)]:[]),...values,id).run());
+    }
+  }
   else { const runs=readJson(localFile(),[]); runs[runs.findIndex(r=>r.id===id)]=next; writeJson(localFile(),runs); }
-  return getRun(id);
+  const stored=await getRun(id);
+  if(stored.publishedAt && (patch.admissionMode!==undefined || patch.stopped===false))throw new Error('Итоги уже опубликованы. Новые старты этого проведения закрыты.');
+  return stored;
 }
 async function publishRun(id, now=Date.now()) {
   const stamp=new Date(now).toISOString();
   if(env?.DB) {
     await retryD1(() => env.DB.prepare(`UPDATE olympiad_story_runs SET published_at=?1 WHERE id=?2 AND published_at IS NULL
-      AND ((entry_mode='anytime' AND stopped=1) OR (entry_mode='scheduled' AND entry_ends_at<=?1))
+      AND (stopped=1 OR COALESCE(json_extract(payload_json,'$.admissionMode'),'auto')!='open')
+      AND ((entry_mode='anytime' AND (stopped=1 OR json_extract(payload_json,'$.admissionMode')='closed')) OR (entry_mode='scheduled' AND entry_ends_at<=?1))
       AND NOT EXISTS (SELECT 1 FROM attempts a WHERE a.story_run_id=?2
         AND json_extract(a.payload_json,'$.status')='in_progress')`).bind(stamp,id).run());
     const run=await getRun(id); if(!run?.publishedAt) throw new Error('Публикация доступна после закрытия входа и завершения всех попыток.');
@@ -91,7 +112,7 @@ async function publishRun(id, now=Date.now()) {
   if(!run) throw new Error('Проведение не найдено.');
   if(run.publishedAt) return run;
   const attempts=readJson(require('path').join(require('./store').STORAGE_DIR,'attempts.json'),[]);
-  const closed=run.entryMode==='anytime'?run.stopped:now>=Date.parse(run.entryEndsAt);
+  const closed=publicationClosed(run,now);
   if(!closed||attempts.some(a=>a.storyRunId===id&&a.status==='in_progress')) throw new Error('Вход ещё открыт или есть активные попытки.');
   run.publishedAt=stamp; writeJson(localFile(),runs); return run;
 }
@@ -129,7 +150,7 @@ function publicRun(run, now=Date.now()) {
   if(!run) return null;
   return { id:run.id,date:run.date,entryMode:run.entryMode||'scheduled',timeZone:run.timeZone,entryStartsAt:run.entryStartsAt,entryEndsAt:run.entryEndsAt,
     blueprintVersion:run.blueprintVersion,storyVersion:run.storyVersion,assetVersion:run.assetVersion,
-    serverTime:new Date(now).toISOString(),entryOpen:entryOpen(run,now),stopped:run.stopped,publishedAt:run.publishedAt,decorationsDisabled:run.decorationsDisabled };
+    serverTime:new Date(now).toISOString(),entryOpen:entryOpen(run,now),admissionMode:run.admissionMode||'auto',stopped:run.stopped,publishedAt:run.publishedAt,decorationsDisabled:run.decorationsDisabled };
 }
 async function hydrate(attempt) {
   if(attempt?.storyRunId) Object.defineProperty(attempt,'_storyRun',{value:await getRun(attempt.storyRunId),writable:true,enumerable:false,configurable:true});
@@ -149,4 +170,4 @@ function storyView(attempt) {
 function scoresVisible(attempt,settings) {
   return attempt.status!=='in_progress' && (attempt.storyRunId ? Boolean(attempt._storyRun?.publishedAt) : Boolean(settings.showParticipantScore));
 }
-module.exports={configureStoryStorage,enabled,makeRun,entryOpen,listRuns,getRun,createRun,updateRun,publishRun,currentRun,publicRun,hydrate,storyView,scoresVisible,recoveryPolicy};
+module.exports={configureStoryStorage,enabled,makeRun,entryOpen,publicationClosed,listRuns,getRun,createRun,updateRun,publishRun,currentRun,publicRun,hydrate,storyView,scoresVisible,recoveryPolicy};

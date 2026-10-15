@@ -186,11 +186,11 @@ function updateAdmissionBanner() {
   if(!run)return;
   const date=value=>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',day:'numeric',month:'long'}).format(new Date(value));
   const hour=value=>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit'}).format(new Date(value));
-  document.getElementById('admission-title').textContent=run.entryMode==='anytime'?'Свободный вход':`${date(run.entryStartsAt)} · ${hour(run.entryStartsAt)}–${hour(run.entryEndsAt)}`;
+  document.getElementById('admission-title').textContent=run.admissionMode==='open'||run.admissionMode==='closed'?'Входом управляет организатор':run.entryMode==='anytime'?'Свободный вход':`${date(run.entryStartsAt)} · ${hour(run.entryStartsAt)}–${hour(run.entryEndsAt)}`;
   banner.dataset.open=String(run.entryOpen);
   const before=(Date.parse(run.serverTime)||Date.now())<Date.parse(run.entryStartsAt);
-  document.getElementById('admission-status').textContent=run.publishedAt?'Итоги опубликованы':run.stopped?'Новые старты остановлены':run.entryOpen?'Можно начинать':before?'Старт ещё не открыт':'Приём завершён';
-  document.getElementById('admission-description').textContent=run.entryOpen?'Начните в пределах времени входа. Каждому — полный личный лимит 18 минут 45 секунд.':run.publishedAt?'Участники могут вернуться к своим результатам.':run.stopped?'Начатые попытки продолжаются. Новые старты возобновляет организатор.':before?'Время московское. До открытия изучите рекомендации и правила.':'Приём новых участников завершён. Начатые попытки продолжаются в пределах своего личного времени.';
+  document.getElementById('admission-status').textContent=run.publishedAt?'Итоги опубликованы':run.stopped||run.admissionMode==='closed'?'Организатор закрыл вход':run.entryOpen?'Можно начинать':before?'Старт ещё не открыт':'Приём завершён';
+  document.getElementById('admission-description').textContent=run.entryOpen?(run.admissionMode==='open'?'Организатор открыл олимпиаду. Каждому — полный личный лимит 18 минут 45 секунд.':'Начните в пределах времени входа. Каждому — полный личный лимит 18 минут 45 секунд.'):run.publishedAt?'Участники могут вернуться к своим результатам.':run.stopped||run.admissionMode==='closed'?'Начатые попытки продолжаются. Новые старты возобновляет организатор.':before?'Время московское. До открытия изучите рекомендации и правила.':'Приём новых участников завершён. Начатые попытки продолжаются в пределах своего личного времени.';
 }
 
 function refreshNavigationState() {
@@ -3990,7 +3990,7 @@ async function init() {
       updateStartAvailability();
     } catch { /* Admission is always checked again by the server on start. */ }
   };
-  window.setInterval(refreshStoryAdmission, 60000);
+  window.setInterval(refreshStoryAdmission, 15000);
   document.addEventListener("visibilitychange", refreshStoryAdmission);
   setupInstallPrompt();
   setInstallAvailability(false);

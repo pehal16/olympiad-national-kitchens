@@ -4277,7 +4277,7 @@ async function handleApi(req, res, url, runtime = {}) {
       for(const a of (await loadAttemptSummaries()).filter(a=>a.storyRunId)) normalized.push(a.status==='in_progress'&&Date.parse(a.expiresAt)<=now?await normalizeAndPersistIfChanged(olympiad,await loadAttemptById(a.id)):a);
       sendJson(res,200,{ok:true,data:runs.map(run=>{
         const own=normalized.filter(a=>a.storyRunId===run.id),active=own.filter(a=>a.status==='in_progress').length;
-        const closed=run.entryMode==='anytime'?run.stopped:now>=Date.parse(run.entryEndsAt);
+        const closed=storyRuns.publicationClosed(run,now);
         const publicationBlockers=[...(!closed?['Приём новых участников ещё не завершён.']:[]),...(active?[`Активных попыток: ${active}.`]:[])];
         return {...storyRuns.publicRun(run,now),isCurrent:run.id===current?.id,serverTime:new Date(now).toISOString(),started:own.length,completed:own.length-active,active,canPublish:!run.publishedAt&&closed&&!active,publicationBlockers};
       })});return;
@@ -4286,7 +4286,8 @@ async function handleApi(req, res, url, runtime = {}) {
       const body=await parseBody(req,{maxBytes:4096});try{const run=await storyRuns.createRun(body.date,{startTime:body.startTime,endTime:body.endTime});invalidateAttemptCaches();sendJson(res,201,{ok:true,data:storyRuns.publicRun(run)});}catch(error){sendJson(res,409,{ok:false,message:error.message});}return;
     }
     if(pathname.match(/^\/api\/admin\/story-runs\/[^/]+$/)&&method==="PATCH") {
-      const body=await parseBody(req,{maxBytes:4096});if(Object.keys(body).some(k=>!["stopped","decorationsDisabled"].includes(k))){sendJson(res,400,{ok:false,message:"Дата и версии закреплены. Создайте другое проведение."});return;}
+      const body=await parseBody(req,{maxBytes:4096});if(Object.keys(body).some(k=>!["stopped","decorationsDisabled","admissionMode"].includes(k))){sendJson(res,400,{ok:false,message:"Дата и версии закреплены. Создайте другое проведение."});return;}
+      if(body.admissionMode!==undefined && (!['auto','open','closed'].includes(body.admissionMode)||body.stopped!==undefined)){sendJson(res,400,{ok:false,message:"Выберите один режим допуска: включено, выключено или по расписанию."});return;}
       try{const run=await storyRuns.updateRun(pathname.split("/")[4],body);invalidateAttemptCaches();sendJson(res,200,{ok:true,data:storyRuns.publicRun(run)});}catch(error){sendJson(res,409,{ok:false,message:error.message});}return;
     }
     if(pathname.match(/^\/api\/admin\/story-runs\/[^/]+\/publish$/)&&method==="POST") {

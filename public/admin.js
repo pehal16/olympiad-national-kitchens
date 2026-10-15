@@ -54,11 +54,12 @@ async function loadStoryRuns() {
     const row=el('article');row.className='story-run-row'+(isCurrent?' is-current':'');row.dataset.runId=run.id;
     const heading=el('div');heading.className='story-run-heading';
     heading.append(el('h3',run.entryMode==='anytime'?'Пробный свободный вход':date(run.entryStartsAt)));
-    const state=el('span',run.publishedAt?'Итоги опубликованы':run.stopped?'Новые старты остановлены':run.entryOpen?'Вход открыт':now<Date.parse(run.entryStartsAt)?'Ожидает начала':'Вход закрыт');state.className='story-run-state';heading.append(state);row.append(heading);
-    if(run.entryMode!=='anytime')row.append(el('p',`Вход с ${time(run.entryStartsAt)} до ${time(run.entryEndsAt)} по Москве. До начала и после закрытия новые попытки недоступны.`));
+    const state=el('span',run.publishedAt?'Итоги опубликованы':run.entryOpen?'Олимпиада включена':'Олимпиада выключена');state.className='story-run-state';heading.append(state);row.append(heading);
+    if(run.entryMode!=='anytime')row.append(el('p',`Расписание: с ${time(run.entryStartsAt)} до ${time(run.entryEndsAt)} по Москве. Ручное включение открывает вход сразу, даже вне этого времени.`));
+    row.append(el('p',run.admissionMode==='open'?'Ручное управление: вход открыт до вашего выключения.':run.admissionMode==='closed'||run.stopped?'Ручное управление: вход закрыт до вашего включения.':'Режим: по расписанию. Можно переключить вручную в любой момент.'));
     const metrics=el('div');metrics.className='story-run-metrics';
     for(const [label,count] of [['Начали',run.started],['Завершили',run.completed],['Проходят',run.active]]){const card=el('div');card.className='story-run-metric';card.append(el('strong',String(count)),el('span',label));metrics.append(card);}row.append(metrics);
-    const help=el('p');help.className='story-run-help';help.textContent=run.publishedAt?'Общие итоги, заработанное меню и разбор доступны участникам. Свидетельство с личными баллами выдаётся сразу после завершения.':run.entryMode==='anytime'?'Перед публикацией остановите новые старты и дождитесь завершения всех начатых попыток.':`Вход открывается автоматически. Публикация общих итогов — после ${time(run.entryEndsAt)} и завершения всех попыток. У последнего участника сохраняются полные 18 минут 45 секунд.`;row.append(help);
+    const help=el('p');help.className='story-run-help';help.textContent=run.publishedAt?'Общие итоги, заработанное меню и разбор доступны участникам. Свидетельство с личными баллами выдаётся сразу после завершения.':run.entryMode==='anytime'?'Перед публикацией остановите новые старты и дождитесь завершения всех начатых попыток.':`${run.admissionMode==="open"?"Вход открыт вручную до вашего выключения.":run.admissionMode==="closed"||run.stopped?"Вход закрыт вручную.":"Вход открывается автоматически."} Публикация общих итогов — после ${time(run.entryEndsAt)} и завершения всех попыток. У последнего участника сохраняются полные 18 минут 45 секунд.`;row.append(help);
     const actions=el('div');actions.className='story-run-actions';
     async function action(path,method,body){
       if(mount.dataset.busy==='true')return;
@@ -67,10 +68,13 @@ async function loadStoryRuns() {
       catch(error){document.getElementById('story-run-message').textContent=error.message;}
       finally{delete mount.dataset.busy;await loadStoryRuns();}
     }
-    const stop=el('button',run.stopped?'Возобновить новые старты':'Остановить новые старты');stop.className='button secondary';stop.type='button';stop.disabled=Boolean(run.publishedAt);stop.addEventListener('click',()=>action(`/api/admin/story-runs/${run.id}`,'PATCH',{stopped:!run.stopped},stop));
+    const toggle=el('button');toggle.className='button admission-switch';toggle.type='button';toggle.disabled=Boolean(run.publishedAt);toggle.setAttribute('role','switch');toggle.setAttribute('aria-checked',String(run.entryOpen));toggle.setAttribute('aria-label','Олимпиада');
+    const track=el('span');track.className='admission-switch-track';track.setAttribute('aria-hidden','true');toggle.append(track,el('span',run.entryOpen?'Включено':'Выключено'));
+    toggle.addEventListener('click',()=>action(`/api/admin/story-runs/${run.id}`,'PATCH',{admissionMode:run.entryOpen?'closed':'open'}));
+    const automatic=el('button','Вернуть расписание');automatic.className='button secondary';automatic.type='button';automatic.disabled=Boolean(run.publishedAt)||(!run.stopped&&(!run.admissionMode||run.admissionMode==='auto'));automatic.addEventListener('click',()=>action(`/api/admin/story-runs/${run.id}`,'PATCH',{admissionMode:'auto'}));
     const decoration=el('button',run.decorationsDisabled?'Включить оформление':'Отключить оформление');decoration.className='button secondary';decoration.type='button';decoration.addEventListener('click',()=>action(`/api/admin/story-runs/${run.id}`,'PATCH',{decorationsDisabled:!run.decorationsDisabled},decoration));
     const publish=el('button',run.publishedAt?'Опубликовано':'Опубликовать общие итоги');publish.type='button';publish.className='button primary';publish.disabled=run.canPublish!==undefined?!run.canPublish:Boolean(run.publishedAt)||(run.entryMode==='anytime'?!run.stopped:now<Date.parse(run.entryEndsAt))||run.active>0;publish.addEventListener('click',()=>action(`/api/admin/story-runs/${run.id}/publish`,'POST',null,publish));
-    actions.append(stop,decoration,publish);row.append(actions);
+    actions.append(toggle,automatic,decoration,publish);row.append(actions);
     if(!run.publishedAt&&run.publicationBlockers?.length)row.append(el('p','Публикация пока недоступна: '+run.publicationBlockers.join(' ')));
     (isCurrent?current:list).append(row);
   }
@@ -334,7 +338,7 @@ function escapeHtml(value) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
+    .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
 

@@ -346,7 +346,8 @@ async function createAttemptAtomic(attempt) {
     const creationStatements=[
       statement(`INSERT INTO attempts(id,payload_json,updated_at,state_revision,access_token_hash,story_run_id)
         SELECT ?1,?2,?3,0,?4,?5 FROM olympiad_story_runs r WHERE r.id=?5 AND r.stopped=0
-        AND r.published_at IS NULL AND (r.entry_mode='anytime' OR
+        AND r.published_at IS NULL AND COALESCE(json_extract(r.payload_json,'$.admissionMode'),'auto')!='closed'
+        AND (json_extract(r.payload_json,'$.admissionMode')='open' OR r.entry_mode='anytime' OR
           (r.entry_starts_at<=strftime('%Y-%m-%dT%H:%M:%fZ','now')
           AND r.entry_ends_at>strftime('%Y-%m-%dT%H:%M:%fZ','now')))
         ON CONFLICT(id) DO NOTHING`,String(storedAttempt.id),JSON.stringify(cloneAttemptState(storedAttempt)),storedAt,storedAttempt.accessTokenHash,storedAttempt.storyRunId),

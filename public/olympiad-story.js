@@ -27,7 +27,7 @@
       cover.width=1584;cover.height=993;cover.fetchPriority='high';hero.replaceChildren(cover);
     }
     const note=doc.querySelector('.landing-pilot-note');
-    if(note)note.textContent=olympiad.story?.entryMode==='anytime'
+    if(note)note.textContent=olympiad.story?.admissionMode==='open'?'Организатор открыл вход вручную. Можно начинать. Каждому — полный личный лимит 18 минут 45 секунд.':olympiad.story?.admissionMode==='closed'?'Организатор закрыл новые старты. Уже начатые попытки продолжаются.':olympiad.story?.entryMode==='anytime'
       ? (olympiad.story.entryOpen?`Начните в любое время. Первые четыре тура — по 30 секунд на задание; кухня — по 45 секунд на блюдо. Всего ${root.formatLimitMinutes(olympiad.durationMinutes)}.`:olympiad.story.publishedAt?'Итоги опубликованы. Новые попытки этого проведения закрыты.':'Организатор остановил новые старты. Начатые попытки продолжаются.')
       : olympiad.story?`Вход ${olympiad.story.date}: с ${new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit'}).format(new Date(olympiad.story.entryStartsAt))} до ${new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit'}).format(new Date(olympiad.story.entryEndsAt))}${Date.parse(olympiad.story.entryEndsAt)-Date.parse(olympiad.story.entryStartsAt)===86400000?' следующего дня':''} по Москве. Каждому — ${root.formatLimitMinutes(olympiad.durationMinutes)}.`:'Дата проведения будет объявлена организатором.';
     let section=doc.getElementById('story-introduction');

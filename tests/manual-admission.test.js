@@ -1,0 +1,61 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+const {createOlympiadServer}=require('../olympiad-server');
+const runs=require('../src/story-runs'),store=require('../src/store');
+
+test('manual admission persists, overrides schedule atomically, preserves active work and protects publication',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'manual-admission-'));
+ const {server,db}=createOlympiadServer({dbPath:path.join(dir,'test.sqlite'),storyEnabled:'true',adminPassword:'synthetic-manual-admin-password',attemptIdSecret:'synthetic-manual-attempt-secret-2026'});
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));
+ t.after(async()=>{await new Promise(r=>server.close(r));fs.rmSync(dir,{recursive:true,force:true});});
+ const base=`http://127.0.0.1:${server.address().port}`;let cookie='';
+ async function api(url,{method='GET',body,token='',admin=false}={}){
+  const res=await fetch(base+url,{method,headers:{'Content-Type':'application/json',...(admin?{cookie}:{}),...(token?{'X-Attempt-Token':token}:{})},...(body!==undefined?{body:JSON.stringify(body)}:{})});
+  if(url.endsWith('/login'))cookie=res.headers.get('set-cookie').split(';')[0];
+  return {status:res.status,...await res.json()};
+ }
+ const run=await runs.createRun('2099-01-01',{startTime:'08:00',endTime:'16:00'}),url=`/api/admin/story-runs/${run.id}`;
+ const participant={fullName:'Проверочный Участник Переключателя',institution:'Изолированный стенд',groupName:'Тестовая группа',mentorName:''},token='synthetic_manual_owner_token_2026';
+ const start=(profile=participant)=>api('/api/public/attempts/start',{method:'POST',body:{participant:profile},token});
+ const patch=body=>api(url,{method:'PATCH',body,admin:true});
+ assert.equal((await api('/api/public/olympiad')).data.story.entryOpen,false);
+ assert.equal((await start()).status,403);
+ assert.equal((await api(url,{method:'PATCH',body:{admissionMode:'open'}})).status,401);
+ await api('/api/admin/login',{method:'POST',body:{password:'synthetic-manual-admin-password'}});
+ assert.equal((await patch({admissionMode:true})).status,400);
+ assert.equal((await patch({admissionMode:'open',stopped:true})).status,400);
+ assert.equal((await patch({admissionMode:'open'})).data.entryOpen,true);
+ assert.equal((await runs.getRun(run.id)).admissionMode,'open','Persisted rather than process-local');
+ await patch({decorationsDisabled:true});assert.equal((await runs.getRun(run.id)).admissionMode,'open');
+ const attempt=(await start()).data,saved=await store.loadAttemptById(attempt.id);
+ assert.equal(attempt.story.runId,run.id);assert.equal(Date.parse(attempt.expiresAt)-Date.parse(attempt.startedAt),18.75*60000);
+ await patch({admissionMode:'closed'});
+ assert.equal((await api('/api/public/olympiad')).data.story.entryOpen,false);
+ assert.equal((await start({...participant,fullName:'Другой Проверочный Участник'})).status,403);
+ assert.equal((await store.createAttemptAtomic({...saved,id:'stale-open-snapshot'})).entryClosed,true,'SQL checks live closed state');
+ assert.equal((await start()).status,200,'Existing owner can resume');
+ const q=saved.variant.questions[0],answerPayload={selectedOptionId:q.options.find(o=>o.isCorrect).id};
+ const answered=await api(`/api/public/attempts/${attempt.id}/answer`,{method:'POST',token,body:{questionId:q.id,answerPayload}});
+ assert.equal(answered.status,200);assert.equal(answered.data.progress.answeredCount,1);
+ const finished=await api(`/api/public/attempts/${attempt.id}/finish`,{method:'POST',token,body:{}});
+ assert.equal(finished.data.certificateAvailable,true);
+ assert.equal((await api(`/api/public/attempts/${attempt.id}/certificate`,{token})).status,200);
+ assert.equal((await api(url+'/publish',{method:'POST',admin:true})).status,409,'Early closure never publishes official answers early');
+ await patch({admissionMode:'auto'});assert.equal((await api('/api/public/olympiad')).data.story.entryOpen,false);
+ // Move only the synthetic run into a live window, then past its end.
+ const active={...await runs.getRun(run.id),entryStartsAt:new Date(Date.now()-60000).toISOString(),entryEndsAt:new Date(Date.now()+60000).toISOString()};
+ db.prepare('UPDATE olympiad_story_runs SET entry_starts_at=?,entry_ends_at=?,payload_json=? WHERE id=?').bind(active.entryStartsAt,active.entryEndsAt,JSON.stringify(active),run.id).run();
+ assert.equal((await api('/api/public/olympiad')).data.story.entryOpen,true);
+ await patch({admissionMode:'closed'});assert.equal((await api('/api/public/olympiad')).data.story.entryOpen,false);
+ active.entryEndsAt=new Date(Date.now()-1).toISOString();active.admissionMode='open';
+ db.prepare('UPDATE olympiad_story_runs SET entry_ends_at=?,payload_json=? WHERE id=?').bind(active.entryEndsAt,JSON.stringify(active),run.id).run();
+ assert.equal((await api('/api/admin/story-runs',{admin:true})).data.find(r=>r.id===run.id).canPublish,false);
+ assert.equal((await api(url+'/publish',{method:'POST',admin:true})).status,409,'Manual open blocks publication even after schedule');
+ const late=await start({...participant,fullName:'Поздний Проверочный Участник'});assert.equal(late.status,201,'Manual open also overrides expired SQL window');
+ await patch({admissionMode:'closed'});
+ assert.equal((await api(url+'/publish',{method:'POST',admin:true})).status,409,'Active participant still blocks publication');
+ await api(`/api/public/attempts/${late.data.id}/finish`,{method:'POST',token,body:{}});
+ assert.equal((await api(url+'/publish',{method:'POST',admin:true})).status,200);
+ assert.equal((await patch({admissionMode:'open'})).status,409,'Published run cannot reopen');
+ assert.equal((await store.createAttemptAtomic({...saved,id:'after-publication'})).entryClosed,true);
+ assert.equal((await store.loadAttemptById(attempt.id)).answers[q.id].answerPayload.selectedOptionId,answerPayload.selectedOptionId);
+});
