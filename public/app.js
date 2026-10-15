@@ -186,7 +186,8 @@ function updateAdmissionBanner() {
   if(!run)return;
   const date=value=>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',day:'numeric',month:'long'}).format(new Date(value));
   const hour=value=>new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit'}).format(new Date(value));
-  document.getElementById('admission-title').textContent=run.admissionMode==='open'||run.admissionMode==='closed'?'Входом управляет организатор':run.entryMode==='anytime'?'Свободный вход':`${date(run.entryStartsAt)} · ${hour(run.entryStartsAt)}–${hour(run.entryEndsAt)}`;
+  const endDate=date(run.entryEndsAt),startDate=date(run.entryStartsAt);
+  document.getElementById('admission-title').textContent=run.admissionMode==='open'||run.admissionMode==='closed'?'Входом управляет организатор':run.entryMode==='anytime'?'Свободный вход':startDate===endDate?`${startDate} · ${hour(run.entryStartsAt)}–${hour(run.entryEndsAt)}`:`${startDate}, ${hour(run.entryStartsAt)} — ${endDate}, ${hour(run.entryEndsAt)}`;
   banner.dataset.open=String(run.entryOpen);
   const before=(Date.parse(run.serverTime)||Date.now())<Date.parse(run.entryStartsAt);
   document.getElementById('admission-status').textContent=run.publishedAt?'Итоги опубликованы':run.stopped||run.admissionMode==='closed'?'Организатор закрыл вход':run.entryOpen?'Можно начинать':before?'Старт ещё не открыт':'Приём завершён';

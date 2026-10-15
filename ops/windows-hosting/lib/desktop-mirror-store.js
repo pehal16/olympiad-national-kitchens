@@ -14,6 +14,7 @@ function openMirror(directory) {
   database.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL;
     CREATE TABLE IF NOT EXISTS mirror_attempts(id TEXT PRIMARY KEY,fingerprint TEXT NOT NULL,bundle_json TEXT NOT NULL,sha256 TEXT NOT NULL,synced_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS mirror_runs(id TEXT PRIMARY KEY,payload_json TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS mirror_registrations(id TEXT PRIMARY KEY,payload_json TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS mirror_meta(key TEXT PRIMARY KEY,value TEXT NOT NULL);`);
   return database;
 }
@@ -37,8 +38,10 @@ function exportResults(database, directory) {
       totalFinalScore: a.status === 'in_progress' ? null : a.totalFinalScore ?? null, totalMaxScore: a.totalMaxScore ?? 150,
       answeredCount: bundle.answers.filter(row => JSON.parse(row.payload_json).answer).length, runId: a.storyRunId || null };
   });
-  const headers = ['ID','ФИО','Учреждение','Группа','Статус','Начало','Завершение','Баллы','Максимум','Сохранено ответов'];
-  const lines = [headers, ...results.map(a => [a.id,a.participant.fullName,a.participant.institution,a.participant.groupName,a.status,a.startedAt,a.finishedAt,a.totalFinalScore,a.totalMaxScore,a.answeredCount])];
+  const headers = ['ID','ФИО','Учреждение','Группа','Наставник','Статус','Начало','Завершение','Баллы','Максимум','Сохранено ответов'];
+  const lines = [headers, ...results.map(a => [a.id,a.participant.fullName,a.participant.institution,a.participant.groupName,a.participant.mentorName,a.status,a.startedAt,a.finishedAt,a.totalFinalScore,a.totalMaxScore,a.answeredCount])];
+  const registrations=database.prepare('SELECT payload_json FROM mirror_registrations ORDER BY id').all().map(row=>JSON.parse(row.payload_json));
+  atomicFile(path.join(directory,'registrations.json'),JSON.stringify({exportedAt:new Date().toISOString(),registrations},null,2));
   const csv = '\uFEFF' + lines.map(row => row.map(csvCell).join(';')).join('\r\n') + '\r\n';
   let exportWarning = null;
   try { atomicFile(path.join(directory, 'Результаты.csv'), csv); }
@@ -48,7 +51,7 @@ function exportResults(database, directory) {
     exportWarning = 'Закройте Результаты.csv в Excel: SQLite и JSON обновлены, основная CSV будет обновлена автоматически.';
   }
   atomicFile(path.join(directory, 'results.json'), JSON.stringify({ exportedAt: new Date().toISOString(), attempts: results }, null, 2));
-  return { attempts: results.length, finished: results.filter(a => a.status !== 'in_progress').length, answers: results.reduce((sum, a) => sum + a.answeredCount, 0), ...(exportWarning ? {exportWarning} : {}) };
+  return { attempts: results.length, finished: results.filter(a => a.status !== 'in_progress').length, answers: results.reduce((sum, a) => sum + a.answeredCount, 0), ...(registrations.length?{registrations:registrations.length}:{}),...(exportWarning ? {exportWarning} : {}) };
 }
 function writeStatus(directory, status) {
   atomicFile(path.join(directory, 'status.json'), JSON.stringify(status, null, 2));
@@ -58,6 +61,7 @@ function writeStatus(directory, status) {
     'Состояние: ' + ({ ok:'Синхронизация завершена',offline:'Нет связи или доступ временно недоступен; копия сохранена, повтор автоматически',syncing:'Получение изменений' }[status.state] || status.state),
     'Проверено: ' + date(status.checkedAt), 'Последняя полная синхронизация: ' + date(status.lastSuccessAt),
     'Попыток на ПК: ' + (status.counts?.attempts ?? 0), 'Завершено: ' + (status.counts?.finished ?? 0), 'Ответов на ПК: ' + (status.counts?.answers ?? 0),
+    'Записей списка участников: '+(status.counts?.registrations??0),
     'Основная база: Cloudflare. Повторная проверка каждые 15 секунд.',
     'При отключении интернета копия может отставать. После подключения автоматически догоняет облако.',
     'Результаты.csv — для просмотра. cloud-results.sqlite содержит также варианты, ответы и журнал.',
@@ -93,18 +97,31 @@ async function syncOnce({ database, directory, privateKey, fetcher, previous = {
   database.exec('BEGIN IMMEDIATE');
   try { for (const run of runs.runs) database.prepare('INSERT INTO mirror_runs VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload_json=excluded.payload_json').run(run.id,JSON.stringify(run)); database.exec('COMMIT'); }
   catch(error) { database.exec('ROLLBACK'); throw error; }
+  if(runs.registryAvailable){
+    let cursor='',seen=new Set();
+    do{
+      if(seen.has(cursor))throw new Error('Invalid registry pagination');seen.add(cursor);
+      const data=await request({view:'registry',after:cursor});if(!Array.isArray(data.registrations)||data.registrations.length>100)throw new Error('Invalid registry manifest');
+      database.exec('BEGIN IMMEDIATE');try{
+        for(const row of data.registrations){if(typeof row.id!=='string'||!/^[a-f0-9]{64}$/.test(row.id)||typeof row.participant_json!=='string')throw new Error('Invalid registration');JSON.parse(row.participant_json);
+          const text=JSON.stringify(row);if(database.prepare('SELECT payload_json FROM mirror_registrations WHERE id=?').get(row.id)?.payload_json!==text){database.prepare('INSERT INTO mirror_registrations VALUES(?,?) ON CONFLICT(id) DO UPDATE SET payload_json=excluded.payload_json').run(row.id,text);changed++;}}
+        database.prepare("INSERT INTO mirror_meta VALUES('currentRunId',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").run(JSON.stringify(runs.currentRunId||null));database.exec('COMMIT');
+      }catch(error){database.exec('ROLLBACK');throw error;}
+      cursor=data.nextAfter;if(cursor!==null&&(typeof cursor!=='string'||!cursor))throw new Error('Invalid registry cursor');
+    }while(cursor);
+  }
   const counts = exportResults(database,directory), checkedAt = now();
   if (database.prepare('PRAGMA quick_check').get().quick_check !== 'ok') throw new Error('Local mirror integrity failed');
   const status = { state:'ok',checkedAt,lastSuccessAt:checkedAt,counts,cloudAttempts,changed,transport:fetcher.lastTransport || 'test',lastError:null };
   const day = checkedAt.slice(0,10);
   const backupState = JSON.parse(database.prepare("SELECT value FROM mirror_meta WHERE key='backupState'").get()?.value || 'null');
   const sinceBackup = backupState ? Date.parse(checkedAt) - Date.parse(backupState.at) : Infinity;
-  if (!backupState || backupState.day !== day || (counts.attempts > 0 && !backupState.attempts) ||
+  if (!backupState || backupState.day !== day || (counts.attempts > 0 && !backupState.attempts) || (counts.registrations>0&&!backupState.registrations) ||
       (counts.finished > backupState.finished && sinceBackup >= 60000) || (changed > 0 && sinceBackup >= 900000)) {
     const destination = path.join(directory,'snapshots'); fs.mkdirSync(destination,{recursive:true});
     const filename = path.join(destination, 'results-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex') + '.sqlite'); await backup(database,filename);
     const copy = new DatabaseSync(filename); try { copy.exec('PRAGMA journal_mode=DELETE;'); if(copy.prepare('PRAGMA integrity_check').get().integrity_check !== 'ok')throw new Error('Snapshot integrity failed'); } finally {copy.close();}
-    database.prepare("INSERT INTO mirror_meta VALUES('backupState',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").run(JSON.stringify({day,at:checkedAt,attempts:counts.attempts,finished:counts.finished}));
+    database.prepare("INSERT INTO mirror_meta VALUES('backupState',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").run(JSON.stringify({day,at:checkedAt,attempts:counts.attempts,finished:counts.finished,registrations:counts.registrations||0}));
   }
   writeStatus(directory,status); return status;
 }

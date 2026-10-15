@@ -7,6 +7,39 @@ function enabled() { return String(env?.STORY_ENABLED ?? process.env.STORY_ENABL
 function anytimeEntryEnabled() { return String(env?.STORY_ANYTIME_ENTRY ?? process.env.STORY_ANYTIME_ENTRY ?? 'false')==='true'; }
 const ANYTIME_RUN_ID = 'anytime-v1';
 function localFile() { return require('path').join(require('./store').STORAGE_DIR, 'story-runs.json'); }
+function controlFile(){return require('path').join(require('./store').STORAGE_DIR,'olympiad-control.json');}
+async function selectedRunId(){
+ if(env?.DB)return (await retryD1(()=>env.DB.prepare("SELECT run_id FROM olympiad_control WHERE id='current'").first()))?.run_id||null;
+ return readJson(controlFile(),{}).runId||null;
+}
+async function selectRun(id){
+ const run=await getRun(id);if(!run||run.publishedAt)throw new Error('Выберите проведение без опубликованных итогов.');
+ if(env?.DB)await retryD1(()=>env.DB.prepare(`INSERT INTO olympiad_control(id,run_id) SELECT 'current',id FROM olympiad_story_runs WHERE id=? AND published_at IS NULL
+  ON CONFLICT(id) DO UPDATE SET run_id=excluded.run_id`).bind(id).run());
+ else writeJson(controlFile(),{runId:id});
+ return getRun(id);
+}
+function scheduleWindow(startsAt,endsAt){
+ const canonical=value=>typeof value==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)&&Number.isFinite(Date.parse(value))&&new Date(value).toISOString()===value;
+ if(!canonical(startsAt)||!canonical(endsAt)||Date.parse(endsAt)<=Date.parse(startsAt))throw new Error('Укажите корректные дату и время открытия и закрытия. Закрытие должно быть позже открытия.');
+ return {entryStartsAt:startsAt,entryEndsAt:endsAt,date:new Date(Date.parse(startsAt)+10800000).toISOString().slice(0,10),entryMode:'scheduled',fixedAdmission:true};
+}
+async function rescheduleRun(id,patch){
+ const run=await getRun(id);if(!run||run.publishedAt)throw new Error('Нельзя изменить расписание после публикации итогов. Создайте новое проведение.');
+ const window=scheduleWindow(patch.entryStartsAt,patch.entryEndsAt),next={...run,...window,admissionMode:'auto',stopped:false};
+ if(env?.DB){
+  await retryD1(()=>env.DB.batch([
+   env.DB.prepare(`UPDATE olympiad_story_runs SET event_date=?,entry_starts_at=?,entry_ends_at=?,entry_mode='scheduled',stopped=0,
+    payload_json=json_set(payload_json,'$.date',?,'$.entryStartsAt',?,'$.entryEndsAt',?,'$.entryMode','scheduled','$.fixedAdmission',json('true'),'$.admissionMode','auto','$.stopped',json('false')) WHERE id=? AND published_at IS NULL`)
+    .bind(next.date,next.entryStartsAt,next.entryEndsAt,next.date,next.entryStartsAt,next.entryEndsAt,id),
+   env.DB.prepare(`INSERT INTO olympiad_control(id,run_id) SELECT 'current',id FROM olympiad_story_runs WHERE id=? AND published_at IS NULL
+    ON CONFLICT(id) DO UPDATE SET run_id=excluded.run_id`).bind(id)
+  ]));
+  const stored=await getRun(id);if(stored.publishedAt)throw new Error('Итоги уже опубликованы. Расписание не изменено.');return stored;
+ }
+ const runs=readJson(localFile(),[]);if(runs.some(r=>r.id!==id&&r.date===next.date))throw new Error('На эту дату уже есть проведение. Выберите его или другую дату.');
+ runs[runs.findIndex(r=>r.id===id)]=next;writeJson(localFile(),runs);writeJson(controlFile(),{runId:id});return next;
+}
 function decode(row) {
   return row ? { ...JSON.parse(row.payload_json), entryMode:row.entry_mode||'scheduled', publishedAt: row.published_at || null, stopped: Boolean(row.stopped) } : null;
 }
@@ -117,6 +150,7 @@ async function publishRun(id, now=Date.now()) {
   run.publishedAt=stamp; writeJson(localFile(),runs); return run;
 }
 async function currentRun(now=Date.now()) {
+  const selected=await selectedRunId();if(selected){const run=await getRun(selected);if(run)return run;}
   const officialDate=env?.OFFICIAL_OLYMPIAD_DATE??process.env.OFFICIAL_OLYMPIAD_DATE;
   if(officialDate){
     const wanted=makeRun(officialDate,`official-${officialDate}`,{startTime:env?.OFFICIAL_OLYMPIAD_START_TIME??process.env.OFFICIAL_OLYMPIAD_START_TIME??'08:00',endTime:env?.OFFICIAL_OLYMPIAD_END_TIME??process.env.OFFICIAL_OLYMPIAD_END_TIME??'16:00'});
@@ -170,4 +204,4 @@ function storyView(attempt) {
 function scoresVisible(attempt,settings) {
   return attempt.status!=='in_progress' && (attempt.storyRunId ? Boolean(attempt._storyRun?.publishedAt) : Boolean(settings.showParticipantScore));
 }
-module.exports={configureStoryStorage,enabled,makeRun,entryOpen,publicationClosed,listRuns,getRun,createRun,updateRun,publishRun,currentRun,publicRun,hydrate,storyView,scoresVisible,recoveryPolicy};
+module.exports={configureStoryStorage,enabled,makeRun,entryOpen,publicationClosed,listRuns,getRun,createRun,updateRun,publishRun,currentRun,publicRun,hydrate,storyView,scoresVisible,recoveryPolicy,selectRun,rescheduleRun,scheduleWindow,selectedRunId};

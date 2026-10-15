@@ -62,6 +62,7 @@ let ydbStore = null;
 function configureCloudflareStorage(env) {
   cloudflareEnv = env || cloudflareEnv || null;
   require('./story-runs').configureStoryStorage(cloudflareEnv);
+  require('./participant-registry').configureRegistry(cloudflareEnv);
   if (cloudflareEnv && (!process.env.STORAGE_BACKEND || process.env.STORAGE_BACKEND === "file")) {
     process.env.STORAGE_BACKEND = "cloudflare";
   }

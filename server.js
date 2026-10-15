@@ -3,6 +3,7 @@ const { URL } = require("url");
 const packageInfo = require("./package.json");
 const { buildDishService } = require("./src/dish-service");
 const storyRuns=require("./src/story-runs");
+const participantRegistry=require('./src/participant-registry');
 const {freezeStoryVariant,buildStoryResult}=require("./src/story-result");
 const {certificateAvailable,buildParticipantCertificate}=require("./src/participant-certificate");
 function storyEnabled(){return storyRuns.enabled();}
@@ -351,6 +352,18 @@ function makeParticipantSignature(profile) {
     normalizeText(profile.institution),
     normalizeGroupKey(profile.groupName)
   ].join("|");
+}
+
+async function organizerParticipants(olympiad,runId){
+  const registrations=await participantRegistry.list(runId),rows=new Map();
+  for(const r of registrations){const participant=JSON.parse(r.participant_json);if(r.mentor_override!==null)participant.mentorName=r.mentor_override;
+    rows.set(r.participant_signature,{id:r.id,runId,participant,mentorAssigned:r.mentor_override!==null,expected:Boolean(r.expected),registeredAt:r.registered_at,status:'not_started',attemptId:null,startedAt:null,finishedAt:null,totalFinalScore:null});}
+  const attempts=currentOlympiadAttempts(await loadAttemptSummaries(),olympiad.id).filter(a=>(a.storyRunId||'legacy')===runId);
+  for(const a of attempts){const signature=a.participantSignature||makeParticipantSignature(a.participant),old=rows.get(signature),active=a.status==='in_progress'&&Date.parse(a.expiresAt)>Date.now();
+    const participant={...a.participant};if(old?.mentorAssigned)participant.mentorName=old.participant.mentorName||'';
+    rows.set(signature,{...old,id:participantRegistry.key(runId,signature),runId,participant,expected:old?.expected||false,registeredAt:old?.registeredAt||null,
+      status:active?'in_progress':'completed',attemptStatus:a.status,attemptId:a.id,startedAt:a.startedAt,finishedAt:a.finishedAt,totalFinalScore:a.status==='in_progress'?null:a.totalFinalScore,signature});}
+  return [...rows.values()].sort((a,b)=>a.participant.fullName.localeCompare(b.participant.fullName,'ru-RU'));
 }
 
 function makeParticipantNameKey(profile) {
@@ -3666,6 +3679,7 @@ async function handleApi(req, res, url, runtime = {}) {
     }
 
     const signature = makeParticipantSignature(validation.profile);
+    if(run&&!run.publishedAt)await participantRegistry.register(run.id,signature,validation.profile);
     const ownAttempt=run?await loadAttemptById(makeOlympiadAttemptIdentity(`${olympiadData.id}|${run.id}`,signature,settings).attemptId):null;
     const attempts = run?(ownAttempt?[ownAttempt]:[]):currentOlympiadAttempts(await loadAttemptSummaries(), olympiadData.id).filter(
       (attempt) => attempt.participantSignature === signature && !attempt.storyRunId
@@ -4285,6 +4299,15 @@ async function handleApi(req, res, url, runtime = {}) {
     if(pathname==="/api/admin/story-runs"&&method==="POST") {
       const body=await parseBody(req,{maxBytes:4096});try{const run=await storyRuns.createRun(body.date,{startTime:body.startTime,endTime:body.endTime});invalidateAttemptCaches();sendJson(res,201,{ok:true,data:storyRuns.publicRun(run)});}catch(error){sendJson(res,409,{ok:false,message:error.message});}return;
     }
+    if(pathname==='/api/admin/story-runs/current'&&method==='PATCH'){
+      const body=await parseBody(req,{maxBytes:4096});try{const run=await storyRuns.selectRun(body.runId);invalidateAttemptCaches();sendJson(res,200,{ok:true,data:storyRuns.publicRun(run)});}catch(error){sendJson(res,409,{ok:false,message:error.message});}return;
+    }
+    if(pathname.match(/^\/api\/admin\/story-runs\/[^/]+\/schedule$/)&&method==='PATCH'){
+      const body=await parseBody(req,{maxBytes:4096});
+      if(Object.keys(body).some(k=>!['entryStartsAt','entryEndsAt'].includes(k))){sendJson(res,400,{ok:false,message:'Укажите только дату и время открытия и закрытия.'});return;}
+      try{const run=await storyRuns.rescheduleRun(pathname.split('/')[4],body);invalidateAttemptCaches();sendJson(res,200,{ok:true,data:storyRuns.publicRun(run)});}
+      catch(error){sendJson(res,409,{ok:false,message:/UNIQUE/.test(error.message)?'На эту дату уже есть проведение. Выберите его или другую дату.':error.message});}return;
+    }
     if(pathname.match(/^\/api\/admin\/story-runs\/[^/]+$/)&&method==="PATCH") {
       const body=await parseBody(req,{maxBytes:4096});if(Object.keys(body).some(k=>!["stopped","decorationsDisabled","admissionMode"].includes(k))){sendJson(res,400,{ok:false,message:"Дата и версии закреплены. Создайте другое проведение."});return;}
       if(body.admissionMode!==undefined && (!['auto','open','closed'].includes(body.admissionMode)||body.stopped!==undefined)){sendJson(res,400,{ok:false,message:"Выберите один режим допуска: включено, выключено или по расписанию."});return;}
@@ -4759,6 +4782,38 @@ async function handleApi(req, res, url, runtime = {}) {
       return;
     }
 
+    if(pathname==='/api/admin/participants'&&method==='GET'){
+      const runId=url.searchParams.get('runId')||(await storyRuns.currentRun())?.id||'legacy';
+      if(runId!=='legacy'&&!await storyRuns.getRun(runId)){sendJson(res,404,{ok:false,message:'Проведение не найдено.'});return;}
+      const people=await organizerParticipants(await ensureOlympiad(),runId);
+      sendJson(res,200,{ok:true,data:{runId,participants:people.map(({signature,...person})=>person)}});return;
+    }
+    if(pathname==='/api/admin/participants/import'&&method==='POST'){
+      const body=await parseBody(req,{maxBytes:256*1024}),runId=body.runId||(await storyRuns.currentRun())?.id;
+      const run=runId?await storyRuns.getRun(runId):null;
+      if(!run||run.publishedAt){sendJson(res,409,{ok:false,message:'Выберите проведение без опубликованных итогов.'});return;}
+      try{
+        const raw=Array.isArray(body.participants)?body.participants:participantRegistry.parseImport(body.text,body.defaults||{});
+        if(!raw.length||raw.length>500)throw Error('Нужен список от1до500 участников.');
+        const people=raw.map((row,i)=>{const v=validateOlympiadParticipantProfile(row);if(!v.valid)throw Error(`Строка ${i+1}: ${v.message}`);return v.profile;});
+        const unique=new Map(people.map(p=>[makeParticipantSignature(p),p]));
+        if(body.preview===true){sendJson(res,200,{ok:true,data:{participants:[...unique.values()],count:unique.size,duplicates:people.length-unique.size}});return;}
+        const existing=new Set((await participantRegistry.list(runId)).map(r=>r.participant_signature));
+        // Sequential bounded writes stay below D1's per-request query budget.
+        if(unique.size>80){sendJson(res,400,{ok:false,message:'Сохраните список порциями до80 участников. Предпросмотр поддерживает500.'});return;}
+        for(const [signature,person]of unique)await participantRegistry.register(runId,signature,person,{expected:true});
+        invalidateAttemptCaches();sendJson(res,200,{ok:true,data:{added:[...unique.keys()].filter(k=>!existing.has(k)).length,alreadyPresent:[...unique.keys()].filter(k=>existing.has(k)).length}});
+      }catch(error){sendJson(res,400,{ok:false,message:error.message});}return;
+    }
+    if(pathname.match(/^\/api\/admin\/participants\/[a-f0-9]{64}$/)&&method==='PATCH'){
+      const body=await parseBody(req,{maxBytes:4096}),runId=body.runId||(await storyRuns.currentRun())?.id||'legacy';
+      if(Object.keys(body).some(k=>!['runId','mentorName'].includes(k))){sendJson(res,400,{ok:false,message:'Можно изменить только наставника.'});return;}
+      const person=(await organizerParticipants(await ensureOlympiad(),runId)).find(p=>p.id===pathname.split('/')[4]);
+      if(!person){sendJson(res,404,{ok:false,message:'Участник не найден в выбранном проведении.'});return;}
+      try{const result=await participantRegistry.mentor(runId,makeParticipantSignature(person.participant),person.participant,body.mentorName);invalidateAttemptCaches();sendJson(res,200,{ok:true,data:result});}
+      catch(error){sendJson(res,400,{ok:false,message:error.message});}return;
+    }
+
     if (method === "GET" && pathname.match(/^\/api\/admin\/attempts\/[^/]+$/)) {
       const olympiadData = await ensureOlympiad();
       const attemptId = pathname.split("/")[4];
@@ -4835,6 +4890,13 @@ async function handleApi(req, res, url, runtime = {}) {
       return;
     }
 
+    if(method==='GET'&&/^\/api\/admin\/exports\/(csv|json)\/download$/.test(pathname)){
+      const kind=pathname.split('/')[4],olympiad=await ensureOlympiad(),runId=url.searchParams.get('runId');
+      const selected=a=>!runId||(a.storyRunId||'legacy')===runId;
+      const text=kind==='csv'?createAttemptsCsv((await buildExportRows(olympiad)).filter(selected)):
+        JSON.stringify(currentOlympiadAttempts(await loadAttempts(),olympiad.id).filter(selected).map(sanitizeAttemptForExport),null,2);
+      res.writeHead(200,{'Content-Type':kind==='csv'?'text/csv; charset=utf-8':'application/json; charset=utf-8','Cache-Control':'private, no-store','Content-Disposition':`attachment; filename="results.${kind}"`,'X-Content-Type-Options':'nosniff'});res.end(text);return;
+    }
     if (method === "POST" && pathname === "/api/admin/exports/csv") {
       const olympiadData = await ensureOlympiad();
       const fileName = `results_${Date.now()}.csv`;

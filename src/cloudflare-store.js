@@ -345,7 +345,8 @@ async function createAttemptAtomic(attempt) {
   if(storedAttempt.storyRunId) {
     const creationStatements=[
       statement(`INSERT INTO attempts(id,payload_json,updated_at,state_revision,access_token_hash,story_run_id)
-        SELECT ?1,?2,?3,0,?4,?5 FROM olympiad_story_runs r WHERE r.id=?5 AND r.stopped=0
+        SELECT ?1,json_set(?2,'$.participant.mentorName',COALESCE((SELECT mentor_override FROM olympiad_registrations
+          WHERE run_id=?5 AND participant_signature=json_extract(?2,'$.participantSignature')),json_extract(?2,'$.participant.mentorName'),'')),?3,0,?4,?5 FROM olympiad_story_runs r WHERE r.id=?5 AND r.stopped=0
         AND r.published_at IS NULL AND COALESCE(json_extract(r.payload_json,'$.admissionMode'),'auto')!='closed'
         AND (json_extract(r.payload_json,'$.admissionMode')='open' OR r.entry_mode='anytime' OR
           (r.entry_starts_at<=strftime('%Y-%m-%dT%H:%M:%fZ','now')

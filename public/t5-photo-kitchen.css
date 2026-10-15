@@ -55,6 +55,13 @@ body:has(.t5-photo-kitchen) #attempt-section.is-t5 #tour-title { font-size:28px;
 .t5-photo-assembly-guide {display:flex;gap:12px;align-items:center;margin:0 0 14px;padding:12px;background:#eee9dd;border-radius:8px;color:#385447;font:500 14px/1.5 system-ui,sans-serif;}
 .t5-photo-assembly-guide.is-ready {background:#e1efe5;color:#154f3d;border-left:3px solid #147568;}
 .t5-photo-guide-arrow {flex:none;font:700 32px/1 system-ui,sans-serif;}
+.t5-photo-guide-arrow.is-cue {animation:t5-guide-point 1.4s ease-in-out infinite;color:#146c50;}
+.t5-photo-kitchen .is-guided-target {outline:3px solid #c4a03d;outline-offset:4px;box-shadow:0 0 0 7px #e7d79755;}
+.t5-photo-serve-guide {max-width:100%;margin:0;align-self:stretch;}
+.t5-photo-footer:has(.t5-photo-serve-guide:not([hidden])) {flex-direction:column;align-items:stretch;}
+.restaurant-kitchen-actions {scroll-margin-top:160px;}
+@keyframes t5-guide-point {0%,100%{transform:translateY(-3px);opacity:.75}50%{transform:translateY(5px);opacity:1}}
+@media(max-width:767px){.t5-photo-operation{scroll-margin-top:160px}.t5-photo-assembly-guide{font-size:15px;line-height:1.5;padding:12px;gap:10px}.t5-photo-kitchen .t5-photo-operation .t5-photo-primary{min-height:60px;font-size:19px}.t5-photo-serve-guide{margin-bottom:12px}.t5-photo-footer{scroll-margin-top:160px}}
 .t5-photo-footer { padding:18px 24px; border-top:1px solid #dedfd2; display:flex; justify-content:flex-end; align-items:center; gap:16px; }
 .t5-photo-footer #submit-answer { border:1px solid #247552!important; border-radius:12px!important; background:#247552!important; color:#fff!important; padding:16px 24px!important; min-height:60px!important; font:600 15px/1.35 Arial,sans-serif!important; cursor:pointer; }
 .t5-photo-footer #submit-answer:hover:not(:disabled) { background:#1c6344!important; }

@@ -18,7 +18,8 @@ function getPath() {
 }
 
 function csvEscape(value) {
-  const text = String(value ?? "");
+  let text = String(value ?? "");
+  if(typeof value==='string'&&/^[\s]*[=+@-]/.test(text))text="'"+text;
   const escaped = text.replace(/"/g, "\"\"");
   return `"${escaped}"`;
 }

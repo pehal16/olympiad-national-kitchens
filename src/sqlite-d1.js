@@ -9,7 +9,8 @@ const MIGRATIONS = [
   "0006_olympiad_integrity_events.sql",
   "0007_olympiad_attempt_concurrency.sql",
   "0008_olympiad_story_runs.sql",
-  "0009_olympiad_anytime_entry.sql"
+  "0009_olympiad_anytime_entry.sql",
+  "0010_olympiad_organizer.sql"
 ];
 
 function createSqliteD1(filename) {

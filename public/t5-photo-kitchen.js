@@ -44,12 +44,16 @@
     const operation = el('div','t5-photo-operation'), operationLabel = el('span','t5-photo-small'), next = button('','t5-photo-primary',()=>{if(locked || selected.size!==4 || stage==='served')return;stage=model.nextStage(dish,selected,stage);changed();});
     const edit = button('Изменить состав','t5-photo-text-button',()=>{if(locked)return;pantryExpanded=true;stage='select';changed();cards.values().next().value?.focus();});
     const operationDetail=el('p','t5-photo-operation-detail'),guide=el('p','t5-photo-assembly-guide'),guideArrow=el('span','t5-photo-guide-arrow','↓'),guideText=el('span');
+    guide.setAttribute('role','status');guide.setAttribute('aria-live','polite');guide.setAttribute('aria-atomic','true');
     guideArrow.setAttribute('aria-hidden','true');guide.append(guideArrow,guideText);guide.id=`t5-assembly-guide-${question.globalIndex}`;
     operationDetail.id=`t5-operation-detail-${question.globalIndex}`;next.setAttribute('aria-describedby',`${guide.id} ${operationDetail.id}`);
     operation.append(operationLabel,operationDetail,guide,next);
     panel.append(scene,mediaNotice,list,stepbar,operation,edit);
     compose.append(pantry,panel);workbench.append(compose);
-    const footer=el('div','t5-photo-footer'), draftNotice=el('p','t5-photo-small');draftNotice.hidden=true;footer.append(draftNotice,submitButton);workbench.append(footer);submitButton.textContent='Подать';
+    const footer=el('div','t5-photo-footer'), draftNotice=el('p','t5-photo-small');draftNotice.hidden=true;
+    const serveGuide=el('p','t5-photo-assembly-guide t5-photo-serve-guide'),serveArrow=el('span','t5-photo-guide-arrow','↓');serveArrow.setAttribute('aria-hidden','true');serveGuide.id=`t5-serve-guide-${question.globalIndex}`;serveGuide.append(serveArrow,el('span','',question.station.number===3?'Сборка готова. Нажмите «Подать», чтобы сохранить последнее блюдо и получить свидетельство.':'Сборка готова. Нажмите «Подать», чтобы отправить ответ и перейти к следующему блюду.'));serveGuide.setAttribute('role','status');serveGuide.hidden=true;
+    const originalDescription=submitButton.getAttribute('aria-describedby');submitButton.setAttribute('aria-describedby',[originalDescription,serveGuide.id].filter(Boolean).join(' '));
+    footer.append(draftNotice,serveGuide,submitButton);workbench.append(footer);submitButton.textContent='Подать';
     shell.append(intro,workbench);
     if (presentationMode === 'restaurant') {
       shell.classList.add('restaurant-kitchen');
@@ -69,11 +73,14 @@
       if(!ready)pantryExpanded=false;
       pantry.classList.toggle('is-condensed',ready&&!pantryExpanded);pantryToggle.hidden=!ready;
       pantryToggle.textContent=pantryExpanded?'Свернуть продукты':'Показать выбранные продукты';pantryToggle.setAttribute('aria-expanded',String(pantryExpanded));
-      if(ready&&!previouslyReady&&root.OlympiadDevice?.isMobile(win.navigator))win.requestAnimationFrame(()=>{if(!disposed)panel.scrollIntoView({block:'start',behavior:'instant'});});
+      if(started&&ready&&!previouslyReady)win.requestAnimationFrame(()=>{if(!disposed)operation.scrollIntoView({block:'center',behavior:'instant'});});
       previouslyReady=ready;
       operationLabel.textContent=!ready?'Выбор компонентов':stage==='served'?'Сборка завершена':`Шаг ${route.indexOf(stage)+1} из ${route.length-1}`;
       operationDetail.hidden=!ready||stage==='served';operationDetail.textContent=operationText||'';
       guide.classList.toggle('is-ready',ready&&stage!=='served');guideArrow.hidden=!ready||stage==='served';
+      operation.hidden=stage==='served';
+      guideArrow.classList.toggle('is-cue',ready&&!locked&&stage!=='served');next.classList.toggle('is-guided-target',ready&&!locked&&stage!=='served');
+      serveGuide.hidden=stage!=='served';serveGuide.classList.toggle('is-ready',stage==='served');serveArrow.classList.toggle('is-cue',stage==='served'&&!locked);submitButton.classList.toggle('is-guided-target',stage==='served'&&!locked);
       guideText.textContent=!ready?`Выберите ещё ${4-selected.size} ${selected.size===3?'продукт':'продукта'}, затем нажмите «Собрать блюдо».`:stage==='served'?'Готово к подаче. Нажмите «Подать» ниже, чтобы сохранить ответ.':stage==='select'?'Все 4 продукта выбраны. Нажмите «Собрать блюдо» ниже.':`Продолжите сборку: нажмите «${operationText}» ниже.`;
       edit.hidden=stage==='select';
       controls.forEach(control=>{if(control!==next)control.disabled=locked;});
@@ -102,7 +109,7 @@
       if(failed&&!layers.childElementCount)layers.append(el('p','t5-photo-empty','Ваш состав: '+model.selection(dish,selected).map(item=>item.text).join(', ')));
       if(selected.size===4&&stage!=='served')model.plan(dish,selected,model.nextStage(dish,selected,stage),layout).layers.forEach(layer=>decode(layer.path).catch(()=>{}));
     }
-    function changed(){if(presentationMode==='restaurant')root.T5DishService?.hideInline();persist();update();render();onChange?.(answer());if(presentationMode==='restaurant'&&stage!=='select')root.OlympiadStory?.action(question.id,stage==='served'?'Сборка завершена. Нажмите «Подать», чтобы сохранить блюдо.':'Шаг выполнен. Продолжайте сборку по своему плану.');}
+    function changed(){if(presentationMode==='restaurant')root.T5DishService?.hideInline();persist();update();render();onChange?.(answer());if(started&&selected.size===4&&stage==='served'&&root.OlympiadDevice?.isMobile(win.navigator))win.requestAnimationFrame(()=>{if(!disposed)footer.scrollIntoView({block:'center',behavior:'instant'});});if(presentationMode==='restaurant'&&stage!=='select')root.OlympiadStory?.action(question.id,stage==='served'?'Сборка завершена. Нажмите «Подать», чтобы сохранить блюдо.':'Шаг выполнен. Нажмите следующую подсвеченную кнопку сборки.');}
     for(const item of dish.items){
       const card=el('button','t5-photo-card');card.type='button';on(card,'click',()=>{if(locked)return;if(selected.has(item.id))selected.delete(item.id);else if(selected.size<4)selected.add(item.id);stage='select';changed();});card.dataset.ingredient=item.id;card.setAttribute('aria-pressed','false');
       const photo=el('img');if(presentationMode==='restaurant'&&root.RestaurantMedia)root.RestaurantMedia.setImage(photo,item.imageUrl,'card');else photo.src=item.imageUrl;photo.alt='';photo.draggable=false;photo.loading='eager';photo.decoding='async';
@@ -116,7 +123,7 @@
     update();render();onChange?.(answer());
     return {getAnswer:answer,isComplete:()=>started&&selected.size===4&&stage==='served',isFinalKitchen:true,
       setLocked(value){locked=Boolean(value);update();},
-      dispose(){disposed=true;revision++;listeners.abort();photos.clear();placeholder.replaceWith(submitButton);submitButton.hidden=false;submitButton.textContent=originalText;shell.remove();onPhase?.('disposed');}};
+      dispose(){disposed=true;revision++;listeners.abort();photos.clear();placeholder.replaceWith(submitButton);submitButton.hidden=false;submitButton.textContent=originalText;submitButton.classList.remove('is-guided-target');if(originalDescription===null)submitButton.removeAttribute('aria-describedby');else submitButton.setAttribute('aria-describedby',originalDescription);shell.remove();onPhase?.('disposed');}};
   }
   root.T5PhotoKitchen={create};
 })(typeof window!=='undefined'?window:globalThis);

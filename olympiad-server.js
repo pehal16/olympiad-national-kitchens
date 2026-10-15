@@ -5,7 +5,7 @@ const path = require("node:path");
 const { createSqliteD1 } = require("./src/sqlite-d1");
 
 const STATIC_FILES = new Set([
-  '/olympiad-ready.css', '/olympiad-device.js',
+  '/olympiad-ready.css', '/olympiad-device.js','/admin-console.css',
   '/attempt-reserve.js',
   '/story-dialogue.js','/restaurant-comic.css','/story-banquet.js','/story-banquet.css',
   '/restaurant-layout.js', '/restaurant-layout.css', '/restaurant-media.js', '/restaurant-atlas.js',
@@ -21,12 +21,14 @@ function isOlympiadApi(pathname) {
     pathname === "/api/public/attempts/start" ||
     /^\/api\/public\/attempts\/[^/]+(?:\/(?:certificate|story-result|current|pulse|answer|dish-selection|finish|integrity))?$/.test(pathname) ||
     pathname.startsWith("/api/admin/story-runs") ||
+    pathname.startsWith('/api/admin/participants') ||
     pathname === "/api/admin/login" ||
     pathname === "/api/admin/session" ||
     pathname === "/api/admin/summary" ||
     pathname === "/api/admin/attempts" ||
     /^\/api\/admin\/attempts\/[^/]+$/.test(pathname) ||
     /^\/api\/admin\/exports\/(?:csv|json)$/.test(pathname) ||
+    /^\/api\/admin\/exports\/(?:csv|json)\/download$/.test(pathname) ||
     pathname.startsWith("/api/admin/content/");
 }
 

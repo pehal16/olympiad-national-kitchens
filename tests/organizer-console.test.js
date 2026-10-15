@@ -1,0 +1,49 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+const {createOlympiadServer}=require('../olympiad-server'),runs=require('../src/story-runs'),store=require('../src/store'),registry=require('../src/participant-registry');
+test('organizer schedule, expected/registered statuses, mentor edits and private scoped downloads preserve attempts',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'organizer-console-')),{server,db}=createOlympiadServer({dbPath:path.join(dir,'test.sqlite'),adminPassword:'synthetic-organizer-admin-password',attemptIdSecret:'synthetic-organizer-attempt-secret',storyEnabled:'true'});
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(async()=>{await new Promise(r=>server.close(r));fs.rmSync(dir,{recursive:true,force:true});});
+ const base=`http://127.0.0.1:${server.address().port}`,token='synthetic_organizer_owner_token_2026';let cookie='';
+ async function api(url,{method='GET',body,admin=false}={}){const r=await fetch(base+url,{method,headers:{'Content-Type':'application/json','X-Attempt-Token':token,...(admin?{cookie}:{})},...(body===undefined?{}:{body:JSON.stringify(body)})});if(url.endsWith('/login'))cookie=r.headers.get('set-cookie').split(';')[0];const text=await r.text();return {status:r.status,text,...(r.headers.get('content-type').includes('application/json')?JSON.parse(text):{})};}
+ await api('/api/admin/login',{method:'POST',body:{password:'synthetic-organizer-admin-password'}});
+ const run=await runs.createRun('2099-01-01',{startTime:'08:00',endTime:'16:00'}),runUrl=`/api/admin/story-runs/${run.id}`;
+ const profile={fullName:'Иванов Проверочный Студент',institution:'Изолированный стенд',groupName:'ТЕСТ',mentorName:''};
+ assert.equal((await api('/api/admin/participants')).status,401);
+ const text='ФИО\tУчреждение\tГруппа\tНаставник\n'+[profile.fullName,profile.institution,profile.groupName,'Импортный Наставник'].join('\t');
+ const preview=await api('/api/admin/participants/import',{method:'POST',admin:true,body:{runId:run.id,text,preview:true}});assert.equal(preview.data.count,1);assert.equal((await registry.list(run.id)).length,0);
+ const save=()=>api('/api/admin/participants/import',{method:'POST',admin:true,body:{runId:run.id,text}});
+ assert.equal((await save()).data.added,1);assert.equal((await save()).data.alreadyPresent,1);
+ const people=()=>api('/api/admin/participants?runId='+run.id,{admin:true});let person=(await people()).data.participants[0];assert.equal(person.status,'not_started');assert.equal(person.registeredAt,null);
+ const mentor=name=>api('/api/admin/participants/'+person.id,{method:'PATCH',admin:true,body:{runId:run.id,mentorName:name}});
+ assert.equal((await mentor('Назначенный Наставник')).status,200);
+ await api('/api/public/register',{method:'POST',body:profile});await api('/api/public/register',{method:'POST',body:profile});
+ person=(await people()).data.participants[0];assert.ok(person.registeredAt);assert.equal(person.participant.mentorName,'Назначенный Наставник');assert.equal((await people()).data.participants.length,1);
+ await api(runUrl,{method:'PATCH',admin:true,body:{admissionMode:'open'}});
+ const started=await api('/api/public/attempts/start',{method:'POST',body:{participant:profile}});assert.equal(started.status,201);const id=started.data.id,stored=await store.loadAttemptById(id);
+ assert.equal(stored.participant.mentorName,'Назначенный Наставник');assert.equal((await people()).data.participants[0].status,'in_progress');
+ const oldClocks=[stored.startedAt,stored.expiresAt],variant=JSON.stringify(stored.variant);
+ const window={entryStartsAt:'2099-01-02T05:00:00.000Z',entryEndsAt:'2099-01-03T13:00:00.000Z'};
+ assert.equal((await api(runUrl+'/schedule',{method:'PATCH',body:window})).status,401);
+ assert.equal((await api(runUrl+'/schedule',{method:'PATCH',admin:true,body:{...window,entryEndsAt:window.entryStartsAt}})).status,409);
+ assert.equal((await api(runUrl+'/schedule',{method:'PATCH',admin:true,body:window})).status,200);
+ const meta=(await api('/api/public/olympiad')).data.story;assert.equal(meta.entryStartsAt,window.entryStartsAt);assert.equal(meta.entryOpen,false);assert.equal(meta.admissionMode,'auto');assert.equal(meta.id,run.id);
+ const after=await store.loadAttemptById(id);assert.deepEqual([after.startedAt,after.expiresAt],oldClocks);assert.equal(JSON.stringify(after.variant),variant);
+ // A direct mentor update must invalidate stale answer revisions without touching any answer rows.
+ await mentor('Второй Назначенный Наставник');assert.equal(await store.updateAttemptWithRevision({...after,stateRevision:after.stateRevision+1},after.stateRevision,{stateOnly:true}),false);
+ const q=after.variant.questions[0],answerPayload={selectedOptionId:q.options.find(o=>o.isCorrect).id};assert.equal((await api(`/api/public/attempts/${id}/answer`,{method:'POST',body:{questionId:q.id,answerPayload}})).status,200);
+ await mentor('Итоговый Наставник');const saved=await store.loadAttemptById(id);assert.equal(saved.participant.mentorName,'Итоговый Наставник');assert.deepEqual(saved.answers[q.id].answerPayload,answerPayload);
+ assert.equal(JSON.stringify(saved.variant),variant);assert.deepEqual([saved.startedAt,saved.expiresAt],oldClocks);
+ await api(`/api/public/attempts/${id}/finish`,{method:'POST',body:{}});assert.equal((await people()).data.participants[0].status,'completed');
+ const certificate=(await api(`/api/public/attempts/${id}/certificate`)).data;assert.equal(certificate.participant.mentorName,'Итоговый Наставник');
+ const download='/api/admin/exports/json/download?runId='+run.id;assert.equal((await api(download)).status,401);const exported=await api(download,{admin:true});assert.equal(exported.status,200);const data=JSON.parse(exported.text);assert.equal(data.length,1);assert.equal(data[0].participant.mentorName,'Итоговый Наставник');assert.ok(!exported.text.includes('accessTokenHash'));
+ const csv=await api('/api/admin/exports/csv/download?runId='+run.id,{admin:true});assert.match(csv.text,/Итоговый Наставник/);
+ const next=await runs.createRun('2099-01-04');assert.equal((await api('/api/admin/story-runs/current',{method:'PATCH',admin:true,body:{runId:next.id}})).status,200);assert.equal((await api('/api/public/olympiad')).data.story.id,next.id);assert.equal((await api('/api/admin/participants',{admin:true})).data.participants.length,0);assert.equal((await people()).data.participants.length,1);
+ assert.equal((await api(runUrl+'/schedule',{method:'PATCH',admin:true,body:{entryStartsAt:'2099-01-04T05:00:00.000Z',entryEndsAt:'2099-01-04T13:00:00.000Z'}})).status,409,'Unique event date collision is safe');
+ assert.equal(await runs.selectedRunId(),next.id);assert.equal((await runs.getRun(run.id)).entryStartsAt,window.entryStartsAt);
+ assert.equal(db.prepare('SELECT COUNT(*) n FROM attempt_variants').first().n,1);
+});
+test('Excel parser handles quoted cells, arbitrary header order, defaults and bad input',()=>{
+ assert.deepEqual(registry.parseImport('Группа\tФИО\tНаставник\nТЕСТ\tИванов Проверочный Студент\t"Наставник; Первый"',{institution:'Стенд'})[0],{fullName:'Иванов Проверочный Студент',institution:'Стенд',groupName:'ТЕСТ',mentorName:'Наставник; Первый'});
+ assert.equal(registry.parseImport('Иванов Проверочный Студент',{institution:'Стенд',groupName:'ТЕСТ'})[0].groupName,'ТЕСТ');
+ assert.throws(()=>registry.parseImport('"Не закрыта'));assert.throws(()=>registry.parseImport(''));
+});

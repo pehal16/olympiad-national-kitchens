@@ -43,7 +43,13 @@ async function handleMirrorRequest(request, env) {
     }
     if (view === 'runs') {
       const rows = await retryD1(() => database.prepare('SELECT * FROM olympiad_story_runs ORDER BY id').all());
-      return json(200, { ok: true, version: 1, runs: rows.results || [] });
+      const control=await retryD1(()=>database.prepare("SELECT run_id FROM olympiad_control WHERE id='current'").first());
+      return json(200, { ok: true, version: 1, runs: rows.results || [],currentRunId:control?.run_id||null,registryAvailable:true });
+    }
+    if(view==='registry'){
+      const after=url.searchParams.get('after')||'';if(after.length>64)return json(400,{ok:false});
+      const rows=await retryD1(()=>database.prepare('SELECT * FROM olympiad_registrations WHERE id>? ORDER BY id LIMIT 100').bind(after).all());
+      const registrations=rows.results||[];return json(200,{ok:true,version:1,registrations,nextAfter:registrations.length===100?registrations.at(-1).id:null});
     }
     return json(400, { ok: false });
   } catch { return json(503, { ok: false, message: 'Mirror temporarily unavailable.' }); }

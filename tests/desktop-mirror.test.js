@@ -29,6 +29,16 @@ test('mirror rejects anonymous, expired, changed URL, other key and non-GET befo
   for(const request of [new Request(url),new Request(url,{headers:signedHeaders(url,s.privateKey,Date.now()-600000)}),new Request(url+'&after=changed',{headers:valid}),new Request(url,{headers:signedHeaders(url,other)}),new Request(url,{method:'POST',headers:valid})])assert.equal((await handleMirrorRequest(request,env)).status,401);
   assert.equal(queries,0);assert.equal((await handleMirrorRequest(new Request(url),{DB:s.cloud})).status,404);
 });
+test('signed desktop copy retains imported/registered participants and mentor assignments across pagination and retries',async t=>{
+ const s=setup(t);
+ for(let i=0;i<105;i++){const id=crypto.createHash('sha256').update('synthetic-registration-'+i).digest('hex');s.cloud.prepare('INSERT INTO olympiad_registrations(id,run_id,participant_signature,participant_json,expected,registered_at,mentor_override,updated_at) VALUES(?,?,?,?,?,?,?,?)')
+  .bind(id,'synthetic-run','synthetic-signature-'+i,JSON.stringify({fullName:'Проверочный Участник',institution:'Стенд',groupName:'ТЕСТ'}),1,null,'Назначенный Наставник','2026-10-15T00:00:00.000Z').run();}
+ const first=await syncOnce({database:s.database,directory:s.directory,privateKey:s.privateKey,fetcher:s.fetcher});assert.equal(first.counts.registrations,105);
+ assert.equal(s.database.prepare('SELECT COUNT(*) n FROM mirror_registrations').get().n,105);
+ assert.equal(JSON.parse(fs.readFileSync(path.join(s.directory,'registrations.json'),'utf8')).registrations.length,105);
+ const again=await syncOnce({database:s.database,directory:s.directory,privateKey:s.privateKey,fetcher:s.fetcher,previous:first});assert.equal(again.changed,0);assert.equal(again.counts.registrations,105);
+ assert.match(s.database.prepare('SELECT payload_json FROM mirror_registrations LIMIT 1').get().payload_json,/Назначенный Наставник/);
+});
 test('signed read exports exact olympiad snapshot and excludes PM01, sessions and passwords',async t=>{
   const s=setup(t);seed(s.cloud);seed(s.cloud,'pm01-attempt','pm01-exam');
   s.cloud.prepare('INSERT INTO admin_sessions VALUES(?,?,?)').bind('admin-token',JSON.stringify({password:'never export this'}),'now').run();
