@@ -350,7 +350,7 @@ async function createAttemptAtomic(attempt) {
         AND r.published_at IS NULL AND COALESCE(json_extract(r.payload_json,'$.admissionMode'),'auto')!='closed'
         AND (json_extract(r.payload_json,'$.admissionMode')='open' OR r.entry_mode='anytime' OR
           (r.entry_starts_at<=strftime('%Y-%m-%dT%H:%M:%fZ','now')
-          AND r.entry_ends_at>strftime('%Y-%m-%dT%H:%M:%fZ','now')))
+          AND ${require('./story-runs').admissionEndSql('r.')}>julianday('now')))
         ON CONFLICT(id) DO NOTHING`,String(storedAttempt.id),JSON.stringify(cloneAttemptState(storedAttempt)),storedAt,storedAttempt.accessTokenHash,storedAttempt.storyRunId),
       statement(`INSERT INTO attempt_variants(id,payload_json,updated_at) SELECT ?1,?2,?3
         WHERE EXISTS(SELECT 1 FROM attempts WHERE id=?1 AND access_token_hash=?4) ON CONFLICT(id) DO NOTHING`,String(storedAttempt.id),JSON.stringify(storedAttempt.variant),storedAt,storedAttempt.accessTokenHash)

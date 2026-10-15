@@ -26,11 +26,11 @@ function scheduleWindow(startsAt,endsAt){
 }
 async function rescheduleRun(id,patch){
  const run=await getRun(id);if(!run||run.publishedAt)throw new Error('Нельзя изменить расписание после публикации итогов. Создайте новое проведение.');
- const window=scheduleWindow(patch.entryStartsAt,patch.entryEndsAt),next={...run,...window,admissionMode:'auto',stopped:false};
+ const window=scheduleWindow(patch.entryStartsAt,patch.entryEndsAt),next={...run,...window,entryGraceMinutes:0,admissionMode:'auto',stopped:false};
  if(env?.DB){
   await retryD1(()=>env.DB.batch([
    env.DB.prepare(`UPDATE olympiad_story_runs SET event_date=?,entry_starts_at=?,entry_ends_at=?,entry_mode='scheduled',stopped=0,
-    payload_json=json_set(payload_json,'$.date',?,'$.entryStartsAt',?,'$.entryEndsAt',?,'$.entryMode','scheduled','$.fixedAdmission',json('true'),'$.admissionMode','auto','$.stopped',json('false')) WHERE id=? AND published_at IS NULL`)
+    payload_json=json_set(payload_json,'$.date',?,'$.entryStartsAt',?,'$.entryEndsAt',?,'$.entryMode','scheduled','$.fixedAdmission',json('true'),'$.entryGraceMinutes',0,'$.admissionMode','auto','$.stopped',json('false')) WHERE id=? AND published_at IS NULL`)
     .bind(next.date,next.entryStartsAt,next.entryEndsAt,next.date,next.entryStartsAt,next.entryEndsAt,id),
    env.DB.prepare(`INSERT INTO olympiad_control(id,run_id) SELECT 'current',id FROM olympiad_story_runs WHERE id=? AND published_at IS NULL
     ON CONFLICT(id) DO UPDATE SET run_id=excluded.run_id`).bind(id)
@@ -43,14 +43,24 @@ async function rescheduleRun(id,patch){
 function decode(row) {
   return row ? { ...JSON.parse(row.payload_json), entryMode:row.entry_mode||'scheduled', publishedAt: row.published_at || null, stopped: Boolean(row.stopped) } : null;
 }
+// An organizer-authorized operational allowance never changes the announced
+// window. A subsequent schedule save clears it; public serializers omit it.
+function admissionEndsAt(run) {
+  const minutes=Number.isSafeInteger(run?.entryGraceMinutes)?Math.max(0,Math.min(1440,run.entryGraceMinutes)):0;
+  return Date.parse(run?.entryEndsAt)+minutes*60000;
+}
+function admissionEndSql(prefix='') {
+  const field=prefix+'payload_json';
+  return `(julianday(${prefix}entry_ends_at)+CASE WHEN json_type(${field},'$.entryGraceMinutes')='integer' THEN max(0,min(1440,json_extract(${field},'$.entryGraceMinutes'))) ELSE 0 END/1440.0)`;
+}
 function entryOpen(run, now = Date.now()) {
   return Boolean(run && !run.stopped && !run.publishedAt && run.admissionMode!=='closed' &&
-    (run.admissionMode==='open' || run.entryMode==='anytime' || (now >= Date.parse(run.entryStartsAt) && now < Date.parse(run.entryEndsAt))));
+    (run.admissionMode==='open' || run.entryMode==='anytime' || (now >= Date.parse(run.entryStartsAt) && now < admissionEndsAt(run))));
 }
 function publicationClosed(run, now = Date.now()) {
   // A manual opening after the scheduled end must still block publication.
   return !entryOpen(run,now) && (run.entryMode==='anytime'
-    ? run.stopped || run.admissionMode==='closed' : now>=Date.parse(run.entryEndsAt));
+    ? run.stopped || run.admissionMode==='closed' : now>=admissionEndsAt(run));
 }
 function makeRun(date, id = require('crypto').randomUUID(), window = {}) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date))) throw new Error('Укажите дату проведения.');
@@ -134,7 +144,7 @@ async function publishRun(id, now=Date.now()) {
   if(env?.DB) {
     await retryD1(() => env.DB.prepare(`UPDATE olympiad_story_runs SET published_at=?1 WHERE id=?2 AND published_at IS NULL
       AND (stopped=1 OR COALESCE(json_extract(payload_json,'$.admissionMode'),'auto')!='open')
-      AND ((entry_mode='anytime' AND (stopped=1 OR json_extract(payload_json,'$.admissionMode')='closed')) OR (entry_mode='scheduled' AND entry_ends_at<=?1))
+      AND ((entry_mode='anytime' AND (stopped=1 OR json_extract(payload_json,'$.admissionMode')='closed')) OR (entry_mode='scheduled' AND ${admissionEndSql()}<=julianday(?1)))
       AND NOT EXISTS (SELECT 1 FROM attempts a WHERE a.story_run_id=?2
         AND json_extract(a.payload_json,'$.status')='in_progress')`).bind(stamp,id).run());
     const run=await getRun(id); if(!run?.publishedAt) throw new Error('Публикация доступна после закрытия входа и завершения всех попыток.');
@@ -167,7 +177,7 @@ async function currentRun(now=Date.now()) {
   }
   const runs=await listRuns();
   const scheduled=runs.filter(r=>r.entryMode!=='anytime');
-  const active=scheduled.find(r=>now>=Date.parse(r.entryStartsAt)&&now<Date.parse(r.entryEndsAt));
+  const active=scheduled.find(r=>now>=Date.parse(r.entryStartsAt)&&now<admissionEndsAt(r));
   if(active)return active;
   // An explicitly timed official day closes free entry before and after its
   // window. Legacy whole-day runs retain the existing anytime behavior.
@@ -204,4 +214,4 @@ function storyView(attempt) {
 function scoresVisible(attempt,settings) {
   return attempt.status!=='in_progress' && (attempt.storyRunId ? Boolean(attempt._storyRun?.publishedAt) : Boolean(settings.showParticipantScore));
 }
-module.exports={configureStoryStorage,enabled,makeRun,entryOpen,publicationClosed,listRuns,getRun,createRun,updateRun,publishRun,currentRun,publicRun,hydrate,storyView,scoresVisible,recoveryPolicy,selectRun,rescheduleRun,scheduleWindow,selectedRunId};
+module.exports={configureStoryStorage,enabled,makeRun,entryOpen,publicationClosed,admissionEndsAt,admissionEndSql,listRuns,getRun,createRun,updateRun,publishRun,currentRun,publicRun,hydrate,storyView,scoresVisible,recoveryPolicy,selectRun,rescheduleRun,scheduleWindow,selectedRunId};

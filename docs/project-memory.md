@@ -2,6 +2,12 @@
 
 Last updated: 2026-10-15
 
+## Automatic official admission with unchanged announcement (2026-10-15)
+
+- User authorizes automatic admission for16October from08:00 Moscow with a private operational allowance, while all announced windows remain08:00–16:00. `entryGraceMinutes` is private run metadata: server entry checks, atomic D1 starts, current-run selection and publication guards share its effective cutoff. Public run/attempt/result serializers retain the announced end and omit the allowance. Personal attempt clocks, variants, answers, certificates and secrets are unchanged.
+- Migration0011 narrowly matches the existing unpublished `official-2026-10-16` and its original bounds, selects it as current, sets automatic admission and the authorized allowance. It cannot reopen published or differently rescheduled runs. No attempts, registrations or credentials are changed. A later organizer schedule save clears the allowance; «Вернуть расписание» retains the saved operational configuration. Manual open/closed overrides still apply.
+- Boundary, atomic admission, publication without/with active attempts, owner continuation/certificate, reset and preservation tests use a separate disposable SQLite database. All314 tests, Cloudflare build and full isolated PM01 verifier pass. Production verification must confirm `auto`, original public bounds and private mirrored metadata after deployment; never create production rehearsal attempts for this change.
+
 ## Organizer schedule, participant register and guided T5 (2026-10-15)
 
 - User explicitly authorizes editable dates/times, a cleaner full organizer cabinet, expected/not-started filters, manual mentor assignment and stronger T5 action guidance on phones. User confirms both Excel paste import and future registrations. Old registrations without an attempt were never persisted and cannot be reconstructed. The abandoned private70-code implementation remains excluded.
