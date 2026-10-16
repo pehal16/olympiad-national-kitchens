@@ -1,4 +1,4 @@
-const CACHE_NAME = "national-kitchens-olympiad-organizer-link1";
+const CACHE_NAME = "national-kitchens-olympiad-admin-review-certificate1";
 const PRECACHE_URLS = [
   "/olympiad-ready.css?v=manual-admission1",
   "/olympiad-device.js?v=oct16-ready1",
@@ -20,7 +20,7 @@ const PRECACHE_URLS = [
   "/t5-dish-service.js?v=1.7.0-layout5-oct12",
   "/t5-photo-kitchen.js?v=mobile-kitchen3",
   "/certificate.css?v=completion-feedback1",
-  "/certificate.js?v=completion-feedback1",
+  "/certificate.js?v=admin-certificate1",
   "/assets/olympiad/certificate/college-seal-user-v1.jpg",
   "/attempt-reserve.js?v=shared1",
   "/app.js?v=organizer-link1",

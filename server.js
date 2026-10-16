@@ -5,7 +5,7 @@ const { buildDishService } = require("./src/dish-service");
 const storyRuns=require("./src/story-runs");
 const tourBriefings=require("./src/tour-briefing");
 const participantRegistry=require('./src/participant-registry');
-const { formatParticipantAnswer } = require("./src/admin-answer-view");
+const { formatParticipantAnswer, reviewParticipantAnswer } = require("./src/admin-answer-view");
 const {freezeStoryVariant,buildStoryResult}=require("./src/story-result");
 const {certificateAvailable,buildParticipantCertificate}=require("./src/participant-certificate");
 function storyEnabled(){return storyRuns.enabled();}
@@ -4917,6 +4917,17 @@ async function handleApi(req, res, url, runtime = {}) {
       catch(error){sendJson(res,400,{ok:false,message:error.message});}return;
     }
 
+    if (method === "GET" && pathname.match(/^\/api\/admin\/attempts\/[^/]+\/certificate$/)) {
+      const olympiad = await ensureOlympiad(), attempt = await loadAttemptById(pathname.split("/")[4]);
+      if (!attempt || attempt.olympiadId !== olympiad.id) {
+        sendJson(res, 404, { ok: false, message: "Попытка не найдена." }); return;
+      }
+      const certificate = buildParticipantCertificate(olympiad, attempt, { ...settings, showParticipantScore: true });
+      sendJson(res, certificate ? 200 : 409, certificate ? { ok: true, data: certificate }
+        : { ok: false, message: "Сертификат доступен после завершения попытки участником." }, { "Cache-Control": "private, no-store" });
+      return;
+    }
+
     if (method === "GET" && pathname.match(/^\/api\/admin\/attempts\/[^/]+$/)) {
       const olympiadData = await ensureOlympiad();
       const attemptId = pathname.split("/")[4];
@@ -4951,6 +4962,7 @@ async function handleApi(req, res, url, runtime = {}) {
             dishLabel: question.dishLabel || "",
             correctAnswer: formatCorrectAnswer(question),
             participantAnswer: formatParticipantAnswer(question, attempt.answers[question.id]),
+            answerReview: reviewParticipantAnswer(question, attempt.answers[question.id]),
             options: (question.options || []).map((option) => ({
               id: option.id,
               text: option.text,
@@ -4974,6 +4986,7 @@ async function handleApi(req, res, url, runtime = {}) {
             status: attempt.status,
             startedAt: attempt.startedAt,
             finishedAt: attempt.finishedAt,
+            certificateAvailable: certificateAvailable(attempt, { ...settings, showParticipantScore: true }),
             variantMeta: {
               issuedQuestionIds: attempt.variant.issuedQuestionIds,
               optionOrderLog: attempt.variant.optionOrderLog,

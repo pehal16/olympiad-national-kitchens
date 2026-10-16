@@ -2,6 +2,27 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { formatParticipantAnswer: format } = require("../src/admin-answer-view");
+const { reviewParticipantAnswer: review } = require("../src/admin-answer-view");
+
+test("answer review marks mixed matches separately and retains the saved score and payload", () => {
+  const q = { type: "bucket_sort", maxScore: 4, items: [{ id: "a", text: "Рататуй" }, { id: "b", text: "Тирамису" }, { id: "c", text: "Фо" }],
+    buckets: [{ id: "fr", label: "Франция" }, { id: "it", label: "Италия" }, { id: "vn", label: "Вьетнам" }], correctBuckets: { a: "fr", b: "it", c: "vn" } };
+  const answer = { finalScore: 1, answerPayload: { buckets: { a: "fr", b: "vn" } } }, before = JSON.stringify({ q, answer });
+  const result = review(q, answer);
+  assert.equal(result.status, "partial");
+  assert.deepEqual(result.lines.map(l => l.status), ["correct", "incorrect", "unanswered"]);
+  assert.equal(result.lines[1].text, "Тирамису: Вьетнам");
+  assert.equal(JSON.stringify({ q, answer }), before);
+  assert.equal(review(q, null).status, "unanswered");
+});
+
+test("kitchen review marks chosen products and identifies omitted correct products", () => {
+  const q = { type: "final_kitchen", maxScore: 16, dishes: [{ id: "dish", title: "Салат", items: [{ id: "a", text: "Помидор" }, { id: "b", text: "Огурец" }, { id: "c", text: "Рис" }], correctIngredientIds: ["a", "b"] }] };
+  const result = review(q, { finalScore: 4, answerPayload: { dishId: "dish", selectedIngredientIds: ["a", "c"] } });
+  assert.deepEqual(result.lines.map(l => [l.text, l.status]), [["Блюдо: Салат", "neutral"], ["Помидор", "correct"], ["Рис", "incorrect"], ["Не выбран продукт: Огурец", "incorrect"]]);
+  assert.equal(review({ type: "dish_detective", maxScore: 2 }, { finalScore: 2, answerPayload: { text: "Допустимая опечатка" } }).lines[0].status, "correct");
+  assert.equal(review({ type: "single_choice", maxScore: 2, options: [{ id: "bad", text: "Неверный выбор", isCorrect: false }] }, { finalScore: 0, answerPayload: { selectedOptionId: "bad" } }).lines[0].status, "incorrect");
+});
 
 test("organizer reads the saved student's choices, including wrong, empty and partial answers", () => {
   const question = { type: "bucket_sort", items: [{ id: "opaque-a", text: "Рататуй" }, { id: "opaque-b", text: "Тирамису" }],

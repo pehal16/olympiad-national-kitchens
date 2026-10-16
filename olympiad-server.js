@@ -26,7 +26,7 @@ function isOlympiadApi(pathname) {
     pathname === "/api/admin/session" ||
     pathname === "/api/admin/summary" ||
     pathname === "/api/admin/attempts" ||
-    /^\/api\/admin\/attempts\/[^/]+$/.test(pathname) ||
+    /^\/api\/admin\/attempts\/[^/]+(?:\/certificate)?$/.test(pathname) ||
     /^\/api\/admin\/exports\/(?:csv|json)$/.test(pathname) ||
     /^\/api\/admin\/exports\/(?:csv|json)\/download$/.test(pathname) ||
     pathname.startsWith("/api/admin/content/");

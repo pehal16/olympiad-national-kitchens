@@ -5,6 +5,12 @@
   const sheet = document.getElementById("certificate-sheet");
   const saveButton = document.getElementById("certificate-save");
   const feedbackLink = document.getElementById("certificate-feedback");
+  const organizerMode = new URLSearchParams(window.location.search).get("organizer") === "1";
+  if (organizerMode) {
+    const back = document.querySelector(".toolbar-back");
+    back.href = "/admin.html";
+    back.textContent = "← В админку";
+  }
   const fields = {
     name: document.getElementById("certificate-name"),
     score: document.getElementById("certificate-score"),
@@ -53,21 +59,26 @@
 
     let attemptToken = "";
     try {
-      attemptToken = localStorage.getItem(`nko_attempt_access_${attemptId}`) || "";
+      attemptToken = organizerMode ? "" : localStorage.getItem(`nko_attempt_access_${attemptId}`) || "";
     } catch (error) {
       // The browser may block storage in private mode.
     }
-    if (!attemptToken) {
+    if (!organizerMode && !attemptToken) {
       fail("Не удалось открыть защищённый результат в этом браузере. Вернитесь к результату на том же устройстве и откройте сертификат снова.");
       return;
     }
 
     let attempt;
     try {
-      const response = await fetch(`/api/public/attempts/${encodeURIComponent(attemptId)}/certificate`, {
-        headers: { "X-Attempt-Token": attemptToken },
+      const response = await fetch(`/api/${organizerMode ? "admin" : "public"}/attempts/${encodeURIComponent(attemptId)}/certificate`, {
+        headers: organizerMode ? {} : { "X-Attempt-Token": attemptToken },
+        credentials: "same-origin",
         cache: "no-store"
       });
+      if (organizerMode && response.status === 401) {
+        fail("Войдите в админку и откройте сертификат участника снова.");
+        return;
+      }
       if (response.status === 409) {
         fail("Свидетельство доступно после личного завершения олимпиады.");
         return;
@@ -101,6 +112,7 @@
       return;
     }
     fields.name.textContent = participant.fullName;
+    if (organizerMode) document.title = `Свидетельство — ${participant.fullName}`;
     fields.name.classList.toggle("long-name", participant.fullName.length > 32);
     fields.score.textContent = `${score} из ${maxScore} баллов`;
     fields.mentor.textContent = participant.mentorName || "—";
@@ -134,7 +146,7 @@
     }
     status.textContent = "В окне печати выберите «Сохранить как PDF» и горизонтальный формат A4. На телефоне лист можно сдвигать по горизонтали; сам макет не меняется.";
     saveButton.disabled = false;
-    feedbackLink.hidden = false;
+    feedbackLink.hidden = organizerMode;
   }
 
   saveButton.addEventListener("click", () => {

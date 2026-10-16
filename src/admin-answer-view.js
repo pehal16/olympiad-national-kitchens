@@ -36,4 +36,66 @@ function formatParticipantAnswer(question, answer) {
   }
 }
 
-module.exports = { formatParticipantAnswer };
+function reviewParticipantAnswer(question, answer) {
+  const score = Number(answer?.finalScore || 0), max = Number(question.maxScore || 0);
+  const status = !answer ? "unanswered" : score >= max && max > 0 ? "correct" : score > 0 ? "partial" : "incorrect";
+  const lines = [], payload = answer?.answerPayload || {};
+  const add = (text, verdict = "neutral") => lines.push({ text, status: verdict });
+  const verdict = value => value ? "correct" : "incorrect";
+  if (!answer) return { status, lines: [{ text: "Нет ответа", status: "unanswered" }] };
+  const selection = (items, selected, expected) => {
+    const ids = Array.isArray(selected) ? selected : [];
+    if (!ids.length) add("Продукты не выбраны", "unanswered");
+    for (const id of ids) {
+      const item = items?.find(entry => entry.id === id);
+      add(item?.text || "Продукт не найден в сохранённом задании", item ? verdict(expected.includes(id)) : "neutral");
+    }
+    for (const id of expected.filter(id => !ids.includes(id))) {
+      const item = items?.find(entry => entry.id === id);
+      if (item) add(`Не выбран продукт: ${item.text}`, "incorrect");
+    }
+  };
+  switch (question.type) {
+    case "single_choice": {
+      const choice = question.options?.find(entry => entry.id === payload.selectedOptionId);
+      add(formatParticipantAnswer(question, answer), !payload.selectedOptionId ? "unanswered" : choice ? verdict(choice.isCorrect) : "neutral");
+      break;
+    }
+    case "dish_detective":
+      add(formatParticipantAnswer(question, answer), payload.text?.trim() ? verdict(score > 0) : "unanswered");
+      break;
+    case "bucket_sort":
+    case "ingredient_matrix":
+      for (const item of question.items || []) {
+        const id = payload.buckets?.[item.id], bucket = question.buckets?.find(entry => entry.id === id);
+        const correct = question.type === "bucket_sort" ? id === question.correctBuckets?.[item.id]
+          : (id === String(question.selectedBucketId || "selected")) === (question.correctIngredientIds || []).includes(item.id);
+        add(`${item.text}: ${bucket?.label || (id ? "Вариант не найден в сохранённом задании" : "Не выбрано")}`,
+          !id ? "unanswered" : bucket ? verdict(correct) : "neutral");
+      }
+      break;
+    case "sequence_drag":
+      for (const [index, id] of (payload.sequence || []).entries()) {
+        const item = question.items?.find(entry => entry.id === id);
+        add(`${index + 1}. ${item?.text || "Вариант не найден в сохранённом задании"}`, item ? verdict(id === question.correctSequence?.[index]) : "neutral");
+      }
+      for (let index = (payload.sequence || []).length; index < (question.correctSequence || []).length; index++) add(`${index + 1}. Не выбрано`, "unanswered");
+      break;
+    case "dish_assembly":
+      selection(question.items, payload.selectedIngredientIds, question.correctIngredientIds || []);
+      break;
+    case "final_kitchen": {
+      const dish = question.dishes?.find(entry => entry.id === payload.dishId);
+      if (!dish) { add(formatParticipantAnswer(question, answer), "unanswered"); break; }
+      add(`Блюдо: ${dish.title}`);
+      selection(dish.items, payload.selectedIngredientIds, dish.correctIngredientIds || []);
+      break;
+    }
+    default:
+      add(formatParticipantAnswer(question, answer));
+  }
+  if (!lines.length) add("Ответ не выбран", "unanswered");
+  return { status, lines };
+}
+
+module.exports = { formatParticipantAnswer, reviewParticipantAnswer };
