@@ -2,6 +2,11 @@
 
 Last updated: 2026-10-16
 
+## Organizer link from the public desktop domain (2026-10-16)
+
+- User reports the organizer entry does not open from `олимпиада.постовит.рф`. Read-only checks confirm the existing participant gateway deliberately returns404 for `/admin.html` and `/api/admin/*`; the official Pages organizer page returns200 and unauthenticated admin API401. The relative navigation link was therefore incorrect for this domain.
+- «Организатор» now links directly to `https://olympiad-gkts.pages.dev/admin.html`, including its HTML fallback before client initialization. After metadata loads, only a loopback standalone instance without `shared-d1` keeps its local `/admin.html`. Shared desktop/Pages/public-domain entry uses the same official cabinet. Existing gateway restrictions, admin password/authentication, participant data and settings are unchanged. The app/service-worker asset versions are refreshed; private checks/installation receipts go under `updates/organizer-link-20261016`.
+
 ## Feedback after participant completion (2026-10-16)
 
 - Published Yandex feedback form: `https://forms.yandex.ru/u/6ad1d2e449af4736c8b7c8f5/`. Participant results show «Оставить отзыв» alongside the available certificate, and the certificate toolbar repeats the link only after its saved result and required images load successfully. Home, registration and active attempts do not show it. The link opens a new tab without a referrer or participant fields/tokens in the URL. It is outside the certificate sheet and hidden with the toolbar when printing; the certificate PDF layout is unchanged.

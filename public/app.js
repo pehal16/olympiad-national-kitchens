@@ -1685,6 +1685,15 @@ function rememberRecoveryReference(){
   if(!state.attempt?.id||recovery?.backend!=='shared-d1')return;
   try{localStorage.setItem('nko_shared_recovery_v1',JSON.stringify({recovery,attemptId:state.attempt.id,questionId:state.attempt.currentQuestion?.id}));}catch{}
 }
+function setupOrganizerAddress() {
+  const link = document.querySelector(".landing-organizer");
+  if (!link) return;
+  const isLoopback = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
+  link.href = isLoopback && state.olympiad?.recovery?.backend !== "shared-d1"
+    ? "/admin.html"
+    : "https://olympiad-gkts.pages.dev/admin.html";
+}
+
 function setupReserveAddress(){
   const stored=savedRecoveryReference();
   for(const id of ['reserve-address','attempt-reserve-address']){
@@ -4068,6 +4077,7 @@ async function init() {
   receiveReserveTransfer();
   await loadAppVersion();
   state.olympiad = await api("/api/public/olympiad");
+  setupOrganizerAddress();
   setupReserveAddress();
   hideMessage(elements.heroLoadMessage);
   elements.heroRetry?.classList.add("hidden");
