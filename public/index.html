@@ -10,9 +10,9 @@
     <link rel="manifest" href="/manifest.webmanifest?v=1.7.0" />
     <link rel="icon" href="/icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="stylesheet" href="/styles.css?v=1.7.0-layout5-oct12" />
+    <link rel="stylesheet" href="/styles.css?v=participant-flow2" />
     <link rel="stylesheet" href="/t5-final-kitchen.css?v=1.7.0-story2" />
-    <link rel="stylesheet" href="/t5-photo-kitchen.css?v=guided-kitchen2" />
+    <link rel="stylesheet" href="/t5-photo-kitchen.css?v=mobile-kitchen3" />
     <link rel="stylesheet" href="/t5-dish-service.css?v=1.7.0-story2" />
     <link rel="stylesheet" href="/olympiad-story.css?v=story2" />
     <link rel="stylesheet" href="/story-banquet.css?v=live-table5" />
@@ -67,7 +67,7 @@
             <button id="hero-action-preparation" class="landing-text-link" type="button">Как подготовиться <span aria-hidden="true">↓</span></button>
             <a class="landing-demo-link" href="/visual-demo.html#margherita" aria-label="Открыть мастерскую блюд без баллов">Мастерская блюд <span aria-hidden="true">↗</span></a>
           </div>
-          <p id="hero-format-badge" class="landing-facts">18 минут 45 секунд <span>·</span> 5 туров <span>·</span> 36 заданий</p>
+          <p id="hero-format-badge" class="landing-facts">36 минут <span>·</span> 5 туров <span>·</span> 36 заданий</p>
           <p class="landing-pilot-note">Тестовый запуск. Результаты неофициальны до утверждения организатором.</p>
         </div>
       </section>
@@ -95,7 +95,7 @@
           <li>Читайте заказ целиком: важны одновременно продукты, способ приготовления и подача.</li>
           <li>При сборке учитывайте именно указанную в задании версию рецепта. Национальные и ресторанные версии могут различаться.</li>
         </ul>
-        <p class="preparation-note">Перед стартом проверьте интернет и заряд устройства, отключите отвлекающие уведомления. На телефоне выбирайте блюдо и страну касаниями — перетаскивание необязательно. Т1–Т4: по 30 секунд на задание; Т5: по 45 секунд на сборку и подачу. Общий предел — 18 минут 45 секунд.</p>
+        <p class="preparation-note">Перед стартом проверьте интернет и заряд устройства, отключите отвлекающие уведомления. На телефоне выбирайте блюдо и страну касаниями — перетаскивание необязательно. На каждое задание — 1 минута. Перед каждым туром — пояснение и кнопка «Начать тур». Во время пояснения таймеры стоят; выбор сохраняется автоматически.</p>
       </section>
 
       <section class="grid-two" id="prestart-section">
@@ -172,6 +172,17 @@
           <div id="prestart-message" class="message hidden" role="status" aria-live="polite"></div>
           <div id="install-message" class="message hidden"></div>
         </section>
+      </section>
+
+      <section id="tour-briefing-section" class="card tour-briefing hidden" aria-labelledby="tour-briefing-title">
+        <div id="tour-briefing-code" class="eyebrow"></div>
+        <h2 id="tour-briefing-title" tabindex="-1"></h2>
+        <p id="tour-briefing-description" class="lead"></p>
+        <ol id="tour-briefing-steps"></ol>
+        <p id="tour-briefing-meta" class="muted"></p>
+        <p class="tour-pause-note">Таймеры на паузе. Прочитайте инструкцию без спешки. Отсчёт начнётся после кнопки «Начать тур».</p>
+        <button id="tour-start" type="button" class="button primary">Начать тур</button>
+        <div id="tour-briefing-message" class="message hidden" role="status"></div>
       </section>
 
       <section id="attempt-section" class="hidden">
@@ -280,6 +291,8 @@
           <div id="result-overview" class="result-overview"></div>
           <div id="result-next" class="result-next"></div>
           <div id="result-tours" class="result-grid"></div>
+          <p id="repeat-note" class="muted hidden">Можно пройти ещё раз. Предыдущие ответы и свидетельство сохранятся отдельно.</p>
+          <button id="repeat-attempt" class="button secondary hidden" type="button">Пройти ещё раз</button>
         </section>
         <section id="certificate-section" class="certificate-section hidden" aria-labelledby="certificate-heading">
           <div class="certificate-actions">
@@ -323,14 +336,14 @@
     <script src="/t4-guest-order.js?v=1.7.0-layout5-oct12"></script>
     <script src="/t5-photo-model.js?v=1.7.0-story2"></script>
     <script src="/t5-dish-service.js?v=1.7.0-layout5-oct12"></script>
-    <script src="/t5-photo-kitchen.js?v=guided-kitchen2"></script>
+    <script src="/t5-photo-kitchen.js?v=mobile-kitchen3"></script>
     <script src="/t5-final-kitchen.js?v=1.7.0-layout2"></script>
     <script src="/restaurant-layout.js?v=oct16-ready1"></script>
     <script src="/story-dialogue.js?v=layout5-oct12"></script>
     <script src="/story-banquet.js?v=assembly45"></script>
-    <script src="/olympiad-story.js?v=organizer2"></script>
+    <script src="/olympiad-story.js?v=participant-flow2"></script>
     <script src="/olympiad-device.js?v=oct16-ready1"></script>
     <script src="/attempt-reserve.js?v=shared1"></script>
-    <script src="/app.js?v=organizer2"></script>
+    <script src="/app.js?v=participant-flow2"></script>
   </body>
 </html>

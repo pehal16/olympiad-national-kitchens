@@ -1,7 +1,13 @@
-﻿const state = {
+const state = {
   olympiad: null,
   participant: null,
   activeAttemptId: "",
+  retakeOf: "",
+  isStartingTour:false,
+  draftSaving:false,
+  draftSavePromise:null,
+  draftSavedKey:"",
+  draftTimer:null,
   attempt: null,
   localDrafts: {},
   questionController: null,
@@ -89,6 +95,11 @@ const elements = {
   startAttempt: document.getElementById("start-attempt"),
   prestartSection: document.getElementById("prestart-section"),
   attemptSection: document.getElementById("attempt-section"),
+  briefingSection:document.getElementById('tour-briefing-section'),
+  briefingTitle:document.getElementById('tour-briefing-title'),
+  briefingMessage:document.getElementById('tour-briefing-message'),
+  tourStart:document.getElementById('tour-start'),
+  repeatAttempt:document.getElementById('repeat-attempt'),
   resultSection: document.getElementById("result-section"),
   participantName: document.getElementById("participant-name"),
   participantMeta: document.getElementById("participant-meta"),
@@ -191,7 +202,7 @@ function updateAdmissionBanner() {
   banner.dataset.open=String(run.entryOpen);
   const before=(Date.parse(run.serverTime)||Date.now())<Date.parse(run.entryStartsAt);
   document.getElementById('admission-status').textContent=run.publishedAt?'Итоги опубликованы':run.stopped||run.admissionMode==='closed'?'Организатор закрыл вход':run.entryOpen?'Можно начинать':before?'Старт ещё не открыт':'Приём завершён';
-  document.getElementById('admission-description').textContent=run.entryOpen?(run.admissionMode==='open'?'Организатор открыл олимпиаду. Каждому — полный личный лимит 18 минут 45 секунд.':'Начните в пределах времени входа. Каждому — полный личный лимит 18 минут 45 секунд.'):run.publishedAt?'Участники могут вернуться к своим результатам.':run.stopped||run.admissionMode==='closed'?'Начатые попытки продолжаются. Новые старты возобновляет организатор.':before?'Время московское. До открытия изучите рекомендации и правила.':'Приём новых участников завершён. Начатые попытки продолжаются в пределах своего личного времени.';
+  document.getElementById('admission-description').textContent=run.entryOpen?(run.admissionMode==='open'?'Организатор открыл олимпиаду. Каждому — минута на каждое задание, между турами — пауза.':'Начните в пределах времени входа. Каждому — минута на каждое задание, между турами — пауза.'):run.publishedAt?'Участники могут вернуться к своим результатам.':run.stopped||run.admissionMode==='closed'?'Начатые попытки продолжаются. Новые старты возобновляет организатор.':before?'Время московское. До открытия изучите рекомендации и правила.':'Приём новых участников завершён. Начатые попытки продолжаются в пределах своего личного времени.';
 }
 
 function refreshNavigationState() {
@@ -362,7 +373,7 @@ function setAttemptSaveStatus(message, type = "idle") {
 
   // In T4 a success badge refers to earlier server records, not to the new
   // unconfirmed selection currently sitting on the tray.
-  elements.attemptSaveStatus.textContent = (state.attempt?.currentQuestion?.interactionMode === "guest_order" || state.attempt?.currentQuestion?.type === "final_kitchen") && type === "success"
+  elements.attemptSaveStatus.textContent = (state.attempt?.currentQuestion?.interactionMode === "guest_order" || state.attempt?.currentQuestion?.type === "final_kitchen") && type === "success" && !message.startsWith('Выбор сохранён')
     ? "Предыдущие ответы сохранены" : message;
   elements.attemptSaveStatus.className = `sync-badge ${type}`;
   setParticipantShellState();
@@ -784,6 +795,7 @@ function handleExamPageHide() {
 }
 
 function enableExamMode() {
+  if(state.attempt?.tourBriefing)return;
   if (state.examModeEnabled) {
     updateExamGuardUi();
     return;
@@ -995,6 +1007,8 @@ function hasMeaningfulAnswer(answer) {
 }
 
 function updateAnswerUi() {
+  captureCurrentDraft();
+  scheduleDraftSave();
   refreshAttemptControls();
   updateExamCockpit();
 }
@@ -2982,6 +2996,7 @@ function renderQuestion(question) {
       queuedAnswerForQuestion(question.id) ||
       state.localDrafts[question.id] ||
       readStoryDraft(question.id) ||
+      state.attempt.currentDraft ||
       null
   };
 
@@ -3033,10 +3048,10 @@ function renderQuestion(question) {
         elements.attemptSection.classList.toggle("is-t5-choice", phase === "choice");
       },
       onChange: (answer) => {
-        rememberDraft(hydratedQuestion.id, answer);
+        rememberDraft(hydratedQuestion.id, answer);scheduleDraftSave();
         if (!hasPendingAnswers() && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
           setAttemptSaveStatus(answer.selectedIngredientIds?.length ? "Состав ещё не отправлен" : hydratedQuestion.selectedDish ? "Выберите компоненты" : "Выберите блюдо", "idle");
-          setAttemptSyncMeta(hydratedQuestion.presentationVersion === 4 ? "Завершите сборку и нажмите «Подать»." : "Черновик не является ответом. Запись подтверждает сервер.", { routine: hydratedQuestion.presentationVersion === 4 });
+          setAttemptSyncMeta(hydratedQuestion.presentationVersion === 4 ? "Завершите сборку и нажмите «Подать». Сохранённый выбор учтётся и по окончании минуты." : "Черновик не является ответом. Запись подтверждает сервер.", { routine: hydratedQuestion.presentationVersion === 4 });
         }
         refreshAttemptControls(); updateExamCockpit();
       },
@@ -3079,7 +3094,7 @@ function renderQuestion(question) {
       submitButton: elements.submitAnswer,
       onPhase: (intro) => elements.attemptSection.classList.toggle("is-t3-intro", intro),
       onChange: (answer) => {
-        rememberDraft(hydratedQuestion.id, answer);
+        rememberDraft(hydratedQuestion.id, answer);scheduleDraftSave();
         refreshAttemptControls(); updateExamCockpit();
       }
     });
@@ -3091,10 +3106,10 @@ function renderQuestion(question) {
       submitButton: elements.submitAnswer,
       onPhase: (intro) => elements.attemptSection.classList.toggle("is-t4-intro", intro),
       onChange: (answer) => {
-        rememberDraft(hydratedQuestion.id, answer);
+        rememberDraft(hydratedQuestion.id, answer);scheduleDraftSave();
         if (!hasPendingAnswers() && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
           setAttemptSaveStatus(answer.selectedOptionId ? "Заказ ещё не отправлен" : "Выберите блюдо", "idle");
-          setAttemptSyncMeta("Текущий выбор станет ответом после подтверждения сервером.");
+          setAttemptSyncMeta("Выбор сохраняется автоматически; его можно изменить до конца минуты или подтвердить сейчас.");
         }
         refreshAttemptControls(); updateExamCockpit();
       }
@@ -3110,7 +3125,7 @@ function renderQuestion(question) {
       inlineIntro: Boolean(state.attempt.story),
         presentationMode: window.RestaurantLayout?.enabled(state.attempt) ? 'restaurant' : 'standard',
         onChange: (answer) => {
-          rememberDraft(hydratedQuestion.id, answer);
+          rememberDraft(hydratedQuestion.id, answer);scheduleDraftSave();
           refreshAttemptControls(); updateExamCockpit();
         }
       });
@@ -3130,7 +3145,77 @@ function renderQuestion(question) {
   updateExamCockpit();
 }
 
+function renderTourBriefing() {
+  window.RestaurantLayout?.result();
+  state.questionController?.dispose?.();state.questionController=null;
+  disableExamMode();
+  const info=state.attempt.tourBriefing;
+  elements.prestartSection.classList.add('hidden');elements.resultSection.classList.add('hidden');elements.attemptSection.classList.add('hidden');
+  elements.briefingSection.classList.remove('hidden');
+  document.getElementById('tour-briefing-code').textContent=`Перед туром ${state.attempt.currentTour.order} из 5`;
+  elements.briefingTitle.textContent=info.title;
+  document.getElementById('tour-briefing-description').textContent=info.description;
+  const list=document.getElementById('tour-briefing-steps');list.replaceChildren();
+  for(const text of info.instructions){const item=document.createElement('li');item.textContent=text;list.append(item);}
+  document.getElementById('tour-briefing-meta').textContent=`Заданий: ${info.questionCount} · На каждое — 1 минута · Максимум: ${info.maxScore} баллов`;
+  elements.tourStart.disabled=false;hideMessage(elements.briefingMessage);
+  window.OlympiadStory?.chapter(state.attempt);
+  saveTimingSnapshot(state.attempt);refreshNavigationState();
+  requestAnimationFrame(()=>{elements.briefingSection.scrollIntoView({block:'start',behavior:'instant'});elements.briefingTitle.focus({preventScroll:true});});
+}
+
+async function startTour() {
+  if(state.isStartingTour||!state.attempt?.tourBriefing)return;
+  const id=state.attempt.id,tourId=state.attempt.tourBriefing.tourId;
+  state.isStartingTour=true;elements.tourStart.disabled=true;hideMessage(elements.briefingMessage);
+  try{
+    if(!await requestExamFullscreen({silent:true}))throw new Error('Разрешите полноэкранный режим и нажмите «Начать тур». Таймеры пока на паузе.');
+    const attempt=await requestWithRetry(()=>api(`/api/public/attempts/${id}/tour/start`,{method:'POST',body:JSON.stringify({tourId})}),{attempts:2,pauseMs:500});
+    applyAttemptState(attempt);startTimers();
+  }catch(error){showMessage(elements.briefingMessage,formatApiError(error),'error');}
+  finally{state.isStartingTour=false;elements.tourStart.disabled=false;}
+}
+
+function prepareRepeat() {
+  if(!state.attempt?.story?.repeatAllowed)return;
+  state.retakeOf=state.attempt.id;state.participant=state.attempt.participant;
+  state.activeAttemptId='';state.attempt=null;state.draftSavedKey='';stopTimers();disableExamMode();
+  elements.briefingSection.classList.add('hidden');elements.resultSection.classList.add('hidden');elements.attemptSection.classList.add('hidden');
+  elements.prestartSection.classList.remove('hidden');
+  elements.startAttempt.dataset.lockReason='';elements.startAttempt.textContent='Пройти ещё раз';
+  elements.startConsent.checked=false;renderParticipant();refreshNavigationState();
+  showMessage(elements.prestartMessage,'Новая попытка получит отдельный результат. Прежние ответы и свидетельство сохранены.','success');
+  scrollToSection(elements.prestartSection);
+}
+
+function scheduleDraftSave() {
+  clearTimeout(state.draftTimer);
+  if(!state.attempt?.autoSaveDrafts||state.attempt?.tourBriefing||state.attempt.status!=='in_progress')return;
+  const payload=state.questionController?.getAnswer?.();
+  if(payload&&state.draftSavedKey!==state.attempt.id+state.attempt.currentQuestion?.id+JSON.stringify(payload))setAttemptSaveStatus('Сохраняем выбор…','pending');
+  state.draftTimer=setTimeout(()=>saveServerDraft(),250);
+}
+
+async function saveServerDraft() {
+  if(state.draftSaving||state.pendingFlushInFlight||state.isSubmittingAnswer||!state.attempt?.autoSaveDrafts||state.attempt.tourBriefing||state.attempt.status!=='in_progress')return;
+  const question=state.attempt.currentQuestion,payload=state.questionController?.getAnswer?.();
+  if(!question||!payload)return;
+  const key=state.attempt.id+question.id+JSON.stringify(payload);
+  if(key===state.draftSavedKey)return;
+  captureCurrentDraft();state.draftSaving=true;
+  try{
+    state.draftSavePromise=api(`/api/public/attempts/${state.attempt.id}/draft`,{method:'POST',body:JSON.stringify({questionId:question.id,answerPayload:payload})});
+    await state.draftSavePromise;
+    state.draftSavedKey=key;
+    if(state.attempt?.currentQuestion?.id===question.id&&JSON.stringify(state.questionController?.getAnswer?.())===JSON.stringify(payload))setAttemptSaveStatus('Выбор сохранён. Можно изменить до конца минуты.','success');
+  }catch(error){
+    if(![409,422].includes(error.status))setAttemptSaveStatus('Выбор остаётся в открытой странице. Ожидаем связь с сервером.','warning');
+  }finally{state.draftSaving=false;state.draftSavePromise=null;}
+}
+
 function renderAttempt() {
+  if(state.attempt?.tourBriefing){renderTourBriefing();return;}
+  elements.briefingSection.classList.add('hidden');
   window.RestaurantLayout?.beforeQuestion();
   const attempt = state.attempt;
   const currentTour = attempt.currentTour;
@@ -3220,6 +3305,10 @@ function renderCertificate(attempt, scoresVisible) {
 }
 
 function renderResult() {
+  elements.briefingSection.classList.add('hidden');
+  const repeatAllowed=Boolean(state.attempt?.story?.repeatAllowed);
+  elements.repeatAttempt.classList.toggle('hidden',!repeatAllowed);
+  document.getElementById('repeat-note').classList.toggle('hidden',!repeatAllowed);
   window.RestaurantLayout?.result();
   if (state.attempt?.status !== "in_progress" && state.questionController?.isFinalKitchen) {
     state.questionController.dispose(); state.questionController = null;
@@ -3316,11 +3405,12 @@ function canSoftSyncAttempt(nextAttempt) {
 }
 
 function describeAttemptTransition(previousAttempt, nextAttempt) {
+  if(nextAttempt?.tourBriefing)return 'Ответы предыдущего тура сохранены. Прочитайте пояснение и начните следующий тур, когда будете готовы.';
   if (!nextAttempt) {
     return "";
   }
   if(previousAttempt?.timing?.questionLimitSeconds&&previousAttempt.currentStepIndex!==nextAttempt.currentStepIndex&&nextAttempt.progress.answeredCount===previousAttempt.progress.answeredCount){
-    return nextAttempt.status==='in_progress'?'Время на задание истекло. Неподтверждённый ответ не записан; открыто следующее задание.':'Время завершилось. Неподтверждённые ответы не записаны; ранее сохранённые ответы учтены.';
+    return nextAttempt.status==='in_progress'?'Время на задание истекло. Сохранённый на сервере выбор учтён; открыто следующее задание.':'Время завершилось. Неподтверждённые ответы не записаны; ранее сохранённые ответы учтены.';
   }
 
   if (!previousAttempt && nextAttempt.status === "in_progress" && nextAttempt.currentTour) {
@@ -3334,7 +3424,7 @@ function describeAttemptTransition(previousAttempt, nextAttempt) {
   ) {
     if (previousAttempt.currentQuestion?.type === "final_kitchen" &&
         (nextAttempt.answerReceipt?.saved === false || nextAttempt.progress.answeredCount === previousAttempt.progress.answeredCount)) {
-      return "Маршрут завершён. Незавершённая сборка не записана; прежние ответы сохранены.";
+      return "Маршрут завершён. Сохранённый выбор компонентов учтён; прежние ответы сохранены.";
     }
     return "Маршрут завершен. Итог сохранен в облаке.";
   }
@@ -3382,7 +3472,7 @@ function applyAttemptState(attempt, options = {}) {
   rememberRecoveryReference();
   if (attempt?.id) state.activeAttemptId = attempt.id;
   const syncService = () => {
-    if(attempt?.story&&attempt.status!=='in_progress'){window.T5DishService?.hideInline();return;}
+    if(attempt?.tourBriefing||(attempt?.story&&attempt.status!=='in_progress')){window.T5DishService?.hideInline();return;}
     window.T5DishService?.sync(attempt, () => {
       refreshAttemptControls();
       if (state.attempt?.status === 'in_progress') elements.questionBody.querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
@@ -3434,6 +3524,8 @@ function applyAttemptState(attempt, options = {}) {
 }
 
 function updateTimers() {
+  if(state.attempt?.tourBriefing)return;
+  if(state.attempt?.autoSaveDrafts)saveServerDraft();
   if (!state.timingSnapshot) {
     return;
   }
@@ -3534,6 +3626,7 @@ async function performPendingAnswerFlush(options = {}) {
 
   try {
     while (state.pendingAnswerQueue.length) {
+      await state.draftSavePromise?.catch(()=>{});
       const pendingItem = state.pendingAnswerQueue[0];
       const data = await requestWithRetry(
         () =>
@@ -3686,12 +3779,17 @@ async function handleRegistration(event) {
 
     state.participant = data.participant;
     state.activeAttemptId = data.activeAttemptId || "";
+    state.retakeOf=data.alreadyCompleted&&data.repeatAllowed?data.completedAttemptId:"";
     renderParticipant();
-    elements.startAttempt.dataset.lockReason = data.alreadyCompleted ? "completed" : "";
+    elements.startAttempt.dataset.lockReason = data.alreadyCompleted&&!data.repeatAllowed ? "completed" : "";
     elements.startAttempt.textContent = data.activeAttemptId
       ? "Продолжить олимпиаду"
       : "Начать олимпиаду";
 
+    if(state.retakeOf){
+      elements.startAttempt.textContent='Пройти ещё раз';refreshNavigationState();
+      showMessage(elements.registrationMessage,'Можно пройти олимпиаду повторно. Прежний результат сохранён отдельно.','success');return;
+    }
     if (data.alreadyCompleted) {
       elements.startAttempt.textContent = "Попытка завершена";
       refreshNavigationState();
@@ -3761,7 +3859,7 @@ async function startAttempt() {
         api("/api/public/attempts/start", {
           method: "POST",
           attemptToken,
-          body: JSON.stringify({ participant: state.participant })
+          body: JSON.stringify({ participant: state.participant, tourBriefings:true, ...(state.retakeOf?{retakeOf:state.retakeOf}:{}) })
         }),
       {
         attempts: 2,
@@ -3771,6 +3869,7 @@ async function startAttempt() {
         }
       }
     );
+    state.retakeOf="";
     rememberAttemptAccessToken(attempt.id, attemptToken);
     clearPendingStartToken(pendingStartKey);
     state.activeAttemptId = attempt.id;
@@ -4066,6 +4165,8 @@ async function init() {
     elements.startConsent.addEventListener("change", updateStartAvailability);
   }
   elements.startAttempt.addEventListener("click", startAttempt);
+  elements.tourStart.addEventListener("click",startTour);
+  elements.repeatAttempt.addEventListener("click",prepareRepeat);
   elements.submitAnswer.addEventListener("click", submitAnswer);
   elements.finishAttempt.addEventListener("click", finishAttempt);
   elements.certificateOpen.addEventListener("click", () => {

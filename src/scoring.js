@@ -275,7 +275,7 @@ function summarizeAttempt(olympiad, attempt) {
   return {
     totalFinalScore,
     totalPenalty,
-    totalDurationMs: Math.max(0, finishedAt - startedAt),
+    totalDurationMs: Math.max(0, finishedAt - startedAt - require("./tour-briefing").pausedDuration(attempt, finishedAt)),
     totalMaxScore: olympiad.scoring ? olympiad.scoring.totalMaxScore : 0,
     tourScores,
     tieBreak: {
@@ -284,7 +284,7 @@ function summarizeAttempt(olympiad, attempt) {
         (byId["tour-4"] ? byId["tour-4"].finalScore : 0) +
         (byId["tour-3"] ? byId["tour-3"].finalScore : 0),
       tour3Penalty: byId["tour-3"] ? byId["tour-3"].penalty : 0,
-      totalDurationMs: Math.max(0, finishedAt - startedAt)
+      totalDurationMs: Math.max(0, finishedAt - startedAt - require("./tour-briefing").pausedDuration(attempt, finishedAt))
     }
   };
 }

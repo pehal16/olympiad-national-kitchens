@@ -15,7 +15,7 @@ function conditionVersion(attempt){
   // Non-story starts also freeze the menu in their questions, without dialogue metadata.
   return attempt?.variant?.questions?.some(q=>q.tourCode==='T4'&&q.menuVersion===3)?3:1;
 }
-function rankingGroup(attempt){return JSON.stringify([attempt.storyRunId||null,conditionVersion(attempt)]);}
+function rankingGroup(attempt){return JSON.stringify([attempt.storyRunId||null,conditionVersion(attempt),...(attempt.variant?.questionTimingVersion===4?['minute-questions']:[])]);}
 function freezeDialogue(variant){
   if([1,2].includes(variant.dialogueVersion)) return variant;
   const newEdition=[4,5,6].includes(variant.conditionVersion)||variant.questions.some(q=>q.tourCode==='T4'&&q.menuVersion===4);

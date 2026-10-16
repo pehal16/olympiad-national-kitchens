@@ -4429,3 +4429,13 @@ pre {
 @media (prefers-reduced-motion: reduce) {
   #attempt-section.is-t3 .question-enter, .t3-dossier *, .t3-dossier *::before, .t3-dossier *::after { animation: none !important; transition: none !important; }
 }
+
+/* A deliberate reading pause; no animation or countdown competes with the instructions. */
+.tour-briefing{max-width:780px;margin:24px auto;padding:clamp(22px,5vw,44px);scroll-margin-top:24px}
+.tour-briefing h2{font-size:clamp(26px,5vw,38px);line-height:1.2;overflow-wrap:anywhere}
+#tour-briefing-title:focus{outline:none}
+.tour-briefing ol{padding-left:24px;line-height:1.65;font-size:18px}
+.tour-briefing li+li{margin-top:14px}
+.tour-pause-note{padding:16px;border-radius:14px;background:#eaf6f0;color:#174d3b;line-height:1.6}
+.tour-briefing .button{min-height:52px;margin-top:12px}
+@media(max-width:600px){.tour-briefing{margin:14px 0}.tour-briefing .button{width:100%}.tour-briefing ol{font-size:17px}}

@@ -4,6 +4,7 @@
   function create(options) {
     const { mount, question, attemptId, submitButton, onChange, onPhase, presentationMode = 'standard' } = options;
     const doc = mount.ownerDocument, win = doc.defaultView, model = root.T5PhotoModel, dish = question.selectedDish;
+    const mobileAuto=Boolean(root.OlympiadDevice?.isMobile(win.navigator)||win.matchMedia?.('(max-width:767px)').matches);
     const scope = `${attemptId}:photo4:${question.id}:${dish.id}`, introKey = `${attemptId}:photo4:intro`;
     const listeners = new AbortController(), photos = new Map(), controls = [], cards = new Map();
     let locked = false, disposed = false, revision = 0, storageFailed = false;
@@ -14,6 +15,7 @@
     try { if (incoming?.dishId === dish.id) selected = new Set(model.selection(dish, incoming.selectedIngredientIds || []).map(item => item.id)); } catch { /* Ignore malformed local drafts. */ }
     const route = model.recipeStages(dish);
     let stage = selected.size === 4 && route.includes(stored?.stage) && Array.isArray(stored?.selectedIngredientIds) && model.key(stored.selectedIngredientIds) === model.key([...selected]) ? stored.stage : 'select';
+    if(mobileAuto&&selected.size===4)stage='served';
     let layout = 'balanced';
     let started = options.inlineIntro || question.sequenceInTour !== 1 || seen.has(introKey) || read(introKey) === true;
     const el = (tag, className, text) => { const node = doc.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = text; return node; };
@@ -60,6 +62,12 @@
       const actions = el('section','restaurant-kitchen-actions');
       actions.append(stepbar, operation, edit, footer); compose.append(actions);
     }
+    if(mobileAuto){
+      shell.classList.add('is-mobile-auto');
+      const preview=el('details','t5-mobile-preview');preview.append(el('summary','','Посмотреть собранное блюдо'),panel);
+      pantry.append(footer,preview);
+      serveGuide.lastChild.textContent='Четыре продукта выбраны. Блюдо собрано — можно подавать.';
+    }
     const answer = () => ({dishId:dish.id,selectedIngredientIds:[...selected]});
     function persist(){write(scope,{...answer(),stage,layout});draftNotice.hidden=!storageFailed;draftNotice.textContent='Черновик сохраняется до закрытия этой страницы.';}
     function update(){
@@ -71,9 +79,9 @@
       stepbar.setAttribute('aria-label',stage==='served'?'Все шаги сборки выполнены':`Шаги сборки: ${route.indexOf(stage)+1} из ${steps.length}`);
       const ready=selected.size===4,operationText=model.operations[dish.photo.kind][route.indexOf(stage)];next.hidden=stage==='served';next.disabled=locked||!ready;next.textContent=stage==='served'?'':ready?(stage==='select'?'Собрать блюдо':operationText):'Собрать блюдо';
       if(!ready)pantryExpanded=false;
-      pantry.classList.toggle('is-condensed',ready&&!pantryExpanded);pantryToggle.hidden=!ready;
+      pantry.classList.toggle('is-condensed',!mobileAuto&&ready&&!pantryExpanded);pantryToggle.hidden=mobileAuto||!ready;
       pantryToggle.textContent=pantryExpanded?'Свернуть продукты':'Показать выбранные продукты';pantryToggle.setAttribute('aria-expanded',String(pantryExpanded));
-      if(started&&ready&&!previouslyReady)win.requestAnimationFrame(()=>{if(!disposed)operation.scrollIntoView({block:'center',behavior:'instant'});});
+      if(!mobileAuto&&started&&ready&&!previouslyReady)win.requestAnimationFrame(()=>{if(!disposed)operation.scrollIntoView({block:'center',behavior:'instant'});});
       previouslyReady=ready;
       operationLabel.textContent=!ready?'Выбор компонентов':stage==='served'?'Сборка завершена':`Шаг ${route.indexOf(stage)+1} из ${route.length-1}`;
       operationDetail.hidden=!ready||stage==='served';operationDetail.textContent=operationText||'';
@@ -109,7 +117,7 @@
       if(failed&&!layers.childElementCount)layers.append(el('p','t5-photo-empty','Ваш состав: '+model.selection(dish,selected).map(item=>item.text).join(', ')));
       if(selected.size===4&&stage!=='served')model.plan(dish,selected,model.nextStage(dish,selected,stage),layout).layers.forEach(layer=>decode(layer.path).catch(()=>{}));
     }
-    function changed(){if(presentationMode==='restaurant')root.T5DishService?.hideInline();persist();update();render();onChange?.(answer());if(started&&selected.size===4&&stage==='served'&&root.OlympiadDevice?.isMobile(win.navigator))win.requestAnimationFrame(()=>{if(!disposed)footer.scrollIntoView({block:'center',behavior:'instant'});});if(presentationMode==='restaurant'&&stage!=='select')root.OlympiadStory?.action(question.id,stage==='served'?'Сборка завершена. Нажмите «Подать», чтобы сохранить блюдо.':'Шаг выполнен. Нажмите следующую подсвеченную кнопку сборки.');}
+    function changed(){if(mobileAuto)stage=selected.size===4?'served':'select';if(presentationMode==='restaurant')root.T5DishService?.hideInline();persist();update();render();onChange?.(answer());if(!mobileAuto&&started&&selected.size===4&&stage==='served'&&root.OlympiadDevice?.isMobile(win.navigator))win.requestAnimationFrame(()=>{if(!disposed)footer.scrollIntoView({block:'center',behavior:'instant'});});if(presentationMode==='restaurant'&&stage!=='select')root.OlympiadStory?.action(question.id,stage==='served'?'Сборка завершена. Нажмите «Подать», чтобы сохранить блюдо.':'Шаг выполнен. Нажмите следующую подсвеченную кнопку сборки.');}
     for(const item of dish.items){
       const card=el('button','t5-photo-card');card.type='button';on(card,'click',()=>{if(locked)return;if(selected.has(item.id))selected.delete(item.id);else if(selected.size<4)selected.add(item.id);stage='select';changed();});card.dataset.ingredient=item.id;card.setAttribute('aria-pressed','false');
       const photo=el('img');if(presentationMode==='restaurant'&&root.RestaurantMedia)root.RestaurantMedia.setImage(photo,item.imageUrl,'card');else photo.src=item.imageUrl;photo.alt='';photo.draggable=false;photo.loading='eager';photo.decoding='async';

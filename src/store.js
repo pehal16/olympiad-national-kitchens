@@ -371,6 +371,10 @@ async function createAttemptAtomic(attempt) {
     const runs=readJson(getPath().join(STORAGE_DIR,'story-runs.json'),[]);
     if(!require('./story-runs').entryOpen(runs.find(r=>r.id===attempt.storyRunId))) return {created:false,attempt:null,entryClosed:true};
   }
+  if (attempt.previousAttemptId && !attempts.some(p => p.id === attempt.previousAttemptId &&
+      p.storyRunId === attempt.storyRunId && p.participantSignature === attempt.participantSignature && p.status !== 'in_progress')) {
+    return {created:false,attempt:null};
+  }
   attempts.push(stored);
   writeJson(ATTEMPTS_FILE, attempts);
   return { created: true, attempt: stored };
@@ -416,6 +420,14 @@ async function updateAttemptWithRevision(attempt, expectedRevision, options = {}
   writeJson(ATTEMPTS_FILE, attempts);
   attempt.stateRevision = stored.stateRevision;
   return true;
+}
+
+async function loadLatestStoryAttempt(runId, signature) {
+  if (getStorageBackend() === 'cloudflare') return require('./story-runs').hydrate(
+    await getCloudflareStore().loadLatestStoryAttempt(runId, signature));
+  const attempts = (await loadAttemptSummaries()).filter(a => a.storyRunId === runId && a.participantSignature === signature);
+  attempts.sort((a,b) => (Number(b.attemptNumber)||1)-(Number(a.attemptNumber)||1) || String(b.startedAt).localeCompare(String(a.startedAt)));
+  return attempts[0] ? loadAttemptById(attempts[0].id) : null;
 }
 
 async function loadAttemptById(attemptId) {
@@ -709,6 +721,7 @@ module.exports = {
   createAttemptAtomic,
   updateAttemptWithRevision,
   loadAttemptById,
+  loadLatestStoryAttempt,
   appendAttemptEvent,
   loadAttemptEvents,
   loadAdminSessions,

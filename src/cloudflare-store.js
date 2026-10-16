@@ -351,7 +351,10 @@ async function createAttemptAtomic(attempt) {
         AND (json_extract(r.payload_json,'$.admissionMode')='open' OR r.entry_mode='anytime' OR
           (r.entry_starts_at<=strftime('%Y-%m-%dT%H:%M:%fZ','now')
           AND ${require('./story-runs').admissionEndSql('r.')}>julianday('now')))
-        ON CONFLICT(id) DO NOTHING`,String(storedAttempt.id),JSON.stringify(cloneAttemptState(storedAttempt)),storedAt,storedAttempt.accessTokenHash,storedAttempt.storyRunId),
+        AND (?6 IS NULL OR EXISTS(SELECT 1 FROM attempts p WHERE p.id=?6 AND p.story_run_id=?5
+          AND json_extract(p.payload_json,'$.participantSignature')=json_extract(?2,'$.participantSignature')
+          AND json_extract(p.payload_json,'$.status')!='in_progress'))
+        ON CONFLICT(id) DO NOTHING`,String(storedAttempt.id),JSON.stringify(cloneAttemptState(storedAttempt)),storedAt,storedAttempt.accessTokenHash,storedAttempt.storyRunId,storedAttempt.previousAttemptId||null),
       statement(`INSERT INTO attempt_variants(id,payload_json,updated_at) SELECT ?1,?2,?3
         WHERE EXISTS(SELECT 1 FROM attempts WHERE id=?1 AND access_token_hash=?4) ON CONFLICT(id) DO NOTHING`,String(storedAttempt.id),JSON.stringify(storedAttempt.variant),storedAt,storedAttempt.accessTokenHash)
     ];
@@ -506,6 +509,13 @@ async function upsertAttempt(attempt, options = {}) {
   }
 
   await upsertAttemptState(attempt);
+}
+
+async function loadLatestStoryAttempt(runId, signature) {
+  const row = await first(`SELECT id FROM attempts WHERE story_run_id=?1
+    AND json_extract(payload_json,'$.participantSignature')=?2
+    ORDER BY CAST(COALESCE(json_extract(payload_json,'$.attemptNumber'),1) AS INTEGER) DESC, id DESC LIMIT 1`,runId,signature);
+  return row ? loadAttemptById(row.id) : null;
 }
 
 async function loadAttemptById(attemptId) {
@@ -745,6 +755,7 @@ module.exports = {
   createAttemptAtomic,
   updateAttemptWithRevision,
   loadAttemptById,
+  loadLatestStoryAttempt,
   appendAttemptEvent,
   loadAttemptEvents,
   loadAdminSessions,

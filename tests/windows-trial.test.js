@@ -31,7 +31,7 @@ test("Windows trial preserves an owned attempt, certificate and backup independe
   assert.equal(trial.server.address().address, "127.0.0.1");
   assert.equal(trial.report.totalQuestions, 36);
   assert.equal(trial.report.totalPoints, 150);
-  assert.equal(trial.report.durationMinutes, 18.75);
+  assert.equal(trial.report.durationMinutes, 36);
   assert.ok(!fs.readFileSync(paths.report, "utf8").includes(readCredentials(paths).adminPassword));
   const token = crypto.randomBytes(32).toString("base64url");
   const participant = { fullName: "Пробный Участник Сервера", institution: "Техническая репетиция", groupName: "TEST", mentorName: "" };
