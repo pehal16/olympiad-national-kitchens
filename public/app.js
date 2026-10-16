@@ -1666,7 +1666,7 @@ function receiveReserveTransfer(){
 }
 async function restoreReserveTransfer(){
   if(!pendingReserveTransfer)return false;
-  if(state.olympiad?.recovery?.backend!=='shared-d1')throw new Error('Этот адрес пока не подключён к общей базе. Вернитесь на исходную страницу.');
+  if(!state.olympiad?.story)throw new Error('Этот адрес пока не подключён к олимпиаде. Вернитесь на исходную страницу.');
   const t=pendingReserveTransfer;
   // Verify ownership before persisting a credential or replacing a saved draft.
   const attempt=await api(`/api/public/attempts/${encodeURIComponent(t.attemptId)}`,{attemptToken:t.token});
