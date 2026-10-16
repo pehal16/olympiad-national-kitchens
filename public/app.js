@@ -1689,15 +1689,17 @@ function setupOrganizerAddress() {
   const link = document.querySelector(".landing-organizer");
   if (!link) return;
   const isLoopback = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
-  link.href = isLoopback && state.olympiad?.recovery?.backend !== "shared-d1"
-    ? "/admin.html"
-    : "https://olympiad-gkts.pages.dev/admin.html";
+  const localDatabase = state.olympiad && state.olympiad.recovery?.backend !== "shared-d1";
+  link.href = localDatabase ? (isLoopback ? "/admin.html" : "http://127.0.0.1:3100/admin.html") : "https://olympiad-gkts.pages.dev/admin.html";
+  if (localDatabase) link.title = "Открывайте кабинет на компьютере, где запущен сервер олимпиады.";
 }
 
 function setupReserveAddress(){
   const stored=savedRecoveryReference();
   for(const id of ['reserve-address','attempt-reserve-address']){
   const link=document.getElementById(id);
+  if (link) link.classList.add('hidden');
+  if (state.olympiad && state.olympiad.recovery?.backend !== 'shared-d1') continue;
   const origins=(state.olympiad?.recovery||stored?.recovery)?.origins;
   if(!link||!window.AttemptReserve||!Array.isArray(origins)||!origins.includes(location.origin))return;
   const target=origins.find(origin=>origin!==location.origin);

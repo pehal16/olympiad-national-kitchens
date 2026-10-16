@@ -41,6 +41,7 @@ function configureTrial(paths) {
 }
 
 async function backupTrial(paths) {
+  paths = activeDatabasePaths(paths);
   if (!fs.existsSync(paths.database)) throw new Error("Сначала запустите олимпиаду: тестовая база ещё не создана.");
   const destination = path.join(paths.root, "backups", `olympiad-${Date.now()}-${crypto.randomBytes(3).toString("hex")}.sqlite`);
   const result = spawnSync(process.execPath, [path.join(__dirname, "backup-olympiad-sqlite.js"), destination], {
@@ -53,15 +54,26 @@ async function backupTrial(paths) {
   return receipt;
 }
 
+function activeDatabasePaths(paths) {
+  const file = path.join(paths.root, 'hosting-settings.json');
+  const hosting = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
+  if (hosting.storageMode !== 'desktop-primary') return paths;
+  if (hosting.publicApiOrigin) throw new Error('Desktop primary cannot relay writes to the cloud.');
+  const database = path.join(paths.root, 'desktop-primary', 'olympiad.sqlite');
+  if (!fs.existsSync(database)) throw new Error('Restored desktop primary database is missing; refusing to create an empty replacement.');
+  return { ...paths, database };
+}
+
 async function startTrial(paths, { port = 3100, openBrowser = true } = {}) {
   const [major, minor] = process.versions.node.split(".").map(Number);
   if (major < 24 || (major === 24 && minor < 15)) throw new Error("Нужен комплект с Node.js 24.15 или новее.");
   const credentials = readCredentials(paths);
   const hostingFile=path.join(paths.root,'hosting-settings.json');
   const hosting=fs.existsSync(hostingFile)?JSON.parse(fs.readFileSync(hostingFile,'utf8')):{};
+  paths = activeDatabasePaths(paths);
   configureTrial(paths);
   const { createOlympiadServer } = require("../olympiad-server");
-  const { server, db } = createOlympiadServer({ dbPath: paths.database, ...credentials, storyEnabled: true, storyAnytimeEntry: true,publicApiOrigin:hosting.publicApiOrigin||'' });
+  const { server, db } = createOlympiadServer({ dbPath: paths.database, ...credentials, storyEnabled: true, storyAnytimeEntry: hosting.storageMode !== 'desktop-primary',publicApiOrigin:hosting.publicApiOrigin||'' });
   try {
     await new Promise((resolve, reject) => {
       server.once("error", reject);
@@ -80,7 +92,7 @@ async function startTrial(paths, { port = 3100, openBrowser = true } = {}) {
     const report = {
       startedAt: new Date().toISOString(), machine: os.hostname(), cpu: os.cpus()[0]?.model,
       memoryGB: Math.round(os.totalmem() / 1024 ** 3), node: process.versions.node,
-      url: baseUrl, database: paths.database, mode:hosting.publicApiOrigin?'shared-d1-participant-host':"isolated-windows-trial",
+      url: baseUrl, database: paths.database, mode:hosting.publicApiOrigin?'shared-d1-participant-host':hosting.storageMode==='desktop-primary'?'desktop-primary':"isolated-windows-trial",
       ...(hosting.publicApiOrigin?{publicApiOrigin:hosting.publicApiOrigin,addonVersion:hosting.addonVersion||null}:{}),
       durationMinutes: metadata.data.durationMinutes, totalQuestions: metadata.data.questionCount,
       totalPoints: metadata.data.tours.reduce((sum, tour) => sum + Number(tour.maxScore), 0),
@@ -88,7 +100,7 @@ async function startTrial(paths, { port = 3100, openBrowser = true } = {}) {
         ? JSON.parse(fs.readFileSync(path.join(__dirname, "..", "package-manifest.json"), "utf8")).revision : "development-copy"
     };
     fs.writeFileSync(paths.report, JSON.stringify(report, null, 2));
-    fs.writeFileSync(paths.organizer,hosting.publicApiOrigin?`\uFEFFОФИЦИАЛЬНАЯ ОЛИМПИАДА\r\nПанель: ${hosting.publicApiOrigin}/admin.html\r\nДля входа используется существующий пароль организатора Cloudflare.\r\nЛокальная база пробных прохождений и её ключи сохранены отдельно.\r\n`:`\uFEFFПРОБНЫЙ СЕРВЕР ОЛИМПИАДЫ\r\nПанель: ${baseUrl}/admin.html\r\nПароль: ${credentials.adminPassword}\r\n\r\nЛокальные тестовые данные: ${paths.root}\r\nЭтот файл содержит пароль. Не отправляйте его участникам.\r\n`, { mode: 0o600 });
+    fs.writeFileSync(paths.organizer,hosting.publicApiOrigin?`\uFEFFОФИЦИАЛЬНАЯ ОЛИМПИАДА\r\nПанель: ${hosting.publicApiOrigin}/admin.html\r\nДля входа используется существующий пароль организатора Cloudflare.\r\nЛокальная база пробных прохождений и её ключи сохранены отдельно.\r\n`:`\uFEFF${hosting.storageMode==='desktop-primary'?'ОФИЦИАЛЬНЫЙ СЕРВЕР ОЛИМПИАДЫ НА ПК':'ПРОБНЫЙ СЕРВЕР ОЛИМПИАДЫ'}\r\nПанель: ${baseUrl}/admin.html\r\nПароль: ${credentials.adminPassword}\r\n\r\nБаза: ${paths.database}\r\nЭтот файл содержит пароль. Не отправляйте его участникам.\r\n`, { mode: 0o600 });
     console.log(`\nПробная олимпиада запущена на ${os.hostname()}.\nОткройте: ${baseUrl}\nПанель организатора: ${baseUrl}/admin.html\nПароль сохранён в: ${paths.organizer}\nОтветы: ${paths.database}\nОтчёт о запуске: ${paths.report}\n\nОставьте это окно открытым. Для остановки нажмите Ctrl+C.\n`);
     if (openBrowser && process.platform === "win32") {
       const browser = spawn("cmd.exe", ["/d", "/c", "start", "", baseUrl], { stdio: "ignore", windowsHide: true });
@@ -137,4 +149,4 @@ async function main() {
 }
 
 if (require.main === module) main().catch(error => { console.error(`\n${error.message}`); process.exitCode = 1; });
-module.exports = { trialPaths, readCredentials, backupTrial, startTrial };
+module.exports = { trialPaths, readCredentials, backupTrial, startTrial, activeDatabasePaths };

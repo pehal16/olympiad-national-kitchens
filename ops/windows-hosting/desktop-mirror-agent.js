@@ -4,6 +4,10 @@ const { createNetworkFetch } = require('./lib/desktop-network-fetch');
 const { openMirror, syncOnce, writeStatus } = require('./lib/desktop-mirror-store');
 const directory = path.join(process.env.LOCALAPPDATA, 'GKTSOlympiadTrial/v1/cloud-mirror');
 async function main() {
+  const hostingFile = path.join(process.env.LOCALAPPDATA, 'GKTSOlympiadTrial/v1/hosting-settings.json');
+  if (fs.existsSync(hostingFile) && JSON.parse(fs.readFileSync(hostingFile,'utf8')).storageMode === 'desktop-primary') {
+    return require('./lib/desktop-primary-backup').main();
+  }
   const privateKey = fs.readFileSync(path.join(directory,'identity-private.pem'),'utf8');
   const database = openMirror(directory), fetcher = createNetworkFetch();
   let status = {}; try { status = JSON.parse(fs.readFileSync(path.join(directory,'status.json'))); } catch {}

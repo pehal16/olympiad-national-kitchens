@@ -18,7 +18,8 @@ If local changes exist, assume they are intentional user or agent work. Do not d
 ## Source Of Truth
 
 - The current branch `main` and `origin/main` are the baseline.
-- Production is Cloudflare Pages, project `olympiad-gkts`.
+- Since the explicit emergency migration authorized on 2026-10-16, the olympiad participant server and primary SQLite database run on the stationary Windows PC. Cloudflare Pages `olympiad-gkts` redirects participants and relays existing participant API sessions to this PC through the existing Timeweb ingress. Other Cloudflare learning/PM01 routes retain their previous backend.
+- The former olympiad D1 database and pre-cutover desktop mirror are preserved archives. Never resume olympiad writes to D1 or automatically import an older cloud copy over the desktop primary. Separately reconcile any cloud records that did not reach the mirror before the quota outage.
 - Do not move work back to older Yandex/serverless behavior unless the user explicitly requests that migration.
 - Do not reintroduce removed IP attempt restrictions.
 - Do not replace current PM01 exam content with older versions from previous prompts or screenshots.

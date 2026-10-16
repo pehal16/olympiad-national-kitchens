@@ -4941,8 +4941,7 @@ async function handleApi(req, res, url, runtime = {}) {
     if (method === "GET" && pathname.match(/^\/api\/admin\/attempts\/[^/]+$/)) {
       const olympiadData = await ensureOlympiad();
       const attemptId = pathname.split("/")[4];
-      const allAttempts = await loadAttempts();
-      const attempt = findAttemptById(allAttempts, attemptId);
+      const attempt = await loadAttemptById(attemptId);
 
       if (!attempt || attempt.olympiadId !== olympiadData.id) {
         sendJson(res, 404, { ok: false, message: "Попытка не найдена." });
