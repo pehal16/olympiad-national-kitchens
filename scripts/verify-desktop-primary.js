@@ -9,5 +9,8 @@ const {PRIMARY_ORIGIN}=require('../src/desktop-primary-relay');
  }
  const home=await fetch(origin+'/',{redirect:'manual',signal:AbortSignal.timeout(20000)});assert.equal(home.status,200);
  for(const route of ['/admin.html','/api/admin/participants','/credentials.json'])assert.equal((await fetch(PRIMARY_ORIGIN+route)).status,404);
+ const organizer=await fetch(PRIMARY_ORIGIN+'/organizer');assert.equal(organizer.status,200);assert.match(await organizer.text(),/organizer\.js/);
+ for(const route of ['/api/organizer/session','/api/organizer/participants','/api/organizer/exports/csv/download'])assert.equal((await fetch(PRIMARY_ORIGIN+route)).status,401);
+ const adminRedirect=await fetch(origin+'/admin.html',{redirect:'manual'});assert.equal(adminRedirect.status,307);assert.equal(adminRedirect.headers.get('location'),PRIMARY_ORIGIN+'/organizer');
  console.log('Desktop primary and Pages relay verified without participant writes; official results remain private.');
 })().catch(error=>{console.error(error.message);process.exitCode=1;});

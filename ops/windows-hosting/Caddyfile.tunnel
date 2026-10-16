@@ -15,5 +15,6 @@
 
 http://:3180 {
 	bind 127.0.0.1
+	vars olympiad_public_root "{$OLYMPIAD_PUBLIC_ROOT}"
 	import olympiad-routes.caddy
 }

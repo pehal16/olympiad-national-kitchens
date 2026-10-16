@@ -1,5 +1,14 @@
 {
   "version": 1,
-  "include": ["/api/*", "/", "/index.html", "/admin", "/admin.html", "/certificate.html"],
+  "include": [
+    "/api/*",
+    "/",
+    "/index.html",
+    "/admin",
+    "/admin.html",
+    "/certificate.html",
+    "/organizer",
+    "/organizer.html"
+  ],
   "exclude": []
 }

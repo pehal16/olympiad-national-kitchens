@@ -31,8 +31,8 @@ async function handleDesktopPrimary(request, env, fetcher = (url, options) => gl
   }
   // Never silently resume writes to the old D1 database after its quota resets.
   if (url.pathname === '/api/desktop-mirror') return unavailable(410,'Облачный снимок сохранён как архив. Основная база находится на ПК.');
-  if (url.pathname.startsWith('/api/admin/')) return unavailable(503,'Панель организатора перенесена на серверный ПК: http://127.0.0.1:3100/admin.html');
-  if (['/admin','/admin.html'].includes(url.pathname)) return new Response('<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Кабинет организатора</title><main style="max-width:40rem;margin:4rem auto;padding:1rem;font:18px/1.6 system-ui"><h1>Кабинет организатора на ПК</h1><p>Откройте эту ссылку на компьютере, где запущен сервер олимпиады.</p><p><a href="http://127.0.0.1:3100/admin.html">Открыть кабинет организатора</a></p><p><a href="'+PRIMARY_ORIGIN+'/">Перейти к олимпиаде</a></p></main></html>',{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'"}});
+  if (url.pathname.startsWith('/api/admin/')) return unavailable(503,'Откройте защищённую панель организатора на основном адресе /organizer.');
+  if (['/admin','/admin.html','/organizer','/organizer.html'].includes(url.pathname)) return new Response(null,{status:307,headers:{Location:PRIMARY_ORIGIN+'/organizer','Cache-Control':'no-store'}});
   // Keep the Pages browser origin for its existing local owner tokens and
   // queued drafts. Its participant API uses the same desktop DB above.
   return null;

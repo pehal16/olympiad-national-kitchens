@@ -4,5 +4,6 @@
 }
 
 olympiada.gorlkts.ru {
+	vars olympiad_public_root "{$OLYMPIAD_PUBLIC_ROOT}"
 	import olympiad-routes.caddy
 }

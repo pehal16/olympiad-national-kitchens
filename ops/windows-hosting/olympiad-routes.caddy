@@ -1,14 +1,48 @@
-# Participant traffic only. The organizer continues to use localhost:3100.
-@organizer path /admin.html /admin.js /content-admin.html /content-admin.js /api/admin /api/admin/*
-respond @organizer "Not found" 404
+encode zstd gzip
 
-@api path /api/*
-header @api {
-	Cache-Control "private, no-store"
-	defer
+# Remote organizer access uses the existing server-side password/session checks.
+# The outer gateway keeps legacy admin and content-admin routes private.
+@remote_organizer path /organizer /organizer.html
+handle @remote_organizer {
+	root * {http.vars.olympiad_public_root}
+	rewrite * /organizer.html
+	header {
+		Cache-Control "private, no-store"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy no-referrer
+	}
+	file_server
 }
 
-encode zstd gzip
-reverse_proxy 127.0.0.1:3100 {
-	header_up -X-Real-IP
+@remote_script path /organizer.js
+handle @remote_script {
+	rewrite * /admin.js
+	header Cache-Control "private, no-store"
+	reverse_proxy 127.0.0.1:3100 {
+		header_up -X-Real-IP
+	}
+}
+
+@remote_api path /api/organizer/*
+handle @remote_api {
+	uri replace /api/organizer/ /api/admin/
+	header Cache-Control "private, no-store"
+	reverse_proxy 127.0.0.1:3100 {
+		header_up -X-Real-IP
+		header_down Set-Cookie "(.*)" "$1; Secure"
+	}
+}
+
+handle {
+	@organizer path /admin /admin.html /admin.js /content-admin.html /content-admin.js /api/admin /api/admin/*
+	respond @organizer "Not found" 404
+	@api path /api/*
+	header @api {
+		Cache-Control "private, no-store"
+		defer
+	}
+	reverse_proxy 127.0.0.1:3100 {
+		header_up -X-Real-IP
+	}
 }

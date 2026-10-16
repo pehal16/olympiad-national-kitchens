@@ -43,6 +43,9 @@ test('Pages relay forwards owner-scoped writes only to the fixed desktop origin,
  assert.equal(r.status,200);assert.equal(calls.length,1);assert.equal(calls[0].url,PRIMARY_ORIGIN+'/api/public/attempts/synthetic/answer?one=1');assert.equal(calls[0].options.headers.get('X-Attempt-Token'),'synthetic-owner');assert.equal(calls[0].options.headers.has('cookie'),false);assert.equal(calls[0].options.headers.has('authorization'),false);assert.equal(new TextDecoder().decode(calls[0].options.body),'{"answerPayload":{"text":"Тест"}}');assert.equal(calls[0].options.redirect,'manual');
  assert.equal((await handleDesktopPrimary(new Request('https://olympiad-gkts.pages.dev/api/admin/story-runs/official/publish',{method:'POST'}),env)).status,503);
  assert.equal((await handleDesktopPrimary(new Request('https://olympiad-gkts.pages.dev/api/desktop-mirror'),env)).status,410);
+ for(const route of ['/admin','/admin.html','/organizer','/organizer.html']){
+  const page=await handleDesktopPrimary(new Request('https://olympiad-gkts.pages.dev'+route),env);assert.equal(page.status,307);assert.equal(page.headers.get('location'),PRIMARY_ORIGIN+'/organizer');
+ }
  for(const path of ['/','/index.html','/certificate.html?attempt=synthetic'])assert.equal(await handleDesktopPrimary(new Request('https://olympiad-gkts.pages.dev'+path),env),null,'Retain Pages storage origin for old owner tokens and certificates.');
  assert.equal((await handleDesktopPrimary(new Request('https://olympiad-gkts.pages.dev/api/public/attempts/synthetic/answer',{method:'POST',body:'{}'}),env,async()=>{throw Error('network');})).status,502);
  assert.equal(await handleDesktopPrimary(request,{}),null);

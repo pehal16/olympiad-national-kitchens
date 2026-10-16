@@ -1690,8 +1690,8 @@ function setupOrganizerAddress() {
   if (!link) return;
   const isLoopback = ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
   const localDatabase = state.olympiad && state.olympiad.recovery?.backend !== "shared-d1";
-  link.href = localDatabase ? (isLoopback ? "/admin.html" : "http://127.0.0.1:3100/admin.html") : "https://olympiad-gkts.pages.dev/admin.html";
-  if (localDatabase) link.title = "Открывайте кабинет на компьютере, где запущен сервер олимпиады.";
+  link.href = localDatabase ? (isLoopback ? "/admin.html" : "https://xn--80aaloaqinm.xn--b1amqadnhd.xn--p1ai/organizer") : "https://olympiad-gkts.pages.dev/admin.html";
+  if (localDatabase) link.title = "Защищённый кабинет организатора. Войдите с паролем.";
 }
 
 function setupReserveAddress(){

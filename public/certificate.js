@@ -6,9 +6,10 @@
   const saveButton = document.getElementById("certificate-save");
   const feedbackLink = document.getElementById("certificate-feedback");
   const organizerMode = new URLSearchParams(window.location.search).get("organizer") === "1";
+  const remoteOrganizer = organizerMode && new URLSearchParams(window.location.search).get("remote") === "1";
   if (organizerMode) {
     const back = document.querySelector(".toolbar-back");
-    back.href = "/admin.html";
+    back.href = remoteOrganizer ? "/organizer" : "/admin.html";
     back.textContent = "← В админку";
   }
   const fields = {
@@ -70,7 +71,7 @@
 
     let attempt;
     try {
-      const response = await fetch(`/api/${organizerMode ? "admin" : "public"}/attempts/${encodeURIComponent(attemptId)}/certificate`, {
+      const response = await fetch(`/api/${organizerMode ? (remoteOrganizer ? "organizer" : "admin") : "public"}/attempts/${encodeURIComponent(attemptId)}/certificate`, {
         headers: organizerMode ? {} : { "X-Attempt-Token": attemptToken },
         credentials: "same-origin",
         cache: "no-store"
