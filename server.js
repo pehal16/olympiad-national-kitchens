@@ -360,14 +360,24 @@ function makeParticipantSignature(profile) {
 async function organizerParticipants(olympiad,runId){
   const registrations=await participantRegistry.list(runId),rows=new Map();
   for(const r of registrations){const participant=JSON.parse(r.participant_json);if(r.mentor_override!==null)participant.mentorName=r.mentor_override;
-    rows.set(r.participant_signature,{id:r.id,runId,participant,mentorAssigned:r.mentor_override!==null,expected:Boolean(r.expected),registeredAt:r.registered_at,status:'not_started',attemptId:null,startedAt:null,finishedAt:null,totalFinalScore:null});}
+    rows.set(r.participant_signature,{id:r.id,runId,participant,mentorAssigned:r.mentor_override!==null,expected:Boolean(r.expected),registeredAt:r.registered_at,status:'not_started',attemptId:null,startedAt:null,finishedAt:null,totalFinalScore:null,attemptCount:0,attempts:[]});}
   const attempts=currentOlympiadAttempts(await loadAttemptSummaries(),olympiad.id).filter(a=>(a.storyRunId||'legacy')===runId);
   attempts.sort((a,b)=>(Number(a.attemptNumber)||1)-(Number(b.attemptNumber)||1)||String(a.startedAt).localeCompare(String(b.startedAt)));
   for(const a of attempts){const signature=a.participantSignature||makeParticipantSignature(a.participant),old=rows.get(signature),active=a.status==='in_progress'&&(Boolean(a.tourBriefing)||Date.parse(a.expiresAt)>Date.now());
     const participant={...a.participant};if(old?.mentorAssigned)participant.mentorName=old.participant.mentorName||'';
+    const history=[...(old?.attempts||[]),{id:a.id,attemptNumber:Number(a.attemptNumber)||1,status:active?'in_progress':'completed',attemptStatus:a.status,startedAt:a.startedAt||null,finishedAt:a.finishedAt||null,totalFinalScore:a.status==='in_progress'?null:a.totalFinalScore}];
     rows.set(signature,{...old,id:participantRegistry.key(runId,signature),runId,participant,expected:old?.expected||false,registeredAt:old?.registeredAt||null,
-      attemptCount:(old?.attemptCount||0)+1,attemptNumber:Number(a.attemptNumber)||1,status:active?'in_progress':'completed',attemptStatus:a.status,attemptId:a.id,startedAt:a.startedAt,finishedAt:a.finishedAt,totalFinalScore:a.status==='in_progress'?null:a.totalFinalScore,signature});}
-  return [...rows.values()].sort((a,b)=>a.participant.fullName.localeCompare(b.participant.fullName,'ru-RU'));
+      attemptCount:history.length,attempts:history,attemptNumber:Number(a.attemptNumber)||1,status:active?'in_progress':'completed',attemptStatus:a.status,attemptId:a.id,startedAt:a.startedAt,finishedAt:a.finishedAt,totalFinalScore:a.status==='in_progress'?null:a.totalFinalScore,signature});}
+  return [...rows.values()].map(person=>{
+    person.attempts.sort((a,b)=>{
+      const left=Date.parse(a.startedAt),right=Date.parse(b.startedAt),validLeft=Number.isFinite(left),validRight=Number.isFinite(right);
+      return validLeft!==validRight?(validLeft?-1:1):(validLeft?left-right:0)||a.attemptNumber-b.attemptNumber||a.id.localeCompare(b.id);
+    });
+    person.attempts=person.attempts.map((attempt,index)=>({...attempt,number:index+1,isLatest:attempt.id===person.attemptId}));
+    const timed=person.attempts.filter(a=>Number.isFinite(Date.parse(a.startedAt)));
+    person.firstStartedAt=timed[0]?.startedAt||null;person.lastStartedAt=timed.at(-1)?.startedAt||null;
+    return person;
+  }).sort((a,b)=>a.participant.fullName.localeCompare(b.participant.fullName,'ru-RU'));
 }
 
 function makeParticipantNameKey(profile) {

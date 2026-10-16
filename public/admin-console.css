@@ -16,5 +16,11 @@
 .answer-unanswered,.answer-neutral{color:#52645a;background:#f3f6ed;border-color:#d3ddd1}
 .admin-certificate-access{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0;padding:16px;background:#f3f6ed;border-radius:12px}
 .admin-certificate-access p{margin:0;flex:1 1 200px}
+.admin-attempt-count{display:inline-block;margin-top:8px;padding:5px 9px;border-radius:7px;background:#e6f0ea;color:#24563e;font-size:13px;font-weight:700}
+.admin-attempt-history{margin:18px 0;padding:16px;border:1px solid #c7d8ca;border-radius:12px;background:#f4f8f0}
+.admin-attempt-history p{margin:0 0 12px}.admin-attempt-history .field{max-width:100%}
+.admin-attempt-history select{min-width:0;max-width:100%}
+.admin-attempt-selected{font-weight:700;color:#24563e}
+.admin-results-count{margin:8px 0 16px;color:#597267;font-size:14px}
 @media(max-width:540px){.admin-answer-line{flex-wrap:wrap}.admin-answer-text{flex-basis:100%}.admin-certificate-link{width:100%;text-align:center}}
 @media(prefers-reduced-motion:reduce){.admin-console *{scroll-behavior:auto!important;transition:none!important}}
