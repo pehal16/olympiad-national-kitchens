@@ -4,8 +4,8 @@ function publicRoute(path) {
   return ['/api/health','/api/public/olympiad','/api/public/register','/api/public/attempts/start'].includes(path) ||
     /^\/api\/public\/attempts\/[^/]+(?:\/(?:certificate|story-result|current|pulse|answer|draft|tour\/start|dish-selection|finish|integrity))?$/.test(path);
 }
-function unavailable(status, message) {
-  return new Response(JSON.stringify({ok:false,message}), {status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'private, no-store'}});
+function unavailable(status, message, code) {
+  return new Response(JSON.stringify({ok:false,message,...(code?{code}:{})}), {status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'private, no-store'}});
 }
 async function handleDesktopPrimary(request, env, fetcher = fetch) {
   if (env.OLYMPIAD_STORAGE_MODE !== 'desktop-primary') return null;
@@ -24,10 +24,10 @@ async function handleDesktopPrimary(request, env, fetcher = fetch) {
         body=new Uint8Array(size);let offset=0;for(const chunk of chunks){body.set(chunk,offset);offset+=chunk.byteLength;}
       }
       const response=await fetcher(PRIMARY_ORIGIN+url.pathname+url.search,{method:request.method,headers,body,redirect:'error',signal:AbortSignal.timeout(20000)});
-      if(!/application\/json/i.test(response.headers.get('content-type')||''))return unavailable(502,'Нет связи с сервером на ПК. Откройте основной адрес олимпиады.');
+      if(!/application\/json/i.test(response.headers.get('content-type')||''))return unavailable(502,'Нет связи с сервером на ПК. Откройте основной адрес олимпиады.','DESKTOP_UPSTREAM_HTTP_'+response.status);
       const text=await response.text();if(request.method!=='HEAD')JSON.parse(text);
       return new Response(request.method==='HEAD'?null:text,{status:response.status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'private, no-store',...(response.headers.has('retry-after')?{'Retry-After':response.headers.get('retry-after')}:{})}});
-    } catch {return unavailable(502,'Нет связи с сервером на ПК. Откройте основной адрес олимпиады.');}
+    } catch(error) {return unavailable(502,'Нет связи с сервером на ПК. Откройте основной адрес олимпиады.','DESKTOP_FETCH_'+(['TypeError','TimeoutError','AbortError','SyntaxError'].includes(error.name)?error.name:'Error'));}
   }
   // Never silently resume writes to the old D1 database after its quota resets.
   if (url.pathname === '/api/desktop-mirror') return unavailable(410,'Облачный снимок сохранён как архив. Основная база находится на ПК.');
