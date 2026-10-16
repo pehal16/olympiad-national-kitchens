@@ -19,3 +19,5 @@ dist-cloudflare/
 output/story/
 output/playwright/
 .playwright-cli/
+__pycache__/
+*.py[cod]

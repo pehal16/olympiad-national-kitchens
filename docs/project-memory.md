@@ -1,6 +1,12 @@
 # Project Memory
 
-Last updated: 2026-10-15
+Last updated: 2026-10-16
+
+## Relay page watchdog after repeated outage (2026-10-16)
+
+- At09:18 Moscow the public domain times out while local3100/3180, shared Pages and the desktop mirror work and official admission is open. A dedicated relay sshd worker still owns13100 after about44minutes, with a blocked send queue and no page response; effective SSH liveness is already30s/3. The previous liveness-only fix is insufficient for this failure. Root cause below that observation (network/VPN/SSH transport) is not established. Only the verified nonworking relay worker is terminated through the existing Timeweb root console; supervisor restores the public route at09:22:43. Windows Node9880/Caddy19480 are retained and SSH15444 remains healthy. No new administrative key or password/access change.
+- Installed checked-in `ops/windows-hosting/relay-watchdog.py` and its systemd service/timer on the existing gateway. Every20seconds it reads the exact loopback13100 listener and checks the static home page, independently of Cloudflare API availability. Three failures for the same connection, age at least60seconds, a final page probe and a repeated port/PID/starttime/UID/comm/executable check are required before TERM of the dedicated sshd worker. Unknown/multiple/non-loopback listeners, changed owners and recovered/young connections are preserved. Service writes only private runtime state and has loopback-only network access/read-only system/home isolation; no credentials/data/DNS are accessed. Existing SSH restrictions/liveness remain. Timer is enabled/active, actual service returns healthy/zero failures/Result=success across repeated cycles. Installer manifest and isolated Linux safety fixtures are under `/root/olympiad-relay-watchdog-install-20261016T062754Z`.
+- Seven safety tests pass on Windows and on the actual Linux gateway with mocked network/signals; no deliberate production outage was injected during the live event.314 Node tests, Cloudflare build, full isolated and production PM01 pass. Read-only verification passes for Pages/3100/3180/public HTTPS, assets/TLS, anonymous admin protections, original secret/config hashes and empty old local archive integrity. All29 attempts and540 answered values from the08:54 snapshot retain variants, clocks, answers and prior event IDs; fresh mirror has32 attempts/28finished/565 answers/22registrations at06:32UTC and continues updating. Official `auto`, announced window and private allowance are unchanged, zero production participant writes by verification. Private receipts under `updates/relay-watchdog-20261016`. Ops/docs changes do not redeploy the Cloudflare app.
 
 ## Relay recovery after physical Windows reboot (2026-10-15)
 

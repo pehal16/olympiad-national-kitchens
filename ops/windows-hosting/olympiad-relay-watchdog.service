@@ -1,0 +1,23 @@
+[Unit]
+Description=Check the dedicated olympiad desktop relay
+After=network.target ssh.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/libexec/olympiad-relay-watchdog.py
+TimeoutStartSec=20
+RuntimeDirectory=olympiad-relay-watchdog
+RuntimeDirectoryMode=0700
+RuntimeDirectoryPreserve=yes
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_NETLINK
+IPAddressDeny=any
+IPAddressAllow=127.0.0.1/32
+ReadWritePaths=/run/olympiad-relay-watchdog

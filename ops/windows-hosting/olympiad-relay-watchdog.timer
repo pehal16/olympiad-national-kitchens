@@ -1,0 +1,11 @@
+[Unit]
+Description=Periodically check the dedicated olympiad desktop relay
+
+[Timer]
+OnBootSec=25s
+OnUnitActiveSec=20s
+AccuracySec=1s
+Unit=olympiad-relay-watchdog.service
+
+[Install]
+WantedBy=timers.target
