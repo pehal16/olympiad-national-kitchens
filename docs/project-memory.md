@@ -2,6 +2,10 @@
 
 Last updated: 2026-10-16
 
+## Small participant-site credit (2026-10-16)
+
+- The bottom of the participant page has a quiet, compact «Создано с помощью ИИ · постовит.рф» badge linking to the user's domain in a new tab with `noopener noreferrer`. It is hidden during active exam mode, like the existing footer. Only index/styles/service-worker cache version change; API, question content, admission, results and credentials are unchanged. Desktop/mobile render checks at1366/390/320px confirm the destination, compact size, no horizontal overflow or runtime errors;316 existing tests, build and full isolated PM01 pass. Private screenshots/installation/verification receipts: `updates/footer-credit-20261016`. Desktop installation copies only these three public files without restarting services.
+
 ## Participant retakes, tour reading pauses and minute answers (2026-10-16)
 
 - The updated participant client requests `tourBriefings:true` for newly issued story attempts. These attempts receive five owner-controlled reading pauses, including before T1. Upcoming question content/clocks stay hidden until «Начать тур»; the owned revision-guarded start is idempotent. Reading time is excluded from overall expiry and scoring duration. Previously issued attempts retain their original immutable variants and clock policy.

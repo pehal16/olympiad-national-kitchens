@@ -2756,6 +2756,32 @@ body.exam-mode-active label {
   letter-spacing: 0.02em;
 }
 
+.creation-credit {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 6px;
+}
+
+.creation-credit a {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4em;
+  padding: 8px 13px;
+  border: 1px solid #526c5f24;
+  border-radius: 999px;
+  background: #ffffff55;
+  color: #53655c;
+  font: 400 11px/1.5 Arial, sans-serif;
+  text-decoration: none;
+  text-align: center;
+}
+
+.creation-credit a:hover { background: #ffffffa6; color: #214c3c; }
+.creation-credit a:focus-visible { outline: 2px solid #247552; outline-offset: 3px; }
+body.exam-mode-active .creation-credit { display: none; }
+
 .grid-four {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
