@@ -2,6 +2,12 @@
 
 Last updated: 2026-10-16
 
+## Readable organizer answers and visible participant identity (2026-10-16)
+
+- Organizer attempt details previously printed raw choice JSON, making shuffled opaque option/item/bucket IDs unreadable. The authenticated detail response now adds `participantAnswer`, resolved solely against that attempt's immutable saved question/dish. The cabinet shows chosen dish/country names, typed detective answers, selected kitchen products and legacy sequences/matrices; unselected/partial/missing choices are explicit. Wrong choices remain wrong in the display, and raw stored payloads, scores, clocks and exports remain unchanged. Detective correct-answer text also uses the saved canonical name.
+- The participant name and close button stay visible at the top of the scrolling dialog. Admin JS/CSS versions are refreshed. The change is confined to the authenticated organizer view and does not expose answer keys on public APIs or open gateway admin routes. Private checks/receipts go under `updates/admin-readable-answers-20261016`; production verification remains read-only.
+- All318 tests and Cloudflare build pass. Isolated HTTP/browser checks at1366/390/320px display actual chosen names (including wrong T1/T2/T3/T5 choices), keep identity/close visible while scrolling, enforce anonymous401 and hide the new field from owner/public responses; the entire stored attempt is byte-for-byte unchanged after organizer reads. Full local PM01 passes. Browser plugin unavailable; existing Edge Playwright is used. No production participant/admin data changes are made by verification.
+
 ## Organizer link from the public desktop domain (2026-10-16)
 
 - User reports the organizer entry does not open from `олимпиада.постовит.рф`. Read-only checks confirm the existing participant gateway deliberately returns404 for `/admin.html` and `/api/admin/*`; the official Pages organizer page returns200 and unauthenticated admin API401. The relative navigation link was therefore incorrect for this domain.

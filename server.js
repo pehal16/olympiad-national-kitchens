@@ -5,6 +5,7 @@ const { buildDishService } = require("./src/dish-service");
 const storyRuns=require("./src/story-runs");
 const tourBriefings=require("./src/tour-briefing");
 const participantRegistry=require('./src/participant-registry');
+const { formatParticipantAnswer } = require("./src/admin-answer-view");
 const {freezeStoryVariant,buildStoryResult}=require("./src/story-result");
 const {certificateAvailable,buildParticipantCertificate}=require("./src/participant-certificate");
 function storyEnabled(){return storyRuns.enabled();}
@@ -960,6 +961,10 @@ function buildAttemptPulse(olympiad, attempt, settings) {
 function formatCorrectAnswer(question) {
   if (!question) {
     return "";
+  }
+
+  if (question.type === "dish_detective") {
+    return question.answerPolicy?.canonical || "";
   }
 
   if (question.type === "final_kitchen") {
@@ -4945,6 +4950,7 @@ async function handleApi(req, res, url, runtime = {}) {
             caseTitle: question.caseTitle || null,
             dishLabel: question.dishLabel || "",
             correctAnswer: formatCorrectAnswer(question),
+            participantAnswer: formatParticipantAnswer(question, attempt.answers[question.id]),
             options: (question.options || []).map((option) => ({
               id: option.id,
               text: option.text,
