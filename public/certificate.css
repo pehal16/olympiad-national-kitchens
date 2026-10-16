@@ -38,6 +38,31 @@ body {
 }
 .document-toolbar button:disabled { opacity: .55; cursor: default; }
 
+.document-toolbar > .document-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.toolbar-feedback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border: 1px solid #0a625d;
+  border-radius: 9px;
+  color: #0a625d;
+  font: 700 14px Arial, sans-serif;
+  text-decoration: none;
+}
+.toolbar-feedback:hover { background: #eef7f4; }
+.toolbar-feedback:focus-visible { outline: 3px solid #b88a31; outline-offset: 3px; }
+.toolbar-feedback[hidden] { display: none !important; }
+
+@media (max-width: 540px) {
+  .document-actions { width: 100%; }
+  .document-actions > * { flex: 1 1 180px; }
+}
+
 main {
   overflow: auto;
   padding: 24px 18px 32px;

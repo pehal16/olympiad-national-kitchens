@@ -4151,6 +4151,31 @@ pre {
   line-height: 1.45;
 }
 
+.completion-feedback {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #dce8e5;
+}
+
+.completion-feedback p {
+  flex: 1 1 240px;
+  margin: 0;
+  color: #5b6a70;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.completion-feedback .button { text-align: center; }
+
+@media (max-width: 540px) {
+  .completion-feedback .button { width: 100%; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

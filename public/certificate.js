@@ -4,6 +4,7 @@
   const status = document.getElementById("certificate-status");
   const sheet = document.getElementById("certificate-sheet");
   const saveButton = document.getElementById("certificate-save");
+  const feedbackLink = document.getElementById("certificate-feedback");
   const fields = {
     name: document.getElementById("certificate-name"),
     score: document.getElementById("certificate-score"),
@@ -16,6 +17,7 @@
     status.classList.add("error");
     sheet.hidden = true;
     saveButton.disabled = true;
+    feedbackLink.hidden = true;
   }
 
   function fitParticipantName() {
@@ -132,6 +134,7 @@
     }
     status.textContent = "В окне печати выберите «Сохранить как PDF» и горизонтальный формат A4. На телефоне лист можно сдвигать по горизонтали; сам макет не меняется.";
     saveButton.disabled = false;
+    feedbackLink.hidden = false;
   }
 
   saveButton.addEventListener("click", () => {

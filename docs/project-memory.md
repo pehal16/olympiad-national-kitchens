@@ -2,6 +2,12 @@
 
 Last updated: 2026-10-16
 
+## Feedback after participant completion (2026-10-16)
+
+- Published Yandex feedback form: `https://forms.yandex.ru/u/6ad1d2e449af4736c8b7c8f5/`. Participant results show «Оставить отзыв» alongside the available certificate, and the certificate toolbar repeats the link only after its saved result and required images load successfully. Home, registration and active attempts do not show it. The link opens a new tab without a referrer or participant fields/tokens in the URL. It is outside the certificate sheet and hidden with the toolbar when printing; the certificate PDF layout is unchanged.
+- This is a static participant-file update with responsive controls and a refreshed service-worker cache. Admission, questions, stored answers, results and secrets are unchanged. Verification/desktop installation receipts are private under `updates/completion-feedback-20261016`; QA uses a separate synthetic SQLite attempt and does not submit production answers or form responses.
+- All316 existing tests, Cloudflare build and isolated full PM01 verification pass. Actual rendered flows at1366/390/320px complete36 questions in separate synthetic attempts and verify both new-tab controls, no referrer, hidden feedback before completion and on an invalid certificate, preserved footer wording and exclusion from print. Browser plugin is unavailable; existing Edge Playwright is used. External form requests are intercepted locally in QA; zero form responses are submitted.
+
 ## Small participant-site credit (2026-10-16)
 
 - User corrected the wording: use exactly «Создано с помощью постовит.рф», without AI attribution or a separator. Index and service-worker version are updated; no service restart or participant-data change. Follow this clarified text in future updates. Private verification receipts: `updates/footer-wording-20261016`.
