@@ -17,4 +17,9 @@ try{
   if(/^[a-f0-9]{40}$/.test(process.env.GITHUB_SHA||''))args.push('--commit-hash',process.env.GITHUB_SHA);
   execFileSync(process.execPath,args,{cwd:temporary,stdio:'inherit'});
  }
-}finally{if(fs.existsSync(file))fs.unlinkSync(file);fs.rmdirSync(temporary);}
+}finally{
+ const resolved=path.resolve(temporary),parent=path.resolve(os.tmpdir());
+ if(path.dirname(resolved)!==parent||!path.basename(resolved).startsWith('olympiad-demo-deploy-'))throw Error('Refusing cleanup outside the owned temporary deployment directory');
+ // Wrangler also writes its own .wrangler state beneath this owned directory.
+ fs.rmSync(resolved,{recursive:true,force:true});
+}
