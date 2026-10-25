@@ -139,5 +139,5 @@ jobs:
       - name: Verify public demonstration and existing PM01
         if: steps.hosting.outputs.public_demo == 'true'
         run: |
-          node scripts/verify-public-demo.js https://olympiad-gkts.pages.dev
+          node scripts/verify-public-demo.js https://olympiad-gkts.pages.dev --exercise
           npm run verify:cloudflare -- https://olympiad-gkts.pages.dev
