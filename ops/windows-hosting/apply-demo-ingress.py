@@ -11,7 +11,6 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
-import urllib.request
 
 TARGET = Path('/etc/nginx/sites-available/olympiad-desktop-relay')
 EXPECTED = '5702a86d1870701007915b381fcca6b1bc6b56e3ef8f4fcdc8f2335ed5007311'

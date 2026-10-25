@@ -13,7 +13,9 @@ async function main(){
 }
 
 async function exercise(){
- assert.ok(['https://olympiad-gkts.pages.dev','https://olympiad-gkts-demo.pages.dev'].includes(base)||/^http:\/\/127\.0\.0\.1:\d+$/.test(base),'Anonymous tests are allowed only on the explicit demo hosts or an isolated loopback server');
+ // main() has already required explicit demonstration metadata on both routes.
+ // The college domain is allowed only after that gate, while it serves demo.
+ assert.ok(['https://olympiad-gkts.pages.dev','https://olympiad-gkts-demo.pages.dev','https://xn--80aaloaqinm.xn--b1amqadnhd.xn--p1ai'].includes(base)||/^http:\/\/127\.0\.0\.1:\d+$/.test(base),'Anonymous tests are allowed only on a verified demo host or an isolated loopback server');
  const crypto=require('node:crypto'),session=crypto.randomBytes(16).toString('hex'),token=crypto.randomBytes(32).toString('base64url');
  async function api(route,body){const response=await fetch(base+route,{method:body?'POST':'GET',headers:{'Content-Type':'application/json','X-Demo-Session':session,'X-Attempt-Token':token},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(30000)}),json=await response.json();assert.ok(response.ok,route+' '+response.status+' '+json.message);return json.data;}
  const profile=await api('/api/public/register',{});assert.equal(profile.participant.fullName,'Демонстрационный Участник');
