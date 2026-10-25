@@ -36,7 +36,7 @@ function answerText(q,payload) {
 }
 function buildStoryResult(olympiad,attempt) {
   if(!attempt.storyRunId) return {state:'legacy'};
-  if(attempt.status==='in_progress'||!attempt._storyRun?.publishedAt) return {state:'waiting',entryEndsAt:attempt._storyRun?.entryEndsAt||null,
+  if(attempt.status==='in_progress'||(!attempt.demonstration&&!attempt._storyRun?.publishedAt)) return {state:'waiting',entryEndsAt:attempt._storyRun?.entryEndsAt||null,
     ...(attempt._storyRun?.entryMode==='anytime'?{entryOpen:require('./story-runs').entryOpen(attempt._storyRun)}:{})};
   const earned=[], kitchen=[];
   for(const q of attempt.variant.questions) {
@@ -66,6 +66,6 @@ function buildStoryResult(olympiad,attempt) {
   const combined=new Map();
   for(const p of earned) { const key=p.dishId+'|'+p.recipeVersion; if(combined.has(key)) combined.get(key).actions.push(...p.actions); else combined.set(key,p); }
   // Keep the empty array for already-open older clients without supplying keys.
-  return {state:'published',publishedAt:attempt._storyRun.publishedAt,plates:[...combined.values()],collectionMax:51,summary:summarizeAttempt(olympiad,attempt),kitchen,review:[]};
+  return {state:'published',demonstration:Boolean(attempt.demonstration),publishedAt:attempt.demonstration?attempt.finishedAt:attempt._storyRun.publishedAt,plates:[...combined.values()],collectionMax:51,summary:summarizeAttempt(olympiad,attempt),kitchen,review:[]};
 }
 module.exports={freezeStoryVariant,buildStoryResult};

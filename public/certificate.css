@@ -323,3 +323,5 @@ main {
     -webkit-print-color-adjust: exact;
   }
 }
+.certificate-sheet.is-demo::after{content:'ДЕМОНСТРАЦИОННЫЙ ОБРАЗЕЦ';position:absolute;inset:42% 0 auto;text-align:center;transform:rotate(-16deg);font:700 36px Arial,sans-serif;letter-spacing:3px;color:rgba(110,69,25,.25);pointer-events:none;z-index:10}
+.certificate-sheet.is-demo .certificate-seal{visibility:hidden}

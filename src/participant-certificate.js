@@ -16,6 +16,7 @@ function buildParticipantCertificate(olympiad, attempt, settings) {
   const summary = summarizeAttempt(olympiad, attempt);
   return {
     id: attempt.id, status: attempt.status, finishedAt: attempt.finishedAt,
+    demonstration: Boolean(attempt.demonstration),
     participant: { fullName: attempt.participant.fullName, mentorName: attempt.participant.mentorName || '' },
     certificateOrder: olympiad.certificateOrder || null,
     story: attempt.storyRunId ? { runId: attempt.storyRunId } : null,

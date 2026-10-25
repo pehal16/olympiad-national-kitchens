@@ -10,6 +10,7 @@ database_id = "4c30c9ab-0c53-4b8a-865a-7c9078d48c2f"
 migrations_dir = "migrations"
 
 [vars]
+OLYMPIAD_PUBLIC_DEMO = "true"
 OLYMPIAD_STORAGE_MODE = "desktop-primary"
 # Read-only desktop mirror identity; public verification key, not a secret.
 DESKTOP_MIRROR_PUBLIC_KEY = "MCowBQYDK2VwAyEAKiKhL1uJTqgGRVCgE8weYuYPqa2zPmvwRgcV/kqDE3I="

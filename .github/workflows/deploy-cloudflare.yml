@@ -17,6 +17,9 @@ on:
       - "package.json"
       - "package-lock.json"
       - "wrangler.toml"
+      - "wrangler.demo.toml"
+      - "scripts/provision-public-demo.js"
+      - "scripts/verify-public-demo.js"
       - ".github/workflows/deploy-cloudflare.yml"
 
 jobs:
@@ -56,7 +59,7 @@ jobs:
 
       - name: Detect olympiad hosting mode
         id: hosting
-        run: node -e "const fs=require('fs');fs.appendFileSync(process.env.GITHUB_OUTPUT,'desktop_primary='+/^OLYMPIAD_STORAGE_MODE = \"desktop-primary\"$/m.test(fs.readFileSync('wrangler.toml','utf8'))+'\n')"
+        run: node -e "const fs=require('fs'),s=fs.readFileSync('wrangler.toml','utf8');fs.appendFileSync(process.env.GITHUB_OUTPUT,'desktop_primary='+/^OLYMPIAD_STORAGE_MODE = \"desktop-primary\"$/m.test(s)+'\npublic_demo='+/^OLYMPIAD_PUBLIC_DEMO = \"true\"$/m.test(s)+'\n')"
 
       - name: Ensure Cloudflare resources
         if: steps.hosting.outputs.desktop_primary != 'true'
@@ -97,6 +100,18 @@ jobs:
       - name: Build Cloudflare Pages bundle
         run: npm run build:cloudflare
 
+      - name: Provision isolated anonymous demonstration
+        if: steps.hosting.outputs.public_demo == 'true'
+        run: node scripts/provision-public-demo.js
+
+      - name: Deploy independent demonstration backend
+        if: steps.hosting.outputs.public_demo == 'true'
+        run: npx wrangler pages deploy dist-cloudflare --config wrangler.demo.toml --project-name olympiad-gkts-demo --branch main --commit-dirty=true
+
+      - name: Verify independent demonstration backend
+        if: steps.hosting.outputs.public_demo == 'true'
+        run: node scripts/verify-public-demo.js https://olympiad-gkts-demo.pages.dev
+
       - name: Configure Pages secrets
         if: steps.hosting.outputs.desktop_primary != 'true'
         shell: bash
@@ -117,5 +132,11 @@ jobs:
         run: npm run verify:cloudflare -- https://olympiad-gkts.pages.dev
 
       - name: Verify desktop primary through Pages
-        if: steps.hosting.outputs.desktop_primary == 'true'
+        if: steps.hosting.outputs.desktop_primary == 'true' && steps.hosting.outputs.public_demo != 'true'
         run: node scripts/verify-desktop-primary.js https://olympiad-gkts.pages.dev
+
+      - name: Verify public demonstration and existing PM01
+        if: steps.hosting.outputs.public_demo == 'true'
+        run: |
+          node scripts/verify-public-demo.js https://olympiad-gkts.pages.dev
+          npm run verify:cloudflare -- https://olympiad-gkts.pages.dev

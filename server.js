@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const publicDemo = require('./src/public-demo');
 const { URL } = require("url");
 const packageInfo = require("./package.json");
 const { buildDishService } = require("./src/dish-service");
@@ -864,6 +865,7 @@ function buildAttemptView(olympiad, attempt, settings) {
   return {
     id: attempt.id,
     participant: attempt.participant,
+    demonstration: Boolean(attempt.demonstration),
     status: attempt.status,
     startedAt: attempt.startedAt,
     finishedAt: attempt.finishedAt,
@@ -3143,6 +3145,9 @@ async function handleApi(req, res, url, runtime = {}) {
 
   const method = req.method;
   const pathname = url.pathname;
+  if (publicDemo.demoEnabled() && pathname.startsWith('/api/admin/')) {
+    sendJson(res,403,{ok:false,message:'Кабинет организатора недоступен в демоверсии.'}); return;
+  }
   if (pathname === "/api/learning" || pathname.startsWith("/api/learning/")) {
     await handleLearningApi(req, res, url, runtime.learning || runtime);
     return;
@@ -3177,6 +3182,7 @@ async function handleApi(req, res, url, runtime = {}) {
     sendJson(res, 200, {
       ok: true,
       app: "national-kitchens-olympiad",
+      demonstration: publicDemo.demoEnabled(),
       appVersion: APP_VERSION,
       now: nowIso(),
       olympiadId: olympiadHealth.id,
@@ -3696,6 +3702,7 @@ async function handleApi(req, res, url, runtime = {}) {
 
   if (method === "GET" && pathname === "/api/public/olympiad") {
     const data=getOlympiadPublicData(await ensureOlympiad());
+    data.demonstration=publicDemo.demoEnabled();
     data.storyEnabled=storyEnabled();
     data.story=storyEnabled()?storyRuns.publicRun(await storyRuns.currentRun()):null;
     if(storyRuns.recoveryPolicy())data.recovery=storyRuns.recoveryPolicy();
@@ -3706,7 +3713,9 @@ async function handleApi(req, res, url, runtime = {}) {
   if (method === "POST" && pathname === "/api/public/register") {
     const olympiadData = await ensureOlympiad();
     const body = await parseBody(req, { maxBytes: 16 * 1024 });
-    const validation = validateOlympiadParticipantProfile(body);
+    const profile = publicDemo.demoEnabled() ? publicDemo.anonymousProfile(req) : body;
+    if(!profile){sendJson(res,400,{ok:false,message:'Обновите демоверсию: не удалось создать анонимную сессию.'});return;}
+    const validation = validateOlympiadParticipantProfile(profile);
     if (!validation.valid) {
       sendJson(res, 400, { ok: false, message: validation.message });
       return;
@@ -3743,7 +3752,9 @@ async function handleApi(req, res, url, runtime = {}) {
   if (method === "POST" && pathname === "/api/public/attempts/start") {
     const olympiadData = await ensureOlympiad();
     const body = await parseBody(req, { maxBytes: 16 * 1024 });
-    const validation = validateOlympiadParticipantProfile(body.participant || body);
+    const profile = publicDemo.demoEnabled() ? publicDemo.anonymousProfile(req) : (body.participant || body);
+    if(!profile){sendJson(res,400,{ok:false,message:'Обновите демоверсию: не удалось создать анонимную сессию.'});return;}
+    const validation = validateOlympiadParticipantProfile(profile);
     if (!validation.valid) {
       sendJson(res, 400, { ok: false, message: validation.message });
       return;
@@ -3843,6 +3854,7 @@ async function handleApi(req, res, url, runtime = {}) {
       attemptNumber,
       ...(previousAttemptId?{previousAttemptId}:{}),
       tourBriefingsEnabled:Boolean(run&&body.tourBriefings===true),
+      demonstration:publicDemo.demoEnabled(),
       autoSaveDrafts:Boolean(run&&body.tourBriefings===true),
       routeSeed,
       accessTokenHash: hashAttemptAccessToken(accessToken),

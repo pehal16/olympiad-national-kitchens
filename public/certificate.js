@@ -113,6 +113,11 @@
       return;
     }
     fields.name.textContent = participant.fullName;
+    if (attempt.demonstration) {
+      sheet.classList.add('is-demo');
+      document.querySelector('.document-toolbar strong').textContent='Демонстрационный сертификат';
+      document.querySelector('.certificate-pilot-label').textContent='Образец · не подтверждает участие в официальной олимпиаде';
+    }
     if (organizerMode) document.title = `Свидетельство — ${participant.fullName}`;
     fields.name.classList.toggle("long-name", participant.fullName.length > 32);
     fields.score.textContent = `${score} из ${maxScore} баллов`;
@@ -121,10 +126,10 @@
     const orderDate = new Intl.DateTimeFormat("ru-RU", {
       day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC"
     }).format(new Date(order.date));
-    fields.number.textContent = `№ ${order.number} / ${orderDate}`;
+    fields.number.textContent = attempt.demonstration ? 'Демонстрация' : `№ ${order.number} / ${orderDate}`;
     // Story participants receive the document at their own finish.
     // Retain the previous pilot annotation only for legacy attempts.
-    if (attempt.story) document.querySelector('.certificate-pilot-label')?.remove();
+    if (attempt.story && !attempt.demonstration) document.querySelector('.certificate-pilot-label')?.remove();
 
     sheet.hidden = false;
     fitParticipantName();
@@ -147,7 +152,7 @@
     }
     status.textContent = "В окне печати выберите «Сохранить как PDF» и горизонтальный формат A4. На телефоне лист можно сдвигать по горизонтали; сам макет не меняется.";
     saveButton.disabled = false;
-    feedbackLink.hidden = organizerMode;
+    feedbackLink.hidden = organizerMode || Boolean(attempt.demonstration);
   }
 
   saveButton.addEventListener("click", () => {

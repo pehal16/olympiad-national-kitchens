@@ -10,7 +10,7 @@ test('Moscow admission opens at 08:00, closes exactly at 16:00, and keeps a late
  // Admission is also checked by the database's own clock. Freeze that clock
  // in this fixture only; production keeps SQLite/D1 strftime('now').
  const prepare=db.prepare.bind(db);
- db.prepare=sql=>prepare(sql.replace(/strftime\('%Y-%m-%dT%H:%M:%fZ','now'\)/g,`strftime('%Y-%m-%dT%H:%M:%fZ','${new NativeDate(now).toISOString()}')`));
+ db.prepare=sql=>prepare(sql.replace(/strftime\('%Y-%m-%dT%H:%M:%fZ','now'\)/g,`strftime('%Y-%m-%dT%H:%M:%fZ','${new NativeDate(now).toISOString()}')`).replace(/julianday\('now'\)/g,`julianday('${new NativeDate(now).toISOString()}')`));
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
  t.after(async()=>{await new Promise(r=>server.close(r));global.Date=NativeDate;if(old===undefined)delete process.env.OFFICIAL_OLYMPIAD_DATE;else process.env.OFFICIAL_OLYMPIAD_DATE=old;fs.rmSync(dir,{recursive:true,force:true});});
  const base=`http://127.0.0.1:${server.address().port}`,token='official_window_test_owner_token';let cookie='';

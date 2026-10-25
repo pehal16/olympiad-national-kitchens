@@ -73,7 +73,7 @@ function createOlympiadServer(options = {}) {
 
   const db = createSqliteD1(dbPath);
   const { configureCloudflareStorage } = require("./src/store");
-  configureCloudflareStorage({ STORY_ENABLED:options.storyEnabled, STORY_ANYTIME_ENTRY:options.storyAnytimeEntry, DB: db, ADMIN_PASSWORD: adminPassword, ATTEMPT_ID_SECRET: attemptIdSecret });
+  configureCloudflareStorage({ OLYMPIAD_DEMO_MODE:options.demoMode, STORY_ENABLED:options.storyEnabled, STORY_ANYTIME_ENTRY:options.storyAnytimeEntry, DB: db, ADMIN_PASSWORD: adminPassword, ATTEMPT_ID_SECRET: attemptIdSecret });
   const { handleApi, serveStatic } = require("./server");
   const appVersion = require("./package.json").version;
 

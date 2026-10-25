@@ -1419,6 +1419,7 @@ async function api(path, options = {}) {
     "Content-Type": "application/json",
     ...(fetchOptions.headers || {})
   };
+  if (state.olympiad?.demonstration) headers['X-Demo-Session'] = demoSessionId();
   if (attemptToken) {
     headers["X-Attempt-Token"] = attemptToken;
   }
@@ -1600,10 +1601,14 @@ function rememberAttemptAccessToken(attemptId, token) {
     // The active page keeps the token in memory; reload recovery may require the organizer.
   }
   try {
-    sessionStorage.setItem("nko_session_attempt_v1", attemptId);
+    sessionStorage.setItem(sessionAttemptStorageKey(), attemptId);
   } catch (error) {
     // Session restoration is optional when browser storage is unavailable.
   }
+}
+
+function sessionAttemptStorageKey() {
+  return state.olympiad?.demonstration ? 'nko_demo_session_attempt_v1' : 'nko_session_attempt_v1';
 }
 
 function loadAttemptAccessToken(attemptId) {
@@ -1624,14 +1629,14 @@ function loadAttemptAccessToken(attemptId) {
 async function restoreSessionAttempt() {
   let attemptId = "";
   try {
-    attemptId = sessionStorage.getItem("nko_session_attempt_v1") || "";
+    attemptId = sessionStorage.getItem(sessionAttemptStorageKey()) || "";
   } catch (error) {
     return;
   }
   if (!attemptId) return;
 
   if (!loadAttemptAccessToken(attemptId)) {
-    sessionStorage.removeItem("nko_session_attempt_v1");
+    sessionStorage.removeItem(sessionAttemptStorageKey());
     return;
   }
 
@@ -1647,7 +1652,7 @@ async function restoreSessionAttempt() {
     }
   } catch (error) {
     if (error.status === 401 || error.status === 404) {
-      sessionStorage.removeItem("nko_session_attempt_v1");
+      sessionStorage.removeItem(sessionAttemptStorageKey());
     }
     showMessage(
       elements.heroLoadMessage,
@@ -2016,12 +2021,37 @@ function formatPoints(value) {
 }
 
 function participantFromForm() {
+  if (state.olympiad?.demonstration) return {};
   return {
     fullName: elements.fullName.value.trim(),
     institution: elements.institution.value.trim(),
     groupName: elements.groupName.value.trim(),
     mentorName: elements.mentorName.value.trim()
   };
+}
+
+let anonymousDemoSession = '';
+function demoSessionId() {
+  if (anonymousDemoSession) return anonymousDemoSession;
+  try { anonymousDemoSession = localStorage.getItem('nko_anonymous_demo_session_v1') || ''; } catch {}
+  if (!/^[a-f0-9]{32}$/.test(anonymousDemoSession)) {
+    anonymousDemoSession = Array.from(crypto.getRandomValues(new Uint8Array(16)),x=>x.toString(16).padStart(2,'0')).join('');
+    try { localStorage.setItem('nko_anonymous_demo_session_v1',anonymousDemoSession); } catch {}
+  }
+  return anonymousDemoSession;
+}
+
+function renderDemoNotice() {
+  if (!state.olympiad?.demonstration) return;
+  const banner = document.createElement('aside');
+  banner.className = 'public-demo-banner'; banner.setAttribute('role','note');
+  const title=document.createElement('strong');title.textContent='Демонстрационная версия · без ввода ФИО';
+  const detail=document.createElement('span');detail.textContent='Все пять туров работают независимо от сервера колледжа. Результаты пробные и не относятся к олимпиаде 16 октября.';
+  banner.append(title,detail);document.querySelector('.shell').prepend(banner);
+  elements.registrationForm.closest('.card').classList.add('hidden');
+  elements.navRegister.textContent='Демопрохождение';
+  document.querySelector('.completion-feedback')?.classList.add('hidden');
+  document.querySelectorAll('a').forEach(link=>{if(link.textContent.trim()==='Организатор')link.classList.add('hidden');});
 }
 
 function renderHero() {
@@ -4081,6 +4111,7 @@ async function init() {
   state.olympiad = await api("/api/public/olympiad");
   setupOrganizerAddress();
   setupReserveAddress();
+  renderDemoNotice();
   hideMessage(elements.heroLoadMessage);
   elements.heroRetry?.classList.add("hidden");
   elements.registrationSubmit.disabled = false;
@@ -4092,6 +4123,7 @@ async function init() {
     closeNavDrawer();document.getElementById('preparation-section')?.scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'});
   });
   window.OlympiadStory?.intro(state.olympiad);
+  if (state.olympiad.demonstration) await handleRegistration({preventDefault(){}});
   const refreshStoryAdmission = async () => {
     if (!state.olympiad?.storyEnabled || state.attempt || document.hidden) return;
     try {

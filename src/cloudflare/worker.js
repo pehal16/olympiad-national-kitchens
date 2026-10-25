@@ -119,6 +119,10 @@ async function handleApiRequest(request, env) {
   configureCloudflareStorage(env);
   const { handleApi, runtimeDiagnostics } = require("../../server");
   const nodeReq = new NodeLikeRequest(request);
+  if (require('../public-demo').demoEnabled()) {
+    nodeReq.socket.remoteAddress = '';
+    for (const key of ['cf-connecting-ip','x-forwarded-for','x-real-ip']) delete nodeReq.headers[key];
+  }
   const nodeRes = new NodeLikeResponse();
   const url = new URL(request.url);
 
@@ -156,6 +160,11 @@ async function handleApiRequest(request, env) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const demoResponse = await require('../public-demo').handleDemoRelay(request, env);
+    if (demoResponse) return demoResponse;
+    if (env.OLYMPIAD_DEMO_MODE === 'true' && (url.pathname.startsWith('/api/admin/') || url.pathname === '/api/desktop-mirror' || url.pathname.startsWith('/api/learning/') || url.pathname.startsWith('/api/pm01/'))) {
+      return jsonError(403,'В демоверсии нет кабинета организатора и реальных данных участников.');
+    }
     const desktopResponse = await require('../desktop-primary-relay').handleDesktopPrimary(request, env);
     if (desktopResponse) return desktopResponse;
     if (url.pathname === '/api/desktop-mirror') {

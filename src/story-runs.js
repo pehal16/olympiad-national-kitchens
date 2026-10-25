@@ -209,9 +209,9 @@ function storyView(attempt) {
   const recordedMap=mapQuestion?mapQuestion.items.map(item=>({dish:item.text,country:mapQuestion.buckets.find(b=>b.id===attempt.answers[mapQuestion.id].answerPayload?.buckets?.[item.id])?.label||'не выбрано'})):[];
   return { runId:attempt.storyRunId,storyVersion:1,assetVersion:attempt.variant?.assetVersion||1,conditionVersion:require('./story-dialogue').conditionVersion(attempt),dialogueVersion:attempt.variant?.dialogueVersion||0,currentChapter:Math.min(5,Math.max(1,Number(attempt.variant?.questions?.[attempt.currentStepIndex]?.tourOrder)||5)),
     recordedPhotos,recordedMap,
-    repeatAllowed:Boolean(run&&!run.publishedAt&&entryOpen(run)),resultAvailable:Boolean(run?.publishedAt&&attempt.status!=='in_progress'),entryMode:run?.entryMode||'scheduled',entryOpen:entryOpen(run),entryEndsAt:run?.entryEndsAt||null,decorationsDisabled:Boolean(run?.decorationsDisabled) };
+    repeatAllowed:Boolean(run&&!run.publishedAt&&entryOpen(run)),resultAvailable:Boolean((run?.publishedAt||attempt.demonstration)&&attempt.status!=='in_progress'),entryMode:run?.entryMode||'scheduled',entryOpen:entryOpen(run),entryEndsAt:run?.entryEndsAt||null,decorationsDisabled:Boolean(run?.decorationsDisabled) };
 }
 function scoresVisible(attempt,settings) {
-  return attempt.status!=='in_progress' && (attempt.storyRunId ? Boolean(attempt._storyRun?.publishedAt) : Boolean(settings.showParticipantScore));
+  return attempt.status!=='in_progress' && (attempt.demonstration || (attempt.storyRunId ? Boolean(attempt._storyRun?.publishedAt) : Boolean(settings.showParticipantScore)));
 }
 module.exports={configureStoryStorage,enabled,makeRun,entryOpen,publicationClosed,admissionEndsAt,admissionEndSql,listRuns,getRun,createRun,updateRun,publishRun,currentRun,publicRun,hydrate,storyView,scoresVisible,recoveryPolicy,selectRun,rescheduleRun,scheduleWindow,selectedRunId};
