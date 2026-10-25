@@ -11,6 +11,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import time
 
 TARGET = Path('/etc/nginx/sites-available/olympiad-desktop-relay')
 EXPECTED = '5702a86d1870701007915b381fcca6b1bc6b56e3ef8f4fcdc8f2335ed5007311'
@@ -18,7 +19,10 @@ DOMAIN = 'xn--80aaloaqinm.xn--b1amqadnhd.xn--p1ai'
 
 
 def run(*args):
-    return subprocess.run(args, check=True, capture_output=True, text=True).stdout
+    result = subprocess.run(args, capture_output=True, text=True)
+    if result.returncode:
+        raise RuntimeError(args[0] + ' failed: ' + result.stderr.strip()[:2000])
+    return result.stdout
 
 
 def health(url, *extra):
@@ -55,7 +59,16 @@ def apply(candidate):
         os.replace(temp, TARGET)
         run('nginx', '-t')
         run('systemctl', 'reload', 'nginx')
-        health('https://' + DOMAIN + '/api/health', '--resolve', DOMAIN + ':443:127.0.0.1')
+        # reload is asynchronous: an immediate new connection can still reach
+        # the retiring workers. Allow the fresh worker generation to start.
+        for attempt in range(6):
+            try:
+                health('https://' + DOMAIN + '/api/health', '--resolve', DOMAIN + ':443:127.0.0.1')
+                break
+            except Exception:
+                if attempt == 5:
+                    raise
+                time.sleep(1)
         run('curl', '--fail', '--silent', '--show-error', '--max-time', '25', '--output', '/dev/null', shop)
     except Exception:
         shutil.copy2(backup, TARGET)
