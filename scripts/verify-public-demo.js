@@ -13,7 +13,7 @@ async function main(){
 }
 
 async function exercise(){
- assert.ok(['https://olympiad-gkts.pages.dev','https://olympiad-gkts-demo.pages.dev'].includes(base),'Anonymous live tests are allowed only on the explicit demo hosts');
+ assert.ok(['https://olympiad-gkts.pages.dev','https://olympiad-gkts-demo.pages.dev'].includes(base)||/^http:\/\/127\.0\.0\.1:\d+$/.test(base),'Anonymous tests are allowed only on the explicit demo hosts or an isolated loopback server');
  const crypto=require('node:crypto'),session=crypto.randomBytes(16).toString('hex'),token=crypto.randomBytes(32).toString('base64url');
  async function api(route,body){const response=await fetch(base+route,{method:body?'POST':'GET',headers:{'Content-Type':'application/json','X-Demo-Session':session,'X-Attempt-Token':token},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(30000)}),json=await response.json();assert.ok(response.ok,route+' '+response.status+' '+json.message);return json.data;}
  const profile=await api('/api/public/register',{});assert.equal(profile.participant.fullName,'Демонстрационный Участник');
@@ -24,7 +24,7 @@ async function exercise(){
   if(q.type==='single_choice')answerPayload={selectedOptionId:q.options[0].id};
   else if(q.type==='bucket_sort')answerPayload={buckets:Object.fromEntries(q.items.map((item,n)=>[item.id,q.buckets[n].id]))};
   else if(q.type==='dish_detective')answerPayload={text:'демонстрация'};
-  else {const dish=q.dishes[0];answerPayload={dishId:dish.id,selectedIngredientIds:dish.items.slice(0,4).map(item=>item.id)};}
+  else {const dish=q.selectedDish;assert.ok(dish?.items?.length>=4,'Missing issued kitchen components');answerPayload={dishId:dish.id,selectedIngredientIds:dish.items.slice(0,4).map(item=>item.id)};}
   view=await api(prefix+'/answer',{questionId:q.id,answerPayload});assert.equal(view.progress.answeredCount,i+1);
   if(i===0)assert.equal((await api(prefix+'/answer',{questionId:q.id,answerPayload})).progress.answeredCount,1);
   if(i%9===0)view=await api(prefix+'/current');
