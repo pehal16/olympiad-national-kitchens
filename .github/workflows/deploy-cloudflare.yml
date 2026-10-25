@@ -19,6 +19,7 @@ on:
       - "wrangler.toml"
       - "wrangler.demo.toml"
       - "scripts/provision-public-demo.js"
+      - "scripts/deploy-public-demo.js"
       - "scripts/verify-public-demo.js"
       - ".github/workflows/deploy-cloudflare.yml"
 
@@ -106,7 +107,7 @@ jobs:
 
       - name: Deploy independent demonstration backend
         if: steps.hosting.outputs.public_demo == 'true'
-        run: npx wrangler pages deploy dist-cloudflare --config wrangler.demo.toml --project-name olympiad-gkts-demo --branch main --commit-dirty=true
+        run: node scripts/deploy-public-demo.js
 
       - name: Verify independent demonstration backend
         if: steps.hosting.outputs.public_demo == 'true'
