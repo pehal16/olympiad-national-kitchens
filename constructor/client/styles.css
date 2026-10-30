@@ -9,10 +9,12 @@
 @font-face {
   font-family: "Noto Sans";
   src: url("/fonts/NotoSans-Regular.ttf");
+  font-weight: 100 900;
 }
 @font-face {
   font-family: "Noto Serif";
   src: url("/fonts/NotoSerif-Regular.ttf");
+  font-weight: 100 900;
 }
 :root {
   font-family: "Noto Sans", Arial, sans-serif;
@@ -2389,4 +2391,13 @@ table .button {
 }
 .paper-element[data-overflow="true"] {
   outline: 2px dashed #b94343;
+}
+
+.template-gallery-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.template-gallery-item .template-choice {
+  width: 100%;
 }

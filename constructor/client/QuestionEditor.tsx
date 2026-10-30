@@ -656,6 +656,16 @@ export function QuestionEditor({
           value={q.theme}
           onChange={(x: string) => change("theme", x)}
         />
+        <Select
+          label="Сложность"
+          value={q.difficulty || "standard"}
+          options={[
+            ["basic", "Базовая"],
+            ["standard", "Средняя"],
+            ["advanced", "Повышенная"],
+          ]}
+          onChange={(value: string) => change("difficulty", value)}
+        />
         <Textarea
           label="Источник и основание ответа"
           value={q.source}

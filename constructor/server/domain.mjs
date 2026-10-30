@@ -1,3 +1,4 @@
+import { scheduledTime } from "./validation.mjs";
 import legacySerializer from "../../src/learning/serializers.js";
 import legacyGrade from "../../src/learning/grading.js";
 import { TYPES, MANUAL } from "../shared/catalog.js";
@@ -15,8 +16,17 @@ export function validateProject(p) {
   for (const [ri, r] of (p.rounds || []).entries()) {
     if (!r.title?.trim()) add(`Тур ${ri + 1}: укажите название.`);
     if (!r.questions?.length) add(`${r.title}: добавьте задания.`);
-    if (Number(r.seconds) < 0)
+    if (!Number.isFinite(Number(r.seconds || 0)) || Number(r.seconds) < 0)
       add(`${r.title}: время не может быть отрицательным.`);
+    for (const field of ["availableFrom", "availableUntil"])
+      if (r[field] && !Number.isFinite(scheduledTime(r[field])))
+        add(`${r.title}: проверьте расписание.`);
+    if (
+      r.availableFrom &&
+      r.availableUntil &&
+      scheduledTime(r.availableFrom) >= scheduledTime(r.availableUntil)
+    )
+      add(`${r.title}: окончание должно быть позже начала.`);
     if (!["automatic", "threshold", "manual"].includes(r.transition))
       add(`${r.title}: неизвестное правило перехода.`);
     if (r.selectCount > 0 && r.selectCount > r.questions.length)
@@ -34,6 +44,8 @@ export function validateProject(p) {
       ids.add(q.id);
       if (!TYPES[q.type]) add(`${prefix}: неизвестный тип.`);
       if (!q.title?.trim()) add(`${prefix}: нужен заголовок.`);
+      if (!Number.isFinite(Number(q.seconds || 0)) || Number(q.seconds) < 0)
+        add(`${prefix}: время должно быть неотрицательным числом.`);
       if (!Number.isFinite(Number(q.maxScore)) || q.maxScore < 0)
         add(`${prefix}: неверный балл.`);
       if (q.type !== "instruction" && !(q.maxScore > 0))
@@ -325,6 +337,7 @@ export function sanitizedQuestion(q) {
 export function attemptView(a, disclosure = "organizer", published = false) {
   const result = {
     id: a.id,
+    published,
     runId: a.runId,
     participant: a.participant,
     status: a.status,
@@ -349,9 +362,21 @@ export function attemptView(a, disclosure = "organizer", published = false) {
     narrator: a.variant.narrator,
     theme: a.variant.theme,
     finalText: a.variant.finalText,
-    rounds: a.variant.rounds.map((r) => ({
+    rounds: a.variant.rounds.map((r, ri) => ({
       ...r,
-      questions: r.questions.map(sanitizedQuestion),
+      cases: ri > a.currentRound ? [] : r.cases,
+      questions: r.questions.map((q) =>
+        ri > a.currentRound || (q.seconds > 0 && !a.questionTimes?.[q.id])
+          ? {
+              id: q.id,
+              title: q.title,
+              type: "instruction",
+              maxScore: q.maxScore,
+              config: {},
+              prompt: "Задание откроется после перехода к нему.",
+            }
+          : sanitizedQuestion(q),
+      ),
     })),
     settings: a.settings,
   };
@@ -377,7 +402,10 @@ export function deadlines(a) {
       durationDeadline(a.startedAt, a.settings.seconds) + (a.pauseMs || 0),
     ),
     round: finiteDeadline(
-      durationDeadline(a.roundStartedAt, r?.seconds) + (a.roundPauseMs || 0),
+      Math.min(
+        durationDeadline(a.roundStartedAt, r?.seconds) + (a.roundPauseMs || 0),
+        r?.availableUntil ? scheduledTime(r.availableUntil) : Infinity,
+      ),
     ),
     question: finiteDeadline(
       durationDeadline(a.questionStartedAt, q?.seconds) +
@@ -440,4 +468,11 @@ export function rankAttempts(
     previous = rankKey;
     return { ...a, summary: s, place: s.pending ? null : place };
   });
+}
+
+export function questionDeadline(a, q) {
+  return (
+    durationDeadline(a.questionTimes?.[q.id], q.seconds) +
+    (a.questionPauses?.[q.id] || 0)
+  );
 }

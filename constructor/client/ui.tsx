@@ -208,13 +208,26 @@ export function MediaPicker({
   value,
   onChange,
   accept = "image/png,image/jpeg,image/webp",
+  mime = "image/webp",
 }: any) {
   const ref = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   return (
     <div className="media-picker">
       <span>{label}</span>
-      {value && <img src={value} alt={label} />}
+      {value &&
+        (mime.startsWith("image/") ? (
+          <img src={value} alt={label} />
+        ) : (
+          <p>
+            Файл прикреплён:{" "}
+            {mime.startsWith("audio/")
+              ? "аудио"
+              : mime.startsWith("video/")
+                ? "видео"
+                : "документ"}
+          </p>
+        ))}
       <input
         ref={ref}
         type="file"
@@ -226,7 +239,7 @@ export function MediaPicker({
           try {
             setBusy(true);
             const m = await upload(file);
-            onChange(m.url);
+            onChange(m.url, m);
           } catch (error) {
             window.dispatchEvent(
               new CustomEvent("constructor-error", { detail: error }),

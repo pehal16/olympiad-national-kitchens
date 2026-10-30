@@ -21,6 +21,7 @@ import {
   remainingDeadline,
   rankAttempts,
   gradeQuestion,
+  questionDeadline,
 } from "./domain.mjs";
 import { project, starterTemplates, RUN_DEFAULTS } from "../shared/catalog.js";
 import {
@@ -119,6 +120,25 @@ export class Service {
     this.store.db
       .prepare("DELETE FROM sessions WHERE hash=?")
       .run(hash(value || ""));
+  }
+  async changePassword(user, body) {
+    const current = this.store.user(user.id);
+    fail(
+      await passwordCheck(body.currentPassword, current.password),
+      "Текущий пароль указан неверно.",
+      403,
+    );
+    const value = await passwordHash(body.newPassword);
+    this.store.transaction(() => {
+      this.store.db
+        .prepare("UPDATE users SET password=? WHERE id=?")
+        .run(value, user.id);
+      this.store.db
+        .prepare("DELETE FROM sessions WHERE user_id=?")
+        .run(user.id);
+      this.store.audit(user.id, "user.password_changed", user.id);
+    });
+    return this.login({ login: user.login, password: body.newPassword });
   }
   owner(user) {
     fail(user?.role === "owner", "Доступно только владельцу.", 403);
@@ -399,7 +419,9 @@ export class Service {
       id: r.id,
       title: r.title,
       description: release.description,
-      cover: release.cover,
+      cover: release.cover?.startsWith("/api/constructor/v1/media/")
+        ? "/api/constructor/v1/public/runs/" + r.id + "/cover"
+        : release.cover,
       legend: release.legend,
       entryMode: r.settings.entryMode,
       status: r.settings.status,
@@ -625,6 +647,12 @@ export class Service {
     if (!timedOut) {
       for (const q of r.questions) {
         if (!q.required || q.type === "instruction") continue;
+        if (
+          q.seconds > 0 &&
+          a.questionTimes?.[q.id] &&
+          Date.now() > questionDeadline(a, q)
+        )
+          continue;
         const answer = a.answers[q.id]?.answer;
         validateCompleteAnswer(q, answer);
       }
@@ -697,11 +725,12 @@ export class Service {
         a.finishedAt = now();
         a.timedOut = true;
       } else if (
-        r.seconds > 0 &&
-        Date.now() >
-          Date.parse(a.roundStartedAt) +
-            r.seconds * 1000 +
-            (a.roundPauseMs || 0)
+        (r.seconds > 0 &&
+          Date.now() >
+            Date.parse(a.roundStartedAt) +
+              r.seconds * 1000 +
+              (a.roundPauseMs || 0)) ||
+        (r.availableUntil && Date.now() > scheduledTime(r.availableUntil))
       ) {
         this.completeRound(a, true);
       } else this.advanceQuestion(a);
@@ -730,6 +759,13 @@ export class Service {
       const r = a.variant.rounds[a.currentRound],
         q = r.questions.find((q) => q.id === questionId);
       fail(q, "Задание недоступно.", 404);
+      if (q.seconds > 0)
+        fail(
+          a.questionTimes?.[q.id] && Date.now() <= questionDeadline(a, q),
+          "Время выполнения этого задания истекло или оно ещё не открыто.",
+          409,
+          "question_expired",
+        );
       fail(
         r.allowBack || r.questions[a.currentQuestion].id === questionId,
         "Возврат к этому заданию закрыт.",
@@ -792,6 +828,14 @@ export class Service {
       Number.isInteger(target) && target >= 0 && target < r.questions.length,
       "Неверное задание.",
     );
+    const targetQuestion = r.questions[target];
+    if (targetQuestion.seconds > 0 && a.questionTimes?.[targetQuestion.id])
+      fail(
+        Date.now() <= questionDeadline(a, targetQuestion),
+        "Время выполнения этого задания истекло.",
+        409,
+        "question_expired",
+      );
     fail(r.allowBack || target >= a.currentQuestion, "Возврат запрещён.", 409);
     fail(
       r.allowSkip || target <= a.currentQuestion + 1,

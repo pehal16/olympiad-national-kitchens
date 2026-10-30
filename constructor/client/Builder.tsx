@@ -827,12 +827,19 @@ function RoundInspector({ r, onChange, onDelete }: any) {
             <MediaPicker
               label="Материал кейса: изображение, аудио, видео или PDF"
               value={c.media || ""}
+              mime={c.mediaMime || "image/webp"}
               accept="image/*,audio/*,video/*,.pdf"
-              onChange={(url: string) =>
+              onChange={(url: string, meta: Json) =>
                 set(
                   "cases",
                   r.cases.map((item: Json) =>
-                    item.id === c.id ? { ...item, media: url } : item,
+                    item.id === c.id
+                      ? {
+                          ...item,
+                          media: url,
+                          mediaMime: meta?.mime || "image/webp",
+                        }
+                      : item,
                   ),
                 )
               }

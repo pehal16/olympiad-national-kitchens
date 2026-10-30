@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { AnswerQueue } from "./answer-queue.mjs";
 import express from "express";
 import multer from "multer";
@@ -18,7 +19,7 @@ import { readRows, exportRows } from "./spreadsheets.mjs";
 import { validateProject, summarize } from "./domain.mjs";
 import { validateTemplate } from "./validation.mjs";
 import { examples } from "./seeds.mjs";
-import { question as makeQuestion } from "../shared/catalog.js";
+import { TYPES, question as makeQuestion } from "../shared/catalog.js";
 import {
   id,
   now,
@@ -207,6 +208,13 @@ export function createApp(options = {}) {
       send(res, {});
     }),
   );
+  app.post(
+    API + "/password",
+    auth,
+    wrap(async (req, res) =>
+      loginResponse(req, res, await service.changePassword(req.user, req.body)),
+    ),
+  );
   app.get(
     API + "/users",
     auth,
@@ -374,7 +382,13 @@ export function createApp(options = {}) {
         "Неверный размер импорта.",
       );
       const values = req.body.rows.map((row, index) => {
-        const type = row.type || "single_choice";
+        const provided = String(row.type || "single_choice").trim();
+        const type =
+          Object.entries(TYPES).find(
+            ([, title]) =>
+              title.toLocaleLowerCase("ru") ===
+              provided.toLocaleLowerCase("ru"),
+          )?.[0] || provided;
         fail(
           [
             "single_choice",
@@ -414,7 +428,13 @@ export function createApp(options = {}) {
               .map((x) => x.trim()),
           };
         else if (type === "calculation")
-          q.key = { value: row.answer, tolerance: 0, unit: "" };
+          q.key = {
+            value: Number(String(row.answer).replace(",", ".")),
+            tolerance: 0,
+            unit: "",
+          };
+        if (q.grading === "manual" && q.rubric?.length === 1)
+          q.rubric[0].maxScore = q.maxScore;
         return q;
       });
       const errors = validateProject({
@@ -624,6 +644,56 @@ export function createApp(options = {}) {
     }),
   );
   app.get(
+    API + "/runs/:id/protocol.pdf",
+    auth,
+    wrap(async (req, res) =>
+      res
+        .attachment("protocol.pdf")
+        .send(await documents.protocol(req.user, req.params.id)),
+    ),
+  );
+  app.get(
+    API + "/runs/:id/questions.xlsx",
+    auth,
+    wrap(async (req, res) => {
+      const attempts = service.results(req.user, req.params.id),
+        rows = [
+          [
+            "Участник",
+            "Группа",
+            "Тур",
+            "Задание",
+            "Тип",
+            "Баллы",
+            "Максимум",
+            "Состояние",
+          ],
+        ];
+      for (const a of attempts)
+        for (const r of a.summary.rounds)
+          for (const q of r.questions) {
+            const original = a.variant.rounds
+              .flatMap((r) => r.questions)
+              .find((x) => x.id === q.id);
+            rows.push([
+              a.participant.fullName,
+              a.participant.groupName,
+              r.title,
+              q.title,
+              original.type,
+              q.score ?? "",
+              q.maxScore,
+              q.manual
+                ? "На проверке"
+                : a.status === "completed"
+                  ? "Проверено"
+                  : "Попытка не завершена",
+            ]);
+          }
+      res.attachment("questions.xlsx").send(await exportRows(rows, "xlsx"));
+    }),
+  );
+  app.get(
     API + "/attempts/:id",
     auth,
     wrap((req, res) => {
@@ -755,6 +825,23 @@ export function createApp(options = {}) {
     wrap((req, res) => send(res, service.get(req.user, "job", req.params.id))),
   );
   app.get(
+    API + "/public/runs/:id/cover",
+    wrap((req, res) => {
+      const run = store.get("run", req.params.id);
+      fail(run, "Проведение не найдено.", 404);
+      const url = store.get("release", run.releaseId)?.cover || "",
+        media = store.get("media", url.split("/").at(-1));
+      fail(
+        url.startsWith(API + "/media/") && media?.mime.startsWith("image/"),
+        "Обложка не найдена.",
+        404,
+      );
+      res
+        .type(media.mime)
+        .sendFile(safePath(root, media.relativePath), { dotfiles: "allow" });
+    }),
+  );
+  app.get(
     API + "/public/runs/:id",
     wrap((req, res) => send(res, service.publicRun(req.params.id))),
   );
@@ -870,22 +957,48 @@ export function createApp(options = {}) {
       });
     }),
   );
+  const uploadDirectory = path.join(root, "jobs", "uploads");
+  fs.mkdirSync(uploadDirectory, { recursive: true, mode: 0o700 });
+  app.use(API, (req, res, next) => {
+    const clean = () => {
+      if (
+        req.file?.path &&
+        path.resolve(req.file.path).startsWith(uploadDirectory + path.sep)
+      )
+        fs.rmSync(req.file.path, { force: true });
+    };
+    res.once("finish", clean);
+    res.once("close", clean);
+    next();
+  });
   const upload = multer({
-    storage: multer.memoryStorage(),
+    storage: multer.diskStorage({
+      destination: uploadDirectory,
+      filename: (req, file, done) => done(null, id("upload")),
+    }),
     limits: { fileSize: 100 * 1024 * 1024, files: 1 },
   });
   app.post(
     API + "/media",
     auth,
     upload.single("file"),
-    wrap((req, res) => send(res, saveMedia(req.file, req.user.id))),
+    wrap(async (req, res) => send(res, await saveMedia(req.file, req.user.id))),
   );
-  function saveMedia(file, owner, attemptId = null) {
+  async function saveMedia(file, owner, attemptId = null) {
     fail(file, "Выберите файл.");
     const ext = path.extname(file.originalname).toLowerCase(),
       mime = mediaTypes[ext];
     fail(mime, "Этот тип файла не поддерживается.");
-    const b = file.buffer;
+    const handle = await fs.promises.open(file.path, "r"),
+      b = Buffer.alloc(16);
+    try {
+      await handle.read(b, 0, 16, 0);
+    } finally {
+      await handle.close();
+    }
+    const digest = crypto.createHash("sha256");
+    for await (const chunk of fs.createReadStream(file.path))
+      digest.update(chunk);
     const signature =
       ext === ".png"
         ? b.subarray(0, 8).toString("hex") === "89504e470d0a1a0a"
@@ -901,7 +1014,8 @@ export function createApp(options = {}) {
     fail(signature, "Содержимое файла не соответствует расширению.");
     const mid = id("media"),
       relativePath = `media/${mid}${ext}`;
-    fs.writeFileSync(safePath(root, relativePath), b, { mode: 0o600 });
+    await fs.promises.rename(file.path, safePath(root, relativePath));
+    fs.chmodSync(safePath(root, relativePath), 0o600);
     return store.put(
       "media",
       mid,
@@ -909,8 +1023,8 @@ export function createApp(options = {}) {
       {
         name: cleanText(file.originalname, 200),
         mime,
-        byteSize: b.length,
-        sha256: hash(b),
+        byteSize: file.size,
+        sha256: digest.digest("hex"),
         relativePath,
         attemptId,
         url: `${API}/media/${mid}`,
@@ -920,14 +1034,27 @@ export function createApp(options = {}) {
   }
   app.post(
     API + "/public/attempts/:id/files",
+    (req, res, next) => {
+      try {
+        sameOrigin(req);
+        req.participant = service.refresh(
+          service.participantAttempt(participantToken(req), req.params.id),
+        );
+        fail(
+          req.participant.status === "in_progress" &&
+            !req.participant.pausedAt &&
+            !req.participant.excludedFromResults,
+          "Загрузка сейчас недоступна.",
+          409,
+        );
+        next();
+      } catch (error) {
+        next(error);
+      }
+    },
     upload.single("file"),
-    wrap((req, res) => {
-      sameOrigin(req);
-      const a = service.participantAttempt(
-        participantToken(req),
-        req.params.id,
-      );
-      fail(a.status === "in_progress", "Попытка уже завершена.", 409);
+    wrap(async (req, res) => {
+      const a = req.participant;
       const q = a.variant.rounds[a.currentRound]?.questions.find(
         (q) => q.id === req.body.questionId,
       );
@@ -944,7 +1071,7 @@ export function createApp(options = {}) {
         ),
         "Расширение не разрешено в задании.",
       );
-      send(res, saveMedia(req.file, a.owner, a.id));
+      send(res, await saveMedia(req.file, a.owner, a.id));
     }),
   );
   app.get(
@@ -990,7 +1117,17 @@ export function createApp(options = {}) {
     upload.single("file"),
     wrap(async (req, res) => {
       fail(req.file, "Выберите таблицу.");
-      send(res, await readRows(req.file.buffer, req.file.originalname));
+      fail(
+        req.file.size <= 25 * 1024 * 1024,
+        "Таблица не должна превышать 25 МБ.",
+      );
+      send(
+        res,
+        await readRows(
+          await fs.promises.readFile(req.file.path),
+          req.file.originalname,
+        ),
+      );
     }),
   );
   const packageUpload = multer({

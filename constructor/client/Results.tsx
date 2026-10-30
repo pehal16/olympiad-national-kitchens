@@ -183,6 +183,26 @@ export function Results({ runId, onBack, onManage }: any) {
                 CSV
               </Button>
               <Button onClick={() => exportResults("xlsx")}>XLSX</Button>
+              <Button
+                onClick={async () =>
+                  download(
+                    await blobRequest("/runs/" + runId + "/questions.xlsx"),
+                    "Результаты по заданиям.xlsx",
+                  )
+                }
+              >
+                По заданиям
+              </Button>
+              <Button
+                onClick={async () =>
+                  download(
+                    await blobRequest("/runs/" + runId + "/protocol.pdf"),
+                    "Протокол.pdf",
+                  )
+                }
+              >
+                Протокол PDF
+              </Button>
             </div>
             <span className="muted">Работ: {filtered.length}</span>
           </div>
@@ -766,6 +786,72 @@ function expectedText(q: Question) {
       return k.acceptedAnswers?.join(", ");
     case "calculation":
       return `${k.value} ${k.unit || ""} ± ${k.tolerance || 0}`;
+    case "matching":
+    case "classification":
+      return (c.items || [])
+        .map(
+          (item: Json) =>
+            item.label +
+            " → " +
+            (c.targets?.find(
+              (target: Json) => target.id === k.mapping?.[item.id],
+            )?.label || "—"),
+        )
+        .join("\n");
+    case "ordering":
+      return (k.order || [])
+        .map(
+          (id: string, index: number) =>
+            index +
+            1 +
+            ". " +
+            (c.items?.find((item: Json) => item.id === id)?.label || "—"),
+        )
+        .join("\n");
+    case "crossword":
+      return (c.clues || [])
+        .map((clue: Json) => clue.label + ": " + (k.words?.[clue.id] || "—"))
+        .join("\n");
+    case "table":
+      return (c.rows || [])
+        .flatMap((row: Json) =>
+          (c.columns || []).map(
+            (column: Json) =>
+              row.label +
+              " / " +
+              column.label +
+              ": " +
+              (k.cells?.[row.id + ":" + column.id] ?? "—"),
+          ),
+        )
+        .join("\n");
+    case "dish_assembly":
+    case "restaurant_kitchen":
+      return (c.items || [])
+        .filter((item: Json) => k.selectedIds?.includes(item.id))
+        .map(
+          (item: Json) =>
+            item.label +
+            (k.placements?.[item.id]
+              ? " → " +
+                (c.slots?.find(
+                  (slot: Json) => slot.id === k.placements[item.id],
+                )?.label || "")
+              : ""),
+        )
+        .join("\n");
+    case "hotspot":
+      return (c.zones || [])
+        .filter((zone: Json) => k.zoneIds?.includes(zone.id))
+        .map((zone: Json) => zone.label)
+        .join(", ");
+    case "safety_checklist":
+      return (c.items || [])
+        .map(
+          (item: Json) =>
+            item.label + ": " + (k.checks?.[item.id] ? "Да" : "Нет"),
+        )
+        .join("\n");
     default:
       return Object.entries(k)
         .map(

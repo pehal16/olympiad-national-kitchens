@@ -63,7 +63,7 @@ const internalize = (text: string) => {
 };
 const fill = (text: string, data = fields) =>
   String(text || "").replace(/\{([a-zA-Z]+)\}/g, (_, key) => data[key] ?? "");
-export function TemplateGallery({ items, onOpen, onCreate }: any) {
+export function TemplateGallery({ items, onOpen, onCreate, onShare }: any) {
   const [kind, setKind] = useState("all");
   return (
     <>
@@ -102,15 +102,18 @@ export function TemplateGallery({ items, onOpen, onCreate }: any) {
         {items
           .filter((t: Json) => kind === "all" || t.kind === kind)
           .map((t: AwardTemplate) => (
-            <button
-              key={t.id}
-              className="template-choice"
-              onClick={() => onOpen(t.id)}
-            >
-              <TemplateThumb template={t} />
-              <strong>{t.title}</strong>
-              <span>Открыть редактор</span>
-            </button>
+            <article key={t.id} className="template-gallery-item">
+              <button className="template-choice" onClick={() => onOpen(t.id)}>
+                <TemplateThumb template={t} />
+                <strong>{t.title}</strong>
+                <span>Открыть редактор</span>
+              </button>
+              {onShare && (
+                <Button kind="quiet" onClick={() => onShare(t.id, t.title)}>
+                  Предоставить доступ
+                </Button>
+              )}
+            </article>
           ))}
       </div>
     </>
@@ -168,7 +171,7 @@ export function PaperElement({
           node.scrollWidth > node.clientWidth + 1) &&
         size > min
       ) {
-        size -= 0.5;
+        size = Math.max(min, size - 0.5);
         node.style.fontSize = size + "px";
       }
       node.dataset.overflow = String(

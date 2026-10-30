@@ -207,6 +207,28 @@ async function main() {
       bytes = Buffer.from(await pdfResponse.arrayBuffer());
     assert.equal((await PDFDocument.load(bytes)).getPageCount(), 1);
     fs.writeFileSync(path.join(output, "issued.pdf"), bytes);
+    const publicRows = await request("/public/runs/" + run.id + "/results");
+    assert.equal(publicRows.length, 1);
+    assert.equal(publicRows[0].score, 4);
+    for (const format of ["zip", "pdf"]) {
+      const collection = await fetch(
+        base + "/api/constructor/v1/runs/" + run.id + "/documents." + format,
+        { headers: { Cookie: client.cookie } },
+      );
+      assert.equal(collection.status, 200);
+      const data = Buffer.from(await collection.arrayBuffer());
+      if (format === "pdf")
+        assert.equal((await PDFDocument.load(data)).getPageCount(), 1);
+      else assert.equal(data.subarray(0, 2).toString(), "PK");
+    }
+    const protocol = await fetch(
+      base + "/api/constructor/v1/runs/" + run.id + "/protocol.pdf",
+      { headers: { Cookie: client.cookie } },
+    );
+    assert.equal(protocol.status, 200);
+    const protocolBytes = Buffer.from(await protocol.arrayBuffer());
+    assert.equal((await PDFDocument.load(protocolBytes)).getPageCount(), 1);
+    fs.writeFileSync(path.join(output, "protocol.pdf"), protocolBytes);
     await page.screenshot({ path: path.join(output, "results-desktop.png") });
     await page.goto(`${base}/constructor/?view=designer&id=${templates[0].id}`);
     await page

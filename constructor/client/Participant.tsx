@@ -11,7 +11,7 @@ import {
 import type { Json, Question } from "../shared/types";
 import { api, blobRequest, download, localGet, localSet } from "./api";
 import { uid } from "../shared/catalog";
-import { Button, Input, Toggle, Empty } from "./ui";
+import { Button, Input, Toggle, Empty, Modal } from "./ui";
 import { Task, Media } from "./Tasks";
 export function Participant({ runId }: { runId: string }) {
   const [run, setRun] = useState<Json | null>(null),
@@ -39,6 +39,7 @@ export function Participant({ runId }: { runId: string }) {
     [conflict, setConflict] = useState(false),
     [clock, setClock] = useState(Date.now()),
     [documents, setDocuments] = useState<Json[]>([]),
+    [leaderboard, setLeaderboard] = useState<Json[] | null>(null),
     [moving, setMoving] = useState(false),
     [storageAvailable, setStorageAvailable] = useState(true);
   const aRef = useRef<Json | null>(null),
@@ -423,7 +424,7 @@ export function Participant({ runId }: { runId: string }) {
           <Check size={42} />
           <h1>
             {attempt.excludedFromResults
-              ? "Участие приостановлено"
+              ? "Работа исключена из зачёта"
               : "Работа завершена"}
           </h1>
           {attempt.excludedFromResults && <p>{attempt.exclusionReason}</p>}
@@ -475,6 +476,15 @@ export function Participant({ runId }: { runId: string }) {
                 </Button>
               ))}
             </section>
+          )}
+          {attempt.published && (
+            <Button
+              onClick={async () =>
+                setLeaderboard(await api("/public/runs/" + runId + "/results"))
+              }
+            >
+              Общие результаты
+            </Button>
           )}
           <Button onClick={refresh}>
             <RefreshCw size={17} />
@@ -530,6 +540,7 @@ export function Participant({ runId }: { runId: string }) {
               {currentCase.media && (
                 <Media
                   src={currentCase.media}
+                  mime={currentCase.mediaMime || "image/webp"}
                   token={session.token}
                   alt={currentCase.title}
                 />
@@ -620,6 +631,36 @@ export function Participant({ runId }: { runId: string }) {
           </footer>
         </main>
       ) : null}
+      {leaderboard && (
+        <Modal
+          title="Опубликованные результаты"
+          wide
+          onClose={() => setLeaderboard(null)}
+        >
+          <table>
+            <thead>
+              <tr>
+                <th>Место</th>
+                <th>Участник</th>
+                <th>Группа</th>
+                <th>Балл</th>
+              </tr>
+            </thead>
+            <tbody>
+              {leaderboard.map((row, index) => (
+                <tr key={index}>
+                  <td>{row.place}</td>
+                  <td>{row.participant}</td>
+                  <td>{row.groupName}</td>
+                  <td>
+                    {row.score} / {row.maxScore}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Modal>
+      )}
     </div>
   );
 }

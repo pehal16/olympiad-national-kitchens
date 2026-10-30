@@ -4,6 +4,7 @@ import { chromium } from "playwright";
 import { PDFDocument } from "pdf-lib";
 import QRCode from "qrcode";
 import { zipSync } from "fflate";
+import { rankAttempts } from "./domain.mjs";
 import { id, now, fail, escapeHtml, hash, safePath, clone } from "./util.mjs";
 const fonts = {
   "PT Serif": "PTSerif-Regular.ttf",
@@ -39,7 +40,7 @@ export function templateHtml(
     .filter(([family]) => fontData[family])
     .map(
       ([family]) =>
-        `@font-face{font-family:'${family}';src:url(data:font/ttf;base64,${fontData[family]}) format('truetype');font-weight:100 900}`,
+        `@font-face{font-family:'${family}';src:url(data:font/ttf;base64,${fontData[family]}) format('truetype');font-weight:${family.startsWith("Noto") ? "100 900" : "400"}}`,
     )
     .join("");
   const body = template.elements
@@ -116,6 +117,12 @@ export class Documents {
       : "";
   }
   async getBrowser() {
+    fail(
+      !this.closing,
+      "Подготовка документов приостановлена: сервер завершает работу.",
+      503,
+    );
+    if (this.browserPromise) return this.browserPromise;
     if (!this.browser) {
       const options = { headless: true };
       if (process.env.CONSTRUCTOR_CHROMIUM)
@@ -127,11 +134,26 @@ export class Documents {
         ].find((file) => fs.existsSync(file));
         if (installed) options.executablePath = installed;
       }
-      this.browser = await chromium.launch(options);
+      this.browserPromise = chromium
+        .launch(options)
+        .then((browser) => {
+          this.browser = browser;
+          return browser;
+        })
+        .finally(() => {
+          this.browserPromise = null;
+        });
+      return this.browserPromise;
     }
     return this.browser;
   }
   async render(template, data, { watermark = false } = {}) {
+    if (template.backgroundImage)
+      fail(
+        this.image(template.backgroundImage),
+        "Фон документа недоступен. Замените его перед выпуском.",
+        422,
+      );
     for (const el of template.elements.filter(
       (e) => !e.hidden && e.type === "image" && e.src,
     ))
@@ -184,7 +206,7 @@ export class Documents {
               el.scrollWidth > el.clientWidth + 1) &&
             size > min
           ) {
-            size -= 0.5;
+            size = Math.max(min, size - 0.5);
             el.style.fontSize = size + "px";
           }
           if (
@@ -379,6 +401,46 @@ export class Documents {
     }
     return Buffer.from(await combined.save());
   }
+  async protocol(user, runId) {
+    const run = this.service.get(user, "run", runId),
+      rows = this.service.results(user, runId),
+      ranked = rankAttempts(
+        rows,
+        run.settings.attemptSelection,
+        run.settings.tieBreak,
+      ),
+      places = new Map(ranked.map((a) => [a.id, a.place]));
+    const roundHeaders = (rows[0]?.variant.rounds || [])
+      .map((r, i) => `<th>Тур ${i + 1}<br>${escapeHtml(r.title)}</th>`)
+      .join("");
+    const body = rows
+      .map(
+        (a, i) =>
+          `<tr><td>${i + 1}</td><td>${escapeHtml(a.participant.fullName)}</td><td>${escapeHtml(a.participant.institution)}<br>${escapeHtml(a.participant.groupName)}</td>${a.summary.rounds.map((r) => `<td>${r.pending ? "На проверке" : a.status === "completed" ? r.score : "—"} / ${r.maxScore}</td>`).join("")}<td>${a.status === "completed" && !a.excludedFromResults ? (a.summary.score ?? "На проверке") : "—"} / ${a.summary.maxScore}</td><td>${places.get(a.id) || "—"}</td><td>${a.excludedFromResults ? "Исключена из зачёта" : a.status === "completed" ? "Завершена" : a.status === "waiting" ? "Ожидает решения" : "Незавершена"}${a.excludedFromResults ? "<br>" + escapeHtml(a.exclusionReason) : ""}</td></tr>`,
+      )
+      .join("");
+    const browser = await this.getBrowser(),
+      page = await browser.newPage();
+    try {
+      const date = new Intl.DateTimeFormat("ru-RU", {
+        timeZone: "Europe/Moscow",
+        dateStyle: "long",
+        timeStyle: "short",
+      }).format(new Date());
+      await page.setContent(
+        `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><style>@font-face{font-family:Noto;src:url(data:font/ttf;base64,${this.fontData["Noto Sans"] || ""})}@page{size:A4 landscape;margin:14mm}body{font:10pt Noto,sans-serif;color:#1b2930}h1{font-size:19pt}h2{font-size:14pt}table{border-collapse:collapse;width:100%;font-size:9pt}th,td{border:.2mm solid #aebbb5;padding:2mm;text-align:left;overflow-wrap:anywhere}thead{display:table-header-group;background:#edf4f0}tr{break-inside:avoid}.meta{margin:8mm 0 5mm}.footer{margin-top:8mm}</style></head><body><h1>${run.published ? "Итоговый" : "Предварительный"} протокол</h1><h2>${escapeHtml(run.title)}</h2><p class="meta">Сформирован: ${escapeHtml(date)} МСК. Учитывается ${run.settings.attemptSelection === "last" ? "последняя завершённая" : run.settings.attemptSelection === "best" ? "лучшая" : "первая завершённая"} попытка. При равенстве баллов: ${run.settings.tieBreak === "time" ? "меньшее время прохождения" : "общее место"}.</p><table><thead><tr><th>№</th><th>Участник</th><th>Организация / группа</th>${roundHeaders}<th>Итого</th><th>Место</th><th>Состояние</th></tr></thead><tbody>${body}</tbody></table><p class="footer">Организатор: ${escapeHtml(user.name)}. ${run.published ? "Результаты опубликованы организатором." : "Результаты ещё не опубликованы."}</p></body></html>`,
+        { waitUntil: "load" },
+      );
+      await page.evaluate(() => document.fonts.ready);
+      return await page.pdf({
+        printBackground: true,
+        preferCSSPageSize: true,
+        tagged: true,
+      });
+    } finally {
+      await page.close();
+    }
+  }
   revoke(user, key, reason) {
     this.service.right(user, "awards");
     const issue = this.service.get(user, "issue", key, true);
@@ -464,6 +526,25 @@ export class Documents {
     return issue;
   }
   async close() {
+    this.closing = true;
+    for (const entry of this.queue.splice(0)) {
+      const job = this.store.get("job", entry.jid);
+      this.store.put(
+        "job",
+        job.id,
+        job.owner,
+        {
+          ...job,
+          status: "failed",
+          error:
+            "Сервер остановлен. Повторите выпуск: готовые экземпляры сохранены.",
+        },
+        job.runId,
+      );
+    }
+    await this.browserPromise?.catch(() => {});
     await this.browser?.close();
+    while (this.running)
+      await new Promise((resolve) => setTimeout(resolve, 50));
   }
 }

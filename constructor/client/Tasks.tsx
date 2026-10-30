@@ -15,7 +15,8 @@ export function Media({
   token?: string;
   mime?: string;
 }) {
-  const [resolved, setResolved] = useState(src);
+  const [resolved, setResolved] = useState(src),
+    [resolvedMime, setResolvedMime] = useState(mime);
   const [expanded, setExpanded] = useState(false);
   const [error, setError] = useState("");
   useEffect(() => {
@@ -26,7 +27,10 @@ export function Media({
       blobRequest(src.slice("/api/constructor/v1".length), undefined, token)
         .then((b) => {
           url = URL.createObjectURL(b);
-          if (active) setResolved(url);
+          if (active) {
+            setResolved(url);
+            setResolvedMime(b.type || mime);
+          }
         })
         .catch(() =>
           setError("Не удалось загрузить файл. Повторите открытие задания."),
@@ -39,11 +43,11 @@ export function Media({
   }, [src, token]);
   if (!src) return null;
   if (error) return <p className="error">{error}</p>;
-  if (mime.startsWith("audio/"))
+  if (resolvedMime.startsWith("audio/"))
     return <audio controls src={resolved} aria-label={alt} />;
-  if (mime.startsWith("video/"))
+  if (resolvedMime.startsWith("video/"))
     return <video controls src={resolved} aria-label={alt} />;
-  if (mime === "application/pdf")
+  if (resolvedMime === "application/pdf")
     return (
       <Button
         onClick={async () =>

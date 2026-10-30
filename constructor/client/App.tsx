@@ -395,6 +395,10 @@ function AdminApp() {
           ))}
         {view === "templates" && (
           <Gallery
+            onShare={(id: string, title: string) => {
+              setSharing({ kind: "template", id, title });
+              setShareLogins("");
+            }}
             items={templates}
             user={user}
             onOpen={async (id: string) => {
@@ -423,6 +427,7 @@ function AdminApp() {
           ))}
         {view === "bank" && (
           <Bank
+            user={user}
             onShare={(id: string, title: string) => {
               setSharing({ kind: "question", id, title });
               setShareLogins("");
@@ -595,7 +600,7 @@ function Login({ setup, onLogin }: any) {
     </main>
   );
 }
-function Bank({ onShare }: any) {
+function Bank({ onShare, user }: any) {
   const [items, setItems] = useState<Json[]>([]),
     [search, setSearch] = useState(""),
     [editing, setEditing] = useState<Question | null>(null),
@@ -658,7 +663,19 @@ function Bank({ onShare }: any) {
                   <td>{x.maxScore}</td>
                   <td>
                     <div className="actions">
-                      <Button onClick={() => setEditing(x as Question)}>
+                      <Button
+                        onClick={() =>
+                          setEditing(
+                            (x.owner === user.id || user.role === "owner"
+                              ? x
+                              : {
+                                  ...x,
+                                  id: uid("bank"),
+                                  title: x.title + " — копия",
+                                }) as Question,
+                          )
+                        }
+                      >
                         Редактировать
                       </Button>
                       <IconButton
@@ -744,7 +761,7 @@ function Bank({ onShare }: any) {
             prompt: "Формулировка",
             options: "Варианты (через |)",
             answer: "Правильные ответы (номера через ,)",
-            type: "Тип (single_choice / multiple_choice)",
+            type: "Тип (название или код)",
             maxScore: "Баллы",
             theme: "Тема",
             source: "Источник",
@@ -884,6 +901,8 @@ function People() {
   );
 }
 function SettingsPage({ user }: { user: User }) {
+  const [oldPassword, setOldPassword] = useState(""),
+    [newPassword, setNewPassword] = useState("");
   const [projects, setProjects] = useState<Json[]>([]),
     [runs, setRuns] = useState<Json[]>([]),
     [kind, setKind] = useState("materials"),
@@ -913,6 +932,40 @@ function SettingsPage({ user }: { user: User }) {
       <div className="page-toolbar">
         <h1>Перенос и резервные копии</h1>
       </div>
+      <section className="panel backup-panel">
+        <h2>Пароль кабинета</h2>
+        <div className="two">
+          <Input
+            label="Текущий пароль"
+            type="password"
+            value={oldPassword}
+            onChange={setOldPassword}
+            autoComplete="current-password"
+          />
+          <Input
+            label="Новый пароль (от 10 символов)"
+            type="password"
+            value={newPassword}
+            onChange={setNewPassword}
+            autoComplete="new-password"
+          />
+        </div>
+        <Button
+          disabled={!oldPassword || newPassword.length < 10}
+          onClick={async () => {
+            const session = await api("/password", {
+              currentPassword: oldPassword,
+              newPassword,
+            });
+            setCsrf(session.csrf);
+            setOldPassword("");
+            setNewPassword("");
+            setResult("Пароль изменён. Прежние сеансы кабинета закрыты.");
+          }}
+        >
+          Изменить пароль
+        </Button>
+      </section>
       <div className="management-grid">
         <section className="panel">
           <h2>Выгрузить пакет</h2>
