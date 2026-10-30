@@ -1,0 +1,3166 @@
+{
+  "title": "Ресторан путешествий",
+  "kind": "olympiad",
+  "subject": "Национальные кухни мира",
+  "audience": "Учебный образец",
+  "description": "Пять глав, 36 заданий, 150 баллов. Изолированный образец без участников и официальных результатов.",
+  "legend": "Гость собирает воспоминания о национальных кухнях мира. Помогите ему пройти путь от фотоальбома до финального стола.",
+  "finalText": "Путешествие завершено. Результаты и документы откроются в соответствии с настройками организатора.",
+  "cover": "/constructor/legacy/assets/olympiad/landing/hero-national-cuisines.webp",
+  "narrator": {
+    "enabled": true,
+    "intro": "Начнём наше гастрономическое путешествие.",
+    "neutral": "Ваш выбор отмечен.",
+    "image": "/constructor/legacy/assets/olympiad/story/layout-v4/portraits/album.webp"
+  },
+  "theme": {
+    "accent": "#005b43",
+    "background": "#f5f7f8"
+  },
+  "rounds": [
+    {
+      "id": "tour-1",
+      "title": "Узнай блюдо",
+      "instructions": "Узнайте 10 блюд по фотографии: один правильный ответ и 2 балла за каждый вопрос.",
+      "seconds": 0,
+      "shuffle": false,
+      "selectCount": 0,
+      "allowBack": true,
+      "allowSkip": true,
+      "transition": "automatic",
+      "threshold": 0,
+      "questions": [
+        {
+          "id": "q_31629245523729468571",
+          "type": "single_choice",
+          "title": "Какое блюдо изображено на фотографии?",
+          "prompt": "Страница альбома: Франция.",
+          "maxScore": 2,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_21853549481508661750",
+                "text": "Бриошь",
+                "label": "Бриошь"
+              },
+              {
+                "id": "o_08853610160484659065",
+                "text": "Бейгл",
+                "label": "Бейгл"
+              },
+              {
+                "id": "o_03217895230372030373",
+                "text": "Круассан",
+                "label": "Круассан"
+              },
+              {
+                "id": "o_32713279073517532002",
+                "text": "Брецель",
+                "label": "Брецель"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_03217895230372030373"
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour1/t1-active-01.webp",
+              "mime": "image/webp",
+              "alt": "Фотография блюда к вопросу 1"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эта страница — из Франции. Я собирался сфотографировать завтрак, а потом вспомнил: сначала фото, потом первый кусочек. Теперь подпись доверяю вам."
+        },
+        {
+          "id": "q_27143375264173415963",
+          "type": "single_choice",
+          "title": "Какое блюдо изображено на фотографии?",
+          "prompt": "Страница альбома: Япония.",
+          "maxScore": 2,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_41535182380487241496",
+                "text": "Лагман",
+                "label": "Лагман"
+              },
+              {
+                "id": "o_10975755081598160586",
+                "text": "Рамен",
+                "label": "Рамен"
+              },
+              {
+                "id": "o_21396245163440812594",
+                "text": "Том-ям",
+                "label": "Том-ям"
+              },
+              {
+                "id": "o_42575649983595203409",
+                "text": "Фо-бо",
+                "label": "Фо-бо"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_10975755081598160586"
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour1/t1-active-02.webp",
+              "mime": "image/webp",
+              "alt": "Фотография блюда к вопросу 2"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эта страница — из Японии. Этот снимок я сделал после долгой прогулки. Телефон почти разрядился, зато аппетит работал без перебоев. Давайте найдём для фотографии подпись."
+        },
+        {
+          "id": "q_39704509094208805084",
+          "type": "single_choice",
+          "title": "Какое блюдо изображено на фотографии?",
+          "prompt": "Страница альбома: Грузия.",
+          "maxScore": 2,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_05000769943848685911",
+                "text": "Пельмени",
+                "label": "Пельмени"
+              },
+              {
+                "id": "o_15415768240546800965",
+                "text": "Хинкали",
+                "label": "Хинкали"
+              },
+              {
+                "id": "o_01890337414106697337",
+                "text": "Вареники",
+                "label": "Вареники"
+              },
+              {
+                "id": "o_05580618980971419681",
+                "text": "Манты",
+                "label": "Манты"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_15415768240546800965"
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour1/t1-active-03.webp",
+              "mime": "image/webp",
+              "alt": "Фотография блюда к вопросу 3"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эта страница — из Грузии. Здесь я задержался за столом дольше, чем планировал. Экскурсия подождала, а фотография осталась. Посмотрите внимательно: следующая строка в альбоме пока пустая."
+        },
+        {
+          "id": "q_41957815362100099446",
+          "type": "single_choice",
+          "title": "Какое блюдо изображено на фотографии?",
+          "prompt": "Страница альбома: Мексика.",
+          "maxScore": 2,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_13245492272451944102",
+                "text": "Тако",
+                "label": "Тако"
+              },
+              {
+                "id": "o_25635349002058141151",
+                "text": "Буррито",
+                "label": "Буррито"
+              },
+              {
+                "id": "o_38181915930007570224",
+                "text": "Энчилада",
+                "label": "Энчилада"
+              },
+              {
+                "id": "o_21949917893715922263",
+                "text": "Кесадилья",
+                "label": "Кесадилья"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_13245492272451944102"
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour1/t1-active-04.webp",
+              "mime": "image/webp",
+              "alt": "Фотография блюда к вопросу 4"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эта страница — из Мексики. Эта страница напоминает о шумной улице и неожиданной остановке. Я хотел сделать один снимок, а сделал целую серию. Выберем подпись к этому кадру."
+        },
+        {
+          "id": "q_38842317330196213968",
+          "type": "single_choice",
+          "title": "Какое блюдо изображено на фотографии?",
+          "prompt": "Страница альбома: Таиланд.",
+          "maxScore": 2,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_20750026823721952621",
+                "text": "Фо-бо",
+                "label": "Фо-бо"
+              },
+              {
+                "id": "o_26438590662825406197",
+                "text": "Рамен",
+                "label": "Рамен"
+              },
+              {
+                "id": "o_31432784730900158901",
+                "text": "Харчо",
+                "label": "Харчо"
+              },
+              {
+                "id": "o_39086015122805614224",
+                "text": "Том-ям",
+                "label": "Том-ям"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_39086015122805614224"
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour1/t1-active-05.webp",
+              "mime": "image/webp",
+              "alt": "Фотография блюда к вопросу 5"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эта страница — из Таиланда. Я сохранил этот кадр между билетами и видом из окна. Пейзаж помню смутно, а обед — прекрасно. Поможете вернуть фотографии её название?"
+        },
+        {
+          "id": "q_14922909551695496255",
+          "type": "single_choice",
+          "title": "Какое блюдо изображено на фотографии?",
+          "prompt": "Страница альбома: Италия.",
+          "maxScore": 2,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_00316371043038686792",
+                "text": "Равиоли",
+                "label": "Равиоли"
+              },
+              {
+                "id": "o_32680176870987780945",
+                "text": "Каннеллони",
+                "label": "Каннеллони"
+              },
+              {
+                "id": "o_20449329770293257782",
+                "text": "Лазанья",
+                "label": "Лазанья"
+              },
+              {
+                "id": "o_38430411520728694791",
+                "text": "Ризотто",
+                "label": "Ризотто"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_20449329770293257782"
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour1/t1-active-06.webp",
+              "mime": "image/webp",
+              "alt": "Фотография блюда к вопросу 6"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эта страница — из Италии. Эту фотографию я отправил друзьям ещё из поездки. Все спросили, что на ней, а я обещал рассказать при встрече. Сегодня обещание пригодилось."
+        },
+        {
+          "id": "q_42890533250789515211",
+          "type": "single_choice",
+          "title": "Какое блюдо изображено на фотографии?",
+          "prompt": "Страница альбома: Япония.",
+          "maxScore": 2,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_17656049224209841816",
+                "text": "Гёдза",
+                "label": "Гёдза"
+              },
+              {
+                "id": "o_05177222641841418445",
+                "text": "Сашими",
+                "label": "Сашими"
+              },
+              {
+                "id": "o_35854318861229969661",
+                "text": "Суши",
+                "label": "Суши"
+              },
+              {
+                "id": "o_07253952321363565312",
+                "text": "Онигири",
+                "label": "Онигири"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_35854318861229969661"
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour1/t1-active-07.webp",
+              "mime": "image/webp",
+              "alt": "Фотография блюда к вопросу 7"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эта страница — из Японии. Этот вечер я помню по разговору за столом. Мы обсуждали дорогу и совсем забыли про время. Снимок сохранился, осталось аккуратно подписать страницу."
+        },
+        {
+          "id": "q_42301780452250040068",
+          "type": "single_choice",
+          "title": "Какое блюдо изображено на фотографии?",
+          "prompt": "Страница альбома: Узбекистан.",
+          "maxScore": 2,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_37468654001553563618",
+                "text": "Плов",
+                "label": "Плов"
+              },
+              {
+                "id": "o_18982277842705293606",
+                "text": "Паэлья",
+                "label": "Паэлья"
+              },
+              {
+                "id": "o_11625548601670590209",
+                "text": "Жареный рис",
+                "label": "Жареный рис"
+              },
+              {
+                "id": "o_27645603404028655994",
+                "text": "Ризотто",
+                "label": "Ризотто"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_37468654001553563618"
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour1/t1-active-08.webp",
+              "mime": "image/webp",
+              "alt": "Фотография блюда к вопросу 8"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эта страница — из Узбекистана. Эта страница немного помялась в чемодане. Фотография пережила переезды лучше моих рубашек, поэтому оставим её в меню. Какую подпись вы бы выбрали?"
+        },
+        {
+          "id": "q_06302314633193830978",
+          "type": "single_choice",
+          "title": "Какое блюдо изображено на фотографии?",
+          "prompt": "Страница альбома: Испания.",
+          "maxScore": 2,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_33372458760071638750",
+                "text": "Ризотто",
+                "label": "Ризотто"
+              },
+              {
+                "id": "o_10087594761157944857",
+                "text": "Жареный рис",
+                "label": "Жареный рис"
+              },
+              {
+                "id": "o_37818907531483616333",
+                "text": "Паэлья",
+                "label": "Паэлья"
+              },
+              {
+                "id": "o_28038724932410771559",
+                "text": "Плов",
+                "label": "Плов"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_37818907531483616333"
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour1/t1-active-09.webp",
+              "mime": "image/webp",
+              "alt": "Фотография блюда к вопросу 9"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эта страница — из Испании. Для этого кадра я даже попросил друзей немного подождать. Теперь они знают: если достал телефон, тарелку пока не трогаем. Ваша очередь подписать снимок."
+        },
+        {
+          "id": "q_02561045470233406441",
+          "type": "single_choice",
+          "title": "Какое блюдо изображено на фотографии?",
+          "prompt": "Страница альбома: США.",
+          "maxScore": 2,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_42171429030448545944",
+                "text": "Хот-дог",
+                "label": "Хот-дог"
+              },
+              {
+                "id": "o_27703241313486804675",
+                "text": "Чизстейк",
+                "label": "Чизстейк"
+              },
+              {
+                "id": "o_41689729992732485814",
+                "text": "Корн-дог",
+                "label": "Корн-дог"
+              },
+              {
+                "id": "o_20120454710378286950",
+                "text": "Панини",
+                "label": "Панини"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_42171429030448545944"
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour1/t1-active-10.webp",
+              "mime": "image/webp",
+              "alt": "Фотография блюда к вопросу 10"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эта страница — из США. Последняя фотография в этой части альбома. Дальше будут дорожные записи, но сначала закончим подписи. Я уже представляю, как покажу эти страницы нашей компании."
+        }
+      ]
+    },
+    {
+      "id": "tour-2",
+      "title": "Кухни мира",
+      "instructions": "Сопоставьте блюда со странами",
+      "seconds": 0,
+      "shuffle": false,
+      "selectCount": 0,
+      "allowBack": true,
+      "allowSkip": true,
+      "transition": "automatic",
+      "threshold": 0,
+      "questions": [
+        {
+          "id": "q_04303686933005294780",
+          "type": "matching",
+          "title": "Европейская классика",
+          "prompt": "",
+          "maxScore": 4,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": true,
+          "shuffle": true,
+          "config": {
+            "items": [
+              {
+                "id": "i_26551833704181197862",
+                "dishId": "wiener_schnitzel",
+                "text": "Венский шницель",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-29.webp",
+                "imageAlt": "Фотография блюда «Венский шницель»",
+                "label": "Венский шницель"
+              },
+              {
+                "id": "i_38087786301922422903",
+                "dishId": "fish_and_chips",
+                "text": "Фиш-энд-чипс",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-30.webp",
+                "imageAlt": "Фотография блюда «Фиш-энд-чипс»",
+                "label": "Фиш-энд-чипс"
+              },
+              {
+                "id": "i_37569142843872184037",
+                "dishId": "tiramisu",
+                "text": "Тирамису",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-27.webp",
+                "imageAlt": "Фотография блюда «Тирамису»",
+                "label": "Тирамису"
+              },
+              {
+                "id": "i_35710876871595081765",
+                "dishId": "ratatouille",
+                "text": "Рататуй",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-28.webp",
+                "imageAlt": "Фотография блюда «Рататуй»",
+                "label": "Рататуй"
+              }
+            ],
+            "targets": [
+              {
+                "id": "b_11186055642669335770",
+                "label": "Франция",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/fr.svg"
+              },
+              {
+                "id": "b_38430865731145926816",
+                "label": "Австрия",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/at.svg"
+              },
+              {
+                "id": "b_09580582540956263102",
+                "label": "Великобритания",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/gb.svg"
+              },
+              {
+                "id": "b_09891021441814529843",
+                "label": "Италия",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/it.svg"
+              }
+            ]
+          },
+          "key": {
+            "mapping": {
+              "i_37569142843872184037": "b_09891021441814529843",
+              "i_35710876871595081765": "b_11186055642669335770",
+              "i_26551833704181197862": "b_38430865731145926816",
+              "i_38087786301922422903": "b_09580582540956263102"
+            }
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Вот моя карта путешествий. Дорожные записи перепутались, и теперь четыре фотографии ждут своих отметок. Выберите блюдо, затем нажмите страну — маршрут останется вашим выбором."
+        },
+        {
+          "id": "q_25655555500885610988",
+          "type": "matching",
+          "title": "Азия",
+          "prompt": "",
+          "maxScore": 4,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": true,
+          "shuffle": true,
+          "config": {
+            "items": [
+              {
+                "id": "i_12835431861090471585",
+                "dishId": "pho",
+                "text": "Фо",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-33.webp",
+                "imageAlt": "Фотография блюда «Фо»",
+                "label": "Фо"
+              },
+              {
+                "id": "i_10758299121503667724",
+                "dishId": "pad_thai",
+                "text": "Пад-тай",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-34.webp",
+                "imageAlt": "Фотография блюда «Пад-тай»",
+                "label": "Пад-тай"
+              },
+              {
+                "id": "i_10036642213665627661",
+                "dishId": "bibimbap",
+                "text": "Бибимбап",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-32.webp",
+                "imageAlt": "Фотография блюда «Бибимбап»",
+                "label": "Бибимбап"
+              },
+              {
+                "id": "i_06126758893373192212",
+                "dishId": "onigiri",
+                "text": "Онигири",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-31.webp",
+                "imageAlt": "Фотография блюда «Онигири»",
+                "label": "Онигири"
+              }
+            ],
+            "targets": [
+              {
+                "id": "b_31277591104275028818",
+                "label": "Таиланд",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/th.svg"
+              },
+              {
+                "id": "b_14326659320618534106",
+                "label": "Республика Корея",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/kr.svg"
+              },
+              {
+                "id": "b_02683343771670193321",
+                "label": "Япония",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/jp.svg"
+              },
+              {
+                "id": "b_40156628141217125004",
+                "label": "Вьетнам",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/vn.svg"
+              }
+            ]
+          },
+          "key": {
+            "mapping": {
+              "i_06126758893373192212": "b_02683343771670193321",
+              "i_10036642213665627661": "b_14326659320618534106",
+              "i_12835431861090471585": "b_40156628141217125004",
+              "i_10758299121503667724": "b_31277591104275028818"
+            }
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Открываем следующий участок карты. Я хранил записи вместе с билетами, но порядок в папке долго не продержался. Расставьте четыре блюда по выбранным направлениям."
+        },
+        {
+          "id": "q_23174110630861173203",
+          "type": "matching",
+          "title": "Европейские вкусы",
+          "prompt": "",
+          "maxScore": 4,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": true,
+          "shuffle": true,
+          "config": {
+            "items": [
+              {
+                "id": "i_37151477430467571941",
+                "dishId": "cheese_fondue",
+                "text": "Сырное фондю",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-47.webp",
+                "imageAlt": "Фотография блюда «Сырное фондю»",
+                "label": "Сырное фондю"
+              },
+              {
+                "id": "i_20947107811023506643",
+                "dishId": "gazpacho",
+                "text": "Гаспачо",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-36.webp",
+                "imageAlt": "Фотография блюда «Гаспачо»",
+                "label": "Гаспачо"
+              },
+              {
+                "id": "i_39252581493086402936",
+                "dishId": "olivier",
+                "text": "Салат «Оливье»",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-38.webp",
+                "imageAlt": "Фотография блюда «Салат «Оливье»»",
+                "label": "Салат «Оливье»"
+              },
+              {
+                "id": "i_27566124430946996256",
+                "dishId": "brussels_waffle",
+                "text": "Брюссельская вафля",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-37.webp",
+                "imageAlt": "Фотография блюда «Брюссельская вафля»",
+                "label": "Брюссельская вафля"
+              }
+            ],
+            "targets": [
+              {
+                "id": "b_36219892534052697086",
+                "label": "Бельгия",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/be.svg"
+              },
+              {
+                "id": "b_06758871320552877504",
+                "label": "Россия",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/ru.svg"
+              },
+              {
+                "id": "b_23223278040670166547",
+                "label": "Испания",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/es.svg"
+              },
+              {
+                "id": "b_30055049414122945357",
+                "label": "Швейцария",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/ch.svg"
+              }
+            ]
+          },
+          "key": {
+            "mapping": {
+              "i_37151477430467571941": "b_30055049414122945357",
+              "i_20947107811023506643": "b_23223278040670166547",
+              "i_27566124430946996256": "b_36219892534052697086",
+              "i_39252581493086402936": "b_06758871320552877504"
+            }
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "На этой странице снова четыре остановки. Мне нравится видеть весь путь сразу, поэтому фотографии оставим рядом с картой. Каждую отметку можно изменить до сохранения."
+        },
+        {
+          "id": "q_02180536202768812109",
+          "type": "matching",
+          "title": "От Европы до Азии",
+          "prompt": "",
+          "maxScore": 4,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": true,
+          "shuffle": true,
+          "config": {
+            "items": [
+              {
+                "id": "i_29875579762727413007",
+                "dishId": "goulash",
+                "text": "Гуляш",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-42.webp",
+                "imageAlt": "Фотография блюда «Гуляш»",
+                "label": "Гуляш"
+              },
+              {
+                "id": "i_07105095851249491820",
+                "dishId": "eclair",
+                "text": "Эклер",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-39.webp",
+                "imageAlt": "Фотография блюда «Эклер»",
+                "label": "Эклер"
+              },
+              {
+                "id": "i_25497361980771832316",
+                "dishId": "kharcho",
+                "text": "Суп харчо",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-41.webp",
+                "imageAlt": "Фотография блюда «Суп харчо»",
+                "label": "Суп харчо"
+              },
+              {
+                "id": "i_10909521561841573841",
+                "dishId": "peking_duck",
+                "text": "Пекинская утка",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-40.webp",
+                "imageAlt": "Фотография блюда «Пекинская утка»",
+                "label": "Пекинская утка"
+              }
+            ],
+            "targets": [
+              {
+                "id": "b_06203558301197406942",
+                "label": "Венгрия",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/hu.svg"
+              },
+              {
+                "id": "b_16385920902293438212",
+                "label": "Франция",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/fr.svg"
+              },
+              {
+                "id": "b_13910275720552783188",
+                "label": "Грузия",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/ge.svg"
+              },
+              {
+                "id": "b_02056644692449145878",
+                "label": "Китай",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/cn.svg"
+              }
+            ]
+          },
+          "key": {
+            "mapping": {
+              "i_07105095851249491820": "b_16385920902293438212",
+              "i_10909521561841573841": "b_02056644692449145878",
+              "i_25497361980771832316": "b_13910275720552783188",
+              "i_29875579762727413007": "b_06203558301197406942"
+            }
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Каждая поездка оставляет свою папку фотографий. Сегодня папки встретились на одном столе: свяжите этот набор с направлениями на карте. Я отмечу только ваш выбор."
+        },
+        {
+          "id": "q_10102656090544920919",
+          "type": "matching",
+          "title": "Гастрономическая карта",
+          "prompt": "",
+          "maxScore": 4,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": true,
+          "shuffle": true,
+          "config": {
+            "items": [
+              {
+                "id": "i_33894195071244485901",
+                "dishId": "mochi",
+                "text": "Моти",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-46.webp",
+                "imageAlt": "Фотография блюда «Моти»",
+                "label": "Моти"
+              },
+              {
+                "id": "i_21383674272224495742",
+                "dishId": "buffalo_wings",
+                "text": "Крылышки баффало",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-43.webp",
+                "imageAlt": "Фотография блюда «Крылышки баффало»",
+                "label": "Крылышки баффало"
+              },
+              {
+                "id": "i_14336834023120073699",
+                "dishId": "burrito",
+                "text": "Буррито",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-45.webp",
+                "imageAlt": "Фотография блюда «Буррито»",
+                "label": "Буррито"
+              },
+              {
+                "id": "i_36480891630600782143",
+                "dishId": "carbonara",
+                "text": "Паста карбонара",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour2/t2-active-44.webp",
+                "imageAlt": "Фотография блюда «Паста карбонара»",
+                "label": "Паста карбонара"
+              }
+            ],
+            "targets": [
+              {
+                "id": "b_16357023371150838876",
+                "label": "США",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/us.svg"
+              },
+              {
+                "id": "b_31142249041980859165",
+                "label": "Япония",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/jp.svg"
+              },
+              {
+                "id": "b_27691014922674687170",
+                "label": "Италия",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/it.svg"
+              },
+              {
+                "id": "b_21976917183579862310",
+                "label": "Мексика",
+                "flagUrl": "/constructor/legacy/assets/olympiad/flags/mx.svg"
+              }
+            ]
+          },
+          "key": {
+            "mapping": {
+              "i_21383674272224495742": "b_16357023371150838876",
+              "i_36480891630600782143": "b_27691014922674687170",
+              "i_14336834023120073699": "b_21976917183579862310",
+              "i_33894195071244485901": "b_31142249041980859165"
+            }
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Последний участок карты перед блокнотом. Четыре снимка, четыре направления и ещё одна страница нашего маршрута. Когда закончите, сохраните сопоставления — записи останутся в альбоме."
+        }
+      ]
+    },
+    {
+      "id": "tour-3",
+      "title": "Кулинарный детектив",
+      "instructions": "Определите блюдо по трём подсказкам и введите его название: 10 заданий по 3 балла.",
+      "seconds": 0,
+      "shuffle": false,
+      "selectCount": 0,
+      "allowBack": true,
+      "allowSkip": true,
+      "transition": "automatic",
+      "threshold": 0,
+      "questions": [
+        {
+          "id": "q_13208065730069249458",
+          "type": "short_text",
+          "title": "Досье блюда № 1",
+          "prompt": "Страница блокнота: Россия.",
+          "maxScore": 3,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "clues": [
+              {
+                "label": "Основа",
+                "text": "Творог"
+              },
+              {
+                "label": "Форма",
+                "text": "Небольшие порции в виде лепёшек"
+              },
+              {
+                "label": "Как готовят",
+                "text": "Обычно обжаривают на сковороде"
+              }
+            ]
+          },
+          "key": {
+            "acceptedAnswers": [
+              "сырники",
+              "сырник",
+              "сырнички",
+              "творожники",
+              "творожник",
+              "сырника",
+              "сырников",
+              "сырником",
+              "сырниками",
+              "творожника",
+              "творожников",
+              "творожниками",
+              "творожные сырники",
+              "сырники творожные",
+              "творожный сырник",
+              "сырник творожный",
+              "сырники из творога",
+              "сырник из творога",
+              "syrniki",
+              "syrnik",
+              "сирники",
+              "сирник",
+              "сырнки",
+              "сырнеки",
+              "сырничкии",
+              "тварожники"
+            ]
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour3/t3-case-01.webp",
+              "mime": "image/webp",
+              "alt": "Ингредиенты и этап приготовления к досье № 1"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эти заметки — из России. Открываю блокнот — и обнаруживаю, что заголовки куда-то исчезли. Три заметки на странице сохранились. Прочитайте их и верните записи название; поле уже готово к вводу."
+        },
+        {
+          "id": "q_23872372671849452533",
+          "type": "short_text",
+          "title": "Досье блюда № 2",
+          "prompt": "Страница блокнота: Беларусь.",
+          "maxScore": 3,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "clues": [
+              {
+                "label": "Основа",
+                "text": "Тёртый сырой картофель"
+              },
+              {
+                "label": "Форма",
+                "text": "Небольшие плоские порции"
+              },
+              {
+                "label": "Как готовят",
+                "text": "Обжаривают на сковороде"
+              }
+            ]
+          },
+          "key": {
+            "acceptedAnswers": [
+              "драники",
+              "драник",
+              "деруны",
+              "дерун",
+              "картофельные оладьи",
+              "картофельная оладья",
+              "оладьи картофельные",
+              "драника",
+              "драников",
+              "драниками",
+              "деруна",
+              "дерунов",
+              "дерунами",
+              "картофельные драники",
+              "драники картофельные",
+              "картофельный драник",
+              "драник картофельный",
+              "картофельные деруны",
+              "деруны картофельные",
+              "draniki",
+              "dranik",
+              "deruny",
+              "derun",
+              "дранеки",
+              "драникии",
+              "дранки",
+              "дранник",
+              "дранники",
+              "дирун",
+              "дируны"
+            ]
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour3/t3-case-02.webp",
+              "mime": "image/webp",
+              "alt": "Ингредиенты и этап приготовления к досье № 2"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эти заметки — из Беларуси. На следующей странице снова пустой заголовок. Обычно я записываю всё после ужина, но здесь явно отвлёкся. Посмотрите на три подсказки и подпишите эту запись."
+        },
+        {
+          "id": "q_08032208143383931661",
+          "type": "short_text",
+          "title": "Досье блюда № 3",
+          "prompt": "Страница блокнота: Израиль.",
+          "maxScore": 3,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "clues": [
+              {
+                "label": "Основа",
+                "text": "Томатно-овощной соус"
+              },
+              {
+                "label": "Особенность",
+                "text": "Яйца готовят целыми, не взбивая"
+              },
+              {
+                "label": "Подача",
+                "text": "Часто подают прямо в сковороде"
+              }
+            ]
+          },
+          "key": {
+            "acceptedAnswers": [
+              "шакшука",
+              "шакшуки",
+              "шакшуку",
+              "шакшукой",
+              "шакшукою",
+              "shakshuka",
+              "shakshukas",
+              "шак шука",
+              "шакшукаа",
+              "шакшукка",
+              "шакшучка",
+              "шакшуак",
+              "шакшюка",
+              "шакшюки"
+            ]
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour3/t3-case-03.webp",
+              "mime": "image/webp",
+              "alt": "Ингредиенты и этап приготовления к досье № 3"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эти заметки — из Израиля. Эта запись пережила дорогу в боковом кармане. Слова на месте, а название осталось за кадром. Давайте восстановим его по тем трём заметкам, которые сохранились."
+        },
+        {
+          "id": "q_35850816040032835825",
+          "type": "short_text",
+          "title": "Досье блюда № 4",
+          "prompt": "Страница блокнота: Узбекистан.",
+          "maxScore": 3,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "clues": [
+              {
+                "label": "Начинка",
+                "text": "Сочная начинка — мясо с луком"
+              },
+              {
+                "label": "Форма",
+                "text": "Закрытое изделие часто формуют треугольником"
+              },
+              {
+                "label": "Как готовят",
+                "text": "Традиционный вариант выпекают на стенке тандыра"
+              }
+            ]
+          },
+          "key": {
+            "acceptedAnswers": [
+              "самса",
+              "самсы",
+              "самсу",
+              "самсой",
+              "самсою",
+              "самс",
+              "самсами",
+              "самсам",
+              "самсах",
+              "samsa",
+              "somsa",
+              "samsas",
+              "somsas",
+              "самсаа",
+              "самсса",
+              "самссы",
+              "сомса",
+              "сомсы",
+              "самсаы"
+            ]
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour3/t3-case-04.webp",
+              "mime": "image/webp",
+              "alt": "Ингредиенты и этап приготовления к досье № 4"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эти заметки — из Узбекистана. Я люблю короткие записи: потом они напоминают целый вечер. Здесь их ровно три, но заголовка опять нет. Прочитайте страницу и впишите подходящее название блюда."
+        },
+        {
+          "id": "q_19479737791881501575",
+          "type": "short_text",
+          "title": "Досье блюда № 5",
+          "prompt": "Страница блокнота: Ливан.",
+          "maxScore": 3,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "clues": [
+              {
+                "label": "Основа",
+                "text": "Нут"
+              },
+              {
+                "label": "Консистенция",
+                "text": "Густая однородная паста"
+              },
+              {
+                "label": "Дополнение",
+                "text": "В состав входит тахини — кунжутная паста"
+              }
+            ]
+          },
+          "key": {
+            "acceptedAnswers": [
+              "хумус",
+              "гумус",
+              "хумуса",
+              "хумусом",
+              "гумуса",
+              "гумусом",
+              "hummus",
+              "humus",
+              "хуммус",
+              "хумусс",
+              "хумуссс",
+              "хуммуса",
+              "хуммусом",
+              "хумсу",
+              "хумусомм",
+              "хумос",
+              "гуммус"
+            ]
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour3/t3-case-05.webp",
+              "mime": "image/webp",
+              "alt": "Ингредиенты и этап приготовления к досье № 5"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эти заметки — из Ливана. Мы добрались до середины блокнота. Я оставлял здесь место для названий, а заполнял только заметки. Сегодня у этой привычки наконец появился шанс на исправление."
+        },
+        {
+          "id": "q_21258641233064019581",
+          "type": "short_text",
+          "title": "Досье блюда № 6",
+          "prompt": "Страница блокнота: Австрия.",
+          "maxScore": 3,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "clues": [
+              {
+                "label": "Тесто",
+                "text": "В классическом варианте — тонкое вытяжное тесто"
+              },
+              {
+                "label": "Начинка",
+                "text": "Яблоки"
+              },
+              {
+                "label": "Как готовят",
+                "text": "Сворачивают с начинкой и выпекают"
+              }
+            ]
+          },
+          "key": {
+            "acceptedAnswers": [
+              "яблочный штрудель",
+              "штрудель",
+              "штрудели",
+              "штруделя",
+              "штруделей",
+              "штруделем",
+              "штруделями",
+              "штрудель яблочный",
+              "яблочные штрудели",
+              "штрудели яблочные",
+              "яблочного штруделя",
+              "штруделя яблочного",
+              "яблочных штруделей",
+              "штруделей яблочных",
+              "штрудель с яблоками",
+              "штрудели с яблоками",
+              "apple strudel",
+              "strudel",
+              "apple strudels",
+              "strudels",
+              "штрудел",
+              "штудель",
+              "штудели",
+              "штрюдель",
+              "яблочный штрудел",
+              "яблочный штудель",
+              "штудель яблочный",
+              "яблочные штудели",
+              "штудели яблочные",
+              "штудель с яблоками",
+              "штрудель яблочний",
+              "яблочний штрудель"
+            ]
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour3/t3-case-06.webp",
+              "mime": "image/webp",
+              "alt": "Ингредиенты и этап приготовления к досье № 6"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эти заметки — из Австрии. Эту страницу я выделил закладкой, чтобы вернуться позже. Позже наступило сегодня. Три подсказки уже перед вами; осталось восстановить заголовок и сохранить свою запись."
+        },
+        {
+          "id": "q_26376356461990949787",
+          "type": "short_text",
+          "title": "Досье блюда № 7",
+          "prompt": "Страница блокнота: США.",
+          "maxScore": 3,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "clues": [
+              {
+                "label": "Вид",
+                "text": "Десерт"
+              },
+              {
+                "label": "Основа начинки",
+                "text": "Сливочный или творожный сыр"
+              },
+              {
+                "label": "Структура",
+                "text": "Отдельная основа, часто из крошки печенья"
+              }
+            ]
+          },
+          "key": {
+            "acceptedAnswers": [
+              "чизкейк",
+              "чиз кейк",
+              "чизкейки",
+              "чиз кейки",
+              "чизкейка",
+              "чизкейков",
+              "чизкейком",
+              "чизкейками",
+              "cheesecake",
+              "cheesecakes",
+              "cheese cake",
+              "cheese cakes",
+              "чизкеик",
+              "чизкейкк",
+              "чизкейкки",
+              "чизкеки",
+              "чизкйек",
+              "чизкек",
+              "чиз кек"
+            ]
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour3/t3-case-07.webp",
+              "mime": "image/webp",
+              "alt": "Ингредиенты и этап приготовления к досье № 7"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эти заметки — из США. Здесь я начал новую страницу особенно аккуратно. Дальше аккуратность куда-то ушла, зато заметки остались понятными. Прочитайте все три, прежде чем вписать название в блокнот."
+        },
+        {
+          "id": "q_00457136960260201988",
+          "type": "short_text",
+          "title": "Досье блюда № 8",
+          "prompt": "Страница блокнота: Россия.",
+          "maxScore": 3,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "clues": [
+              {
+                "label": "Основа",
+                "text": "Говядина, нарезанная тонкими полосками"
+              },
+              {
+                "label": "Соус",
+                "text": "В этой версии — сметанный соус с луком"
+              },
+              {
+                "label": "Как готовят",
+                "text": "Мясо быстро обжаривают и доводят до готовности в соусе"
+              }
+            ]
+          },
+          "key": {
+            "acceptedAnswers": [
+              "бефстроганов",
+              "беф строганов",
+              "говядина по-строгановски",
+              "мясо по-строгановски",
+              "бефстроганов из говядины",
+              "beef stroganoff",
+              "beef stroganov",
+              "befstroganov",
+              "бефстроганоф",
+              "бефстроганофь",
+              "бефстрогонов",
+              "бевстроганов"
+            ]
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour3/t3-case-08-v3.webp",
+              "mime": "image/webp",
+              "alt": "Ингредиенты и этап приготовления к досье № 8"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эти заметки — из России. Следующая запись короткая, но я хорошо помню сам вечер. Блокнот сохранил только три подсказки, и ими мы ограничимся. Попробуйте вернуть этой странице её заголовок."
+        },
+        {
+          "id": "q_06776045290451356923",
+          "type": "short_text",
+          "title": "Досье блюда № 9",
+          "prompt": "Страница блокнота: Мексика.",
+          "maxScore": 3,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "clues": [
+              {
+                "label": "Основа",
+                "text": "Авокадо"
+              },
+              {
+                "label": "Консистенция",
+                "text": "Густой соус или паста"
+              },
+              {
+                "label": "Подача",
+                "text": "Закуска или дополнение к другим блюдам"
+              }
+            ]
+          },
+          "key": {
+            "acceptedAnswers": [
+              "гуакамоле",
+              "guacamole",
+              "гуакомоле",
+              "гуакамолле",
+              "гуакомолле",
+              "гуакамоли",
+              "гуакомоли",
+              "гуакамолэ",
+              "гуакомолэ",
+              "гуакамол",
+              "гуакамлоэ"
+            ]
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour3/t3-case-09.webp",
+              "mime": "image/webp",
+              "alt": "Ингредиенты и этап приготовления к досье № 9"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эти заметки — из Мексики. До конца блокнота осталось немного. Эта страница тоже ждёт названия, а рядом уже видны записки друзей. Сначала разберём три подсказки и завершим текущую запись."
+        },
+        {
+          "id": "q_09389185332987426097",
+          "type": "short_text",
+          "title": "Досье блюда № 10",
+          "prompt": "Страница блокнота: Россия.",
+          "maxScore": 3,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "clues": [
+              {
+                "label": "Основа",
+                "text": "Мясной бульон и несколько видов мясных продуктов, включая копчёности"
+              },
+              {
+                "label": "Вкусовые добавки",
+                "text": "Солёные огурцы, лук и томат"
+              },
+              {
+                "label": "Отделка при подаче",
+                "text": "Лимон, маслины и сметана"
+              }
+            ]
+          },
+          "key": {
+            "acceptedAnswers": [
+              "солянка",
+              "мясная солянка",
+              "сборная солянка",
+              "солянка мясная",
+              "солянка сборная",
+              "солянка сборная мясная",
+              "сборная мясная солянка",
+              "солянки",
+              "солянку",
+              "солянкой",
+              "solyanka",
+              "meat solyanka",
+              "салянка",
+              "соляннка",
+              "солянкаа",
+              "салянки",
+              "салянку",
+              "сольянка",
+              "солянка мяснаяя"
+            ]
+          },
+          "media": [
+            {
+              "url": "/constructor/legacy/assets/olympiad/tour3/t3-case-10-v4.webp",
+              "mime": "image/webp",
+              "alt": "Ингредиенты и этап приготовления к досье № 10"
+            }
+          ],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Эти заметки — из России. Последняя страница нашего блокнота. Три сохранённые заметки помогут вернуть ещё одно название. После этой записи закроем книжку и посмотрим, что пожелала компания за столом."
+        }
+      ]
+    },
+    {
+      "id": "tour-4",
+      "title": "Собери заказ гостя",
+      "instructions": "Выберите одно блюдо по пожеланиям гостя: 8 заказов по 4 балла.",
+      "seconds": 0,
+      "shuffle": false,
+      "selectCount": 0,
+      "allowBack": true,
+      "allowSkip": true,
+      "transition": "automatic",
+      "threshold": 0,
+      "questions": [
+        {
+          "id": "q_36040476000415492834",
+          "type": "single_choice",
+          "title": "Заказ гостя № 1",
+          "prompt": "Хочу горячий суп со свёклой, кусочками овощей и говядиной. Со сметаной и хлебом. Не однородный крем-суп.",
+          "maxScore": 4,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_27402626570672266281",
+                "menuDishId": "mushroom_cream_soup",
+                "text": "Крем-суп из шампиньонов",
+                "description": "Однородный грибной крем-суп со сливками, ломтиками шампиньонов и тостами.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-plate-v2-1c3b3ae30b0e.webp",
+                "imageAlt": "Крем-суп из шампиньонов",
+                "label": "Крем-суп из шампиньонов"
+              },
+              {
+                "id": "o_36153845240742178019",
+                "menuDishId": "shchi_t4_v3",
+                "text": "Щи из свежей капусты с говядиной",
+                "description": "Суп с говядиной, свежей капустой, картофелем, морковью и луком; сметана и хлеб отдельно.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-1f394d757551.webp",
+                "imageAlt": "Щи из свежей капусты с говядиной",
+                "label": "Щи из свежей капусты с говядиной"
+              },
+              {
+                "id": "o_04440087824058770048",
+                "menuDishId": "solyanka_t4_v3",
+                "text": "Солянка мясная сборная",
+                "description": "Суп с несколькими видами мясных продуктов, солёным огурцом и томатом; маслины, лимон, сметана и хлеб для подачи.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-3e3cba5b4f90.webp",
+                "imageAlt": "Солянка мясная сборная",
+                "label": "Солянка мясная сборная"
+              },
+              {
+                "id": "o_15532137903153941933",
+                "menuDishId": "borsch",
+                "text": "Борщ с говядиной и сметаной",
+                "description": "Горячий суп со свёклой, капустой, картофелем и кусочками говядины; сметана и хлеб для подачи.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-plate-v2-12c457572062.webp",
+                "imageAlt": "Борщ с говядиной и сметаной",
+                "label": "Борщ с говядиной и сметаной"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_15532137903153941933"
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Компания уже собралась за столом. Передаю первое пожелание: все условия написаны в заказе, а рядом четыре готовые подачи. Выберите одну и подтвердите заказ."
+        },
+        {
+          "id": "q_15524782983257086249",
+          "type": "single_choice",
+          "title": "Заказ гостя № 2",
+          "prompt": "Начну с овощного салата: пусть будет свёкла и небольшие кусочки овощей. Заправка — растительное масло. Сегодня без мяса, рыбы и майонеза.",
+          "maxScore": 4,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_06249585733171899777",
+                "menuDishId": "vinaigrette_t4_v3",
+                "text": "Винегрет с зелёным горошком",
+                "description": "Свёкла, картофель, морковь, солёный огурец, лук и горошек, нарезанные небольшими кусочками; заправка на растительном масле.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-773c9395fe9c.webp",
+                "imageAlt": "Винегрет с зелёным горошком",
+                "label": "Винегрет с зелёным горошком"
+              },
+              {
+                "id": "o_13444758053571950525",
+                "menuDishId": "olivier_beef_t4_v3",
+                "text": "Оливье с говядиной",
+                "description": "Отварная говядина, картофель, морковь, яйца, солёный огурец и горошек; майонезная заправка.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-62571e39e0c6.webp",
+                "imageAlt": "Оливье с говядиной",
+                "label": "Оливье с говядиной"
+              },
+              {
+                "id": "o_05058132021080718160",
+                "menuDishId": "herring_shuba_t4_v3",
+                "text": "Сельдь под шубой",
+                "description": "Сельдь, лук, картофель, морковь и свёкла, уложенные слоями с майонезом. Здесь версия без яйца.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-0594f5db278f.webp",
+                "imageAlt": "Сельдь под шубой",
+                "label": "Сельдь под шубой"
+              },
+              {
+                "id": "o_27736263321862254548",
+                "menuDishId": "mimosa_saira_t4_v3",
+                "text": "Мимоза с сайрой",
+                "description": "Слоёный салат из консервированной сайры, яиц, лука и майонеза, с крошкой желтка сверху. Здесь версия без картофеля и моркови.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-21efb180f1b3.webp",
+                "imageAlt": "Мимоза с сайрой",
+                "label": "Мимоза с сайрой"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_06249585733171899777"
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Следующий гость передал свою записку. Я оставил её без сокращений, чтобы ничего не потерять. Сравните условия с четырьмя подачами и выберите одну для заказа."
+        },
+        {
+          "id": "q_01099733240604247955",
+          "type": "single_choice",
+          "title": "Заказ гостя № 3",
+          "prompt": "На горячее выберу курицу, тушённую с овощами, а не жареную в панировке. Люблю томатную подливу и зелень; к ней хотелось бы рис.",
+          "maxScore": 4,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_24942540970646543824",
+                "menuDishId": "chicken_kyiv_t4_v3",
+                "text": "Котлета по-киевски с пюре",
+                "description": "Цельное куриное филе со сливочным маслом и зеленью внутри, обжаренное в сухарной панировке. Гарнир — картофельное пюре.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-e42f4cb9717c.webp",
+                "imageAlt": "Котлета по-киевски с пюре",
+                "label": "Котлета по-киевски с пюре"
+              },
+              {
+                "id": "o_07395281750872836193",
+                "menuDishId": "chicken_tabaka_t4_v3",
+                "text": "Цыплёнок табака с овощами",
+                "description": "Небольшой цыплёнок, распластанный и обжаренный на сковороде под прессом; томат и огурец для подачи.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-e8108dbd53c4.webp",
+                "imageAlt": "Цыплёнок табака с овощами",
+                "label": "Цыплёнок табака с овощами"
+              },
+              {
+                "id": "o_13627242833845898166",
+                "menuDishId": "chicken_satsivi_t4_v3",
+                "text": "Сациви из курицы с рисом",
+                "description": "Курица в густом соусе из грецких орехов с луком, чесноком и пряностями. В этом меню подаётся с рисом.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-5d6f67dc2f6c.webp",
+                "imageAlt": "Сациви из курицы с рисом",
+                "label": "Сациви из курицы с рисом"
+              },
+              {
+                "id": "o_12548502030550529649",
+                "menuDishId": "chakhokhbili_t4_v3",
+                "text": "Чахохбили с рисом",
+                "description": "Кусочки курицы, тушённые с томатами, луком, чесноком и зеленью. Гарнир — белый рис.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-61f7ee6b9067.webp",
+                "imageAlt": "Чахохбили с рисом",
+                "label": "Чахохбили с рисом"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_12548502030550529649"
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Теперь посмотрим ещё одно пожелание компании. Все подробности находятся в карточке заказа; моя история их не меняет. Перед вами четыре подачи, и выбор остаётся за вами."
+        },
+        {
+          "id": "q_21441866952890534323",
+          "type": "single_choice",
+          "title": "Заказ гостя № 4",
+          "prompt": "Хочу сытное мясное блюдо с картофелем: говядина кусочками, картофель тушится вместе с ней. Пюре оставим на другой раз; сырная корочка тоже не нужна.",
+          "maxScore": 4,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_26762514973933275409",
+                "menuDishId": "beef_roast_t4_v3",
+                "text": "Жаркое из говядины с картофелем",
+                "description": "Кусочки говядины и картофеля, тушённые вместе с луком и морковью в небольшом количестве подливы.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-ae9df4ce335f.webp",
+                "imageAlt": "Жаркое из говядины с картофелем",
+                "label": "Жаркое из говядины с картофелем"
+              },
+              {
+                "id": "o_14771997162289082407",
+                "menuDishId": "meat_french_t4_v3",
+                "text": "Мясо по-французски с картофелем",
+                "description": "Привычная версия кафе: свинина с ломтиками картофеля, луком и сметаной, запечённая под сырной корочкой.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-eb4c5b31e237.webp",
+                "imageAlt": "Мясо по-французски с картофелем",
+                "label": "Мясо по-французски с картофелем"
+              },
+              {
+                "id": "o_04371845653100599019",
+                "menuDishId": "goulash_puree_t4_v3",
+                "text": "Гуляш с картофельным пюре",
+                "description": "Столовая версия: кусочки говядины в томатной подливе с луком и морковью. Картофельное пюре подаётся отдельно от мяса.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-a029353f0af2.webp",
+                "imageAlt": "Гуляш с картофельным пюре",
+                "label": "Гуляш с картофельным пюре"
+              },
+              {
+                "id": "o_34759878692894138325",
+                "menuDishId": "stroganoff_puree_t4_v3",
+                "text": "Бефстроганов с картофельным пюре",
+                "description": "Тонкие полоски говядины с луком в сметанном соусе с небольшим добавлением томата; рядом картофельное пюре.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-4c14a2e824c6.webp",
+                "imageAlt": "Бефстроганов с картофельным пюре",
+                "label": "Бефстроганов с картофельным пюре"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_26762514973933275409"
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Мне нравится, когда меню превращается в общий разговор. Но сейчас у нас конкретный заказ: прочитайте пожелание целиком, посмотрите все четыре фотографии и выберите подачу."
+        },
+        {
+          "id": "q_14787663551402996368",
+          "type": "single_choice",
+          "title": "Заказ гостя № 5",
+          "prompt": "Для меня — белая рыба с отварным картофелем. Рыбу хочу приготовленную в небольшом количестве бульона, без жареной корочки. Соус — со сливочным маслом, яйцом и зеленью.",
+          "maxScore": 4,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_12686614580458983918",
+                "menuDishId": "fish_marinade_t4_v3",
+                "text": "Рыба под овощным маринадом с рисом",
+                "description": "Обжаренные кусочки минтая под маринадом из моркови, лука и томата. В этом меню подаются с белым рисом.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-8ba4840eda6f.webp",
+                "imageAlt": "Рыба под овощным маринадом с рисом",
+                "label": "Рыба под овощным маринадом с рисом"
+              },
+              {
+                "id": "o_18414133562408739576",
+                "menuDishId": "fish_cutlets_t4_v3",
+                "text": "Рыбные котлеты с пюре",
+                "description": "Жареные котлеты из измельчённой трески с луком, яйцом и размоченным хлебом. Гарнир — картофельное пюре.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-feba2e7f3c49.webp",
+                "imageAlt": "Рыбные котлеты с пюре",
+                "label": "Рыбные котлеты с пюре"
+              },
+              {
+                "id": "o_16196650522463954000",
+                "menuDishId": "zander_polish_t4_v3",
+                "text": "Судак под польским соусом с картофелем",
+                "description": "Припущенное филе судака с соусом из сливочного масла, рубленого варёного яйца и петрушки. Гарнир — отварной картофель.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-c1a3b10021f7.webp",
+                "imageAlt": "Судак под польским соусом с картофелем",
+                "label": "Судак под польским соусом с картофелем"
+              },
+              {
+                "id": "o_18956194700228338810",
+                "menuDishId": "fish_and_chips_t4_v3",
+                "text": "Фиш-энд-чипс",
+                "description": "Филе белой рыбы, обжаренное в хрустящем кляре, с крупно нарезанным жареным картофелем.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-0a0bd123fe6a.webp",
+                "imageAlt": "Фиш-энд-чипс",
+                "label": "Фиш-энд-чипс"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_16196650522463954000"
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Половина записок уже передана. Следующая ждёт вашего решения: условия сохранены полностью, а четыре подачи расположены рядом. Можно сравнить их ещё раз перед подтверждением."
+        },
+        {
+          "id": "q_07143838624021533853",
+          "type": "single_choice",
+          "title": "Заказ гостя № 6",
+          "prompt": "Попробую пасту с начинкой из мягкого сыра и шпината. Хочу небольшие закрытые изделия, сваренные в воде. Запечённую пасту и мясной соус сегодня пропущу.",
+          "maxScore": 4,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_28968876233979852357",
+                "menuDishId": "ricotta_ravioli",
+                "text": "Равиоли с рикоттой и шпинатом",
+                "description": "Небольшие отварные изделия из яичного теста с мягким сыром рикотта и шпинатом внутри.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v1-51e097c6fa28.webp",
+                "imageAlt": "Равиоли с рикоттой и шпинатом",
+                "label": "Равиоли с рикоттой и шпинатом"
+              },
+              {
+                "id": "o_33225539712357551074",
+                "menuDishId": "cannelloni_t4_v3",
+                "text": "Каннеллони с рикоттой и шпинатом",
+                "description": "Крупные трубочки пасты с рикоттой и шпинатом, запечённые под соусом бешамель и сыром.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-7777ffba97b8.webp",
+                "imageAlt": "Каннеллони с рикоттой и шпинатом",
+                "label": "Каннеллони с рикоттой и шпинатом"
+              },
+              {
+                "id": "o_39553757731339674623",
+                "menuDishId": "lasagna_t4_v3",
+                "text": "Лазанья с мясным рагу",
+                "description": "Слои яичной пасты, мясного рагу с томатом и соуса бешамель, запечённые под сыром. Здесь версия со светлыми листами пасты.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-6ddc428bdc48.webp",
+                "imageAlt": "Лазанья с мясным рагу",
+                "label": "Лазанья с мясным рагу"
+              },
+              {
+                "id": "o_30915989313848297964",
+                "menuDishId": "carbonara_t4_v3",
+                "text": "Спагетти карбонара",
+                "description": "Спагетти с яйцом, пекорино, обжаренной свиной щековиной и чёрным перцем; версия без сливок.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-93aad856590b.webp",
+                "imageAlt": "Спагетти карбонара",
+                "label": "Спагетти карбонара"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_28968876233979852357"
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Очередное пожелание лежит рядом с меню. Я обещал друзьям передать всё точно, поэтому ориентируемся на текст заказа. Посмотрите четыре варианта и отметьте выбранную подачу."
+        },
+        {
+          "id": "q_34704643412586717323",
+          "type": "single_choice",
+          "title": "Заказ гостя № 7",
+          "prompt": "Для завтрака подберите мучное изделие из молочно-яичного теста текучей консистенции, без дрожжей и химических разрыхлителей. Тесто распределяют по нагретой сковороде, смазанной небольшим количеством жира. Сладкое сопровождение подают отдельно; творожная основа и запекание в форме не предусматриваются.",
+          "maxScore": 4,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_34814916010990563364",
+                "menuDishId": "flour_oladyi",
+                "text": "Оладьи со сметаной",
+                "description": "Небольшие пышные мучные оладьи на кефире, обжаренные на сковороде; сметана отдельно.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v1-73d09e4f21ba.webp",
+                "imageAlt": "Оладьи со сметаной",
+                "label": "Оладьи со сметаной"
+              },
+              {
+                "id": "o_00084902111031505605",
+                "menuDishId": "thin_blini",
+                "text": "Тонкие блины с вареньем",
+                "description": "Блины из жидкого теста на молоке с яйцом и мукой, без дрожжей, соды и разрыхлителя; готовят на сковороде с небольшим количеством жира. Ягодное варенье подают отдельно.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v1-a10f479e6bc2.webp",
+                "imageAlt": "Тонкие блины с вареньем",
+                "label": "Тонкие блины с вареньем"
+              },
+              {
+                "id": "o_40523031871427577675",
+                "menuDishId": "syrniki_t4_v3",
+                "text": "Сырники со сметаной",
+                "description": "Небольшие жареные изделия из творога с яйцом, сахаром и мукой, с румяной корочкой; сметана отдельно.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-d1098dfcbfe6.webp",
+                "imageAlt": "Сырники со сметаной",
+                "label": "Сырники со сметаной"
+              },
+              {
+                "id": "o_21415962882895729433",
+                "menuDishId": "curd_casserole_t4_v3",
+                "text": "Творожная запеканка со сметаной",
+                "description": "Запечённая творожная масса с яйцом и манной крупой, нарезанная порциями; сметана отдельно.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-08da821f67ee.webp",
+                "imageAlt": "Творожная запеканка со сметаной",
+                "label": "Творожная запеканка со сметаной"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_00084902111031505605"
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Осталось ещё две записки компании. Вот первая: прочитайте её условия и сравните готовые подачи. Сохраним ваш выбор, а разговор за столом тем временем продолжится."
+        },
+        {
+          "id": "q_06805042202030983493",
+          "type": "single_choice",
+          "title": "Заказ гостя № 8",
+          "prompt": "К чаю требуется многослойный торт из выпеченных коржей. Крем получают без заваривания из кисломолочного продукта; после сборки изделие выдерживают для увлажнения и размягчения коржей. Тесто имеет аромат введённого в него продукта пчеловодства. Слоёное тесто, кофейная пропитка и запечённая сырная масса не подходят.",
+          "maxScore": 4,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": false,
+          "shuffle": true,
+          "config": {
+            "options": [
+              {
+                "id": "o_23722304110588321977",
+                "menuDishId": "napoleon_t4_v3",
+                "text": "Наполеон с заварным кремом",
+                "description": "Коржи из слоёного теста с молочно-яичным заварным кремом; сверху крошка слоёных коржей. Версия без ореховой посыпки.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-f3b5ce8c8bc2.webp",
+                "imageAlt": "Наполеон с заварным кремом",
+                "label": "Наполеон с заварным кремом"
+              },
+              {
+                "id": "o_15001441642062700722",
+                "menuDishId": "tiramisu_t4_v3",
+                "text": "Тирамису",
+                "description": "Печенье савоярди, пропитанное кофе, крем с маскарпоне и какао сверху; охлаждённая подача.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-5d65e0f86eec.webp",
+                "imageAlt": "Тирамису",
+                "label": "Тирамису"
+              },
+              {
+                "id": "o_28340034271190137922",
+                "menuDishId": "medovik_t4_v3",
+                "text": "Медовик со сметанным кремом",
+                "description": "Тонкие медовые коржи, прослоенные сметанным кремом и выдержанные для пропитки; сверху крошка коржей.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-016a9d5447fd.webp",
+                "imageAlt": "Медовик со сметанным кремом",
+                "label": "Медовик со сметанным кремом"
+              },
+              {
+                "id": "o_36991229602969013245",
+                "menuDishId": "cheesecake_ny_t4_v3",
+                "text": "Чизкейк Нью-Йорк",
+                "description": "Запечённый десерт со сливочным сыром на основе из крошки песочного печенья, подаётся охлаждённым.",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour4/t4-menu-v3-5700d5f2dc8e.webp",
+                "imageAlt": "Чизкейк Нью-Йорк",
+                "label": "Чизкейк Нью-Йорк"
+              }
+            ]
+          },
+          "key": {
+            "optionId": "o_28340034271190137922"
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Последнее пожелание компании перед кухней. Четыре подачи готовы к сравнению, все условия — в карточке заказа. Выберите одну; затем посмотрим, как собрать заключительные блюда вечера."
+        }
+      ]
+    },
+    {
+      "id": "tour-5",
+      "title": "Финальная кухня",
+      "instructions": "Маргарита, греческий салат и Филадельфия: выберите четыре компонента из восьми и соберите каждое блюдо. До 16 баллов за блюдо, без штрафов.",
+      "seconds": 0,
+      "shuffle": false,
+      "selectCount": 0,
+      "allowBack": true,
+      "allowSkip": true,
+      "transition": "automatic",
+      "threshold": 0,
+      "questions": [
+        {
+          "id": "q_07331218101902132856",
+          "type": "restaurant_kitchen",
+          "title": "Пицца «Маргарита»",
+          "prompt": "",
+          "maxScore": 16,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": true,
+          "shuffle": true,
+          "config": {
+            "items": [
+              {
+                "id": "i_19731766683461894839",
+                "text": "Чеддер",
+                "imageAlt": "Чеддер",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/7b8da139573f89431de3c6a5.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/519a1c4f387853bd56117ce6.webp",
+                "visual": {
+                  "token": "db6090e3d96b6b14",
+                  "role": "top",
+                  "scale": 0.78,
+                  "order": 6
+                },
+                "label": "Чеддер"
+              },
+              {
+                "id": "i_06588015603918097918",
+                "text": "Варёное яйцо",
+                "imageAlt": "Варёное яйцо",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/ac84aa43c6d0c5ffdeb72a3e.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/53c7a312f6bc8d350da083f7.webp",
+                "visual": {
+                  "token": "b9e5952ad954b8eb",
+                  "role": "top",
+                  "scale": 0.78,
+                  "order": 3
+                },
+                "label": "Варёное яйцо"
+              },
+              {
+                "id": "i_18263158922160249417",
+                "text": "Моцарелла",
+                "imageAlt": "Моцарелла",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/06d0a602ccde3b7fd0ed5072.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/10807268146232c258511bc2.webp",
+                "visual": {
+                  "token": "46463b4e94a11c4b",
+                  "role": "top",
+                  "scale": 0.78,
+                  "order": 1
+                },
+                "label": "Моцарелла"
+              },
+              {
+                "id": "i_14393314510709216022",
+                "text": "Огурец",
+                "imageAlt": "Огурец",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/790c9f28e2afffaf2bb31ff0.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/d367958a1d4b4fb42864cc6c.webp",
+                "visual": {
+                  "token": "cb5996d5838fe927",
+                  "role": "top",
+                  "scale": 0.78,
+                  "order": 5
+                },
+                "label": "Огурец"
+              },
+              {
+                "id": "i_32362085362422980702",
+                "text": "Базилик",
+                "imageAlt": "Базилик",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/22a44d006e0db616aa691c52.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/77d3900d67e970d4406b517a.webp",
+                "visual": {
+                  "token": "0df12daac60c53b0",
+                  "role": "top",
+                  "scale": 0.78,
+                  "order": 0
+                },
+                "label": "Базилик"
+              },
+              {
+                "id": "i_09187315230484323246",
+                "text": "Тесто для пиццы",
+                "imageAlt": "Тесто для пиццы",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/c54782c8ac94061c3b870784.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/5750ad8c8b19a1a06a261dad.webp",
+                "visual": {
+                  "token": "f422a041aa813032",
+                  "role": "basis",
+                  "scale": 1,
+                  "order": 7
+                },
+                "label": "Тесто для пиццы"
+              },
+              {
+                "id": "i_03587890001337987883",
+                "text": "Томаты и оливковое масло",
+                "imageAlt": "Томаты и оливковое масло",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/e4e1efe5585c970eec62015f.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/0e1b7424b945ec4f807f5333.webp",
+                "visual": {
+                  "token": "c1dd310dfd6cc040",
+                  "role": "sauce",
+                  "scale": 0.84,
+                  "order": 4
+                },
+                "label": "Томаты и оливковое масло"
+              },
+              {
+                "id": "i_10068999390153439073",
+                "text": "Курица гриль",
+                "imageAlt": "Курица гриль",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/85c434ec83c02869107688e5.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/75beedcbc1e5957a8272249d.webp",
+                "visual": {
+                  "token": "a75a6d83e4387028",
+                  "role": "top",
+                  "scale": 0.78,
+                  "order": 2
+                },
+                "label": "Курица гриль"
+              }
+            ],
+            "slots": [],
+            "selectCount": 4,
+            "photo": {
+              "kind": "pizza",
+              "frames": {
+                "shaped": "/constructor/legacy/assets/olympiad/tour5/photo-v4/5750ad8c8b19a1a06a261dad.webp",
+                "oil": "/constructor/legacy/assets/olympiad/tour5/photo-v4/f9975fcd20610ce8c698a9f6.webp"
+              },
+              "finals": [
+                {
+                  "key": "0df12daac60c53b0+46463b4e94a11c4b+a75a6d83e4387028+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/33c425ab73a11e223b188162.webp"
+                },
+                {
+                  "key": "0df12daac60c53b0+46463b4e94a11c4b+b9e5952ad954b8eb+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/ba48207ecf65c6fd616056bf.webp"
+                },
+                {
+                  "key": "0df12daac60c53b0+46463b4e94a11c4b+c1dd310dfd6cc040+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/40d0331e32ced98b858ec60f.webp"
+                },
+                {
+                  "key": "0df12daac60c53b0+46463b4e94a11c4b+cb5996d5838fe927+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/71c580401ed1ec879e45ff06.webp"
+                },
+                {
+                  "key": "0df12daac60c53b0+46463b4e94a11c4b+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/ab8438e3238a3d876e297f68.webp"
+                },
+                {
+                  "key": "0df12daac60c53b0+a75a6d83e4387028+b9e5952ad954b8eb+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/dbd94971a318e0105db363ad.webp"
+                },
+                {
+                  "key": "0df12daac60c53b0+a75a6d83e4387028+c1dd310dfd6cc040+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/49cf58712e97e4e9121d659a.webp"
+                },
+                {
+                  "key": "0df12daac60c53b0+a75a6d83e4387028+cb5996d5838fe927+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/9573423cf0ad571c28a69002.webp"
+                },
+                {
+                  "key": "0df12daac60c53b0+a75a6d83e4387028+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/c37b199b2814fffc9cd0f145.webp"
+                },
+                {
+                  "key": "0df12daac60c53b0+b9e5952ad954b8eb+c1dd310dfd6cc040+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/923100f9eba78b0e05f826be.webp"
+                },
+                {
+                  "key": "0df12daac60c53b0+b9e5952ad954b8eb+cb5996d5838fe927+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/135a1a09e034e44c936b9f2e.webp"
+                },
+                {
+                  "key": "0df12daac60c53b0+b9e5952ad954b8eb+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/5515db7561fcdca62bc4f73b.webp"
+                },
+                {
+                  "key": "0df12daac60c53b0+c1dd310dfd6cc040+cb5996d5838fe927+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/28054d4471362cbf9cd2a660.webp"
+                },
+                {
+                  "key": "0df12daac60c53b0+c1dd310dfd6cc040+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/1a79a14f1d2ecd40ef7ff1ab.webp"
+                },
+                {
+                  "key": "0df12daac60c53b0+cb5996d5838fe927+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/5e539227d90e683cf603fbb9.webp"
+                },
+                {
+                  "key": "46463b4e94a11c4b+a75a6d83e4387028+b9e5952ad954b8eb+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/d0db445ad9088313789eb0c0.webp"
+                },
+                {
+                  "key": "46463b4e94a11c4b+a75a6d83e4387028+c1dd310dfd6cc040+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/4e9c75ade070ad1b33b903c7.webp"
+                },
+                {
+                  "key": "46463b4e94a11c4b+a75a6d83e4387028+cb5996d5838fe927+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/da661d1bc1658799afc0acfd.webp"
+                },
+                {
+                  "key": "46463b4e94a11c4b+a75a6d83e4387028+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/62e6607d3b0bffbe5866a7fe.webp"
+                },
+                {
+                  "key": "46463b4e94a11c4b+b9e5952ad954b8eb+c1dd310dfd6cc040+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/cdcb1302048c84bc1fcb59ab.webp"
+                },
+                {
+                  "key": "46463b4e94a11c4b+b9e5952ad954b8eb+cb5996d5838fe927+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/1dbfa1d2394cb037f209ea14.webp"
+                },
+                {
+                  "key": "46463b4e94a11c4b+b9e5952ad954b8eb+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/b4b46b68e41a00ba69d19640.webp"
+                },
+                {
+                  "key": "46463b4e94a11c4b+c1dd310dfd6cc040+cb5996d5838fe927+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/36bb981d6ae5559e42fcf677.webp"
+                },
+                {
+                  "key": "46463b4e94a11c4b+c1dd310dfd6cc040+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/cdf463ab38bb1c7f9719deb4.webp"
+                },
+                {
+                  "key": "46463b4e94a11c4b+cb5996d5838fe927+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/3858ef570ab50758cb48bded.webp"
+                },
+                {
+                  "key": "a75a6d83e4387028+b9e5952ad954b8eb+c1dd310dfd6cc040+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/1190eff91bdb01589ae26b64.webp"
+                },
+                {
+                  "key": "a75a6d83e4387028+b9e5952ad954b8eb+cb5996d5838fe927+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/81eb8ae87b36447624fec0a2.webp"
+                },
+                {
+                  "key": "a75a6d83e4387028+b9e5952ad954b8eb+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/b87b3bebbbbf3664eb29621d.webp"
+                },
+                {
+                  "key": "a75a6d83e4387028+c1dd310dfd6cc040+cb5996d5838fe927+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/24807ebbc0b5ce9624fbcd47.webp"
+                },
+                {
+                  "key": "a75a6d83e4387028+c1dd310dfd6cc040+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/af3c053d75f3829c9f854695.webp"
+                },
+                {
+                  "key": "a75a6d83e4387028+cb5996d5838fe927+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/c212c71b31349a30501a092f.webp"
+                },
+                {
+                  "key": "b9e5952ad954b8eb+c1dd310dfd6cc040+cb5996d5838fe927+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/9e9d47c3fcb0ea09d195a1ff.webp"
+                },
+                {
+                  "key": "b9e5952ad954b8eb+c1dd310dfd6cc040+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/f3ae89fcdb958e338bc0ab52.webp"
+                },
+                {
+                  "key": "b9e5952ad954b8eb+cb5996d5838fe927+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/b62b92f7e09780687474330f.webp"
+                },
+                {
+                  "key": "c1dd310dfd6cc040+cb5996d5838fe927+db6090e3d96b6b14+f422a041aa813032",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/dada2d651def9eccf64416fe.webp"
+                }
+              ]
+            },
+            "kind": "pizza",
+            "variantLabel": "Классическая версия с моцареллой",
+            "stages": [
+              "Выбор компонентов",
+              "Сформовать основу",
+              "Добавить компоненты",
+              "Запечь и подать"
+            ]
+          },
+          "key": {
+            "selectedIds": [
+              "i_09187315230484323246",
+              "i_03587890001337987883",
+              "i_18263158922160249417",
+              "i_32362085362422980702"
+            ]
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Мы добрались до кухни. Начинаем первую сборку: условие, продукты и настоящие шаги уже перед вами. Я подожду за столом и приму вашу подачу после сохранения."
+        },
+        {
+          "id": "q_40384247162666377683",
+          "type": "restaurant_kitchen",
+          "title": "Греческий салат",
+          "prompt": "",
+          "maxScore": 16,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": true,
+          "shuffle": true,
+          "config": {
+            "items": [
+              {
+                "id": "i_07907849640087856128",
+                "text": "Томаты и огурец",
+                "imageAlt": "Томаты и огурец",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/9ef7f459501a02dd331e3414.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/b2c3839750e52bb752c27e4c.webp",
+                "visual": {
+                  "token": "6420669104ccef06",
+                  "role": "base",
+                  "scale": 0.9,
+                  "order": 2
+                },
+                "label": "Томаты и огурец"
+              },
+              {
+                "id": "i_20269629731411210910",
+                "text": "Майонезная заправка",
+                "imageAlt": "Майонезная заправка",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/f216c9c40f85ce0a07cb3f94.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/59b6e7e0a05a636296846f67.webp",
+                "visual": {
+                  "token": "6f256d28b8ea43fc",
+                  "role": "dressing",
+                  "scale": 0.6,
+                  "order": 3
+                },
+                "label": "Майонезная заправка"
+              },
+              {
+                "id": "i_19323302824032801109",
+                "text": "Кукуруза",
+                "imageAlt": "Кукуруза",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/f8f075ee7e99a82cd5d19bf3.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/1f89fdb454d4925377cb8e0c.webp",
+                "visual": {
+                  "token": "0214f0394af333b5",
+                  "role": "base",
+                  "scale": 0.65,
+                  "order": 0
+                },
+                "label": "Кукуруза"
+              },
+              {
+                "id": "i_37123337082432002867",
+                "text": "Сухарики",
+                "imageAlt": "Сухарики",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/1a817059bd144b427847253f.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/0e7439efde8a9bd8cd3ca674.webp",
+                "visual": {
+                  "token": "98641ff74d8ef9a4",
+                  "role": "top",
+                  "scale": 0.65,
+                  "order": 5
+                },
+                "label": "Сухарики"
+              },
+              {
+                "id": "i_14762247410241195671",
+                "text": "Курица гриль",
+                "imageAlt": "Курица гриль",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/a8d9014b2c1be213fce680b3.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/5881b96ce8259013987f0ed9.webp",
+                "visual": {
+                  "token": "cdb3ecc17761a1ee",
+                  "role": "base",
+                  "scale": 0.72,
+                  "order": 7
+                },
+                "label": "Курица гриль"
+              },
+              {
+                "id": "i_24284618483617249453",
+                "text": "Оливковое масло и орегано",
+                "imageAlt": "Оливковое масло и орегано",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/4ddaa4617858ea66bdd10297.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/59d49242e0dde2661f8eb3ec.webp",
+                "visual": {
+                  "token": "b49e50aa84d2d205",
+                  "role": "dressing",
+                  "scale": 0.75,
+                  "order": 6
+                },
+                "label": "Оливковое масло и орегано"
+              },
+              {
+                "id": "i_27574632970462534048",
+                "text": "Красный лук и оливки",
+                "imageAlt": "Красный лук и оливки",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/68152307e79233d6cf69a2fd.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/ca2bccdd4cb21368f54c7548.webp",
+                "visual": {
+                  "token": "851f63aeded7bdb1",
+                  "role": "base",
+                  "scale": 0.83,
+                  "order": 4
+                },
+                "label": "Красный лук и оливки"
+              },
+              {
+                "id": "i_02168089272761247062",
+                "text": "Фета",
+                "imageAlt": "Фета",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/125aeb6f27d61890c8f1af26.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/084bca697683cf57c0e751f0.webp",
+                "visual": {
+                  "token": "3788fd8dbe7d753c",
+                  "role": "top",
+                  "scale": 0.67,
+                  "order": 1
+                },
+                "label": "Фета"
+              }
+            ],
+            "slots": [],
+            "selectCount": 4,
+            "photo": {
+              "kind": "greek",
+              "frames": {
+                "bowl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/482c50a12e48ff8866715fee.webp"
+              },
+              "finals": [
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+6420669104ccef06+6f256d28b8ea43fc",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/5e6caa358387b7e959804d71.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+6420669104ccef06+851f63aeded7bdb1",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/e841aae9db8c4c796aad93cd.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+6420669104ccef06+98641ff74d8ef9a4",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/0c6619bd9bd4473c0bde18b3.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+6420669104ccef06+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/fcf22cfef662505eb2326e21.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+6420669104ccef06+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/23e055e8b17480c8f1a5cc16.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+6f256d28b8ea43fc+851f63aeded7bdb1",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/1f4de2a40d199864f665e7de.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+6f256d28b8ea43fc+98641ff74d8ef9a4",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/8efd3e3ca8c9c01e9eeeafd8.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+6f256d28b8ea43fc+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/c3b41a7eba153a5e16876d6d.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+6f256d28b8ea43fc+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/de85be255b449b90efadd1c1.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+851f63aeded7bdb1+98641ff74d8ef9a4",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/6a59155575fa6d9495337c78.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+851f63aeded7bdb1+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/aedf3187c029a144c4d3a479.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+851f63aeded7bdb1+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/35527e10a58b7d63ec618c05.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+98641ff74d8ef9a4+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/e5b36e356253e59d79abebd1.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/923230a38fb2bf2ab64e50f7.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+3788fd8dbe7d753c+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/48746aa993c18b2a6116225e.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6420669104ccef06+6f256d28b8ea43fc+851f63aeded7bdb1",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/54ba52a56d9e2c1b65e212a5.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6420669104ccef06+6f256d28b8ea43fc+98641ff74d8ef9a4",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/5f9034a18872ac7e512e2193.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6420669104ccef06+6f256d28b8ea43fc+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/10bc567b758db38580236a9a.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6420669104ccef06+6f256d28b8ea43fc+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/aeaf9b76332176e0f9208b45.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6420669104ccef06+851f63aeded7bdb1+98641ff74d8ef9a4",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/da4e5cd98f904db3e95c2dd4.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6420669104ccef06+851f63aeded7bdb1+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/4b08269b09faebb1093f45eb.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6420669104ccef06+851f63aeded7bdb1+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/cfe1f020aca0c3fcbdaab21f.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6420669104ccef06+98641ff74d8ef9a4+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/15d051b399528b195f72640c.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6420669104ccef06+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/1fcd47e0aa7551e2e0bf3d61.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6420669104ccef06+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/d2ce220e301cb13e0c0e173b.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6f256d28b8ea43fc+851f63aeded7bdb1+98641ff74d8ef9a4",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/5a0b49f5fcc2bd1615e59103.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6f256d28b8ea43fc+851f63aeded7bdb1+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/9ca3d0c4c63621033ffd3bd5.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6f256d28b8ea43fc+851f63aeded7bdb1+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/9993794183edfdce383e7dfd.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6f256d28b8ea43fc+98641ff74d8ef9a4+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/bcf6d4fef18667d30b03b52d.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6f256d28b8ea43fc+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/2c2aae283d4cbe9d6e16d900.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+6f256d28b8ea43fc+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/85db2d0f265b9ec6a33b74c5.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+851f63aeded7bdb1+98641ff74d8ef9a4+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/d120610504e8347384ade200.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+851f63aeded7bdb1+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/0a16a52a7fd14ea895ecf660.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+851f63aeded7bdb1+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/fa7fb651118598091f84e6d0.webp"
+                },
+                {
+                  "key": "0214f0394af333b5+98641ff74d8ef9a4+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/20e193d4a9d51add54b17864.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6420669104ccef06+6f256d28b8ea43fc+851f63aeded7bdb1",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/1501b0515aec399366119dd2.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6420669104ccef06+6f256d28b8ea43fc+98641ff74d8ef9a4",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/ea2c578cf06f36c864f3ba68.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6420669104ccef06+6f256d28b8ea43fc+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/bc413a13d5cb4d040429e922.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6420669104ccef06+6f256d28b8ea43fc+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/e8a5bb6f70903c248a38e9b9.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6420669104ccef06+851f63aeded7bdb1+98641ff74d8ef9a4",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/03f63a4a513f77f27f3981c5.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6420669104ccef06+851f63aeded7bdb1+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/6aad7b5c766293d552299676.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6420669104ccef06+851f63aeded7bdb1+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/28f763919b3c1e83ed8365e4.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6420669104ccef06+98641ff74d8ef9a4+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/2826dd8c282322bb87583df5.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6420669104ccef06+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/a846049ade4821a706c7d3a3.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6420669104ccef06+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/fb27172d153c83966eedfe44.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6f256d28b8ea43fc+851f63aeded7bdb1+98641ff74d8ef9a4",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/96e883ee5ab73233ace563ae.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6f256d28b8ea43fc+851f63aeded7bdb1+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/08d234c6414d2ee66119070a.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6f256d28b8ea43fc+851f63aeded7bdb1+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/43ee115ad3c432a57d9a10a1.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6f256d28b8ea43fc+98641ff74d8ef9a4+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/d72a93be4841e89f7562a3a4.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6f256d28b8ea43fc+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/b56134a33e737fbc1964dd97.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+6f256d28b8ea43fc+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/e6e4de8306afb7994c4d3040.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+851f63aeded7bdb1+98641ff74d8ef9a4+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/0670c210d6f2a27a290c6520.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+851f63aeded7bdb1+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/2c27bf38ccac4360396a0947.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+851f63aeded7bdb1+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/a2d405563b2caed5310832d0.webp"
+                },
+                {
+                  "key": "3788fd8dbe7d753c+98641ff74d8ef9a4+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/ec3cd4d7b591cac1ba8f70e2.webp"
+                },
+                {
+                  "key": "6420669104ccef06+6f256d28b8ea43fc+851f63aeded7bdb1+98641ff74d8ef9a4",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/e42feefb62453a63348c9f7d.webp"
+                },
+                {
+                  "key": "6420669104ccef06+6f256d28b8ea43fc+851f63aeded7bdb1+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/7e507cedc36a39978041e3a7.webp"
+                },
+                {
+                  "key": "6420669104ccef06+6f256d28b8ea43fc+851f63aeded7bdb1+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/72840633d7d5dc8a2354b02c.webp"
+                },
+                {
+                  "key": "6420669104ccef06+6f256d28b8ea43fc+98641ff74d8ef9a4+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/2dbedbcafdb8b36ff78b7878.webp"
+                },
+                {
+                  "key": "6420669104ccef06+6f256d28b8ea43fc+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/a7d5a0364ad4bd644e6f47b8.webp"
+                },
+                {
+                  "key": "6420669104ccef06+6f256d28b8ea43fc+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/ad825eb306c90a16a347f466.webp"
+                },
+                {
+                  "key": "6420669104ccef06+851f63aeded7bdb1+98641ff74d8ef9a4+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/d1084ecd08b4e558d8f21fa8.webp"
+                },
+                {
+                  "key": "6420669104ccef06+851f63aeded7bdb1+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/efb9e986c6d5764172a5922f.webp"
+                },
+                {
+                  "key": "6420669104ccef06+851f63aeded7bdb1+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/54bc891fd2846852791e3689.webp"
+                },
+                {
+                  "key": "6420669104ccef06+98641ff74d8ef9a4+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/6cbc284e50ce1f061440b3bc.webp"
+                },
+                {
+                  "key": "6f256d28b8ea43fc+851f63aeded7bdb1+98641ff74d8ef9a4+b49e50aa84d2d205",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/25f3b004014580617703a6f0.webp"
+                },
+                {
+                  "key": "6f256d28b8ea43fc+851f63aeded7bdb1+98641ff74d8ef9a4+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/a8280d8effeeb7ee58a6e467.webp"
+                },
+                {
+                  "key": "6f256d28b8ea43fc+851f63aeded7bdb1+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/5fe81dc258043da9425e1cc0.webp"
+                },
+                {
+                  "key": "6f256d28b8ea43fc+98641ff74d8ef9a4+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/8345db83ab7765fa71929b9d.webp"
+                },
+                {
+                  "key": "851f63aeded7bdb1+98641ff74d8ef9a4+b49e50aa84d2d205+cdb3ecc17761a1ee",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/0191798b5c7fd33eab7c013b.webp"
+                }
+              ]
+            },
+            "kind": "greek",
+            "variantLabel": "Версия без сладкого перца и уксуса",
+            "stages": [
+              "Выбор компонентов",
+              "Подготовить",
+              "Собрать и подать"
+            ]
+          },
+          "key": {
+            "selectedIds": [
+              "i_07907849640087856128",
+              "i_27574632970462534048",
+              "i_02168089272761247062",
+              "i_24284618483617249453"
+            ]
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Для второй подачи снова открывается рабочая поверхность. Посмотрите условие, выберите свой состав и пройдите шаги приготовления. После нажатия «Подать» блюдо окажется передо мной."
+        },
+        {
+          "id": "q_38539968223837685338",
+          "type": "restaurant_kitchen",
+          "title": "Ролл «Филадельфия»",
+          "prompt": "",
+          "maxScore": 16,
+          "seconds": 0,
+          "grading": "automatic",
+          "required": true,
+          "partialCredit": true,
+          "shuffle": true,
+          "config": {
+            "items": [
+              {
+                "id": "i_14768335770590498351",
+                "text": "Угорь",
+                "imageAlt": "Угорь",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/b2a483b1896f94477cbb2bb6.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/fb09e13b4f9cdea96869ef4d.webp",
+                "visual": {
+                  "token": "92d41f086181bca3",
+                  "role": "cover",
+                  "scale": 1,
+                  "priority": 2,
+                  "order": 4
+                },
+                "label": "Угорь"
+              },
+              {
+                "id": "i_42034340020285706743",
+                "text": "Рис и нори",
+                "imageAlt": "Рис и нори",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/2ffa1ea0cd0dae9a7b566b2f.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/2ffa1ea0cd0dae9a7b566b2f.webp",
+                "visual": {
+                  "token": "6fc29783707c160d",
+                  "role": "basis",
+                  "scale": 1,
+                  "order": 2
+                },
+                "label": "Рис и нори"
+              },
+              {
+                "id": "i_02377745863099451587",
+                "text": "Сливочный сыр",
+                "imageAlt": "Сливочный сыр",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/e26933362bcc67dccf8e4629.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/fbdea1c04748de5d61d3a5b3.webp",
+                "visual": {
+                  "token": "810958791ad4bd30",
+                  "role": "filling",
+                  "scale": 1,
+                  "order": 3
+                },
+                "label": "Сливочный сыр"
+              },
+              {
+                "id": "i_04906024163591761645",
+                "text": "Лосось",
+                "imageAlt": "Лосось",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/cfd031b834af525a952e171f.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/cfd031b834af525a952e171f.webp",
+                "visual": {
+                  "token": "14738acc4c3df530",
+                  "role": "cover",
+                  "scale": 1,
+                  "priority": 0,
+                  "order": 0
+                },
+                "label": "Лосось"
+              },
+              {
+                "id": "i_36420048943855268635",
+                "text": "Креветки",
+                "imageAlt": "Креветки",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/8401261c15eb16d92b7d0f19.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/74cc77aa4204cdfed9a4db1b.webp",
+                "visual": {
+                  "token": "bceddd1a849af329",
+                  "role": "cover",
+                  "scale": 1,
+                  "priority": 3,
+                  "order": 6
+                },
+                "label": "Креветки"
+              },
+              {
+                "id": "i_03116523800909668148",
+                "text": "Огурец",
+                "imageAlt": "Огурец",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/36af0ab1d34158d792b4b256.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/544971875e822ef06906f686.webp",
+                "visual": {
+                  "token": "554adbc8e560fe56",
+                  "role": "filling",
+                  "scale": 1,
+                  "order": 1
+                },
+                "label": "Огурец"
+              },
+              {
+                "id": "i_10350730892592582075",
+                "text": "Тунец",
+                "imageAlt": "Тунец",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/aedc5da33d697bcad375f232.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/481bc42f4a58c4a2797071ca.webp",
+                "visual": {
+                  "token": "d7ad8bdb48c35e92",
+                  "role": "cover",
+                  "scale": 1,
+                  "priority": 1,
+                  "order": 7
+                },
+                "label": "Тунец"
+              },
+              {
+                "id": "i_03067088782383208072",
+                "text": "Крабовые палочки",
+                "imageAlt": "Крабовые палочки",
+                "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/a69e8a21073c6af84d4c0df4.webp",
+                "layerImageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/5f5c91e10280c407a985b276.webp",
+                "visual": {
+                  "token": "a5bde2a13a8538d9",
+                  "role": "cover",
+                  "scale": 1,
+                  "priority": 4,
+                  "order": 5
+                },
+                "label": "Крабовые палочки"
+              }
+            ],
+            "slots": [],
+            "selectCount": 4,
+            "photo": {
+              "kind": "roll",
+              "frames": {
+                "rice": "/constructor/legacy/assets/olympiad/tour5/photo-v4/b337fd1c1110aa554ce54b2c.webp",
+                "flipped": "/constructor/legacy/assets/olympiad/tour5/photo-v4/c3293765238cbfbec52fe71f.webp",
+                "rolled": "/constructor/legacy/assets/olympiad/tour5/photo-v4/b8465568228538fd57995b27.webp",
+                "14738acc4c3df530": "/constructor/legacy/assets/olympiad/tour5/photo-v4/1f6c1aaa92028b6b3c621309.webp",
+                "bceddd1a849af329": "/constructor/legacy/assets/olympiad/tour5/photo-v4/97f0131473bb4295d9d6e9d9.webp",
+                "d7ad8bdb48c35e92": "/constructor/legacy/assets/olympiad/tour5/photo-v4/b9f4c33d6b559b9b08cfe171.webp",
+                "92d41f086181bca3": "/constructor/legacy/assets/olympiad/tour5/photo-v4/a6223eb678d91ea07122ddeb.webp",
+                "a5bde2a13a8538d9": "/constructor/legacy/assets/olympiad/tour5/photo-v4/ef4ca1fbbbacaad2eba7d462.webp"
+              },
+              "finals": [
+                {
+                  "key": "14738acc4c3df530+554adbc8e560fe56+6fc29783707c160d+810958791ad4bd30",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/eb8483a389517cf1dfa6a2ea.webp"
+                },
+                {
+                  "key": "14738acc4c3df530+554adbc8e560fe56+6fc29783707c160d+92d41f086181bca3",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/b954f4a63c0999d92a30a6bd.webp"
+                },
+                {
+                  "key": "14738acc4c3df530+554adbc8e560fe56+6fc29783707c160d+a5bde2a13a8538d9",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/93bce0f4af2495604d5c5cc5.webp"
+                },
+                {
+                  "key": "14738acc4c3df530+554adbc8e560fe56+6fc29783707c160d+bceddd1a849af329",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/eb8d3c775d2963e7f9c70e2a.webp"
+                },
+                {
+                  "key": "14738acc4c3df530+554adbc8e560fe56+6fc29783707c160d+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/3b84d565410715a8cd943264.webp"
+                },
+                {
+                  "key": "14738acc4c3df530+6fc29783707c160d+810958791ad4bd30+92d41f086181bca3",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/d9f2d4a4da7d6bdfc8824122.webp"
+                },
+                {
+                  "key": "14738acc4c3df530+6fc29783707c160d+810958791ad4bd30+a5bde2a13a8538d9",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/2c9482d6640b9c4b63bdcd7a.webp"
+                },
+                {
+                  "key": "14738acc4c3df530+6fc29783707c160d+810958791ad4bd30+bceddd1a849af329",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/bef19e4f122035024613c8b2.webp"
+                },
+                {
+                  "key": "14738acc4c3df530+6fc29783707c160d+810958791ad4bd30+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/e5648b00638304de17a723c1.webp"
+                },
+                {
+                  "key": "14738acc4c3df530+6fc29783707c160d+92d41f086181bca3+a5bde2a13a8538d9",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/c718a15af47080f99428c192.webp"
+                },
+                {
+                  "key": "14738acc4c3df530+6fc29783707c160d+92d41f086181bca3+bceddd1a849af329",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/d7ad3c3ad1b786030fa38cb6.webp"
+                },
+                {
+                  "key": "14738acc4c3df530+6fc29783707c160d+92d41f086181bca3+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/fffcfa7a35bf00b6a57b77c1.webp"
+                },
+                {
+                  "key": "14738acc4c3df530+6fc29783707c160d+a5bde2a13a8538d9+bceddd1a849af329",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/50f2776756c979f4b97b02e5.webp"
+                },
+                {
+                  "key": "14738acc4c3df530+6fc29783707c160d+a5bde2a13a8538d9+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/c4a89c0fc2ad8ed076842658.webp"
+                },
+                {
+                  "key": "14738acc4c3df530+6fc29783707c160d+bceddd1a849af329+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/df1311284a6954f84354ea79.webp"
+                },
+                {
+                  "key": "554adbc8e560fe56+6fc29783707c160d+810958791ad4bd30+92d41f086181bca3",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/1ef8b79358e73d8e881ca4a4.webp"
+                },
+                {
+                  "key": "554adbc8e560fe56+6fc29783707c160d+810958791ad4bd30+a5bde2a13a8538d9",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/d936d992c4e7b101d6149bfb.webp"
+                },
+                {
+                  "key": "554adbc8e560fe56+6fc29783707c160d+810958791ad4bd30+bceddd1a849af329",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/c568f3af7286939d5804e067.webp"
+                },
+                {
+                  "key": "554adbc8e560fe56+6fc29783707c160d+810958791ad4bd30+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/7a8ce35f2b5367d166256e03.webp"
+                },
+                {
+                  "key": "554adbc8e560fe56+6fc29783707c160d+92d41f086181bca3+a5bde2a13a8538d9",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/ca52b2597390a2b9b8836258.webp"
+                },
+                {
+                  "key": "554adbc8e560fe56+6fc29783707c160d+92d41f086181bca3+bceddd1a849af329",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/32d0e2a1dbdda175189cde4f.webp"
+                },
+                {
+                  "key": "554adbc8e560fe56+6fc29783707c160d+92d41f086181bca3+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/f908c5cc95862b27efb1a15c.webp"
+                },
+                {
+                  "key": "554adbc8e560fe56+6fc29783707c160d+a5bde2a13a8538d9+bceddd1a849af329",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/1e99bd342f75cb4654822a07.webp"
+                },
+                {
+                  "key": "554adbc8e560fe56+6fc29783707c160d+a5bde2a13a8538d9+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/19de3d4a0f2ae958eb7fd7ce.webp"
+                },
+                {
+                  "key": "554adbc8e560fe56+6fc29783707c160d+bceddd1a849af329+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/f4ce54e40b07223d2aa56a5c.webp"
+                },
+                {
+                  "key": "6fc29783707c160d+810958791ad4bd30+92d41f086181bca3+a5bde2a13a8538d9",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/cdb56ad34a8ffda4a9612bba.webp"
+                },
+                {
+                  "key": "6fc29783707c160d+810958791ad4bd30+92d41f086181bca3+bceddd1a849af329",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/a41d55f2c0b50b46ec49536a.webp"
+                },
+                {
+                  "key": "6fc29783707c160d+810958791ad4bd30+92d41f086181bca3+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/529e34a4b0e7eca5b651627a.webp"
+                },
+                {
+                  "key": "6fc29783707c160d+810958791ad4bd30+a5bde2a13a8538d9+bceddd1a849af329",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/83dd3402dc4bf794cb9a1e17.webp"
+                },
+                {
+                  "key": "6fc29783707c160d+810958791ad4bd30+a5bde2a13a8538d9+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/11b25ec2ad9228873680bbee.webp"
+                },
+                {
+                  "key": "6fc29783707c160d+810958791ad4bd30+bceddd1a849af329+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/fce8e9abf0c47968d49e9ff7.webp"
+                },
+                {
+                  "key": "6fc29783707c160d+92d41f086181bca3+a5bde2a13a8538d9+bceddd1a849af329",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/1154f32c1972b26feebe8aa0.webp"
+                },
+                {
+                  "key": "6fc29783707c160d+92d41f086181bca3+a5bde2a13a8538d9+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/058f77c56fb54b0589d46b29.webp"
+                },
+                {
+                  "key": "6fc29783707c160d+92d41f086181bca3+bceddd1a849af329+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/c232968b874d32da49d9216c.webp"
+                },
+                {
+                  "key": "6fc29783707c160d+a5bde2a13a8538d9+bceddd1a849af329+d7ad8bdb48c35e92",
+                  "imageUrl": "/constructor/legacy/assets/olympiad/tour5/photo-v4/3c62a175affaecee11501cdb.webp"
+                }
+              ]
+            },
+            "kind": "roll",
+            "variantLabel": "Ресторанная версия с огурцом",
+            "stages": [
+              "Выбор компонентов",
+              "Подготовить",
+              "Собрать и подать"
+            ]
+          },
+          "key": {
+            "selectedIds": [
+              "i_42034340020285706743",
+              "i_02377745863099451587",
+              "i_03116523800909668148",
+              "i_04906024163591761645"
+            ]
+          },
+          "media": [],
+          "rubric": [],
+          "source": "Исходный банк национальных кухонь, редакция a19b073",
+          "explanation": "",
+          "dialogue": "Последняя сборка нашего вечера. Все продукты и шаги находятся на кухне; выбор остаётся за вами. После сохранения этой подачи меню закроется, а свидетельство уже будет доступно."
+        }
+      ]
+    }
+  ],
+  "awardRules": [],
+  "status": "draft"
+}

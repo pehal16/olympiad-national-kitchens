@@ -1,6 +1,16 @@
 # Project Memory
 
-Last updated: 2026-10-26
+Last updated: 2026-10-30
+
+## Universal constructor: isolated module (2026-10-30)
+
+- The owner approved implementation of a full teacher constructor, including rounds, all task families, mixed grading, immutable publications, documents, portable packages and a complete offline Windows/LAN installation. The module lives in `constructor/`; UI `/constructor/`, API `/api/constructor/v1/`, own Node/SQLite/filesystem. It does not read or migrate official olympiad/PM01 records. Public anonymous demo, protected desktop organizer and former D1 archive keep their existing roles.
+- Implementation starts from `a19b073` in a separate checkout. The occupied original main checkout is dirty and behind; its changes to `src/variant.js` and `public/t5-final-kitchen.js` must be preserved. Approved visual references are in `constructor/design/`.
+- Constructor materials follow draft, interactive preview, isolated trial, publication, conduct, review, award approval and issuance. Attempts retain immutable versions. Personal codes are hashed; teacher/participant file access is checked on the API. Repeated saves have stable receipts; a short SQLite FULL group commit acknowledges only after durable commit. Unfinished/excluded work remains distinguishable and requires an explicit reason for exclusion. Changes to grades/nominations invalidate award approval and suspend issued documents.
+- Twelve editable document templates use bundled licensed Cyrillic fonts and fixed-mm Chromium rendering. Documents retain snapshots, numbers, reissue/revocation links and audit history. Encrypted material/results packages include media, art/fonts/checksums, exclude credentials/sessions, preview conflicts and deduplicate repeated content per recipient. Imported results are read-only archives. Full encrypted backups restore only into an empty directory.
+- Three source-only examples are restaurant (36 tasks/150 points), informatics with manual review, and a one-round test. They are authored demonstration copies, not methodical acceptance of a new real event.
+- First local acceptance: 36 constructor tests pass; browser journey saved/reloaded, recovered an offline answer, performed criterion grading, approved awards and created a one-page PDF at desktop1536 and mobile390 widths without page errors. 100 simultaneous participants submitted2,000 answers plus400 retries while12 PDFs ran: no lost/duplicate answers, p95save361ms. Earlier p952077ms failed and motivated durable group commit; do not cite it as passing. Windows packaging and server canary/live acceptance are tracked in `docs/constructor-release.md`; do not infer deployment from local tests.
+- Deployment plan uses only a separate service/data directory on the existing Timeweb server, with resource caps and canary acceptance before adding two scoped nginx prefixes. Existing shop applications and official olympiad databases remain separate. Owner credentials are encrypted for private delivery; no passwords or private keys belong in Git or public Actions logs.
 
 ## Independent public demonstration while the college PC is off (2026-10-25)
 

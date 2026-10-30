@@ -1,0 +1,453 @@
+import fs from "node:fs";
+import path from "node:path";
+import { chromium } from "playwright";
+import { PDFDocument } from "pdf-lib";
+import QRCode from "qrcode";
+import { zipSync } from "fflate";
+import { id, now, fail, escapeHtml, hash, safePath, clone } from "./util.mjs";
+const fonts = {
+  "PT Serif": "PTSerif-Regular.ttf",
+  "PT Sans": "PTSans-Regular.ttf",
+  "Noto Sans": "NotoSans-Regular.ttf",
+  "Noto Serif": "NotoSerif-Regular.ttf",
+};
+export function fillFields(text, data) {
+  return String(text || "").replace(/\{([a-zA-Z]+)\}/g, (_, key) =>
+    String(data[key] ?? ""),
+  );
+}
+function n(value, fallback = 0) {
+  return Number.isFinite(Number(value)) ? Number(value) : fallback;
+}
+function safeColor(value, fallback = "#202b32") {
+  return /^(#[a-f0-9]{3,8}|transparent)$/i.test(String(value))
+    ? value
+    : fallback;
+}
+export function templateHtml(
+  template,
+  data,
+  { image = (src) => src, fontData = {}, watermark = false } = {},
+) {
+  fail(
+    template &&
+      Array.isArray(template.elements) &&
+      template.elements.length <= 300,
+    "Неверный шаблон.",
+  );
+  const fontCss = Object.entries(fonts)
+    .filter(([family]) => fontData[family])
+    .map(
+      ([family]) =>
+        `@font-face{font-family:'${family}';src:url(data:font/ttf;base64,${fontData[family]}) format('truetype');font-weight:100 900}`,
+    )
+    .join("");
+  const body = template.elements
+    .filter((el) => !el.hidden)
+    .map((el) => {
+      const style = `position:absolute;left:${n(el.x)}mm;top:${n(el.y)}mm;width:${n(el.width)}mm;height:${n(el.height)}mm;transform:rotate(${n(el.rotation)}deg);opacity:${Math.max(0, Math.min(1, n(el.opacity, 1)))};box-sizing:border-box;`;
+      if (el.type === "rect" || el.type === "line")
+        return `<div style="${style}border:${Math.max(0.1, n(el.lineWidth, 0.3))}mm solid ${safeColor(el.stroke)};background:${safeColor(el.fill, "transparent")};${el.type === "line" ? "border-width:0;border-top-width:" + Math.max(0.1, n(el.lineWidth, 0.3)) + "mm;" : ""}"></div>`;
+      if (el.type === "image" || el.type === "qr") {
+        const src = image(el.src || "");
+        return src
+          ? `<img alt="" style="${style}object-fit:contain" src="${escapeHtml(src)}">`
+          : "";
+      }
+      const text = fillFields(el.text, data);
+      return `<div class="text" data-fit="${el.autoFit !== false}" data-min="${n(el.minSize, 7)}" style="${style}font-family:'${fonts[el.font] ? el.font : "PT Serif"}';font-size:${n(el.size, 14)}pt;color:${safeColor(el.color)};font-weight:${el.bold ? "700" : "400"};font-style:${el.italic ? "italic" : "normal"};text-decoration:${el.underline ? "underline" : "none"};text-align:${["left", "center", "right"].includes(el.align) ? el.align : "left"};line-height:${n(el.lineHeight, 1.2)};white-space:pre-wrap;overflow-wrap:anywhere;">${escapeHtml(text)}</div>`;
+    })
+    .join("");
+  return `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><style>${fontCss}@page{size:${n(template.width, 297)}mm ${n(template.height, 210)}mm;margin:0}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}html,body{margin:0;padding:0}body{width:${n(template.width, 297)}mm;height:${n(template.height, 210)}mm;background:${safeColor(template.background, "#ffffff")};position:relative}.sheet{position:relative;width:100%;height:100%}</style></head><body><div class="sheet">${template.backgroundImage ? `<img alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="${escapeHtml(image(template.backgroundImage))}">` : ""}${body}${watermark ? '<div style="position:absolute;top:45%;width:100%;transform:rotate(-25deg);font:54pt sans-serif;color:#7772;text-align:center">ОБРАЗЕЦ</div>' : ""}</div></body></html>`;
+}
+export class Documents {
+  constructor(service, assetRoot) {
+    this.service = service;
+    this.store = service.store;
+    this.assetRoot = assetRoot;
+    this.browser = null;
+    this.running = false;
+    this.queue = [];
+    this.fontData = {};
+    for (const job of this.store
+      .list("job")
+      .filter((j) => j.status === "running" || j.status === "queued"))
+      this.store.put(
+        "job",
+        job.id,
+        job.owner,
+        {
+          ...job,
+          status: "failed",
+          error:
+            "Подготовка была прервана перезапуском. Повторите выпуск: готовые экземпляры сохранятся.",
+        },
+        job.runId,
+      );
+    for (const [family, name] of Object.entries(fonts)) {
+      const f = path.join(assetRoot, "fonts", name);
+      if (fs.existsSync(f))
+        this.fontData[family] = fs.readFileSync(f).toString("base64");
+    }
+  }
+  image(src) {
+    if (/^data:image\/(png|jpeg|webp);base64,/.test(src)) return src;
+    let file, mime;
+    if (src.startsWith("/api/constructor/v1/media/")) {
+      const mid = src.split("/").at(-1);
+      const m = this.store.get("media", mid);
+      if (!m) return "";
+      file = safePath(this.store.root, m.relativePath);
+      mime = m.mime;
+    } else if (
+      src.startsWith("/constructor/legacy/") ||
+      src.startsWith("/constructor/awards/")
+    ) {
+      file = safePath(this.assetRoot, src.slice("/constructor/".length));
+      mime =
+        path.extname(file) === ".svg"
+          ? "image/svg+xml"
+          : path.extname(file) === ".png"
+            ? "image/png"
+            : "image/webp";
+    } else return "";
+    return fs.existsSync(file)
+      ? `data:${mime};base64,${fs.readFileSync(file).toString("base64")}`
+      : "";
+  }
+  async getBrowser() {
+    if (!this.browser) {
+      const options = { headless: true };
+      if (process.env.CONSTRUCTOR_CHROMIUM)
+        options.executablePath = process.env.CONSTRUCTOR_CHROMIUM;
+      else if (process.platform === "win32") {
+        const installed = [
+          "C:/Program Files/Google/Chrome/Application/chrome.exe",
+          "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+        ].find((file) => fs.existsSync(file));
+        if (installed) options.executablePath = installed;
+      }
+      this.browser = await chromium.launch(options);
+    }
+    return this.browser;
+  }
+  async render(template, data, { watermark = false } = {}) {
+    for (const el of template.elements.filter(
+      (e) => !e.hidden && e.type === "image" && e.src,
+    ))
+      fail(
+        this.image(el.src),
+        "Изображение документа недоступно. Замените его перед выпуском.",
+        422,
+      );
+    const browser = await this.getBrowser(),
+      page = await browser.newPage();
+    try {
+      await page.setContent(
+        templateHtml(template, data, {
+          image: (src) => this.image(src),
+          fontData: {
+            ...this.fontData,
+            ...Object.fromEntries(
+              Object.entries(template.fontAssets || {}).map(([family, url]) => {
+                const m = this.store.get(
+                  "media",
+                  String(url).split("/").at(-1),
+                );
+                return [
+                  family,
+                  m
+                    ? fs
+                        .readFileSync(safePath(this.store.root, m.relativePath))
+                        .toString("base64")
+                    : this.fontData[family],
+                ];
+              }),
+            ),
+          },
+          watermark,
+        }),
+        { waitUntil: "load" },
+      );
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+        await Promise.all(Array.from(document.images).map((i) => i.decode()));
+      });
+      const issues = await page.evaluate(() => {
+        const problems = [];
+        for (const el of document.querySelectorAll(".text")) {
+          let size = parseFloat(getComputedStyle(el).fontSize);
+          const min = (Number(el.dataset.min) * 96) / 72;
+          while (
+            el.dataset.fit === "true" &&
+            (el.scrollHeight > el.clientHeight + 1 ||
+              el.scrollWidth > el.clientWidth + 1) &&
+            size > min
+          ) {
+            size -= 0.5;
+            el.style.fontSize = size + "px";
+          }
+          if (
+            el.scrollHeight > el.clientHeight + 1 ||
+            el.scrollWidth > el.clientWidth + 1
+          )
+            problems.push(el.textContent);
+        }
+        return problems;
+      });
+      fail(
+        !issues.length,
+        `Текст не помещается в макет: ${issues.join("; ")}`,
+        422,
+        "document_overflow",
+      );
+      return await page.pdf({
+        printBackground: true,
+        preferCSSPageSize: true,
+        tagged: true,
+      });
+    } finally {
+      await page.close();
+    }
+  }
+  enqueue(user, kind, runId, task) {
+    const jid = id("job");
+    this.store.put(
+      "job",
+      jid,
+      user.id,
+      { kind, runId, status: "queued", createdAt: now(), done: 0, total: 0 },
+      runId,
+    );
+    this.queue.push({ jid, user, task });
+    this.drain();
+    return this.store.get("job", jid);
+  }
+  async drain() {
+    if (this.running) return;
+    this.running = true;
+    while (this.queue.length) {
+      const { jid, user, task } = this.queue.shift();
+      let job = this.store.get("job", jid);
+      try {
+        job.status = "running";
+        this.store.put("job", jid, user.id, job, job.runId);
+        const result = await task((progress) => {
+          job = { ...job, ...progress };
+          this.store.put("job", jid, user.id, job, job.runId);
+        });
+        this.store.put(
+          "job",
+          jid,
+          user.id,
+          { ...job, status: "completed", result, finishedAt: now() },
+          job.runId,
+        );
+      } catch (e) {
+        this.store.put(
+          "job",
+          jid,
+          user.id,
+          { ...job, status: "failed", error: e.message, finishedAt: now() },
+          job.runId,
+        );
+      }
+    }
+    this.running = false;
+  }
+  issue(user, runId) {
+    this.service.right(user, "awards");
+    const run = this.service.get(user, "run", runId, true);
+    fail(
+      run.awardsApproved && run.approvedAwards,
+      "Сначала утвердите награждение.",
+      409,
+    );
+    const current = this.service.awardPreview(user, runId);
+    fail(
+      current.resultHash === run.approvedAwards.resultHash,
+      "Результаты изменились после утверждения.",
+      409,
+    );
+    const candidates = run.approvedAwards.candidates.filter((c) => !c.excluded);
+    return this.enqueue(user, "awards", runId, async (progress) => {
+      const issued = [];
+      progress({ total: candidates.length });
+      for (const [index, candidate] of candidates.entries()) {
+        const key = hash(
+            `${runId}:${run.approvedAwards.resultHash}:${candidate.id}:${hash(candidate)}`,
+          ),
+          existing = this.store
+            .list("issue", null, runId)
+            .find((i) => i.issuanceKey === key && i.status === "issued");
+        if (existing) {
+          issued.push(existing.id);
+          progress({ done: index + 1 });
+          continue;
+        }
+        const previous = this.store
+          .list("issue", null, runId)
+          .find(
+            (i) =>
+              i.participantId === candidate.participantId &&
+              i.fields.ruleId === candidate.ruleId &&
+              i.status === "suspended",
+          );
+        const template = this.service.get(
+          user,
+          "template",
+          candidate.templateId,
+        );
+        const iid = id("issue"),
+          number = `${this.store.meta("instanceId").slice(-6).toUpperCase()}-${String(this.store.list("issue").length + 1).padStart(6, "0")}`;
+        const fields = { ...candidate, number };
+        const snapshot = clone(template);
+        if (snapshot.elements.some((e) => e.type === "qr")) {
+          const base = process.env.CONSTRUCTOR_PUBLIC_ORIGIN || "";
+          for (const el of snapshot.elements.filter((e) => e.type === "qr"))
+            el.src = base
+              ? await QRCode.toDataURL(`${base}/constructor/verify/${iid}`)
+              : "";
+        }
+        const bytes = await this.render(snapshot, fields);
+        const relativePath = `documents/${iid}.pdf`;
+        fs.writeFileSync(safePath(this.store.root, relativePath), bytes, {
+          mode: 0o600,
+        });
+        this.store.put(
+          "issue",
+          iid,
+          run.owner,
+          {
+            runId,
+            attemptId: candidate.attemptId,
+            participantId: candidate.participantId,
+            fields,
+            templateSnapshot: snapshot,
+            status: "issued",
+            issuedAt: now(),
+            relativePath,
+            sha256: hash(bytes),
+            issuanceKey: key,
+            previousIssueId: previous?.id || null,
+          },
+          runId,
+        );
+        if (previous) {
+          previous.status = "revoked";
+          previous.revokedAt = now();
+          previous.revokeReason =
+            "Перевыпуск после изменения утверждённых результатов";
+          this.store.put("issue", previous.id, previous.owner, previous, runId);
+        }
+        this.store.audit(user.id, "document.issued", iid, { number, runId });
+        issued.push(iid);
+        progress({ done: index + 1 });
+      }
+      return { issued };
+    });
+  }
+  async collection(user, runId, format) {
+    this.service.get(user, "run", runId);
+    const issues = this.store
+      .list("issue", null, runId)
+      .filter((i) => i.status === "issued");
+    fail(issues.length, "Документы ещё не выпущены.", 404);
+    if (format === "zip") {
+      const files = {};
+      for (const issue of issues) {
+        const name = issue.fields.fullName.replace(
+          /[<>:"/\\|?*\x00-\x1f]/g,
+          "_",
+        );
+        files[`${issue.fields.number}-${name}.pdf`] = new Uint8Array(
+          fs.readFileSync(safePath(this.store.root, issue.relativePath)),
+        );
+      }
+      return Buffer.from(zipSync(files, { level: 0 }));
+    }
+    const combined = await PDFDocument.create();
+    for (const issue of issues) {
+      const input = await PDFDocument.load(
+        fs.readFileSync(safePath(this.store.root, issue.relativePath)),
+      );
+      for (const page of await combined.copyPages(
+        input,
+        input.getPageIndices(),
+      ))
+        combined.addPage(page);
+    }
+    return Buffer.from(await combined.save());
+  }
+  revoke(user, key, reason) {
+    this.service.right(user, "awards");
+    const issue = this.service.get(user, "issue", key, true);
+    fail(String(reason || "").trim(), "Укажите причину отзыва.");
+    issue.status = "revoked";
+    issue.revokedAt = now();
+    issue.revokeReason = String(reason).slice(0, 2000);
+    this.store.audit(user.id, "document.revoked", key, { reason });
+    return this.store.put("issue", key, issue.owner, issue, issue.runId);
+  }
+  async reissue(user, key, body) {
+    const old = this.service.get(user, "issue", key, true);
+    this.service.right(user, "awards");
+    fail(body.reason, "Укажите причину перевыпуска.");
+    const fields = {
+      ...old.fields,
+      ...Object.fromEntries(
+        Object.entries(body.fields || {}).filter(([key]) =>
+          [
+            "fullName",
+            "institution",
+            "groupName",
+            "mentorName",
+            "degree",
+            "nomination",
+            "issuer",
+            "order",
+            "date",
+          ].includes(key),
+        ),
+      ),
+    };
+    const template = body.templateId
+      ? this.service.get(user, "template", body.templateId)
+      : old.templateSnapshot;
+    const bytes = await this.render(template, fields);
+    this.revoke(user, key, body.reason);
+    const next = id("issue"),
+      relativePath = `documents/${next}.pdf`;
+    fs.writeFileSync(safePath(this.store.root, relativePath), bytes, {
+      mode: 0o600,
+    });
+    const issue = this.store.put(
+      "issue",
+      next,
+      user.id,
+      {
+        ...old,
+        id: next,
+        fields,
+        templateSnapshot: clone(template),
+        status: "issued",
+        issuedAt: now(),
+        relativePath,
+        sha256: hash(bytes),
+        previousIssueId: key,
+        issuanceKey: id("reissue"),
+        revokedAt: null,
+        revokeReason: null,
+      },
+      old.runId,
+    );
+    this.store.audit(user.id, "document.reissued", next, {
+      previousIssueId: key,
+      reason: body.reason,
+    });
+    return issue;
+  }
+  async close() {
+    await this.browser?.close();
+  }
+}

@@ -1,4 +1,4 @@
-const CACHE_NAME = "national-kitchens-olympiad-public-demo1";
+const CACHE_NAME = "national-kitchens-olympiad-public-demo-constructor1";
 const PRECACHE_URLS = [
   "/olympiad-ready.css?v=manual-admission1",
   "/olympiad-device.js?v=oct16-ready1",
@@ -70,6 +70,11 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
   const pathname = url.pathname;
+  // The independent constructor serves its own shell and authenticated API.
+  // A failed constructor navigation must never fall back to the olympiad shell.
+  if (pathname === "/constructor" || pathname.startsWith("/constructor/") || pathname.startsWith("/api/constructor/")) {
+    return;
+  }
   const isCoreShellAsset =
     pathname === "/" ||
     pathname.endsWith(".html") ||

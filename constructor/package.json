@@ -1,0 +1,38 @@
+{
+  "name": "olympiad-constructor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "dev": "node server/index.mjs",
+    "dev:ui": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build && node scripts/build-server.mjs",
+    "test": "node --test tests/*.spec.mjs",
+    "verify": "node scripts/verify.mjs",
+    "load": "node scripts/load.mjs",
+    "package:windows": "node scripts/package-windows.mjs"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "express": "^5.1.0",
+    "fflate": "^0.8.2",
+    "lucide-react": "^0.468.0",
+    "multer": "^2.0.2",
+    "pdf-lib": "^1.17.1",
+    "playwright": "^1.56.0",
+    "qrcode": "^1.5.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "esbuild": "^0.25.5",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.0"
+  }
+}
