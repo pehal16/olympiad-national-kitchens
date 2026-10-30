@@ -44,7 +44,16 @@ try:
     target.write_text(updated)
     subprocess.run(['nginx','-t'],check=True)
     subprocess.run(['systemctl','reload','nginx'],check=True)
-    subprocess.run(['curl','--fail','--silent','--max-time','20','--resolve',domain+':443:127.0.0.1','https://'+domain+'/api/constructor/v1/health'],check=True)
+    # A successful reload starts a new generation asynchronously. Do not mistake an
+    # old worker serving the former upstream for a failed new configuration.
+    probe=['curl','--fail','--silent','--max-time','5','--resolve',domain+':443:127.0.0.1','https://'+domain+'/api/constructor/v1/health']
+    for attempt in range(30):
+        result=subprocess.run(probe,capture_output=True,text=True)
+        if result.returncode==0 and '"sqlite"' in result.stdout and '"status":"ok"' in result.stdout:
+            print(result.stdout)
+            break
+        time.sleep(1)
+    else: raise RuntimeError('Constructor ingress did not become healthy; preserving the previous configuration')
 except Exception:
     target.write_text(original)
     if previous is None: include.unlink(missing_ok=True)

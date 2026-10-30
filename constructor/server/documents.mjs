@@ -393,6 +393,12 @@ export class Documents {
     const old = this.service.get(user, "issue", key, true);
     this.service.right(user, "awards");
     fail(body.reason, "Укажите причину перевыпуска.");
+    fail(
+      old.status !== "suspended",
+      "Сначала заново утвердите результаты и выполните выпуск по обновлённому списку.",
+      409,
+    );
+    const next = id("issue");
     const fields = {
       ...old.fields,
       ...Object.fromEntries(
@@ -411,13 +417,22 @@ export class Documents {
         ),
       ),
     };
-    const template = body.templateId
-      ? this.service.get(user, "template", body.templateId)
-      : old.templateSnapshot;
+    const template = clone(
+      body.templateId
+        ? this.service.get(user, "template", body.templateId)
+        : old.templateSnapshot,
+    );
+    for (const element of template.elements.filter((e) => e.type === "qr"))
+      element.src = process.env.CONSTRUCTOR_PUBLIC_ORIGIN
+        ? await QRCode.toDataURL(
+            process.env.CONSTRUCTOR_PUBLIC_ORIGIN +
+              "/constructor/verify/" +
+              next,
+          )
+        : "";
     const bytes = await this.render(template, fields);
     this.revoke(user, key, body.reason);
-    const next = id("issue"),
-      relativePath = `documents/${next}.pdf`;
+    const relativePath = `documents/${next}.pdf`;
     fs.writeFileSync(safePath(this.store.root, relativePath), bytes, {
       mode: 0o600,
     });
@@ -435,6 +450,7 @@ export class Documents {
         relativePath,
         sha256: hash(bytes),
         previousIssueId: key,
+        version: Number(old.version || 1) + 1,
         issuanceKey: id("reissue"),
         revokedAt: null,
         revokeReason: null,

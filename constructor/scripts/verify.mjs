@@ -49,6 +49,26 @@ async function main() {
         sameSite: "Strict",
       },
     ]);
+    const allowedOrigin = new URL(base).origin,
+      networkOrigins = new Set();
+    const restrictNetwork = async (context) => {
+      if (process.env.CONSTRUCTOR_OFFLINE_ACCEPTANCE === "1")
+        await context.route("**/*", (route) => {
+          const url = route.request().url();
+          if (
+            url.startsWith("data:") ||
+            url.startsWith("blob:") ||
+            new URL(url).origin === allowedOrigin
+          )
+            return route.continue();
+          return route.abort("internetdisconnected");
+        });
+      context.on("request", (r) => {
+        if (r.url().startsWith("http"))
+          networkOrigins.add(new URL(r.url()).origin);
+      });
+    };
+    await restrictNetwork(admin);
     const page = await admin.newPage();
     page.setDefaultTimeout(15000);
     page.on("pageerror", (e) => errors.push(e.message));
@@ -92,6 +112,7 @@ async function main() {
       isMobile: true,
       hasTouch: true,
     });
+    await restrictNetwork(context);
     const student = await context.newPage();
     student.setDefaultTimeout(15000);
     student.on("pageerror", (e) => errors.push(e.message));
@@ -198,6 +219,8 @@ async function main() {
     assert.match(finished.answers[manual.id].answer, /Восстановленный/);
     report("constructor-full-route", {
       passed: true,
+      internetBlocked: process.env.CONSTRUCTOR_OFFLINE_ACCEPTANCE === "1",
+      networkOrigins: [...networkOrigins],
       savedReloaded: true,
       mobileViewport: "390×844",
       offlineDraftRecovered: true,

@@ -18,7 +18,7 @@ for (const style of ["classic", "modern", "theme"])
         [w, h, 180],
       ])
         art += `<g transform="translate(${x} ${y}) rotate(${rotate})"><path d="M12 12H31L12 31Z" fill="url(#gold)"/><path d="M12 32L22 22V49L12 59Z" fill="#205c48"/><path d="M12 61L22 51V73L12 83Z" fill="url(#gold)"/><path d="M22 12H65L58 19H15Z" fill="none" stroke="#c69a43" stroke-width=".2"/>${Array.from({ length: 7 }, (_, i) => `<path d="M${8 + i * 3} 5L5 ${8 + i * 3}" stroke="#cfa85c" stroke-width=".18"/>`).join("")}</g>`;
-      art += `<path d="M${w / 2 - 3} 75l3-3 3 3-3 3Z" fill="url(#gold)"/><path d="M${w / 2 - 3} ${h - 25}l3-3 3 3-3 3Z" fill="url(#gold)"/>`;
+      art += `<path d="M${w / 2 - 3} ${h * 0.33}l3-3 3 3-3 3Z" fill="url(#gold)"/><path d="M${w / 2 - 3} ${h - 25}l3-3 3 3-3 3Z" fill="url(#gold)"/>`;
     } else if (style === "modern") {
       art = `<path d="M0 0H${w}V6H6V${h}H0Z" fill="#005b43"/><path d="M${w} ${h}H0V${h - 5}H${w - 6}V0H${w}Z" fill="#005b43"/><path d="M11 13H${w - 22}M22 ${h - 13}H${w - 11}" stroke="#b59755" stroke-width=".5"/><path d="M${w - 45} 6H${w - 6}V45Z" fill="#e8f2ec"/><path d="M6 ${h - 45}V${h - 6}H45Z" fill="#e8f2ec"/>`;
     } else {

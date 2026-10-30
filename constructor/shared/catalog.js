@@ -273,20 +273,6 @@ export function template(kind = "diploma", style = "classic") {
     accent: color,
     elements: [
       {
-        ...element("rect", "", 9, 9, 279, 192),
-        stroke: color,
-        fill: "transparent",
-        lineWidth: 0.45,
-        locked: true,
-      },
-      {
-        ...element("rect", "", 12, 12, 273, 186),
-        stroke: color,
-        fill: "transparent",
-        lineWidth: 0.2,
-        locked: true,
-      },
-      {
         ...element("text", titles[kind], 30, 30, 237, 22, 54),
         color,
         bold: true,

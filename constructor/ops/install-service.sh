@@ -107,7 +107,8 @@ RestartSec=5
 WantedBy=multi-user.target
 UNIT
 systemctl daemon-reload
-systemctl enable --now olympiad-constructor
+systemctl enable olympiad-constructor
+systemctl restart olympiad-constructor
 for attempt in $(seq 1 60); do curl -fsS http://127.0.0.1:3210/api/constructor/v1/health >/dev/null && break; sleep 1; done
 "$node" ops/bootstrap-owner.cjs http://127.0.0.1:3210 "$data" "$release/ops/owner-delivery-public.pem"
 python3 "$release/ops/configure-ingress.py" "$base"
