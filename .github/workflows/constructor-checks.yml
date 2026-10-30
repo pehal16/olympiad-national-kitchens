@@ -1,0 +1,30 @@
+name: Constructor isolated acceptance
+on:
+  push:
+    branches: [main]
+    paths: ['constructor/**', '.github/workflows/constructor-checks.yml']
+  pull_request:
+    paths: ['constructor/**', '.github/workflows/constructor-checks.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: constructor
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: constructor/package-lock.json
+      - run: npm ci --ignore-scripts --no-fund --no-audit
+      - run: npx playwright install --with-deps chromium --only-shell
+      - run: npm run build
+      - run: npm test
+      - run: npm run verify
+        env:
+          CONSTRUCTOR_OFFLINE_ACCEPTANCE: '1'
