@@ -105,14 +105,14 @@ export function exportPackage(
     if (m) {
       records.push({ kind: "media", value: m });
       const f = safePath(s.root, m.relativePath);
-      if (fs.existsSync(f))
-        files[m.relativePath] = new Uint8Array(fs.readFileSync(f));
+      fail(fs.existsSync(f), "В пакете отсутствует связанный файл.");
+      files[m.relativePath] = new Uint8Array(fs.readFileSync(f));
     }
   }
   for (const record of records.filter((x) => x.kind === "issue")) {
     const f = safePath(s.root, record.value.relativePath);
-    if (fs.existsSync(f))
-      files[record.value.relativePath] = new Uint8Array(fs.readFileSync(f));
+    fail(fs.existsSync(f), "В пакете отсутствует выданный документ.");
+    files[record.value.relativePath] = new Uint8Array(fs.readFileSync(f));
   }
   const portableAssets = attachPortableAssets(service, records, files);
   const manifest = {
@@ -196,6 +196,20 @@ export function inspectPackage(service, user, buffer, password) {
         r.value.status === "completed" || r.value.excludedFromResults,
         "Пакет содержит активную попытку.",
       );
+  }
+  for (const record of manifest.records.filter(
+    (r) => r.kind === "media" || r.kind === "issue",
+  )) {
+    const file = record.value.relativePath,
+      prefix = record.kind === "media" ? "media/" : "documents/";
+    fail(
+      typeof file === "string" &&
+        file.startsWith(prefix) &&
+        manifest.files?.[file] &&
+        files[file] &&
+        hash(files[file]) === record.value.sha256,
+      "Для записи отсутствует её собственный проверенный файл.",
+    );
   }
   for (const [name, entry] of Object.entries(manifest.files || {})) {
     fail(

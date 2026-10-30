@@ -307,7 +307,12 @@ export function createApp(options = {}) {
         "release",
         id("release"),
         req.user.id,
-        { ...p, projectId: p.id, trial: true, version: 0 },
+        {
+          ...service.prepareMedia(req.user, p),
+          projectId: p.id,
+          trial: true,
+          version: 0,
+        },
         p.id,
       );
       const run = service.createRun(req.user, {
@@ -461,10 +466,12 @@ export function createApp(options = {}) {
       fail(q && q.type && q.title, "Заполните задание.");
       send(
         res,
-        store.put("question", id("bank"), req.user.id, {
-          ...q,
-          sharedWith: [],
-        }),
+        store.put(
+          "question",
+          id("bank"),
+          req.user.id,
+          service.prepareMedia(req.user, { ...q, sharedWith: [] }),
+        ),
       );
     }),
   );
@@ -479,7 +486,11 @@ export function createApp(options = {}) {
           "question",
           q.id,
           q.owner,
-          { ...req.body.question, sharedWith: q.sharedWith },
+          service.prepareMedia(
+            req.user,
+            { ...req.body.question, sharedWith: q.sharedWith },
+            q.owner,
+          ),
           "",
           req.body.expectedRevision,
         ),
@@ -534,7 +545,11 @@ export function createApp(options = {}) {
           "template",
           t.id,
           t.owner,
-          req.body.template,
+          service.prepareMedia(
+            req.user,
+            { ...req.body.template, sharedWith: t.sharedWith || [] },
+            t.owner,
+          ),
           "",
           req.body.expectedRevision,
         ),
@@ -554,7 +569,7 @@ export function createApp(options = {}) {
           number: "ОБРАЗЕЦ",
           degree: "I степени",
         },
-        { watermark: true },
+        { watermark: true, user: req.user },
       );
       res.type("pdf").send(bytes);
     }),
@@ -832,7 +847,9 @@ export function createApp(options = {}) {
       const url = store.get("release", run.releaseId)?.cover || "",
         media = store.get("media", url.split("/").at(-1));
       fail(
-        url.startsWith(API + "/media/") && media?.mime.startsWith("image/"),
+        url.startsWith(API + "/media/") &&
+          media?.owner === run.owner &&
+          media?.mime.startsWith("image/"),
         "Обложка не найдена.",
         404,
       );
@@ -1080,15 +1097,7 @@ export function createApp(options = {}) {
       const m = store.get("media", req.params.id);
       fail(m, "Файл не найден.", 404);
       const user = service.authenticate(cookies(req).constructor_session);
-      let allowed =
-        user &&
-        (user.role === "owner" ||
-          m.owner === user.id ||
-          ["project", "template", "question"].some((kind) =>
-            service
-              .visible(user, kind)
-              .some((p) => JSON.stringify(p).includes(m.id)),
-          ));
+      let allowed = service.mediaReadable(user, m);
       if (!allowed && participantToken(req)) {
         const ps = store.get("participantSession", hash(participantToken(req))),
           a =
@@ -1097,6 +1106,7 @@ export function createApp(options = {}) {
               : null;
         allowed = Boolean(
           a &&
+          m.owner === a.owner &&
           (JSON.stringify(a.variant).includes(m.id) || m.attemptId === a.id),
         );
       }

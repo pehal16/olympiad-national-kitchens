@@ -12,6 +12,7 @@ import {
   publicUser,
   cleanText,
   clone,
+  safePath,
 } from "./util.mjs";
 import {
   validateProject,
@@ -172,6 +173,63 @@ export class Service {
   visible(user, kind) {
     return this.store.list(kind).filter((item) => this.readable(user, item));
   }
+  mediaReadable(user, media) {
+    return Boolean(
+      user &&
+      media &&
+      (user.role === "owner" ||
+        media.owner === user.id ||
+        ["project", "question", "template"].some((kind) =>
+          this.store
+            .list(kind, media.owner)
+            .some(
+              (material) =>
+                material.sharedWith?.includes(user.id) &&
+                JSON.stringify(material).includes(media.id),
+            ),
+        )),
+    );
+  }
+  assertMediaReadable(user, value) {
+    for (const mid of new Set(
+      JSON.stringify(value).match(/media_[a-f0-9-]{36}/g) || [],
+    ))
+      fail(
+        this.mediaReadable(user, this.store.get("media", mid)),
+        "Связанный файл недоступен этому преподавателю.",
+        404,
+        "media_forbidden",
+      );
+  }
+  prepareMedia(user, value, targetOwner = user.id) {
+    this.assertMediaReadable(user, value);
+    let json = JSON.stringify(value);
+    for (const mid of new Set(json.match(/media_[a-f0-9-]{36}/g) || [])) {
+      const media = this.store.get("media", mid);
+      if (media.owner === targetOwner) continue;
+      let copy = this.store
+        .list("media", targetOwner)
+        .find((m) => m.copiedFrom === mid && m.sha256 === media.sha256);
+      if (!copy) {
+        const key = id("media"),
+          relativePath = "media/" + key + path.extname(media.relativePath);
+        fs.copyFileSync(
+          safePath(this.store.root, media.relativePath),
+          safePath(this.store.root, relativePath),
+        );
+        copy = this.store.put("media", key, targetOwner, {
+          ...media,
+          id: key,
+          relativePath,
+          url: "/api/constructor/v1/media/" + key,
+          attemptId: null,
+          copiedFrom: mid,
+        });
+      }
+      json = json.replaceAll(mid, copy.id);
+    }
+    return JSON.parse(json);
+  }
   listUsers(user) {
     this.owner(user);
     return this.store.db
@@ -260,7 +318,7 @@ export class Service {
     return publicUser(this.store.user(key));
   }
   createProject(user, body = {}) {
-    const base = body.project
+    let base = body.project
       ? clone(body.project)
       : project(body.title || "Новая олимпиада", body.kind || "olympiad");
     delete base.owner;
@@ -269,11 +327,12 @@ export class Service {
     base.sharedWith = [];
     base.status = "draft";
     base.createdAt = now();
+    base = this.prepareMedia(user, base);
     return this.store.put("project", id("project"), user.id, base);
   }
   saveProject(user, key, body) {
     const existing = this.get(user, "project", key, true);
-    const draft = clone(body.project || body);
+    let draft = clone(body.project || body);
     delete draft.id;
     delete draft.owner;
     delete draft.revision;
@@ -284,6 +343,7 @@ export class Service {
       Array.isArray(draft.rounds) && JSON.stringify(draft).length < 3000000,
       "Неверный или слишком большой проект.",
     );
+    draft = this.prepareMedia(user, draft, existing.owner);
     return this.store.put(
       "project",
       key,
@@ -297,6 +357,7 @@ export class Service {
     this.right(user, "publish");
     const p = this.get(user, "project", key, true),
       errors = validateProject(p);
+    this.assertMediaReadable(user, p);
     fail(!errors.length, errors.join("\n"), 422, "project_incomplete");
     const releases = this.store.list("release", null, key);
     const release = this.store.put(
@@ -329,10 +390,11 @@ export class Service {
   }
   createTemplate(user, body) {
     validateTemplate(body);
-    const value = clone(body);
+    let value = clone(body);
     delete value.id;
     delete value.owner;
     value.sharedWith = [];
+    value = this.prepareMedia(user, value);
     return this.store.put("template", id("template"), user.id, value);
   }
   templates(user) {
@@ -369,7 +431,13 @@ export class Service {
       createdAt: now(),
       registrationFields: settings.registrationFields,
     };
-    const run = this.store.put("run", id("run"), user.id, r, release.projectId);
+    const run = this.store.put(
+      "run",
+      id("run"),
+      release.owner,
+      r,
+      release.projectId,
+    );
     this.store.audit(user.id, "run.created", run.id);
     return run;
   }

@@ -147,7 +147,11 @@ export class Documents {
     }
     return this.browser;
   }
-  async render(template, data, { watermark = false } = {}) {
+  async render(template, data, { watermark = false, user } = {}) {
+    this.service.assertMediaReadable(
+      user || { id: template.owner, role: "teacher" },
+      template,
+    );
     if (template.backgroundImage)
       fail(
         this.image(template.backgroundImage),
@@ -331,7 +335,7 @@ export class Documents {
               ? await QRCode.toDataURL(`${base}/constructor/verify/${iid}`)
               : "";
         }
-        const bytes = await this.render(snapshot, fields);
+        const bytes = await this.render(snapshot, fields, { user });
         const relativePath = `documents/${iid}.pdf`;
         fs.writeFileSync(safePath(this.store.root, relativePath), bytes, {
           mode: 0o600,
@@ -492,7 +496,7 @@ export class Documents {
               next,
           )
         : "";
-    const bytes = await this.render(template, fields);
+    const bytes = await this.render(template, fields, { user });
     this.revoke(user, key, body.reason);
     const relativePath = `documents/${next}.pdf`;
     fs.writeFileSync(safePath(this.store.root, relativePath), bytes, {
