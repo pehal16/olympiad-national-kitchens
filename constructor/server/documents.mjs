@@ -296,18 +296,34 @@ export class Documents {
       409,
     );
     const candidates = run.approvedAwards.candidates.filter((c) => !c.excluded);
+    const approvalHash = hash(run.approvedAwards),
+      checkApproval = () => {
+        const latest = this.store.get("run", runId);
+        fail(
+          latest.awardsApproved && hash(latest.approvedAwards) === approvalHash,
+          "Утверждённый список изменился. Проверьте награждение и повторите выпуск.",
+          409,
+        );
+      };
     return this.enqueue(user, "awards", runId, async (progress) => {
-      const issued = [];
+      const issued = [],
+        skippedRevoked = [];
       progress({ total: candidates.length });
       for (const [index, candidate] of candidates.entries()) {
+        checkApproval();
         const key = hash(
             `${runId}:${run.approvedAwards.resultHash}:${candidate.id}:${hash(candidate)}`,
           ),
           existing = this.store
             .list("issue", null, runId)
-            .find((i) => i.issuanceKey === key && i.status === "issued");
+            .find(
+              (i) =>
+                i.issuanceKey === key &&
+                ["issued", "revoked"].includes(i.status),
+            );
         if (existing) {
-          issued.push(existing.id);
+          if (existing.status === "revoked") skippedRevoked.push(existing.id);
+          else issued.push(existing.id);
           progress({ done: index + 1 });
           continue;
         }
@@ -336,6 +352,7 @@ export class Documents {
               : "";
         }
         const bytes = await this.render(snapshot, fields, { user });
+        checkApproval();
         const relativePath = `documents/${iid}.pdf`;
         fs.writeFileSync(safePath(this.store.root, relativePath), bytes, {
           mode: 0o600,
@@ -370,7 +387,7 @@ export class Documents {
         issued.push(iid);
         progress({ done: index + 1 });
       }
-      return { issued };
+      return { issued, skippedRevoked };
     });
   }
   async collection(user, runId, format) {
@@ -497,37 +514,54 @@ export class Documents {
           )
         : "";
     const bytes = await this.render(template, fields, { user });
-    this.revoke(user, key, body.reason);
+    fail(
+      this.store.get("issue", key).revision === old.revision,
+      "Результаты изменились во время подготовки. Заново утвердите награждение.",
+      409,
+    );
     const relativePath = `documents/${next}.pdf`;
     fs.writeFileSync(safePath(this.store.root, relativePath), bytes, {
       mode: 0o600,
     });
-    const issue = this.store.put(
-      "issue",
-      next,
-      user.id,
-      {
-        ...old,
-        id: next,
-        fields,
-        templateSnapshot: clone(template),
-        status: "issued",
-        issuedAt: now(),
-        relativePath,
-        sha256: hash(bytes),
-        previousIssueId: key,
-        version: Number(old.version || 1) + 1,
-        issuanceKey: id("reissue"),
-        revokedAt: null,
-        revokeReason: null,
-      },
-      old.runId,
-    );
-    this.store.audit(user.id, "document.reissued", next, {
-      previousIssueId: key,
-      reason: body.reason,
-    });
-    return issue;
+    try {
+      return this.store.transaction(() => {
+        fail(
+          this.store.get("issue", key).revision === old.revision,
+          "Документ изменился во время подготовки. Обновите реестр.",
+          409,
+        );
+        this.revoke(user, key, body.reason);
+        const issue = this.store.put(
+          "issue",
+          next,
+          old.owner,
+          {
+            ...old,
+            id: next,
+            fields,
+            templateSnapshot: clone(template),
+            status: "issued",
+            issuedAt: now(),
+            relativePath,
+            sha256: hash(bytes),
+            previousIssueId: key,
+            version: Number(old.version || 1) + 1,
+            issuanceKey: id("reissue"),
+            revokedAt: null,
+            revokeReason: null,
+          },
+          old.runId,
+        );
+        this.store.audit(user.id, "document.reissued", next, {
+          previousIssueId: key,
+          reason: body.reason,
+        });
+        return issue;
+      });
+    } catch (error) {
+      fs.rmSync(safePath(this.store.root, relativePath), { force: true });
+      throw error;
+    }
   }
   async close() {
     this.closing = true;

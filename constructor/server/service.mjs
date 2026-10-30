@@ -649,6 +649,13 @@ export class Service {
       },
       runId,
     );
+    if (run.awardsApproved || run.published)
+      this.invalidateAwards(
+        { id: run.owner, role: "teacher" },
+        runId,
+        "Начата новая попытка после утверждения результатов",
+        participant.id,
+      );
     this.store.audit(participant.id, "attempt.started", aid);
     return this.newParticipantSession(a);
   }
@@ -1058,7 +1065,7 @@ export class Service {
     });
     return this.persistAttempt(a);
   }
-  invalidateAwards(user, key, reason) {
+  invalidateAwards(user, key, reason, actor = user.id) {
     const run = this.get(user, "run", key, true);
     run.awardsApproved = false;
     run.published = false;
@@ -1068,7 +1075,7 @@ export class Service {
       .filter((i) => i.status === "issued")) {
       issue.status = "suspended";
       this.store.put("issue", issue.id, issue.owner, issue, key);
-      this.store.audit(user.id, "document.suspended", issue.id, { reason });
+      this.store.audit(actor, "document.suspended", issue.id, { reason });
     }
   }
   setNominations(user, key, body) {

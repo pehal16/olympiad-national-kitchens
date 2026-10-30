@@ -868,10 +868,13 @@ export function createApp(options = {}) {
       sameOrigin(req);
       const key = String(req.body.startKey || "");
       fail(key.length >= 16 && key.length <= 128, "Нет ключа начала попытки.");
-      const cached = store.request("begin:" + req.params.id, key);
-      if (cached) return send(res, JSON.parse(cached));
-      const result = service.begin(req.params.id, req.body);
-      store.request("begin:" + req.params.id, key, result);
+      const result = store.transaction(() => {
+        const cached = store.request("begin:" + req.params.id, key);
+        if (cached) return JSON.parse(cached);
+        const created = service.begin(req.params.id, req.body);
+        store.request("begin:" + req.params.id, key, created);
+        return created;
+      });
       send(res, result);
     }),
   );
