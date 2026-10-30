@@ -127,6 +127,95 @@ async function main() {
     await student.reload();
     await student.getByLabel(option, { exact: true }).waitFor();
     assert.ok(await student.getByLabel(option, { exact: true }).isChecked());
+    const studentSession = await student.evaluate(
+        (id) => JSON.parse(localStorage.getItem("constructor-session:" + id)),
+        run.id,
+      ),
+      firstQuestion = p.rounds[0].questions[0];
+    const remoteAnswer = async (optionId) => {
+      const rows = await request("/runs/" + run.id + "/results"),
+        a = rows[0];
+      await request(
+        "/public/attempts/" + a.id + "/answers/" + firstQuestion.id,
+        {
+          answer: optionId,
+          expectedRevision: a.answers[firstQuestion.id].revision,
+          idempotencyKey: uid("remote"),
+        },
+        "PUT",
+        studentSession.token,
+      );
+    };
+    await remoteAnswer(firstQuestion.config.options[1].id);
+    await student
+      .getByLabel(firstQuestion.config.options[2].label, { exact: true })
+      .check();
+    await student
+      .getByRole("button", {
+        name: "Использовать серверный ответ",
+        exact: true,
+      })
+      .waitFor();
+    await student
+      .getByRole("button", { name: "Подтвердить и продолжить" })
+      .click();
+    await student
+      .getByText("Сначала выберите версию ответа при конфликте сохранения.", {
+        exact: true,
+      })
+      .waitFor();
+    assert.equal(
+      (await request("/runs/" + run.id + "/results"))[0].currentQuestion,
+      0,
+    );
+    await student
+      .getByRole("button", {
+        name: "Использовать серверный ответ",
+        exact: true,
+      })
+      .click();
+    await student
+      .getByText("Ответ подтверждён сервером", { exact: true })
+      .waitFor();
+    assert.ok(
+      await student
+        .getByLabel(firstQuestion.config.options[1].label, { exact: true })
+        .isChecked(),
+    );
+    const closeAlert = student.getByRole("button", {
+      name: "Закрыть сообщение",
+      exact: true,
+    });
+    if (await closeAlert.isVisible()) await closeAlert.click();
+    await remoteAnswer(firstQuestion.config.options[0].id);
+    await student
+      .getByLabel(firstQuestion.config.options[2].label, { exact: true })
+      .check();
+    await student
+      .getByRole("button", {
+        name: "Сохранить мою копию как новую",
+        exact: true,
+      })
+      .waitFor();
+    await student
+      .getByRole("button", {
+        name: "Сохранить мою копию как новую",
+        exact: true,
+      })
+      .click();
+    await student
+      .getByText("Ответ подтверждён сервером", { exact: true })
+      .waitFor();
+    assert.equal(
+      (await request("/runs/" + run.id + "/results"))[0].answers[
+        firstQuestion.id
+      ].answer,
+      firstQuestion.config.options[2].id,
+    );
+    await student.getByLabel(option, { exact: true }).check();
+    await student
+      .getByText("Ответ подтверждён сервером", { exact: true })
+      .waitFor();
     await student.screenshot({
       path: path.join(output, "participant-mobile.png"),
     });
@@ -246,6 +335,8 @@ async function main() {
       savedReloaded: true,
       mobileViewport: "390×844",
       offlineDraftRecovered: true,
+      draftConflictResolved: true,
+      navigationBlockedUntilResolution: true,
       manualReview: true,
       issuedPdfPages: 1,
       consoleErrors: errors,

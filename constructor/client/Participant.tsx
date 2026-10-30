@@ -142,7 +142,11 @@ export function Participant({ runId }: { runId: string }) {
   const flush = useCallback(async () => {
     if (!session || !aRef.current || !qidRef.current) return;
     if (inFlight.current) await inFlight.current;
-    if (!dirty.current || conflict) return;
+    if (conflict)
+      throw new Error(
+        "Сначала выберите версию ответа при конфликте сохранения.",
+      );
+    if (!dirty.current) return;
     const task = async () => {
       while (dirty.current) {
         const version = seq.current,
@@ -282,6 +286,31 @@ export function Participant({ runId }: { runId: string }) {
       : `${Math.floor(remaining / 60)
           .toString()
           .padStart(2, "0")}:${(remaining % 60).toString().padStart(2, "0")}`;
+  const resolveConflict = async (useServer: boolean) => {
+    if (!session) return;
+    const latest = await api(
+      "/public/attempts/" + session.attemptId,
+      undefined,
+      "GET",
+      session.token,
+    );
+    receive(latest);
+    const entry = latest.answers[qidRef.current];
+    revision.current = entry?.revision || 0;
+    pending.current = null;
+    if (useServer) {
+      valueRef.current = entry?.answer;
+      setValue(entry?.answer);
+      dirty.current = false;
+      setSaved("Ответ подтверждён сервером");
+    } else {
+      dirty.current = true;
+      setSaved("Сохраняем выбранную локальную копию…");
+    }
+    setConflict(false);
+    setError("");
+    await stash();
+  };
   const currentCase = r?.cases?.find((c: Json) => c.id === q?.caseId);
   return (
     <div
@@ -306,30 +335,10 @@ export function Participant({ runId }: { runId: string }) {
           <p>{error}</p>
           {conflict && (
             <div className="actions">
-              <Button
-                onClick={() => {
-                  const answer = aRef.current?.answers[qidRef.current];
-                  valueRef.current = answer?.answer;
-                  setValue(answer?.answer);
-                  revision.current = answer?.revision || 0;
-                  pending.current = null;
-                  dirty.current = false;
-                  setConflict(false);
-                  setError("");
-                  stash();
-                }}
-              >
+              <Button onClick={() => resolveConflict(true)}>
                 Использовать серверный ответ
               </Button>
-              <Button
-                onClick={() => {
-                  revision.current =
-                    aRef.current?.answers[qidRef.current]?.revision || 0;
-                  pending.current = null;
-                  setConflict(false);
-                  setError("");
-                }}
-              >
+              <Button onClick={() => resolveConflict(false)}>
                 Сохранить мою копию как новую
               </Button>
               <Button
