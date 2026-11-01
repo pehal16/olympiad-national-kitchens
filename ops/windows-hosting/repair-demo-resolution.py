@@ -32,7 +32,7 @@ def render(text, addresses):
     text=text.replace('olympiad-gkts.pages.dev',ORIGIN)
     trusted='proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;'
     if text.count(trusted)!=2: raise RuntimeError('Unexpected demo TLS scopes')
-    text=text.replace(trusted,trusted+'\n        proxy_next_upstream error timeout http_502 http_503 http_504;\n        proxy_next_upstream_tries 2;\n        proxy_hide_header Alt-Svc;')
+    text=text.replace(trusted,trusted+'\n        proxy_ssl_verify_depth 4;\n        proxy_next_upstream error timeout http_502 http_503 http_504;\n        proxy_next_upstream_tries 2;\n        proxy_hide_header Alt-Svc;\n        add_header X-Olympiad-Ingress demo-direct-v4 always;')
     return text
 
 
@@ -43,7 +43,10 @@ def run(*args):
 
 
 def get(route):
-    return run('curl','--fail','--silent','--show-error','--max-time','20','--resolve',DOMAIN+':443:127.0.0.1','https://'+DOMAIN+route)
+    response=run('curl','--include','--fail','--silent','--show-error','--max-time','20','--resolve',DOMAIN+':443:127.0.0.1','https://'+DOMAIN+route)
+    headers,body=response.split('\n\n',1)
+    if 'x-olympiad-ingress: demo-direct-v4' not in headers.lower():raise RuntimeError('Waiting for the new nginx generation')
+    return body
 
 
 def healthy_peers():
