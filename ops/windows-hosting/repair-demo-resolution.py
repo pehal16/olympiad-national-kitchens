@@ -32,6 +32,8 @@ def render(text):
     trusted='proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;'
     if text.count(trusted)!=2: raise RuntimeError('Unexpected demo TLS scopes')
     text=text.replace(trusted,trusted+'\n        proxy_next_upstream error timeout http_502 http_503 http_504;\n        proxy_next_upstream_tries 2;\n        proxy_hide_header Alt-Svc;')
+    text=text.replace('proxy_connect_timeout 5s;', 'proxy_connect_timeout 2s;')
+    text=text.replace('proxy_connect_timeout 3s;\n        proxy_read_timeout 30s;\n        proxy_intercept_errors on;', 'proxy_connect_timeout 2s;\n        proxy_read_timeout 30s;\n        proxy_intercept_errors on;')
     return text
 
 
