@@ -5,6 +5,7 @@ const path = require("node:path");
 const { createSqliteD1 } = require("./src/sqlite-d1");
 
 const STATIC_FILES = new Set([
+  '/demo-analytics.js',
   '/olympiad-ready.css', '/olympiad-device.js','/admin-console.css',
   '/attempt-reserve.js',
   '/story-dialogue.js','/restaurant-comic.css','/story-banquet.js','/story-banquet.css',
@@ -16,7 +17,7 @@ const STATIC_FILES = new Set([
 ]);
 
 function isOlympiadApi(pathname) {
-  return pathname === "/api/public/olympiad" ||
+  return require('./src/demo-analytics').analyticsRoute(pathname) || pathname === "/api/public/olympiad" ||
     pathname === "/api/public/register" ||
     pathname === "/api/public/attempts/start" ||
     /^\/api\/public\/attempts\/[^/]+(?:\/(?:certificate|story-result|current|pulse|answer|draft|tour\/start|dish-selection|finish|integrity))?$/.test(pathname) ||
@@ -71,7 +72,7 @@ function createOlympiadServer(options = {}) {
     throw new Error("OLYMPIAD_DB_PATH must not be inside the public directory.");
   }
 
-  const db = createSqliteD1(dbPath);
+  const db = createSqliteD1(dbPath, {demoAnalytics:String(options.demoMode)==='true'});
   const { configureCloudflareStorage } = require("./src/store");
   configureCloudflareStorage({ OLYMPIAD_DEMO_MODE:options.demoMode, STORY_ENABLED:options.storyEnabled, STORY_ANYTIME_ENTRY:options.storyAnytimeEntry, DB: db, ADMIN_PASSWORD: adminPassword, ATTEMPT_ID_SECRET: attemptIdSecret });
   const { handleApi, serveStatic } = require("./server");
@@ -95,10 +96,14 @@ function createOlympiadServer(options = {}) {
     try {
       if(publicApiOrigin&&(pathname==='/api/health'||(pathname.startsWith('/api/public/')&&isOlympiadApi(pathname)))){
         await require('./src/shared-olympiad-api').relayParticipantApi(req,res,url,options.sharedApiFetch||fetch);
+      }else if(require('./src/demo-analytics').analyticsRoute(pathname)){
+        const webRequest=new Request(url,{method:req.method,headers:req.headers,...(!['GET','HEAD'].includes(req.method)?{body:require('node:stream').Readable.toWeb(req),duplex:'half'}:{})});
+        const result=await require('./src/demo-analytics').handleDemoAnalytics(webRequest,{DB:db,OLYMPIAD_DEMO_MODE:options.demoMode});
+        res.writeHead(result.status,Object.fromEntries(result.headers));res.end(Buffer.from(await result.arrayBuffer()));
       }else if(publicApiOrigin&&pathname==='/admin.html'&&req.method==='GET'){
         res.writeHead(302,{Location:publicApiOrigin+'/admin.html','Cache-Control':'no-store'});res.end();
       }else if (pathname === "/api/health" && req.method === "GET") {
-        sendJson(res, 200, { ok: true, appVersion, mode: "olympiad-only", storage: "sqlite" });
+        sendJson(res, 200, { ok: true, appVersion, mode: "olympiad-only", storage: "sqlite", ...(String(options.demoMode)==='true'?{demonstration:true}:{}) });
       } else if (pathname.startsWith("/api/")) {
         if (!isOlympiadApi(pathname)) {
           sendJson(res, 404, { ok: false, message: "Маршрут недоступен на сервере олимпиады." });

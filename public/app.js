@@ -4123,6 +4123,7 @@ async function init() {
     closeNavDrawer();document.getElementById('preparation-section')?.scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'});
   });
   window.OlympiadStory?.intro(state.olympiad);
+  if (state.olympiad.demonstration) window.DemoAnalytics?.mount(demoSessionId());
   if (state.olympiad.demonstration) await handleRegistration({preventDefault(){}});
   const refreshStoryAdmission = async () => {
     if (!state.olympiad?.storyEnabled || state.attempt || document.hidden) return;

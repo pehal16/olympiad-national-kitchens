@@ -162,6 +162,8 @@ export default {
     const url = new URL(request.url);
     const demoResponse = await require('../public-demo').handleDemoRelay(request, env);
     if (demoResponse) return demoResponse;
+    const analyticsResponse = await require('../demo-analytics').handleDemoAnalytics(request, env);
+    if (analyticsResponse) return analyticsResponse;
     if (env.OLYMPIAD_DEMO_MODE === 'true' && (url.pathname.startsWith('/api/admin/') || url.pathname === '/api/desktop-mirror' || url.pathname.startsWith('/api/learning/') || url.pathname.startsWith('/api/pm01/'))) {
       return jsonError(403,'В демоверсии нет кабинета организатора и реальных данных участников.');
     }

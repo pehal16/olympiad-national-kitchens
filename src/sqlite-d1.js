@@ -15,7 +15,7 @@ const MIGRATIONS = [
   "0012_olympiad_retakes.sql"
 ];
 
-function createSqliteD1(filename) {
+function createSqliteD1(filename, options = {}) {
   if (!filename || filename === ":memory:") {
     throw new Error("A persistent SQLite database path is required.");
   }
@@ -28,7 +28,7 @@ function createSqliteD1(filename) {
     "CREATE TABLE IF NOT EXISTS local_schema_migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL)"
   );
 
-  for (const name of MIGRATIONS) {
+  for (const name of [...MIGRATIONS, ...(options.demoAnalytics ? ['0013_demo_visits.sql'] : [])]) {
     if (database.prepare("SELECT name FROM local_schema_migrations WHERE name = ?1").get(name)) {
       continue;
     }

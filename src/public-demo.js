@@ -14,7 +14,7 @@ function anonymousProfile(req) {
   return { fullName: 'Демонстрационный Участник', institution: 'Демонстрационная площадка',
     groupName: 'ДЕМО-' + require('node:crypto').createHash('sha256').update(session).digest('hex').slice(0,16), mentorName: '' };
 }
-function publicRoute(path) { return require('./desktop-primary-relay').publicRoute(path); }
+function publicRoute(path) { return require('./demo-analytics').analyticsRoute(path) || require('./desktop-primary-relay').publicRoute(path); }
 async function handleDemoRelay(request, env, fetcher = (url, options) => globalThis.fetch(url, options)) {
   if (String(env?.OLYMPIAD_PUBLIC_DEMO || '') !== 'true' || !publicRoute(new URL(request.url).pathname)) return null;
   const url = new URL(request.url);
@@ -31,6 +31,7 @@ async function handleDemoRelay(request, env, fetcher = (url, options) => globalT
       body=new Uint8Array(size);let offset=0;for(const chunk of chunks){body.set(chunk,offset);offset+=chunk.byteLength;}
     }
     const response=await fetcher(DEMO_ORIGIN+url.pathname+url.search,{method:request.method,headers,body,redirect:'manual',signal:AbortSignal.timeout(20000)});
+    if(response.status===204&&url.pathname==='/api/public/demo/visit'&&request.method==='POST')return new Response(null,{status:204,headers:{'Cache-Control':'no-store'}});
     if (!/application\/json/i.test(response.headers.get('Content-Type')||'')) return failure(502,'Демонстрационная площадка временно недоступна.');
     return new Response(request.method==='HEAD'?null:await response.text(),{status:response.status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'private, no-store'}});
   } catch { return failure(502,'Не удалось подключиться к демонстрационной площадке. Попробуйте ещё раз.'); }

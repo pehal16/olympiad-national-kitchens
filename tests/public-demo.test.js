@@ -26,8 +26,11 @@ test('anonymous isolated demonstration: all 36 questions, no supplied identity, 
  assert.equal((await api('/api/public/register',{},token,'invalid')).status,400);
  const profile={fullName:'Не Сохранять Фамилию',institution:'Не сохранять организацию',groupName:'Не сохранять группу',mentorName:'Не сохранять наставника'};
  const registered=await api('/api/public/register',profile);assert.equal(registered.status,200,registered.message);assert.equal(registered.data.participant.fullName,'Демонстрационный Участник');assert.equal(registered.data.participant.mentorName,'');
+ const visit=await fetch(base+'/api/public/demo/visit',{method:'POST',headers:{'Content-Type':'application/json','X-Demo-Session':session},body:JSON.stringify({viewId:'1'.repeat(32),persistent:true})});assert.equal(visit.status,204);
  const start=()=>api('/api/public/attempts/start',{participant:profile,tourBriefings:true});
  const [a,b]=await Promise.all([start(),start()]);assert.equal(a.data.id,b.data.id);assert.equal(a.data.demonstration,true);
+ assert.equal(a.data.demoVisitorHash,undefined);
+ const counters=await api('/api/public/demo/statistics');assert.equal(counters.data.startedAttempts,1);assert.equal(counters.data.uniqueBrowsers,1);assert.equal(counters.data.pageViews,1);
  let view=a.data;const id=view.id,prefix='/api/public/attempts/'+id;
  assert.equal((await api(prefix,null,'incorrect-owner-token')).status,401);
  assert.equal((await api('/api/admin/login',{password:'synthetic-demo-admin-password'})).status,403);

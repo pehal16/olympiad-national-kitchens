@@ -3855,6 +3855,7 @@ async function handleApi(req, res, url, runtime = {}) {
       ...(previousAttemptId?{previousAttemptId}:{}),
       tourBriefingsEnabled:Boolean(run&&body.tourBriefings===true),
       demonstration:publicDemo.demoEnabled(),
+      ...(publicDemo.demoEnabled()?{demoVisitorHash:require('./src/demo-analytics').visitorKey(req.headers['x-demo-session'])}:{}),
       autoSaveDrafts:Boolean(run&&body.tourBriefings===true),
       routeSeed,
       accessTokenHash: hashAttemptAccessToken(accessToken),

@@ -9,6 +9,11 @@ async function main(){
   if(body.data){assert.equal(body.data.questionCount,36);assert.equal(body.data.story.entryOpen,true);assert.equal(body.data.story.entryMode,'anytime');assert.equal(body.data.recovery,undefined,'No transfer to the switched-off college PC');}
  }
  console.log('Public demonstration is online independently of the college PC: '+base);
+ const statsResponse=await fetch(base+'/api/public/demo/statistics',{signal:AbortSignal.timeout(30000)}),stats=await statsResponse.json();
+ assert.equal(statsResponse.status,200,'Demo statistics');assert.equal(stats.ok,true);
+ for(const key of ['pageViews','uniqueBrowsers','startedAttempts'])assert.ok(Number.isSafeInteger(stats.data[key])&&stats.data[key]>=0,'Invalid counter '+key);
+ assert.equal(stats.data.uniqueMetric,'persistent_browser');assert.ok(!Number.isNaN(Date.parse(stats.data.countingSince)));
+ console.log('Anonymous demo counters are readable; verification does not create visits.');
  if(process.argv.includes('--exercise'))await exercise();
 }
 
