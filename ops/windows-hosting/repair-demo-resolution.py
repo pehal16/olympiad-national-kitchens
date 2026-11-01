@@ -1,7 +1,7 @@
 """Repair only the inspected olympiad ingress; keep its constructor locations.
 
 nginx1.24 resolves a named upstream only at reload, including unreachable IPv6.
-Use its existing DNS stub at request time, with IPv4 and safe upstream retries.
+Probe current DNS IPv4 answers and retain only stable, certificate-checked peers.
 """
 import concurrent.futures
 import datetime
@@ -11,6 +11,8 @@ import os
 from pathlib import Path
 import re
 import shutil
+import socket
+import ipaddress
 import subprocess
 import time
 
@@ -19,21 +21,15 @@ EXPECTED='96c7e430a4a508c2162814ab057f5e2579b10f16ae90c78c95308cdf8236d5aa'
 DOMAIN='xn--80aaloaqinm.xn--b1amqadnhd.xn--p1ai'
 
 
-def render(text):
-    text,n=re.subn(r'upstream olympiad_public_demo\s*\{[^}]*\}', '', text, count=1)
+def render(text, addresses):
+    peers=[str(ipaddress.IPv4Address(x)) for x in addresses]
+    if not peers: raise RuntimeError('No verified IPv4 peers')
+    block='upstream olympiad_public_demo {\n'+''.join('    server '+x+':443 max_fails=0;\n' for x in peers)+'    keepalive 16;\n}'
+    text,n=re.subn(r'upstream olympiad_public_demo\s*\{[^}]*\}', block, text, count=1)
     if n!=1: raise RuntimeError('Expected the inspected demo upstream')
-    old='proxy_pass https://olympiad_public_demo;'
-    if text.count(old)!=1: raise RuntimeError('Unexpected fallback layout')
-    text=text.replace(old, 'set $olympiad_demo_origin olympiad-gkts.pages.dev;\n        proxy_pass https://$olympiad_demo_origin;')
-    text=text.replace('https://olympiad_public_demo;', 'https://olympiad-gkts.pages.dev;')
-    protocol='ssl_protocols TLSv1.2 TLSv1.3;'
-    if text.count(protocol)!=1: raise RuntimeError('Unexpected TLS layout')
-    text=text.replace(protocol,protocol+'\n    resolver 127.0.0.53 ipv6=off valid=60s;\n    resolver_timeout 3s;')
     trusted='proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;'
     if text.count(trusted)!=2: raise RuntimeError('Unexpected demo TLS scopes')
     text=text.replace(trusted,trusted+'\n        proxy_next_upstream error timeout http_502 http_503 http_504;\n        proxy_next_upstream_tries 2;\n        proxy_hide_header Alt-Svc;')
-    text=text.replace('proxy_connect_timeout 5s;', 'proxy_connect_timeout 2s;')
-    text=text.replace('proxy_connect_timeout 3s;\n        proxy_read_timeout 30s;\n        proxy_intercept_errors on;', 'proxy_connect_timeout 2s;\n        proxy_read_timeout 30s;\n        proxy_intercept_errors on;')
     return text
 
 
@@ -47,12 +43,28 @@ def get(route):
     return run('curl','--fail','--silent','--show-error','--max-time','20','--resolve',DOMAIN+':443:127.0.0.1','https://'+DOMAIN+route)
 
 
+def healthy_peers():
+    name='olympiad-gkts.pages.dev'
+    ips=sorted(set(x[4][0] for x in socket.getaddrinfo(name,443,socket.AF_INET)))
+    def probe(ip):
+        try:
+            for _ in range(3):
+                raw=run('curl','--http1.1','--fail','--silent','--show-error','--connect-timeout','4','--max-time','6','--resolve',name+':443:'+ip,'https://'+name+'/api/health')
+                if not json.loads(raw).get('demonstration'): return None
+            return ip
+        except Exception:return None
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+        good=[ip for ip in pool.map(probe,ips) if ip]
+    print(json.dumps({'dnsIPv4Answers':ips,'verifiedDemoIPv4':good}),flush=True)
+    if not good:raise RuntimeError('No stable verified Cloudflare address; ingress unchanged')
+    return good
+
+
 def main():
     if not TARGET.is_file() or TARGET.is_symlink(): raise RuntimeError('Unexpected target')
     original=TARGET.read_bytes()
     if hashlib.sha256(original).hexdigest()!=EXPECTED: raise RuntimeError('Inspect the changed vhost before applying')
-    if 'nameserver 127.0.0.53' not in Path('/etc/resolv.conf').read_text(): raise RuntimeError('DNS stub changed')
-    candidate=render(original.decode()).encode()
+    candidate=render(original.decode(),healthy_peers()).encode()
     backup=Path('/var/backups')/('olympiad-before-dns-repair-'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'.conf')
     if backup.exists(): raise RuntimeError('Backup already exists')
     shutil.copy2(TARGET,backup)
