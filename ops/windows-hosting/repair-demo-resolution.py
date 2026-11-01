@@ -19,6 +19,7 @@ import time
 TARGET=Path('/etc/nginx/sites-available/olympiad-desktop-relay')
 EXPECTED='96c7e430a4a508c2162814ab057f5e2579b10f16ae90c78c95308cdf8236d5aa'
 DOMAIN='xn--80aaloaqinm.xn--b1amqadnhd.xn--p1ai'
+ORIGIN='olympiad-gkts-demo.pages.dev'
 
 
 def render(text, addresses):
@@ -27,6 +28,8 @@ def render(text, addresses):
     block='upstream olympiad_public_demo {\n'+''.join('    server '+x+':443 max_fails=0;\n' for x in peers)+'    keepalive 16;\n}'
     text,n=re.subn(r'upstream olympiad_public_demo\s*\{[^}]*\}', block, text, count=1)
     if n!=1: raise RuntimeError('Expected the inspected demo upstream')
+    if text.count('olympiad-gkts.pages.dev')!=4:raise RuntimeError('Unexpected demo host/SNI layout')
+    text=text.replace('olympiad-gkts.pages.dev',ORIGIN)
     trusted='proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;'
     if text.count(trusted)!=2: raise RuntimeError('Unexpected demo TLS scopes')
     text=text.replace(trusted,trusted+'\n        proxy_next_upstream error timeout http_502 http_503 http_504;\n        proxy_next_upstream_tries 2;\n        proxy_hide_header Alt-Svc;')
@@ -44,7 +47,7 @@ def get(route):
 
 
 def healthy_peers():
-    name='olympiad-gkts.pages.dev'
+    name=ORIGIN
     ips=sorted(set(x[4][0] for x in socket.getaddrinfo(name,443,socket.AF_INET)))
     def probe(ip):
         try:
