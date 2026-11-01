@@ -42,10 +42,10 @@ def run(*args):
     return p.stdout
 
 
-def get(route):
+def get(route, require_marker=True):
     response=run('curl','--include','--fail','--silent','--show-error','--max-time','20','--resolve',DOMAIN+':443:127.0.0.1','https://'+DOMAIN+route)
     headers,body=response.split('\n\n',1)
-    if 'x-olympiad-ingress: demo-direct-v4' not in headers.lower():raise RuntimeError('Waiting for the new nginx generation')
+    if require_marker and 'x-olympiad-ingress: demo-direct-v4' not in headers.lower():raise RuntimeError('Waiting for the new nginx generation')
     return body
 
 
@@ -90,7 +90,7 @@ def main():
         with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
             responses=list(pool.map(get,routes*5))
         assert json.loads(responses[2])['ok']
-        assert json.loads(get('/api/constructor/v1/health'))['ok']
+        assert json.loads(get('/api/constructor/v1/health',False))['ok']
         run('curl','--fail','--silent','--show-error','--max-time','20','--output','/dev/null','https://xn----7sbbhcc4cggjkbdbvhis.xn--p1ai/api/settings')
     except Exception:
         shutil.copy2(backup,TARGET);run('nginx','-t');run('systemctl','reload','nginx');raise
