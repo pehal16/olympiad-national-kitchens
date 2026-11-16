@@ -2,6 +2,7 @@ import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { useState } from "react";
 import type { Question, Json } from "../shared/types";
 import { TYPES, MANUAL, question, uid } from "../shared/catalog";
+import { convertQuestion } from "../shared/authoring.js";
 import { upload } from "./api";
 import {
   Button,
@@ -18,24 +19,32 @@ export function QuestionEditor({
   q,
   onChange,
   cases = [],
+  guided = false,
 }: {
   q: Question;
-  onChange: (q: Question) => void;
+  onChange: (q: any) => void;
   cases?: Json[];
+  guided?: boolean;
 }) {
+  const [showOptionImages, setShowOptionImages] = useState(() =>
+    Boolean(q.config?.options?.some((option: Json) => option.imageUrl)),
+  );
   const c = q.config || {},
     k = q.key || {};
-  const change = (key: string, value: any) => onChange({ ...q, [key]: value }),
+  const change = (key: string, value: any) =>
+      onChange((current: Question | null) =>
+        current ? { ...current, [key]: value } : current,
+      ),
     config = (key: string, value: any) =>
       change("config", { ...c, [key]: value }),
     key = (key: string, value: any) => change("key", { ...k, [key]: value });
   const options = c.options || [],
     items = c.items || [];
   return (
-    <section className="question-editor">
+    <section className="question-editor" data-question-id={q.id}>
       <div className="editor-title">
-        <Input
-          label="Заголовок задания"
+        <Textarea
+          label={guided ? "Текст задания" : "Заголовок задания"}
           value={q.title}
           onChange={(x: string) => change("title", x)}
         />
@@ -43,14 +52,34 @@ export function QuestionEditor({
           label="Тип задания"
           value={q.type}
           options={Object.entries(TYPES)}
-          onChange={(type: string) =>
-            onChange({
-              ...question(type),
-              id: q.id,
-              title: q.title,
-              prompt: q.prompt,
-            })
-          }
+          onChange={(type: string) => {
+            if (type === q.type) return;
+            const choices = ["single_choice", "multiple_choice"];
+            if (choices.includes(type) && choices.includes(q.type)) {
+              const selected =
+                q.type === "single_choice"
+                  ? k.optionId
+                    ? [k.optionId]
+                    : []
+                  : k.optionIds || [];
+              onChange({
+                ...q,
+                type,
+                key:
+                  type === "multiple_choice"
+                    ? { optionIds: selected }
+                    : { optionId: selected.length === 1 ? selected[0] : "" },
+              });
+              return;
+            }
+            if (
+              !window.confirm(
+                `Изменить тип задания «${q.title}»? Настройки ответа будут заменены. Продолжить?`,
+              )
+            )
+              return;
+            onChange(convertQuestion(q, type) as Question);
+          }}
         />
       </div>
       {cases.length > 0 && (
@@ -64,14 +93,16 @@ export function QuestionEditor({
           onChange={(x: string) => change("caseId", x)}
         />
       )}
-      <Textarea
-        label="Текст задания"
-        value={q.prompt}
-        onChange={(x: string) => change("prompt", x)}
-        rows={3}
-      />
+      {(!guided || q.prompt) && (
+        <Textarea
+          label={guided ? "Дополнение к заданию" : "Текст задания"}
+          value={q.prompt}
+          onChange={(x: string) => change("prompt", x)}
+          rows={3}
+        />
+      )}
       {["single_choice", "multiple_choice"].includes(q.type) && (
-        <section>
+        <section className="choice-set" data-images={showOptionImages}>
           <h3>Варианты ответов</h3>
           {options.map((o: Json, i: number) => (
             <div className="option-editor" key={o.id}>
@@ -114,16 +145,36 @@ export function QuestionEditor({
                   type="file"
                   accept="image/*"
                   onChange={async (e) => {
-                    const f = e.target.files?.[0];
-                    if (f) {
-                      const m = await upload(f);
-                      config(
-                        "options",
-                        options.map((x: Json) =>
-                          x.id === o.id ? { ...x, imageUrl: m.url } : x,
-                        ),
-                      );
-                    }
+                    const input = e.currentTarget,
+                      f = input.files?.[0];
+                    if (f)
+                      try {
+                        const m = await upload(f);
+                        onChange((current: Question | null) =>
+                          current?.id === q.id
+                            ? {
+                                ...current,
+                                config: {
+                                  ...current.config,
+                                  options: current.config.options.map(
+                                    (option: Json) =>
+                                      option.id === o.id
+                                        ? { ...option, imageUrl: m.url }
+                                        : option,
+                                  ),
+                                },
+                              }
+                            : current,
+                        );
+                      } catch (error) {
+                        window.dispatchEvent(
+                          new CustomEvent("constructor-error", {
+                            detail: error,
+                          }),
+                        );
+                      } finally {
+                        input.value = "";
+                      }
                   }}
                 />
               </label>
@@ -139,11 +190,26 @@ export function QuestionEditor({
                 <Trash2 size={16} />
               </IconButton>
               {o.imageUrl && (
-                <img
-                  className="option-thumbnail"
-                  src={o.imageUrl}
-                  alt={o.label}
-                />
+                <div className="option-media">
+                  <img
+                    className="option-thumbnail"
+                    src={o.imageUrl}
+                    alt={o.label}
+                  />
+                  <Button
+                    kind="quiet"
+                    onClick={() =>
+                      config(
+                        "options",
+                        options.map((x: Json) =>
+                          x.id === o.id ? { ...x, imageUrl: "" } : x,
+                        ),
+                      )
+                    }
+                  >
+                    Убрать фото
+                  </Button>
+                </div>
               )}
             </div>
           ))}
@@ -155,6 +221,11 @@ export function QuestionEditor({
             <Plus size={16} />
             Добавить вариант
           </Button>
+          <Toggle
+            label="Показать настройки изображений"
+            value={showOptionImages}
+            onChange={setShowOptionImages}
+          />
           <p className="muted">
             Отметьте правильные варианты слева. Ключ виден только преподавателю.
           </p>
@@ -598,8 +669,10 @@ export function QuestionEditor({
           onChange={(x: string) => config("nodeTypes", x.split("\n"))}
         />
       )}
-      <section className="attached-media">
-        <h3>Материалы к заданию</h3>
+      {guided && <RubricEditor q={q} onChange={onChange} />}
+      <details className="attached-media">
+        <summary>Изображения и другие материалы (необязательно)</summary>
+
         {(q.media || []).map((m: Json, i: number) => (
           <div className="file-row" key={m.url}>
             <span>{m.alt || `Материал ${i + 1}`}</span>
@@ -629,10 +702,17 @@ export function QuestionEditor({
               if (f) {
                 try {
                   const m = await upload(f);
-                  change("media", [
-                    ...(q.media || []),
-                    { url: m.url, mime: m.mime, alt: m.name },
-                  ]);
+                  onChange((current: Question | null) =>
+                    current?.id === q.id
+                      ? {
+                          ...current,
+                          media: [
+                            ...(current.media || []),
+                            { url: m.url, mime: m.mime, alt: m.name },
+                          ],
+                        }
+                      : current,
+                  );
                 } catch (error) {
                   window.dispatchEvent(
                     new CustomEvent("constructor-error", { detail: error }),
@@ -642,13 +722,16 @@ export function QuestionEditor({
             }}
           />
         </label>
-      </section>
-      <Textarea
-        label="Пояснение после раскрытия результатов"
-        value={q.explanation}
-        onChange={(x: string) => change("explanation", x)}
-        rows={3}
-      />
+      </details>
+      <details>
+        <summary>Пояснение к ответу (необязательно)</summary>
+        <Textarea
+          label="Пояснение после раскрытия результатов"
+          value={q.explanation}
+          onChange={(x: string) => change("explanation", x)}
+          rows={3}
+        />
+      </details>
       <details className="author-details">
         <summary>Методические сведения и реплика рассказчика</summary>
         <Input
@@ -680,10 +763,94 @@ export function QuestionEditor({
     </section>
   );
 }
+export function RubricEditor({ q, onChange }: any) {
+  if (q.grading !== "manual") return null;
+  return (
+    <section>
+      <h3>Критерии</h3>
+      {q.rubric.map((r: Json, i: number) => (
+        <div key={r.id} className="criterion">
+          <input
+            aria-label={`Критерий ${i + 1}`}
+            value={r.title}
+            onChange={(e) =>
+              onChange({
+                ...q,
+                rubric: q.rubric.map((x: Json) =>
+                  x.id === r.id ? { ...x, title: e.target.value } : x,
+                ),
+              })
+            }
+          />
+          <input
+            aria-label={`Баллы по критерию ${i + 1}`}
+            type="number"
+            min="0"
+            value={r.maxScore}
+            onChange={(e) =>
+              onChange({
+                ...q,
+                rubric: q.rubric.map((x: Json) =>
+                  x.id === r.id
+                    ? { ...x, maxScore: Number(e.target.value) }
+                    : x,
+                ),
+              })
+            }
+          />
+          <IconButton
+            title="Убрать критерий"
+            onClick={() =>
+              onChange({
+                ...q,
+                rubric: q.rubric.filter((x: Json) => x.id !== r.id),
+              })
+            }
+          >
+            <Trash2 size={15} />
+          </IconButton>
+        </div>
+      ))}
+      <Button
+        onClick={() =>
+          onChange({
+            ...q,
+            rubric: [
+              ...q.rubric,
+              {
+                id: uid("criterion"),
+                title: "Новый критерий",
+                maxScore: 0,
+              },
+            ],
+          })
+        }
+      >
+        Добавить критерий
+      </Button>
+      <p className="muted">
+        Сумма:{" "}
+        {q.rubric.reduce(
+          (s: number, x: Json) => s + Number(x.maxScore || 0),
+          0,
+        )}{" "}
+        из {q.maxScore}
+      </p>
+    </section>
+  );
+}
 export function QuestionInspector({ q, onChange, onPreview, onBank }: any) {
   return (
     <>
       <h2>Настройки задания</h2>
+      <Input
+        label="Короткое название для вашего списка"
+        value={q.internal?.label || ""}
+        onChange={(v: string) =>
+          onChange({ ...q, internal: { ...q.internal, label: v } })
+        }
+        hint="Видно только преподавателю. Можно оставить пустым."
+      />
       <Input
         label="Баллы"
         type="number"
@@ -693,11 +860,14 @@ export function QuestionInspector({ q, onChange, onPreview, onBank }: any) {
         onChange={(x: number) => onChange({ ...q, maxScore: x })}
       />
       <Input
-        label="Время, секунд (0 — без лимита)"
+        label="Время задания, минут (0 — без лимита)"
         type="number"
         min="0"
-        value={q.seconds}
-        onChange={(x: number) => onChange({ ...q, seconds: x })}
+        value={q.seconds / 60}
+        step="0.5"
+        onChange={(x: number) =>
+          onChange({ ...q, seconds: Math.round(x * 60) })
+        }
       />
       <Toggle
         label="Перемешивать варианты"
@@ -744,79 +914,7 @@ export function QuestionInspector({ q, onChange, onPreview, onBank }: any) {
           }
         />
       )}
-      {q.grading === "manual" && (
-        <section>
-          <h3>Критерии</h3>
-          {q.rubric.map((r: Json, i: number) => (
-            <div key={r.id} className="criterion">
-              <input
-                aria-label={`Критерий ${i + 1}`}
-                value={r.title}
-                onChange={(e) =>
-                  onChange({
-                    ...q,
-                    rubric: q.rubric.map((x: Json) =>
-                      x.id === r.id ? { ...x, title: e.target.value } : x,
-                    ),
-                  })
-                }
-              />
-              <input
-                aria-label={`Баллы по критерию ${i + 1}`}
-                type="number"
-                min="0"
-                value={r.maxScore}
-                onChange={(e) =>
-                  onChange({
-                    ...q,
-                    rubric: q.rubric.map((x: Json) =>
-                      x.id === r.id
-                        ? { ...x, maxScore: Number(e.target.value) }
-                        : x,
-                    ),
-                  })
-                }
-              />
-              <IconButton
-                title="Убрать критерий"
-                onClick={() =>
-                  onChange({
-                    ...q,
-                    rubric: q.rubric.filter((x: Json) => x.id !== r.id),
-                  })
-                }
-              >
-                <Trash2 size={15} />
-              </IconButton>
-            </div>
-          ))}
-          <Button
-            onClick={() =>
-              onChange({
-                ...q,
-                rubric: [
-                  ...q.rubric,
-                  {
-                    id: uid("criterion"),
-                    title: "Новый критерий",
-                    maxScore: 0,
-                  },
-                ],
-              })
-            }
-          >
-            Добавить критерий
-          </Button>
-          <p className="muted">
-            Сумма:{" "}
-            {q.rubric.reduce(
-              (s: number, x: Json) => s + Number(x.maxScore || 0),
-              0,
-            )}{" "}
-            из {q.maxScore}
-          </p>
-        </section>
-      )}
+      <RubricEditor q={q} onChange={onChange} />
       <div className="inspector-actions">
         <Button onClick={onPreview}>Показать как участнику</Button>
         <Button onClick={onBank}>Сохранить в банк</Button>

@@ -1,0 +1,414 @@
+/* Work area stays calm; story and statistics remain available on request. */
+.olympiad-page .public-demo-banner {
+  padding: 10px 18px;
+  border-radius: 14px;
+  font:
+    14px/1.5 system-ui,
+    sans-serif;
+  display: flex;
+  gap: 6px 18px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.olympiad-page .public-demo-banner strong {
+  font-size: 15px;
+}
+.olympiad-page .demo-statistics {
+  margin-top: 48px;
+}
+.story-immersive #attempt-section .restaurant-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.story-immersive #attempt-section .restaurant-conversation,
+.story-immersive #attempt-section .restaurant-task {
+  width: 100%;
+}
+.story-immersive #attempt-section details.story-chapter {
+  border: 1px solid #ced8cf;
+  background: #fafbf6;
+  border-radius: 14px;
+  padding: 0 16px;
+}
+.story-immersive #attempt-section .story-chapter-toggle {
+  cursor: pointer;
+  padding: 12px 0;
+  font:
+    600 16px/1.5 system-ui,
+    sans-serif;
+  color: #1f574a;
+}
+.story-immersive
+  #attempt-section
+  details.story-chapter:not([open])
+  > :not(summary) {
+  display: none !important;
+}
+.story-immersive
+  #attempt-section
+  details.story-chapter[open]
+  .story-narrator-stage {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: transparent;
+  overflow: visible;
+}
+.story-immersive #attempt-section details.story-chapter .story-portrait-frame {
+  width: 110px;
+  height: 145px;
+  flex: 0 0 110px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+.story-immersive
+  #attempt-section
+  details.story-chapter
+  .story-narrator-portrait {
+  position: static;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: cover;
+  object-position: center 28%;
+  max-width: 100%;
+}
+.story-immersive #attempt-section details.story-chapter .story-speech {
+  position: static;
+  inset: auto;
+  flex: 1;
+  margin: 0;
+  padding: 16px;
+  border: 0;
+  box-shadow: none;
+  background: none;
+}
+.story-immersive #attempt-section details.story-chapter .story-speech::after {
+  display: none;
+}
+.story-immersive #attempt-section details.story-chapter .story-chapter-copy {
+  padding: 8px 0;
+}
+.story-immersive #attempt-section details.story-chapter .story-more {
+  width: auto;
+  padding: 10px 18px;
+  min-height: 44px;
+}
+.story-immersive #attempt-section .has-dialogue-condition #question-case {
+  display: block;
+}
+.story-immersive #attempt-section[data-chapter="4"] #question-card {
+  display: block;
+}
+.story-immersive #attempt-section[data-chapter="4"] .restaurant-orders-context {
+  display: none;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-receipt {
+  padding: 14px 18px;
+  background: #f3f0e7;
+  border-radius: 14px;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-wish {
+  font-size: 18px;
+  line-height: 1.45;
+  margin: 8px 0;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-menu {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-menu-card {
+  border-radius: 14px;
+  overflow: hidden;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-menu-select {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  gap: 6px 12px;
+  padding: 12px;
+  width: 100%;
+  text-align: left;
+  min-height: 142px;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-photo {
+  grid-row: 1/3;
+  width: 120px;
+  height: 115px;
+  aspect-ratio: auto;
+  background: transparent;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-photo img {
+  object-fit: contain;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-menu-title {
+  font-size: 20px;
+  line-height: 1.2;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-menu-description {
+  font-size: 15px;
+  line-height: 1.4;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-tray {
+  padding: 12px 16px;
+  border-radius: 14px;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-tray-selection {
+  min-height: 40px;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-tray-photo {
+  width: 70px;
+  height: 50px;
+}
+.station-receipt {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 18px;
+  align-items: center;
+  margin: 20px 0;
+}
+.station-receipt img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+}
+.station-receipt p {
+  font-size: 18px;
+  line-height: 1.5;
+}
+@media (max-width: 700px) {
+  .olympiad-page .public-demo-banner {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+  .olympiad-page .public-demo-banner span {
+    display: none;
+  }
+  .story-immersive #attempt-section details.story-chapter {
+    padding: 0 12px;
+  }
+  .story-immersive
+    #attempt-section
+    details.story-chapter
+    .story-portrait-frame {
+    width: 78px;
+    height: 108px;
+    flex-basis: 78px;
+  }
+  .story-immersive #attempt-section details.story-chapter .story-guest-line {
+    font-size: 17px;
+  }
+  .story-immersive #attempt-section .restaurant-orders .t4-menu {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .story-immersive #attempt-section .restaurant-orders .t4-menu-select {
+    grid-template-columns: 94px minmax(0, 1fr);
+    min-height: 128px;
+    padding: 10px;
+    gap: 6px 10px;
+  }
+  .story-immersive #attempt-section .restaurant-orders .t4-photo {
+    width: 94px;
+    height: 100px;
+  }
+  .story-immersive #attempt-section .restaurant-orders .t4-menu-title {
+    font-size: 19px;
+  }
+  .story-immersive #attempt-section .restaurant-orders .t4-menu-description {
+    font-size: 15px;
+  }
+  .story-immersive #attempt-section .restaurant-orders .t4-tray {
+    position: sticky;
+    bottom: 8px;
+    z-index: 5;
+    box-shadow: 0 3px 18px #163c3520;
+    background: #fafbf6;
+  }
+  .station-receipt {
+    grid-template-columns: 100px 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .olympiad-page * {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.olympiad-page.exam-mode-active .public-demo-banner {
+  display: none;
+}
+.story-immersive #attempt-section .restaurant-workspace {
+  padding: 0 !important;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.story-immersive #attempt-section .restaurant-task > .restaurant-paper,
+.story-immersive
+  #attempt-section[data-chapter="4"]
+  #question-card
+  > .restaurant-paper {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 8px 0;
+}
+.story-immersive #attempt-section .restaurant-task #question-prompt {
+  font-size: 25px;
+  margin: 0 0 10px;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-receipt {
+  position: relative;
+  padding: 12px 16px;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-receipt-head {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-receipt-head h3 {
+  display: none;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-help {
+  min-height: 36px;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-receipt-style {
+  padding-right: 130px;
+  margin: 0 0 7px;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-wish {
+  margin: 0;
+  font-size: 18px;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-menu-card {
+  position: relative;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-menu-select {
+  min-height: 155px;
+  grid-template-columns: 120px minmax(0, 1fr);
+}
+.story-immersive #attempt-section .restaurant-orders .t4-photo {
+  height: 88px;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-zoom {
+  position: absolute;
+  left: 12px;
+  bottom: 8px;
+  width: 120px;
+  min-height: 44px;
+  padding: 4px 6px;
+  font-size: 13px;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-tray {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 16px;
+  align-items: center;
+  margin-top: 12px;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-tray > h3,
+.story-immersive #attempt-section .restaurant-orders .t4-tray > .t4-hint {
+  display: none;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-tray-selection {
+  grid-column: 1;
+  grid-row: 1;
+  min-height: 36px;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-tray-actions {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-status:empty {
+  display: none;
+}
+.story-immersive #attempt-section .restaurant-orders .t4-status {
+  grid-column: 1/-1;
+  margin: 0;
+  font-size: 14px;
+}
+@media (max-width: 700px) {
+  .story-immersive #attempt-section .restaurant-orders .t4-menu-select {
+    grid-template-columns: 94px minmax(0, 1fr);
+    min-height: 156px;
+  }
+  .story-immersive #attempt-section .restaurant-orders .t4-photo {
+    width: 94px;
+    height: 88px;
+  }
+  .story-immersive #attempt-section .restaurant-orders .t4-zoom {
+    left: 10px;
+    width: 94px;
+    font-size: 12px;
+  }
+  .story-immersive #attempt-section .restaurant-orders .t4-tray {
+    display: block;
+    position: sticky;
+    bottom: 6px;
+  }
+  .story-immersive #attempt-section .restaurant-orders .t4-tray-actions {
+    margin-top: 6px;
+  }
+  .story-immersive #attempt-section .restaurant-orders .t4-tray-selection {
+    min-height: 24px;
+  }
+  .story-immersive
+    #attempt-section
+    .restaurant-orders
+    .t4-tray-selection
+    .t4-empty {
+    margin: 0;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 700px) {
+  .story-immersive
+    #attempt-section:is([data-layout-version="4"], [data-layout-version="5"])
+    .dashboard-head {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px !important;
+    padding: 10px !important;
+  }
+  .story-immersive
+    #attempt-section:is([data-layout-version="4"], [data-layout-version="5"])
+    .timer-stack {
+    width: auto !important;
+    min-width: 0;
+    grid-column: 2;
+    grid-row: 1/3;
+  }
+  .story-immersive #attempt-section .timer-box {
+    min-width: 64px;
+    padding: 6px;
+  }
+  .story-immersive #attempt-section .timer-box strong {
+    font-size: 22px;
+  }
+  .story-immersive #attempt-section .restaurant-current-chapter {
+    font-size: 17px;
+  }
+  .story-immersive #attempt-section .restaurant-header-status {
+    gap: 4px;
+  }
+  .story-immersive #attempt-section .restaurant-header-route {
+    gap: 4px;
+  }
+  .story-immersive #attempt-section #participant-exam-badge {
+    font-size: 10px !important;
+  }
+  .story-immersive #attempt-section .restaurant-orders .t4-tray {
+    margin-bottom: 14px;
+  }
+}

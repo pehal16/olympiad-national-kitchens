@@ -1,6 +1,6 @@
 {
   "name": "olympiad-constructor",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -12,6 +12,7 @@
     "build": "tsc --noEmit && vite build && node scripts/build-server.mjs",
     "test": "node --test tests/*.spec.mjs",
     "verify": "node scripts/verify.mjs",
+    "verify:guided": "node scripts/verify-guided.mjs",
     "load": "node scripts/load.mjs",
     "package:windows": "node scripts/package-windows.mjs"
   },

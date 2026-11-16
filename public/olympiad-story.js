@@ -18,8 +18,8 @@
     if(!olympiad.storyEnabled)return;
     doc.body.classList.add('has-restaurant-story');
     const title=doc.getElementById('hero-title'),sub=doc.getElementById('hero-subtitle');
-    title.textContent='Ресторан путешествий';
-    sub.textContent='Вечер вкусов · олимпиада «Национальные кухни мира»';
+    title.textContent='Национальные кухни мира';
+    sub.textContent='Авторская цифровая олимпиада · сценарий «Ресторан путешествий»';
     const hero=doc.querySelector('.landing-hero-media');
     if(!hero.querySelector('.restaurant-pizza-cover')){
       hero.style.backgroundImage='none';
@@ -73,7 +73,7 @@
     doc.body.classList.remove('story-result-active');
     if(attempt?.story)doc.getElementById('story-introduction')?.setAttribute('hidden','');
     if(!attempt?.story||attempt.story.decorationsDisabled||!attempt.currentQuestion){chapterNode?.remove();chapterNode=null;dialogueAttempt=null;return;}
-    if(!chapterNode){chapterNode=el('section','story-chapter');doc.getElementById('question-card').before(chapterNode);}
+    if(!chapterNode){chapterNode=el('details','story-chapter');doc.getElementById('question-card').before(chapterNode);}
     const q=attempt.currentQuestion,number=attempt.story.currentChapter;
     const changed=chapterNode.dataset.question!==q.id||chapterNode.dataset.attempt!==attempt.id;
     const previous=dialogueAttempt;if(previous?.id!==attempt.id){confirmedCount=attempt.progress.answeredCount;busyQuestion=null;}dialogueAttempt=attempt;
@@ -92,7 +92,8 @@
       const response=el('div','story-extra-speech');response.append(el('span','story-speaker','Ваш гость'),el('p','',d.extra));exchange.append(student,response);
       const status=el('p','story-action-line');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
       copy.append(more,exchange,status);
-      chapterNode.replaceChildren(stage,copy);
+      const summary=el('summary','story-chapter-toggle','История гостя');
+      chapterNode.replaceChildren(summary,stage,copy);
       let wasOpen=opened.has(dialogueKey(attempt,q));try{wasOpen ||= root.localStorage.getItem(dialogueKey(attempt,q))==='open';}catch{}
       extra(wasOpen);
       if(previous?.id===attempt.id&&attempt.progress.answeredCount>previous.progress.answeredCount)say(number===4?'Заказ принят. Следующая записка уже перед вами.':'Записал. Откроем следующую страницу.');
@@ -106,6 +107,8 @@
     if(!dialogueAttempt||chapterNode?.dataset.question!==questionId)return;
     const signature=JSON.stringify(payload);if(signature===dialogueSignature)return;dialogueSignature=signature;
     const q=dialogueAttempt.currentQuestion;
+    const chosen=Boolean(payload?.text?.trim()||payload?.selectedOptionId||payload?.sequence?.some(Boolean)||Object.keys(payload?.buckets||{}).length||payload?.selectedIngredientIds?.length);
+    if(!chosen){say(q.tourCode==='T3'?'Введите название блюда.':'Выберите ответ, когда будете готовы.');return;}
     if(q.tourCode==='T3'){if(payload?.text?.trim()&&!typed){typed=true;say('Вижу, запись начата. Подтвердите её, когда закончите.');}}
     else if(q.tourCode==='T2')say('Отметка на карте изменена. Сохраните блок, когда закончите.');
     else if(q.tourCode==='T5')say('Рабочая поверхность обновлена. Продолжайте свою сборку.');

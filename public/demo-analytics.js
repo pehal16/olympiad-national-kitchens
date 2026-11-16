@@ -6,7 +6,8 @@
     const anchor=document.getElementById('hero-section');if(!anchor)return;
     const panel=document.createElement('section');panel.className='demo-statistics';panel.id='demo-statistics';panel.setAttribute('aria-labelledby','demo-statistics-title');
     panel.innerHTML='<div class="demo-statistics-head"><div><span class="eyebrow">Ресторан открыт для знакомства</span><h2 id="demo-statistics-title">Демоверсия в цифрах</h2></div><button class="button secondary" type="button">Обновить</button></div><dl><div><dt>Уникальные браузеры</dt><dd data-metric="uniqueBrowsers">—</dd></div><div><dt>Открытия страницы</dt><dd data-metric="pageViews">—</dd></div><div><dt>Начатые прохождения</dt><dd data-metric="startedAttempts">—</dd></div></dl><p class="demo-statistics-status" role="status">Загружаем статистику…</p><p class="demo-statistics-note">Это приблизительное число посетителей. Другой браузер, адрес демоверсии или очистка его данных дают новую отметку. Без доступного хранилища учитываются открытия, но не уникальный браузер. ФИО и IP для счётчика не сохраняются.</p>';
-    anchor.after(panel);
+    const end=document.querySelector('.site-footer') || document.querySelector('footer');
+    if(end)end.before(panel);else anchor.parentNode.append(panel);
     const status=panel.querySelector('[role=status]'),button=panel.querySelector('button');
     const viewId=Array.from(crypto.getRandomValues(new Uint8Array(16)),x=>x.toString(16).padStart(2,'0')).join('');
     // A read-only inspection must not inflate the visitor statistics.

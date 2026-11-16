@@ -430,6 +430,7 @@ function getOlympiadPublicData(olympiad) {
     description: olympiad.description,
     durationMinutes: storyEnabled()?36:timingProfile.durationMinutes,
     participantFlowVersion:2,
+    stationPausesSupported: storyEnabled(),
     questionCount: olympiad.tours.find((tour) => tour.code === "T5")?.generation?.mode === "final_kitchen_stations" ? 36 : 45,
     startAt: olympiad.startAt,
     endAt: olympiad.endAt,
@@ -750,6 +751,7 @@ function normalizeAttemptState(olympiad, attempt) {
         const state=getTourState(attempt,tour.id);if(state)state.finishedAt=endedAt;
         startTourIfNeeded(attempt,getCurrentTour(attempt),endedAt);
       }
+      else tourBriefings.stationPause(attempt, tour, question.id, endedAt);
       if(tourBriefings.pending(attempt))return attempt;
       markQuestionPresented(attempt,endedAt);
     }
@@ -3854,6 +3856,7 @@ async function handleApi(req, res, url, runtime = {}) {
       attemptNumber,
       ...(previousAttemptId?{previousAttemptId}:{}),
       tourBriefingsEnabled:Boolean(run&&body.tourBriefings===true),
+      stationPausesEnabled:Boolean(run&&body.tourBriefings===true&&body.stationPauses===true),
       demonstration:publicDemo.demoEnabled(),
       ...(publicDemo.demoEnabled()?{demoVisitorHash:require('./src/demo-analytics').visitorKey(req.headers['x-demo-session'])}:{}),
       autoSaveDrafts:Boolean(run&&body.tourBriefings===true),
@@ -3947,6 +3950,7 @@ async function handleApi(req, res, url, runtime = {}) {
       const tour=getCurrentTour(attempt);
       if(attempt.status!=='in_progress'||tour?.id!==body.tourId){sendJson(res,409,{ok:false,message:'Этот тур уже завершён. Обновите страницу.'});return;}
       if(!tourBriefings.pending(attempt)){sendJson(res,200,{ok:true,data:buildAttemptView(olympiad,attempt,settings)});return;}
+      if(attempt.tourBriefing.stationTransition&&body.fromQuestionId!==attempt.tourBriefing.fromQuestionId){sendJson(res,409,{ok:false,message:'Эта подача уже пройдена. Обновите страницу.'});return;}
       const expected=Number(attempt.stateRevision)||0;
       tourBriefings.begin(attempt,tour);markQuestionPresented(attempt);
       if(await updateAttemptWithRevision(attempt,expected,{changedQuestionIds:[getCurrentQuestion(attempt).id]})){
@@ -4243,6 +4247,7 @@ async function handleApi(req, res, url, runtime = {}) {
     } else {
       const nextQuestion = getCurrentQuestion(attempt);
       const previousTourId = currentQuestion.tourId;
+      if (nextQuestion && nextQuestion.tourId === previousTourId) tourBriefings.stationPause(attempt, getCurrentTour(attempt), currentQuestion.id, savedAt);
       if (nextQuestion && nextQuestion.tourId !== previousTourId) {
         const previousTourState = getTourState(attempt, previousTourId);
         if (previousTourState && !previousTourState.finishedAt) {

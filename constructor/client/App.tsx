@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import type { User, Json, Project, Question } from "../shared/types";
 import { question, TYPES, uid } from "../shared/catalog";
+import { blankQuestion } from "../shared/authoring.js";
 import { api, setCsrf, blobRequest, download } from "./api";
 import {
   Button,
@@ -107,6 +108,8 @@ function AdminApp() {
     [kind, setKind] = useState("olympiad"),
     [examples, setExamples] = useState<Json[]>([]),
     [sharing, setSharing] = useState<Json | null>(null),
+    [projectsLoading, setProjectsLoading] = useState(true),
+    [menuOpen, setMenuOpen] = useState(false),
     [shareLogins, setShareLogins] = useState("");
   const flusher = useRef<(() => Promise<void>) | null>(null);
   const registerFlush = useCallback((fn: (() => Promise<void>) | null) => {
@@ -154,6 +157,7 @@ function AdminApp() {
         if (active) {
           setProjects(p);
           setExamples(e);
+          setProjectsLoading(false);
         }
       } else if (view === "builder") {
         let value = await api("/projects/" + key);
@@ -192,11 +196,10 @@ function AdminApp() {
       />
     );
   const nav = [
-    ["projects", "Мои проекты", FolderOpen],
-    ["bank", "Банк заданий", Library],
-    ["templates", "Документы", FileText],
+    ["projects", "Мои работы", FolderOpen],
+    ["materials", "Материалы", Library],
+    ["help", "Помощь", BookOpen],
     ...(user.role === "owner" ? [["people", "Педагоги", Users]] : []),
-    ["settings", "Настройки", Settings],
   ];
   return (
     <div className="admin-shell">
@@ -209,7 +212,15 @@ function AdminApp() {
             платформа
           </strong>
         </button>
-        <nav>
+        <button
+          className="mobile-navigation-toggle"
+          aria-expanded={menuOpen}
+          aria-controls="teacher-navigation"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          Меню
+        </button>
+        <nav id="teacher-navigation" className={menuOpen ? "menu-open" : ""}>
           {nav.map(([screen, label, Icon]: any) => (
             <button
               key={screen}
@@ -221,7 +232,10 @@ function AdminApp() {
                   ? "active"
                   : ""
               }
-              onClick={() => navigate(screen)}
+              onClick={() => {
+                setMenuOpen(false);
+                navigate(screen);
+              }}
             >
               <Icon size={20} />
               <span>{label}</span>
@@ -229,7 +243,13 @@ function AdminApp() {
           ))}
         </nav>
         <div className="account">
-          <span>{user.name}</span>
+          <Button
+            title="Настройки моего кабинета"
+            onClick={() => navigate("settings")}
+          >
+            <Settings size={20} />
+            <span>{user.name}</span>
+          </Button>
           <IconButton
             title="Выйти"
             onClick={async () => {
@@ -246,18 +266,79 @@ function AdminApp() {
       <main
         className={"admin-main " + (view === "designer" ? "designer-main" : "")}
       >
+        {view === "materials" && (
+          <section className="panel guided-form">
+            <h1>Материалы</h1>
+            <p>
+              Сохраняйте задания для повторного использования и оформляйте
+              наградные документы.
+            </p>
+            <div className="actions">
+              <Button onClick={() => navigate("bank")}>Банк заданий</Button>
+              <Button onClick={() => navigate("templates")}>
+                Шаблоны документов
+              </Button>
+            </div>
+          </section>
+        )}
+        {view === "help" && (
+          <section className="panel help-content">
+            <h1>Как подготовить свою работу</h1>
+            <ol>
+              <li>
+                <strong>Название.</strong> Выберите олимпиаду или тестирование.
+                Можно начать с готового образца.
+              </li>
+              <li>
+                <strong>Задания.</strong> Введите условие, варианты и
+                самостоятельно отметьте правильный ответ. Развёрнутые работы
+                оцениваются по критериям.
+              </li>
+              <li>
+                <strong>Условия.</strong> Выберите вход, время и награды. Для
+                начала достаточно общей ссылки и одной попытки.
+              </li>
+              <li>
+                <strong>Проверка.</strong> Нажмите «Проверить работу». Кнопка
+                «Исправить» приведёт к нужному заданию. Пройдите работу как
+                студент.
+              </li>
+              <li>
+                <strong>Проведение.</strong> Подготовьте ссылку, проверьте её с
+                другого устройства и откройте вход студентам.
+              </li>
+              <li>
+                <strong>Итоги.</strong> Проверьте развёрнутые ответы, утвердите
+                получателей наград и выпустите документы.
+              </li>
+            </ol>
+            <h2>Если связь пропала</h2>
+            <p>
+              Дождитесь подтверждения сохранения. При предложении восстановить
+              копию сначала прочитайте, где она сохранена. Вы можете скачать
+              свою копию, прежде чем выбирать между редакциями.
+            </p>
+            <h2>Локальная версия</h2>
+            <p>
+              Компьютер с платформой должен оставаться включённым. Для студентов
+              используйте сетевую ссылку из карточки проведения. Интернет в сети
+              колледжа не обязателен.
+            </p>
+            <Button onClick={() => navigate("projects")}>К моим работам</Button>
+          </section>
+        )}
         {view === "projects" && (
           <>
             <div className="page-toolbar">
               <div>
-                <h1>Мои проекты</h1>
+                <h1>Мои олимпиады и тесты</h1>
                 <p className="muted">
                   Олимпиады и тестирования: от замысла до наградных документов.
                 </p>
               </div>
               <Button kind="primary" onClick={() => setCreating(true)}>
                 <Plus size={18} />
-                Создать проект
+                Создать работу
               </Button>
             </div>
             <div className="project-search">
@@ -268,96 +349,74 @@ function AdminApp() {
                 placeholder="Название, дисциплина"
               />
             </div>
-            <section className="panel">
-              <div className="table-scroll">
-                <table className="project-table">
-                  <thead>
-                    <tr>
-                      <th>Проект</th>
-                      <th>Дисциплина</th>
-                      <th>Туры / задания</th>
-                      <th>Изменён</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {projects
-                      .filter((p) =>
-                        [p.title, p.subject]
-                          .join(" ")
-                          .toLowerCase()
-                          .includes(search.toLowerCase()),
-                      )
-                      .map((p) => (
-                        <tr key={p.id}>
-                          <td>
-                            <button
-                              className="project-link"
-                              onClick={() => navigate("builder", p.id)}
-                            >
-                              {p.title}
-                            </button>
-                            <small>
-                              {p.kind === "test" ? "Тестирование" : "Олимпиада"}
-                            </small>
-                          </td>
-                          <td>{p.subject || "—"}</td>
-                          <td>
-                            {p.rounds.length} /{" "}
-                            {p.rounds.reduce(
-                              (n, r) => n + r.questions.length,
-                              0,
-                            )}
-                          </td>
-                          <td>
-                            {new Date(p.updatedAt).toLocaleDateString("ru-RU")}
-                          </td>
-                          <td>
-                            <div className="actions">
-                              <Button onClick={() => navigate("builder", p.id)}>
-                                Открыть
-                              </Button>
-                              <IconButton
-                                title="Дублировать проект"
-                                onClick={async () => {
-                                  const value = await api(
-                                    "/projects/" + p.id + "/copy",
-                                    {},
-                                  );
-                                  await navigate("builder", value.id);
-                                }}
-                              >
-                                <Copy size={17} />
-                              </IconButton>
-                              <IconButton
-                                title="Предоставить доступ"
-                                onClick={() => {
-                                  setSharing({
-                                    kind: "project",
-                                    id: p.id,
-                                    title: p.title,
-                                    shared: p.sharedWith?.length || 0,
-                                  });
-                                  setShareLogins("");
-                                }}
-                              >
-                                <Share2 size={17} />
-                              </IconButton>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-              {!projects.length && (
-                <Empty title="Создайте первый проект">
-                  <p>
-                    Начните с пустого проекта или готового учебного образца.
-                  </p>
-                </Empty>
-              )}
-            </section>
+            {projectsLoading && <p role="status">Загружаем ваши работы…</p>}
+            <div className="project-cards">
+              {projects
+                .filter((p) =>
+                  [p.title, p.subject]
+                    .join(" ")
+                    .toLowerCase()
+                    .includes(search.toLowerCase()),
+                )
+                .map((p) => (
+                  <article className="project-card" key={p.id}>
+                    <h2>{p.title}</h2>
+                    <p>
+                      {p.kind === "test" ? "Тестирование" : "Олимпиада"}
+                      {p.subject ? " · " + p.subject : ""}
+                    </p>
+                    <p>
+                      Туров: {p.rounds.length} · Заданий:{" "}
+                      {p.rounds.reduce((n, r) => n + r.questions.length, 0)}
+                    </p>
+                    <p>
+                      Изменено{" "}
+                      {new Date(p.updatedAt).toLocaleDateString("ru-RU")}
+                    </p>
+                    <div className="project-actions">
+                      <Button
+                        kind="primary"
+                        onClick={() => navigate("builder", p.id)}
+                      >
+                        Продолжить подготовку
+                      </Button>
+                      <details>
+                        <summary>Другие действия</summary>
+                        <Button
+                          onClick={async () => {
+                            const value = await api(
+                              "/projects/" + p.id + "/copy",
+                              {},
+                            );
+                            await navigate("builder", value.id);
+                          }}
+                        >
+                          Создать копию
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setSharing({
+                              kind: "project",
+                              id: p.id,
+                              title: p.title,
+                            });
+                            setShareLogins("");
+                          }}
+                        >
+                          Предоставить доступ
+                        </Button>
+                      </details>
+                    </div>
+                  </article>
+                ))}
+            </div>
+            {!projectsLoading && !projects.length && (
+              <Empty title="Подготовьте первую работу">
+                <p>
+                  Нажмите «Создать работу» или возьмите учебный образец ниже.
+                </p>
+              </Empty>
+            )}
             <section className="example-section">
               <h2>Начать с готового образца</h2>
               <div className="example-list">
@@ -519,6 +578,21 @@ function Login({ setup, onLogin }: any) {
     name: "",
     setupCode: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [invitationInfo, setInvitationInfo] = useState<Json | null>(null);
+  useEffect(() => {
+    if (invitation)
+      api("/invitation-info?invite=" + encodeURIComponent(invitation))
+        .then((v: any) => {
+          setInvitationInfo(v);
+          setValues((old) => ({ ...old, name: old.name || v.name }));
+        })
+        .catch((e: any) =>
+          window.dispatchEvent(
+            new CustomEvent("constructor-error", { detail: e }),
+          ),
+        );
+  }, [invitation]);
   return (
     <main className="login-page">
       <div className="login-brand">
@@ -563,6 +637,15 @@ function Login({ setup, onLogin }: any) {
             />
           </>
         )}
+        {invitationInfo && (
+          <p className="muted">
+            Приглашение действительно до{" "}
+            {new Date(invitationInfo.expiresAt).toLocaleString("ru-RU", {
+              timeZone: "Europe/Moscow",
+            })}{" "}
+            МСК. Задайте свой пароль — он останется известен только вам.
+          </p>
+        )}
         {(setup || invitation) && (
           <Input
             label="Ваше имя"
@@ -580,7 +663,8 @@ function Login({ setup, onLogin }: any) {
         />
         <Input
           label="Пароль"
-          type="password"
+          type={showPassword ? "text" : "password"}
+          hint="Не менее 10 символов"
           minLength={10}
           value={values.password}
           onChange={(x: string) => setValues({ ...values, password: x })}
@@ -588,6 +672,11 @@ function Login({ setup, onLogin }: any) {
             setup || invitation ? "new-password" : "current-password"
           }
           required
+        />
+        <Toggle
+          label="Показать пароль"
+          value={showPassword}
+          onChange={setShowPassword}
         />
         <Button kind="primary" type="submit">
           {setup
@@ -607,6 +696,10 @@ function Bank({ onShare, user }: any) {
     [importing, setImporting] = useState(false),
     [previewing, setPreviewing] = useState(false),
     [previewValue, setPreviewValue] = useState<any>(null);
+  const original = useRef("");
+  useEffect(() => {
+    original.current = JSON.stringify(editing);
+  }, [editing?.id]);
   const reload = () => api("/questions").then(setItems);
   useEffect(() => {
     reload().catch(() => {});
@@ -622,7 +715,7 @@ function Bank({ onShare, user }: any) {
           </Button>
           <Button
             kind="primary"
-            onClick={() => setEditing(question() as Question)}
+            onClick={() => setEditing(blankQuestion() as Question)}
           >
             <Plus size={17} />
             Новое задание
@@ -702,10 +795,23 @@ function Bank({ onShare, user }: any) {
         <Modal
           title="Редактор задания банка"
           wide
-          onClose={() => setEditing(null)}
+          onClose={() => {
+            if (
+              JSON.stringify(editing) !== original.current &&
+              !window.confirm(
+                "Закрыть редактор без сохранения изменений задания?",
+              )
+            )
+              return;
+            setEditing(null);
+          }}
         >
           <div className="bank-editor">
-            <QuestionEditor q={editing} onChange={setEditing} />
+            <QuestionEditor
+              key={editing.id}
+              q={editing}
+              onChange={setEditing}
+            />
             <aside>
               <QuestionInspector
                 q={editing}

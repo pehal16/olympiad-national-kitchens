@@ -1,5 +1,12 @@
 import { uid as localId } from "../shared/catalog";
-import { useRef, useState, useId, isValidElement, cloneElement } from "react";
+import {
+  useRef,
+  useState,
+  useId,
+  useEffect,
+  isValidElement,
+  cloneElement,
+} from "react";
 import type { ReactNode } from "react";
 import { Plus, Trash2, Upload, X, LoaderCircle } from "lucide-react";
 import { upload } from "./api";
@@ -165,14 +172,53 @@ export function Modal({
   onClose: () => void;
   wide?: boolean;
 }) {
+  const dialog = useRef<HTMLElement>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement;
+    const controls = () =>
+      Array.from(
+        dialog.current?.querySelectorAll<HTMLElement>(
+          'button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), summary, a[href], [tabindex="0"]',
+        ) || [],
+      ).filter((x) => x.offsetParent !== null);
+    controls()
+      .find((x) => !x.classList.contains("icon-button"))
+      ?.focus();
+    const key = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        closeRef.current();
+      }
+      if (e.key !== "Tab") return;
+      const items = controls(),
+        first = items[0],
+        last = items[items.length - 1];
+      if (!first) {
+        e.preventDefault();
+        return;
+      }
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    const node = dialog.current;
+    node?.addEventListener("keydown", key);
+    return () => {
+      node?.removeEventListener("keydown", key);
+      previous?.focus();
+    };
+  }, []);
   return (
-    <div
-      className="modal-backdrop"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
+    <div className="modal-backdrop">
       <section
+        ref={dialog}
         role="dialog"
         aria-modal="true"
         aria-label={title}

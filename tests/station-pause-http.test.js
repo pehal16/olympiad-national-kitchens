@@ -1,0 +1,56 @@
+'use strict';
+const test = require('node:test'), assert = require('node:assert/strict');
+const fs = require('node:fs'), path = require('node:path'), os = require('node:os');
+const briefings = require('../src/tour-briefing');
+
+test('kitchen station pause survives SQLite reload, excludes waiting time, rejects stale Continue and leaves legacy policy intact', async t => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'station-pause-'));
+  process.env.EXPORTS_DIR = path.join(dir, 'exports');
+  const { server } = require('../olympiad-server').createOlympiadServer({ dbPath: path.join(dir, 'test.sqlite'), adminPassword: 'isolated-station-test-admin', storyEnabled: 'true', storyAnytimeEntry: 'true', attemptIdSecret: 'isolated-station-test-identity-secret' });
+  await new Promise(r => server.listen(0, '127.0.0.1', r));
+  t.after(async () => { await new Promise(r => server.close(r)); fs.rmSync(dir, { recursive: true, force: true }); });
+  const base = `http://127.0.0.1:${server.address().port}`, token = 'isolated_station_participant_token';
+  const store = require('../src/store');
+  async function api(route, body, status = 200) {
+    const response = await fetch(base + route, { method: body ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json', 'X-Attempt-Token': token }, ...(body ? { body: JSON.stringify(body) } : {}) });
+    const value = await response.json(); assert.equal(response.status, status, JSON.stringify(value)); return value.data;
+  }
+  assert.equal((await api('/api/public/olympiad')).stationPausesSupported, true);
+  const first = await api('/api/public/attempts/start', { participant: { fullName: 'Проверка Паузы Станций', institution: 'Изолированный стенд', groupName: 'QA' }, tourBriefings: true, stationPauses: true }, 201);
+  const prefix = `/api/public/attempts/${first.id}`;
+  let saved = await store.loadAttemptById(first.id);
+  const tour = saved.variant.tours.find(t => t.code === 'T5'), kitchen = saved.variant.questions.filter(q => q.tourCode === 'T5');
+  const now = new Date().toISOString();
+  saved.currentStepIndex = saved.variant.questions.indexOf(kitchen[0]);
+  delete saved.tourBriefing;
+  saved.tourStates[tour.id] = { startedAt: now, finishedAt: null };
+  saved.questionLog[kitchen[0].id] = { availableAt: now, presentedAt: now };
+  await store.upsertAttempt(saved);
+  const payload = { dishId: kitchen[0].dishes[0].id, selectedIngredientIds: kitchen[0].dishes[0].items.slice(0, 4).map(x => x.id) };
+  const answer = await api(prefix + '/answer', { questionId: kitchen[0].id, answerPayload: payload });
+  assert.equal(answer.tourBriefing.stationTransition, true);
+  assert.equal(answer.tourBriefing.fromQuestionId, kitchen[0].id);
+  saved = await store.loadAttemptById(first.id);
+  assert.equal(saved.stationPausesEnabled, true);
+  const rankingGroup = require("../src/story-dialogue").rankingGroup;
+  assert.notEqual(rankingGroup(saved), rankingGroup({ ...saved, stationPausesEnabled: false }));
+  const expiry = Date.parse(saved.expiresAt), wait = 120000;
+  saved.tourBriefing.pausedAt = new Date(Date.now() - wait).toISOString();
+  await store.upsertAttempt(saved);
+  const waiting = await api(prefix + '/current');
+  assert.equal(waiting.currentQuestion, null); assert.equal(waiting.tourBriefing.stationTransition, true);
+  const continued = await api(prefix + '/tour/start', { tourId: tour.id, fromQuestionId: kitchen[0].id });
+  assert.equal(continued.currentQuestion.id, kitchen[1].id);
+  assert.ok(continued.timing.questionRemainingMs > 43000);
+  saved = await store.loadAttemptById(first.id);
+  assert.ok(Date.parse(saved.expiresAt) - expiry >= wait);
+  const deadline = continued.timing.questionDeadline;
+  const duplicate = await api(prefix + '/tour/start', { tourId: tour.id, fromQuestionId: kitchen[0].id });
+  assert.equal(duplicate.timing.questionDeadline, deadline);
+  const next = await api(prefix + '/answer', { questionId: kitchen[1].id, answerPayload: { dishId: kitchen[1].dishes[0].id, selectedIngredientIds: kitchen[1].dishes[0].items.slice(0, 4).map(x => x.id) } });
+  assert.equal(next.tourBriefing.fromQuestionId, kitchen[1].id);
+  await api(prefix + '/tour/start', { tourId: tour.id, fromQuestionId: kitchen[0].id }, 409);
+  const legacy = { tourBriefingsEnabled: true };
+  assert.equal(briefings.stationPause(legacy, tour, kitchen[0].id, now), false);
+  assert.equal(legacy.tourBriefing, undefined);
+});

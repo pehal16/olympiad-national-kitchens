@@ -73,16 +73,19 @@ async function main() {
     page.setDefaultTimeout(15000);
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto(`${base}/constructor/?view=builder&id=${saved.id}`);
+    await page.getByRole("button", { name: "2. Задания", exact: true }).click();
     await page
       .getByLabel("Текст задания", { exact: true })
       .fill("Выберите первый ответ. Изменение проверяется после перезагрузки.");
     await page.getByText("Черновик сохранён", { exact: true }).waitFor();
     await page.reload();
+    await page.getByRole("button", { name: "2. Задания", exact: true }).click();
     assert.match(
       await page.getByLabel("Текст задания", { exact: true }).inputValue(),
       /после перезагрузки/,
     );
     await page.screenshot({ path: path.join(output, "builder-desktop.png") });
+    await page.getByRole("button", { name: "Все настройки", exact: true }).click();
     await page
       .getByRole("button", { name: "Проверить и опубликовать", exact: true })
       .click();

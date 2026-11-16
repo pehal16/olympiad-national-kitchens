@@ -17,9 +17,13 @@ import { Documents } from "./documents.mjs";
 import { exportPackage, inspectPackage, importPackage } from "./transfer.mjs";
 import { readRows, exportRows } from "./spreadsheets.mjs";
 import { validateProject, summarize } from "./domain.mjs";
-import { validateTemplate } from "./validation.mjs";
+import { validateTemplate, validateRunSettings } from "./validation.mjs";
 import { examples } from "./seeds.mjs";
-import { TYPES, question as makeQuestion } from "../shared/catalog.js";
+import {
+  TYPES,
+  RUN_DEFAULTS,
+  question as makeQuestion,
+} from "../shared/catalog.js";
 import {
   id,
   now,
@@ -184,6 +188,10 @@ export function createApp(options = {}) {
       loginResponse(req, res, await service.login(req.body));
     }),
   );
+  app.get(
+    API + "/invitation-info",
+    wrap((req, res) => send(res, service.invitationInfo(req.query.invite))),
+  );
   app.post(
     API + "/accept-invitation",
     wrap(async (req, res) => {
@@ -197,6 +205,41 @@ export function createApp(options = {}) {
     wrap((req, res) => {
       service.ensureTemplates(req.user);
       send(res, { user: publicUser(req.user), csrf: req.user.csrf });
+    }),
+  );
+  app.get(
+    API + "/me/preferences",
+    auth,
+    wrap((req, res) => send(res, service.preferences(req.user))),
+  );
+  app.put(
+    API + "/me/preferences",
+    auth,
+    wrap((req, res) => send(res, service.preferences(req.user, req.body))),
+  );
+  app.get(
+    API + "/connection-info",
+    auth,
+    wrap((req, res) => {
+      const configured = process.env.CONSTRUCTOR_PUBLIC_ORIGIN;
+      const origin = configured || `${req.protocol}://${req.get("host")}`;
+      const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(
+        new URL(origin).hostname,
+      );
+      const origins = local
+        ? [
+            ...new Set(
+              Object.values(os.networkInterfaces())
+                .flat()
+                .filter((x) => x && x.family === "IPv4" && !x.internal)
+                .map(
+                  (x) =>
+                    `http://${x.address}${new URL(origin).port ? ":" + new URL(origin).port : ""}`,
+                ),
+            ),
+          ]
+        : [origin];
+      send(res, { origins, mode: local ? "local" : "online" });
     }),
   );
   app.post(
@@ -272,18 +315,40 @@ export function createApp(options = {}) {
   app.post(
     API + "/projects/:id/check",
     auth,
+    wrap((req, res) => {
+      const issues = [];
+      const p = service.get(req.user, "project", req.params.id);
+      const errors = validateProject(p, issues);
+      if (p.conductDefaults)
+        try {
+          validateRunSettings({ ...RUN_DEFAULTS, ...p.conductDefaults });
+        } catch (e) {
+          errors.push(e.message);
+          issues.push({
+            field: "conduct",
+            message: e.message,
+            severity: "error",
+          });
+        }
+      send(res, { errors, issues });
+    }),
+  );
+  app.post(
+    API + "/projects/:id/prepare-run",
+    auth,
     wrap((req, res) =>
-      send(res, {
-        errors: validateProject(
-          service.get(req.user, "project", req.params.id),
-        ),
-      }),
+      send(res, service.prepareRun(req.user, req.params.id, req.body)),
     ),
   );
   app.post(
     API + "/projects/:id/publish",
     auth,
-    wrap((req, res) => send(res, service.publish(req.user, req.params.id))),
+    wrap((req, res) =>
+      send(
+        res,
+        service.publish(req.user, req.params.id, req.body.expectedRevision),
+      ),
+    ),
   );
   app.get(
     API + "/projects/:id/releases",
@@ -1223,7 +1288,8 @@ export function createApp(options = {}) {
         status: "ok",
         storage: "sqlite",
         mode: process.env.CONSTRUCTOR_MODE || "local",
-        version: "1.0.0",
+        version: "1.1.0",
+        revision: process.env.CONSTRUCTOR_RELEASE_REVISION || null,
       });
     }),
   );

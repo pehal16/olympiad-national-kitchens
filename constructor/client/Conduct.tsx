@@ -3,6 +3,7 @@ import { Plus, ExternalLink, Download, Users, Play } from "lucide-react";
 import type { Json } from "../shared/types";
 import { RUN_DEFAULTS } from "../shared/catalog";
 import { api, blobRequest, download } from "./api";
+import { SimpleRunSettings, ParticipantLink } from "./Guided";
 import {
   Button,
   Input,
@@ -268,17 +269,48 @@ export function RunManagement({ runId, onBack, onResults }: any) {
         <div className="actions">
           <Button onClick={() => window.open(link, "_blank", "noopener")}>
             <ExternalLink size={17} />
-            Открыть вход
+            Посмотреть страницу входа
           </Button>
           <Button kind="primary" onClick={onResults}>
             Результаты и награды
           </Button>
         </div>
       </div>
+      <section className="panel run-state">
+        <h2>
+          {settings.status === "open"
+            ? "Вход для студентов открыт"
+            : "Вход для студентов закрыт"}
+        </h2>
+        <p>
+          Закрытие входа не завершает уже начатые работы и не публикует итоги.
+        </p>
+        <Button
+          kind="primary"
+          onClick={async () => {
+            const next = {
+              ...settings,
+              status: settings.status === "open" ? "closed" : "open",
+            };
+            const value = await api(
+              "/runs/" + runId,
+              { settings: next },
+              "PUT",
+            );
+            setRun(value);
+            setSettings(value.settings);
+          }}
+        >
+          {settings.status === "open"
+            ? "Закрыть вход новым участникам"
+            : "Открыть вход студентам"}
+        </Button>
+      </section>
+      <ParticipantLink runId={runId} />
       <div className="management-grid">
         <section className="panel">
           <h2>Настройки проведения</h2>
-          <RunSettings
+          <SimpleRunSettings
             value={settings}
             onChange={setSettings}
             started={Boolean(run.started)}
@@ -293,51 +325,55 @@ export function RunManagement({ runId, onBack, onResults }: any) {
           >
             Сохранить настройки
           </Button>
-          <Field label="Ссылка для участников">
-            <input
-              readOnly
-              value={link}
-              onFocus={(e) => e.currentTarget.select()}
-            />
-          </Field>
         </section>
         <section className="panel">
-          <div className="section-head">
-            <h2>Участники</h2>
-            <Button onClick={() => setImporting(true)}>Импорт CSV/XLSX</Button>
-          </div>
-          <Textarea
-            label="Добавить участников: ФИО; организация; группа; наставник"
-            value={rows}
-            onChange={setRows}
-            rows={5}
-          />
-          <Button
-            kind="primary"
-            disabled={!rows.trim()}
-            onClick={async () => {
-              const values = rows
-                .split("\n")
-                .filter((x) => x.trim())
-                .map((line) => {
-                  const [
-                    fullName,
-                    institution = "",
-                    groupName = "",
-                    mentorName = "",
-                  ] = line.split(";").map((x) => x.trim());
-                  return { fullName, institution, groupName, mentorName };
-                });
-              setCodes(
-                await api("/runs/" + runId + "/participants", { rows: values }),
-              );
-              setRows("");
-              await reload();
-            }}
-          >
-            <Users size={17} />
-            Добавить и выдать коды
-          </Button>
+          <h2>Участники: {participants.length}</h2>
+          {settings.entryMode === "open" && (
+            <p>Студенты появятся в списке после регистрации по общей ссылке.</p>
+          )}
+          <details open={settings.entryMode === "codes"}>
+            <summary>Подготовить список и персональные коды</summary>
+            <div className="section-head">
+              <h2>Участники</h2>
+              <Button onClick={() => setImporting(true)}>
+                Импорт CSV/XLSX
+              </Button>
+            </div>
+            <Textarea
+              label="Добавить участников: ФИО; организация; группа; наставник"
+              value={rows}
+              onChange={setRows}
+              rows={5}
+            />
+            <Button
+              kind="primary"
+              disabled={!rows.trim()}
+              onClick={async () => {
+                const values = rows
+                  .split("\n")
+                  .filter((x) => x.trim())
+                  .map((line) => {
+                    const [
+                      fullName,
+                      institution = "",
+                      groupName = "",
+                      mentorName = "",
+                    ] = line.split(";").map((x) => x.trim());
+                    return { fullName, institution, groupName, mentorName };
+                  });
+                setCodes(
+                  await api("/runs/" + runId + "/participants", {
+                    rows: values,
+                  }),
+                );
+                setRows("");
+                await reload();
+              }}
+            >
+              <Users size={17} />
+              Добавить и выдать коды
+            </Button>
+          </details>
           <div className="table-scroll">
             <table>
               <thead>

@@ -184,7 +184,7 @@ function updateHeroAction() {
   } else if (state.attempt) {
     elements.heroActionRegister.textContent = "Посмотреть результат";
   } else if (state.participant) {
-    elements.heroActionRegister.textContent = "К правилам и старту";
+    elements.heroActionRegister.textContent = state.olympiad.demonstration ? "Пройти пример олимпиады" : "К правилам и старту";
   } else {
     elements.heroActionRegister.textContent = "Зарегистрироваться";
   }
@@ -1597,6 +1597,7 @@ function rememberAttemptAccessToken(attemptId, token) {
   state.attemptAccessTokens[attemptId] = token;
   try {
     localStorage.setItem(storageKey, token);
+    localStorage.setItem(`${storageKey}_environment`, JSON.stringify({ demonstration: Boolean(state.olympiad?.demonstration), demoSession: state.olympiad?.demonstration ? demoSessionId() : "" }));
   } catch (error) {
     // The active page keeps the token in memory; reload recovery may require the organizer.
   }
@@ -2088,6 +2089,9 @@ function renderRules() {
     item.textContent = rule;
     elements.rulesList.appendChild(item);
   });
+  if (state.olympiad.stationPausesSupported) {
+    const stationRule = document.createElement("li"); stationRule.textContent = "В новом прохождении после сохранения подачи пятого тура можно рассмотреть результат без расхода времени следующей станции. Её таймер начинается по кнопке «Продолжить»."; elements.rulesList.append(stationRule);
+  }
 }
 
 function renderParticipant() {
@@ -3198,8 +3202,27 @@ function renderTourBriefing() {
   document.getElementById('tour-briefing-description').textContent=info.description;
   const list=document.getElementById('tour-briefing-steps');list.replaceChildren();
   for(const text of info.instructions){const item=document.createElement('li');item.textContent=text;list.append(item);}
-  document.getElementById('tour-briefing-meta').textContent=`Заданий: ${info.questionCount} · На каждое — 1 минута · Максимум: ${info.maxScore} баллов`;
+  document.getElementById('tour-briefing-meta').textContent=`Заданий: ${info.questionCount} · На каждое — ${info.questionTimeLimitSeconds ? info.questionTimeLimitSeconds + " с" : "по таймеру"} · Максимум: ${info.maxScore} баллов`;
   elements.tourStart.disabled=false;hideMessage(elements.briefingMessage);
+  let receiptNode=document.getElementById('station-saved-receipt');
+  if(receiptNode)receiptNode.remove();
+  document.querySelector(".tour-pause-note").textContent = info.stationTransition ? "Отсчёт следующей станции начнётся после кнопки «Продолжить». Можно спокойно посмотреть сохранённый состав." : "Таймеры на паузе. Прочитайте инструкцию без спешки. Отсчёт начнётся после кнопки «Начать тур».";
+  elements.tourStart.textContent=info.stationTransition?'Продолжить':'Начать тур';
+  if(info.stationTransition){
+    document.getElementById('tour-briefing-code').textContent='Между подачами';
+    elements.briefingTitle.textContent=info.previousQuestionTimedOut?'Время станции истекло':'Подача сохранена';
+    document.getElementById('tour-briefing-description').textContent='Посмотрите сохранённый состав. Следующая станция начнётся после нажатия «Продолжить».';
+    list.replaceChildren();
+    document.getElementById('tour-briefing-meta').textContent='Следующая станция пока не началась.';
+    const receipt=state.attempt.dishService;
+    if(receipt){receiptNode=document.createElement('section');receiptNode.id='station-saved-receipt';
+      const title=document.createElement('h3');title.textContent=receipt.dishTitle;receiptNode.append(title);
+      const composition=document.createElement('p');composition.textContent=(receipt.composition||[]).join(' · ');receiptNode.append(composition);
+      const picture=receipt.serving?.imageUrl||receipt.photos?.[0]?.imageUrl;
+      if(picture){const image=document.createElement('img');image.src=picture;image.alt='Сохранённая подача участника';image.style.cssText='display:block;max-width:100%;max-height:280px;object-fit:contain;margin:16px auto';receiptNode.append(image);}
+      elements.tourStart.before(receiptNode);
+    }
+  }
   window.OlympiadStory?.chapter(state.attempt);
   saveTimingSnapshot(state.attempt);refreshNavigationState();
   requestAnimationFrame(()=>{elements.briefingSection.scrollIntoView({block:'start',behavior:'instant'});elements.briefingTitle.focus({preventScroll:true});});
@@ -3210,8 +3233,8 @@ async function startTour() {
   const id=state.attempt.id,tourId=state.attempt.tourBriefing.tourId;
   state.isStartingTour=true;elements.tourStart.disabled=true;hideMessage(elements.briefingMessage);
   try{
-    if(!await requestExamFullscreen({silent:true}))throw new Error('Разрешите полноэкранный режим и нажмите «Начать тур». Таймеры пока на паузе.');
-    const attempt=await requestWithRetry(()=>api(`/api/public/attempts/${id}/tour/start`,{method:'POST',body:JSON.stringify({tourId})}),{attempts:2,pauseMs:500});
+    if(!await requestExamFullscreen({silent:true}))throw new Error('Разрешите полноэкранный режим и нажмите «'+(state.attempt?.tourBriefing?.stationTransition?'Продолжить':'Начать тур')+'». Таймеры пока на паузе.');
+    const attempt=await requestWithRetry(()=>api(`/api/public/attempts/${id}/tour/start`,{method:'POST',body:JSON.stringify({tourId,fromQuestionId:state.attempt.tourBriefing.fromQuestionId})}),{attempts:2,pauseMs:500});
     applyAttemptState(attempt);startTimers();
   }catch(error){showMessage(elements.briefingMessage,formatApiError(error),'error');}
   finally{state.isStartingTour=false;elements.tourStart.disabled=false;}
@@ -3233,7 +3256,7 @@ function scheduleDraftSave() {
   clearTimeout(state.draftTimer);
   if(!state.attempt?.autoSaveDrafts||state.attempt?.tourBriefing||state.attempt.status!=='in_progress')return;
   const payload=state.questionController?.getAnswer?.();
-  if(payload&&state.draftSavedKey!==state.attempt.id+state.attempt.currentQuestion?.id+JSON.stringify(payload))setAttemptSaveStatus('Сохраняем выбор…','pending');
+  if(payload&&state.draftSavedKey!==state.attempt.id+state.attempt.currentQuestion?.id+JSON.stringify(payload))setAttemptSaveStatus(hasMeaningfulAnswer(payload)?'Сохраняем выбор…':'Ответ ещё не выбран',hasMeaningfulAnswer(payload)?'pending':'idle');
   state.draftTimer=setTimeout(()=>saveServerDraft(),250);
 }
 
@@ -3248,7 +3271,7 @@ async function saveServerDraft() {
     state.draftSavePromise=api(`/api/public/attempts/${state.attempt.id}/draft`,{method:'POST',body:JSON.stringify({questionId:question.id,answerPayload:payload})});
     await state.draftSavePromise;
     state.draftSavedKey=key;
-    if(state.attempt?.currentQuestion?.id===question.id&&JSON.stringify(state.questionController?.getAnswer?.())===JSON.stringify(payload))setAttemptSaveStatus('Выбор сохранён. Можно изменить до конца минуты.','success');
+    if(state.attempt?.currentQuestion?.id===question.id&&JSON.stringify(state.questionController?.getAnswer?.())===JSON.stringify(payload))setAttemptSaveStatus(hasMeaningfulAnswer(payload)?'Выбор сохранён на сервере. Можно изменить до конца минуты.':'Ответ ещё не выбран',hasMeaningfulAnswer(payload)?'success':'idle');
   }catch(error){
     if(![409,422].includes(error.status))setAttemptSaveStatus('Выбор остаётся в открытой странице. Ожидаем связь с сервером.','warning');
   }finally{state.draftSaving=false;state.draftSavePromise=null;}
@@ -3900,7 +3923,7 @@ async function startAttempt() {
         api("/api/public/attempts/start", {
           method: "POST",
           attemptToken,
-          body: JSON.stringify({ participant: state.participant, tourBriefings:true, ...(state.retakeOf?{retakeOf:state.retakeOf}:{}) })
+          body: JSON.stringify({ participant: state.participant, tourBriefings:true, stationPauses:Boolean(state.olympiad.stationPausesSupported), ...(state.retakeOf?{retakeOf:state.retakeOf}:{}) })
         }),
       {
         attempts: 2,
@@ -4009,7 +4032,7 @@ async function submitAnswer() {
 
     if (data && data.status === "in_progress") {
       startTimers();
-      setAttemptSaveStatus("Ответ сохранён", "success");
+      setAttemptSaveStatus("Предыдущий ответ подтверждён. Выполните новое задание.", "idle");
     } else {
       setAttemptSaveStatus("Финальный ответ принят. Маршрут завершён.", "success");
       showMessage(elements.attemptMessage, "Маршрут завершён.", "success");

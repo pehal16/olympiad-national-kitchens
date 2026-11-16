@@ -20,12 +20,19 @@ const instructions = {
 
 function view(attempt, tour) {
   if (!pending(attempt) || !tour) return null;
+  const seconds = attempt.variant?.questions?.find(q => q.tourId === tour.id)?.timeLimitSeconds || null;
   return {
     tourId: tour.id, code: tour.code, title: tour.title,
     description: tour.description || '', questionCount: tour.questionCount,
     timeLimitMinutes: tour.timeLimitMinutes, maxScore: tour.maxScore,
+    questionTimeLimitSeconds: seconds,
     pausedAt: attempt.tourBriefing.pausedAt,
-    instructions: instructions[tour.code] || [tour.description || 'Выполните задания тура и подтвердите каждый ответ.']
+    stationTransition: Boolean(attempt.tourBriefing.stationTransition),
+    fromQuestionId: attempt.tourBriefing.fromQuestionId || null,
+    previousQuestionTimedOut: Boolean(attempt.questionLog?.[attempt.tourBriefing.fromQuestionId]?.timedOutAt),
+    instructions: tour.code === 'T5' && attempt.stationPausesEnabled
+      ? ['На каждой станции выберите четыре компонента и выполните сборку.', `На выполнение станции${seconds ? ' — ' + seconds + ' секунд' : ' действует указанный таймер'}. Если время истечёт, будет учтён сохранённый выбор.`, 'Между подачами таймеры на паузе. Следующая станция начинается по кнопке «Продолжить».']
+      : instructions[tour.code] || [tour.description || 'Выполните задания тура и подтвердите каждый ответ.']
   };
 }
 
@@ -34,9 +41,16 @@ function begin(attempt, tour, now = Date.now()) {
   const pause = Math.max(0, now - Date.parse(attempt.tourBriefing.pausedAt));
   attempt.expiresAt = new Date(Date.parse(attempt.expiresAt) + pause).toISOString();
   attempt.pausedMs = (Number(attempt.pausedMs) || 0) + pause;
-  attempt.tourStates[tour.id] = { startedAt: new Date(now).toISOString(), finishedAt: null };
+  if (attempt.tourBriefing.stationTransition && attempt.tourStates[tour.id]) {
+    attempt.tourStates[tour.id].startedAt = new Date(Date.parse(attempt.tourStates[tour.id].startedAt) + pause).toISOString();
+  } else attempt.tourStates[tour.id] = { startedAt: new Date(now).toISOString(), finishedAt: null };
   delete attempt.tourBriefing;
   return true;
 }
 
-module.exports = { pending, pausedDuration, view, begin };
+function stationPause(attempt, tour, fromQuestionId, pausedAt) {
+  if (!attempt.stationPausesEnabled || !attempt.tourBriefingsEnabled || tour?.code !== 'T5') return false;
+  attempt.tourBriefing = { tourId: tour.id, pausedAt, stationTransition: true, fromQuestionId };
+  return true;
+}
+module.exports = { pending, pausedDuration, view, begin, stationPause };

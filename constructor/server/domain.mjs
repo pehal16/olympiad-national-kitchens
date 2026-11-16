@@ -6,14 +6,34 @@ import { fail, hash, clone, id, durationDeadline } from "./util.mjs";
 const { canonicalText, roundScore } = legacyGrade;
 const listIds = (v) => (Array.isArray(v) ? v : []).map(String);
 const same = (a, b) => canonicalText(a) === canonicalText(b);
-export function validateProject(p) {
+export function validateProject(p, issues = null) {
   const errors = [];
-  const add = (msg) => errors.push(msg);
+  let location = { field: "title" };
+  const add = (msg) => {
+    errors.push(msg);
+    const field = /заголовок|укажите название|текст задания/.test(msg)
+      ? "title"
+      : /вариант/.test(msg)
+        ? "options"
+        : /критери/.test(msg)
+          ? "rubric"
+          : /балл/.test(msg)
+            ? "maxScore"
+            : /время/.test(msg)
+              ? "seconds"
+              : /ключ|эталон|ответ|соответстви|последовательност|сборк/.test(
+                    msg,
+                  )
+                ? "key"
+                : location.field;
+    issues?.push({ ...location, field, message: msg, severity: "error" });
+  };
   if (!p.title?.trim()) add("Укажите название.");
   if (!Array.isArray(p.rounds) || !p.rounds.length)
     add("Добавьте хотя бы один тур.");
   const ids = new Set();
   for (const [ri, r] of (p.rounds || []).entries()) {
+    location = { roundId: r.id, field: "round" };
     if (!r.title?.trim()) add(`Тур ${ri + 1}: укажите название.`);
     if (!r.questions?.length) add(`${r.title}: добавьте задания.`);
     if (!Number.isFinite(Number(r.seconds || 0)) || Number(r.seconds) < 0)
@@ -39,11 +59,12 @@ export function validateProject(p) {
         `${r.title}: для случайного выбора задайте одинаковый максимум всем вопросам набора.`,
       );
     for (const [qi, q] of (r.questions || []).entries()) {
+      location = { roundId: r.id, questionId: q.id, field: "question" };
       const prefix = `${r.title}, задание ${qi + 1}`;
       if (ids.has(q.id)) add(`${prefix}: повторяется идентификатор.`);
       ids.add(q.id);
       if (!TYPES[q.type]) add(`${prefix}: неизвестный тип.`);
-      if (!q.title?.trim()) add(`${prefix}: нужен заголовок.`);
+      if (!q.title?.trim()) add(`${prefix}: напишите текст задания.`);
       if (!Number.isFinite(Number(q.seconds || 0)) || Number(q.seconds) < 0)
         add(`${prefix}: время должно быть неотрицательным числом.`);
       if (!Number.isFinite(Number(q.maxScore)) || q.maxScore < 0)
@@ -53,6 +74,15 @@ export function validateProject(p) {
       const c = q.config || {},
         k = q.key || {};
       if (q.grading === "manual" || MANUAL.includes(q.type)) {
+        if (
+          q.rubric?.some(
+            (x) =>
+              !String(x.title || "").trim() ||
+              !Number.isFinite(Number(x.maxScore)) ||
+              Number(x.maxScore) < 0,
+          )
+        )
+          add(`${prefix}: проверьте названия и баллы критериев.`);
         if (
           !q.rubric?.length ||
           Math.abs(
@@ -64,6 +94,12 @@ export function validateProject(p) {
         continue;
       }
       if (["single_choice", "multiple_choice"].includes(q.type)) {
+        if (
+          (c.options || []).some(
+            (o) => !String(o.label || "").trim() && !o.imageUrl,
+          )
+        )
+          add(`${prefix}: заполните все варианты ответа.`);
         if (
           c.options?.length < 2 ||
           new Set((c.options || []).map((x) => x.id)).size !== c.options?.length

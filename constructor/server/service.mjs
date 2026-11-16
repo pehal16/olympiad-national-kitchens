@@ -107,6 +107,7 @@ export class Service {
     this.store.db
       .prepare("INSERT INTO sessions VALUES(?,?,?,?)")
       .run(hash(value), u.id, csrf, Date.now() + 12 * 3600000);
+    this.ensureTemplates(u);
     return { token: value, csrf, user: publicUser(u) };
   }
   authenticate(value) {
@@ -255,6 +256,22 @@ export class Service {
       expiresAt: new Date(Date.now() + 72 * 3600000).toISOString(),
     };
   }
+  invitationInfo(value) {
+    const invitation = this.store.db
+      .prepare(
+        "SELECT data,expires FROM invitations WHERE hash=? AND used=0 AND expires>?",
+      )
+      .get(hash(value || ""), Date.now());
+    fail(
+      invitation,
+      "Приглашение использовано или срок истёк. Попросите организатора создать новое.",
+      410,
+    );
+    return {
+      name: JSON.parse(invitation.data).name,
+      expiresAt: new Date(invitation.expires).toISOString(),
+    };
+  }
   async acceptInvite(body) {
     const h = hash(body.invitation || "");
     const inv = this.store.db
@@ -330,6 +347,68 @@ export class Service {
     base = this.prepareMedia(user, base);
     return this.store.put("project", id("project"), user.id, base);
   }
+  preferences(user, value) {
+    const key = "preferences:" + user.id;
+    if (value !== undefined) {
+      fail(
+        ["guided", "full"].includes(value.authoringMode),
+        "Неизвестный вид редактора.",
+      );
+      this.store.meta(
+        key,
+        JSON.stringify({ authoringMode: value.authoringMode }),
+      );
+    }
+    return JSON.parse(this.store.meta(key) || '{"authoringMode":"guided"}');
+  }
+  prepareRun(user, key, body) {
+    this.right(user, "publish");
+    this.right(user, "conduct");
+    return this.store.transaction(() => {
+      const p = this.get(user, "project", key, true);
+      fail(
+        /^[a-zA-Z0-9_-]{8,100}$/.test(body.operationId || ""),
+        "Повторите подготовку ссылки.",
+      );
+      const receiptKey = `${user.id}:prepare:${key}`;
+      const previous = this.store.request(receiptKey, body.operationId);
+      if (previous) return JSON.parse(previous);
+      fail(
+        p.revision === Number(body.expectedRevision),
+        "Работа изменилась. Проверьте её ещё раз.",
+        409,
+      );
+      // A reload can lose the browser's delivery ID. Preparing the same saved
+      // work and conditions still returns its existing run. A separate conduct
+      // can deliberately be created in the full editor.
+      const settings = { ...RUN_DEFAULTS, ...body.settings, status: "draft" };
+      const signature =
+        "draft-" +
+        hash({
+          revision: p.revision,
+          settings: Object.fromEntries(
+            Object.keys(settings)
+              .sort()
+              .map((k) => [k, settings[k]]),
+          ),
+        });
+      const prepared = this.store.request(receiptKey, signature);
+      if (prepared) {
+        const result = JSON.parse(prepared);
+        this.store.request(receiptKey, body.operationId, result);
+        return result;
+      }
+      const release = this.publish(user, key);
+      const run = this.createRun(user, {
+        releaseId: release.id,
+        settings,
+      });
+      const result = { releaseId: release.id, runId: run.id, status: "draft" };
+      this.store.request(receiptKey, body.operationId, result);
+      this.store.request(receiptKey, signature, result);
+      return result;
+    });
+  }
   saveProject(user, key, body) {
     const existing = this.get(user, "project", key, true);
     let draft = clone(body.project || body);
@@ -353,10 +432,15 @@ export class Service {
       body.expectedRevision,
     );
   }
-  publish(user, key) {
+  publish(user, key, expectedRevision) {
     this.right(user, "publish");
     const p = this.get(user, "project", key, true),
       errors = validateProject(p);
+    fail(
+      expectedRevision === undefined || Number(expectedRevision) === p.revision,
+      "Работа изменилась. Проверьте её ещё раз.",
+      409,
+    );
     this.assertMediaReadable(user, p);
     fail(!errors.length, errors.join("\n"), 422, "project_incomplete");
     const releases = this.store.list("release", null, key);
@@ -471,6 +555,9 @@ export class Service {
       );
       r.published = Boolean(body.publishResults);
     }
+    r.registrationFields = r.settings.registrationFields;
+    if (body.teacherNotes !== undefined)
+      r.teacherNotes = cleanText(body.teacherNotes, 12000);
     if (body.title) r.title = cleanText(body.title, 240);
     validateRunSettings(r.settings);
     this.store.audit(user.id, "run.updated", key, {
@@ -1163,7 +1250,8 @@ export class Service {
       409,
     );
     const rules = release.awardRules || [];
-    const candidates = [];
+    const candidates = [],
+      mentors = new Set();
     for (const a of ranked) {
       for (const rule of rules) {
         const match =
@@ -1178,7 +1266,20 @@ export class Service {
             (run.nominations?.[rule.id] || rule.participantIds || []).includes(
               a.participantId,
             ));
-        if (match)
+        if (match) {
+          const mentor = rule.recipient === "mentor";
+          fail(
+            !mentor || a.participant.mentorName?.trim(),
+            `У участника «${a.participant.fullName}» не указано ФИО наставника. Уточните данные перед награждением.`,
+            422,
+          );
+          const mentorKey = hash([
+            rule.id,
+            a.participant.mentorName?.trim().toLocaleLowerCase("ru"),
+            a.participant.institution?.trim().toLocaleLowerCase("ru"),
+          ]);
+          if (mentor && mentors.has(mentorKey)) continue;
+          if (mentor) mentors.add(mentorKey);
           candidates.push({
             id: hash(a.id + ":" + rule.id),
             attemptId: a.id,
@@ -1197,11 +1298,15 @@ export class Service {
               timeZone: "Europe/Moscow",
             }).format(new Date()),
             event: release.title,
-            fullName: a.participant.fullName,
+            recipient: mentor ? "mentor" : "participant",
+            fullName: mentor
+              ? a.participant.mentorName
+              : a.participant.fullName,
             institution: a.participant.institution,
             groupName: a.participant.groupName,
             mentorName: a.participant.mentorName,
           });
+        }
       }
     }
     return {

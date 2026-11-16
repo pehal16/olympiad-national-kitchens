@@ -23,8 +23,12 @@ jobs:
           cache-dependency-path: constructor/package-lock.json
       - run: npm ci --ignore-scripts --no-fund --no-audit
       - run: npx playwright install --with-deps chromium --only-shell
+      - run: bash -n ops/install-service.sh
       - run: npm run build
       - run: npm test
       - run: npm run verify
+        env:
+          CONSTRUCTOR_OFFLINE_ACCEPTANCE: '1'
+      - run: npm run verify:guided
         env:
           CONSTRUCTOR_OFFLINE_ACCEPTANCE: '1'

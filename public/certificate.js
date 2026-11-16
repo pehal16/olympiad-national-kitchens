@@ -59,8 +59,18 @@
     }
 
     let attemptToken = "";
+    let demoSession = "";
+    let environment = null;
     try {
       attemptToken = organizerMode ? "" : localStorage.getItem(`nko_attempt_access_${attemptId}`) || "";
+      if (!organizerMode) {
+        try { environment = JSON.parse(localStorage.getItem(`nko_attempt_access_${attemptId}_environment`) || "null"); } catch { /* Retain compatible token when old metadata is damaged. */ }
+        // Legacy access is demo-only when this exact attempt is the demo session.
+        const legacyDemo = !environment && sessionStorage.getItem("nko_demo_session_attempt_v1") === attemptId;
+        if (environment?.demonstration || legacyDemo) {
+          demoSession = environment?.demoSession || localStorage.getItem("nko_anonymous_demo_session_v1") || "";
+        }
+      }
     } catch (error) {
       // The browser may block storage in private mode.
     }
@@ -71,11 +81,25 @@
 
     let attempt;
     try {
-      const response = await fetch(`/api/${organizerMode ? (remoteOrganizer ? "organizer" : "admin") : "public"}/attempts/${encodeURIComponent(attemptId)}/certificate`, {
-        headers: organizerMode ? {} : { "X-Attempt-Token": attemptToken },
+      const url = `/api/${organizerMode ? (remoteOrganizer ? "organizer" : "admin") : "public"}/attempts/${encodeURIComponent(attemptId)}/certificate`;
+      let response = await fetch(url, {
+        headers: organizerMode ? {} : { "X-Attempt-Token": attemptToken, ...(demoSession ? { "X-Demo-Session": demoSession } : {}) },
         credentials: "same-origin",
         cache: "no-store"
       });
+      // Older demo attempts have only a token. Never redirect a successful official
+      // certificate, or a record explicitly marked as official, to another database.
+      if (!response.ok && !organizerMode && !environment && !demoSession) {
+        let legacySession = "";
+        try { legacySession = localStorage.getItem("nko_anonymous_demo_session_v1") || ""; } catch {}
+        if (/^[a-f0-9]{32}$/.test(legacySession)) {
+          const candidate = await fetch(url, { headers: { "X-Attempt-Token": attemptToken, "X-Demo-Session": legacySession }, credentials: "same-origin", cache: "no-store" });
+          if (candidate.ok) {
+            const check = await candidate.clone().json();
+            if ((check.data || check).demonstration === true) response = candidate;
+          }
+        }
+      }
       if (organizerMode && response.status === 401) {
         fail("Войдите в админку и откройте сертификат участника снова.");
         return;

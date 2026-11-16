@@ -76,6 +76,28 @@ systemctl stop olympiad-constructor-canary
 # Only after acceptance, configure the independent persistent service.
 data="$base/data"
 install -d -o olympiad-constructor -g olympiad-constructor -m 700 "$data"
+if [ -f "$data/constructor.sqlite" ]; then
+  # Online SQLite snapshot first, then immutable media/documents referenced by it.
+  # Keep the old unit for a code rollback; never roll back newly received answers.
+  snapshot="$base/pre-update/$revision"
+  install -d -m 700 "$snapshot"
+  "$node" --input-type=module - "$data" "$snapshot" <<'SNAPSHOT'
+import fs from 'node:fs';
+import path from 'node:path';
+import { DatabaseSync, backup } from 'node:sqlite';
+const [source, destination] = process.argv.slice(2);
+const database = new DatabaseSync(path.join(source, 'constructor.sqlite'), { readOnly: true });
+await backup(database, path.join(destination, 'constructor.sqlite'));
+database.close();
+const check = new DatabaseSync(path.join(destination, 'constructor.sqlite'), { readOnly: true });
+if (check.prepare('PRAGMA integrity_check').get().integrity_check !== 'ok') throw Error('Backup integrity check failed');
+check.close();
+for (const name of ['media', 'documents']) if (fs.existsSync(path.join(source, name))) fs.cpSync(path.join(source, name), path.join(destination, name), { recursive: true, errorOnExist: true });
+SNAPSHOT
+  if [ -f /etc/systemd/system/olympiad-constructor.service ]; then
+    cp -p /etc/systemd/system/olympiad-constructor.service "$snapshot/previous.service"
+  fi
+fi
 cat > /etc/systemd/system/olympiad-constructor.service <<UNIT
 [Unit]
 Description=Olympiad and assessment constructor
@@ -90,6 +112,7 @@ Environment=CONSTRUCTOR_CHROMIUM=$browser
 Environment=CONSTRUCTOR_HOST=127.0.0.1
 Environment=CONSTRUCTOR_PORT=3210
 Environment=CONSTRUCTOR_MODE=online
+Environment=CONSTRUCTOR_RELEASE_REVISION=$revision
 Environment=CONSTRUCTOR_PUBLIC_ORIGIN=https://xn--80aaloaqinm.xn--b1amqadnhd.xn--p1ai
 ExecStart=$node $release/dist/server.cjs
 MemoryMax=900M

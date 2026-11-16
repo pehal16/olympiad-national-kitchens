@@ -64,7 +64,8 @@ const internalize = (text: string) => {
 const fill = (text: string, data = fields) =>
   String(text || "").replace(/\{([a-zA-Z]+)\}/g, (_, key) => data[key] ?? "");
 export function TemplateGallery({ items, onOpen, onCreate, onShare }: any) {
-  const [kind, setKind] = useState("all");
+  const [kind, setKind] = useState("all"),
+    [recipient, setRecipient] = useState("all");
   return (
     <>
       <div className="page-toolbar">
@@ -81,6 +82,17 @@ export function TemplateGallery({ items, onOpen, onCreate, onShare }: any) {
           Новый шаблон
         </Button>
       </div>
+      <Select
+        label="Для кого подбираем документ"
+        value={recipient}
+        onChange={setRecipient}
+        options={[
+          ["all", "Все документы"],
+          ["participant", "Участник"],
+          ["winner", "Победитель или призёр"],
+          ["mentor", "Наставник"],
+        ]}
+      />
       <div className="section-tabs">
         {[
           ["all", "Все шаблоны"],
@@ -100,7 +112,15 @@ export function TemplateGallery({ items, onOpen, onCreate, onShare }: any) {
       </div>
       <div className="template-gallery">
         {items
-          .filter((t: Json) => kind === "all" || t.kind === kind)
+          .filter(
+            (t: Json) =>
+              (kind === "all" || t.kind === kind) &&
+              (recipient === "all" ||
+                (recipient === "participant" && t.kind === "certificate") ||
+                (recipient === "winner" &&
+                  ["diploma", "commendation"].includes(t.kind)) ||
+                (recipient === "mentor" && t.kind === "thanks")),
+          )
           .map((t: AwardTemplate) => (
             <article key={t.id} className="template-gallery-item">
               <button className="template-choice" onClick={() => onOpen(t.id)}>
@@ -119,12 +139,12 @@ export function TemplateGallery({ items, onOpen, onCreate, onShare }: any) {
     </>
   );
 }
-export function TemplateThumb({ template: t }: any) {
-  const scale = 210 / (t.width * 3.7795);
+export function TemplateThumb({ template: t, width = 210 }: any) {
+  const scale = width / (t.width * 3.7795);
   return (
     <div
       className="template-thumb"
-      style={{ height: t.height * 3.7795 * scale }}
+      style={{ width, height: t.height * 3.7795 * scale }}
     >
       <div
         className="paper"
@@ -289,7 +309,16 @@ export function Designer({ initial, templates, onBack, registerFlush }: any) {
     [sample, setSample] = useState<Json>(fields),
     [sampleParticipants, setSampleParticipants] = useState<Json[]>([]),
     [restore, setRestore] = useState<Json | null>(null),
-    [guide, setGuide] = useState(false);
+    [guide, setGuide] = useState(false),
+    [simple, setSimple] = useState(true);
+  const [previewWidth, setPreviewWidth] = useState(
+    Math.min(460, window.innerWidth - 80),
+  );
+  useEffect(() => {
+    const resize = () => setPreviewWidth(Math.min(460, window.innerWidth - 80));
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, []);
   const current = useRef(t),
     revision = useRef(initial.revision),
     dirty = useRef(false),
@@ -617,7 +646,76 @@ export function Designer({ initial, templates, onBack, registerFlush }: any) {
           </Button>
         </div>
       )}
-      <div className="designer-layout">
+      <Button onClick={() => setSimple(!simple)}>
+        {simple ? "Расширенный редактор макета" : "Простое оформление"}
+      </Button>
+      {simple && (
+        <section className="simple-document panel">
+          <div>
+            <h2>Оформите документ</h2>
+            <Input
+              label="Название шаблона в вашем списке"
+              value={t.title}
+              onChange={(v: string) => change("title", v)}
+            />
+            <p className="muted">
+              Выберите готовое оформление. ФИО, название работы и другие поля в
+              фигурных скобках подставляются автоматически при выпуске.
+            </p>
+            <Select
+              label="Готовое оформление"
+              value=""
+              options={[
+                ["", "Выберите оформление"],
+                ...templates.map((x: any) => [x.id, x.title]),
+              ]}
+              onChange={(id: string) => {
+                const chosen = templates.find((x: any) => x.id === id);
+                if (chosen)
+                  apply({
+                    ...structuredClone(chosen),
+                    id: t.id,
+                    owner: t.owner,
+                    revision: revision.current,
+                    title: t.title,
+                  });
+              }}
+            />
+            {t.elements
+              .filter((x: any) => ["text", "field"].includes(x.type))
+              .map((element: any, i: number) => (
+                <Textarea
+                  key={element.id}
+                  rows={2}
+                  label={"Текст документа · " + (i + 1)}
+                  value={humanize(element.text)}
+                  onChange={(v: string) =>
+                    apply({
+                      ...t,
+                      elements: t.elements.map((x: any) =>
+                        x.id === element.id
+                          ? { ...x, text: internalize(v) }
+                          : x,
+                      ),
+                    })
+                  }
+                />
+              ))}
+            <p className="muted">
+              Логотипы, подписи, расположение и размер элементов меняются в
+              расширенном редакторе. Для проверки полного листа нажмите
+              «Предпросмотр».
+            </p>
+          </div>
+          <div className="simple-paper">
+            <TemplateThumb template={t} width={previewWidth} />
+            <p className="muted">
+              Образец. Настоящие данные будут подставлены при выпуске.
+            </p>
+          </div>
+        </section>
+      )}
+      <div className="designer-layout" hidden={simple}>
         <aside className="panel template-library">
           <div className="inspector-tabs">
             {["Шаблоны", "Элементы"].map((x) => (

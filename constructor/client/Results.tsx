@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Download,
   Eye,
@@ -8,6 +8,7 @@ import {
   Search,
 } from "lucide-react";
 import type { Json, Question } from "../shared/types";
+import { learningSummary } from "../shared/results.js";
 import { api, blobRequest, download } from "./api";
 import { Button, Input, Select, Textarea, Toggle, Modal, Empty } from "./ui";
 import { Task } from "./Tasks";
@@ -41,19 +42,49 @@ export function Results({ runId, onBack, onManage }: any) {
     [nomination, setNomination] = useState<Json | null>(null),
     [nominees, setNominees] = useState<string[]>([]),
     [nominationReason, setNominationReason] = useState("");
+  const [refreshed, setRefreshed] = useState("");
+  const [refreshError, setRefreshError] = useState("");
+  const [notes, setNotes] = useState("");
+  const [noteStatus, setNoteStatus] = useState("");
+  const noteRef = useRef(notes);
+  noteRef.current = notes;
+  const notesLoaded = useRef(false),
+    loading = useRef(false);
   const reload = async () => {
-    const [r, a, t, i, n] = await Promise.all([
-      api("/runs/" + runId),
-      api("/runs/" + runId + "/results"),
-      api("/templates"),
-      api("/runs/" + runId + "/issues"),
-      api("/runs/" + runId + "/nominations"),
-    ]);
-    setRun(r);
-    setRows(a);
-    setTemplates(t);
-    setIssues(i);
-    setNominationRules(n);
+    if (loading.current) return;
+    loading.current = true;
+    try {
+      const [r, a, t, i, n] = await Promise.all([
+        api("/runs/" + runId),
+        api("/runs/" + runId + "/results"),
+        api("/templates"),
+        api("/runs/" + runId + "/issues"),
+        api("/runs/" + runId + "/nominations"),
+      ]);
+      setRun(r);
+      setRows(a);
+      setSelected((previous) =>
+        previous
+          ? a.find((row: any) => row.id === previous.id) || previous
+          : null,
+      );
+      setTemplates(t);
+      setIssues(i);
+      setNominationRules(n);
+      if (!notesLoaded.current) {
+        setNotes(r.teacherNotes || "");
+        notesLoaded.current = true;
+      }
+      setRefreshed(new Date().toLocaleTimeString("ru-RU"));
+      setRefreshError("");
+    } catch (e: any) {
+      setRefreshError(
+        "Обновление не удалось. На экране последние полученные сведения.",
+      );
+      throw e;
+    } finally {
+      loading.current = false;
+    }
   };
   useEffect(() => {
     reload().catch((e) =>
@@ -68,7 +99,7 @@ export function Results({ runId, onBack, onManage }: any) {
     const q =
       detail.variant.rounds
         .flatMap((r: Json) => r.questions)
-        .find((q: Json) => q.grading === "manual") ||
+        .find((q: Json) => q.grading === "manual" && !detail.reviews?.[q.id]) ||
       detail.variant.rounds[0].questions[0];
     setQid(q.id);
     setHistory(false);
@@ -112,6 +143,12 @@ export function Results({ runId, onBack, onManage }: any) {
     if (result.status === "failed") throw new Error(result.error);
     await reload();
   };
+  const analysis = learningSummary(rows);
+  const complete = rows.filter(
+    (a) =>
+      a.status === "completed" && !a.excludedFromResults && !a.summary.pending,
+  );
+  const needsReview = rows.filter((a) => a.summary.pending);
   if (!run) return <p>Загружаем результаты…</p>;
   return (
     <div className="results-page">
@@ -141,6 +178,108 @@ export function Results({ runId, onBack, onManage }: any) {
           </Button>
         </div>
       </div>
+      <section className="panel result-overview">
+        <div className="run-counts">
+          <span>
+            Начато попыток: <strong>{rows.length}</strong>
+          </span>
+          <span>
+            Выполняются:{" "}
+            <strong>
+              {rows.filter((a) => a.status === "in_progress").length}
+            </strong>
+          </span>
+          <span>
+            Завершены:{" "}
+            <strong>
+              {rows.filter((a) => a.status === "completed").length}
+            </strong>
+          </span>
+          <span>
+            Требуют проверки: <strong>{needsReview.length}</strong>
+          </span>
+        </div>
+        <p className="muted" role="status">
+          Обновлено: {refreshed || "—"}. Автообновление каждые 8 секунд.{" "}
+          {refreshError}
+        </p>
+        {needsReview.length > 0 && (
+          <Button kind="primary" onClick={() => choose(needsReview[0])}>
+            Проверить следующую работу
+          </Button>
+        )}
+      </section>
+      <details className="panel result-analysis">
+        <summary>Затруднения по турам и план разбора</summary>
+        <p className="muted">
+          Средний процент от максимума: только завершённые работы с
+          окончательной проверкой, включённые в зачёт. n = {complete.length}.
+          Это результат прохождения, а не измерение прироста знаний.
+        </p>
+        {analysis.rounds.map((r: any) => (
+          <div className="round-percent" key={r.id}>
+            <span>{r.title}</span>
+            <meter min="0" max="100" value={r.percent} />
+            <strong>{Math.round(r.percent)}%</strong>
+          </div>
+        ))}
+        {analysis.questions.length > 0 && (
+          <div className="table-scroll">
+            <table>
+              <caption>Задания для разбора · сначала меньший процент</caption>
+              <thead>
+                <tr>
+                  <th>Задание</th>
+                  <th>Средний результат</th>
+                  <th>Ответ ниже максимума</th>
+                  <th>Без ответа</th>
+                </tr>
+              </thead>
+              <tbody>
+                {analysis.questions.slice(0, 10).map((q: any) => (
+                  <tr key={q.id}>
+                    <td>{q.title}</td>
+                    <td>
+                      {Math.round(q.percent)}% · n={q.n}
+                    </td>
+                    <td>{q.belowMaximum}</td>
+                    <td>{q.blank}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <p className="muted">
+          По таймеру завершено попыток: {analysis.timedOutAttempts}. Пустой
+          ответ сам по себе не доказывает нехватку времени или технический сбой.
+          Причины уточняются по истории и наблюдениям преподавателя.
+        </p>
+        <Textarea
+          label="Мой план последующего разбора"
+          value={notes}
+          onChange={(v: string) => {
+            setNotes(v);
+            setNoteStatus("Есть несохранённые изменения");
+          }}
+          placeholder="Какое затруднение заметили? Какой пример разберём? Что предложим выполнить повторно?"
+        />
+        <Button
+          onClick={async () => {
+            const value = notes;
+            await api("/runs/" + runId, { teacherNotes: value }, "PUT");
+            setNoteStatus(
+              noteRef.current === value
+                ? "План разбора сохранён"
+                : "Есть несохранённые изменения",
+            );
+          }}
+        >
+          Сохранить план разбора
+        </Button>
+        <p role="status">{noteStatus}</p>
+        <p className="muted">Запись видна только организатору проведения.</p>
+      </details>
       <div className="result-filters">
         <Select
           label="Состояние"
@@ -602,7 +741,34 @@ export function Results({ runId, onBack, onManage }: any) {
               <div className="award-recipients">
                 {preview.candidates.map((c: Json) => (
                   <section className="recipient" key={c.id}>
-                    <strong>{c.participant.fullName}</strong>
+                    <strong>{c.fullName}</strong>
+                    <span>
+                      {c.recipient === "mentor"
+                        ? "Наставник · по результату участника " +
+                          c.participant.fullName
+                        : "Участник"}
+                    </span>
+                    <Button
+                      onClick={async () =>
+                        download(
+                          await blobRequest(
+                            "/templates/" +
+                              (overrides[c.id]?.templateId || c.templateId) +
+                              "/preview",
+                            {
+                              fields: {
+                                ...c,
+                                degree: overrides[c.id]?.degree ?? c.degree,
+                                number: "ОБРАЗЕЦ",
+                              },
+                            },
+                          ),
+                          "Образец наградного документа.pdf",
+                        )
+                      }
+                    >
+                      Посмотреть полный документ PDF
+                    </Button>
                     <span>
                       {c.nomination} · {c.score} баллов · место {c.place}
                     </span>
