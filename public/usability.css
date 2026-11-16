@@ -51,6 +51,9 @@
   .story-narrator-stage {
   min-height: 0;
   display: flex;
+  flex-direction: row;
+  height: auto;
+  max-height: none;
   align-items: center;
   gap: 18px;
   background: transparent;

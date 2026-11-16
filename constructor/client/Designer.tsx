@@ -659,8 +659,9 @@ export function Designer({ initial, templates, onBack, registerFlush }: any) {
               onChange={(v: string) => change("title", v)}
             />
             <p className="muted">
-              Выберите готовое оформление. ФИО, название работы и другие поля в
-              фигурных скобках подставляются автоматически при выпуске.
+              Выберите оформление и при необходимости измените надписи. ФИО,
+              название работы, организатор и дата подставятся из данных
+              проведения при выпуске документов.
             </p>
             <Select
               label="Готовое оформление"
@@ -682,12 +683,17 @@ export function Designer({ initial, templates, onBack, registerFlush }: any) {
               }}
             />
             {t.elements
-              .filter((x: any) => ["text", "field"].includes(x.type))
+              .filter((x: any) => x.type === "text" && x.text?.trim())
               .map((element: any, i: number) => (
                 <Textarea
                   key={element.id}
                   rows={2}
-                  label={"Текст документа · " + (i + 1)}
+                  label={
+                    "Надпись: «" +
+                    element.text.trim().slice(0, 38) +
+                    (element.text.trim().length > 38 ? "…" : "") +
+                    "»"
+                  }
                   value={humanize(element.text)}
                   onChange={(v: string) =>
                     apply({

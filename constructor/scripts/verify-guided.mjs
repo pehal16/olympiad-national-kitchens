@@ -348,6 +348,36 @@ try {
     path: output + "/guided-results.png",
     fullPage: true,
   });
+  await page.getByRole("button", { name: "Материалы", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Шаблоны документов", exact: true })
+    .click();
+  await page.locator(".template-gallery-item button").first().click();
+  await page
+    .getByRole("heading", { name: "Оформите документ", exact: true })
+    .waitFor();
+  assert.equal(
+    await page.locator(".simple-document textarea").count(),
+    3,
+    "basic mode asks only about the three static inscriptions",
+  );
+  assert.ok(
+    (
+      await page
+        .locator(".simple-document textarea")
+        .evaluateAll((nodes) => nodes.map((node) => node.value))
+    ).every((value) => !value.includes("{")),
+    "automatic fields do not need manual editing",
+  );
+  await page.screenshot({ path: output + "/guided-document-desktop.png" });
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.locator(".simple-paper").scrollIntoViewIfNeeded();
+  assert.ok(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth + 1,
+    ),
+  );
+  await page.screenshot({ path: output + "/guided-document-320.png" });
   assert.deepEqual(errors, []);
   const report = {
     passed: true,
