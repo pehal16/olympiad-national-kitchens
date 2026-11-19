@@ -1,4 +1,44 @@
 /* Work area stays calm; story and statistics remain available on request. */
+.olympiad-page .landing-hero-actions .teacher-entry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 17px 24px;
+  border: 1px solid #ba812c;
+  border-radius: 18px;
+  background: linear-gradient(120deg, #ffe4ac, #efb450);
+  color: #173b30;
+  font:
+    700 17px/1.35 system-ui,
+    sans-serif;
+  text-decoration: none;
+  box-shadow: 0 6px 18px #8c5f2326;
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.olympiad-page .landing-hero-actions .teacher-entry:hover {
+  background: #ffda8e;
+  color: #123025;
+  box-shadow: 0 7px 22px #8c5f2340;
+}
+.olympiad-page .landing-hero-actions .teacher-entry:focus-visible {
+  outline: 3px solid #005b43;
+  outline-offset: 4px;
+}
+.olympiad-page .teacher-entry svg {
+  flex: 0 0 22px;
+}
+@media (max-width: 600px) {
+  .olympiad-page .landing-hero-actions .teacher-entry {
+    width: 100%;
+    padding: 15px 14px;
+    font-size: 16px;
+    gap: 9px;
+  }
+}
 .olympiad-page .public-demo-banner {
   padding: 10px 18px;
   border-radius: 14px;

@@ -1,6 +1,12 @@
 # Project Memory
 
-Last updated: 2026-11-17
+Last updated: 2026-11-19
+
+## Visible teacher entry and creation demonstration (2026-11-19)
+
+- The home-page teacher entry uses a prominent amber button with an accessible focus outline. The public stylesheet and service-worker cache versions change together.
+- The regular constructor login offers `Демоверсия создания олимпиады` at `/constructor/demo/`. This is an interactive browser-only demonstration using the same question editor and participant renderer, with six common question types, up to ten questions, title/description and a participant preview. It makes no authenticated API requests, creates no account or server-side records, and does not replace an existing teacher session. Its draft is saved only in this tab's sessionStorage; storage refusal is shown explicitly. Conduct, awards and uploads belong to the full invited-teacher cabinet; no trial is represented as a published event or graded result.
+- The demo is separate from the anonymous participant demonstration. Normal login, invitation/setup, working data, official olympiad routing and the desktop primary retain their existing behavior. Release verification and deployment must be checked from the current revision before claiming the change is live.
 
 ## Guided authoring and participant usability · 1.1 (2026-11-17)
 

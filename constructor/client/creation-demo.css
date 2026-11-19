@@ -1,0 +1,193 @@
+.login-demo-entry {
+  display: grid;
+  gap: 12px;
+  padding-top: 22px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.login-demo-entry .demo-entry-link {
+  min-height: 54px;
+  white-space: normal;
+  background: #fff0ce;
+  border: 1px solid #d1a148;
+  color: #193c32;
+  font-weight: 700;
+}
+.login-demo-entry .demo-entry-link:hover {
+  background: #ffe0a1;
+}
+.creation-demo .app-header {
+  justify-content: space-between;
+}
+.creation-demo .brand {
+  color: var(--accent);
+  text-decoration: none;
+}
+.creation-demo-main {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 36px 24px;
+}
+.creation-demo-intro {
+  max-width: 900px;
+}
+.creation-demo-intro h1 {
+  margin: 16px 0 12px;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+.creation-demo-intro p {
+  margin: 10px 0;
+}
+.creation-demo-badge {
+  display: inline-block;
+  background: #fff0ce;
+  color: #654817;
+  padding: 7px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.creation-demo-steps {
+  display: flex;
+  gap: 12px;
+  margin: 28px 0;
+}
+.creation-demo-steps .button {
+  flex: 1;
+}
+.creation-demo-name {
+  max-width: 850px;
+  display: grid;
+  gap: 20px;
+}
+.creation-demo-name h2 {
+  margin: 0;
+}
+.creation-demo-name > .button {
+  justify-self: start;
+}
+.creation-demo-workspace {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+.creation-demo-outline h2 {
+  font-size: 20px;
+  margin: 0 0 16px;
+}
+.creation-demo-outline ol {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.creation-demo-outline li button {
+  background: transparent;
+  color: inherit;
+  border: 0;
+  border-radius: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+.creation-demo-outline li button:hover {
+  background: #f1f5f3;
+}
+.creation-demo-outline li button.active {
+  background: #e2f0e8;
+  color: #005b43;
+  font-weight: 700;
+}
+.creation-demo-outline > .button {
+  width: 100%;
+}
+.creation-demo-canvas {
+  min-width: 0;
+}
+.creation-demo-canvas .editor-title {
+  grid-template-columns: minmax(0, 1fr) 220px;
+}
+.creation-demo-canvas .task h3 {
+  overflow-wrap: anywhere;
+}
+.creation-demo-task-head,
+.creation-demo-task-actions,
+.creation-demo-footer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.creation-demo-task-head {
+  justify-content: space-between;
+}
+.creation-demo-task-head h2 {
+  margin: 0;
+}
+.creation-demo-task-actions {
+  margin-top: 24px;
+}
+.creation-demo-footer {
+  justify-content: space-between;
+  margin-top: 28px;
+}
+@media (max-width: 700px) {
+  .creation-demo .app-header {
+    padding: 14px 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .creation-demo .brand strong {
+    font-size: 17px;
+  }
+  .creation-demo-main {
+    padding: 24px 16px;
+  }
+  .creation-demo-steps {
+    gap: 6px;
+  }
+  .creation-demo-steps .button {
+    padding: 10px 6px;
+    font-size: 14px;
+    min-width: 0;
+  }
+  .creation-demo-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .creation-demo-outline {
+    padding: 18px;
+  }
+  .creation-demo-outline ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .creation-demo-outline li {
+    max-width: 100%;
+  }
+  .creation-demo-outline li button {
+    padding: 10px;
+    max-width: 220px;
+  }
+  .creation-demo-canvas .editor-title {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .creation-demo .panel {
+    padding: 18px;
+  }
+  .creation-demo-footer > .button {
+    width: 100%;
+    justify-content: center;
+    white-space: normal;
+  }
+  .creation-demo-canvas .option-editor {
+    grid-template-columns: 24px minmax(0, 1fr) 40px;
+  }
+}

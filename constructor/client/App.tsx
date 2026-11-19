@@ -40,6 +40,7 @@ import { RunManagement, SpreadsheetImport } from "./Conduct";
 const Builder = lazy(() =>
   import("./Builder").then((m) => ({ default: m.Builder })),
 );
+const CreationDemo = lazy(() => import("./CreationDemo"));
 const Designer = lazy(() =>
   import("./Designer").then((m) => ({ default: m.Designer })),
 );
@@ -70,7 +71,9 @@ export function App() {
   return (
     <>
       <Suspense fallback={<div className="loading">Загружаем кабинет…</div>}>
-        {page === "play" ? (
+        {page === "demo" ? (
+          <CreationDemo />
+        ) : page === "play" ? (
           <Participant runId={path[2]} />
         ) : page === "verify" ? (
           <Verify issueId={path[2]} />
@@ -685,6 +688,17 @@ function Login({ setup, onLogin }: any) {
               ? "Создать кабинет"
               : "Войти"}
         </Button>
+        {!setup && !invitation && (
+          <div className="login-demo-entry">
+            <span className="muted">Хотите сначала попробовать?</span>
+            <a className="button demo-entry-link" href="/constructor/demo/">
+              Демоверсия создания олимпиады <span aria-hidden="true">→</span>
+            </a>
+            <small className="muted">
+              Без регистрации. Создайте вопросы и откройте предпросмотр.
+            </small>
+          </div>
+        )}
       </form>
     </main>
   );

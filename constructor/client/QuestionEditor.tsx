@@ -20,11 +20,15 @@ export function QuestionEditor({
   onChange,
   cases = [],
   guided = false,
+  typeOptions = Object.entries(TYPES),
+  allowMedia = true,
 }: {
   q: Question;
   onChange: (q: any) => void;
   cases?: Json[];
   guided?: boolean;
+  typeOptions?: [string, string][];
+  allowMedia?: boolean;
 }) {
   const [showOptionImages, setShowOptionImages] = useState(() =>
     Boolean(q.config?.options?.some((option: Json) => option.imageUrl)),
@@ -51,7 +55,7 @@ export function QuestionEditor({
         <Select
           label="Тип задания"
           value={q.type}
-          options={Object.entries(TYPES)}
+          options={typeOptions}
           onChange={(type: string) => {
             if (type === q.type) return;
             const choices = ["single_choice", "multiple_choice"];
@@ -138,46 +142,48 @@ export function QuestionEditor({
                   )
                 }
               />
-              <label className="button small file-button">
-                {o.imageUrl ? "Заменить фото" : "Добавить фото"}
-                <input
-                  hidden
-                  type="file"
-                  accept="image/*"
-                  onChange={async (e) => {
-                    const input = e.currentTarget,
-                      f = input.files?.[0];
-                    if (f)
-                      try {
-                        const m = await upload(f);
-                        onChange((current: Question | null) =>
-                          current?.id === q.id
-                            ? {
-                                ...current,
-                                config: {
-                                  ...current.config,
-                                  options: current.config.options.map(
-                                    (option: Json) =>
-                                      option.id === o.id
-                                        ? { ...option, imageUrl: m.url }
-                                        : option,
-                                  ),
-                                },
-                              }
-                            : current,
-                        );
-                      } catch (error) {
-                        window.dispatchEvent(
-                          new CustomEvent("constructor-error", {
-                            detail: error,
-                          }),
-                        );
-                      } finally {
-                        input.value = "";
-                      }
-                  }}
-                />
-              </label>
+              {allowMedia && (
+                <label className="button small file-button">
+                  {o.imageUrl ? "Заменить фото" : "Добавить фото"}
+                  <input
+                    hidden
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const input = e.currentTarget,
+                        f = input.files?.[0];
+                      if (f)
+                        try {
+                          const m = await upload(f);
+                          onChange((current: Question | null) =>
+                            current?.id === q.id
+                              ? {
+                                  ...current,
+                                  config: {
+                                    ...current.config,
+                                    options: current.config.options.map(
+                                      (option: Json) =>
+                                        option.id === o.id
+                                          ? { ...option, imageUrl: m.url }
+                                          : option,
+                                    ),
+                                  },
+                                }
+                              : current,
+                          );
+                        } catch (error) {
+                          window.dispatchEvent(
+                            new CustomEvent("constructor-error", {
+                              detail: error,
+                            }),
+                          );
+                        } finally {
+                          input.value = "";
+                        }
+                    }}
+                  />
+                </label>
+              )}
               <IconButton
                 title="Удалить вариант"
                 onClick={() =>
@@ -221,11 +227,13 @@ export function QuestionEditor({
             <Plus size={16} />
             Добавить вариант
           </Button>
-          <Toggle
-            label="Показать настройки изображений"
-            value={showOptionImages}
-            onChange={setShowOptionImages}
-          />
+          {allowMedia && (
+            <Toggle
+              label="Показать настройки изображений"
+              value={showOptionImages}
+              onChange={setShowOptionImages}
+            />
+          )}
           <p className="muted">
             Отметьте правильные варианты слева. Ключ виден только преподавателю.
           </p>
@@ -670,59 +678,61 @@ export function QuestionEditor({
         />
       )}
       {guided && <RubricEditor q={q} onChange={onChange} />}
-      <details className="attached-media">
-        <summary>Изображения и другие материалы (необязательно)</summary>
+      {allowMedia && (
+        <details className="attached-media">
+          <summary>Изображения и другие материалы (необязательно)</summary>
 
-        {(q.media || []).map((m: Json, i: number) => (
-          <div className="file-row" key={m.url}>
-            <span>{m.alt || `Материал ${i + 1}`}</span>
-            <small>{m.mime}</small>
-            <IconButton
-              title="Убрать материал"
-              onClick={() =>
-                change(
-                  "media",
-                  q.media.filter((_: any, j: number) => j !== i),
-                )
-              }
-            >
-              <Trash2 size={16} />
-            </IconButton>
-          </div>
-        ))}
-        <label className="button file-button">
-          <Plus size={16} />
-          Добавить фото, аудио, видео или PDF
-          <input
-            type="file"
-            hidden
-            accept="image/*,audio/mpeg,audio/wav,video/mp4,video/webm,application/pdf"
-            onChange={async (e) => {
-              const f = e.target.files?.[0];
-              if (f) {
-                try {
-                  const m = await upload(f);
-                  onChange((current: Question | null) =>
-                    current?.id === q.id
-                      ? {
-                          ...current,
-                          media: [
-                            ...(current.media || []),
-                            { url: m.url, mime: m.mime, alt: m.name },
-                          ],
-                        }
-                      : current,
-                  );
-                } catch (error) {
-                  window.dispatchEvent(
-                    new CustomEvent("constructor-error", { detail: error }),
-                  );
+          {(q.media || []).map((m: Json, i: number) => (
+            <div className="file-row" key={m.url}>
+              <span>{m.alt || `Материал ${i + 1}`}</span>
+              <small>{m.mime}</small>
+              <IconButton
+                title="Убрать материал"
+                onClick={() =>
+                  change(
+                    "media",
+                    q.media.filter((_: any, j: number) => j !== i),
+                  )
                 }
-              }
-            }}
-          />
-        </label>
-      </details>
+              >
+                <Trash2 size={16} />
+              </IconButton>
+            </div>
+          ))}
+          <label className="button file-button">
+            <Plus size={16} />
+            Добавить фото, аудио, видео или PDF
+            <input
+              type="file"
+              hidden
+              accept="image/*,audio/mpeg,audio/wav,video/mp4,video/webm,application/pdf"
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (f) {
+                  try {
+                    const m = await upload(f);
+                    onChange((current: Question | null) =>
+                      current?.id === q.id
+                        ? {
+                            ...current,
+                            media: [
+                              ...(current.media || []),
+                              { url: m.url, mime: m.mime, alt: m.name },
+                            ],
+                          }
+                        : current,
+                    );
+                  } catch (error) {
+                    window.dispatchEvent(
+                      new CustomEvent("constructor-error", { detail: error }),
+                    );
+                  }
+                }
+              }}
+            />
+          </label>
+        </details>
+      )}
       <details>
         <summary>Пояснение к ответу (необязательно)</summary>
         <Textarea
