@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { AnswerQueue } from "./answer-queue.mjs";
+import { registerAssistant } from "./assistant.mjs";
 import express from "express";
 import multer from "multer";
 import fs from "node:fs";
@@ -92,7 +93,6 @@ export function createApp(options = {}) {
     });
     next();
   });
-  app.use(express.json({ limit: "8mb" }));
   const wrap = (fn) => (req, res, next) =>
     Promise.resolve()
       .then(() => fn(req, res))
@@ -129,6 +129,17 @@ export function createApp(options = {}) {
     }
   }
   const send = (res, data) => res.json({ ok: true, data });
+  const closeAssistant = registerAssistant(app, {
+    api: API,
+    auth,
+    wrap,
+    send,
+    service,
+    workerToken:
+      options.assistantWorkerToken ??
+      process.env.CONSTRUCTOR_ASSISTANT_WORKER_TOKEN,
+  });
+  app.use(express.json({ limit: "8mb" }));
   const rate = new Map();
   app.use(API, (req, res, next) => {
     if (/\/(login|setup|accept-invitation|begin)$/.test(req.path)) {
@@ -1337,6 +1348,7 @@ export function createApp(options = {}) {
     service,
     documents,
     async close() {
+      closeAssistant();
       backups.stop();
       answerQueue.close();
       await documents.close();
