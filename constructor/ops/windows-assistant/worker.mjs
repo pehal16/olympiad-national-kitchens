@@ -5,8 +5,11 @@ import { pathToFileURL } from "node:url";
 import {
   defaultModel,
   ollamaRequest,
+  ollamaTestRequest,
   readDraft,
   readSource,
+  readTestDraft,
+  readTestRequest,
 } from "../../shared/assistant.mjs";
 
 const ollama = "http://127.0.0.1:11435";
@@ -43,7 +46,8 @@ async function cabinetJson(url, body, headers, networkInterface) {
       !address.internal &&
       !address.address.startsWith("169.254."),
   )?.address;
-  if (!localAddress) throw new Error("Нет IPv4 на выбранном сетевом интерфейсе.");
+  if (!localAddress)
+    throw new Error("Нет IPv4 на выбранном сетевом интерфейсе.");
 
   const payload = JSON.stringify(body);
   const request = httpsRequest(url, {
@@ -86,13 +90,17 @@ async function modelPresent() {
 }
 
 async function generate(input) {
+  const test = "instruction" in input;
   const response = await json(ollama + "/api/generate", {
-    body: ollamaRequest(input, model),
-    timeout: 120_000,
+    body: test ? ollamaTestRequest(input, model) : ollamaRequest(input, model),
+    timeout: test ? 150_000 : 120_000,
   });
   if (response.done !== true || response.done_reason === "length") return null;
   try {
-    return readDraft(JSON.parse(response.response), input.sourceText);
+    const draft = JSON.parse(response.response);
+    return test
+      ? readTestDraft(draft, input.count)
+      : readDraft(draft, input.sourceText);
   } catch {
     return null;
   }
@@ -193,10 +201,13 @@ async function work() {
   while (true) {
     try {
       const ready = await modelPresent().catch(() => false);
-      const { job } = await endpoint("/claim", { ready });
+      const { job } = await endpoint("/claim", { ready, supportsTests: true });
       status(ready ? "Помощник подключён." : "Ожидание локальной модели.");
       if (job) {
-        const input = readSource(job.input);
+        const input =
+          job.input?.instruction === undefined
+            ? readSource(job.input)
+            : readTestRequest(job.input);
         let draft, failure;
         try {
           draft = input ? await generate(input) : null;

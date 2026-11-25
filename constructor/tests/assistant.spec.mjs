@@ -6,6 +6,7 @@ import path from "node:path";
 import { once } from "node:events";
 import { randomBytes } from "node:crypto";
 import { createApp, API } from "../server/index.mjs";
+import { validateProject } from "../server/domain.mjs";
 
 test("assistant jobs are private to their project's author, require a live worker and verify the source before preview", async (t) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "constructor-ai-test-"));
@@ -77,8 +78,11 @@ test("assistant jobs are private to their project's author, require a live worke
     return { status: response.status, ...(await response.json()) };
   };
   const create = (body = source) => call(projectRoute, { user, body });
-  const claim = (ready = true) =>
-    call(workerRoute + "/claim", { worker: true, body: { ready } });
+  const claim = (ready = true, supportsTests = false) =>
+    call(workerRoute + "/claim", {
+      worker: true,
+      body: { ready, supportsTests },
+    });
   const complete = (job, draft) =>
     call(workerRoute + "/complete", {
       worker: true,
@@ -154,6 +158,98 @@ test("assistant jobs are private to their project's author, require a live worke
   assert.equal(
     (await call(`${projectRoute}/${next.id}`, { user })).status,
     404,
+  );
+
+  await t.test(
+    "one instruction generates a private, complete test and creates one editable draft on confirmation",
+    async () => {
+      const route = "/assistant/tests";
+      const instruction =
+        "Составь два разных вопроса о приготовлении круассанов";
+      const body = { instruction };
+      const draft = {
+        title: "Приготовление круассанов",
+        questions: [
+          {
+            title: sample.title,
+            prompt: sample.prompt,
+            options: sample.options,
+            correctIndex: 0,
+          },
+          {
+            title: "Формование",
+            prompt: "Откуда начинают сворачивать треугольник теста?",
+            options: [
+              "С вершины",
+              "От широкого основания",
+              "От середины",
+              "С боковой стороны",
+            ],
+            correctIndex: 1,
+          },
+        ],
+      };
+      assert.equal((await call(route, { user, body })).status, 503);
+      await claim(true, true);
+      assert.equal(
+        (await call("/assistant/status", { user })).data.testOnline,
+        true,
+      );
+      assert.equal(
+        (
+          await call(route, {
+            user,
+            body: { instruction: "Составь 21 вопрос" },
+          })
+        ).status,
+        400,
+      );
+      const before = (await call("/projects", { user })).data.length;
+      const first = await call(route, { user, body });
+      assert.equal(first.status, 202);
+      assert.equal((await claim()).data.job, null);
+      const partial = (await claim(true, true)).data.job;
+      assert.deepEqual(partial.input, { instruction, count: 2 });
+      await complete(partial, {
+        ...draft,
+        questions: draft.questions.slice(0, 1),
+      });
+      assert.equal(
+        (await call(`${route}/${first.data.id}`, { user })).data.state,
+        "failed",
+      );
+
+      const queued = await call(route, { user, body });
+      const leased = (await claim(true, true)).data.job;
+      await complete(leased, draft);
+      const receipt = `${route}/${queued.data.id}`;
+      assert.equal((await call(receipt, { user: teacher })).status, 404);
+      assert.equal(
+        (await call(`${receipt}/project`, { user: teacher, body: {} })).status,
+        404,
+      );
+      assert.deepEqual((await call(receipt, { user })).data, {
+        state: "ready",
+        test: draft,
+      });
+      assert.equal((await call("/projects", { user })).data.length, before);
+      const created = await call(`${receipt}/project`, { user, body: {} });
+      assert.equal(created.status, 200);
+      assert.deepEqual(
+        (await call(`${receipt}/project`, { user, body: {} })).data,
+        created.data,
+      );
+      const stored = (await call("/projects/" + created.data.id, { user }))
+        .data;
+      assert.equal(stored.kind, "test");
+      assert.equal(stored.status, "draft");
+      assert.deepEqual(
+        stored.rounds[0].questions.map((q) => q.key.optionId),
+        ["o1", "o2"],
+      );
+      assert.deepEqual(validateProject(stored), []);
+      assert.equal((await call("/projects", { user })).data.length, before + 1);
+    },
   );
 
   await claim(false);

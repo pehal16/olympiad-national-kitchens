@@ -2,6 +2,12 @@
 
 Last updated: 2026-11-25
 
+## Tests from one instruction in the teacher cabinet (2026-11-25)
+
+- **Создать тест с ИИ** on the projects page takes one instruction and proposes a title, questions, four options per question and one answer key. The teacher reviews the preview and creates an editable test draft with a single confirmation. **ИИ-помощник** on the **Задания** step adds all generated questions to the selected round in one edit.
+- The default is ten questions. The instruction can specify a count from one to twenty and include the audience or difficulty. Qwen3.5 on the existing iRU worker generates the test. The cabinet verifies the number, structure, unique questions and option keys before showing the preview. Teachers review the factual accuracy before using a test.
+- New requests and previews expire in the assistant's in-memory queue. The normal project service saves confirmed drafts, and retrying the confirmation in the same queue entry returns the same project. The cabinet supports older open editor tabs through the existing source-based route. Update the iRU worker before releasing the new frontend.
+
 ## Ollama assistant in the live Timeweb constructor (2026-11-25)
 
 - The teacher cabinet at `олимпиада.постовит.рф/constructor/` serves the assistant from release `53c93247c29eaa9033d8bbbe2d00037125913188`. The rollout updated `olympiad-constructor.service` only. It verified a consistent SQLite backup and kept the live cabinet database, original service unit and public routing. The previous release is retained for a code rollback.

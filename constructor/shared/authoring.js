@@ -42,6 +42,23 @@ export function blankQuestion(type = "single_choice") {
   q.internal = { authored: true };
   return q;
 }
+
+export function assistantQuestions(draft) {
+  return draft.questions.map((item) => {
+    const question = blankQuestion("single_choice");
+    const options = item.options.map((label, index) => ({
+      id: "o" + (index + 1),
+      label,
+    }));
+    return {
+      ...question,
+      title: item.prompt,
+      internal: { ...question.internal, label: item.title },
+      config: { ...question.config, options },
+      key: { optionId: options[item.correctIndex].id },
+    };
+  });
+}
 export function convertQuestion(q, type) {
   if (
     ["single_choice", "multiple_choice"].includes(q.type) &&

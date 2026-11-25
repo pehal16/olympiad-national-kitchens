@@ -23,6 +23,7 @@ import {
 import type { User, Json, Project, Question } from "../shared/types";
 import { question, TYPES, uid } from "../shared/catalog";
 import { blankQuestion } from "../shared/authoring.js";
+import { AssistantTest } from "./Assistant";
 import { api, setCsrf, blobRequest, download } from "./api";
 import {
   Button,
@@ -339,10 +340,13 @@ function AdminApp() {
                   Олимпиады и тестирования: от замысла до наградных документов.
                 </p>
               </div>
-              <Button kind="primary" onClick={() => setCreating(true)}>
-                <Plus size={18} />
-                Создать работу
-              </Button>
+              <div className="actions">
+                <AssistantTest onCreate={(id) => navigate("builder", id)} />
+                <Button kind="primary" onClick={() => setCreating(true)}>
+                  <Plus size={18} />
+                  Создать работу
+                </Button>
+              </div>
             </div>
             <div className="project-search">
               <Input
