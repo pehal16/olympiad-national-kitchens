@@ -12,6 +12,7 @@ import {
   readTestRequest,
 } from "../../shared/assistant.mjs";
 import {
+  assembleWorkQuestions,
   resolveWorkPlan,
   readWorkQuestions,
   testScopeQuestion,
@@ -193,13 +194,13 @@ async function generateWork(job, endpoint) {
         return combined ? parsed : null;
       };
       let draft = await structured(drafted);
-      let validated = readBatch(draft?.questions);
+      let validated = readBatch(assembleWorkQuestions(draft?.questions, batch));
       if (!validated) {
         draft = await structured({
           ...drafted,
           options: { ...drafted.options, temperature: 0.05 },
         });
-        validated = readBatch(draft?.questions);
+        validated = readBatch(assembleWorkQuestions(draft?.questions, batch));
       }
       if (!validated && batch.itemType === "single_choice") {
         const guide = sources
@@ -240,11 +241,12 @@ async function generateWork(job, endpoint) {
       const check = await structured(
         workReviewRequest(batch, validated, sources, model),
       ).catch(() => null);
-      if (!readBatch(check?.questions)) {
+      const checked = assembleWorkQuestions(check?.questions, batch);
+      if (!readBatch(checked)) {
         reviewed = false;
         questions.push(...validated);
       } else {
-        questions.push(...check.questions);
+        questions.push(...checked);
         if (!standardId && check.standardId) {
           standardId = check.standardId;
           standardQuote = check.standardQuote;

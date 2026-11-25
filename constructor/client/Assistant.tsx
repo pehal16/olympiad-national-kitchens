@@ -165,8 +165,8 @@ function Preview({ work }: { work: Work }) {
           <details>
             <summary>Задания и ключи · {group.questions.length}</summary>
             <ol className="assistant-questions">
-              {group.questions.map((item) => (
-                <li key={item.prompt}>
+              {group.questions.map((item, index) => (
+                <li key={index}>
                   <p className="muted">{types[item.type]}</p>
                   <strong>{item.prompt}</strong>
                   <Answer item={item} />
