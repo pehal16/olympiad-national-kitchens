@@ -19,6 +19,7 @@ import {
   workPlanRequest,
   workQuestionsRequest,
   workReviewRequest,
+  workKeyReviewRequest,
 } from "../../shared/assistant-work.mjs";
 
 const ollama = "http://127.0.0.1:11435";
@@ -238,10 +239,27 @@ async function generateWork(job, endpoint) {
       }
       if (!validated)
         return { failure: "invalid_block", block: index + 1, stage: "draft" };
-      const check = await structured(
+      let check = await structured(
         workReviewRequest(batch, validated, sources, model),
       ).catch(() => null);
-      const checked = assembleWorkQuestions(check?.questions, batch);
+      let checked = assembleWorkQuestions(check?.questions, batch);
+      if (!readBatch(checked)) {
+        check = await structured(
+          workKeyReviewRequest(batch, validated, sources, model),
+        ).catch(() => null);
+        const decisions = check?.checks;
+        if (
+          Array.isArray(decisions) &&
+          decisions.length === batch.count &&
+          decisions.every((decision) => decision?.consistent === true)
+        ) {
+          checked = validated.map((question, i) => ({
+            ...question,
+            sourceId: decisions[i].sourceId,
+            quote: decisions[i].quote,
+          }));
+        }
+      }
       if (!readBatch(checked)) {
         reviewed = false;
         questions.push(...validated);
