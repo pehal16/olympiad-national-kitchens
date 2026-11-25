@@ -4,7 +4,9 @@ param(
     [string]$Mode = 'Preflight',
     [string]$InstallDir = (Join-Path $env:LOCALAPPDATA 'GKTSOllamaAssistant'),
     [string]$NodeExe,
-    [string]$CabinetOrigin
+    [string]$CabinetOrigin,
+    [string]$CabinetInterface,
+    [Security.SecureString]$CabinetCredential
 )
 
 $ErrorActionPreference = 'Stop'
@@ -137,7 +139,7 @@ function Stop-OwnedWorker($config) {
     Get-CimInstance Win32_Process -Filter "Name='node.exe'" |
         Where-Object { $_.ExecutablePath -eq $config.nodeExe -and
             $_.CommandLine -and $_.CommandLine.Contains($scriptArgument) -and
-            $_.CommandLine.EndsWith(' --work') } |
+            $_.CommandLine.TrimEnd().EndsWith(' --work') } |
         ForEach-Object { Stop-Process -Id $_.ProcessId -ErrorAction SilentlyContinue }
 }
 
@@ -232,20 +234,38 @@ if ($Mode -eq 'Check') {
 }
 
 if ($Mode -eq 'Connect') {
+    $task = Test-TaskOwner
     $uri = [Uri]$CabinetOrigin
     if (-not $uri.IsAbsoluteUri -or $uri.Scheme -ne 'https' -or $uri.UserInfo -or
         $uri.AbsolutePath -ne '/' -or $uri.Query -or $uri.Fragment) {
         throw 'Укажите HTTPS-адрес кабинета без пути, параметров и учётных данных.'
     }
-    $credential = Read-Host 'Рабочий ключ помощника' -AsSecureString
+    if ($CabinetInterface) {
+        $addresses = Get-NetIPAddress -InterfaceAlias $CabinetInterface -AddressFamily IPv4 -AddressState Preferred -ErrorAction SilentlyContinue
+        if (-not ($addresses | Where-Object { $_.IPAddress -notmatch '^(127\.|169\.254\.)' })) {
+            throw 'На выбранном сетевом интерфейсе нет адреса IPv4.'
+        }
+    }
+    $credential = if ($CabinetCredential) { $CabinetCredential } else { Read-Host 'Рабочий ключ помощника' -AsSecureString }
     if ($credential.Length -ne 43) { throw 'Рабочий ключ должен содержать 43 символа.' }
     $config.origin = $uri.GetLeftPart([UriPartial]::Authority)
+    $config | Add-Member -NotePropertyName cabinetInterface -NotePropertyValue $CabinetInterface -Force
     $credential | ConvertFrom-SecureString | Set-Content -LiteralPath $secretPath -Encoding ASCII
     Save-Config $config
-    $task = Test-TaskOwner
-    if ($task -and $task.State -eq 'Running') { Stop-ScheduledTask -InputObject $task }
+    if ($task -and $task.State -eq 'Running') {
+        Stop-ScheduledTask -InputObject $task
+        for ($attempt = 0; $attempt -lt 30 -and (Test-TaskOwner).State -eq 'Running'; $attempt++) {
+            Start-Sleep -Milliseconds 200
+        }
+        if ((Test-TaskOwner).State -eq 'Running') { throw 'Задача помощника не остановилась для подключения.' }
+    }
     Stop-OwnedWorker $config
-    Register-Assistant
+    if ($task) {
+        if (-not $task.Settings.Enabled) { Enable-ScheduledTask -InputObject $task | Out-Null }
+        Start-ScheduledTask -TaskName $taskName -TaskPath '\'
+    } else {
+        Register-Assistant
+    }
     return
 }
 
@@ -255,7 +275,8 @@ try {
     if ($config.origin) {
         $env:GKTS_ASSISTANT_MODEL = $model
         $env:GKTS_ASSISTANT_ORIGIN = $config.origin
-        $credential = Get-Content -LiteralPath $secretPath -Raw | ConvertTo-SecureString
+        $env:GKTS_ASSISTANT_INTERFACE = $config.cabinetInterface
+        $credential = (Get-Content -LiteralPath $secretPath -Raw).Trim() | ConvertTo-SecureString
         $env:GKTS_ASSISTANT_TOKEN = [Net.NetworkCredential]::new('', $credential).Password
         try {
             $node = Start-Process -FilePath $config.nodeExe -ArgumentList @(('"' + $workerScript + '"'), '--work') `

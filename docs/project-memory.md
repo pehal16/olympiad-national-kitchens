@@ -1,6 +1,12 @@
 # Project Memory
 
-Last updated: 2026-11-24
+Last updated: 2026-11-25
+
+## Ollama assistant in the live Timeweb constructor (2026-11-25)
+
+- The teacher cabinet at `олимпиада.постовит.рф/constructor/` serves the assistant from release `53c93247c29eaa9033d8bbbe2d00037125913188`. The rollout updated `olympiad-constructor.service` only. It verified a consistent SQLite backup and kept the live cabinet database, original service unit and public routing. The previous release is retained for a code rollback.
+- On `DESKTOP-SF3K6M4`, the existing `GKTS-TeacherAssistant-Ollama` task runs at Windows sign-in. Its worker reaches the cabinet over HTTPS using the `Ethernet` interface because the VPN route to Timeweb timed out. Ollama 0.40.17 continues on `127.0.0.1:11435`. The worker key stays in Windows DPAPI and the protected Timeweb service configuration.
+- Authenticated production checks generated two drafts from a synthetic source in **12.045 s** and **4.016 s**. Both returned four options, the expected answer and a verbatim quote. The test jobs were cleared and the project was checked for changes. Ollama reported **5,862,210,928 bytes** on RTX 5070. In the cabinet, open the project step **Задания → ИИ-помощник**. The iRU must stay powered on, online and signed in to Windows for generation.
 
 ## Ollama teacher assistant pilot (2026-11-24)
 

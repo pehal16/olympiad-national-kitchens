@@ -1,3 +1,5 @@
+import { request as httpsRequest } from "node:https";
+import { networkInterfaces } from "node:os";
 import { setTimeout as delay } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
 import {
@@ -29,6 +31,51 @@ async function json(url, { body, headers, timeout = 5000 } = {}) {
     });
   }
   return response.json();
+}
+
+async function cabinetJson(url, body, headers, networkInterface) {
+  if (!networkInterface || !url.startsWith("https:"))
+    return json(url, { body, headers });
+
+  const localAddress = networkInterfaces()[networkInterface]?.find(
+    (address) =>
+      address.family === "IPv4" &&
+      !address.internal &&
+      !address.address.startsWith("169.254."),
+  )?.address;
+  if (!localAddress) throw new Error("Нет IPv4 на выбранном сетевом интерфейсе.");
+
+  const payload = JSON.stringify(body);
+  const request = httpsRequest(url, {
+    method: "POST",
+    family: 4,
+    localAddress,
+    signal: AbortSignal.timeout(5000),
+    headers: {
+      ...headers,
+      "Content-Type": "application/json",
+      "Content-Length": Buffer.byteLength(payload),
+    },
+  });
+  const responseReady = new Promise((resolve, reject) => {
+    request.once("response", resolve);
+    request.once("error", reject);
+  });
+  request.end(payload);
+  const response = await responseReady;
+  const status = response.statusCode;
+  if (status < 200 || status >= 300) {
+    response.destroy();
+    throw Object.assign(new Error(`HTTP ${status}`), { status });
+  }
+  let bytes = 0;
+  const chunks = [];
+  for await (const chunk of response) {
+    bytes += chunk.length;
+    if (bytes > 64 * 1024) throw new Error("Ответ кабинета слишком большой.");
+    chunks.push(chunk);
+  }
+  return JSON.parse(Buffer.concat(chunks, bytes).toString("utf8"));
 }
 
 async function modelPresent() {
@@ -126,8 +173,14 @@ async function work() {
   if (!/^[A-Za-z0-9_-]{43}$/.test(credential || ""))
     throw new Error("Неверный формат рабочего ключа.");
   const headers = { Authorization: `Bearer ${credential}` };
+  const networkInterface = process.env.GKTS_ASSISTANT_INTERFACE;
   const endpoint = async (route, body) => {
-    const payload = await json(origin + api + route, { body, headers });
+    const payload = await cabinetJson(
+      origin + api + route,
+      body,
+      headers,
+      networkInterface,
+    );
     if (payload.ok !== true) throw new Error("Ответ кабинета не принят.");
     return payload.data;
   };
