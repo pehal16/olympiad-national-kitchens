@@ -17,12 +17,14 @@
     "package:windows": "node scripts/package-windows.mjs"
   },
   "dependencies": {
+    "cheerio": "1.2.0",
     "exceljs": "^4.4.0",
     "express": "^5.1.0",
     "fflate": "^0.8.2",
     "lucide-react": "^0.468.0",
     "multer": "^2.0.2",
     "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "6.5.438",
     "playwright": "^1.56.0",
     "qrcode": "^1.5.4",
     "react": "^19.2.0",

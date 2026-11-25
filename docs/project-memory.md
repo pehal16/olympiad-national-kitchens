@@ -2,6 +2,12 @@
 
 Last updated: 2026-11-25
 
+## AI authoring from an instruction and lecture files (2026-11-25)
+
+- **Создать работу с ИИ** accepts one instruction and optional lecture files in PDF with a text layer, DOCX, TXT or MD. It preserves the materials across a clarification and builds a draft with named sections. A teacher can request separate works or add the generated sections to an existing project. Native question types are single choice, ordering, matching and classification.
+- The assistant extracts the text of each file, selects passages for each subject block and generates assignments on the iRU. A second model pass revises answers and compares available excerpts. The server checks literal quotes and native answer keys. OpenStax chapters, the IRPO standards navigator and registry, the National Electronic Library catalog, and compatible public links are separate provenance types. A catalog entry supports finding a document. A sourced response carries the actual excerpt. A published FSES excerpt supports considering a competency link to the named education program.
+- The project service saves the confirmed draft. The queue keeps lecture texts and follow-up answers privately for the active job and releases them after it finishes or expires. Published events and participant results use the existing constructor routes. The current working program, relevant FSES edition, and substantive methodological acceptance remain teacher decisions.
+
 ## Tests from one instruction in the teacher cabinet (2026-11-25)
 
 - Timeweb deploys release `7fd94e56b5ab9020a929521c20630dfbbcd770c8`. The production HTTPS/API check generated ten questions with answer keys through the iRU worker in 16.563 s. An isolated Edge run at 1366 px and 390 px created a test with ten questions, added three to the selected round, waited for the server save and reloaded the resulting thirteen saved questions. The rollout verified an SQLite snapshot before switching the service.

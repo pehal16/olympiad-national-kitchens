@@ -29,7 +29,7 @@ import {
 import { QuestionEditor, QuestionInspector } from "./QuestionEditor";
 import { Task } from "./Tasks";
 import { Conduct } from "./Conduct";
-import { AssistantTest } from "./Assistant";
+import { AssistantWork } from "./Assistant";
 import { GuidedSteps } from "./Guided";
 import { blankQuestion } from "../shared/authoring.js";
 export function Builder({
@@ -551,18 +551,22 @@ export function Builder({
         >
           Повторить
         </Button>
-        {r && (guided ? step === 1 : tab === "Туры и задания") && (
-          <AssistantTest
-            key={r.id}
+        {(guided ? step === 1 : tab === "Туры и задания") && (
+          <AssistantWork
+            key={r?.id || "new"}
             projectId={p.id}
-            onInsert={(questions) => {
-              const target = ref.current.rounds.find(
-                (item) => item.id === r.id,
-              );
-              if (!target) throw new Error("Выбранный тур уже удалён.");
+            onInsert={(rounds, placement) => {
+              const current = ref.current;
+              const target = current.rounds.find((item) => item.id === r?.id);
+              if (placement === "new_rounds" || !target) {
+                update({ ...current, rounds: [...current.rounds, ...rounds] });
+                setRi(current.rounds.length);
+                setQi(0);
+                return;
+              }
               updateRound({
                 ...target,
-                questions: [...target.questions, ...questions],
+                questions: [...target.questions, ...rounds.flatMap((item) => item.questions)],
               });
               setQi(target.questions.length);
             }}

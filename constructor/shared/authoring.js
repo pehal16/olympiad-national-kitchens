@@ -1,4 +1,4 @@
-import { question } from "./catalog.js";
+import { question, round } from "./catalog.js";
 
 export const COMMON_TYPES = [
   "single_choice",
@@ -58,6 +58,35 @@ export function assistantQuestions(draft) {
       key: { optionId: options[item.correctIndex].id },
     };
   });
+}
+
+export function assistantRounds(groups) {
+  return groups.map((group) => ({
+    ...round(group.title),
+    questions: group.questions.map((item) => {
+      const q = blankQuestion(item.type);
+      const items = item.items.map((label, index) => ({ id: "i" + index, label }));
+      const targets = item.targets.map((label, index) => ({ id: "t" + index, label }));
+      q.title = item.prompt;
+      q.internal.label = item.title;
+      q.explanation = item.explanation;
+      const source = item.evidence;
+      if (source) {
+        q.source = [source.title, source.locator, source.url, "«" + source.quote + "»"].filter(Boolean).join("\n");
+      }
+      if (item.type === "single_choice") {
+        q.config.options = items;
+        q.key = { optionId: items[item.answer[0]].id };
+      } else if (item.type === "ordering") {
+        q.config.items = items;
+        q.key = { order: item.answer.map((index) => items[index].id) };
+      } else {
+        q.config = { items, targets };
+        q.key = { mapping: Object.fromEntries(items.map((entry, index) => [entry.id, targets[item.answer[index]].id])) };
+      }
+      return q;
+    }),
+  }));
 }
 export function convertQuestion(q, type) {
   if (

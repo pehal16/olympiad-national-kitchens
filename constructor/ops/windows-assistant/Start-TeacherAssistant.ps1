@@ -192,6 +192,7 @@ if ($Mode -eq 'Install') {
         $PSCommandPath = $installedStarter
         (Join-Path $PSScriptRoot 'worker.mjs') = $workerScript
         (Join-Path $PSScriptRoot '..\..\shared\assistant.mjs') = (Join-Path $app 'shared\assistant.mjs')
+        (Join-Path $PSScriptRoot '..\..\shared\assistant-work.mjs') = (Join-Path $app 'shared\assistant-work.mjs')
     }
     foreach ($source in $sources.Keys) {
         $resolved = (Resolve-Path -LiteralPath $source).Path

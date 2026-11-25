@@ -877,6 +877,35 @@ table .button {
   border-top: 1px solid var(--border);
   padding-block: 0.75rem 0.25rem;
 }
+.assistant-block {
+  border-block-start: 1px solid var(--border);
+  padding-block: 0.75rem;
+  overflow-wrap: anywhere;
+}
+.assistant-block summary {
+  cursor: pointer;
+  padding-block: 0.4rem;
+}
+.assistant-quote {
+  border-inline-start: 3px solid var(--border);
+  margin: 0.75rem 0;
+  padding-inline-start: 0.75rem;
+  overflow-wrap: anywhere;
+}
+.assistant-files input {
+  max-inline-size: 100%;
+}
+.assistant-files-list {
+  list-style: none;
+  padding-inline-start: 0;
+}
+.assistant-files-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  overflow-wrap: anywhere;
+}
 .modal > header {
   display: flex;
   align-items: center;

@@ -11,6 +11,14 @@ import {
   readTestDraft,
   readTestRequest,
 } from "../../shared/assistant.mjs";
+import {
+  resolveWorkPlan,
+  readWorkQuestions,
+  testScopeQuestion,
+  workPlanRequest,
+  workQuestionsRequest,
+  workReviewRequest,
+} from "../../shared/assistant-work.mjs";
 
 const ollama = "http://127.0.0.1:11435";
 const model = process.env.GKTS_ASSISTANT_MODEL || defaultModel;
@@ -36,9 +44,9 @@ async function json(url, { body, headers, timeout = 5000 } = {}) {
   return response.json();
 }
 
-async function cabinetJson(url, body, headers, networkInterface) {
+async function cabinetJson(url, body, headers, networkInterface, timeout) {
   if (!networkInterface || !url.startsWith("https:"))
-    return json(url, { body, headers });
+    return json(url, { body, headers, timeout });
 
   const localAddress = networkInterfaces()[networkInterface]?.find(
     (address) =>
@@ -54,7 +62,7 @@ async function cabinetJson(url, body, headers, networkInterface) {
     method: "POST",
     family: 4,
     localAddress,
-    signal: AbortSignal.timeout(5000),
+    signal: AbortSignal.timeout(timeout),
     headers: {
       ...headers,
       "Content-Type": "application/json",
@@ -76,7 +84,7 @@ async function cabinetJson(url, body, headers, networkInterface) {
   const chunks = [];
   for await (const chunk of response) {
     bytes += chunk.length;
-    if (bytes > 64 * 1024) throw new Error("Ответ кабинета слишком большой.");
+    if (bytes > 128 * 1024) throw new Error("Ответ кабинета слишком большой.");
     chunks.push(chunk);
   }
   return JSON.parse(Buffer.concat(chunks, bytes).toString("utf8"));
@@ -104,6 +112,158 @@ async function generate(input) {
   } catch {
     return null;
   }
+}
+
+async function structured(body) {
+  const result = await json(ollama + "/api/generate", {
+    body,
+    timeout: 100_000,
+  });
+  if (result.done !== true || result.done_reason === "length") return null;
+  try {
+    return JSON.parse(result.response);
+  } catch {
+    return null;
+  }
+}
+
+function workItemType(group, index) {
+  if (group.format === "test" || (group.format === "mixed" && index % 2 === 0))
+    return "single_choice";
+  const instructions = group.directions || "";
+  if (/классификац/iu.test(instructions)) return "classification";
+  if (/соответств/iu.test(instructions)) return "matching";
+  if (/порядок|последовательност/iu.test(instructions)) return "ordering";
+  return ["matching", "ordering", "classification"][index % 3];
+}
+
+async function generateWork(job, endpoint) {
+  const input = job.input;
+  const scope = testScopeQuestion(input);
+  if (scope) return { clarify: scope };
+  const plan = resolveWorkPlan(
+    await structured(workPlanRequest(input, model)),
+    input,
+  );
+  if (!plan) return { failure: "invalid_plan" };
+  if (plan.state === "clarify") return { clarify: plan.question };
+  const results = [];
+  for (let index = 0; index < plan.groups.length; index++) {
+    const group = plan.groups[index];
+    const context = await endpoint(
+      "/research",
+      {
+        id: job.id,
+        lease: job.lease,
+        group: index,
+        plan: index === 0 ? plan : undefined,
+      },
+      55_000,
+    );
+    const sources = context.sources.filter((source) => source.excerpt);
+    const questions = [];
+    const comparisons = [];
+    let reviewed = true;
+    let standardId = "",
+      standardQuote = "";
+    const batchSize = group.format === "test" ? 10 : 1;
+    for (let offset = 0; offset < group.count; offset += batchSize) {
+      const batch = {
+        ...group,
+        count: Math.min(batchSize, group.count - offset),
+        itemType: workItemType(group, offset),
+      };
+      const previous = questions.map(
+        ({ title, prompt }) => title + ". " + prompt.slice(0, 150),
+      );
+      const drafted = workQuestionsRequest(
+        input,
+        batch,
+        sources,
+        model,
+        previous,
+      );
+      const readBatch = (items) => {
+        const parsed = readWorkQuestions(items, batch);
+        if (!parsed) return null;
+        const combined = readWorkQuestions([...questions, ...parsed], {
+          ...group,
+          count: questions.length + batch.count,
+        });
+        return combined ? parsed : null;
+      };
+      let draft = await structured(drafted);
+      let validated = readBatch(draft?.questions);
+      if (!validated) {
+        draft = await structured({
+          ...drafted,
+          options: { ...drafted.options, temperature: 0.05 },
+        });
+        validated = readBatch(draft?.questions);
+      }
+      if (!validated && batch.itemType === "single_choice") {
+        const guide = sources
+          .map((s) => s.excerpt)
+          .join("\n")
+          .slice(0, 6800);
+        const fallback = ollamaTestRequest(
+          {
+            count: batch.count,
+            instruction: [
+              group.topic,
+              group.directions,
+              "Используй опору ниже, вопросы должны различаться.",
+              guide,
+              previous.length ? "Уже использованы: " + previous.join("; ") : "",
+            ].join("\n"),
+          },
+          model,
+        );
+        fallback.options.num_ctx = drafted.options.num_ctx;
+        const recovered = readTestDraft(
+          await structured(fallback),
+          batch.count,
+        );
+        const mapped = recovered?.questions.map((item) => ({
+          title: item.title,
+          prompt: item.prompt,
+          type: "single_choice",
+          items: item.options,
+          targets: [],
+          answer: [item.correctIndex],
+          explanation: "Ответ — " + item.options[item.correctIndex],
+        }));
+        validated = readBatch(mapped);
+      }
+      if (!validated)
+        return { failure: "invalid_block", block: index + 1, stage: "draft" };
+      const check = await structured(
+        workReviewRequest(batch, validated, sources, model),
+      ).catch(() => null);
+      if (!readBatch(check?.questions)) {
+        reviewed = false;
+        questions.push(...validated);
+      } else {
+        questions.push(...check.questions);
+        if (!standardId && check.standardId) {
+          standardId = check.standardId;
+          standardQuote = check.standardQuote;
+        }
+        if (Array.isArray(check.comparisons))
+          comparisons.push(...check.comparisons);
+      }
+    }
+    if (!readWorkQuestions(questions, group))
+      return { failure: "invalid_block", block: index + 1, stage: "combined" };
+    results.push({
+      questions,
+      reviewed,
+      standardId,
+      standardQuote,
+      comparisons: comparisons.slice(0, 4),
+    });
+  }
+  return { results };
 }
 
 async function verifyLocal() {
@@ -182,12 +342,13 @@ async function work() {
     throw new Error("Неверный формат рабочего ключа.");
   const headers = { Authorization: `Bearer ${credential}` };
   const networkInterface = process.env.GKTS_ASSISTANT_INTERFACE;
-  const endpoint = async (route, body) => {
+  const endpoint = async (route, body, timeout = 5000) => {
     const payload = await cabinetJson(
       origin + api + route,
       body,
       headers,
       networkInterface,
+      timeout,
     );
     if (payload.ok !== true) throw new Error("Ответ кабинета не принят.");
     return payload.data;
@@ -201,19 +362,44 @@ async function work() {
   while (true) {
     try {
       const ready = await modelPresent().catch(() => false);
-      const { job } = await endpoint("/claim", { ready, supportsTests: true });
+      const { job } = await endpoint("/claim", {
+        ready,
+        supportsTests: true,
+        supportsWork: true,
+      });
       status(ready ? "Помощник подключён." : "Ожидание локальной модели.");
       if (job) {
-        const input =
-          job.input?.instruction === undefined
-            ? readSource(job.input)
-            : readTestRequest(job.input);
-        let draft, failure;
+        let completion;
         try {
-          draft = input ? await generate(input) : null;
-          if (!draft) failure = "invalid_draft";
-        } catch {
-          failure = "local_failure";
+          if (job.input?.kind === "work") {
+            completion = await generateWork(job, endpoint);
+          } else {
+            const input =
+              job.input?.instruction === undefined
+                ? readSource(job.input)
+                : readTestRequest(job.input);
+            const draft = input ? await generate(input) : null;
+            completion = draft ? { draft } : { failure: "invalid_draft" };
+          }
+        } catch (error) {
+          if (job.input?.kind === "work") {
+            console.error(
+              "Работа прервана" +
+                (Number.isInteger(error.status)
+                  ? " (HTTP " + error.status + ")"
+                  : "") +
+                ".",
+            );
+          }
+          completion = { failure: "local_failure" };
+        }
+        if (job.input?.kind === "work" && completion.failure) {
+          console.error(
+            "Проверка работы: " +
+              completion.failure +
+              (completion.block ? " · блок " + completion.block : "") +
+              (completion.stage ? " · " + completion.stage : ""),
+          );
         }
         // An acknowledgement can be lost after the cabinet accepts the result.
         for (let attempt = 0; attempt < 3; attempt++) {
@@ -221,8 +407,7 @@ async function work() {
             await endpoint("/complete", {
               id: job.id,
               lease: job.lease,
-              draft,
-              failure,
+              ...completion,
             });
             break;
           } catch (error) {

@@ -23,7 +23,7 @@ import {
 import type { User, Json, Project, Question } from "../shared/types";
 import { question, TYPES, uid } from "../shared/catalog";
 import { blankQuestion } from "../shared/authoring.js";
-import { AssistantTest } from "./Assistant";
+import { AssistantWork } from "./Assistant";
 import { api, setCsrf, blobRequest, download } from "./api";
 import {
   Button,
@@ -341,7 +341,7 @@ function AdminApp() {
                 </p>
               </div>
               <div className="actions">
-                <AssistantTest onCreate={(id) => navigate("builder", id)} />
+                <AssistantWork onCreate={(id) => navigate("builder", id)} />
                 <Button kind="primary" onClick={() => setCreating(true)}>
                   <Plus size={18} />
                   Создать работу
