@@ -307,7 +307,7 @@ async function library(group, get) {
   return candidates.slice(0, 2);
 }
 
-async function publicDocument(raw, code, keys, get) {
+async function publicDocument(raw, code, keys, get, supplied = false) {
   const source = await get(raw);
   if (!source) return [];
   const address = source.url;
@@ -395,7 +395,17 @@ async function publicDocument(raw, code, keys, get) {
         excerpt: "",
       },
     ];
-  return excerpts(document, keys, 2).filter((item) => rank(item.excerpt, keys));
+  const relevant = excerpts(document, keys, 2).filter((item) =>
+    rank(item.excerpt, keys),
+  );
+  if (relevant.length || !supplied || document.kind !== "textbook")
+    return relevant;
+  const chapterTerms = terms(
+    address.pathname.split("/").at(-1).replaceAll("-", " "),
+  );
+  return excerpts(document, chapterTerms, 2).filter((item) =>
+    rank(item.excerpt, chapterTerms),
+  );
 }
 
 function programCode(input, documents) {
@@ -531,11 +541,12 @@ export async function researchWorkGroup(input, group, documents, cache) {
     officialProgram(chosen.code, keys, get),
     textbook(group, terms(group.englishQuery || ""), get),
     library(group, get),
-    Promise.all(
-      [...provided, ...references].map((link) =>
-        publicDocument(link, chosen.code, keys, get),
+    Promise.all([
+      ...provided.map((link) =>
+        publicDocument(link, chosen.code, keys, get, true),
       ),
-    ).then((items) => items.flat()),
+      ...references.map((link) => publicDocument(link, chosen.code, keys, get)),
+    ]).then((items) => items.flat()),
   ]);
   const items = settled.flatMap((result) =>
     result.status === "fulfilled" ? result.value : [],
