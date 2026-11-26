@@ -33,7 +33,7 @@ type Group = {
   sources: Source[];
   comparisons: { lecture: Source; reference: Source; remark: string }[];
 };
-type Work = { title: string; placement: Placement; groups: Group[] };
+export type Work = { title: string; placement: Placement; groups: Group[] };
 type Job =
   | { state: "queued" | "running"; progress?: { block: number; total: number } }
   | { state: "clarify"; question: string }
@@ -143,7 +143,7 @@ function Answer({ item }: { item: Item }) {
   );
 }
 
-function Preview({ work }: { work: Work }) {
+export function AssistantPreview({ work }: { work: Work }) {
   return (
     <>
       <h3>{work.title}</h3>
@@ -363,7 +363,7 @@ function AssistantDialog({
     >
       {job?.state === "ready" ? (
         <>
-          <Preview work={job.work} />
+          <AssistantPreview work={job.work} />
           {error && (
             <p role="alert" className="error">
               {error}

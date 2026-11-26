@@ -1,6 +1,12 @@
 # Project Memory
 
-Last updated: 2026-11-25
+Last updated: 2026-11-26
+
+## Teacher cabinet AI chat (2026-11-26)
+
+- The cabinet **ИИ-чат** keeps private conversations for the signed-in teacher in the existing constructor database. The projects page and project editor link to it. The active project is available as context and can also be referenced by title. A teacher can ask for an explanation, a project search or structural check, a new work, additional sections or questions, or a targeted edit to existing text.
+- The iRU worker interprets the request using recent turns. Project searches and checks use readable project records and native validation. Generation uses the existing lecture parser, source retrieval, model review and literal quote checks. A proposal shows the target, generated assignments or the old and new text. Applying it uses the native draft service with the expected revision and an idempotent receipt. The chat does not publish or modify runs or student answers.
+- Up to five optional PDF, DOCX, TXT or MD materials remain available while a work request is active, including clarification. Attached file names and the displayed conversation stay in the private chat until it is deleted. The current iRU worker must support chat via its heartbeat before enabling generation.
 
 ## Untimed teacher invitation (2026-11-26)
 

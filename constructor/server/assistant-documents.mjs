@@ -4,7 +4,7 @@ import path from "node:path";
 
 export const maxLectureBytes = 5 * 1024 * 1024;
 const maxPages = 100;
-const maxText = 240_000;
+export const maxLectureText = 240_000;
 
 function normalize(text) {
   return text
@@ -111,7 +111,7 @@ export async function readLectures(files) {
       const size = pages.reduce((total, page) => total + page.text.length, 0);
       if (size < 30) throw new Error("Загрузите документ с читаемым текстом.");
       length += size;
-      if (length > maxText)
+      if (length > maxLectureText)
         throw new Error(
           "Суммарный текст превышает 240 000 символов. Разделите материалы.",
         );

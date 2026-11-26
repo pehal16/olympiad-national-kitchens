@@ -8,6 +8,7 @@ import {
 } from "react";
 import {
   BookOpen,
+  MessageCircle,
   FolderOpen,
   Library,
   FileText,
@@ -42,6 +43,7 @@ const Builder = lazy(() =>
   import("./Builder").then((m) => ({ default: m.Builder })),
 );
 const CreationDemo = lazy(() => import("./CreationDemo"));
+const AssistantChat = lazy(() => import("./AssistantChat"));
 const Designer = lazy(() =>
   import("./Designer").then((m) => ({ default: m.Designer })),
 );
@@ -201,6 +203,7 @@ function AdminApp() {
     );
   const nav = [
     ["projects", "Мои работы", FolderOpen],
+    ["chat", "ИИ-чат", MessageCircle],
     ["materials", "Материалы", Library],
     ["help", "Помощь", BookOpen],
     ...(user.role === "owner" ? [["people", "Педагоги", Users]] : []),
@@ -270,6 +273,9 @@ function AdminApp() {
       <main
         className={"admin-main " + (view === "designer" ? "designer-main" : "")}
       >
+        {view === "chat" && (
+          <AssistantChat key={"chat:" + key} initialProject={key} onOpen={(id) => navigate("builder", id)} />
+        )}
         {view === "materials" && (
           <section className="panel guided-form">
             <h1>Материалы</h1>
@@ -341,6 +347,9 @@ function AdminApp() {
                 </p>
               </div>
               <div className="actions">
+                <Button onClick={() => navigate("chat")}>
+                  <MessageCircle size={18} /> Открыть ИИ-чат
+                </Button>
                 <AssistantWork onCreate={(id) => navigate("builder", id)} />
                 <Button kind="primary" onClick={() => setCreating(true)}>
                   <Plus size={18} />
@@ -453,6 +462,7 @@ function AdminApp() {
               key={key}
               initial={data}
               onBack={() => navigate("projects")}
+              onChat={() => navigate("chat", key)}
               onRun={(id: string) => navigate("run", id)}
               registerFlush={registerFlush}
             />

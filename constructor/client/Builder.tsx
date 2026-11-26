@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   ArrowLeft,
+  MessageCircle,
   Plus,
   Trash2,
   Copy,
@@ -35,11 +36,13 @@ import { blankQuestion } from "../shared/authoring.js";
 export function Builder({
   initial,
   onBack,
+  onChat,
   onRun,
   registerFlush,
 }: {
   initial: Project;
   onBack: () => void;
+  onChat: () => void;
   onRun: (id: string) => void;
   registerFlush: (fn: (() => Promise<void>) | null) => void;
 }) {
@@ -523,6 +526,7 @@ export function Builder({
         </div>
       )}
       <div className="actions" data-history-version={historyVersion}>
+        <Button onClick={onChat}><MessageCircle size={17} /> ИИ-чат по работе</Button>
         <Button
           onClick={() => {
             const next = !guided;
