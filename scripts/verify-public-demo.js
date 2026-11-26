@@ -1,7 +1,17 @@
 "use strict";
 const assert=require('node:assert/strict');
 const base=String(process.argv[2]||'https://olympiad-gkts.pages.dev').replace(/\/+$/,'');
+const ingress='https://xn--80aaloaqinm.xn--b1amqadnhd.xn--p1ai';
 async function main(){
+ if(process.argv.includes('--teacher-invitation')) {
+  assert.equal(base,ingress,'The teacher invitation is verified on the existing olympiad domain');
+  const landing=await fetch(base+'/demo-teacher/',{signal:AbortSignal.timeout(30000)});
+  assert.equal(landing.status,200);
+  assert.equal(landing.headers.get('x-olympiad-route'),'teacher-demo-static');
+  assert.match(await landing.text(),/id="hero-action-register"/);
+  await exercise(true);
+  return;
+ }
  for(const route of ['/api/health','/api/public/olympiad']){
   const response=await fetch(base+route,{signal:AbortSignal.timeout(30000)}),body=await response.json();
   assert.equal(response.status,200,route);assert.equal(body.ok,true,route);
@@ -21,12 +31,13 @@ async function main(){
 }
 
 async function exercise(teacherDemo){
- // main() has already required explicit demonstration metadata on both routes.
- // The college domain is allowed only after that gate, while it serves demo.
- assert.ok(['https://olympiad-gkts.pages.dev','https://olympiad-gkts-demo.pages.dev','https://xn--80aaloaqinm.xn--b1amqadnhd.xn--p1ai'].includes(base)||/^http:\/\/127\.0\.0\.1:\d+$/.test(base),'Anonymous tests are allowed only on a verified demo host or an isolated loopback server');
+ assert.ok(['https://olympiad-gkts.pages.dev','https://olympiad-gkts-demo.pages.dev',ingress].includes(base)||/^http:\/\/127\.0\.0\.1:\d+$/.test(base),'Anonymous tests are allowed only on a verified demo host or an isolated loopback server');
  const crypto=require('node:crypto'),session=crypto.randomBytes(16).toString('hex'),token=crypto.randomBytes(32).toString('base64url');
  async function api(route,body){const response=await fetch(base+route,{method:body?'POST':'GET',headers:{'Content-Type':'application/json','X-Demo-Session':session,'X-Attempt-Token':token},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(30000)}),json=await response.json();assert.ok(response.ok,route+' '+response.status+' '+json.message);return json.data;}
  const mode=teacherDemo?'?demo=teacher':'';
+ const metadata=await api('/api/public/olympiad'+mode);
+ assert.equal(metadata.demonstration,true,'Only the demonstration backend may receive test answers');
+ if(teacherDemo)assert.equal(metadata.teacherDemo,true);
  const profile=await api('/api/public/register'+mode,{});assert.equal(profile.participant.fullName,'Демонстрационный Участник');
  let view=await api('/api/public/attempts/start'+mode,{tourBriefings:true,stationPauses:teacherDemo});
  assert.equal(view.demonstration,true);assert.equal(view.teacherDemo,teacherDemo);
@@ -45,7 +56,7 @@ async function exercise(teacherDemo){
  }
  assert.notEqual(view.status,'in_progress');const certificate=await api(prefix+'/certificate'),table=await api(prefix+'/story-result');
  assert.equal(certificate.demonstration,true);assert.equal(certificate.summary.totalMaxScore,150);assert.equal(table.state,'published');assert.equal(table.demonstration,true);
- const foreign=await fetch(base+prefix+'/certificate',{headers:{'X-Attempt-Token':'incorrect-synthetic-owner-token'},signal:AbortSignal.timeout(30000)});assert.equal(foreign.status,401);
+ const foreign=await fetch(base+prefix+'/certificate',{headers:{'X-Attempt-Token':'incorrect-synthetic-owner-token','X-Demo-Session':crypto.randomBytes(16).toString('hex')},signal:AbortSignal.timeout(30000)});assert.equal(foreign.status,401);
  console.log(JSON.stringify({environment:'live isolated Cloudflare demonstration',teacherDemo,answers:36,duplicateAnswerSafe:true,reloadSafe:true,foreignOwnerDenied:true,score:certificate.summary.totalFinalScore,maxScore:150,earnedPlates:table.plates.length,certificateDemonstration:true}));
 }
 main().catch(e=>{console.error(e.message);process.exitCode=1;});

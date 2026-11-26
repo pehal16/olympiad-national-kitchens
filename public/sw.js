@@ -1,4 +1,4 @@
-const CACHE_NAME = "national-kitchens-teacher-demo-20261126b";
+const CACHE_NAME = "national-kitchens-teacher-demo-domain-20261126";
 const PRECACHE_URLS = [
   "/usability.css?v=20261126-teacher-demo2",
   "/olympiad-ready.css?v=manual-admission1",
@@ -25,7 +25,7 @@ const PRECACHE_URLS = [
   "/assets/olympiad/certificate/college-seal-user-v1.jpg",
   "/attempt-reserve.js?v=shared1",
   "/demo-analytics.js?v=usability20261116",
-  "/app.js?v=teacher-demo-20261126",
+  "/app.js?v=teacher-demo-domain-20261126",
   "/t5-final-kitchen.js?v=teacher-demo-20261126",
   "/t4-guest-order.js?v=1.7.0-layout5-oct12",
   "/t2-country-match.js?v=1.7.0-oct16-ready1",
@@ -75,6 +75,9 @@ self.addEventListener("fetch", (event) => {
   // The independent constructor serves its own shell and authenticated API.
   // A failed constructor navigation must never fall back to the olympiad shell.
   if (pathname === "/constructor" || pathname.startsWith("/constructor/") || pathname.startsWith("/api/constructor/")) {
+    return;
+  }
+  if (pathname === "/demo-teacher" || pathname.startsWith("/demo-teacher/")) {
     return;
   }
   const isCoreShellAsset =

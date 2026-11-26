@@ -170,7 +170,8 @@ function setButtonAvailability(button, enabled, hint = "") {
   }
 }
 
-const teacherDemoLink = new URLSearchParams(window.location.search).get("demo") === "teacher";
+const teacherDemoBase = window.location.pathname === "/demo-teacher/" ? "/demo-teacher" : "";
+const teacherDemoLink = Boolean(teacherDemoBase) || new URLSearchParams(window.location.search).get("demo") === "teacher";
 function updateHeroAction() {
   if (!elements.heroActionRegister) return;
   if (!state.olympiad) {
@@ -1289,7 +1290,7 @@ function setNetworkStatus(isOnline = navigator.onLine) {
 }
 
 async function registerServiceWorker() {
-  if (!("serviceWorker" in navigator)) {
+  if (teacherDemoBase || !("serviceWorker" in navigator)) {
     return;
   }
 
@@ -1428,7 +1429,7 @@ async function api(path, options = {}) {
     "Content-Type": "application/json",
     ...(fetchOptions.headers || {})
   };
-  if (state.olympiad?.demonstration) headers['X-Demo-Session'] = demoSessionId();
+  if (teacherDemoLink || state.olympiad?.demonstration) headers['X-Demo-Session'] = demoSessionId();
   if (attemptToken) {
     headers["X-Attempt-Token"] = attemptToken;
   }
@@ -4268,7 +4269,7 @@ async function init() {
   elements.finishAttempt.addEventListener("click", finishAttempt);
   elements.certificateOpen.addEventListener("click", () => {
     if (elements.certificateSection.classList.contains("hidden")) return;
-    window.location.assign(`/certificate.html?attempt=${encodeURIComponent(state.attempt.id)}`);
+    window.location.assign(`${teacherDemoBase}/certificate.html?attempt=${encodeURIComponent(state.attempt.id)}`);
   });
   if (elements.examGuardReturn) {
     elements.examGuardReturn.addEventListener("click", restoreExamMode);

@@ -1,10 +1,11 @@
 # Project Memory
 
-Last updated: 2026-11-25
+Last updated: 2026-11-26
 
 ## Untimed teacher invitation (2026-11-26)
 
-- Share `https://olympiad-gkts.pages.dev/?demo=teacher`. The anonymous teacher sees «Начать» and enters the first question with one click, with no registration form or full-screen requirement. Later tour instructions and the fifth-tour station controls remain available.
+- Share `https://xn--80aaloaqinm.xn--b1amqadnhd.xn--p1ai/demo-teacher/` (олимпиада.постовит.рф). The anonymous teacher sees «Начать» and enters the first question with one click, with no registration form or full-screen requirement. Later tour instructions and the fifth-tour station controls remain available. The original Pages invitation remains accessible at `/?demo=teacher`.
+- The Timeweb vhost uses a read-only `/demo-teacher/` prefix for the invitation shell, its frontend files and certificate. From the first metadata request, the browser marks the participant API calls with the existing anonymous demo header. The dedicated Cloudflare backend serves the invitation while the regular domain can serve the desktop app. `ops/windows-hosting/apply-teacher-demo-link.py` applies the scoped prefix against the inspected vhost with backup, TLS validation and rollback.
 - The server issues a separate anonymous demo attempt with no expiry, no automatic advancement by time, and a distinct ranking group. The stored attempt mode survives reload, and the ordinary demo and official editions keep their timing. The timer-free mode is recognized only in the isolated demo backend. The public demo landing links to the teacher invitation.
 - Release checks cover both 36-question routes. The new test advances server time by two hours, confirms that the original question is still current, and completes the several tours with all 150 points, including station pauses and a demo certificate.
 
