@@ -2,6 +2,12 @@
 
 Last updated: 2026-11-25
 
+## Untimed teacher invitation (2026-11-26)
+
+- Share `https://olympiad-gkts.pages.dev/?demo=teacher`. The anonymous teacher sees «Начать» and enters the first question with one click, with no registration form or full-screen requirement. Later tour instructions and the fifth-tour station controls remain available.
+- The server issues a separate anonymous demo attempt with no expiry, no automatic advancement by time, and a distinct ranking group. The stored attempt mode survives reload, and the ordinary demo and official editions keep their timing. The timer-free mode is recognized only in the isolated demo backend. The public demo landing links to the teacher invitation.
+- Release checks cover both 36-question routes. The new test advances server time by two hours, confirms that the original question is still current, and completes the several tours with all 150 points, including station pauses and a demo certificate.
+
 ## AI authoring from an instruction and lecture files (2026-11-25)
 
 - Timeweb release `9912d96e3578a7fe8d5bc3159ea3e26b23408b88` was verified after an SQLite snapshot. The published app used two uploaded chemistry notes, the actual OpenStax chapter and the available FSES text to generate two choice questions and an interactive task in 40.476 s. Both blocks passed the second model check. Individual citation evidence was unresolved in that run and the UI reports it. The isolated Edge run at 1366/390 px accepted a DOCX and a text PDF, retained them through clarification, saved 5+10+2 questions and reloaded the draft. Ten questions in that run had a literal supporting excerpt. The additional ordering-key check found a matching quote in its lecture.

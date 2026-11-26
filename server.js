@@ -544,6 +544,7 @@ function getTourState(attempt, tourId) {
 }
 
 function getTiming(attempt) {
+  if (attempt.demonstration && attempt.teacherDemo) return { totalRemainingMs: null, tourRemainingMs: null };
   const currentTour = getCurrentTour(attempt);
   const now = tourBriefings.pending(attempt) ? Date.parse(attempt.tourBriefing.pausedAt) : Date.now();
   const totalRemainingMs = Math.max(
@@ -722,7 +723,8 @@ function normalizeAttemptState(olympiad, attempt) {
   }
 
   if(tourBriefings.pending(attempt))return attempt;
-  if (!attempt.tourBriefingsEnabled && Date.now() > new Date(attempt.expiresAt).getTime()) {
+  const untimed = attempt.demonstration && attempt.teacherDemo;
+  if (!untimed && !attempt.tourBriefingsEnabled && Date.now() > new Date(attempt.expiresAt).getTime()) {
     return finalizeAttempt(olympiad, attempt, "expired");
   }
 
@@ -733,6 +735,11 @@ function normalizeAttemptState(olympiad, attempt) {
 
   startTourIfNeeded(attempt, currentTour);
   if(tourBriefings.pending(attempt))return attempt;
+
+  if (untimed) {
+    markQuestionPresented(attempt);
+    return attempt;
+  }
 
   if(require('./src/question-clock').enabled(attempt)){
     markQuestionPresented(attempt);
@@ -868,6 +875,7 @@ function buildAttemptView(olympiad, attempt, settings) {
     id: attempt.id,
     participant: attempt.participant,
     demonstration: Boolean(attempt.demonstration),
+    teacherDemo: Boolean(attempt.demonstration && attempt.teacherDemo),
     status: attempt.status,
     startedAt: attempt.startedAt,
     finishedAt: attempt.finishedAt,
@@ -3705,6 +3713,7 @@ async function handleApi(req, res, url, runtime = {}) {
   if (method === "GET" && pathname === "/api/public/olympiad") {
     const data=getOlympiadPublicData(await ensureOlympiad());
     data.demonstration=publicDemo.demoEnabled();
+    data.teacherDemo=publicDemo.teacherDemoRequested(url);
     data.storyEnabled=storyEnabled();
     data.story=storyEnabled()?storyRuns.publicRun(await storyRuns.currentRun()):null;
     if(storyRuns.recoveryPolicy())data.recovery=storyRuns.recoveryPolicy();
@@ -3715,7 +3724,7 @@ async function handleApi(req, res, url, runtime = {}) {
   if (method === "POST" && pathname === "/api/public/register") {
     const olympiadData = await ensureOlympiad();
     const body = await parseBody(req, { maxBytes: 16 * 1024 });
-    const profile = publicDemo.demoEnabled() ? publicDemo.anonymousProfile(req) : body;
+    const profile = publicDemo.demoEnabled() ? publicDemo.anonymousProfile(req, publicDemo.teacherDemoRequested(url)) : body;
     if(!profile){sendJson(res,400,{ok:false,message:'Обновите демоверсию: не удалось создать анонимную сессию.'});return;}
     const validation = validateOlympiadParticipantProfile(profile);
     if (!validation.valid) {
@@ -3754,7 +3763,8 @@ async function handleApi(req, res, url, runtime = {}) {
   if (method === "POST" && pathname === "/api/public/attempts/start") {
     const olympiadData = await ensureOlympiad();
     const body = await parseBody(req, { maxBytes: 16 * 1024 });
-    const profile = publicDemo.demoEnabled() ? publicDemo.anonymousProfile(req) : (body.participant || body);
+    const teacherDemo = publicDemo.teacherDemoRequested(url);
+    const profile = publicDemo.demoEnabled() ? publicDemo.anonymousProfile(req, teacherDemo) : (body.participant || body);
     if(!profile){sendJson(res,400,{ok:false,message:'Обновите демоверсию: не удалось создать анонимную сессию.'});return;}
     const validation = validateOlympiadParticipantProfile(profile);
     if (!validation.valid) {
@@ -3858,13 +3868,14 @@ async function handleApi(req, res, url, runtime = {}) {
       tourBriefingsEnabled:Boolean(run&&body.tourBriefings===true),
       stationPausesEnabled:Boolean(run&&body.tourBriefings===true&&body.stationPauses===true),
       demonstration:publicDemo.demoEnabled(),
+      ...(teacherDemo?{teacherDemo:true}:{}),
       ...(publicDemo.demoEnabled()?{demoVisitorHash:require('./src/demo-analytics').visitorKey(req.headers['x-demo-session'])}:{}),
       autoSaveDrafts:Boolean(run&&body.tourBriefings===true),
       routeSeed,
       accessTokenHash: hashAttemptAccessToken(accessToken),
       stateRevision: 0,
       startedAt,
-      expiresAt: new Date(
+      expiresAt: teacherDemo ? null : new Date(
         Date.parse(startedAt) + (variant.durationMinutes || olympiadData.durationMinutes) * 60 * 1000
       ).toISOString(),
       finishedAt: null,
@@ -3884,6 +3895,7 @@ async function handleApi(req, res, url, runtime = {}) {
     };
 
     if(attempt.tourBriefingsEnabled){attempt.tourStates={};startTourIfNeeded(attempt,variant.tours[0],startedAt);}
+    if (teacherDemo && tourBriefings.pending(attempt)) tourBriefings.begin(attempt, variant.tours[0], Date.parse(startedAt));
     if(run) Object.defineProperty(attempt,"_storyRun",{value:run,configurable:true});
     markQuestionPresented(attempt);
     const creation = await createAttemptAtomic(attempt);

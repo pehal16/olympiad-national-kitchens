@@ -13,7 +13,7 @@
   function button(text,fn,cls='button secondary'){const n=el('button',cls,text);n.type='button';n.addEventListener('click',fn);return n;}
   function image(path,alt,cls){const n=el('img',cls);n.src=path;n.alt=alt;n.decoding='async';n.addEventListener('error',()=>{n.hidden=true;});return n;}
   function arrow(direction,fn){const n=button('',fn,'story-arrow');n.setAttribute('aria-label',direction<0?'Предыдущие подачи':'Следующие подачи');n.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${direction<0?'M15 5 8 12l7 7':'m9 5 7 7-7 7'}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;return n;}
-  function phase(name){const line=doc.querySelector('.story-welcome-line');if(line&&name==='registered')line.textContent='«Итак, познакомились! Альбом уже на столе. Подтвердите правила и начинайте, когда будете готовы: наш вечер отсчитывается только после старта». ';}
+  function phase(name){const line=doc.querySelector('.story-welcome-line');if(line&&name==='registered')line.textContent=doc.body.classList.contains('teacher-demo')?'«Альбом уже на столе. Начинайте, когда будете готовы».':'«Итак, познакомились! Альбом уже на столе. Подтвердите правила и начинайте, когда будете готовы: наш вечер отсчитывается только после старта». ';}
   function intro(olympiad){
     if(!olympiad.storyEnabled)return;
     doc.body.classList.add('has-restaurant-story');
@@ -27,10 +27,10 @@
       cover.width=1584;cover.height=993;cover.fetchPriority='high';hero.replaceChildren(cover);
     }
     const note=doc.querySelector('.landing-pilot-note');
-    if(note)note.textContent=olympiad.story?.admissionMode==='open'?'Организатор открыл вход вручную. Можно начинать. Каждому — минута на каждое задание. Между турами — пауза.':olympiad.story?.admissionMode==='closed'?'Организатор закрыл новые старты. Уже начатые попытки продолжаются.':olympiad.story?.entryMode==='anytime'
+    if(note)note.textContent=olympiad.teacherDemo?'Пробный маршрут без регистрации и ограничения времени.':olympiad.story?.admissionMode==='open'?'Организатор открыл вход вручную. Можно начинать. Каждому — минута на каждое задание. Между турами — пауза.':olympiad.story?.admissionMode==='closed'?'Организатор закрыл новые старты. Уже начатые попытки продолжаются.':olympiad.story?.entryMode==='anytime'
       ? (olympiad.story.entryOpen?`Начните в любое время. На каждое задание — одна минута, между турами — пауза. Всего ${root.formatLimitMinutes(olympiad.durationMinutes)}.`:olympiad.story.publishedAt?'Итоги опубликованы. Новые попытки этого проведения закрыты.':'Организатор остановил новые старты. Начатые попытки продолжаются.')
       : olympiad.story?`Вход ${olympiad.story.date}: с ${new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit'}).format(new Date(olympiad.story.entryStartsAt))} до ${new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit'}).format(new Date(olympiad.story.entryEndsAt))}${Date.parse(olympiad.story.entryEndsAt)-Date.parse(olympiad.story.entryStartsAt)===86400000?' следующего дня':''} по Москве. Каждому — ${root.formatLimitMinutes(olympiad.durationMinutes)}.`:'Дата проведения будет объявлена организатором.';
-    if(note&&olympiad.story?.entryMode==='scheduled'&&(!olympiad.story.admissionMode||olympiad.story.admissionMode==='auto')){
+    if(note&&!olympiad.teacherDemo&&olympiad.story?.entryMode==='scheduled'&&(!olympiad.story.admissionMode||olympiad.story.admissionMode==='auto')){
       const formatter=new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',dateStyle:'medium',timeStyle:'short'});
       note.textContent=`Вход: ${formatter.format(new Date(olympiad.story.entryStartsAt))} — ${formatter.format(new Date(olympiad.story.entryEndsAt))} по Москве. Каждому — ${root.formatLimitMinutes(olympiad.durationMinutes)}.`;
     }
@@ -50,7 +50,10 @@
       'Соевый соус, имбирь и васаби сопровождают подачу роллов. Их выбирать не нужно; они не влияют на баллы.',
       'Перед каждым туром прочитайте пояснение и нажмите «Начать тур». До нажатия таймеры на паузе. На каждое задание, блок сопоставления или блюдо — 1 минута. Выбор автоматически сохраняется на сервере; по истечении минуты сохранённый выбор учитывается даже без кнопки «Далее». Неизменённый пустой ответ даёт 0 баллов. После перехода вернуться к заданию нельзя; время не переносится. Внутри тура таймер идёт и при уходе со страницы. Для уже начатых попыток действуют их исходные лимиты.',
       'Сюжет не добавляет баллов. Сразу после личного завершения появляются общий стол истории и свидетельство с набранными баллами из 150. Правильные ответы не показываются. Ваше заработанное меню, реакции гостя и общие итоги открываются после публикации организатором.'
-    ])guide.append(el('p','',text));doc.getElementById('rules-details').append(guide);
+    ].map((text,index) => !olympiad.teacherDemo ? text : index === 6
+      ? 'Подтверждайте каждый ответ. Между турами можно прочитать пояснение и продолжить, когда будете готовы.'
+      : text.replace(/; \d+ минут(?:ы)?, максимум/g, '; максимум'))) guide.append(el('p','',text));
+    doc.getElementById('rules-details').append(guide);
     }
     const entry=doc.getElementById('prestart-section'),copy=doc.querySelector('.landing-hero-copy');
     if(section.parentNode!==copy)copy.append(section);

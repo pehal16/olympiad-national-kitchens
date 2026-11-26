@@ -455,3 +455,23 @@
     margin-bottom: 14px;
   }
 }
+
+
+/* The restaurant layout normally forces timers to display. */
+body.teacher-demo #attempt-section :is(.timer-stack, #tour-limit, #cockpit-pace-card, #participant-exam-badge) {
+  display: none !important;
+}
+
+/* Put the invitation action before the story on the first screen. */
+body.teacher-demo .landing-hero-actions {
+  order: 1;
+}
+body.teacher-demo .landing-hero-actions > :not(#hero-action-register) {
+  display: none;
+}
+@media (max-width: 700px) {
+  body.teacher-demo .landing-hero-media {
+    min-height: 0;
+    height: 155px;
+  }
+}

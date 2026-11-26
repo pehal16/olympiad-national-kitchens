@@ -170,6 +170,7 @@ function setButtonAvailability(button, enabled, hint = "") {
   }
 }
 
+const teacherDemoLink = new URLSearchParams(window.location.search).get("demo") === "teacher";
 function updateHeroAction() {
   if (!elements.heroActionRegister) return;
   if (!state.olympiad) {
@@ -183,6 +184,10 @@ function updateHeroAction() {
     elements.heroActionRegister.textContent = "Продолжить олимпиаду";
   } else if (state.attempt) {
     elements.heroActionRegister.textContent = "Посмотреть результат";
+  } else if (state.olympiad.teacherDemo) {
+    elements.heroActionRegister.disabled = elements.startAttempt.disabled;
+    elements.heroActionRegister.textContent = state.isStartingAttempt ? "Открываем маршрут…" :
+      state.activeAttemptId ? "Продолжить" : state.retakeOf ? "Пройти ещё раз" : "Начать";
   } else if (state.participant) {
     elements.heroActionRegister.textContent = state.olympiad.demonstration ? "Пройти пример олимпиады" : "К правилам и старту";
   } else {
@@ -202,7 +207,7 @@ function updateAdmissionBanner() {
   banner.dataset.open=String(run.entryOpen);
   const before=(Date.parse(run.serverTime)||Date.now())<Date.parse(run.entryStartsAt);
   document.getElementById('admission-status').textContent=run.publishedAt?'Итоги опубликованы':run.stopped||run.admissionMode==='closed'?'Организатор закрыл вход':run.entryOpen?'Можно начинать':before?'Старт ещё не открыт':'Приём завершён';
-  document.getElementById('admission-description').textContent=run.entryOpen?(run.admissionMode==='open'?'Организатор открыл олимпиаду. Каждому — минута на каждое задание, между турами — пауза.':'Начните в пределах времени входа. Каждому — минута на каждое задание, между турами — пауза.'):run.publishedAt?'Участники могут вернуться к своим результатам.':run.stopped||run.admissionMode==='closed'?'Начатые попытки продолжаются. Новые старты возобновляет организатор.':before?'Время московское. До открытия изучите рекомендации и правила.':'Приём новых участников завершён. Начатые попытки продолжаются в пределах своего личного времени.';
+  document.getElementById('admission-description').textContent=state.olympiad.teacherDemo && run.entryOpen ? 'Можно начать без регистрации и проходить в своём темпе.' : run.entryOpen?(run.admissionMode==='open'?'Организатор открыл олимпиаду. Каждому — минута на каждое задание, между турами — пауза.':'Начните в пределах времени входа. Каждому — минута на каждое задание, между турами — пауза.'):run.publishedAt?'Участники могут вернуться к своим результатам.':run.stopped||run.admissionMode==='closed'?'Начатые попытки продолжаются. Новые старты возобновляет организатор.':before?'Время московское. До открытия изучите рекомендации и правила.':'Приём новых участников завершён. Начатые попытки продолжаются в пределах своего личного времени.';
 }
 
 function refreshNavigationState() {
@@ -412,7 +417,7 @@ function isMobileExamBrowser() {
 }
 
 function supportsOlympiadProtectedMode() {
-  return isMobileExamBrowser() || supportsOlympiadFullscreen();
+  return Boolean(state.olympiad?.teacherDemo) || isMobileExamBrowser() || supportsOlympiadFullscreen();
 }
 
 function unsupportedOlympiadBrowserMessage() {
@@ -538,7 +543,7 @@ function updateStartAvailability() {
 
   const blockedByCompletion = elements.startAttempt.dataset.lockReason === "completed";
   const hasParticipant = Boolean(state.participant);
-  const consentGranted = !elements.startConsent || elements.startConsent.checked;
+  const consentGranted = state.olympiad?.teacherDemo || !elements.startConsent || elements.startConsent.checked;
   const browserSupported = supportsOlympiadProtectedMode();
   const entryBlocked = state.olympiad?.storyEnabled && !state.olympiad?.story?.entryOpen && !state.activeAttemptId;
 
@@ -578,6 +583,7 @@ function unlockExamKeyboard() {
 }
 
 async function requestExamFullscreen(options = {}) {
+  if (state.olympiad?.teacherDemo) return true;
   if (isMobileExamBrowser()) return document.visibilityState === "visible";
   if (document.fullscreenElement) {
     await tryLockExamKeyboard();
@@ -795,7 +801,7 @@ function handleExamPageHide() {
 }
 
 function enableExamMode() {
-  if(state.attempt?.tourBriefing)return;
+  if (state.attempt?.teacherDemo || state.attempt?.tourBriefing) return;
   if (state.examModeEnabled) {
     updateExamGuardUi();
     return;
@@ -1409,6 +1415,9 @@ async function requestWithRetry(task, options = {}) {
 }
 
 async function api(path, options = {}) {
+  if (teacherDemoLink && ["/api/public/olympiad", "/api/public/register", "/api/public/attempts/start"].includes(path)) {
+    path += "?demo=teacher";
+  }
   let response;
   const { attemptToken: explicitAttemptToken, ...fetchOptions } = options;
   const attemptIdMatch = String(path).match(/^\/api\/public\/attempts\/([^/]+)/);
@@ -1609,6 +1618,7 @@ function rememberAttemptAccessToken(attemptId, token) {
 }
 
 function sessionAttemptStorageKey() {
+  if (state.olympiad?.teacherDemo) return 'nko_teacher_demo_session_attempt_v1';
   return state.olympiad?.demonstration ? 'nko_demo_session_attempt_v1' : 'nko_session_attempt_v1';
 }
 
@@ -2051,6 +2061,16 @@ function renderDemoNotice() {
   banner.append(title,detail);document.querySelector('.shell').prepend(banner);
   elements.registrationForm.closest('.card').classList.add('hidden');
   elements.navRegister.textContent='Демопрохождение';
+  if (state.olympiad.teacherDemo) {
+    title.textContent = "Демо для преподавателя";
+    detail.textContent = "Нажмите «Начать», чтобы пройти все пять туров без ограничения времени.";
+    document.querySelector("#prestart-section .start-disclaimer").classList.add("hidden");
+    document.querySelector("#prestart-section .card:not(.hidden) .section-intro").textContent = "Начните пробное прохождение в своём темпе.";
+    document.querySelector(".preparation-note").textContent = "Вы можете прерваться и продолжить позже в том же браузере. Чтобы засчитать ответ, нажмите кнопку подтверждения.";
+    document.body.classList.add("teacher-demo");
+  } else {
+    document.getElementById("teacher-demo-link").classList.remove("hidden");
+  }
   document.querySelector('.completion-feedback')?.classList.add('hidden');
   document.querySelectorAll('a').forEach(link=>{if(link.textContent.trim()==='Организатор')link.classList.add('hidden');});
 }
@@ -2061,7 +2081,7 @@ function renderHero() {
   elements.heroSubtitle.textContent = state.olympiad.subtitle;
   if (elements.heroFormatBadge) {
     const totalTours = Array.isArray(state.olympiad.tours) ? state.olympiad.tours.length : 0;
-    elements.heroFormatBadge.textContent = `${formatLimitMinutes(state.olympiad.durationMinutes)} · ${totalTours} туров · ${state.olympiad.questionCount ?? 36} заданий`;
+    elements.heroFormatBadge.textContent = `${state.olympiad.teacherDemo ? "Без таймера" : formatLimitMinutes(state.olympiad.durationMinutes)} · ${totalTours} туров · ${state.olympiad.questionCount ?? 36} заданий`;
   }
 }
 
@@ -2083,6 +2103,7 @@ function renderRules() {
     "Итог фиксируется после завершения."
   ];
 
+  if (state.olympiad.teacherDemo) rules.splice(0, 4, "Демонстрация без регистрации и ограничения времени.");
   elements.rulesList.innerHTML = "";
   rules.forEach((rule) => {
     const item = document.createElement("li");
@@ -2090,7 +2111,7 @@ function renderRules() {
     elements.rulesList.appendChild(item);
   });
   if (state.olympiad.stationPausesSupported) {
-    const stationRule = document.createElement("li"); stationRule.textContent = "В новом прохождении после сохранения подачи пятого тура можно рассмотреть результат без расхода времени следующей станции. Её таймер начинается по кнопке «Продолжить»."; elements.rulesList.append(stationRule);
+    const stationRule = document.createElement("li"); stationRule.textContent = state.olympiad.teacherDemo ? "В пятом туре следующая станция открывается по кнопке «Продолжить»." : "В новом прохождении после сохранения подачи пятого тура можно рассмотреть результат без расхода времени следующей станции. Её таймер начинается по кнопке «Продолжить»."; elements.rulesList.append(stationRule);
   }
 }
 
@@ -3096,7 +3117,7 @@ function renderQuestion(question) {
         rememberDraft(hydratedQuestion.id, answer);scheduleDraftSave();
         if (!hasPendingAnswers() && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
           setAttemptSaveStatus(answer.selectedIngredientIds?.length ? "Состав ещё не отправлен" : hydratedQuestion.selectedDish ? "Выберите компоненты" : "Выберите блюдо", "idle");
-          setAttemptSyncMeta(hydratedQuestion.presentationVersion === 4 ? "Завершите сборку и нажмите «Подать». Сохранённый выбор учтётся и по окончании минуты." : "Черновик не является ответом. Запись подтверждает сервер.", { routine: hydratedQuestion.presentationVersion === 4 });
+          setAttemptSyncMeta(hydratedQuestion.teacherDemo ? "Завершите сборку и нажмите «Подать»." : hydratedQuestion.presentationVersion === 4 ? "Завершите сборку и нажмите «Подать». Сохранённый выбор учтётся и по окончании минуты." : "Черновик не является ответом. Запись подтверждает сервер.", { routine: hydratedQuestion.presentationVersion === 4 });
         }
         refreshAttemptControls(); updateExamCockpit();
       },
@@ -3154,7 +3175,7 @@ function renderQuestion(question) {
         rememberDraft(hydratedQuestion.id, answer);scheduleDraftSave();
         if (!hasPendingAnswers() && !state.isSubmittingAnswer && !state.isFinishingAttempt) {
           setAttemptSaveStatus(answer.selectedOptionId ? "Заказ ещё не отправлен" : "Выберите блюдо", "idle");
-          setAttemptSyncMeta("Выбор сохраняется автоматически; его можно изменить до конца минуты или подтвердить сейчас.");
+          setAttemptSyncMeta(state.attempt.teacherDemo ? "Выбор сохраняется автоматически до подтверждения." : "Выбор сохраняется автоматически; его можно изменить до конца минуты или подтвердить сейчас.");
         }
         refreshAttemptControls(); updateExamCockpit();
       }
@@ -3202,11 +3223,11 @@ function renderTourBriefing() {
   document.getElementById('tour-briefing-description').textContent=info.description;
   const list=document.getElementById('tour-briefing-steps');list.replaceChildren();
   for(const text of info.instructions){const item=document.createElement('li');item.textContent=text;list.append(item);}
-  document.getElementById('tour-briefing-meta').textContent=`Заданий: ${info.questionCount} · На каждое — ${info.questionTimeLimitSeconds ? info.questionTimeLimitSeconds + " с" : "по таймеру"} · Максимум: ${info.maxScore} баллов`;
+  document.getElementById('tour-briefing-meta').textContent=`Заданий: ${info.questionCount} · На каждое — ${state.attempt.teacherDemo ? "без таймера" : info.questionTimeLimitSeconds ? info.questionTimeLimitSeconds + " с" : "по таймеру"} · Максимум: ${info.maxScore} баллов`;
   elements.tourStart.disabled=false;hideMessage(elements.briefingMessage);
   let receiptNode=document.getElementById('station-saved-receipt');
   if(receiptNode)receiptNode.remove();
-  document.querySelector(".tour-pause-note").textContent = info.stationTransition ? "Отсчёт следующей станции начнётся после кнопки «Продолжить». Можно спокойно посмотреть сохранённый состав." : "Таймеры на паузе. Прочитайте инструкцию без спешки. Отсчёт начнётся после кнопки «Начать тур».";
+  document.querySelector(".tour-pause-note").textContent = state.attempt.teacherDemo ? (info.stationTransition ? "Следующая станция откроется по кнопке «Продолжить»." : "Прочитайте инструкцию и начните тур.") : info.stationTransition ? "Отсчёт следующей станции начнётся после кнопки «Продолжить». Можно спокойно посмотреть сохранённый состав." : "Таймеры на паузе. Прочитайте инструкцию без спешки. Отсчёт начнётся после кнопки «Начать тур».";
   elements.tourStart.textContent=info.stationTransition?'Продолжить':'Начать тур';
   if(info.stationTransition){
     document.getElementById('tour-briefing-code').textContent='Между подачами';
@@ -3271,7 +3292,7 @@ async function saveServerDraft() {
     state.draftSavePromise=api(`/api/public/attempts/${state.attempt.id}/draft`,{method:'POST',body:JSON.stringify({questionId:question.id,answerPayload:payload})});
     await state.draftSavePromise;
     state.draftSavedKey=key;
-    if(state.attempt?.currentQuestion?.id===question.id&&JSON.stringify(state.questionController?.getAnswer?.())===JSON.stringify(payload))setAttemptSaveStatus(hasMeaningfulAnswer(payload)?'Выбор сохранён на сервере. Можно изменить до конца минуты.':'Ответ ещё не выбран',hasMeaningfulAnswer(payload)?'success':'idle');
+    if(state.attempt?.currentQuestion?.id===question.id&&JSON.stringify(state.questionController?.getAnswer?.())===JSON.stringify(payload))setAttemptSaveStatus(hasMeaningfulAnswer(payload)?state.attempt.teacherDemo?'Выбор сохранён на сервере. Подтвердите ответ, чтобы продолжить.':'Выбор сохранён на сервере. Можно изменить до конца минуты.':'Ответ ещё не выбран',hasMeaningfulAnswer(payload)?'success':'idle');
   }catch(error){
     if(![409,422].includes(error.status))setAttemptSaveStatus('Выбор остаётся в открытой странице. Ожидаем связь с сервером.','warning');
   }finally{state.draftSaving=false;state.draftSavePromise=null;}
@@ -3590,7 +3611,7 @@ function applyAttemptState(attempt, options = {}) {
 function updateTimers() {
   if(state.attempt?.tourBriefing)return;
   if(state.attempt?.autoSaveDrafts)saveServerDraft();
-  if (!state.timingSnapshot) {
+  if (state.attempt?.teacherDemo || !state.timingSnapshot) {
     return;
   }
 
@@ -3848,7 +3869,7 @@ async function handleRegistration(event) {
     elements.startAttempt.dataset.lockReason = data.alreadyCompleted&&!data.repeatAllowed ? "completed" : "";
     elements.startAttempt.textContent = data.activeAttemptId
       ? "Продолжить олимпиаду"
-      : "Начать олимпиаду";
+      : state.olympiad.teacherDemo ? "Начать" : "Начать олимпиаду";
 
     if(state.retakeOf){
       elements.startAttempt.textContent='Пройти ещё раз';refreshNavigationState();
@@ -3889,7 +3910,7 @@ async function startAttempt() {
     updateStartAvailability();
     return;
   }
-  if (elements.startConsent && !elements.startConsent.checked) {
+  if (!state.olympiad.teacherDemo && elements.startConsent && !elements.startConsent.checked) {
     showMessage(
       elements.prestartMessage,
       `Подтвердите готовность работать ${formatLimitMinutes(state.olympiad.durationMinutes)} без отвлечений.`,
@@ -3900,9 +3921,11 @@ async function startAttempt() {
   }
 
   hideMessage(elements.prestartMessage);
+  if (state.olympiad.teacherDemo) hideMessage(elements.heroLoadMessage);
   hideMessage(elements.attemptMessage);
   state.isStartingAttempt = true;
   updateStartAvailability();
+  if (state.olympiad.teacherDemo) updateHeroAction();
   setAttemptSaveStatus("Открываем маршрут...", "pending");
   setAttemptSyncMeta("Подбираем вариант и подключаемся к облаку...");
 
@@ -3946,7 +3969,7 @@ async function startAttempt() {
     setAttemptSyncMeta(`Подключение подтверждено: ${formatDateTime(new Date())}`, { routine: true });
     showMessage(
       elements.attemptMessage,
-      "Маршрут открыт. Ответы будут автоматически сохраняться в облаке, а защищённый режим олимпиады включён.",
+      attempt.teacherDemo ? "Маршрут открыт. Подтверждайте ответы, чтобы переходить к следующим заданиям." : "Маршрут открыт. Ответы будут автоматически сохраняться в облаке, а защищённый режим олимпиады включён.",
       "success"
     );
     if (hasPendingAnswers()) {
@@ -3956,7 +3979,7 @@ async function startAttempt() {
     const message = formatApiError(error);
     setAttemptSaveStatus("Не удалось открыть маршрут", "error");
     setAttemptSyncMeta(`Запуск: ${message}`);
-    showMessage(elements.prestartMessage, message, "error");
+    showMessage(state.olympiad.teacherDemo ? elements.heroLoadMessage : elements.prestartMessage, message, "error");
   } finally {
     state.isStartingAttempt = false;
     if (!isAttemptInProgress() && document.fullscreenElement && typeof document.exitFullscreen === "function") {
@@ -3967,6 +3990,7 @@ async function startAttempt() {
       }
     }
     updateStartAvailability();
+    if (state.olympiad.teacherDemo) updateHeroAction();
   }
 }
 
@@ -4131,7 +4155,10 @@ async function finishAttempt() {
 async function init() {
   receiveReserveTransfer();
   await loadAppVersion();
+  if (teacherDemoLink) elements.prestartSection.classList.add("hidden");
   state.olympiad = await api("/api/public/olympiad");
+  if (teacherDemoLink && !state.olympiad.teacherDemo) throw new Error("Демо для преподавателя по этому адресу недоступно.");
+  elements.prestartSection.classList.remove("hidden");
   setupOrganizerAddress();
   setupReserveAddress();
   renderDemoNotice();
@@ -4146,7 +4173,7 @@ async function init() {
     closeNavDrawer();document.getElementById('preparation-section')?.scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'});
   });
   window.OlympiadStory?.intro(state.olympiad);
-  if (state.olympiad.demonstration) window.DemoAnalytics?.mount(demoSessionId());
+  if (state.olympiad.demonstration && !state.olympiad.teacherDemo) window.DemoAnalytics?.mount(demoSessionId());
   if (state.olympiad.demonstration) await handleRegistration({preventDefault(){}});
   const refreshStoryAdmission = async () => {
     if (!state.olympiad?.storyEnabled || state.attempt || document.hidden) return;
@@ -4201,6 +4228,8 @@ async function init() {
       scrollToSection(elements.attemptSection);
     } else if (state.attempt) {
       scrollToSection(elements.resultSection);
+    } else if (state.olympiad?.teacherDemo) {
+      startAttempt();
     } else {
       scrollToSection(elements.prestartSection);
       (state.participant ? elements.startConsent : elements.fullName).focus({ preventScroll: true });

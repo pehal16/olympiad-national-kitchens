@@ -868,7 +868,8 @@ function getCurrentTour(attempt) {
 
 function sanitizeQuestion(question, attempt) {
   const safe=sanitizeQuestionData(question,attempt);
-  if(safe&&Number.isFinite(question.timeLimitSeconds))safe.timeLimitSeconds=question.timeLimitSeconds;
+  if (safe && attempt?.demonstration && attempt.teacherDemo) safe.teacherDemo = true;
+  else if(safe&&Number.isFinite(question.timeLimitSeconds))safe.timeLimitSeconds=question.timeLimitSeconds;
   const dialogue=require('./story-dialogue').publicDialogue(question);
   return dialogue?{...safe,dialogue}:safe;
 }

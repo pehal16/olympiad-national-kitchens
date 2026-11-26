@@ -20,7 +20,8 @@ const instructions = {
 
 function view(attempt, tour) {
   if (!pending(attempt) || !tour) return null;
-  const seconds = attempt.variant?.questions?.find(q => q.tourId === tour.id)?.timeLimitSeconds || null;
+  const untimed = attempt.demonstration && attempt.teacherDemo;
+  const seconds = untimed ? null : attempt.variant?.questions?.find(q => q.tourId === tour.id)?.timeLimitSeconds || null;
   return {
     tourId: tour.id, code: tour.code, title: tour.title,
     description: tour.description || '', questionCount: tour.questionCount,
@@ -30,7 +31,11 @@ function view(attempt, tour) {
     stationTransition: Boolean(attempt.tourBriefing.stationTransition),
     fromQuestionId: attempt.tourBriefing.fromQuestionId || null,
     previousQuestionTimedOut: Boolean(attempt.questionLog?.[attempt.tourBriefing.fromQuestionId]?.timedOutAt),
-    instructions: tour.code === 'T5' && attempt.stationPausesEnabled
+    instructions: untimed && tour.code === 'T5'
+      ? ['На каждой станции выберите четыре компонента и выполните сборку.', 'Нажмите «Подать», чтобы сохранить ответ. Следующая станция откроется по кнопке «Продолжить».']
+      : untimed && tour.code === 'T3'
+        ? [instructions.T3[0], 'Введите название блюда и подтвердите ответ.']
+        : tour.code === 'T5' && attempt.stationPausesEnabled
       ? ['На каждой станции выберите четыре компонента и выполните сборку.', `На выполнение станции${seconds ? ' — ' + seconds + ' секунд' : ' действует указанный таймер'}. Если время истечёт, будет учтён сохранённый выбор.`, 'Между подачами таймеры на паузе. Следующая станция начинается по кнопке «Продолжить».']
       : instructions[tour.code] || [tour.description || 'Выполните задания тура и подтвердите каждый ответ.']
   };
@@ -39,7 +44,9 @@ function view(attempt, tour) {
 function begin(attempt, tour, now = Date.now()) {
   if (!pending(attempt) || attempt.tourBriefing.tourId !== tour?.id) return false;
   const pause = Math.max(0, now - Date.parse(attempt.tourBriefing.pausedAt));
-  attempt.expiresAt = new Date(Date.parse(attempt.expiresAt) + pause).toISOString();
+  if (!(attempt.demonstration && attempt.teacherDemo)) {
+    attempt.expiresAt = new Date(Date.parse(attempt.expiresAt) + pause).toISOString();
+  }
   attempt.pausedMs = (Number(attempt.pausedMs) || 0) + pause;
   if (attempt.tourBriefing.stationTransition && attempt.tourStates[tour.id]) {
     attempt.tourStates[tour.id].startedAt = new Date(Date.parse(attempt.tourStates[tour.id].startedAt) + pause).toISOString();

@@ -1,8 +1,10 @@
 "use strict";
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
-const {handleDemoRelay,DEMO_ORIGIN}=require('../src/public-demo');
+const {handleDemoRelay,DEMO_ORIGIN,teacherDemoRequested,configureDemo}=require('../src/public-demo');
 
 test('public demo relay is fixed, owner-scoped and never forwards to PC, production D1 or redirects',async()=>{
+ configureDemo({});
+ assert.equal(teacherDemoRequested(new URL('https://example.test/?demo=teacher')),false);
  const calls=[],env={OLYMPIAD_PUBLIC_DEMO:'true',DB:{prepare(){throw Error('Original database must remain untouched');}}};
  const input=new Request('https://olympiad-gkts.pages.dev/api/public/attempts/synthetic/answer',{method:'POST',headers:{'Content-Type':'application/json','X-Attempt-Token':'demo-owner','X-Demo-Session':'a'.repeat(32),Cookie:'private-original-cookie',Authorization:'private-original-auth'},body:'{"demo":true}'});
  const r=await handleDemoRelay(input,env,async(url,options)=>{calls.push({url,options});return new Response('{"ok":true}',{headers:{'Content-Type':'application/json'}});});
@@ -15,7 +17,7 @@ test('public demo relay is fixed, owner-scoped and never forwards to PC, product
  assert.equal((await handleDemoRelay(new Request('https://example.com/api/health'),env,async()=>new Response('',{status:302,headers:{Location:'https://other.invalid/'}}))).status,502);
 });
 
-test('anonymous isolated demonstration: all 36 questions, no supplied identity, duplicate start, reload, owner protection and immediate demo results',async t=>{
+test('anonymous isolated demonstration: all 36 questions, separate timed and untimed links, 36 answers each, anonymous access and immediate results',async t=>{
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'public-demo-'));
  const {server,db}=require('../olympiad-server').createOlympiadServer({dbPath:path.join(dir,'demo.sqlite'),adminPassword:'synthetic-demo-admin-password',attemptIdSecret:'synthetic-isolated-demo-attempt-secret',storyEnabled:'true',storyAnytimeEntry:'true',demoMode:'true'});
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
@@ -49,4 +51,50 @@ test('anonymous isolated demonstration: all 36 questions, no supplied identity, 
  const raw=await store.loadAttemptById(id);assert.equal(raw.demonstration,true);assert.doesNotMatch(JSON.stringify(raw),/Не Сохранять|Не сохранять/);
  const second=await api('/api/public/attempts/start',{participant:profile},'different-demo-owner-access-token','c'.repeat(32));assert.equal(second.status,201);assert.notEqual(second.data.id,id);
  assert.equal((await api(prefix+'/certificate',null,'different-demo-owner-access-token')).status,401);
+
+ // One browser can use both links without inheriting the timed attempt.
+ const teacher='?demo=teacher';
+ assert.equal((await api('/api/public/olympiad'+teacher)).data.teacherDemo,true);
+ assert.equal((await api('/api/public/olympiad')).data.teacherDemo,false);
+ assert.equal((await api('/api/public/register'+teacher,profile)).data.alreadyCompleted,false);
+ const teacherStart=()=>api('/api/public/attempts/start'+teacher,{participant:profile,tourBriefings:true,stationPauses:true});
+ const [first,retry]=await Promise.all([teacherStart(),teacherStart()]);
+ assert.equal(first.data.id,retry.data.id);
+ assert.notEqual(first.data.id,id);
+ let lesson=first.data;
+ const route='/api/public/attempts/'+lesson.id;
+ assert.equal(lesson.teacherDemo,true);
+ assert.equal(lesson.participant.fullName,'Демонстрационный Участник');
+ assert.equal(lesson.expiresAt,null);
+ assert.equal(lesson.tourBriefing,null);
+ assert.equal(lesson.currentQuestion.timeLimitSeconds,undefined);
+ assert.equal((await api(route,null,'different-demo-owner-access-token')).status,401);
+ const frozen=(await store.loadAttemptById(lesson.id)).variant;
+ const now=Date.now;
+ try {
+   Date.now=()=>now()+2*60*60*1000;
+   const reopened=await api(route+'/current');
+   assert.equal(reopened.data.currentQuestion.id,lesson.currentQuestion.id);
+   assert.equal(reopened.data.timing.questionRemainingMs,undefined);
+   assert.equal(reopened.data.timing.totalRemainingMs,null);
+   for(const q of frozen.questions){
+     if(lesson.tourBriefing) {
+       assert.equal(lesson.tourBriefing.questionTimeLimitSeconds,null);
+       const started=await api(route+'/tour/start',{tourId:q.tourId,fromQuestionId:lesson.tourBriefing.fromQuestionId});
+       assert.equal(started.status,200,started.message);
+       lesson=started.data;
+     }
+     assert.equal(lesson.currentQuestion.id,q.id);
+     const answerPayload=q.type==='single_choice'?{selectedOptionId:q.options.find(o=>o.isCorrect).id}:q.type==='bucket_sort'?{buckets:q.correctBuckets}:q.type==='dish_detective'?{text:q.answerPolicy.canonical}:{dishId:q.dishes[0].id,selectedIngredientIds:q.dishes[0].correctIngredientIds};
+     const answered=await api(route+'/answer',{questionId:q.id,answerPayload});
+     assert.equal(answered.status,200,answered.message);
+     lesson=answered.data;
+   }
+ } finally { Date.now=now; }
+ assert.equal(lesson.status,'reviewed');
+ assert.equal(lesson.summary.totalFinalScore,150);
+ assert.equal(lesson.progress.answeredCount,36);
+ assert.equal((await api(route+'/certificate')).data.demonstration,true);
+ assert.equal((await api('/api/public/register',profile)).data.completedAttemptId,id);
+ assert.equal((await api('/api/public/register'+teacher,profile)).data.completedAttemptId,lesson.id);
 });

@@ -80,7 +80,7 @@
     function rulesContent() {
       const body = element("div"), list = element("ul", "t5-rules");
       rules.forEach(text => list.append(element("li", "", text)));
-      body.append(list, element("p", "t5-time-note", "Время тура уже идёт: чтение правил входит в 15 минут.")); return body;
+      body.append(list); if (!question.teacherDemo) body.append(element("p", "t5-time-note", "Время тура уже идёт: чтение правил входит в 15 минут.")); return body;
     }
     function photo(url, alt, className, hero = false) {
       const frame = element("span", className), img = element("img");
@@ -296,7 +296,7 @@
       onPhase("intro"); shell.classList.add("t5-intro"); submitButton.hidden = true;
       const stations = element("ol", "t5-intro-stations");
       ["Горячая сборка", "Свежая сборка", "Фирменная сборка"].forEach(title => stations.append(element("li", "", title)));
-      shell.append(element("h3", "t5-intro-facts", "3 станции · 48 баллов · 15 минут"), stations, rulesContent(),
+      shell.append(element("h3", "t5-intro-facts", question.teacherDemo ? "3 станции · 48 баллов" : "3 станции · 48 баллов · 15 минут"), stations, rulesContent(),
         button("Открыть кухню", "button primary t5-start", () => {
           if (locked) return; started = true; introSeen.add(introKey); write(introKey, "seen");
           shell.classList.remove("t5-intro"); renderActivity(); shell.querySelector("button")?.focus({ preventScroll: true }); onChange(model.getAnswer());

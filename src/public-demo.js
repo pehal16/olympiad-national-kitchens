@@ -6,13 +6,14 @@ const DEMO_ORIGIN = 'https://olympiad-gkts-demo.pages.dev';
 let active = false;
 function configureDemo(env) { active = String(env?.OLYMPIAD_DEMO_MODE || '') === 'true'; }
 function demoEnabled() { return active; }
-function anonymousProfile(req) {
+function teacherDemoRequested(url) { return demoEnabled() && url.searchParams.get('demo') === 'teacher'; }
+function anonymousProfile(req, teacherDemo = false) {
   const session = String(req.headers?.['x-demo-session'] || '');
   if (!/^[a-f0-9]{32}$/.test(session)) {
     return null;
   }
   return { fullName: 'Демонстрационный Участник', institution: 'Демонстрационная площадка',
-    groupName: 'ДЕМО-' + require('node:crypto').createHash('sha256').update(session).digest('hex').slice(0,16), mentorName: '' };
+    groupName: 'ДЕМО-' + require('node:crypto').createHash('sha256').update(teacherDemo ? session + ':teacher' : session).digest('hex').slice(0,16), mentorName: '' };
 }
 function publicRoute(path) { return require('./demo-analytics').analyticsRoute(path) || require('./desktop-primary-relay').publicRoute(path); }
 async function handleDemoRelay(request, env, fetcher = (url, options) => globalThis.fetch(url, options)) {
@@ -37,4 +38,4 @@ async function handleDemoRelay(request, env, fetcher = (url, options) => globalT
   } catch { return failure(502,'Не удалось подключиться к демонстрационной площадке. Попробуйте ещё раз.'); }
 }
 function failure(status,message){return new Response(JSON.stringify({ok:false,message}),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'private, no-store'}});}
-module.exports={DEMO_ORIGIN,configureDemo,demoEnabled,anonymousProfile,handleDemoRelay};
+module.exports={DEMO_ORIGIN,configureDemo,demoEnabled,teacherDemoRequested,anonymousProfile,handleDemoRelay};
