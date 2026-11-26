@@ -194,6 +194,7 @@ if ($Mode -eq 'Install') {
         (Join-Path $PSScriptRoot '..\..\shared\assistant.mjs') = (Join-Path $app 'shared\assistant.mjs')
         (Join-Path $PSScriptRoot '..\..\shared\assistant-work.mjs') = (Join-Path $app 'shared\assistant-work.mjs')
         (Join-Path $PSScriptRoot '..\..\shared\assistant-chat.mjs') = (Join-Path $app 'shared\assistant-chat.mjs')
+        (Join-Path $PSScriptRoot '..\..\shared\assistant-history.mjs') = (Join-Path $app 'shared\assistant-history.mjs')
     }
     foreach ($source in $sources.Keys) {
         $resolved = (Resolve-Path -LiteralPath $source).Path
@@ -278,6 +279,7 @@ try {
         $env:GKTS_ASSISTANT_MODEL = $model
         $env:GKTS_ASSISTANT_ORIGIN = $config.origin
         $env:GKTS_ASSISTANT_INTERFACE = $config.cabinetInterface
+        $env:GKTS_ASSISTANT_HISTORY_FILE = Join-Path $root 'history\assistant-history.sqlite'
         $credential = (Get-Content -LiteralPath $secretPath -Raw).Trim() | ConvertTo-SecureString
         $env:GKTS_ASSISTANT_TOKEN = [Net.NetworkCredential]::new('', $credential).Password
         try {

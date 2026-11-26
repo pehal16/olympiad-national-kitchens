@@ -2,12 +2,18 @@
 
 Last updated: 2026-11-26
 
+## AI chat history on the college iRU (2026-11-26)
+
+- The teacher chat history, lecture names and outstanding proposals are stored in a local SQLite file under the installed assistant's Windows profile. The cabinet retrieves and saves each account's chats through an independent authenticated worker connection. Account authentication and confirmed work drafts use the existing Timeweb database. The local history and model can report availability independently.
+- The migration verifies each imported row and the aggregate digest, and verifies a local SQLite snapshot before the old live rows are eligible for removal. The relay pins the identity of the local history database. The cabinet keeps an operation receipt containing only saved draft IDs when it applies a proposal so a lost acknowledgement cannot create or edit it twice.
+- The [model improvement plan](assistant-model-improvement-plan.md) sets out formula rendering and validation, context measurements at 16K and 32K, and a conditional fine-tuning trial after the reference evaluation.
+
 ## Teacher cabinet AI chat (2026-11-26)
 
 - Timeweb release `91077ec07a62c68f2b0ef068acea32ffac6ad8c8` passed the protected SQLite snapshot and HTTPS checks in run `45788446097`. The iRU returned a conversational answer in 6.554 s and a follow-up in 3.920 s. The chemistry draft used two uploaded lessons, the requested OpenStax chapter and the accessible text of the FSES in 46.968 s. Both blocks passed model review. All three assignments had a literal supporting excerpt.
 - The isolated real-model browser test at 1366 and 390 px found and checked a project, renamed it, retained two files through clarification, saved 5 + 10 + 2 assignments and reopened the chat. Fourteen of the seventeen assignments had source excerpts. A separate real-model check added one question to the requested existing round. The iRU scheduled task was running with the verified worker files after the update.
 
-- The cabinet **ИИ-чат** keeps private conversations for the signed-in teacher in the existing constructor database. The projects page and project editor link to it. The active project is available as context and can also be referenced by title. A teacher can ask for an explanation, a project search or structural check, a new work, additional sections or questions, or a targeted edit to existing text.
+- **ИИ-чат** was introduced with private conversations for the signed-in teacher in the constructor database. The subsequent iRU history migration is described above. The projects page and project editor link to it. The active project is available as context and can also be referenced by title. A teacher can ask for an explanation, a project search or structural check, a new work, additional sections or questions, or a targeted edit to existing text.
 - The iRU worker interprets the request using recent turns. Project searches and checks use readable project records and native validation. Generation uses the existing lecture parser, source retrieval, model review and literal quote checks. A proposal shows the target, generated assignments or the old and new text. Applying it uses the native draft service with the expected revision and an idempotent receipt. The chat does not publish or modify runs or student answers.
 - An explicit count and named topic for one new question survive an unusable first plan. A supplied OpenStax chapter can match its own chapter terms when the plan contains only terms in another language.
 - Up to five optional PDF, DOCX, TXT or MD materials remain available while a work request is active, including clarification. Attached file names and the displayed conversation stay in the private chat until it is deleted. The current iRU worker must support chat via its heartbeat before enabling generation.

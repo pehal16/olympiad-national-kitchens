@@ -6,6 +6,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { createApp, API } from "../server/index.mjs";
+import {
+  historyKind,
+  historyMarker,
+  openAssistantHistory,
+  removeMigratedHistory,
+} from "../shared/assistant-history.mjs";
 
 test("chat decisions stay private and proposed edits apply once to the reviewed revision", async (t) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "constructor-chat-"));
@@ -15,8 +21,15 @@ test("chat decisions stay private and proposed edits apply once to the reviewed 
     assistantWorkerToken: workerToken,
   });
   const server = instance.app.listen(0, "127.0.0.1");
+  const file = path.join(dir, "iru", "assistant-history.sqlite");
+  let localHistory = openAssistantHistory(file);
+  const bridge = new AbortController();
+  let syncing;
   t.after(async () => {
+    bridge.abort();
+    await syncing;
     await new Promise((resolve) => server.close(resolve));
+    localHistory.close();
     await instance.close();
     fs.rmSync(dir, { recursive: true, force: true });
   });
@@ -42,6 +55,50 @@ test("chat decisions stay private and proposed edits apply once to the reviewed 
   });
   const worker = "/assistant/worker";
   const chats = "/assistant/chats";
+  const old = instance.store.put(historyKind, "chat_previous", user.id, {
+    title: "Прежний чат",
+    messages: [{ id: "old-turn-001", role: "user", text: "Контроль переноса" }],
+    pendingId: null,
+    proposal: null,
+    target: null,
+  });
+
+  async function pump() {
+    const endpoint = async (suffix, body) => {
+      const response = await fetch(base + worker + "/history/" + suffix, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + workerToken,
+        },
+        body: JSON.stringify({ identity: localHistory.identity, ...body }),
+        signal: bridge.signal,
+      });
+      assert.equal(response.status, 200);
+      return (await response.json()).data;
+    };
+    try {
+      while (!bridge.signal.aborted) {
+        const { job } = await endpoint("claim", {});
+        if (!job) continue;
+        let value;
+        let error;
+        try {
+          value = localHistory.perform(job);
+        } catch (cause) {
+          error = cause.historyCode || "local_failure";
+        }
+        await endpoint("complete", {
+          id: job.id,
+          lease: job.lease,
+          value,
+          error,
+        });
+      }
+    } catch (error) {
+      if (!bridge.signal.aborted) throw error;
+    }
+  }
 
   async function call(route, body, login = owner, status = 200) {
     const response = await fetch(base + route, {
@@ -68,6 +125,25 @@ test("chat decisions stay private and proposed edits apply once to the reviewed 
   await call(chats + "/message", action, owner, 503);
   const heartbeat = { ready: true, supportsWork: true, supportsChat: true };
   await call(worker + "/claim", heartbeat, null);
+  await call(chats, undefined, owner, 503);
+  syncing = pump();
+  for (
+    let attempt = 0;
+    !(await call("/assistant/status")).historyOnline;
+    attempt++
+  ) {
+    assert.ok(attempt < 70, "history migration did not finish");
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  const migrated = await call(chats + "/" + old.id);
+  assert.deepEqual(migrated.messages, old.messages);
+  await call(chats + "/" + old.id, undefined, reader, 404);
+  assert.deepEqual(removeMigratedHistory(instance.store.db), {
+    migrated: 1,
+    remaining: 0,
+  });
+  assert.equal(JSON.parse(instance.store.meta(historyMarker)).cleaned, true);
+
   const initial = await call(chats + "/message", action, owner, 202);
   const route = chats + "/" + initial.id;
   assert.deepEqual(await call(chats, undefined, reader), []);
@@ -125,5 +201,24 @@ test("chat decisions stay private and proposed edits apply once to the reviewed 
   assert.equal(
     instance.store.get("project", project.id).title,
     "Сохранено в редакторе",
+  );
+  assert.deepEqual(instance.store.list(historyKind), []);
+  bridge.abort();
+  await syncing;
+  const device = localHistory.identity;
+  localHistory.close();
+  localHistory = openAssistantHistory(file);
+  assert.equal(localHistory.identity, device);
+  const reopened = localHistory.perform({
+    operation: "get",
+    value: { owner: user.id, id: initial.id },
+  });
+  assert.match(reopened.data, /Учебная работа по химии/u);
+  assert.equal(
+    localHistory.perform({
+      operation: "get",
+      value: { owner: reader.user.id, id: initial.id },
+    }),
+    null,
   );
 });

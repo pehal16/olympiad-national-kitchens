@@ -18,6 +18,7 @@ import { assistantQuestions } from "../shared/authoring.js";
 import { project as draftProject } from "../shared/catalog.js";
 import { maxLectureBytes, readLectures } from "./assistant-documents.mjs";
 import { researchWorkGroup } from "./assistant-sources.mjs";
+import { registerAssistantHistory } from "./assistant-history.mjs";
 import {
   createAssistantProjects,
   registerAssistantChat,
@@ -57,7 +58,7 @@ export function registerAssistant(
   function prune() {
     const now = Date.now();
     for (const [jobId, job] of jobs) {
-      if (job.expires > now) continue;
+      if (job.expires > now || job.completing) continue;
       if (job.state === "queued" || job.state === "running") {
         finish(job, "failed", {
           error: "Время ожидания истекло. Повторите запрос.",
@@ -69,7 +70,6 @@ export function registerAssistant(
   }
 
   function finish(job, state, result) {
-    if (job.chat) chat.finish(job, state, result);
     Object.assign(job, { state, result, expires: Date.now() + resultMs });
     delete job.input;
     delete job.documents;
@@ -130,6 +130,20 @@ export function registerAssistant(
     }
     next();
   };
+  const history = registerAssistantHistory(app, {
+    api,
+    wrap,
+    send,
+    store: service.store,
+    workerAuth,
+    enabled,
+  });
+
+  async function finishWithHistory(job, state, result) {
+    if (job.chat) await chat.finish(job, state, result);
+    finish(job, state, result);
+  }
+
   const body = express.json({ limit: "24kb" });
   app.post(
     api + "/assistant/worker/claim",
@@ -158,6 +172,7 @@ export function registerAssistant(
       if (!job) return send(res, { job: null });
       job.state = "running";
       job.lease = token();
+      job.replyId = id("turn");
       job.testWorker = supportsTests;
       job.workWorker = supportsWork;
       job.chatWorker = supportsChat;
@@ -178,64 +193,78 @@ export function registerAssistant(
         "Запрос больше не ожидает результата.",
         409,
       );
-      if (job.state !== "running") return send(res, { received: true });
-      if (job.chatWorker) lastChatReady = Date.now();
-      if (job.chat && !job.work) {
-        if (!chat.completePlan(job, req.body?.decision)) finish(job, "ready");
-        return send(res, { received: true });
-      }
-      if (job.work) {
-        lastReady = lastWorkReady = Date.now();
-        if (job.testWorker) lastTestReady = lastReady;
-        const clarified = req.body?.clarify;
-        if (
-          typeof clarified === "string" &&
-          clarified.trim() &&
-          clarified.length <= 500 &&
-          job.input.replies.length < 3
-        ) {
-          waitForReply(job, clarified.trim());
-        } else {
-          const work =
-            job.plan &&
-            readWorkResult(req.body?.results, job.plan, job.contexts);
-          const block = req.body?.block;
-          const error =
-            req.body?.failure === "invalid_plan"
-              ? "Помощник не разобрал поручение. Уточните темы, число заданий и формат работы."
-              : req.body?.failure === "invalid_block" &&
-                  Number.isInteger(block) &&
-                  job.plan?.groups[block - 1]
-                ? "Помощник не составил корректные задания в блоке " +
-                  block +
-                  ". Попробуйте ещё раз."
-                : "Помощник не закончил работу. Повторите запрос или сузьте объём задания.";
-          finish(job, work ? "ready" : "failed", work ? { work } : { error });
+      const complete = async () => {
+        if (job.state !== "running" || job.lease !== req.body.lease)
+          return send(res, { received: true });
+        job.completing = true;
+        try {
+          if (job.chatWorker) lastChatReady = Date.now();
+          if (job.chat && !job.work) {
+            if (!(await chat.completePlan(job, req.body?.decision)))
+              finish(job, "ready");
+            return send(res, { received: true });
+          }
+          if (job.work) {
+            lastReady = lastWorkReady = Date.now();
+            if (job.testWorker) lastTestReady = lastReady;
+            const clarified = req.body?.clarify;
+            if (
+              typeof clarified === "string" &&
+              clarified.trim() &&
+              clarified.length <= 500 &&
+              job.input.replies.length < 3
+            ) {
+              await waitForReply(job, clarified.trim());
+            } else {
+              const work =
+                job.plan &&
+                readWorkResult(req.body?.results, job.plan, job.contexts);
+              const block = req.body?.block;
+              const error =
+                req.body?.failure === "invalid_plan"
+                  ? "Помощник не разобрал поручение. Уточните темы, число заданий и формат работы."
+                  : req.body?.failure === "invalid_block" &&
+                      Number.isInteger(block) &&
+                      job.plan?.groups[block - 1]
+                    ? "Помощник не составил корректные задания в блоке " +
+                      block +
+                      ". Попробуйте ещё раз."
+                    : "Помощник не закончил работу. Повторите запрос или сузьте объём задания.";
+              await finishWithHistory(
+                job,
+                work ? "ready" : "failed",
+                work ? { work } : { error },
+              );
+            }
+            return send(res, { received: true });
+          }
+          const draft = job.test
+            ? readTestDraft(req.body?.draft, job.input.count)
+            : readDraft(req.body?.draft, job.input.sourceText);
+          lastReady = Date.now();
+          if (job.testWorker) lastTestReady = lastReady;
+          if (job.workWorker) lastWorkReady = lastReady;
+          if (draft) {
+            finish(
+              job,
+              "ready",
+              job.test
+                ? { test: draft }
+                : { draft, sourceTitle: job.input.sourceTitle },
+            );
+          } else {
+            const message =
+              req.body?.failure === "local_failure"
+                ? workerErrors.local_failure
+                : workerErrors[job.test ? "invalid_test" : "invalid_draft"];
+            finish(job, "failed", { error: message });
+          }
+          send(res, { received: true });
+        } finally {
+          delete job.completing;
         }
-        return send(res, { received: true });
-      }
-      const draft = job.test
-        ? readTestDraft(req.body?.draft, job.input.count)
-        : readDraft(req.body?.draft, job.input.sourceText);
-      lastReady = Date.now();
-      if (job.testWorker) lastTestReady = lastReady;
-      if (job.workWorker) lastWorkReady = lastReady;
-      if (draft) {
-        finish(
-          job,
-          "ready",
-          job.test
-            ? { test: draft }
-            : { draft, sourceTitle: job.input.sourceTitle },
-        );
-      } else {
-        const message =
-          req.body?.failure === "local_failure"
-            ? workerErrors.local_failure
-            : workerErrors[job.test ? "invalid_test" : "invalid_draft"];
-        finish(job, "failed", { error: message });
-      }
-      send(res, { received: true });
+      };
+      return job.chat ? chat.serial(job.actor, complete) : complete();
     }),
   );
 
@@ -248,7 +277,8 @@ export function registerAssistant(
         online: enabled && online(),
         testOnline: enabled && online(true),
         workOnline: enabled && online(false, true),
-        chatOnline: enabled && online(false, false, true),
+        chatOnline: enabled && online(false, false, true) && history.online(),
+        historyOnline: history.online(),
       });
     }),
   );
@@ -295,8 +325,8 @@ export function registerAssistant(
 
   function checkQueue(actor) {
     prune();
-    const pending = [...jobs.values()].filter(
-      (job) => job.state === "queued" || job.state === "running",
+    const pending = [...jobs.values()].filter((job) =>
+      ["preparing", "queued", "running"].includes(job.state),
     );
     fail(
       !pending.some((job) => job.actor === actor),
@@ -418,13 +448,13 @@ export function registerAssistant(
     }
   }
 
-  function waitForReply(job, question) {
+  async function waitForReply(job, question) {
+    if (job.chat) await chat.clarify(job, question);
     Object.assign(job, {
       state: "clarify",
       expires: Date.now() + resultMs,
       result: { question },
     });
-    if (job.chat) chat.clarify(job, question);
   }
 
   function resume(job, reply) {
@@ -440,6 +470,7 @@ export function registerAssistant(
     wrap,
     send,
     service,
+    history,
     jobs,
     enabled,
     online: () => online(false, false, true),
@@ -451,15 +482,16 @@ export function registerAssistant(
     enqueue(properties) {
       const job = {
         id: id("draft"),
-        state: "queued",
+        state: "preparing",
         expires: Date.now() + waitMs,
         ...properties,
       };
       jobs.set(job.id, job);
       return job;
     },
-    cancel(job) {
-      finish(job, "cancelled");
+    async cancel(job, notify = true) {
+      if (notify) await finishWithHistory(job, "cancelled");
+      else finish(job, "cancelled");
       if (!job.lease) jobs.delete(job.id);
     },
   });
@@ -594,6 +626,7 @@ export function registerAssistant(
   );
   return () => {
     if (timer) clearInterval(timer);
+    history.close();
     jobs.clear();
   };
 }

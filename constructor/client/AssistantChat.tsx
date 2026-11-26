@@ -115,6 +115,7 @@ export default function AssistantChat({
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<boolean | null>(null);
+  const [historyOnline, setHistoryOnline] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(Boolean(initialThread));
   const [error, setError] = useState("");
@@ -147,16 +148,21 @@ export default function AssistantChat({
       setSelected(initialProject);
       return;
     }
+    await loadThread(id);
+  }
+
+  async function loadThread(id: string, live = () => true) {
     try {
       const value: Thread = await api(route + "/" + id);
-      if (active.current === id) {
+      if (live() && active.current === id) {
         setThread(value);
         setSelected(value.target?.id || "");
+        setError("");
       }
     } catch (e) {
-      if (active.current === id) setError((e as Error).message);
+      if (live() && active.current === id) setError((e as Error).message);
     } finally {
-      if (active.current === id) setLoading(false);
+      if (live() && active.current === id) setLoading(false);
     }
   }
 
@@ -165,11 +171,6 @@ export default function AssistantChat({
     const report = (e: unknown) => {
       if (live) setError((e as Error).message);
     };
-    api(route)
-      .then((value: Link[]) => {
-        if (live) setThreads(value);
-      })
-      .catch(report);
     api("/projects")
       .then((value: Link[]) => {
         if (live) setProjects(value);
@@ -178,24 +179,53 @@ export default function AssistantChat({
     const heartbeat = () =>
       api("/assistant/status")
         .then((value) => {
-          if (live) setStatus(value.chatOnline === true);
+          if (!live) return;
+          setStatus(value.chatOnline === true);
+          setHistoryOnline(value.historyOnline === true);
         })
         .catch(() => {
-          if (live) setStatus(false);
+          if (!live) return;
+          setStatus(false);
+          setHistoryOnline(false);
         });
     void heartbeat();
     const timer = window.setInterval(heartbeat, 12_000);
-    if (initialThread) void open(initialThread);
     return () => {
       live = false;
       window.clearInterval(timer);
     };
   }, []);
 
+  useEffect(() => {
+    if (historyOnline === null) return;
+    if (!historyOnline) {
+      setThreads([]);
+      setThread(null);
+      setDeleting(false);
+      setLoading(false);
+      return;
+    }
+    let live = true;
+    api(route)
+      .then((value: Link[]) => {
+        if (live) setThreads(value);
+      })
+      .catch((e) => {
+        if (live) setError((e as Error).message);
+      });
+    if (active.current) {
+      setLoading(true);
+      void loadThread(active.current, () => live);
+    }
+    return () => {
+      live = false;
+    };
+  }, [historyOnline]);
+
   const isWorking = working(thread);
   const threadId = thread?.id;
   useEffect(() => {
-    if (!threadId || !isWorking) return;
+    if (!threadId || !isWorking || !historyOnline) return;
     let live = true;
     let timer: number;
     const poll = async () => {
@@ -219,7 +249,7 @@ export default function AssistantChat({
       live = false;
       window.clearTimeout(timer);
     };
-  }, [threadId, isWorking]);
+  }, [threadId, isWorking, historyOnline]);
 
   const lastMessage = thread?.messages.at(-1)?.id;
   useEffect(() => {
@@ -351,7 +381,9 @@ export default function AssistantChat({
           id="assistant-chat-list"
           className={"chat-thread-list" + (historyOpen ? " open" : "")}
         >
-          {threads.length ? (
+          {historyOnline === false ? (
+            <p className="muted">История сейчас недоступна.</p>
+          ) : threads.length ? (
             threads.map((item) => (
               <button
                 type="button"
@@ -379,7 +411,9 @@ export default function AssistantChat({
                 ? "Проверяем подключение…"
                 : status
                   ? "Подключён"
-                  : "Компьютер колледжа недоступен"}
+                  : historyOnline
+                    ? "История подключена · модель недоступна"
+                    : "Компьютер колледжа недоступен"}
             </span>
           </div>
           {thread && (
@@ -407,7 +441,12 @@ export default function AssistantChat({
           </div>
         )}
         <div className="chat-transcript" ref={transcript}>
-          {loading ? (
+          {historyOnline === false ? (
+            <p role="status">
+              История хранится на компьютере колледжа и появится после его
+              подключения.
+            </p>
+          ) : loading ? (
             <p role="status">Открываем чат…</p>
           ) : !thread?.messages.length ? (
             <div className="chat-welcome">

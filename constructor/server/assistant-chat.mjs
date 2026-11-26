@@ -10,7 +10,6 @@ import { validateProject } from "./domain.mjs";
 import { maxLectureText } from "./assistant-documents.mjs";
 import { fail, id } from "./util.mjs";
 
-const kind = "assistant_chat";
 const modelFailure = "Помощник не закончил запрос. Попробуйте ещё раз.";
 const normalize = (value) => value.toLowerCase().replace(/ё/g, "е").trim();
 const links = (projects) => projects.map(({ id, title }) => ({ id, title }));
@@ -128,6 +127,7 @@ export function registerAssistantChat(
     wrap,
     send,
     service,
+    history,
     jobs,
     enabled,
     online,
@@ -143,21 +143,37 @@ export function registerAssistantChat(
   const { store } = service;
   const route = api + "/assistant/chats";
 
+  const mutations = new Map();
+
+  function serial(owner, callback) {
+    const previous = mutations.get(owner) || Promise.resolve();
+    const next = previous.catch(() => {}).then(callback);
+    mutations.set(owner, next);
+    return next.finally(() => {
+      if (mutations.get(owner) === next) mutations.delete(owner);
+    });
+  }
+
+  const privateRoute = (callback) =>
+    wrap((req, res) => serial(req.user.id, () => callback(req, res)));
+
   function save(thread, data) {
     const { id: key, owner, revision, updatedAt, ...content } = thread;
-    return store.put(kind, key, owner, { ...content, ...data }, "", revision);
+    return history.put(key, owner, revision, { ...content, ...data });
   }
 
   function append(thread, role, text, data = {}, extra = {}) {
+    const key = extra.id || id("turn");
+    if (thread.messages.some((message) => message.id === key)) return thread;
     const messages = [
       ...thread.messages,
-      { id: id("turn"), role, text, ...extra },
+      { id: key, role, text, ...extra },
     ].slice(-40);
     return save(thread, { ...data, messages });
   }
 
-  function current(user, key) {
-    const thread = store.get(kind, key);
+  async function current(user, key) {
+    const thread = await history.get(user.id, key);
     fail(thread?.owner === user.id, "Чат не найден.", 404);
     return thread;
   }
@@ -167,8 +183,8 @@ export function registerAssistantChat(
     return user?.active ? user : null;
   }
 
-  function jobThread(job) {
-    const thread = store.get(kind, job.chat?.threadId);
+  async function jobThread(job) {
+    const thread = await history.get(job.actor, job.chat.threadId);
     return thread?.pendingId === job.id ? thread : null;
   }
 
@@ -187,59 +203,57 @@ export function registerAssistantChat(
   function active(thread) {
     if (!thread.pendingId) return thread;
     prune();
-    thread = store.get(kind, thread.id);
-    const pendingId = thread.pendingId;
-    if (!pendingId || jobs.has(pendingId)) return thread;
+    const job = jobs.get(thread.pendingId);
+    if (
+      job &&
+      ["preparing", "queued", "running", "clarify"].includes(job.state)
+    )
+      return thread;
     return append(
       thread,
       "assistant",
-      "Запрос завершился без результата. Его можно отправить ещё раз.",
+      job?.result?.error ||
+        "Запрос завершился без результата. Его можно отправить ещё раз.",
       { pendingId: null },
     );
   }
 
-  const createThread = (user) => {
-    fail(
-      store.list(kind, user.id).length < 60,
-      "Удалите один из старых чатов и повторите попытку.",
-      409,
-    );
-    return store.put(kind, id("chat"), user.id, {
-      title: "Новый чат",
-      target: null,
-      messages: [],
-      proposal: null,
-      pendingId: null,
-    });
-  };
+  const createThread = (user) => ({
+    id: id("chat"),
+    owner: user.id,
+    revision: null,
+    messages: [],
+    proposal: null,
+    pendingId: null,
+  });
 
   app.get(
     route,
     auth,
-    wrap((req, res) => {
-      const entries = store
-        .list(kind, req.user.id)
-        .map(({ id, title, updatedAt }) => ({ id, title, updatedAt }));
-      send(res, entries);
+    privateRoute(async (req, res) => {
+      send(res, await history.list(req.user.id));
     }),
   );
 
   app.get(
     route + "/:threadId",
     auth,
-    wrap((req, res) => {
-      send(res, detail(active(current(req.user, req.params.threadId))));
+    privateRoute(async (req, res) => {
+      send(
+        res,
+        detail(await active(await current(req.user, req.params.threadId))),
+      );
     }),
   );
 
   app.delete(
     route + "/:threadId",
     auth,
-    wrap((req, res) => {
-      const thread = current(req.user, req.params.threadId);
+    privateRoute(async (req, res) => {
+      const thread = await current(req.user, req.params.threadId);
+      await history.remove(thread.owner, thread.id, thread.revision);
       const job = jobs.get(thread.pendingId);
-      if (job) cancel(job);
-      store.remove(kind, thread.id);
+      if (job) await cancel(job, false);
       send(res, {});
     }),
   );
@@ -247,26 +261,26 @@ export function registerAssistantChat(
   app.post(
     route + "/:threadId/cancel",
     auth,
-    wrap((req, res) => {
-      const thread = active(current(req.user, req.params.threadId));
+    privateRoute(async (req, res) => {
+      const thread = await active(await current(req.user, req.params.threadId));
       const job = jobs.get(thread.pendingId);
-      if (job) cancel(job);
-      send(res, detail(active(current(req.user, thread.id))));
+      if (job) await cancel(job);
+      send(res, detail(job ? await current(req.user, thread.id) : thread));
     }),
   );
 
   app.post(
     [route + "/message", route + "/:threadId/message"],
     auth,
-    wrap(async (req, res) => {
+    privateRoute(async (req, res) => {
       const user = req.user;
       const key = req.params.threadId;
       fail(
-        enabled && online(),
+        enabled && online() && history.online(),
         "ИИ-чат сейчас недоступен. Проверьте подключение компьютера колледжа.",
         503,
       );
-      if (key) current(user, key);
+      if (key) await current(user, key);
       checkQueue(user.id);
       const incoming = await parseMaterials(req, res);
       if (res.destroyed) return;
@@ -282,8 +296,10 @@ export function registerAssistantChat(
           ? "Составь учебную работу по приложенным лекциям."
           : "");
       fail(text, "Напишите сообщение или прикрепите лекцию.");
+      const thread = key
+        ? await active(await current(user, key))
+        : createThread(user);
       checkQueue(user.id);
-      const thread = key ? active(current(user, key)) : createThread(user);
       const pending = jobs.get(thread.pendingId);
       fail(
         !pending || pending.state === "clarify",
@@ -340,13 +356,13 @@ export function registerAssistantChat(
         );
       }
       if (pending?.work && (targetId || "") === (thread.target?.id || "")) {
-        append(thread, "user", text, {}, { attachments });
+        const updated = await append(thread, "user", text, {}, { attachments });
         pending.documents = documents;
         pending.input.lectures = lectureList(pending.documents);
         resume(pending, text);
-        return send(res.status(202), detail(current(user, thread.id)));
+        return send(res.status(202), detail(updated));
       }
-      const history = thread.messages
+      const recentMessages = thread.messages
         .slice(-10)
         .map(({ role, text }) => ({ role, text: text.slice(0, 650) }));
       const job = enqueue({
@@ -365,7 +381,7 @@ export function registerAssistantChat(
         input: {
           kind: "chat",
           message: text,
-          history,
+          history: recentMessages,
           projects: links(projectList),
           currentProjectId: target?.id || "",
           details: detailed.map(context),
@@ -399,7 +415,7 @@ export function registerAssistantChat(
         },
       });
       try {
-        const updated = append(
+        const updated = await append(
           thread,
           "user",
           text,
@@ -410,7 +426,8 @@ export function registerAssistantChat(
           },
           { attachments },
         );
-        if (pending) cancel(pending);
+        if (pending) await cancel(pending, false);
+        resume(job);
         send(res.status(202), detail(updated));
       } catch (error) {
         jobs.delete(job.id);
@@ -422,18 +439,25 @@ export function registerAssistantChat(
   app.post(
     route + "/:threadId/apply/:proposalId",
     auth,
-    wrap((req, res) => {
-      const result = store.transaction(() => {
-        const thread = current(req.user, req.params.threadId);
-        const { proposalId } = req.params;
-        if (thread.messages.some((message) => message.applied === proposalId))
-          return thread;
-        const proposal = thread.proposal;
-        fail(
-          proposal?.id === proposalId && !thread.pendingId,
-          "Сначала дождитесь ответа или запросите новый предпросмотр.",
-          409,
-        );
+    privateRoute(async (req, res) => {
+      const thread = await active(await current(req.user, req.params.threadId));
+      const { proposalId } = req.params;
+      if (thread.messages.some((message) => message.applied === proposalId))
+        return send(res, detail(thread));
+      const proposal = thread.proposal;
+      fail(
+        proposal?.id === proposalId && !thread.pendingId,
+        "Сначала дождитесь ответа или запросите новый предпросмотр.",
+        409,
+      );
+      const key = "assistant-draft-apply:" + req.user.id;
+      const projects = store.transaction(() => {
+        // Keep only draft IDs here so a lost acknowledgement cannot apply the proposal twice.
+        const previous = store.request(key, proposalId);
+        if (previous)
+          return JSON.parse(previous).map((id) =>
+            service.get(req.user, "project", id),
+          );
         let projects;
         if (proposal.action === "create") {
           projects = createAssistantProjects(service, req.user, proposal.work);
@@ -474,46 +498,59 @@ export function registerAssistantChat(
             }),
           ];
         }
-        return append(
-          thread,
-          "assistant",
-          proposal.action === "create"
-            ? "Черновик сохранён. Его можно открыть в редакторе."
-            : "Изменения внесены в рабочий черновик.",
-          {
-            proposal: null,
-            target: projects.length === 1 ? links(projects)[0] : null,
-          },
-          { projects: links(projects), applied: proposalId },
+        store.request(
+          key,
+          proposalId,
+          projects.map(({ id }) => id),
         );
+        return projects;
       });
+      const result = await append(
+        thread,
+        "assistant",
+        proposal.action === "create"
+          ? "Черновик сохранён. Его можно открыть в редакторе."
+          : "Изменения внесены в рабочий черновик.",
+        {
+          proposal: null,
+          target: projects.length === 1 ? links(projects)[0] : null,
+        },
+        { projects: links(projects), applied: proposalId },
+      );
       send(res, detail(result));
     }),
   );
 
-  function settle(job, text, data = {}, extra = {}) {
-    const thread = jobThread(job);
+  async function settle(job, text, data = {}, extra = {}) {
+    const thread = await jobThread(job);
     if (thread)
-      append(thread, "assistant", text, { pendingId: null, ...data }, extra);
+      await append(
+        thread,
+        "assistant",
+        text,
+        { pendingId: null, ...data },
+        { id: job.replyId, ...extra },
+      );
   }
 
   return {
-    completePlan(job, value) {
-      const thread = jobThread(job);
+    serial,
+    async completePlan(job, value) {
+      const thread = await jobThread(job);
       const user = ownerOf(job);
       if (!thread || !user) return false;
       const decision = readChatDecision(value);
       if (!decision) {
-        settle(job, modelFailure);
+        await settle(job, modelFailure);
         return false;
       }
       const { action, text, instruction, roundId, edits } = decision;
       if (action === "clarify" && job.chat.replies.length < 3) {
-        waitForReply(job, text);
+        await waitForReply(job, text);
         return true;
       }
       if (action === "answer" || action === "clarify") {
-        settle(job, text);
+        await settle(job, text);
         return false;
       }
       let project;
@@ -527,7 +564,7 @@ export function registerAssistantChat(
           if (error.status !== 404) throw error;
         }
         if (!project || (writable && project.status === "archived")) {
-          settle(
+          await settle(
             job,
             writable
               ? "Выберите доступную для редактирования работу в поле «Работа для чата» или напишите её точное название."
@@ -539,7 +576,7 @@ export function registerAssistantChat(
       const target = project ? links([project])[0] : null;
       const revision = project?.revision;
       if (action === "locate" || action === "inspect") {
-        settle(
+        await settle(
           job,
           action === "locate"
             ? `Нашёл «${project.title}».`
@@ -550,7 +587,7 @@ export function registerAssistantChat(
         return false;
       }
       if (project && revision !== job.chat.revisions[project.id]) {
-        settle(
+        await settle(
           job,
           "Работа изменилась во время запроса. Повторите поручение для свежей редакции.",
           { target },
@@ -560,7 +597,7 @@ export function registerAssistantChat(
       if (action === "update") {
         const changes = draftChanges(project, edits);
         if (!changes?.length) {
-          settle(
+          await settle(
             job,
             changes
               ? "Указанный текст уже сохранён в работе."
@@ -568,7 +605,7 @@ export function registerAssistantChat(
             { target },
           );
         } else {
-          settle(
+          await settle(
             job,
             "Подготовил изменения. Проверьте текст перед применением.",
             {
@@ -590,12 +627,16 @@ export function registerAssistantChat(
           ? project.rounds.find((entry) => entry.id === roundId)
           : null;
       if (action === "add" && roundId && !round) {
-        settle(job, "Уточните название тура, в который добавить задания.", {
-          target,
-        });
+        await settle(
+          job,
+          "Уточните название тура, в который добавить задания.",
+          {
+            target,
+          },
+        );
         return false;
       }
-      if (target) save(thread, { target });
+      if (target) await save(thread, { target });
       job.chat.work = {
         action,
         target,
@@ -620,13 +661,13 @@ export function registerAssistantChat(
       return true;
     },
 
-    clarify(job, question) {
-      const thread = jobThread(job);
-      if (thread) append(thread, "assistant", question);
+    async clarify(job, question) {
+      const thread = await jobThread(job);
+      if (thread)
+        await append(thread, "assistant", question, {}, { id: job.replyId });
     },
 
-    finish(job, state, result) {
-      if (!jobThread(job)) return;
+    async finish(job, state, result) {
       if (state === "ready" && result?.work && job.chat.work) {
         const { action, target, revision, roundId, roundTitle } = job.chat.work;
         const groups = result.work.groups;
@@ -634,7 +675,7 @@ export function registerAssistantChat(
           (n, group) => n + group.questions.length,
           0,
         );
-        settle(
+        await settle(
           job,
           `Подготовил заданий — ${total}. Проверьте работу, ключи и источники перед сохранением.`,
           {
@@ -651,11 +692,13 @@ export function registerAssistantChat(
           },
         );
       } else if (state === "failed" || state === "cancelled") {
-        settle(
+        await settle(
           job,
           state === "cancelled"
             ? "Запрос остановлен."
             : result?.error || modelFailure,
+          {},
+          state === "cancelled" ? { id: id("turn") } : {},
         );
       }
     },

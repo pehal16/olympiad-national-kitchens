@@ -3,6 +3,7 @@ import { networkInterfaces } from "node:os";
 import { setTimeout as delay } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
 import { chatRequest, readChatDecision } from "../../shared/assistant-chat.mjs";
+import { historyWireBytes, openAssistantHistory } from "../../shared/assistant-history.mjs";
 import {
   defaultModel,
   ollamaRequest,
@@ -47,7 +48,7 @@ async function json(url, { body, headers, timeout = 5000 } = {}) {
   return response.json();
 }
 
-async function cabinetJson(url, body, headers, networkInterface, timeout) {
+async function cabinetJson(url, body, headers, networkInterface, timeout, limit) {
   if (!networkInterface || !url.startsWith("https:"))
     return json(url, { body, headers, timeout });
 
@@ -87,7 +88,7 @@ async function cabinetJson(url, body, headers, networkInterface, timeout) {
   const chunks = [];
   for await (const chunk of response) {
     bytes += chunk.length;
-    if (bytes > 192 * 1024) throw new Error("Ответ кабинета слишком большой.");
+    if (bytes > limit) throw new Error("Ответ кабинета слишком большой.");
     chunks.push(chunk);
   }
   return JSON.parse(Buffer.concat(chunks, bytes).toString("utf8"));
@@ -363,6 +364,34 @@ function cabinetOrigin(value) {
   return url.origin;
 }
 
+async function serveHistory(endpoint, history) {
+  while (true) {
+    try {
+      const { job } = await endpoint("/history/claim", { identity: history.identity }, 14000, historyWireBytes);
+      if (!job) continue;
+      const result = { identity: history.identity, id: job.id, lease: job.lease };
+      try {
+        result.value = history.perform(job);
+      } catch (error) {
+        result.error = error.historyCode || "local_failure";
+      }
+      // Only retry delivery. The SQLite mutation has already run.
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          await endpoint("/history/complete", result);
+          break;
+        } catch (error) {
+          if (error.status === 409) break;
+          if (attempt === 2) throw error;
+          await delay(500);
+        }
+      }
+    } catch {
+      await delay(2000);
+    }
+  }
+}
+
 async function work() {
   const origin = cabinetOrigin(process.env.GKTS_ASSISTANT_ORIGIN);
   const credential = process.env.GKTS_ASSISTANT_TOKEN;
@@ -370,17 +399,27 @@ async function work() {
     throw new Error("Неверный формат рабочего ключа.");
   const headers = { Authorization: `Bearer ${credential}` };
   const networkInterface = process.env.GKTS_ASSISTANT_INTERFACE;
-  const endpoint = async (route, body, timeout = 5000) => {
+  const endpoint = async (route, body, timeout = 5000, limit = 192 * 1024) => {
     const payload = await cabinetJson(
       origin + api + route,
       body,
       headers,
       networkInterface,
       timeout,
+      limit,
     );
     if (payload.ok !== true) throw new Error("Ответ кабинета не принят.");
     return payload.data;
   };
+  const historyFile = process.env.GKTS_ASSISTANT_HISTORY_FILE;
+  if (historyFile) {
+    try {
+      const history = openAssistantHistory(historyFile);
+      void serveHistory(endpoint, history);
+    } catch {
+      console.error("Локальная история ИИ-чата недоступна.");
+    }
+  }
   let previousStatus;
   const status = (message) => {
     if (previousStatus !== message)
