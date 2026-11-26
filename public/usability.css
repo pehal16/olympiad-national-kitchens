@@ -480,3 +480,20 @@ body.teacher-demo .landing-hero-actions > :not(#hero-action-register) {
     font-size: clamp(26px, 8.2vw, 32px);
   }
 }
+
+.teacher-demo #result-section .result-hero {
+  grid-template-columns: minmax(0, 1fr);
+}
+.teacher-demo #result-section .certificate-section {
+  min-width: 0;
+  margin-top: 0;
+}
+.teacher-demo #result-section .certificate-actions > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 540px) {
+  .teacher-demo #result-section .certificate-section { padding: 16px; }
+  .teacher-demo #result-section #certificate-open { width: 100%; white-space: normal; }
+}

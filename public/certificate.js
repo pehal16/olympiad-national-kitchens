@@ -28,27 +28,72 @@
   }
 
   function fitParticipantName() {
-    const sheetTop = sheet.getBoundingClientRect().top;
-    const maxFooterBottom = sheet.getBoundingClientRect().height - 25;
+    sheet.classList.toggle("compact-name", false);
+    const footer = sheet.querySelector(".certificate-footer");
+    const maxFooterBottom = sheet.clientHeight - 25;
+    const footerOverflows = () => footer.offsetTop + footer.offsetHeight > maxFooterBottom;
     let fontSize = fields.name.textContent.length > 32 ? 50 : 63;
     fields.name.style.fontSize = `${fontSize}px`;
-    while (
-      fontSize > 20 &&
-      document.querySelector(".certificate-footer").getBoundingClientRect().bottom - sheetTop > maxFooterBottom
-    ) {
+    while (fontSize > 20 && footerOverflows()) {
       fontSize -= 2;
       fields.name.style.fontSize = `${fontSize}px`;
     }
-    if (document.querySelector(".certificate-footer").getBoundingClientRect().bottom - sheetTop > maxFooterBottom) {
+    if (footerOverflows()) {
       sheet.classList.add("compact-name");
-      while (
-        fontSize > 16 &&
-        document.querySelector(".certificate-footer").getBoundingClientRect().bottom - sheetTop > maxFooterBottom
-      ) {
+      while (fontSize > 16 && footerOverflows()) {
         fontSize -= 1;
         fields.name.style.fontSize = `${fontSize}px`;
       }
     }
+  }
+
+  function renderNames(fullName, mentorName = "") {
+    fields.name.textContent = fullName;
+    fields.name.classList.toggle("long-name", fullName.length > 32);
+    fields.mentor.textContent = mentorName || "—";
+    fields.mentor.style.fontSize = `${mentorName.length > 70 ? 12 : mentorName.length > 35 ? 15 : 19}px`;
+  }
+
+  function openDemoEditor(attemptId, participant) {
+    const editor = document.getElementById("certificate-editor");
+    const fullNameInput = document.getElementById("certificate-full-name");
+    const mentorInput = document.getElementById("certificate-mentor-name");
+    const draftKey = `nko_teacher_certificate_${attemptId}`;
+    try {
+      const draft = JSON.parse(sessionStorage.getItem(draftKey));
+      if (typeof draft?.fullName === "string") fullNameInput.value = draft.fullName.slice(0, fullNameInput.maxLength);
+      if (typeof draft?.mentorName === "string") mentorInput.value = draft.mentorName.slice(0, mentorInput.maxLength);
+    } catch {
+      // Editing still works when the browser blocks session storage.
+    }
+
+    const updatePreview = (saveDraft = false) => {
+      const fullName = fullNameInput.value.trim().replace(/\s+/g, " ");
+      const mentorName = mentorInput.value.trim().replace(/\s+/g, " ");
+      renderNames(fullName || participant.fullName, mentorName);
+      fitParticipantName();
+      if (saveDraft) {
+        try { sessionStorage.setItem(draftKey, JSON.stringify({ fullName, mentorName })); } catch {}
+      }
+    };
+    for (const input of [fullNameInput, mentorInput]) {
+      input.addEventListener("input", () => updatePreview(true));
+    }
+
+    if (!window.location.pathname.startsWith("/demo-teacher/")) {
+      document.querySelector(".toolbar-back").href = "./?demo=teacher";
+    }
+    document.getElementById("certificate-participation").textContent = "прошёл(а) демоверсию онлайн-олимпиады";
+    editor.append(saveButton.parentElement);
+    editor.hidden = false;
+    updatePreview();
+
+    const fitPreview = () => {
+      const width = sheet.offsetWidth;
+      if (width) sheet.style.setProperty("--certificate-preview-zoom", Math.min(1, editor.offsetWidth / width));
+    };
+    fitPreview();
+    window.addEventListener("resize", fitPreview);
   }
 
   async function loadCertificate() {
@@ -136,17 +181,15 @@
       fail("Реквизиты приказа не настроены. Обратитесь к организатору олимпиады.");
       return;
     }
-    fields.name.textContent = participant.fullName;
+    const allowPersonalization = !organizerMode && attempt.demonstration === true && attempt.teacherDemo === true;
+    renderNames(participant.fullName, participant.mentorName);
     if (attempt.demonstration) {
       sheet.classList.add('is-demo');
       document.querySelector('.document-toolbar strong').textContent='Демонстрационный сертификат';
       document.querySelector('.certificate-pilot-label').textContent='Образец · не подтверждает участие в официальной олимпиаде';
     }
     if (organizerMode) document.title = `Свидетельство — ${participant.fullName}`;
-    fields.name.classList.toggle("long-name", participant.fullName.length > 32);
     fields.score.textContent = `${score} из ${maxScore} баллов`;
-    fields.mentor.textContent = participant.mentorName || "—";
-    fields.mentor.style.fontSize = `${participant.mentorName?.length > 70 ? 12 : participant.mentorName?.length > 35 ? 15 : 19}px`;
     const orderDate = new Intl.DateTimeFormat("ru-RU", {
       day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC"
     }).format(new Date(order.date));
@@ -174,9 +217,10 @@
       saveButton.disabled = true;
       return;
     }
-    status.textContent = "В окне печати выберите «Сохранить как PDF» и горизонтальный формат A4. На телефоне лист можно сдвигать по горизонтали; сам макет не меняется.";
+    status.textContent = allowPersonalization ? "" : "В окне печати выберите «Сохранить как PDF» и горизонтальный формат A4. На телефоне лист можно сдвигать по горизонтали; сам макет не меняется.";
     saveButton.disabled = false;
     feedbackLink.hidden = organizerMode || Boolean(attempt.demonstration);
+    if (allowPersonalization) openDemoEditor(attemptId, participant);
   }
 
   saveButton.addEventListener("click", () => {

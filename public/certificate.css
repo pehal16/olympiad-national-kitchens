@@ -27,7 +27,8 @@ body {
 .toolbar-back { color: #0d6662; font-weight: 700; text-decoration: none; }
 .toolbar-back:hover { text-decoration: underline; }
 
-.document-toolbar button {
+.document-toolbar button,
+.certificate-editor button {
   padding: 12px 20px;
   border: 0;
   border-radius: 9px;
@@ -36,13 +37,16 @@ body {
   font: 700 14px Arial, sans-serif;
   cursor: pointer;
 }
-.document-toolbar button:disabled { opacity: .55; cursor: default; }
+.document-toolbar button:disabled,
+.certificate-editor button:disabled { opacity: .55; cursor: default; }
 
-.document-toolbar > .document-actions {
+.document-toolbar > .document-actions,
+.certificate-editor > .document-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
+.certificate-editor > .document-actions { justify-content: flex-end; }
 .toolbar-feedback {
   display: inline-flex;
   align-items: center;
@@ -81,6 +85,53 @@ main {
   border-radius: 10px;
   background: #fff7f2;
   color: #763f2f;
+}
+
+.certificate-editor {
+  display: grid;
+  gap: 16px;
+  max-width: 1122px;
+  margin: 0 auto 20px;
+  padding: clamp(16px, 3vw, 24px);
+  border: 1px solid #d5e1df;
+  border-radius: 14px;
+  background: #fff;
+}
+.certificate-editor[hidden] { display: none; }
+.certificate-editor h1 {
+  margin: 0;
+  font: 700 clamp(22px, 3vw, 30px) / 1.15 Georgia, "Times New Roman", serif;
+}
+.certificate-editor-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+.certificate-editor label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.certificate-editor input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #91a9aa;
+  border-radius: 8px;
+  color: inherit;
+  font: 16px Arial, sans-serif;
+}
+.certificate-editor input:focus-visible { outline: 2px solid #0a625d; outline-offset: 2px; }
+.certificate-editor p { margin: 0; color: #42555a; font-size: 14px; line-height: 1.4; }
+
+@media (max-width: 540px) {
+  .certificate-editor-fields { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media screen {
+  .certificate-editor:not([hidden]) + .certificate-sheet { zoom: var(--certificate-preview-zoom, 1); }
 }
 
 .certificate-sheet[hidden] { display: none !important; }
@@ -309,7 +360,7 @@ main {
 
 @media print {
   html, body { width: 297mm; height: 210mm; margin: 0; background: #fff; }
-  .document-toolbar, .document-status { display: none !important; }
+  .document-toolbar, .document-status, .certificate-editor { display: none !important; }
   main { overflow: visible; width: 297mm; height: 210mm; padding: 0; }
   .certificate-sheet {
     width: 297mm;

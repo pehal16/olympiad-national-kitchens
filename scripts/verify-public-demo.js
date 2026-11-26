@@ -56,6 +56,7 @@ async function exercise(teacherDemo){
  }
  assert.notEqual(view.status,'in_progress');const certificate=await api(prefix+'/certificate'),table=await api(prefix+'/story-result');
  assert.equal(certificate.demonstration,true);assert.equal(certificate.summary.totalMaxScore,150);assert.equal(table.state,'published');assert.equal(table.demonstration,true);
+ assert.equal(certificate.teacherDemo,teacherDemo?true:undefined);
  const foreign=await fetch(base+prefix+'/certificate',{headers:{'X-Attempt-Token':'incorrect-synthetic-owner-token','X-Demo-Session':crypto.randomBytes(16).toString('hex')},signal:AbortSignal.timeout(30000)});assert.equal(foreign.status,401);
  console.log(JSON.stringify({environment:'live isolated Cloudflare demonstration',teacherDemo,answers:36,duplicateAnswerSafe:true,reloadSafe:true,foreignOwnerDenied:true,score:certificate.summary.totalFinalScore,maxScore:150,earnedPlates:table.plates.length,certificateDemonstration:true}));
 }

@@ -3388,6 +3388,21 @@ function renderCertificate(attempt, scoresVisible) {
 
   elements.certificateSection.classList.toggle("hidden", !available);
   elements.certificateOpen.disabled = !available;
+
+  const heading = document.getElementById("certificate-heading");
+  const description = elements.certificateSection.querySelector(".certificate-actions p");
+  if (attempt?.demonstration && attempt.teacherDemo) {
+    heading.textContent = "Ваш демосертификат";
+    elements.certificateOpen.textContent = "Конструктор сертификата";
+    description.textContent = "Впишите своё ФИО и ФИО наставника. Сертификат можно сохранить как PDF.";
+    elements.resultTitle.closest(".result-head").after(elements.certificateSection);
+  } else if (attempt?.story) {
+    heading.textContent = attempt.demonstration ? "Демонстрационный образец сертификата" : "Ваше свидетельство об участии";
+    elements.certificateOpen.textContent = attempt.demonstration ? "Открыть образец" : "Открыть свидетельство";
+    description.textContent = attempt.demonstration
+      ? "Пробное прохождение завершено. Образец с демонстрационными баллами можно сохранить как PDF. Он не подтверждает участие в официальной олимпиаде."
+      : "Олимпиада завершена. В свидетельстве указаны ваши баллы из 150 и приказ № 199 / 05.10.2026. Документ можно сохранить как PDF.";
+  }
 }
 
 function renderResult() {
@@ -3424,8 +3439,9 @@ function renderResult() {
       "Попытка завершена, результат сохранён в облаке. Организатор увидит итоговый балл и статус в панели управления.";
   } else {
     elements.resultTitle.textContent = `Ваш результат: ${summary.totalFinalScore} из ${summary.totalMaxScore}`;
-    elements.resultSubtitle.textContent =
-      "Ответы сохранены. Это тестовый результат; сертификат участника доступен ниже.";
+    elements.resultSubtitle.textContent = state.attempt.teacherDemo
+      ? "Ответы сохранены."
+      : "Ответы сохранены. Это тестовый результат; сертификат участника доступен ниже.";
   }
 
   renderResultOverview(summary, state.attempt, scoresVisible);

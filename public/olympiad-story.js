@@ -152,14 +152,11 @@
     session=attempt;request=api;onAvailable=notify;
     for(const id of ['result-overview','result-next','result-tours'])doc.getElementById(id)?.classList.add('hidden');
     if(!resultMount){resultMount=el('section','story-result');doc.getElementById('result-tours').after(resultMount);}
-    const certificate=doc.getElementById('certificate-section');
-    doc.getElementById('result-section').append(certificate);
-    doc.getElementById('certificate-heading').textContent=attempt.demonstration?'Демонстрационный образец сертификата':'Ваше свидетельство об участии';
-    doc.getElementById('certificate-open').textContent=attempt.demonstration?'Открыть образец':'Открыть свидетельство';
-    certificate.querySelector('p').textContent=attempt.demonstration?'Пробное прохождение завершено. Образец с демонстрационными баллами можно сохранить как PDF; он не подтверждает участие в официальной олимпиаде.':'Олимпиада завершена. В свидетельстве указаны ваши баллы из 150 и приказ № 199 / 05.10.2026. Документ можно сохранить как PDF.';
+    const teacherDemo=attempt.demonstration&&attempt.teacherDemo;
+    if(!teacherDemo)doc.getElementById('result-section').append(doc.getElementById('certificate-section'));
     if(loaded){if(resultMount._publishedData!==loaded||resultMount._decorationsDisabled!==Boolean(session.story.decorationsDisabled))renderTable(loaded);return;}
     doc.getElementById('result-title').textContent='Меню принято. Спасибо за этот вечер!';
-    doc.getElementById('result-subtitle').textContent='Ответы сохранены. Ужин на общем столе — финальная сцена нашей истории. Свидетельство с баллами доступно в конце страницы. Ваше заработанное меню и реакции гостя откроются после публикации итогов.';
+    doc.getElementById('result-subtitle').textContent=teacherDemo?'Ответы сохранены. Теперь можно оформить демосертификат.':'Ответы сохранены. Ужин на общем столе — финальная сцена нашей истории. Свидетельство с баллами доступно в конце страницы. Ваше заработанное меню и реакции гостя откроются после публикации итогов.';
     root.T5DishService?.hideInline();
     if(resultMount._waitingAttemptId!==attempt.id||resultMount._decorationsDisabled!==Boolean(attempt.story.decorationsDisabled)){
       resultMount.replaceChildren();resultMount._waitingAttemptId=attempt.id;resultMount._decorationsDisabled=Boolean(attempt.story.decorationsDisabled);
@@ -196,10 +193,6 @@
     for(const row of data.kitchen){const article=el('article','story-kitchen-row');article.append(el('h3','',row.receipt.dishTitle),el('p','',`Баллы: ${row.score} из ${row.maxScore}. ${row.fullyCorrect?'Блюдо добавлено в меню.':'Сохранён фактический состав вашей подачи.'}`),el('p','',row.receipt.composition.join(' · ')),button('Посмотреть подачу и реакцию',()=>{
       root.T5DishService?.sync({id:session.id+':review:'+Date.now(),status:'reviewed',dishService:row.receipt},()=>{});root.T5DishService?.setLocked(false);
     }));kitchen.append(article);}resultMount.append(kitchen);
-    const certificate=doc.getElementById('certificate-section');
-    doc.getElementById('result-section').append(certificate);
-    doc.getElementById('certificate-heading').textContent=session?.demonstration?'Демонстрационный образец сертификата':'Ваше свидетельство об участии';
-    doc.getElementById('certificate-open').textContent=session?.demonstration?'Открыть образец':'Открыть свидетельство';
   }
   doc.addEventListener('visibilitychange',()=>{clearTimer();if(!doc.hidden&&session&&!loaded)refresh();});
   root.OlympiadStory={intro,chapter,result,draft,action,updateState,phase};

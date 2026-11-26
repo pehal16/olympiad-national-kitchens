@@ -48,6 +48,7 @@ test('anonymous isolated demonstration: all 36 questions, separate timed and unt
  const restored=await api(prefix);assert.equal(restored.data.progress.answeredCount,36);
  const table=await api(prefix+'/story-result');assert.equal(table.data.state,'published');assert.equal(table.data.plates.length,51);
  const cert=await api(prefix+'/certificate');assert.equal(cert.data.demonstration,true);assert.equal(cert.data.summary.totalFinalScore,150);
+ assert.equal(cert.data.teacherDemo,undefined);
  const raw=await store.loadAttemptById(id);assert.equal(raw.demonstration,true);assert.doesNotMatch(JSON.stringify(raw),/Не Сохранять|Не сохранять/);
  const second=await api('/api/public/attempts/start',{participant:profile},'different-demo-owner-access-token','c'.repeat(32));assert.equal(second.status,201);assert.notEqual(second.data.id,id);
  assert.equal((await api(prefix+'/certificate',null,'different-demo-owner-access-token')).status,401);
@@ -94,7 +95,10 @@ test('anonymous isolated demonstration: all 36 questions, separate timed and unt
  assert.equal(lesson.status,'reviewed');
  assert.equal(lesson.summary.totalFinalScore,150);
  assert.equal(lesson.progress.answeredCount,36);
- assert.equal((await api(route+'/certificate')).data.demonstration,true);
+ const teacherCertificate=(await api(route+'/certificate')).data;
+ assert.equal(teacherCertificate.demonstration,true);
+ assert.equal(teacherCertificate.teacherDemo,true);
+ assert.deepEqual(teacherCertificate.participant,{fullName:'Демонстрационный Участник',mentorName:''});
  assert.equal((await api('/api/public/register',profile)).data.completedAttemptId,id);
  assert.equal((await api('/api/public/register'+teacher,profile)).data.completedAttemptId,lesson.id);
 });

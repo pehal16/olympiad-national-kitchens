@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Сертификат участника — Национальные кухни мира</title>
     <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
-    <link rel="stylesheet" href="certificate.css?v=public-demo1" />
+    <link rel="stylesheet" href="certificate.css?v=teacher-certificate-20261126" />
   </head>
   <body>
     <header class="document-toolbar">
@@ -22,6 +22,20 @@
 
     <main>
       <div id="certificate-status" class="document-status" role="status">Загружаем сохранённый результат…</div>
+      <section id="certificate-editor" class="certificate-editor" aria-labelledby="certificate-editor-title" hidden>
+        <h1 id="certificate-editor-title">Конструктор сертификата</h1>
+        <div class="certificate-editor-fields">
+          <label for="certificate-full-name">
+            Ваше ФИО
+            <input id="certificate-full-name" type="text" autocomplete="name" maxlength="160" />
+          </label>
+          <label for="certificate-mentor-name">
+            ФИО наставника (если есть)
+            <input id="certificate-mentor-name" type="text" autocomplete="off" maxlength="160" />
+          </label>
+        </div>
+        <p>Имена появятся на сертификате сразу и останутся в этой вкладке.</p>
+      </section>
       <article id="certificate-sheet" class="certificate-sheet" aria-label="Сертификат участника" hidden>
         <img class="certificate-art" src="assets/olympiad/certificate/ornamental-frame-v1.png" alt="" aria-hidden="true" />
         <header class="certificate-header">
@@ -40,7 +54,7 @@
           <p class="certificate-event">Олимпиада «Национальные кухни мира»</p>
           <p class="certificate-intro">Настоящим подтверждается, что</p>
           <h1 id="certificate-name"></h1>
-          <p class="certificate-detail">принял(а) участие в онлайн-олимпиаде<br />«Национальные кухни мира»</p>
+          <p class="certificate-detail"><span id="certificate-participation">принял(а) участие в онлайн-олимпиаде</span><br />«Национальные кухни мира»</p>
         </div>
         <div class="certificate-facts">
           <div class="certificate-fact">
@@ -64,6 +78,6 @@
         <img class="certificate-seal" src="assets/olympiad/certificate/college-seal-user-v1.jpg" alt="Печать Горловского колледжа технологий и сервиса" width="510" height="352" decoding="async" />
       </article>
     </main>
-    <script src="certificate.js?v=usability20261116" defer></script>
+    <script src="certificate.js?v=teacher-certificate-20261126" defer></script>
   </body>
 </html>
