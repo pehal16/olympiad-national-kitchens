@@ -13,6 +13,19 @@ import {
   testScopeQuestion,
 } from "../shared/assistant-work.mjs";
 
+test("an explicit single request keeps its topic and count when planning returns no usable plan", () => {
+  const plan = resolveWorkPlan(null, {
+    instruction:
+      "Добавь ровно один вопрос с одним правильным ответом о сокращении дробей.",
+    replies: [],
+    inProject: true,
+  });
+  assert.deepEqual(
+    plan.groups.map(({ count, topic, format }) => ({ count, topic, format })),
+    [{ count: 1, topic: "сокращении дробей", format: "test" }],
+  );
+});
+
 test("explicit clarification retains all requested blocks in one work", () => {
   const input = {
     instruction:

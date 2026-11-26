@@ -144,10 +144,17 @@ async function generateWork(job, endpoint) {
   const input = job.input;
   const scope = testScopeQuestion(input);
   if (scope) return { clarify: scope };
-  const plan = resolveWorkPlan(
-    await structured(workPlanRequest(input, model)),
-    input,
-  );
+  const request = workPlanRequest(input, model);
+  let plan = resolveWorkPlan(await structured(request), input);
+  if (!plan) {
+    plan = resolveWorkPlan(
+      await structured({
+        ...request,
+        options: { ...request.options, temperature: 0.05, num_predict: 3200 },
+      }),
+      input,
+    );
+  }
   if (!plan) return { failure: "invalid_plan" };
   if (plan.state === "clarify") return { clarify: plan.question };
   const results = [];

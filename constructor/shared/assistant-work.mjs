@@ -199,9 +199,9 @@ function explicitWorkBlocks(input) {
       .slice(match.index + match[0].length, end)
       .split(/[,.;\n]/u)[0];
     const details = clause.replace(/\s+и(?:\s+ровно)?\s*$/iu, "").trim();
-    const topic =
-      details.match(/(?:^|\s)(?:по|о|об|про|на тему)\s+(.+)$/iu)?.[1] ||
-      details.replace(/^на\s+/iu, "");
+    const namedTopic = details.match(/(?:^|\s)(?:по|о|об|про|на тему)\s+(.+)$/iu)?.[1];
+    if (matches.length === 1 && !namedTopic) return [];
+    const topic = namedTopic || details.replace(/^на\s+/iu, "");
     const count = numberWords.get(match[1].toLowerCase()) ?? Number(match[1]);
     const label = text(topic, 180, 3);
     if (!label || count < 1 || count > 20) return [];
@@ -221,7 +221,7 @@ function explicitWorkBlocks(input) {
       },
     ];
   });
-  return groups.length === matches.length && groups.length >= 2 ? groups : [];
+  return groups.length === matches.length ? groups : [];
 }
 
 export function resolveWorkPlan(candidate, input) {
