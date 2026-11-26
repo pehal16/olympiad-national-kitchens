@@ -8,10 +8,49 @@ import { randomBytes } from "node:crypto";
 import { zipSync } from "fflate";
 import { createApp, API } from "../server/index.mjs";
 import { validateProject } from "../server/domain.mjs";
+import { researchWorkGroup } from "../server/assistant-sources.mjs";
 import {
   resolveWorkPlan,
   testScopeQuestion,
 } from "../shared/assistant-work.mjs";
+
+test("an explicit single request keeps its topic and count when planning returns no usable plan", () => {
+  const plan = resolveWorkPlan(null, {
+    instruction:
+      "Добавь ровно один вопрос с одним правильным ответом о сокращении дробей.",
+    replies: [],
+    inProject: true,
+  });
+  assert.deepEqual(
+    plan.groups.map(({ count, topic, format }) => ({ count, topic, format })),
+    [{ count: 1, topic: "сокращении дробей", format: "test" }],
+  );
+});
+
+test("a supplied textbook chapter remains usable when plan keywords are in another language", async () => {
+  const chapter = new URL(
+    "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces",
+  );
+  const text =
+    "Intermolecular forces include dispersion forces, dipole-dipole attractions and hydrogen bonds.";
+  const cache = new Map([
+    [
+      chapter.href,
+      Promise.resolve({
+        url: chapter,
+        bytes: Buffer.from("<main><p>" + text + "</p></main>"),
+      }),
+    ],
+  ]);
+  const result = await researchWorkGroup(
+    { instruction: "Учебник " + chapter.href, replies: [] },
+    { topic: "Межмолекулярные силы", query: "", englishQuery: "" },
+    [],
+    cache,
+  );
+  assert.equal(result.sources[0].kind, "textbook");
+  assert.equal(result.sources[0].excerpt, text);
+});
 
 test("explicit clarification retains all requested blocks in one work", () => {
   const input = {

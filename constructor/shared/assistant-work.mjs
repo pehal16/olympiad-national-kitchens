@@ -199,9 +199,9 @@ function explicitWorkBlocks(input) {
       .slice(match.index + match[0].length, end)
       .split(/[,.;\n]/u)[0];
     const details = clause.replace(/\s+и(?:\s+ровно)?\s*$/iu, "").trim();
-    const topic =
-      details.match(/(?:^|\s)(?:по|о|об|про|на тему)\s+(.+)$/iu)?.[1] ||
-      details.replace(/^на\s+/iu, "");
+    const namedTopic = details.match(/(?:^|\s)(?:по|о|об|про|на тему)\s+(.+)$/iu)?.[1];
+    if (matches.length === 1 && !namedTopic) return [];
+    const topic = namedTopic || details.replace(/^на\s+/iu, "");
     const count = numberWords.get(match[1].toLowerCase()) ?? Number(match[1]);
     const label = text(topic, 180, 3);
     if (!label || count < 1 || count > 20) return [];
@@ -221,7 +221,7 @@ function explicitWorkBlocks(input) {
       },
     ];
   });
-  return groups.length === matches.length && groups.length >= 2 ? groups : [];
+  return groups.length === matches.length ? groups : [];
 }
 
 export function resolveWorkPlan(candidate, input) {
@@ -576,6 +576,7 @@ export function workPlanRequest(input, model) {
       "Разбери поручение преподавателя на самостоятельные тематические блоки.",
       "Сохраняй темы, количество заданий и порядок. Объединяй задания одной темы и формата в один блок с их общим количеством. В одном блоке от 1 до 20 заданий, суммарно до 40.",
       "Задай одно короткое уточнение по-русски только если от него зависит состав работы. Например, если по слову «тестов» нельзя понять, нужны отдельные работы или вопросы внутри одной работы.",
+      "contextInstruction поясняет ссылки на предыдущие сообщения чата. При расхождении используй прямые требования из instruction и последнего уточнения.",
       "Последнее уточнение преподавателя имеет приоритет над исходной формулировкой. Если из ответа понятно, сколько вопросов, интерактивов и работ нужно, сразу верни state=plan. Не повторяй решённый вопрос и не спрашивай преподавателя о технических полях или переводе.",
       "При явном запросе отдельных работ задавай для их блоков разные workTitle, иначе оставляй workTitle пустым. В существующем проекте выделяй блоки турами.",
       "В существующем проекте placement=selected для запроса добавить в текущий тур или одного простого блока. Для раздельных блоков или явно нового тура используй placement=new_rounds.",

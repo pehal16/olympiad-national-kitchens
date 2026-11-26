@@ -14,10 +14,14 @@ import {
   readWorkPlan,
   readWorkResult,
 } from "../shared/assistant-work.mjs";
-import { assistantQuestions, assistantRounds } from "../shared/authoring.js";
+import { assistantQuestions } from "../shared/authoring.js";
 import { project as draftProject } from "../shared/catalog.js";
 import { maxLectureBytes, readLectures } from "./assistant-documents.mjs";
 import { researchWorkGroup } from "./assistant-sources.mjs";
+import {
+  createAssistantProjects,
+  registerAssistantChat,
+} from "./assistant-chat.mjs";
 
 const heartbeatMs = 20_000;
 const waitMs = 4 * 60_000;
@@ -46,6 +50,8 @@ export function registerAssistant(
   let lastReady = 0;
   let lastTestReady = 0;
   let lastWorkReady = 0;
+  let lastChatReady = 0;
+  let chat;
   const reading = new Set();
 
   function prune() {
@@ -63,6 +69,7 @@ export function registerAssistant(
   }
 
   function finish(job, state, result) {
+    if (job.chat) chat.finish(job, state, result);
     Object.assign(job, { state, result, expires: Date.now() + resultMs });
     delete job.input;
     delete job.documents;
@@ -71,15 +78,23 @@ export function registerAssistant(
   }
 
   const timer = enabled ? setInterval(prune, 5_000).unref() : null;
-  const online = (test = false, work = false) =>
-    Date.now() - (work ? lastWorkReady : test ? lastTestReady : lastReady) <
+  const online = (test = false, work = false, chatMode = false) =>
+    Date.now() -
+      (chatMode
+        ? lastChatReady
+        : work
+          ? lastWorkReady
+          : test
+            ? lastTestReady
+            : lastReady) <
       heartbeatMs ||
     [...jobs.values()].some(
       (job) =>
         job.state === "running" &&
         job.expires > Date.now() &&
         (!test || job.testWorker) &&
-        (!work || job.workWorker),
+        (!work || job.workWorker) &&
+        (!chatMode || job.chatWorker),
     );
 
   function projectScope(req) {
@@ -95,7 +110,7 @@ export function registerAssistant(
     prune();
     const job = jobs.get(req.params.jobId);
     fail(
-      job?.actor === req.user.id && job.projectId === projectId,
+      job?.actor === req.user.id && !job.chat && job.projectId === projectId,
       "Черновик недоступен или время его хранения истекло.",
       404,
     );
@@ -125,9 +140,11 @@ export function registerAssistant(
       const ready = req.body?.ready === true;
       const supportsTests = req.body?.supportsTests === true;
       const supportsWork = req.body?.supportsWork === true;
+      const supportsChat = supportsWork && req.body?.supportsChat === true;
       lastReady = ready ? Date.now() : 0;
       if (supportsTests) lastTestReady = lastReady;
       if (supportsWork) lastWorkReady = lastReady;
+      if (supportsChat) lastChatReady = lastReady;
       if (!ready || [...jobs.values()].some((job) => job.state === "running")) {
         return send(res, { job: null });
       }
@@ -135,13 +152,15 @@ export function registerAssistant(
         (item) =>
           item.state === "queued" &&
           (!item.test || supportsTests) &&
-          (!item.work || supportsWork),
+          (!item.work || supportsWork) &&
+          (!item.chat || supportsChat),
       );
       if (!job) return send(res, { job: null });
       job.state = "running";
       job.lease = token();
       job.testWorker = supportsTests;
       job.workWorker = supportsWork;
+      job.chatWorker = supportsChat;
       job.expires =
         Date.now() + (job.work ? workRunMs : job.test ? testRunMs : runMs);
       send(res, { job: { id: job.id, lease: job.lease, input: job.input } });
@@ -160,6 +179,11 @@ export function registerAssistant(
         409,
       );
       if (job.state !== "running") return send(res, { received: true });
+      if (job.chatWorker) lastChatReady = Date.now();
+      if (job.chat && !job.work) {
+        if (!chat.completePlan(job, req.body?.decision)) finish(job, "ready");
+        return send(res, { received: true });
+      }
       if (job.work) {
         lastReady = lastWorkReady = Date.now();
         if (job.testWorker) lastTestReady = lastReady;
@@ -170,11 +194,7 @@ export function registerAssistant(
           clarified.length <= 500 &&
           job.input.replies.length < 3
         ) {
-          Object.assign(job, {
-            state: "clarify",
-            expires: Date.now() + resultMs,
-            result: { question: clarified.trim() },
-          });
+          waitForReply(job, clarified.trim());
         } else {
           const work =
             job.plan &&
@@ -228,6 +248,7 @@ export function registerAssistant(
         online: enabled && online(),
         testOnline: enabled && online(true),
         workOnline: enabled && online(false, true),
+        chatOnline: enabled && online(false, false, true),
       });
     }),
   );
@@ -369,6 +390,80 @@ export function registerAssistant(
   const workBody = express.json({ limit: "64kb" });
   const worksRoute = api + "/assistant/works";
 
+  async function parseMaterials(req, res) {
+    fail(
+      !reading.has(req.user.id) && reading.size < 2,
+      "Помощник читает документы. Попробуйте через минуту.",
+      429,
+    );
+    reading.add(req.user.id);
+    const parser = req.is("multipart/form-data") ? parseLectures : workBody;
+    try {
+      await new Promise((resolve, reject) => {
+        parser(req, res, (error) => {
+          if (error)
+            reject(
+              error.code?.startsWith("LIMIT_")
+                ? Object.assign(new Error("До 5 материалов по 5 МБ каждый."), {
+                    status: 413,
+                  })
+                : error,
+            );
+          else resolve();
+        });
+      });
+      return await readLectures(req.files);
+    } finally {
+      reading.delete(req.user.id);
+    }
+  }
+
+  function waitForReply(job, question) {
+    Object.assign(job, {
+      state: "clarify",
+      expires: Date.now() + resultMs,
+      result: { question },
+    });
+    if (job.chat) chat.clarify(job, question);
+  }
+
+  function resume(job, reply) {
+    if (reply) job.input.replies.push(reply);
+    job.result = undefined;
+    job.state = "queued";
+    job.expires = Date.now() + waitMs;
+  }
+
+  chat = registerAssistantChat(app, {
+    api,
+    auth,
+    wrap,
+    send,
+    service,
+    jobs,
+    enabled,
+    online: () => online(false, false, true),
+    prune,
+    checkQueue,
+    parseMaterials,
+    resume,
+    waitForReply,
+    enqueue(properties) {
+      const job = {
+        id: id("draft"),
+        state: "queued",
+        expires: Date.now() + waitMs,
+        ...properties,
+      };
+      jobs.set(job.id, job);
+      return job;
+    },
+    cancel(job) {
+      finish(job, "cancelled");
+      if (!job.lease) jobs.delete(job.id);
+    },
+  });
+
   function registerWorks(route) {
     app.post(
       route,
@@ -382,33 +477,7 @@ export function registerAssistant(
           "assistant_offline",
         );
         checkQueue(req.user.id);
-        fail(
-          !reading.has(req.user.id) && reading.size < 2,
-          "Помощник читает документы. Попробуйте через минуту.",
-          429,
-        );
-        reading.add(req.user.id);
-        const parser = req.is("multipart/form-data") ? parseLectures : workBody;
-        let documents;
-        try {
-          await new Promise((resolve, reject) => {
-            parser(req, res, (error) => {
-              if (error)
-                reject(
-                  error.code?.startsWith("LIMIT_")
-                    ? Object.assign(
-                        new Error("До 5 материалов по 5 МБ каждый."),
-                        { status: 413 },
-                      )
-                    : error,
-                );
-              else resolve();
-            });
-          });
-          documents = await readLectures(req.files);
-        } finally {
-          reading.delete(req.user.id);
-        }
+        const documents = await parseMaterials(req, res);
         let instruction = readWorkInstruction(req.body?.instruction);
         fail(
           !req.body?.instruction || instruction,
@@ -473,10 +542,7 @@ export function registerAssistant(
           503,
           "assistant_offline",
         );
-        job.input.replies.push(reply);
-        job.result = undefined;
-        job.state = "queued";
-        job.expires = Date.now() + waitMs;
+        resume(job, reply);
         res.status(202);
         send(res, { id: job.id, state: job.state });
       }),
@@ -500,18 +566,8 @@ export function registerAssistant(
         409,
       );
       if (!job.createdProjects) {
-        const titles = new Map();
-        for (const group of work.groups) {
-          const entries = titles.get(group.workTitle) || [];
-          entries.push(group);
-          titles.set(group.workTitle, entries);
-        }
         job.createdProjects = service.store.transaction(() =>
-          [...titles].map(([title, groups]) => {
-            const project = draftProject(title, "test");
-            project.rounds = assistantRounds(groups);
-            return service.createProject(req.user, { project }).id;
-          }),
+          createAssistantProjects(service, req.user, work).map(({ id }) => id),
         );
       }
       send(res, { id: job.createdProjects[0], ids: job.createdProjects });

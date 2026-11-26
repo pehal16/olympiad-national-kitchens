@@ -2,6 +2,16 @@
 
 Last updated: 2026-11-26
 
+## Teacher cabinet AI chat (2026-11-26)
+
+- Timeweb release `91077ec07a62c68f2b0ef068acea32ffac6ad8c8` passed the protected SQLite snapshot and HTTPS checks in run `45788446097`. The iRU returned a conversational answer in 6.554 s and a follow-up in 3.920 s. The chemistry draft used two uploaded lessons, the requested OpenStax chapter and the accessible text of the FSES in 46.968 s. Both blocks passed model review. All three assignments had a literal supporting excerpt.
+- The isolated real-model browser test at 1366 and 390 px found and checked a project, renamed it, retained two files through clarification, saved 5 + 10 + 2 assignments and reopened the chat. Fourteen of the seventeen assignments had source excerpts. A separate real-model check added one question to the requested existing round. The iRU scheduled task was running with the verified worker files after the update.
+
+- The cabinet **ИИ-чат** keeps private conversations for the signed-in teacher in the existing constructor database. The projects page and project editor link to it. The active project is available as context and can also be referenced by title. A teacher can ask for an explanation, a project search or structural check, a new work, additional sections or questions, or a targeted edit to existing text.
+- The iRU worker interprets the request using recent turns. Project searches and checks use readable project records and native validation. Generation uses the existing lecture parser, source retrieval, model review and literal quote checks. A proposal shows the target, generated assignments or the old and new text. Applying it uses the native draft service with the expected revision and an idempotent receipt. The chat does not publish or modify runs or student answers.
+- An explicit count and named topic for one new question survive an unusable first plan. A supplied OpenStax chapter can match its own chapter terms when the plan contains only terms in another language.
+- Up to five optional PDF, DOCX, TXT or MD materials remain available while a work request is active, including clarification. Attached file names and the displayed conversation stay in the private chat until it is deleted. The current iRU worker must support chat via its heartbeat before enabling generation.
+
 ## Untimed teacher invitation (2026-11-26)
 
 - Share `https://xn--80aaloaqinm.xn--b1amqadnhd.xn--p1ai/demo-teacher/` (олимпиада.постовит.рф). The anonymous teacher sees «Начать» and enters the first question with one click, with no registration form or full-screen requirement. Later tour instructions and the fifth-tour station controls remain available. The original Pages invitation remains accessible at `/?demo=teacher`.

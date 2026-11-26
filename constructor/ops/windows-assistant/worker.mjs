@@ -2,6 +2,7 @@ import { request as httpsRequest } from "node:https";
 import { networkInterfaces } from "node:os";
 import { setTimeout as delay } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
+import { chatRequest, readChatDecision } from "../../shared/assistant-chat.mjs";
 import {
   defaultModel,
   ollamaRequest,
@@ -86,7 +87,7 @@ async function cabinetJson(url, body, headers, networkInterface, timeout) {
   const chunks = [];
   for await (const chunk of response) {
     bytes += chunk.length;
-    if (bytes > 128 * 1024) throw new Error("Ответ кабинета слишком большой.");
+    if (bytes > 192 * 1024) throw new Error("Ответ кабинета слишком большой.");
     chunks.push(chunk);
   }
   return JSON.parse(Buffer.concat(chunks, bytes).toString("utf8"));
@@ -143,10 +144,17 @@ async function generateWork(job, endpoint) {
   const input = job.input;
   const scope = testScopeQuestion(input);
   if (scope) return { clarify: scope };
-  const plan = resolveWorkPlan(
-    await structured(workPlanRequest(input, model)),
-    input,
-  );
+  const request = workPlanRequest(input, model);
+  let plan = resolveWorkPlan(await structured(request), input);
+  if (!plan) {
+    plan = resolveWorkPlan(
+      await structured({
+        ...request,
+        options: { ...request.options, temperature: 0.05, num_predict: 3200 },
+      }),
+      input,
+    );
+  }
   if (!plan) return { failure: "invalid_plan" };
   if (plan.state === "clarify") return { clarify: plan.question };
   const results = [];
@@ -386,6 +394,7 @@ async function work() {
         ready,
         supportsTests: true,
         supportsWork: true,
+        supportsChat: true,
       });
       status(ready ? "Помощник подключён." : "Ожидание локальной модели.");
       if (job) {
@@ -393,6 +402,9 @@ async function work() {
         try {
           if (job.input?.kind === "work") {
             completion = await generateWork(job, endpoint);
+          } else if (job.input?.kind === "chat") {
+            const decision = readChatDecision(await structured(chatRequest(job.input, model)));
+            completion = decision ? { decision } : { failure: "local_failure" };
           } else {
             const input =
               job.input?.instruction === undefined
