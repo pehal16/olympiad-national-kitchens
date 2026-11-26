@@ -1,6 +1,6 @@
-const CACHE_NAME = "national-kitchens-teacher-demo-20261126";
+const CACHE_NAME = "national-kitchens-teacher-demo-20261126b";
 const PRECACHE_URLS = [
-  "/usability.css?v=20261126-teacher-demo",
+  "/usability.css?v=20261126-teacher-demo2",
   "/olympiad-ready.css?v=manual-admission1",
   "/olympiad-device.js?v=oct16-ready1",
   "/story-dialogue.js?v=layout5-oct12",

@@ -475,3 +475,8 @@ body.teacher-demo .landing-hero-actions > :not(#hero-action-register) {
     height: 155px;
   }
 }
+@media (max-width: 390px) {
+  body.teacher-demo .landing-hero-copy h1 {
+    font-size: clamp(26px, 8.2vw, 32px);
+  }
+}
