@@ -207,29 +207,28 @@ export function registerAssistant(
           if (job.work) {
             lastReady = lastWorkReady = Date.now();
             if (job.testWorker) lastTestReady = lastReady;
-            const clarified = req.body?.clarify;
-            if (
-              typeof clarified === "string" &&
-              clarified.trim() &&
-              clarified.length <= 500 &&
-              job.input.replies.length < 3
-            ) {
-              await waitForReply(job, clarified.trim());
+            const clarified = readWorkPlan({
+              state: "clarify",
+              question: req.body?.clarify,
+            })?.question;
+            if (clarified && !job.input.replies.length) {
+              await waitForReply(job, clarified);
             } else {
               const work =
                 job.plan &&
                 readWorkResult(req.body?.results, job.plan, job.contexts);
               const block = req.body?.block;
               const error =
-                req.body?.failure === "invalid_plan"
-                  ? "Помощник не разобрал поручение. Уточните темы, число заданий и формат работы."
+                clarified ||
+                (req.body?.failure === "invalid_plan"
+                  ? "Помощнику не удалось собрать план черновика. Отправьте ещё раз поручение с темой работы."
                   : req.body?.failure === "invalid_block" &&
                       Number.isInteger(block) &&
                       job.plan?.groups[block - 1]
                     ? "Помощник не составил корректные задания в блоке " +
                       block +
                       ". Попробуйте ещё раз."
-                    : "Помощник не закончил работу. Повторите запрос или сузьте объём задания.";
+                    : "Помощник не закончил работу. Повторите запрос или сузьте объём задания.");
               await finishWithHistory(
                 job,
                 work ? "ready" : "failed",

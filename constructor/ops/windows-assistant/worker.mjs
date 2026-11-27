@@ -25,9 +25,9 @@ import {
 } from "../../shared/assistant.mjs";
 import {
   assembleWorkQuestions,
+  isNewWorkRequest,
   resolveWorkPlan,
   readWorkQuestions,
-  testScopeQuestion,
   workPlanRequest,
   workQuestionsRequest,
   workReviewRequest,
@@ -153,18 +153,17 @@ function workItemType(group, index) {
 
 async function generateWork(job, endpoint) {
   const input = job.input;
-  const scope = testScopeQuestion(input);
-  if (scope) return { clarify: scope };
   const request = workPlanRequest(input, model);
   let plan = resolveWorkPlan(await structured(request), input);
-  if (!plan) {
-    plan = resolveWorkPlan(
+  if (!plan || (plan.state === "clarify" && input.replies.length)) {
+    const retried = resolveWorkPlan(
       await structured({
         ...request,
         options: { ...request.options, temperature: 0.05, num_predict: 3200 },
       }),
       input,
     );
+    plan = retried || plan;
   }
   if (!plan) return { failure: "invalid_plan" };
   if (plan.state === "clarify") return { clarify: plan.question };
@@ -407,6 +406,8 @@ async function completeCalculation(input, decision) {
 }
 
 async function generateChat(input) {
+  if (isNewWorkRequest(input.message, Boolean(input.history?.length)))
+    return readChatDecision({ action: "create", instruction: input.message });
   if (input.mathEnabled) {
     const exact = explicitConversion(input.message);
     if (exact) return readChatDecision({ action: "calculate", math: exact });

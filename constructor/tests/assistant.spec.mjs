@@ -10,8 +10,9 @@ import { createApp, API } from "../server/index.mjs";
 import { validateProject } from "../server/domain.mjs";
 import { researchWorkGroup } from "../server/assistant-sources.mjs";
 import {
+  isNewWorkRequest,
+  readWorkPlan,
   resolveWorkPlan,
-  testScopeQuestion,
 } from "../shared/assistant-work.mjs";
 
 test("an explicit single request keeps its topic and count when planning returns no usable plan", () => {
@@ -52,19 +53,14 @@ test("a supplied textbook chapter remains usable when plan keywords are in anoth
   assert.equal(result.sources[0].excerpt, text);
 });
 
-test("explicit clarification retains all requested blocks in one work", () => {
+test("counted tests and interactive tasks form one work from the initial request", () => {
   const input = {
     instruction:
       "Сделай 5 тестов по мясу, 10 тестов по тесту и два интерактивных задания по горячим блюдам.",
     replies: [],
   };
-  assert.match(testScopeQuestion(input), /отдельные работы/u);
-  input.replies.push(
-    "В одной работе 5 вопросов по мясу, 10 вопросов по дрожжевому тесту и 2 интерактивных задания по горячим блюдам.",
-  );
-  assert.equal(testScopeQuestion(input), "");
   const plan = resolveWorkPlan(
-    { state: "clarify", question: "Уточните." },
+    { state: "clarify", question: "Это отдельные работы?" },
     input,
   );
   assert.deepEqual(
@@ -74,6 +70,63 @@ test("explicit clarification retains all requested blocks in one work", () => {
       [10, "test", ""],
       [2, "interactive", ""],
     ],
+  );
+});
+
+test("a short format reply keeps the original count and topic while a full reply can replace both", () => {
+  const instruction = "10 тестов по истории театра";
+  assert.equal(isNewWorkRequest(instruction), true);
+  const scopeReply = { instruction, replies: ["Вопросы."] };
+  const got = resolveWorkPlan(null, scopeReply);
+  assert.deepEqual(
+    got.groups.map(({ count, topic, workTitle }) => [count, topic, workTitle]),
+    [[10, "истории театра", ""]],
+  );
+  const changed = resolveWorkPlan(null, {
+    ...scopeReply,
+    replies: ["Вопросы.", "Составь 3 вопроса по истории кино."],
+  });
+  assert.deepEqual(
+    changed.groups.map(({ count, topic }) => [count, topic]),
+    [[3, "истории кино"]],
+  );
+  assert.equal(isNewWorkRequest("Составь тест по театру"), true);
+  assert.equal(isNewWorkRequest("Составь тест", true), false);
+  assert.equal(
+    isNewWorkRequest("Составь 10 вопросов по этой теме", true),
+    false,
+  );
+  assert.equal(isNewWorkRequest("Составь план подготовки к олимпиаде"), false);
+  assert.equal(
+    isNewWorkRequest("Как составить 10 тестов по истории театра?"),
+    false,
+  );
+  assert.equal(
+    isNewWorkRequest("Составь 10 тестов по истории и добавь их в эту работу"),
+    false,
+  );
+  assert.equal(isNewWorkRequest("Составь 3 вопроса к тесту «Театр»"), false);
+  const withTopic = resolveWorkPlan(null, {
+    instruction: "Подготовь 4 вопроса.",
+    replies: ["По климатическим поясам России."],
+  });
+  assert.deepEqual(
+    withTopic.groups.map(({ count, topic }) => [count, topic]),
+    [[4, "климатическим поясам России"]],
+  );
+  assert.deepEqual(
+    resolveWorkPlan(null, { instruction: "Подготовь 4 вопроса.", replies: [] }),
+    { state: "clarify", question: "По какой теме подготовить работу?" },
+  );
+});
+
+test("the work planner only surfaces the first clarifying question", () => {
+  assert.deepEqual(
+    readWorkPlan({
+      state: "clarify",
+      question: "На какую тему подготовить тест?\nДля какого курса?",
+    }),
+    { state: "clarify", question: "На какую тему подготовить тест?" },
   );
 });
 
