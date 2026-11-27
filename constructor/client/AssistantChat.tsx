@@ -13,6 +13,7 @@ import { maxChatMessage } from "../shared/assistant-chat.mjs";
 import { maxWorkFiles } from "../shared/assistant-work.mjs";
 import { AssistantPreview, type Work } from "./Assistant";
 import { api } from "./api";
+import { MathText } from "./MathText";
 import { Button, IconButton } from "./ui";
 import "./assistant-chat.css";
 
@@ -492,7 +493,9 @@ export default function AssistantChat({
                 key={turn.id}
               >
                 <h2>{turn.role === "user" ? "Вы" : "Помощник"}</h2>
-                <p>{turn.text}</p>
+                <p>
+                  <MathText text={turn.text} />
+                </p>
                 {turn.attachments?.length ? (
                   <ul className="chat-attachments">
                     {turn.attachments.map((file, index) => (

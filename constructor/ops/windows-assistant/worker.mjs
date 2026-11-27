@@ -2,7 +2,17 @@ import { request as httpsRequest } from "node:https";
 import { networkInterfaces } from "node:os";
 import { setTimeout as delay } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
-import { chatRequest, readChatDecision } from "../../shared/assistant-chat.mjs";
+import {
+  chatMathRequest,
+  chatRequest,
+  isCalculationRequest,
+  readChatDecision,
+} from "../../shared/assistant-chat.mjs";
+import {
+  explicitConversion,
+  mathInputIssue,
+  mathSource,
+} from "../../shared/assistant-math.mjs";
 import { historyWireBytes, openAssistantHistory } from "../../shared/assistant-history.mjs";
 import {
   defaultModel,
@@ -177,7 +187,8 @@ async function generateWork(job, endpoint) {
     let reviewed = true;
     let standardId = "",
       standardQuote = "";
-    const batchSize = group.format === "test" ? 10 : 1;
+    const numerical = /расчет|расчёт|вычисл|формул|уравнен|плотност|электрическ/iu.test(group.topic + " " + group.directions);
+    const batchSize = group.format === "test" ? (numerical ? 4 : 10) : 1;
     for (let offset = 0; offset < group.count; offset += batchSize) {
       const batch = {
         ...group,
@@ -252,6 +263,17 @@ async function generateWork(job, endpoint) {
         workReviewRequest(batch, validated, sources, model),
       ).catch(() => null);
       let checked = assembleWorkQuestions(check?.questions, batch);
+      if (Array.isArray(checked) && batch.itemType === "single_choice") {
+        checked = checked.map((question) => {
+          const previous = validated.find(
+            ({ title, prompt }) =>
+              title === question?.title && prompt === question?.prompt,
+          );
+          return previous?.calculation && !question.calculation
+            ? { ...question, calculation: previous.calculation }
+            : question;
+        });
+      }
       if (!readBatch(checked)) {
         check = await structured(
           workKeyReviewRequest(batch, validated, sources, model),
@@ -364,6 +386,45 @@ function cabinetOrigin(value) {
   return url.origin;
 }
 
+async function completeCalculation(input, decision) {
+  if (decision.action === "clarify")
+    return { ...decision, mathClarification: true };
+  const source = mathSource(input);
+  const issue = mathInputIssue(decision.math, source);
+  if (!issue) return decision;
+  const corrected = readChatDecision(
+    await structured(chatMathRequest(input, model, issue)),
+  );
+  if (corrected?.action === "clarify")
+    return { ...corrected, mathClarification: true };
+  if (corrected?.action === "calculate" && !mathInputIssue(corrected.math, source))
+    return corrected;
+  return {
+    action: "clarify",
+    text: "Уточните исходные величины с единицами и формулу, по которой нужно выполнить расчёт.",
+    mathClarification: true,
+  };
+}
+
+async function generateChat(input) {
+  if (input.mathEnabled) {
+    const exact = explicitConversion(input.message);
+    if (exact) return readChatDecision({ action: "calculate", math: exact });
+    if (isCalculationRequest(input.message, Boolean(input.calculationContext))) {
+      const decision = readChatDecision(
+        await structured(chatMathRequest(input, model)),
+      );
+      if (decision?.action === "calculate" || decision?.action === "clarify")
+        return completeCalculation(input, decision);
+    }
+  }
+  const request = chatRequest(input, model);
+  const result = readChatDecision(await structured(request));
+  return result?.action === "calculate" && input.mathEnabled
+    ? completeCalculation(input, result)
+    : result;
+}
+
 async function serveHistory(endpoint, history) {
   while (true) {
     try {
@@ -442,7 +503,7 @@ async function work() {
           if (job.input?.kind === "work") {
             completion = await generateWork(job, endpoint);
           } else if (job.input?.kind === "chat") {
-            const decision = readChatDecision(await structured(chatRequest(job.input, model)));
+            const decision = await generateChat(job.input);
             completion = decision ? { decision } : { failure: "local_failure" };
           } else {
             const input =

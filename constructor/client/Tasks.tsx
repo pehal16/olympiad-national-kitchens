@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowUp, ArrowDown, Plus, Trash2, Upload, ZoomIn } from "lucide-react";
 import type { Question, Json } from "../shared/types";
 import { api, blobRequest, download, upload } from "./api";
+import { MathText } from "./MathText";
 import { Button, Field, IconButton, Input, Modal, Textarea } from "./ui";
 export function Media({
   src,
@@ -120,7 +121,7 @@ export function Task({
   const manual = q.grading === "manual";
   return (
     <div className="task" data-type={q.type}>
-      {q.prompt && <p className="task-prompt">{q.prompt}</p>}
+      {q.prompt && <p className="task-prompt"><MathText text={q.prompt} /></p>}
       {q.media?.map((m: Json, i: number) => (
         <Media
           key={m.url || i}
@@ -178,8 +179,8 @@ export function Task({
                 {o.imageUrl && (
                   <Media src={o.imageUrl} alt={o.label} token={token} />
                 )}
-                <span>{o.label}</span>
-                {o.description && <small>{o.description}</small>}
+                <span><MathText text={o.label} /></span>
+                {o.description && <small><MathText text={o.description} /></small>}
               </label>
             );
           })}
@@ -271,11 +272,11 @@ export function Task({
                 }}
                 disabled={readOnly}
               >
-                <strong>{target.label}</strong>
+                <strong><MathText text={target.label} /></strong>
                 {items
                   .filter((i: Json) => v[i.id] === target.id)
                   .map((i: Json) => (
-                    <span key={i.id}>{i.label}</span>
+                    <span key={i.id}><MathText text={i.label} /></span>
                   ))}
               </button>
             ))}

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { MathText } from "./MathText";
 import {
   ArrowLeft,
   MessageCircle,
@@ -1091,7 +1092,7 @@ export function Builder({
           wide
           onClose={() => setPreview(false)}
         >
-          <h2>{q.title}</h2>
+          <h2><MathText text={q.title} /></h2>
           <InteractivePreview q={q} />
           <p className="muted">
             Для сохранения ответов и проверки всего маршрута используйте пробное

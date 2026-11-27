@@ -13,6 +13,7 @@ import { api, blobRequest, download, localGet, localSet } from "./api";
 import { uid } from "../shared/catalog";
 import { Button, Input, Toggle, Empty, Modal } from "./ui";
 import { Task, Media } from "./Tasks";
+import { MathText } from "./MathText";
 export function Participant({ runId }: { runId: string }) {
   const [run, setRun] = useState<Json | null>(null),
     [session, setSession] = useState<Json | null>(() => {
@@ -562,7 +563,7 @@ export function Participant({ runId }: { runId: string }) {
               <p>{r.instructions}</p>
             </details>
           )}
-          <h1>{q.title}</h1>
+          <h1><MathText text={q.title} /></h1>
           <Task
             key={q.id}
             q={q}

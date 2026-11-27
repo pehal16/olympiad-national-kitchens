@@ -194,6 +194,7 @@ if ($Mode -eq 'Install') {
         (Join-Path $PSScriptRoot '..\..\shared\assistant.mjs') = (Join-Path $app 'shared\assistant.mjs')
         (Join-Path $PSScriptRoot '..\..\shared\assistant-work.mjs') = (Join-Path $app 'shared\assistant-work.mjs')
         (Join-Path $PSScriptRoot '..\..\shared\assistant-chat.mjs') = (Join-Path $app 'shared\assistant-chat.mjs')
+        (Join-Path $PSScriptRoot '..\..\shared\assistant-math.mjs') = (Join-Path $app 'shared\assistant-math.mjs')
         (Join-Path $PSScriptRoot '..\..\shared\assistant-history.mjs') = (Join-Path $app 'shared\assistant-history.mjs')
     }
     foreach ($source in $sources.Keys) {

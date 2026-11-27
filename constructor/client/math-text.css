@@ -1,0 +1,22 @@
+.formula-block {
+  display: block;
+  max-width: 100%;
+  margin-block: 0.45em;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.formula-inline {
+  white-space: normal;
+  display: inline;
+}
+
+.formula-inline .katex {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.formula-fallback {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}

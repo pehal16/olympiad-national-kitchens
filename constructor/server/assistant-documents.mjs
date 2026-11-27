@@ -28,6 +28,75 @@ function plainText(bytes) {
   }
 }
 
+function officeMath($, node) {
+  const current = $(node);
+  const name = node.name;
+  const child = (tag) => {
+    const entry = current.children(tag).first().get(0);
+    return entry ? officeMath($, entry) : "";
+  };
+  if (name === "m:f") {
+    const num = child("m\\:num"),
+      den = child("m\\:den");
+    if (!num || !den) throw Error("Incomplete fraction");
+    return "\\frac{" + num + "}{" + den + "}";
+  }
+  if (name === "m:sSup" || name === "m:sSub" || name === "m:sSubSup") {
+    const base = child("m\\:e"),
+      sub = child("m\\:sub"),
+      sup = child("m\\:sup");
+    return (
+      "{" +
+      base +
+      "}" +
+      (sub ? "_{" + sub + "}" : "") +
+      (sup ? "^{" + sup + "}" : "")
+    );
+  }
+  if (name === "m:rad") {
+    const degree = child("m\\:deg");
+    return (
+      "\\sqrt" + (degree ? "[" + degree + "]" : "") + "{" + child("m\\:e") + "}"
+    );
+  }
+  if (name === "m:d") {
+    const start = current.find("m\\:begChr").first().attr("m:val") ?? "(";
+    const end = current.find("m\\:endChr").first().attr("m:val") ?? ")";
+    if (start !== "(" || end !== ")") throw Error("Unsupported delimiter");
+    return "\\left(" + child("m\\:e") + "\\right)";
+  }
+  if (name === "m:t") {
+    return current
+      .text()
+      .replace(/[\\{}_#%$&^]/gu, (character) =>
+        character === "\\"
+          ? "\\backslash "
+          : character === "^"
+            ? "\\text{^}"
+            : "\\" + character,
+      );
+  }
+  if (name === "m:rPr" || name === "w:rPr" || name === "m:ctrlPr") return "";
+  if (
+    ![
+      "m:oMath",
+      "m:r",
+      "m:e",
+      "m:sub",
+      "m:sup",
+      "m:num",
+      "m:den",
+      "m:deg",
+    ].includes(name)
+  )
+    throw Error("Unsupported Word equation");
+  return current
+    .children()
+    .toArray()
+    .map((entry) => officeMath($, entry))
+    .join("");
+}
+
 function wordText(bytes) {
   const parts = unzipSync(bytes, {
     filter(entry) {
@@ -45,8 +114,16 @@ function wordText(bytes) {
   return $("w\\:p")
     .map((_i, node) =>
       $(node)
-        .find("w\\:t")
-        .map((_j, textNode) => $(textNode).text())
+        .find("w\\:t, m\\:oMath")
+        .map((_j, textNode) => {
+          if (textNode.name === "w:t") return $(textNode).text();
+          try {
+            const equation = officeMath($, textNode);
+            return equation ? " \\(" + equation + "\\) " : "";
+          } catch {
+            return " [формула Word в исходном файле] ";
+          }
+        })
         .get()
         .join(""),
     )

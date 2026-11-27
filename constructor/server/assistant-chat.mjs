@@ -8,15 +8,24 @@ import {
 import { maxWorkFiles, maxWorkInstruction } from "../shared/assistant-work.mjs";
 import { validateProject } from "./domain.mjs";
 import { maxLectureText } from "./assistant-documents.mjs";
+import {
+  evaluateMath,
+  mathInputIssue,
+  mathReply,
+  mathSource,
+} from "../shared/assistant-math.mjs";
+import { historyContext, retrieveExcerpts } from "./assistant-retrieval.mjs";
 import { fail, id } from "./util.mjs";
 
 const modelFailure = "Помощник не закончил запрос. Попробуйте ещё раз.";
 const normalize = (value) => value.toLowerCase().replace(/ё/g, "е").trim();
 const links = (projects) => projects.map(({ id, title }) => ({ id, title }));
-const lectureList = (documents) =>
-  documents.map(({ title, pages }) => ({
-    title,
-    preview: pages[0].text.slice(0, 650),
+const lectureList = (documents, request) =>
+  documents.map((document) => ({
+    title: document.title,
+    preview: retrieveExcerpts(document, request, 2)
+      .map(({ excerpt, locator }) => locator + " · " + excerpt)
+      .join("\n"),
   }));
 
 function context(project) {
@@ -358,13 +367,14 @@ export function registerAssistantChat(
       if (pending?.work && (targetId || "") === (thread.target?.id || "")) {
         const updated = await append(thread, "user", text, {}, { attachments });
         pending.documents = documents;
-        pending.input.lectures = lectureList(pending.documents);
+        pending.input.lectures = lectureList(
+          pending.documents,
+          pending.input.instruction + "\n" + text,
+        );
         resume(pending, text);
         return send(res.status(202), detail(updated));
       }
-      const recentMessages = thread.messages
-        .slice(-10)
-        .map(({ role, text }) => ({ role, text: text.slice(0, 650) }));
+      const recentMessages = historyContext(thread.messages);
       const job = enqueue({
         actor: user.id,
         documents,
@@ -380,7 +390,16 @@ export function registerAssistantChat(
         },
         input: {
           kind: "chat",
+          mathEnabled: true,
           message: text,
+          ...(pending?.chat.mathClarification
+            ? {
+                calculationContext: [
+                  pending.chat.original,
+                  ...pending.chat.replies,
+                ],
+              }
+            : {}),
           history: recentMessages,
           projects: links(projectList),
           currentProjectId: target?.id || "",
@@ -404,13 +423,14 @@ export function registerAssistantChat(
                 })),
               }
             : undefined,
-          attachments: documents.map(({ title, pages }) => ({
-            title,
-            pages: pages.length,
-            excerpts: pages.slice(0, 2).map(({ text, locator }) => ({
-              text: text.slice(0, 460),
-              locator,
-            })),
+          attachments: documents.map((document) => ({
+            title: document.title,
+            pages: document.pages.length,
+            excerpts: retrieveExcerpts(
+              document,
+              text,
+              Math.min(12, Math.floor(16 / documents.length)),
+            ).map(({ excerpt, locator }) => ({ text: excerpt, locator })),
           })),
         },
       });
@@ -546,8 +566,21 @@ export function registerAssistantChat(
       }
       const { action, text, instruction, roundId, edits } = decision;
       if (action === "clarify" && job.chat.replies.length < 3) {
+        job.chat.mathClarification = decision.mathClarification === true;
         await waitForReply(job, text);
         return true;
+      }
+      if (action === "calculate") {
+        const result = mathInputIssue(decision.math, mathSource(job.input))
+          ? null
+          : evaluateMath(decision.math);
+        await settle(
+          job,
+          result
+            ? mathReply(result, decision.math.operation)
+            : "Расчёт не прошёл проверку. Уточните исходные числа, формулу или требуемые единицы.",
+        );
+        return false;
       }
       if (action === "answer" || action === "clarify") {
         await settle(job, text);
@@ -655,7 +688,10 @@ export function registerAssistantChat(
           instruction === job.chat.original ? "" : instruction,
         replies: [...job.chat.replies],
         inProject: Boolean(target),
-        lectures: lectureList(job.documents),
+        lectures: lectureList(
+          job.documents,
+          [job.chat.original, ...job.chat.replies].join("\n"),
+        ),
       };
       resume(job);
       return true;

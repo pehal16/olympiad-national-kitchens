@@ -1,6 +1,13 @@
 # Project Memory
 
-Last updated: 2026-11-26
+Last updated: 2026-11-27
+
+## Teacher assistant formulas and longer context (2026-11-27)
+
+- The constructor renders LaTeX in chat, work previews, the editor and participant questions and answers. The iRU worker extracts a structured calculation. The cabinet independently checks supported arithmetic, linear equations, polynomial equivalence and dimensions. It asks for missing quantities and can continue the same calculation from the answer. A single-choice draft can show a checked key when exactly one answer matches an accepted calculation.
+- Assistant chat and work generation request 32,768 tokens. Retrieval searches the full extracted lecture by page, and chat brings forward up to 40 recent messages within size limits. DOCX fractions, simple roots, powers and subscripts preserve their structure on extraction. Image-only pages and complex unsupported Word structures require source review.
+- The reproducible synthetic evaluation on the college RTX 5070 with Ollama 0.40.17 and Qwen3.5 9B Q4_K_M went from 75/100 with the direct model to 100/100 with the checked path, including all 10 incomplete conditions. The batch runs took 82.6 s and 83.5 s respectively. The 84-page fixture returned 10/10 facts with page locators at 26,484 prompt tokens in 11.0 s at 32K, with 6,575,221,636 bytes on GPU and no model bytes on CPU. The retrieval pass found 10/10 in 5.5 s at 3,231 prompt tokens. An exploratory 49K setting used the same prompt. Retain 32K for the cabinet.
+- Reproduce with `node constructor/scripts/benchmark-assistant.mjs baseline|enhanced|context <private-report-path>`. These results cover synthetic technical cases. An independent teacher-reviewed corpus and source-backed pedagogical review are still needed to measure wider educational quality. The release uses the base Qwen weights and the separate calculation and retrieval modules.
 
 ## AI chat history on the college iRU (2026-11-26)
 

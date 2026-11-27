@@ -6,6 +6,7 @@ import {
   readPdfPages,
 } from "./assistant-documents.mjs";
 import { compact } from "../shared/assistant-work.mjs";
+import { retrieveExcerpts } from "./assistant-retrieval.mjs";
 
 const allowed = new Map([
   [
@@ -527,8 +528,20 @@ export async function researchWorkGroup(input, group, documents, cache) {
     .map((url) => allowedURL(url.replace(/[.,;]+$/u, "")))
     .filter(Boolean)
     .slice(0, 4);
+  const lectureQuery = [
+    group.topic,
+    group.query,
+    group.englishQuery,
+    group.directions,
+  ]
+    .filter(Boolean)
+    .join("\n");
   const lectures = documents.flatMap((doc) =>
-    excerpts({ ...doc, kind: "lecture" }, keys),
+    retrieveExcerpts(
+      doc,
+      lectureQuery,
+      Math.min(4, Math.floor(8 / documents.length)),
+    ),
   );
   const references = referencePages
     .filter((item) =>

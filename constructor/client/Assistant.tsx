@@ -3,6 +3,7 @@ import { assistantRounds } from "../shared/authoring.js";
 import { maxWorkFiles, maxWorkInstruction } from "../shared/assistant-work.mjs";
 import type { Round } from "../shared/types";
 import { api } from "./api";
+import { MathText } from "./MathText";
 import { Button, Modal, Textarea } from "./ui";
 
 type Placement = "selected" | "new_rounds";
@@ -21,6 +22,7 @@ type Item = {
   targets: string[];
   answer: number[];
   explanation: string;
+  calculationChecked?: boolean;
   evidence?: Source;
 };
 type Group = {
@@ -122,7 +124,9 @@ function Answer({ item }: { item: Item }) {
     return (
       <ol>
         {item.answer.map((index) => (
-          <li key={index}>{item.items[index]}</li>
+          <li key={index}>
+            <MathText text={item.items[index]} />
+          </li>
         ))}
       </ol>
     );
@@ -131,11 +135,22 @@ function Answer({ item }: { item: Item }) {
     <ul>
       {item.items.map((label, index) => (
         <li key={label}>
-          {label}
+          <MathText text={label} />
           {item.type === "single_choice" ? (
-            item.answer[0] === index && <strong> · предполагаемый ответ</strong>
+            item.answer[0] === index && (
+              <strong>
+                {" "}
+                ·{" "}
+                {item.calculationChecked
+                  ? "расчёт проверен"
+                  : "предполагаемый ответ"}
+              </strong>
+            )
           ) : (
-            <strong> → {item.targets[item.answer[index]]}</strong>
+            <strong>
+              {" "}
+              → <MathText text={item.targets[item.answer[index]]} />
+            </strong>
           )}
         </li>
       ))}
@@ -168,9 +183,13 @@ export function AssistantPreview({ work }: { work: Work }) {
               {group.questions.map((item, index) => (
                 <li key={index}>
                   <p className="muted">{types[item.type]}</p>
-                  <strong>{item.prompt}</strong>
+                  <strong>
+                    <MathText text={item.prompt} />
+                  </strong>
                   <Answer item={item} />
-                  <p>{item.explanation}</p>
+                  <p>
+                    <MathText text={item.explanation} />
+                  </p>
                   {item.evidence ? (
                     <SourceQuote source={item.evidence} />
                   ) : (
