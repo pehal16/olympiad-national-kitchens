@@ -6,6 +6,7 @@ Last updated: 2026-11-27
 
 - Complete creation requests with an explicit topic can enter the work planner directly, including counted requests in an ongoing chat and the shorthand «10 тестов по теме». Counted tests default to questions in one draft. Explicit requests for separate works, references to earlier chat context and edits to an existing project retain their own routing.
 - A brief format reply such as «Вопросы» preserves the original topic, count and source material. A topic supplied after a count-only request completes the original instruction. The authoring planner can request one missing detail and the teacher reviews the resulting draft before saving.
+- Timeweb release `df5d382019ae89f40d39064736b9e23b5f2d58c0` passed the production switch and live checks in run `45985627107`. A short request produced 10 questions in one draft with zero clarifications in 75.178 s. A count-only request asked one topic question and produced 4 questions in 45.081 s after the reply. Both assistant connections were online and the active Timeweb database had zero chat rows. An isolated real-model run through invitation acceptance saved a 10-question draft under the invited teacher, drafted 3 questions inside an ongoing chat and retained 4 questions after topic clarification. All 62 constructor tests, 341 root tests, both builds and the local PM01 verifier passed.
 
 ## Teacher assistant formulas and longer context (2026-11-27)
 
